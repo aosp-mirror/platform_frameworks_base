@@ -77,6 +77,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
@@ -709,8 +710,7 @@ public final class TvInputManagerService extends SystemService {
             }
             sessionState.isCurrent = false;
             sessionState.currentChannel = null;
-            notifyCurrentChannelInfosUpdatedLocked(
-                    userState, getCurrentTvChannelInfosInternalLocked(userState));
+            notifyCurrentChannelInfosUpdatedLocked(userState);
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
         } finally {
@@ -851,15 +851,18 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private void notifyCurrentChannelInfosUpdatedLocked(
-            UserState userState, List<TvChannelInfo> infos) {
+    private void notifyCurrentChannelInfosUpdatedLocked(UserState userState) {
         if (DEBUG) {
             Slog.d(TAG, "notifyCurrentChannelInfosUpdatedLocked");
         }
         int n = userState.mCallbacks.beginBroadcast();
         for (int i = 0; i < n; ++i) {
             try {
-                userState.mCallbacks.getBroadcastItem(i).onCurrentTvChannelInfosUpdated(infos);
+                ITvInputManagerCallback callback = userState.mCallbacks.getBroadcastItem(i);
+                Pair<Integer, Integer> pidUid = userState.callbackPidUidMap.get(callback);
+                List<TvChannelInfo> infos = getCurrentTvChannelInfosInternalLocked(
+                        userState, pidUid.first, pidUid.second);
+                callback.onCurrentTvChannelInfosUpdated(infos);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report updated current channel infos to callback", e);
             }
@@ -1063,14 +1066,19 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void registerCallback(final ITvInputManagerCallback callback, int userId) {
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "registerCallback");
+            int callingPid = Binder.getCallingPid();
+            int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "registerCallback");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     final UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     if (!userState.mCallbacks.register(callback)) {
                         Slog.e(TAG, "client process has already died");
+                    } else {
+                        userState.callbackPidUidMap.put(
+                                callback, Pair.create(callingPid, callingUid));
                     }
                 }
             } finally {
@@ -1087,6 +1095,7 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.mCallbacks.unregister(callback);
+                    userState.callbackPidUidMap.remove(callback);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1419,8 +1428,8 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void tune(IBinder sessionToken, final Uri channelUri, Bundle params, int userId) {
             final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "tune");
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId, "tune");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -1432,8 +1441,7 @@ public final class TvInputManagerService extends SystemService {
                         if (sessionState != null) {
                             sessionState.isCurrent = true;
                             sessionState.currentChannel = channelUri;
-                            notifyCurrentChannelInfosUpdatedLocked(
-                                    userState, getCurrentTvChannelInfosInternalLocked(userState));
+                            notifyCurrentChannelInfosUpdatedLocked(userState);
                         }
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
@@ -2090,16 +2098,13 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public List<TvChannelInfo> getCurrentTvChannelInfos(@UserIdInt int userId) {
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "getTvCurrentChannelInfos");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    return getCurrentTvChannelInfosInternalLocked(userState);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+            int callingPid = Binder.getCallingPid();
+            int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "getTvCurrentChannelInfos");
+            synchronized (mLock) {
+                UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                return getCurrentTvChannelInfosInternalLocked(userState, callingPid, callingUid);
             }
         }
 
@@ -2273,14 +2278,15 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private List<TvChannelInfo> getCurrentTvChannelInfosInternalLocked(UserState userState) {
+    private List<TvChannelInfo> getCurrentTvChannelInfosInternalLocked(
+            UserState userState, int callingPid, int callingUid) {
         List<TvChannelInfo> channelInfos = new ArrayList<>();
-        boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission();
+        boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission(callingPid, callingUid);
         for (SessionState state : userState.sessionStateMap.values()) {
             if (state.isCurrent) {
                 Integer appTag;
                 int appType;
-                if (state.callingUid == Binder.getCallingUid()) {
+                if (state.callingUid == callingUid) {
                     appTag = APP_TAG_SELF;
                     appType = TvChannelInfo.APP_TYPE_SELF;
                 } else {
@@ -2322,8 +2328,8 @@ public final class TvInputManagerService extends SystemService {
         return false;
     }
 
-    private boolean hasAccessWatchedProgramsPermission() {
-        return mContext.checkCallingPermission(PERMISSION_ACCESS_WATCHED_PROGRAMS)
+    private boolean hasAccessWatchedProgramsPermission(int callingPid, int callingUid) {
+        return mContext.checkPermission(PERMISSION_ACCESS_WATCHED_PROGRAMS, callingPid, callingUid)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -2359,6 +2365,9 @@ public final class TvInputManagerService extends SystemService {
         // A list of callbacks.
         private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
                 new RemoteCallbackList<ITvInputManagerCallback>();
+
+        private final Map<ITvInputManagerCallback, Pair<Integer, Integer>> callbackPidUidMap =
+                new HashMap<>();
 
         // The token of a "main" TV input session.
         private IBinder mainSessionToken = null;
@@ -2712,8 +2721,7 @@ public final class TvInputManagerService extends SystemService {
                 mSessionState.isCurrent = true;
                 mSessionState.currentChannel = channelUri;
                 UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
-                notifyCurrentChannelInfosUpdatedLocked(
-                        userState, getCurrentTvChannelInfosInternalLocked(userState));
+                notifyCurrentChannelInfosUpdatedLocked(userState);
                 try {
                     // TODO: Consider adding this channel change in the watch log. When we do
                     // that, how we can protect the watch log from malicious tv inputs should

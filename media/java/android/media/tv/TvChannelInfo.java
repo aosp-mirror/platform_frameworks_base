@@ -22,19 +22,44 @@ import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
+
 
 /**
+ * This class is used to specify information of a TV channel.
  * @hide
  */
 public final class TvChannelInfo implements Parcelable {
     static final String TAG = "TvChannelInfo";
+
+    /**
+     * App tag for {@link #getAppTag()}: the corresponding application of the channel is the same as
+     * the caller.
+     * <p>{@link #getAppType()} returns {@link #APP_TYPE_SELF} if and only if the app tag is
+     * {@link #APP_TAG_SELF}.
+     */
     public static final int APP_TAG_SELF = 0;
+    /**
+     * App tag for {@link #getAppType()}: the corresponding application of the channel is the same
+     * as the caller.
+     * <p>{@link #getAppType()} returns {@link #APP_TYPE_SELF} if and only if the app tag is
+     * {@link #APP_TAG_SELF}.
+     */
     public static final int APP_TYPE_SELF = 1;
+    /**
+     * App tag for {@link #getAppType()}: the corresponding app of the channel is a system
+     * application.
+     */
     public static final int APP_TYPE_SYSTEM = 2;
+    /**
+     * App tag for {@link #getAppType()}: the corresponding app of the channel is not a system
+     * application.
+     */
     public static final int APP_TYPE_NON_SYSTEM = 3;
 
     /** @hide */
@@ -68,6 +93,7 @@ public final class TvChannelInfo implements Parcelable {
     @AppType private final int mAppType;
     private final int mAppTag;
 
+    /** @hide */
     public TvChannelInfo(
             String inputId, @Nullable Uri channelUri, boolean isRecordingSession,
             boolean isForeground, @AppType int appType, int appTag) {
@@ -90,24 +116,41 @@ public final class TvChannelInfo implements Parcelable {
         mAppTag = source.readInt();
     }
 
+    /**
+     * Returns the TV input ID of the channel.
+     */
+    @NonNull
     public String getInputId() {
         return mInputId;
     }
 
+    /**
+     * Returns the channel URI of the channel.
+     * <p>Returns {@code null} if it's a passthrough input or the permission is not granted.
+     */
+    @Nullable
     public Uri getChannelUri() {
         return mChannelUri;
     }
 
+    /**
+     * Returns {@code true} if the channel session is a recording session.
+     * @see TvInputService.RecordingSession
+     */
     public boolean isRecordingSession() {
         return mIsRecordingSession;
     }
 
+    /**
+     * Returns {@code true} if the application is a foreground application.
+     * @see android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+     */
     public boolean isForeground() {
         return mIsForeground;
     }
 
     /**
-     * Gets app tag.
+     * Returns the app tag.
      * <p>App tag is used to differentiate one app from another.
      * {@link #APP_TAG_SELF} is for current app.
      */
@@ -115,6 +158,9 @@ public final class TvChannelInfo implements Parcelable {
         return mAppTag;
     }
 
+    /**
+     * Returns the app type.
+     */
     @AppType
     public int getAppType() {
         return mAppType;
@@ -126,7 +172,7 @@ public final class TvChannelInfo implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mInputId);
         String uriString = mChannelUri == null ? null : mChannelUri.toString();
         dest.writeString(uriString);
@@ -144,5 +190,27 @@ public final class TvChannelInfo implements Parcelable {
                 + ";isForeground=" + mIsForeground
                 + ";appType=" + mAppType
                 + ";appTag=" + mAppTag;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TvChannelInfo)) {
+            return false;
+        }
+
+        TvChannelInfo other = (TvChannelInfo) o;
+
+        return TextUtils.equals(mInputId, other.getInputId())
+                && Objects.equals(mChannelUri, other.mChannelUri)
+                && mIsRecordingSession == other.mIsRecordingSession
+                && mIsForeground == other.mIsForeground
+                && mAppType == other.mAppType
+                && mAppTag == other.mAppTag;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                mInputId, mChannelUri, mIsRecordingSession, mIsForeground, mAppType, mAppTag);
     }
 }
