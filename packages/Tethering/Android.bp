@@ -102,6 +102,7 @@ java_defaults {
     ],
     libs: [
         "framework-tethering",
+        "framework-wifi",
     ],
     jarjar_rules: "jarjar-rules.txt",
     optimize: {
