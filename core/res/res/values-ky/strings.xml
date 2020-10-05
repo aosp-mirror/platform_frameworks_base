@@ -1108,7 +1108,7 @@
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
-    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Системанын кээ бир функциялары иштебеши мүмкүн"</string>
+    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> иштөөдө"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Көбүрөөк маалымат үчүн же колдонмону токтотуш үчүн таптап коюңуз."</string>
@@ -1317,7 +1317,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялык консоль иштетилди"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Аны өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB портунда суюктук же урандылар бар"</string>
-    <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порт автоматтык түрдө өчүрүлдү. Кененирээк маалымат алуу үчүн, таптап коюңуз."</string>
+    <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порт автоматтык түрдө өчтү. Кененирээк маалымат алуу үчүн, таптап коюңуз."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB портун колдонууга болот"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"Телефон суюктук менен урандыларды аныктаган жок."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"Мүчүлүштүк тууралуу кабар алынууда…"</string>

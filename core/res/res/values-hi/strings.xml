@@ -1548,7 +1548,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ब्राउज़र लॉन्च करें?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"हमेशा"</string>
-    <string name="activity_resolver_use_once" msgid="948462794469672658">"केवल एक बार"</string>
+    <string name="activity_resolver_use_once" msgid="948462794469672658">"सिर्फ़ एक बार"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s वर्क प्रोफ़ाइल का समर्थन नहीं करता"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"टैबलेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टीवी"</string>
