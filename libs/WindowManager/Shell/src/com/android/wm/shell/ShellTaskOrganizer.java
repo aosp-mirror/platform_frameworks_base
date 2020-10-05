@@ -66,10 +66,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     public ShellTaskOrganizer(SyncTransactionQueue syncQueue, TransactionPool transactionPool,
             ShellExecutor mainExecutor, ShellExecutor animExecutor) {
-        super();
-        addListener(new FullscreenTaskListener(syncQueue), WINDOWING_MODE_FULLSCREEN);
-        mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
+        this(null, syncQueue, transactionPool, mainExecutor, animExecutor);
     }
 
     @VisibleForTesting

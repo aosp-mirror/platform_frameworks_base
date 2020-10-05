@@ -88,7 +88,7 @@ import java.util.function.Consumer;
  * This class is also responsible for general resize/offset PiP operations within SysUI component,
  * see also {@link PipMotionHelper}.
  */
-public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganizer.TaskListener,
+public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
     private static final boolean DEBUG = false;
