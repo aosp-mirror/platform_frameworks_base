@@ -73,18 +73,4 @@
     <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
         android:visibility="gone" />
 
-    <FrameLayout
-        android:id="@+id/qs_drag_handle_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:elevation="4dp"
-        android:paddingBottom="5dp">
-        <View
-            android:layout_width="46dp"
-            android:layout_height="3dp"
-            android:background="@drawable/qs_footer_drag_handle" />
-    </FrameLayout>
-
-
 </com.android.systemui.qs.QSContainerImpl>
