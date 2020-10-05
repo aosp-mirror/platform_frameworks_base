@@ -1585,10 +1585,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Start the recents activity to perform the recents animation.
      *
      * @param intent                 The intent to start the recents activity.
+     * @param eventTime              When the (touch) event is triggered to start recents activity.
      * @param recentsAnimationRunner Pass {@code null} to only preload the activity.
      */
     @Override
-    public void startRecentsActivity(Intent intent, @Deprecated IAssistDataReceiver unused,
+    public void startRecentsActivity(Intent intent, long eventTime,
             @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final int callingPid = Binder.getCallingPid();
@@ -1608,7 +1609,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (recentsAnimationRunner == null) {
                     anim.preloadRecentsActivity();
                 } else {
-                    anim.startRecentsActivity(recentsAnimationRunner);
+                    anim.startRecentsActivity(recentsAnimationRunner, eventTime);
                 }
             }
         } finally {

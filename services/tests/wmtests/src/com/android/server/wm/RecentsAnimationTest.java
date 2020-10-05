@@ -147,7 +147,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
 
         Intent recentsIntent = new Intent().setComponent(mRecentsComponent);
         // Null animation indicates to preload.
-        mAtm.startRecentsActivity(recentsIntent, null /* assistDataReceiver */,
+        mAtm.startRecentsActivity(recentsIntent, 0 /* eventTime */,
                 null /* recentsAnimationRunner */);
 
         Task recentsStack = defaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN,
@@ -167,7 +167,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
 
         spyOn(recentsActivity);
         // Start when the recents activity exists. It should ensure the configuration.
-        mAtm.startRecentsActivity(recentsIntent, null /* assistDataReceiver */,
+        mAtm.startRecentsActivity(recentsIntent, 0 /* eventTime */,
                 null /* recentsAnimationRunner */);
 
         verify(recentsActivity).ensureActivityConfiguration(anyInt() /* globalChanges */,
@@ -381,7 +381,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
 
         Intent recentsIntent = new Intent();
         recentsIntent.setComponent(recentsComponent);
-        mAtm.startRecentsActivity(recentsIntent, null /* assistDataReceiver */,
+        mAtm.startRecentsActivity(recentsIntent, 0 /* eventTime */,
                 mock(IRecentsAnimationRunner.class));
         return recentsAnimation[0];
     }
