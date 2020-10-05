@@ -248,7 +248,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"پاک کردن اعلان"</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"‏GPS فعال شد."</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"‏دستیابی به GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"‏TeleTypewriter فعال شد."</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"تله‌تایپ فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"زنگ لرزشی."</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"زنگ بی‌صدا."</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -802,7 +802,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"برگشت"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"اعلان‌ها"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"میان‌برهای صفحه‌کلید"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"تغییر طرح‌بندی صفحه‌کلید"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"تغییر جانمایی صفحه‌کلید"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"برنامه‌ها"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"دستیار"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"مرورگر"</string>
@@ -979,7 +979,7 @@
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- می‌تواند در <xliff:g id="APP">%1$s</xliff:g> اقدام انجام دهد"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"به <xliff:g id="APP">%1$s</xliff:g> اجازه داده شود تکه‌هایی از برنامه‌ها نشان دهد"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"مجاز"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"رد کردن"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"مجاز نبودن"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"نه متشکرم"</string>

@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ವೈ-ಫೈ ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ಪ್ರಕಾಶಮಾನ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ಸ್ವಯಂ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣಗಳನ್ನು ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ ಮೋಡ್"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ಮುಗಿದಿದೆ"</string>
