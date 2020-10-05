@@ -963,14 +963,25 @@ base::expected<AssetManager2::SelectedValue, NullOrIOError> AssetManager2::GetRe
 }
 
 base::expected<std::monostate, NullOrIOError> AssetManager2::ResolveReference(
-    AssetManager2::SelectedValue& value) const {
+    AssetManager2::SelectedValue& value, bool cache_value) const {
   if (value.type != Res_value::TYPE_REFERENCE || value.data == 0U) {
     // Not a reference. Nothing to do.
     return {};
   }
 
-  uint32_t combined_flags = value.flags;
-  uint32_t resolve_resid = value.data;
+  const uint32_t original_flags = value.flags;
+  const uint32_t original_resid = value.data;
+  if (cache_value) {
+    auto cached_value = cached_resolved_values_.find(value.data);
+    if (cached_value != cached_resolved_values_.end()) {
+      value = cached_value->second;
+      value.flags |= original_flags;
+      return {};
+    }
+  }
+
+  uint32_t combined_flags = 0U;
+  uint32_t resolve_resid = original_resid;
   constexpr const uint32_t kMaxIterations = 20;
   for (uint32_t i = 0U;; i++) {
     auto result = GetResource(resolve_resid, true /*may_be_bag*/);
@@ -981,9 +992,15 @@ base::expected<std::monostate, NullOrIOError> AssetManager2::ResolveReference(
     if (result->type != Res_value::TYPE_REFERENCE ||
         result->data == Res_value::DATA_NULL_UNDEFINED ||
         result->data == resolve_resid || i == kMaxIterations) {
-      // This reference can't be resolved, so exit now and let the caller deal with it.
+      result->flags |= combined_flags;
+      if (cache_value) {
+        cached_resolved_values_[original_resid] = *result;
+      }
+
+      // Add the original flags after caching the result so queries with a different set of original
+      // flags do not include these original flags.
       value = *result;
-      value.flags |= combined_flags;
+      value.flags |= original_flags;
       return {};
     }
 
@@ -1353,6 +1370,8 @@ void AssetManager2::InvalidateCaches(uint32_t diff) {
       ++iter;
     }
   }
+
+  cached_resolved_values_.clear();
 }
 
 uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) const {
@@ -1533,7 +1552,7 @@ base::expected<std::monostate, NullOrIOError> Theme::ResolveAttributeReference(
     return base::unexpected(std::nullopt);
   }
 
-  auto resolve_result = asset_manager_->ResolveReference(*result);
+  auto resolve_result = asset_manager_->ResolveReference(*result, true /* cache_value */);
   if (resolve_result.has_value()) {
     result->flags |= value.flags;
     value = *result;
