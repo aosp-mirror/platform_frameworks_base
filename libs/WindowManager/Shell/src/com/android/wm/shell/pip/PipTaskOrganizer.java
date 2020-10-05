@@ -58,6 +58,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -149,15 +150,25 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             new PipAnimationController.PipAnimationCallback() {
         @Override
         public void onPipAnimationStart(PipAnimationController.PipTransitionAnimator animator) {
-            sendOnPipTransitionStarted(animator.getTransitionDirection());
+            final int direction = animator.getTransitionDirection();
+            if (direction == TRANSITION_DIRECTION_TO_PIP) {
+                InteractionJankMonitor.getInstance().begin(
+                        InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP, 2000);
+            }
+            sendOnPipTransitionStarted(direction);
         }
 
         @Override
         public void onPipAnimationEnd(SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
-            finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection(),
+            final int direction = animator.getTransitionDirection();
+            finishResize(tx, animator.getDestinationBounds(), direction,
                     animator.getAnimationType());
-            sendOnPipTransitionFinished(animator.getTransitionDirection());
+            sendOnPipTransitionFinished(direction);
+            if (direction == TRANSITION_DIRECTION_TO_PIP) {
+                InteractionJankMonitor.getInstance().end(
+                        InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
+            }
         }
 
         @Override
