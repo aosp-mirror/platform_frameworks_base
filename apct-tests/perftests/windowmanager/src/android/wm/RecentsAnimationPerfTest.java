@@ -226,7 +226,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
             mMeasuredTimeNs = 0;
 
             final long startTime = SystemClock.elapsedRealtimeNanos();
-            atm.startRecentsActivity(sRecentsIntent, null /* unused */, anim);
+            atm.startRecentsActivity(sRecentsIntent, 0 /* eventTime */, anim);
             final long elapsedTimeNsOfStart = SystemClock.elapsedRealtimeNanos() - startTime;
             mMeasuredTimeNs += elapsedTimeNsOfStart;
             state.addExtraResult("start", elapsedTimeNsOfStart);

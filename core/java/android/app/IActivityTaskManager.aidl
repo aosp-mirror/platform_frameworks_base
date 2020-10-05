@@ -123,7 +123,7 @@ interface IActivityTaskManager {
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
     int startAssistantActivity(in String callingPackage, in String callingFeatureId, int callingPid,
             int callingUid, in Intent intent, in String resolvedType, in Bundle options, int userId);
-    void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
+    void startRecentsActivity(in Intent intent, in long eventTime,
             in IRecentsAnimationRunner recentsAnimationRunner);
     int startActivityFromRecents(int taskId, in Bundle options);
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
