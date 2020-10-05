@@ -78,6 +78,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.INSETS_CONTROLLER;
 
@@ -2707,7 +2708,13 @@ public final class ViewRootImpl implements ViewParent,
                 updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();
                 surfaceDestroyed = hadSurface && !mSurface.isValid();
-                surfaceReplaced = (surfaceGenerationId != mSurface.getGenerationId())
+                // When using Blast, the surface generation id may not change when there's a new
+                // SurfaceControl. In that case, we also check relayout flag
+                // RELAYOUT_RES_SURFACE_CHANGED since it should indicate that WMS created a new
+                // SurfaceControl.
+                surfaceReplaced = (surfaceGenerationId != mSurface.getGenerationId()
+                        || (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
+                        == RELAYOUT_RES_SURFACE_CHANGED)
                         && mSurface.isValid();
 
                 if (cutoutChanged) {
