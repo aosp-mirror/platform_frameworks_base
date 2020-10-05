@@ -40,7 +40,3 @@ cc_test {
     ],
     test_config: "vts_permission_validate_test.xml",
 }
-
-vts_config {
-    name: "VtsValidatePermission",
-}
