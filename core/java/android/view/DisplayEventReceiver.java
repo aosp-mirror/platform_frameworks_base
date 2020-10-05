@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -158,8 +157,6 @@ public abstract class DisplayEventReceiver {
      * @param frameTimelineVsyncId The frame timeline vsync id, used to correlate a frame
      * produced by HWUI with the timeline data stored in Surface Flinger.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
-            + "Choreographer#postFrameCallback} instead")
     public void onVsync(long timestampNanos, long physicalDisplayId, int frame,
             long frameTimelineVsyncId) {
     }
@@ -203,8 +200,6 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
-            + "Choreographer#postFrameCallback} instead")
     private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame,
             long frameTimelineVsyncId) {
         onVsync(timestampNanos, physicalDisplayId, frame, frameTimelineVsyncId);
