@@ -21,6 +21,7 @@ import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS
 import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
 
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.PRIMARY_PROVIDER_NAME;
+import static com.android.server.location.timezone.LocationTimeZoneManagerService.SECONDARY_PROVIDER_NAME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,7 +43,8 @@ import java.util.Objects;
  */
 final class SimulatedBinderProviderEvent {
 
-    private static final List<String> VALID_PROVIDER_NAMES = Arrays.asList(PRIMARY_PROVIDER_NAME);
+    private static final List<String> VALID_PROVIDER_NAMES =
+            Arrays.asList(PRIMARY_PROVIDER_NAME, SECONDARY_PROVIDER_NAME);
 
     static final int INJECTED_EVENT_TYPE_ON_BIND = 1;
     static final int INJECTED_EVENT_TYPE_ON_UNBIND = 2;
