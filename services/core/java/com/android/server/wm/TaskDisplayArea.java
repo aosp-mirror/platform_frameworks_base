@@ -1305,10 +1305,9 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             final int windowingMode = windowingModes[j];
             for (int i = getStackCount() - 1; i >= 0; --i) {
                 final Task stack = getStackAt(i);
-                if (!stack.isActivityTypeStandardOrUndefined()) {
-                    continue;
-                }
-                if (stack.getWindowingMode() != windowingMode) {
+                if (stack.mCreatedByOrganizer
+                        || !stack.isActivityTypeStandardOrUndefined()
+                        || stack.getWindowingMode() != windowingMode) {
                     continue;
                 }
                 stacks.add(stack);

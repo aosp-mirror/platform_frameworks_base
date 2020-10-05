@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -316,6 +317,29 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         final int afterWindowMode = task.getRootTask().getWindowingMode();
         assertEquals(windowingMode, afterWindowMode);
+    }
+
+    /**
+     * Ensures that {@link LaunchParamsModifier} doesn't alter non-root tasks' windowingMode.
+     */
+    @Test
+    public void testLayoutNonRootTaskWindowingModeChange() {
+        final LaunchParams params = new LaunchParams();
+        final int windowingMode = WINDOWING_MODE_FREEFORM;
+        params.mWindowingMode = windowingMode;
+        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
+        final Task task = new TaskBuilder(mAtm.mStackSupervisor).setCreateParentTask(true).build();
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+
+        mController.registerModifier(positioner);
+
+        final int beforeWindowMode = task.getWindowingMode();
+        assertNotEquals(windowingMode, beforeWindowMode);
+
+        mController.layoutTask(task, null /* windowLayout */);
+
+        final int afterWindowMode = task.getWindowingMode();
+        assertEquals(afterWindowMode, beforeWindowMode);
     }
 
     /**
