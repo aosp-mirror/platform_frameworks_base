@@ -105,4 +105,27 @@ public class RethrowFromSystemCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testTelephony() {
+        compilationHelper
+                .addSourceFile("/android/annotation/SystemService.java")
+                .addSourceFile("/com/android/internal/telephony/ITelephony.java")
+                .addSourceFile("/android/os/IInterface.java")
+                .addSourceFile("/android/os/RemoteException.java")
+                .addSourceLines("TelephonyManager.java",
+                        "import android.annotation.SystemService;",
+                        "import com.android.internal.telephony.ITelephony;",
+                        "import android.os.RemoteException;",
+                        "@SystemService(\"telephony\") public class TelephonyManager {",
+                        "  ITelephony mService;",
+                        "  void bar() {",
+                        "    try {",
+                        "      mService.bar();",
+                        "    } catch (RemoteException ignored) {",
+                        "    }",
+                        "  }",
+                        "}")
+                .doTest();
+    }
 }

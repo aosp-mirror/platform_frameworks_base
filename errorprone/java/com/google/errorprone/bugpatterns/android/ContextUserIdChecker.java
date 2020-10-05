@@ -18,6 +18,7 @@ package com.google.errorprone.bugpatterns.android;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.bugpatterns.android.UidChecker.getFlavor;
+import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.enclosingClass;
 import static com.google.errorprone.matchers.Matchers.hasAnnotation;
 import static com.google.errorprone.matchers.Matchers.instanceMethod;
@@ -60,8 +61,13 @@ public final class ContextUserIdChecker extends BugChecker implements MethodInvo
 
     private static final Matcher<ExpressionTree> BINDER_CALL = methodInvocation(
             instanceMethod().onDescendantOf("android.os.IInterface").withAnyName());
-    private static final Matcher<ExpressionTree> GET_USER_ID_CALL = methodInvocation(
-            instanceMethod().onDescendantOf("android.content.Context").named("getUserId"));
+    private static final Matcher<ExpressionTree> GET_USER_ID_CALL = methodInvocation(anyOf(
+            instanceMethod().onExactClass("android.app.admin.DevicePolicyManager")
+                    .named("myUserId"),
+            instanceMethod().onExactClass("android.content.pm.ShortcutManager")
+                    .named("injectMyUserId"),
+            instanceMethod().onDescendantOf("android.content.Context")
+                    .named("getUserId")));
 
     private static final Matcher<ExpressionTree> USER_ID_FIELD = new Matcher<ExpressionTree>() {
         @Override
