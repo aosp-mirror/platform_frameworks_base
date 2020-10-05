@@ -205,9 +205,8 @@ message DisplayContentProto {
     optional WindowStateProto input_method_input_target = 28;
     optional WindowStateProto input_method_control_target = 29;
     optional WindowStateProto current_focus = 30;
-    optional InsetsSourceProviderProto insets_source_provider = 31;
-    optional ImeInsetsSourceProviderProto ime_insets_source_provider = 32;
-    optional bool can_show_ime = 33;
+    optional ImeInsetsSourceProviderProto ime_insets_source_provider = 31;
+    optional bool can_show_ime = 32;
 }
 
 /* represents DisplayArea object */
@@ -527,6 +526,7 @@ message InsetsSourceProviderProto {
 message ImeInsetsSourceProviderProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional WindowStateProto ime_target_from_ime = 1;
-    optional bool is_ime_layout_drawn = 2;
+    optional InsetsSourceProviderProto insets_source_provider = 1;
+    optional WindowStateProto ime_target_from_ime = 2;
+    optional bool is_ime_layout_drawn = 3;
 }
