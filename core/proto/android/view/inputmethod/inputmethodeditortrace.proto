@@ -65,8 +65,6 @@ message InputMethodEditorProto {
         repeated ClientSideProto client = 1;
     }
 
-    /* todo: extract as a separate message to allow other dumps to use this as their client side
-        proto */
     /* groups together the dump from ime related client side classes */
     message ClientSideProto {
         optional int32 display_id = 1;
