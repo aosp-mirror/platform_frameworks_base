@@ -104,7 +104,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
-import android.os.storage.StorageManagerInternal;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
@@ -1554,24 +1553,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (bp.isRuntime()) {
             notifyRuntimePermissionStateChanged(packageName, userId);
         }
-
-        // Only need to do this if user is initialized. Otherwise it's a new user
-        // and there are no processes running as the user yet and there's no need
-        // to make an expensive call to remount processes for the changed permissions.
-        if (READ_EXTERNAL_STORAGE.equals(permName)
-                || WRITE_EXTERNAL_STORAGE.equals(permName)) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (mUserManagerInt.isUserInitialized(userId)) {
-                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                            StorageManagerInternal.class);
-                    storageManagerInternal.onExternalStoragePolicyChanged(uid, packageName);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
     }
 
     @Override
