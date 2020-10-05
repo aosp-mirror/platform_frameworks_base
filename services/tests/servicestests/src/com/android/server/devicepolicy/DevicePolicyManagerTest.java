@@ -5728,6 +5728,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Device owner should be allowed to request Device ID attestation.
         dpms.enforceCallerCanRequestDeviceIdAttestation(dpms.getCallerIdentity(admin1));
 
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
         // Another package must not be allowed to request Device ID attestation.
         assertExpectException(SecurityException.class, null,
                 () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
@@ -5757,6 +5758,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpms.enforceCallerCanRequestDeviceIdAttestation(dpms.getCallerIdentity(admin1));
 
         // But not another package.
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
         assertExpectException(SecurityException.class, null,
                 () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
                         dpms.getCallerIdentity(null, admin2.getPackageName())));
