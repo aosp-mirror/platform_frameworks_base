@@ -771,4 +771,84 @@ public abstract class KeyProperties {
         }
         return result;
     }
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SECURITY_LEVEL_" }, value = {
+            SECURITY_LEVEL_UNKNOWN,
+            SECURITY_LEVEL_UNKNOWN_SECURE,
+            SECURITY_LEVEL_SOFTWARE,
+            SECURITY_LEVEL_TRUSTED_ENVIRONMENT,
+            SECURITY_LEVEL_STRONGBOX,
+    })
+    public @interface SecurityLevelEnum {}
+
+    /**
+     * This security level indicates that no assumptions can be made about the security level of the
+     * respective key.
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN = -2;
+    /**
+     * This security level indicates that due to the target API level of the caller no exact
+     * statement can be made about the security level of the key, however, the security level
+     * can be considered is at least equivalent to {@link #SECURITY_LEVEL_TRUSTED_ENVIRONMENT}.
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN_SECURE = -1;
+
+    /** Indicates enforcement by system software. */
+    public static final int SECURITY_LEVEL_SOFTWARE = 0;
+
+    /** Indicates enforcement by a trusted execution environment. */
+    public static final int SECURITY_LEVEL_TRUSTED_ENVIRONMENT = 1;
+
+    /**
+     * Indicates enforcement by environment meeting the Strongbox security profile,
+     * such as a secure element.
+     */
+    public static final int SECURITY_LEVEL_STRONGBOX = 2;
+
+    /**
+     * @hide
+     */
+    public abstract static class SecurityLevel {
+        private SecurityLevel() {}
+
+        /**
+         * @hide
+         */
+        public static int toKeymaster(int securityLevel) {
+            switch (securityLevel) {
+                case SECURITY_LEVEL_SOFTWARE:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_SOFTWARE;
+                case SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
+                case SECURITY_LEVEL_STRONGBOX:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX;
+                default:
+                    throw new IllegalArgumentException("Unsupported security level: "
+                            + securityLevel);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public static int fromKeymaster(int securityLevel) {
+            switch (securityLevel) {
+                case KeymasterDefs.KM_SECURITY_LEVEL_SOFTWARE:
+                    return SECURITY_LEVEL_SOFTWARE;
+                case KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
+                    return SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
+                case KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX:
+                    return SECURITY_LEVEL_STRONGBOX;
+                default:
+                    throw new IllegalArgumentException("Unsupported security level: "
+                            + securityLevel);
+            }
+        }
+    }
+
 }
