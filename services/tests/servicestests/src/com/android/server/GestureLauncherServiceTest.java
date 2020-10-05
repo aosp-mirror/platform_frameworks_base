@@ -486,7 +486,7 @@ public class GestureLauncherServiceTest {
             outLaunched.value = false;
             intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
                     outLaunched);
-            assertFalse(intercepted);
+            assertTrue(intercepted);
             assertFalse(outLaunched.value);
         }
 
@@ -538,7 +538,7 @@ public class GestureLauncherServiceTest {
             outLaunched.value = false;
             intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
                     outLaunched);
-            assertFalse(intercepted);
+            assertTrue(intercepted);
             assertFalse(outLaunched.value);
         }
 
@@ -561,6 +561,60 @@ public class GestureLauncherServiceTest {
         List<Integer> intervals = intervalCaptor.getAllValues();
         assertEquals((int) INITIAL_EVENT_TIME_MILLIS, intervals.get(0).intValue());
         assertEquals((int) interval, intervals.get(1).intValue());
+    }
+
+    @Test
+    public void
+            testInterceptPowerKeyDown_tenInboundPresses_panicGestureEnabled_pressesIntercepted() {
+        withPanicGestureEnabledSettingValue(true);
+        mGestureLauncherService.updatePanicButtonGestureEnabled();
+        withUserSetupCompleteValue(true);
+
+        // First button press does nothing
+        long eventTime = INITIAL_EVENT_TIME_MILLIS;
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        boolean interactive = true;
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        // 3 more button presses which should not trigger any gesture, but intercepts action.
+        for (int i = 0; i < 3; i++) {
+            eventTime += interval;
+            keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                    IGNORED_REPEAT);
+            outLaunched.value = false;
+            intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                    outLaunched);
+            assertTrue(intercepted);
+            assertFalse(outLaunched.value);
+        }
+
+        // Fifth button press should trigger the panic flow
+        eventTime += interval;
+        keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        outLaunched.value = false;
+        intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertTrue(outLaunched.value);
+        assertTrue(intercepted);
+
+        // 5 more button presses which should not trigger any gesture, but intercepts action.
+        for (int i = 0; i < 5; i++) {
+            eventTime += interval;
+            keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                    IGNORED_REPEAT);
+            outLaunched.value = false;
+            intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                    outLaunched);
+            assertTrue(intercepted);
+            assertFalse(outLaunched.value);
+        }
     }
 
     @Test
