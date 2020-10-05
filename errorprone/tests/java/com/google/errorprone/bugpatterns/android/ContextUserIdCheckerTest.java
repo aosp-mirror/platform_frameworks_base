@@ -92,4 +92,56 @@ public class ContextUserIdCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testDevicePolicyManager() {
+        compilationHelper
+                .addSourceFile("/android/annotation/SystemService.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/foo/IFooService.java")
+                .addSourceFile("/android/os/IInterface.java")
+                .addSourceFile("/android/os/UserHandle.java")
+                .addSourceFile("/android/os/RemoteException.java")
+                .addSourceLines("DevicePolicyManager.java",
+                        "package android.app.admin;",
+                        "import android.annotation.SystemService;",
+                        "import android.content.Context;",
+                        "import android.foo.IFooService;",
+                        "import android.os.UserHandle;",
+                        "import android.os.RemoteException;",
+                        "@SystemService(\"dp\") public class DevicePolicyManager {",
+                        "  IFooService mService;",
+                        "  int myUserId() { return 0; }",
+                        "  void bar() throws RemoteException {",
+                        "    mService.baz(null, myUserId());",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testShortcutManager() {
+        compilationHelper
+                .addSourceFile("/android/annotation/SystemService.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/foo/IFooService.java")
+                .addSourceFile("/android/os/IInterface.java")
+                .addSourceFile("/android/os/UserHandle.java")
+                .addSourceFile("/android/os/RemoteException.java")
+                .addSourceLines("ShortcutManager.java",
+                        "package android.content.pm;",
+                        "import android.annotation.SystemService;",
+                        "import android.content.Context;",
+                        "import android.foo.IFooService;",
+                        "import android.os.UserHandle;",
+                        "import android.os.RemoteException;",
+                        "@SystemService(\"shortcut\") public class ShortcutManager {",
+                        "  IFooService mService;",
+                        "  int injectMyUserId() { return 0; }",
+                        "  void bar() throws RemoteException {",
+                        "    mService.baz(null, injectMyUserId());",
+                        "  }",
+                        "}")
+                .doTest();
+    }
 }
