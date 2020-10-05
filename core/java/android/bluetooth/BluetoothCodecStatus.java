@@ -17,7 +17,6 @@
 package android.bluetooth;
 
 import android.annotation.Nullable;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,7 +38,6 @@ public final class BluetoothCodecStatus implements Parcelable {
      * This extra represents the current codec status of the A2DP
      * profile.
      */
-    @UnsupportedAppUsage
     public static final String EXTRA_CODEC_STATUS =
             "android.bluetooth.extra.CODEC_STATUS";
 
@@ -198,7 +196,6 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @return the current codec configuration
      */
-    @UnsupportedAppUsage
     public @Nullable BluetoothCodecConfig getCodecConfig() {
         return mCodecConfig;
     }
@@ -208,7 +205,6 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @return an array with the codecs local capabilities
      */
-    @UnsupportedAppUsage
     public @Nullable BluetoothCodecConfig[] getCodecsLocalCapabilities() {
         return mCodecsLocalCapabilities;
     }
@@ -218,7 +214,6 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @return an array with the codecs selectable capabilities
      */
-    @UnsupportedAppUsage
     public @Nullable BluetoothCodecConfig[] getCodecsSelectableCapabilities() {
         return mCodecsSelectableCapabilities;
     }
