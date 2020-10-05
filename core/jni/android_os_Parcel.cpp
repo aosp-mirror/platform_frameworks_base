@@ -638,50 +638,77 @@ static jboolean android_os_Parcel_hasFileDescriptors(jlong nativePtr)
     return ret;
 }
 
+// String tries to allocate itself on the stack, within a known size, but will
+// make a heap allocation if not.
+template <size_t StackReserve>
+class StackString {
+public:
+    StackString(JNIEnv* env, jstring str) : mEnv(env), mJStr(str) {
+        LOG_ALWAYS_FATAL_IF(str == nullptr);
+        mSize = env->GetStringLength(str);
+        if (mSize > StackReserve) {
+            mStr = new jchar[mSize];
+        } else {
+            mStr = &mBuffer[0];
+        }
+        mEnv->GetStringRegion(str, 0, mSize, mStr);
+    }
+    ~StackString() {
+        if (mStr != &mBuffer[0]) {
+            delete[] mStr;
+        }
+    }
+    const jchar* str() { return mStr; }
+    jsize size() { return mSize; }
+
+private:
+    JNIEnv* mEnv;
+    jstring mJStr;
+
+    jchar mBuffer[StackReserve];
+    // pointer to &mBuffer[0] if string fits in mBuffer, otherwise owned
+    jchar* mStr;
+    jsize mSize;
+};
+
+// This size is chosen to be longer than most interface descriptors.
+// Ones longer than this will be allocated on the heap.
+typedef StackString<64> InterfaceDescriptorString;
+
 static void android_os_Parcel_writeInterfaceToken(JNIEnv* env, jclass clazz, jlong nativePtr,
                                                   jstring name)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    if (parcel != NULL) {
-        // In the current implementation, the token is just the serialized interface name that
-        // the caller expects to be invoking
-        const jchar* str = env->GetStringCritical(name, 0);
-        if (str != NULL) {
-            parcel->writeInterfaceToken(String16(
-                  reinterpret_cast<const char16_t*>(str),
-                  env->GetStringLength(name)));
-            env->ReleaseStringCritical(name, str);
-        }
+    if (parcel != nullptr) {
+        InterfaceDescriptorString descriptor(env, name);
+        parcel->writeInterfaceToken(reinterpret_cast<const char16_t*>(descriptor.str()),
+                                    descriptor.size());
     }
 }
 
 static void android_os_Parcel_enforceInterface(JNIEnv* env, jclass clazz, jlong nativePtr, jstring name)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    if (parcel != NULL) {
-        const jchar* str = env->GetStringCritical(name, 0);
-        if (str) {
-            IPCThreadState* threadState = IPCThreadState::self();
-            const int32_t oldPolicy = threadState->getStrictModePolicy();
-            const bool isValid = parcel->enforceInterface(
-                reinterpret_cast<const char16_t*>(str),
-                env->GetStringLength(name),
-                threadState);
-            env->ReleaseStringCritical(name, str);
-            if (isValid) {
-                const int32_t newPolicy = threadState->getStrictModePolicy();
-                if (oldPolicy != newPolicy) {
-                    // Need to keep the Java-level thread-local strict
-                    // mode policy in sync for the libcore
-                    // enforcements, which involves an upcall back
-                    // into Java.  (We can't modify the
-                    // Parcel.enforceInterface signature, as it's
-                    // pseudo-public, and used via AIDL
-                    // auto-generation...)
-                    set_dalvik_blockguard_policy(env, newPolicy);
-                }
-                return;     // everything was correct -> return silently
+    if (parcel != nullptr) {
+        InterfaceDescriptorString descriptor(env, name);
+        IPCThreadState* threadState = IPCThreadState::self();
+        const int32_t oldPolicy = threadState->getStrictModePolicy();
+        const bool isValid =
+                parcel->enforceInterface(reinterpret_cast<const char16_t*>(descriptor.str()),
+                                         descriptor.size(), threadState);
+        if (isValid) {
+            const int32_t newPolicy = threadState->getStrictModePolicy();
+            if (oldPolicy != newPolicy) {
+                // Need to keep the Java-level thread-local strict
+                // mode policy in sync for the libcore
+                // enforcements, which involves an upcall back
+                // into Java.  (We can't modify the
+                // Parcel.enforceInterface signature, as it's
+                // pseudo-public, and used via AIDL
+                // auto-generation...)
+                set_dalvik_blockguard_policy(env, newPolicy);
             }
+            return; // everything was correct -> return silently
         }
     }
 
