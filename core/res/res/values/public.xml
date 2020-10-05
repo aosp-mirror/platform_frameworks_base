@@ -3071,6 +3071,8 @@
   <public-group type="string" first-id="0x01040028">
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveCluster" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public name="config_systemVideoCall" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">
