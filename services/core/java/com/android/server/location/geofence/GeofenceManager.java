@@ -327,7 +327,7 @@ public class GeofenceManager extends
     protected boolean isActive(GeofenceRegistration registration) {
         CallerIdentity identity = registration.getIdentity();
         return registration.isPermitted()
-                && mUserInfoHelper.isCurrentUserId(identity.getUserId())
+                && (identity.isSystem() || mUserInfoHelper.isCurrentUserId(identity.getUserId()))
                 && mSettingsHelper.isLocationEnabled(identity.getUserId())
                 && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
                 identity.getPackageName());

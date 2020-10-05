@@ -150,6 +150,11 @@ public final class CallerIdentity {
         return mListenerId;
     }
 
+    /** Returns true if this represents a system identity. */
+    public boolean isSystem() {
+        return mUid == Process.SYSTEM_UID;
+    }
+
     /**
      * Adds this identity to the worksource supplied, or if not worksource is supplied, creates a
      * new worksource representing this identity.

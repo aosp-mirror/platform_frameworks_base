@@ -259,7 +259,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         CallerIdentity identity = registration.getIdentity();
         return registration.isPermitted()
                 && (registration.isForeground() || isBackgroundRestrictionExempt(identity))
-                && mUserInfoHelper.isCurrentUserId(identity.getUserId())
+                && (identity.isSystem() || mUserInfoHelper.isCurrentUserId(identity.getUserId()))
                 && mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
                 identity.getUserId())
                 && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),

@@ -202,22 +202,20 @@ public class LocationProviderManagerTest {
     @Test
     public void testIsEnabled() {
         assertThat(mManager.isEnabled(CURRENT_USER)).isTrue();
+        assertThat(mManager.isEnabled(OTHER_USER)).isTrue();
 
         mInjector.getSettingsHelper().setLocationEnabled(false, CURRENT_USER);
         assertThat(mManager.isEnabled(CURRENT_USER)).isFalse();
+        assertThat(mManager.isEnabled(OTHER_USER)).isTrue();
 
         mInjector.getSettingsHelper().setLocationEnabled(true, CURRENT_USER);
         mProvider.setAllowed(false);
         assertThat(mManager.isEnabled(CURRENT_USER)).isFalse();
+        assertThat(mManager.isEnabled(OTHER_USER)).isFalse();
 
         mProvider.setAllowed(true);
-        mInjector.getUserInfoHelper().setCurrentUserId(OTHER_USER);
-        assertThat(mManager.isEnabled(CURRENT_USER)).isFalse();
-        assertThat(mManager.isEnabled(OTHER_USER)).isTrue();
-
-        mInjector.getUserInfoHelper().setCurrentUserId(CURRENT_USER);
         assertThat(mManager.isEnabled(CURRENT_USER)).isTrue();
-        assertThat(mManager.isEnabled(OTHER_USER)).isFalse();
+        assertThat(mManager.isEnabled(OTHER_USER)).isTrue();
     }
 
     @Test
@@ -237,22 +235,14 @@ public class LocationProviderManagerTest {
         mProvider.setAllowed(false);
         verify(listener, timeout(TIMEOUT_MS).times(2)).onProviderEnabledChanged(NAME, CURRENT_USER,
                 false);
+        verify(listener, timeout(TIMEOUT_MS).times(1)).onProviderEnabledChanged(NAME, OTHER_USER,
+                false);
 
         mProvider.setAllowed(true);
         verify(listener, timeout(TIMEOUT_MS).times(2)).onProviderEnabledChanged(NAME, CURRENT_USER,
                 true);
-
-        mInjector.getUserInfoHelper().setCurrentUserId(OTHER_USER);
-        verify(listener, timeout(TIMEOUT_MS).times(3)).onProviderEnabledChanged(NAME, CURRENT_USER,
-                false);
         verify(listener, timeout(TIMEOUT_MS).times(1)).onProviderEnabledChanged(NAME, OTHER_USER,
                 true);
-
-        mInjector.getUserInfoHelper().setCurrentUserId(CURRENT_USER);
-        verify(listener, timeout(TIMEOUT_MS).times(3)).onProviderEnabledChanged(NAME, CURRENT_USER,
-                true);
-        verify(listener, timeout(TIMEOUT_MS).times(1)).onProviderEnabledChanged(NAME, OTHER_USER,
-                false);
 
         mManager.removeEnabledListener(listener);
         mInjector.getSettingsHelper().setLocationEnabled(false, CURRENT_USER);
@@ -396,16 +386,6 @@ public class LocationProviderManagerTest {
 
         mProvider.setAllowed(true);
         verify(listener, timeout(TIMEOUT_MS).times(2)).onProviderEnabledChanged(NAME, true);
-
-        mInjector.getUserInfoHelper().setCurrentUserId(OTHER_USER);
-        verify(listener, timeout(TIMEOUT_MS).times(3)).onProviderEnabledChanged(NAME, false);
-        loc = createLocation(NAME, mRandom);
-        mProvider.setProviderLocation(loc);
-        verify(listener, times(1)).onLocationChanged(any(Location.class),
-                nullable(IRemoteCallback.class));
-
-        mInjector.getUserInfoHelper().setCurrentUserId(CURRENT_USER);
-        verify(listener, timeout(TIMEOUT_MS).times(3)).onProviderEnabledChanged(NAME, true);
 
         loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
