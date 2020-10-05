@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου. Οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εμφανίζονται σε συννεφάκι από προεπιλογή."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Κρατάει την προσοχή σας με μια κινούμενη συντόμευση προς αυτό το περιεχόμενο."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Εμφανίζεται στο επάνω μέρος της ενότητας συζητήσεων, προβάλλεται ως κινούμενο συννεφάκι, εμφανίζει τη φωτογραφία προφίλ στην οθόνη κλειδώματος"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Εμφανίζεται επάνω στις συζητήσεις, προβάλλεται ως κιν. συννεφάκι, εμφανίζει τη φωτ. προφίλ στην οθ. κλειδ."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ρυθμίσεις"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Προτεραιότητα"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν υποστηρίζει τις λειτουργίες συζήτησης"</string>
