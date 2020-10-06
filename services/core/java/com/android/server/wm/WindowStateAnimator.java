@@ -23,12 +23,10 @@ import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DRAW;
@@ -46,19 +44,16 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_CROP;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
-import static com.android.server.wm.WindowStateAnimatorProto.LAST_CLIP_RECT;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 
-import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -365,7 +360,7 @@ class WindowStateAnimator {
             if (mSurfaceController != null && mPendingDestroySurface != null) {
                 mPostDrawTransaction.reparentChildren(
                     mSurfaceController.getClientViewRootSurface(),
-                    mPendingDestroySurface.mSurfaceControl).apply();
+                    mPendingDestroySurface.getClientViewRootSurface()).apply();
             }
             destroySurfaceLocked();
             mSurfaceDestroyDeferred = true;
@@ -399,7 +394,7 @@ class WindowStateAnimator {
                 && (mWin.mActivityRecord == null || !mWin.mActivityRecord.isRelaunching())) {
             mPostDrawTransaction.reparentChildren(
                     mPendingDestroySurface.getClientViewRootSurface(),
-                    mSurfaceController.mSurfaceControl).apply();
+                    mSurfaceController.getClientViewRootSurface()).apply();
         }
 
         destroyDeferredSurfaceLocked();
@@ -993,7 +988,7 @@ class WindowStateAnimator {
             if (!mPendingDestroySurface.mChildrenDetached) {
                 mPostDrawTransaction.reparentChildren(
                         mPendingDestroySurface.getClientViewRootSurface(),
-                        mSurfaceController.mSurfaceControl);
+                        mSurfaceController.getClientViewRootSurface());
             }
         }
 

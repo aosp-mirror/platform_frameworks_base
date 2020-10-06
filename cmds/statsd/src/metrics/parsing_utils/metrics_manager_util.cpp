@@ -348,6 +348,81 @@ bool handleMetricActivationOnConfigUpdate(
     return true;
 }
 
+sp<MetricProducer> createCountMetricProducerAndUpdateMetadata(
+        const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseNs,
+        const int64_t currentTimeNs, const CountMetric& metric, const int metricIndex,
+        const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap,
+        vector<sp<ConditionTracker>>& allConditionTrackers,
+        const unordered_map<int64_t, int>& conditionTrackerMap,
+        const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
+        const unordered_map<int64_t, int>& stateAtomIdMap,
+        const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
+        const unordered_map<int64_t, int>& metricToActivationMap,
+        unordered_map<int, vector<int>>& trackerToMetricMap,
+        unordered_map<int, vector<int>>& conditionToMetricMap,
+        unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
+        unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
+        vector<int>& metricsWithActivation) {
+    if (!metric.has_id() || !metric.has_what()) {
+        ALOGW("cannot find metric id or \"what\" in CountMetric \"%lld\"", (long long)metric.id());
+        return nullptr;
+    }
+    int trackerIndex;
+    if (!handleMetricWithAtomMatchingTrackers(metric.what(), metricIndex,
+                                              metric.has_dimensions_in_what(),
+                                              allAtomMatchingTrackers, atomMatchingTrackerMap,
+                                              trackerToMetricMap, trackerIndex)) {
+        return nullptr;
+    }
+
+    int conditionIndex = -1;
+    if (metric.has_condition()) {
+        if (!handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                        metric.links(), allConditionTrackers, conditionIndex,
+                                        conditionToMetricMap)) {
+            return nullptr;
+        }
+    } else {
+        if (metric.links_size() > 0) {
+            ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
+            return nullptr;
+        }
+    }
+
+    std::vector<int> slicedStateAtoms;
+    unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+    if (metric.slice_by_state_size() > 0) {
+        if (!handleMetricWithStates(config, metric.slice_by_state(), stateAtomIdMap,
+                                    allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
+            return nullptr;
+        }
+    } else {
+        if (metric.state_link_size() > 0) {
+            ALOGW("CountMetric has a MetricStateLink but doesn't have a slice_by_state");
+            return nullptr;
+        }
+    }
+
+    unordered_map<int, shared_ptr<Activation>> eventActivationMap;
+    unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+    if (!handleMetricActivation(config, metric.id(), metricIndex, metricToActivationMap,
+                                atomMatchingTrackerMap, activationAtomTrackerToMetricMap,
+                                deactivationAtomTrackerToMetricMap, metricsWithActivation,
+                                eventActivationMap, eventDeactivationMap)) {
+        return nullptr;
+    }
+
+    uint64_t metricHash;
+    if (!getMetricProtoHash(config, metric, metric.id(), metricToActivationMap, metricHash)) {
+        return nullptr;
+    }
+
+    return new CountMetricProducer(key, metric, conditionIndex, initialConditionCache, wizard,
+                                   metricHash, timeBaseNs, currentTimeNs, eventActivationMap,
+                                   eventDeactivationMap, slicedStateAtoms, stateGroupMap);
+}
+
 sp<MetricProducer> createEventMetricProducerAndUpdateMetadata(
         const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseNs,
         const EventMetric& metric, const int metricIndex,
@@ -550,68 +625,20 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
     // Build MetricProducers for each metric defined in config.
     // build CountMetricProducer
     for (int i = 0; i < config.count_metric_size(); i++) {
-        const CountMetric& metric = config.count_metric(i);
-        if (!metric.has_what()) {
-            ALOGW("cannot find \"what\" in CountMetric \"%lld\"", (long long)metric.id());
-            return false;
-        }
-
         int metricIndex = allMetricProducers.size();
+        const CountMetric& metric = config.count_metric(i);
         metricMap.insert({metric.id(), metricIndex});
-        int trackerIndex;
-        if (!handleMetricWithAtomMatchingTrackers(metric.what(), metricIndex,
-                                                  metric.has_dimensions_in_what(),
-                                                  allAtomMatchingTrackers, atomMatchingTrackerMap,
-                                                  trackerToMetricMap, trackerIndex)) {
-            return false;
-        }
-
-        int conditionIndex = -1;
-        if (metric.has_condition()) {
-            if (!handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
-                                            metric.links(), allConditionTrackers, conditionIndex,
-                                            conditionToMetricMap)) {
-                return false;
-            }
-        } else {
-            if (metric.links_size() > 0) {
-                ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
-                return false;
-            }
-        }
-
-        std::vector<int> slicedStateAtoms;
-        unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
-        if (metric.slice_by_state_size() > 0) {
-            if (!handleMetricWithStates(config, metric.slice_by_state(), stateAtomIdMap,
-                                        allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
-                return false;
-            }
-        } else {
-            if (metric.state_link_size() > 0) {
-                ALOGW("CountMetric has a MetricStateLink but doesn't have a slice_by_state");
-                return false;
-            }
-        }
-
-        unordered_map<int, shared_ptr<Activation>> eventActivationMap;
-        unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
-        bool success = handleMetricActivation(
-                config, metric.id(), metricIndex, metricToActivationMap, atomMatchingTrackerMap,
+        sp<MetricProducer> producer = createCountMetricProducerAndUpdateMetadata(
+                key, config, timeBaseTimeNs, currentTimeNs, metric, metricIndex,
+                allAtomMatchingTrackers, atomMatchingTrackerMap, allConditionTrackers,
+                conditionTrackerMap, initialConditionCache, wizard, stateAtomIdMap,
+                allStateGroupMaps, metricToActivationMap, trackerToMetricMap, conditionToMetricMap,
                 activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                metricsWithActivation, eventActivationMap, eventDeactivationMap);
-        if (!success) return false;
-
-        uint64_t metricHash;
-        if (!getMetricProtoHash(config, metric, metric.id(), metricToActivationMap, metricHash)) {
+                metricsWithActivation);
+        if (producer == nullptr) {
             return false;
         }
-
-        sp<MetricProducer> countProducer = new CountMetricProducer(
-                key, metric, conditionIndex, initialConditionCache, wizard, metricHash,
-                timeBaseTimeNs, currentTimeNs, eventActivationMap, eventDeactivationMap,
-                slicedStateAtoms, stateGroupMap);
-        allMetricProducers.push_back(countProducer);
+        allMetricProducers.push_back(producer);
     }
 
     // build DurationMetricProducer

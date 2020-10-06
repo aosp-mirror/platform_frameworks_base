@@ -18,6 +18,7 @@ package android.app.time;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.content.Context;
@@ -36,7 +37,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-// @SystemApi
+@SystemApi
 @SystemService(Context.TIME_MANAGER)
 public final class TimeManager {
     private static final String TAG = "time.TimeManager";

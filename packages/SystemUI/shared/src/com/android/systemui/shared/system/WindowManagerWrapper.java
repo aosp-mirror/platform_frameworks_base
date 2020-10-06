@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -81,10 +82,23 @@ public class WindowManagerWrapper {
             WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
+    public static final int ITYPE_EXTRA_NAVIGATION_BAR = InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+
     private static final WindowManagerWrapper sInstance = new WindowManagerWrapper();
 
     public static WindowManagerWrapper getInstance() {
         return sInstance;
+    }
+
+
+    /**
+     * Sets {@param providesInsetsTypes} as the inset types provided by {@param params}.
+     * @param params The window layout params.
+     * @param providesInsetsTypes The inset types we would like this layout params to provide.
+     */
+    public void setProvidesInsetsTypes(WindowManager.LayoutParams params,
+            int[] providesInsetsTypes) {
+        params.providesInsetsTypes = providesInsetsTypes;
     }
 
     /**

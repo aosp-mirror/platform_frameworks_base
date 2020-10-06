@@ -58,7 +58,24 @@ stubs_defaults {
             "media/aidl",
         ],
     },
-    libs: ["framework-internal-utils"],
+    // These are libs from framework-internal-utils that are required (i.e. being referenced)
+    // from framework-non-updatable-sources. Add more here when there's a need.
+    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+    // dependencies gets bigger.
+    libs: [
+        "android.hardware.cas-V1.2-java",
+        "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.5-java",
+        "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V2.0-java",
+        "android.hardware.tv.input-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.usb-V1.0-java-constants",
+        "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.vibrator-V1.3-java",
+        "framework-protos",
+    ],
     installable: false,
     annotations_enabled: true,
     previous_api: ":android.api.public.latest",
@@ -143,6 +160,11 @@ droidstubs {
             api_file: "non-updatable-api/current.txt",
             removed_api_file: "non-updatable-api/removed.txt",
         },
+        last_released: {
+            api_file: ":android-non-updatable.api.public.latest",
+            removed_api_file: ":android-non-updatable-removed.api.public.latest",
+            baseline_file: ":public-api-incompatibilities-with-last-released",
+        },
         api_lint: {
             enabled: true,
             new_since: ":android-non-updatable.api.public.latest",
@@ -204,6 +226,11 @@ droidstubs {
         current: {
             api_file: "non-updatable-api/system-current.txt",
             removed_api_file: "non-updatable-api/system-removed.txt",
+        },
+        last_released: {
+            api_file: ":android-non-updatable.api.system.latest",
+            removed_api_file: ":android-non-updatable-removed.api.system.latest",
+            baseline_file: ":system-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,

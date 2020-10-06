@@ -107,10 +107,10 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.permission.AppIdPermissionState;
-import com.android.server.pm.permission.AppIdPermissionState.PermissionState;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
+import com.android.server.pm.permission.LegacyPermissionState;
+import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
 import com.android.server.pm.permission.PermissionSettings;
 import com.android.server.utils.TimingsTraceAndSlog;
 
@@ -733,7 +733,8 @@ public final class Settings {
                     pkgSetting.signatures = new PackageSignatures(disabledPkg.signatures);
                     pkgSetting.appId = disabledPkg.appId;
                     // Clone permissions
-                    pkgSetting.getPermissionsState().copyFrom(disabledPkg.getPermissionsState());
+                    pkgSetting.getLegacyPermissionState()
+                            .copyFrom(disabledPkg.getLegacyPermissionState());
                     // Clone component info
                     List<UserInfo> users = getAllUsers(userManager);
                     if (users != null) {
@@ -2114,7 +2115,7 @@ public final class Settings {
     }
 
     void readInstallPermissionsLPr(XmlPullParser parser,
-            AppIdPermissionState permissionsState) throws IOException, XmlPullParserException {
+            LegacyPermissionState permissionsState) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -2406,7 +2407,7 @@ public final class Settings {
                 serializer.attribute(null, "userId",
                         Integer.toString(usr.userId));
                 usr.signatures.writeXml(serializer, "sigs", mPastSignatures);
-                writePermissionsLPr(serializer, usr.getPermissionsState()
+                writePermissionsLPr(serializer, usr.getLegacyPermissionState()
                         .getInstallPermissionStates());
                 serializer.endTag(null, "shared-user");
             }
@@ -2734,7 +2735,7 @@ public final class Settings {
 
         // If this is a shared user, the permissions will be written there.
         if (pkg.sharedUser == null) {
-            writePermissionsLPr(serializer, pkg.getPermissionsState()
+            writePermissionsLPr(serializer, pkg.getLegacyPermissionState()
                     .getInstallPermissionStates());
         }
 
@@ -2825,7 +2826,8 @@ public final class Settings {
                     serializer, "install-initiator-sigs", mPastSignatures);
         }
 
-        writePermissionsLPr(serializer, pkg.getPermissionsState().getInstallPermissionStates());
+        writePermissionsLPr(serializer,
+                pkg.getLegacyPermissionState().getInstallPermissionStates());
 
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
@@ -3551,7 +3553,7 @@ public final class Settings {
             }
 
             if (parser.getName().equals(TAG_PERMISSIONS)) {
-                readInstallPermissionsLPr(parser, ps.getPermissionsState());
+                readInstallPermissionsLPr(parser, ps.getLegacyPermissionState());
             } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
                 readUsesStaticLibLPw(parser, ps);
             } else {
@@ -3848,7 +3850,7 @@ public final class Settings {
                     packageSetting.signatures.readXml(parser, mPastSignatures);
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
                     readInstallPermissionsLPr(parser,
-                            packageSetting.getPermissionsState());
+                            packageSetting.getLegacyPermissionState());
                     packageSetting.installPermissionsFixed = true;
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
@@ -4074,7 +4076,7 @@ public final class Settings {
                 if (tagName.equals("sigs")) {
                     su.signatures.readXml(parser, mPastSignatures);
                 } else if (tagName.equals("perms")) {
-                    readInstallPermissionsLPr(parser, su.getPermissionsState());
+                    readInstallPermissionsLPr(parser, su.getLegacyPermissionState());
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <shared-user>: " + parser.getName());
@@ -4494,7 +4496,7 @@ public final class Settings {
 
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
             ArraySet<String> permissionNames, PackageSetting ps,
-            AppIdPermissionState permissionsState, SimpleDateFormat sdf, Date date,
+            LegacyPermissionState permissionsState, SimpleDateFormat sdf, Date date,
             List<UserInfo> users, boolean dumpAll, boolean dumpAllComponents) {
         AndroidPackage pkg = ps.pkg;
         if (checkinTag != null) {
@@ -4944,8 +4946,8 @@ public final class Settings {
                     && !packageName.equals(ps.name)) {
                 continue;
             }
-            final AppIdPermissionState permissionsState =
-                    mPermissionDataProvider.getAppIdPermissionState(ps.appId);
+            final LegacyPermissionState permissionsState =
+                    mPermissionDataProvider.getLegacyPermissionState(ps.appId);
             if (permissionNames != null
                     && !permissionsState.hasPermissionState(permissionNames)) {
                 continue;
@@ -5002,8 +5004,8 @@ public final class Settings {
                     pw.println("Hidden system packages:");
                     printedSomething = true;
                 }
-                final AppIdPermissionState permissionsState =
-                        mPermissionDataProvider.getAppIdPermissionState(ps.appId);
+                final LegacyPermissionState permissionsState =
+                        mPermissionDataProvider.getLegacyPermissionState(ps.appId);
                 dumpPackageLPr(pw, "  ", checkin ? "dis" : null, permissionNames, ps,
                         permissionsState, sdf, date, users, packageName != null, dumpAllComponents);
             }
@@ -5033,8 +5035,8 @@ public final class Settings {
             if (packageName != null && su != dumpState.getSharedUser()) {
                 continue;
             }
-            final AppIdPermissionState permissionsState =
-                    mPermissionDataProvider.getAppIdPermissionState(su.userId);
+            final LegacyPermissionState permissionsState =
+                    mPermissionDataProvider.getLegacyPermissionState(su.userId);
             if (permissionNames != null
                     && !permissionsState.hasPermissionState(permissionNames)) {
                 continue;
@@ -5178,7 +5180,7 @@ public final class Settings {
     }
 
     void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
-            AppIdPermissionState permissionsState) {
+            LegacyPermissionState permissionsState) {
         Collection<PermissionState> permissionStates =
                 permissionsState.getInstallPermissionStates();
         if (!permissionStates.isEmpty()) {
@@ -5424,7 +5426,7 @@ public final class Settings {
                 if (packageSetting.sharedUser == null) {
                     List<RuntimePermissionsState.PermissionState> permissions =
                             getPermissionsFromPermissionsState(
-                                    packageSetting.getPermissionsState(), userId);
+                                    packageSetting.getLegacyPermissionState(), userId);
                     packagePermissions.put(packageName, permissions);
                 }
             }
@@ -5437,7 +5439,7 @@ public final class Settings {
                 SharedUserSetting sharedUserSetting = mSharedUsers.valueAt(i);
                 List<RuntimePermissionsState.PermissionState> permissions =
                         getPermissionsFromPermissionsState(
-                                sharedUserSetting.getPermissionsState(), userId);
+                                sharedUserSetting.getLegacyPermissionState(), userId);
                 sharedUserPermissions.put(sharedUserName, permissions);
             }
 
@@ -5449,7 +5451,7 @@ public final class Settings {
 
         @NonNull
         private List<RuntimePermissionsState.PermissionState> getPermissionsFromPermissionsState(
-                @NonNull AppIdPermissionState permissionsState, @UserIdInt int userId) {
+                @NonNull LegacyPermissionState permissionsState, @UserIdInt int userId) {
             Collection<PermissionState> permissionStates =
                     permissionsState.getRuntimePermissionStates(userId);
             List<RuntimePermissionsState.PermissionState> permissions = new ArrayList<>();
@@ -5509,11 +5511,11 @@ public final class Settings {
                 List<RuntimePermissionsState.PermissionState> permissions =
                         packagePermissions.get(packageName);
                 if (permissions != null) {
-                    readPermissionsStateLpr(permissions, packageSetting.getPermissionsState(),
+                    readPermissionsStateLpr(permissions, packageSetting.getLegacyPermissionState(),
                             userId);
                 } else if (packageSetting.sharedUser == null && !isUpgradeToR) {
                     Slog.w(TAG, "Missing permission state for package: " + packageName);
-                    packageSetting.getPermissionsState().setMissing(true, userId);
+                    packageSetting.getLegacyPermissionState().setMissing(true, userId);
                 }
             }
 
@@ -5527,18 +5529,18 @@ public final class Settings {
                 List<RuntimePermissionsState.PermissionState> permissions =
                         sharedUserPermissions.get(sharedUserName);
                 if (permissions != null) {
-                    readPermissionsStateLpr(permissions, sharedUserSetting.getPermissionsState(),
-                            userId);
+                    readPermissionsStateLpr(permissions,
+                            sharedUserSetting.getLegacyPermissionState(), userId);
                 } else if (!isUpgradeToR) {
                     Slog.w(TAG, "Missing permission state for shared user: " + sharedUserName);
-                    sharedUserSetting.getPermissionsState().setMissing(true, userId);
+                    sharedUserSetting.getLegacyPermissionState().setMissing(true, userId);
                 }
             }
         }
 
         private void readPermissionsStateLpr(
                 @NonNull List<RuntimePermissionsState.PermissionState> permissions,
-                @NonNull AppIdPermissionState permissionsState, @UserIdInt int userId) {
+                @NonNull LegacyPermissionState permissionsState, @UserIdInt int userId) {
             int permissionsSize = permissions.size();
             for (int i = 0; i < permissionsSize; i++) {
                 RuntimePermissionsState.PermissionState permission = permissions.get(i);
@@ -5617,7 +5619,7 @@ public final class Settings {
                             XmlUtils.skipCurrentTag(parser);
                             continue;
                         }
-                        parsePermissionsLPr(parser, ps.getPermissionsState(), userId);
+                        parsePermissionsLPr(parser, ps.getLegacyPermissionState(), userId);
                     } break;
 
                     case TAG_SHARED_USER: {
@@ -5628,14 +5630,14 @@ public final class Settings {
                             XmlUtils.skipCurrentTag(parser);
                             continue;
                         }
-                        parsePermissionsLPr(parser, sus.getPermissionsState(), userId);
+                        parsePermissionsLPr(parser, sus.getLegacyPermissionState(), userId);
                     } break;
                 }
             }
         }
 
         private void parsePermissionsLPr(XmlPullParser parser,
-                AppIdPermissionState permissionsState, int userId)
+                LegacyPermissionState permissionsState, int userId)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             int type;

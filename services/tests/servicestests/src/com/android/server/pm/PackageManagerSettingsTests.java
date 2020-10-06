@@ -891,8 +891,10 @@ public class PackageManagerSettingsTests {
             assertNotSame(origPkgSetting.mimeGroups, testPkgSetting.mimeGroups);
         }
         assertThat(origPkgSetting.mimeGroups, is(testPkgSetting.mimeGroups));
-        assertNotSame(origPkgSetting.mPermissionsState, testPkgSetting.mPermissionsState);
-        assertThat(origPkgSetting.mPermissionsState, is(testPkgSetting.mPermissionsState));
+        assertNotSame(origPkgSetting.mLegacyPermissionsState,
+                testPkgSetting.mLegacyPermissionsState);
+        assertThat(origPkgSetting.mLegacyPermissionsState,
+                is(testPkgSetting.mLegacyPermissionsState));
         assertThat(origPkgSetting.name, is(testPkgSetting.name));
         // mOldCodePaths is _not_ copied
         // assertNotSame(origPkgSetting.mOldCodePaths, testPkgSetting.mOldCodePaths);

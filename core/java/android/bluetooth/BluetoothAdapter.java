@@ -2563,7 +2563,7 @@ public final class BluetoothAdapter {
      * Create a listening, insecure RFCOMM Bluetooth socket with Service Record.
      * <p>The link key is not required to be authenticated, i.e the communication may be
      * vulnerable to Person In the Middle attacks. For Bluetooth 2.1 devices,
-     * the link will be encrypted, as encryption is mandartory.
+     * the link will be encrypted, as encryption is mandatory.
      * For legacy devices (pre Bluetooth 2.1 devices) the link will not
      * be encrypted. Use {@link #listenUsingRfcommWithServiceRecord}, if an
      * encrypted and authenticated communication channel is desired.
@@ -2602,7 +2602,7 @@ public final class BluetoothAdapter {
      * an input and output capability or just has the ability to display a numeric key,
      * a secure socket connection is not possible and this socket can be used.
      * Use {@link #listenUsingInsecureRfcommWithServiceRecord}, if encryption is not required.
-     * For Bluetooth 2.1 devices, the link will be encrypted, as encryption is mandartory.
+     * For Bluetooth 2.1 devices, the link will be encrypted, as encryption is mandatory.
      * For more details, refer to the Security Model section 5.2 (vol 3) of
      * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming

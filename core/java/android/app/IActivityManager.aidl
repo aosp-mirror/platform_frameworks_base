@@ -25,7 +25,6 @@ import android.app.GrantedUriPermission;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
-import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
 import android.app.IServiceConnection;
@@ -70,7 +69,6 @@ import android.os.RemoteCallback;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
-import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import com.android.internal.app.IVoiceInteractor;
@@ -469,11 +467,6 @@ interface IActivityManager {
     boolean startUserInBackground(int userid);
     @UnsupportedAppUsage
     boolean isInLockTaskMode();
-    @UnsupportedAppUsage
-    void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
-            in IRecentsAnimationRunner recentsAnimationRunner);
-    @UnsupportedAppUsage
-    void cancelRecentsAnimation(boolean restoreHomeStackPosition);
     @UnsupportedAppUsage
     int startActivityFromRecents(int taskId, in Bundle options);
     @UnsupportedAppUsage

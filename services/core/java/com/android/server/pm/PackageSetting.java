@@ -28,7 +28,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.permission.AppIdPermissionState;
+import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import java.io.File;
@@ -214,11 +214,12 @@ public class PackageSetting extends PackageSettingBase {
         mimeGroups = updatedMimeGroups;
     }
 
+    @Deprecated
     @Override
-    public AppIdPermissionState getPermissionsState() {
+    public LegacyPermissionState getLegacyPermissionState() {
         return (sharedUser != null)
-                ? sharedUser.getPermissionsState()
-                : super.getPermissionsState();
+                ? sharedUser.getLegacyPermissionState()
+                : super.getLegacyPermissionState();
     }
 
     public int getAppId() {

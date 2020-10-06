@@ -587,6 +587,51 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
 
     // Now, perform the update. Must iterate the metric types in the same order
     int metricIndex = 0;
+    for (int i = 0; i < config.count_metric_size(); i++, metricIndex++) {
+        newMetricProducerMap[config.count_metric(i).id()] = metricIndex;
+        const CountMetric& metric = config.count_metric(i);
+        switch (metricsToUpdate[metricIndex]) {
+            case UPDATE_PRESERVE: {
+                const auto& oldMetricProducerIt = oldMetricProducerMap.find(metric.id());
+                if (oldMetricProducerIt == oldMetricProducerMap.end()) {
+                    ALOGE("Could not find Metric %lld in the previous config, but expected it "
+                          "to be there",
+                          (long long)metric.id());
+                    return false;
+                }
+                const int oldIndex = oldMetricProducerIt->second;
+                sp<MetricProducer> producer = oldMetricProducers[oldIndex];
+                producer->onConfigUpdated(
+                        config, i, metricIndex, allAtomMatchingTrackers, oldAtomMatchingTrackerMap,
+                        newAtomMatchingTrackerMap, matcherWizard, allConditionTrackers,
+                        conditionTrackerMap, wizard, metricToActivationMap, trackerToMetricMap,
+                        conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                newMetricProducers.push_back(producer);
+                break;
+            }
+            case UPDATE_REPLACE:
+            case UPDATE_NEW: {
+                sp<MetricProducer> producer = createCountMetricProducerAndUpdateMetadata(
+                        key, config, timeBaseNs, currentTimeNs, metric, metricIndex,
+                        allAtomMatchingTrackers, newAtomMatchingTrackerMap, allConditionTrackers,
+                        conditionTrackerMap, initialConditionCache, wizard, stateAtomIdMap,
+                        allStateGroupMaps, metricToActivationMap, trackerToMetricMap,
+                        conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                if (producer == nullptr) {
+                    return false;
+                }
+                newMetricProducers.push_back(producer);
+                break;
+            }
+            default: {
+                ALOGE("Metric \"%lld\" update state is unknown. This should never happen",
+                      (long long)metric.id());
+                return false;
+            }
+        }
+    }
     for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
         newMetricProducerMap[config.event_metric(i).id()] = metricIndex;
         const EventMetric& metric = config.event_metric(i);

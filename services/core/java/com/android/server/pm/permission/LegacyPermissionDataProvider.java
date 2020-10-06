@@ -31,7 +31,7 @@ public interface LegacyPermissionDataProvider {
      * @return the legacy permission state
      */
     @NonNull
-    public abstract AppIdPermissionState getAppIdPermissionState(@AppIdInt int appId);
+    LegacyPermissionState getLegacyPermissionState(@AppIdInt int appId);
 
     /**
      * Get the GIDs computed from the permission state of a UID, either a package or a shared user.
@@ -40,5 +40,5 @@ public interface LegacyPermissionDataProvider {
      * @return the GIDs for the UID
      */
     @NonNull
-    public abstract int[] getGidsForUid(int uid);
+    int[] getGidsForUid(int uid);
 }
