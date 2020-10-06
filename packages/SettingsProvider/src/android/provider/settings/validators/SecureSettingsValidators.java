@@ -29,6 +29,7 @@ import static android.provider.settings.validators.SettingsValidators.NONE_NEGAT
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.TILE_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.TTS_LIST_VALIDATOR;
 
@@ -101,6 +102,8 @@ public class SecureSettingsValidators {
                 Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE,
                 new InclusiveFloatRangeValidator(0.5f, 2.0f));
         VALIDATORS.put(Secure.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.REDUCE_BRIGHT_COLORS_LEVEL, PERCENTAGE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.TTS_DEFAULT_RATE, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.TTS_DEFAULT_PITCH, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.TTS_DEFAULT_SYNTH, PACKAGE_NAME_VALIDATOR);

@@ -60,6 +60,8 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
+        Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL,
+        Settings.Secure.REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS,
         Settings.Secure.TTS_DEFAULT_RATE,
         Settings.Secure.TTS_DEFAULT_PITCH,
         Settings.Secure.TTS_DEFAULT_SYNTH,
