@@ -739,7 +739,7 @@ public class Surface implements Parcelable {
      * Set the scaling mode to be used for this surfaces buffers
      * @hide
      */
-    void setScalingMode(@ScalingMode int scalingMode) {
+     public void setScalingMode(@ScalingMode int scalingMode) {
         synchronized (mLock) {
             checkNotReleasedLocked();
             int err = nativeSetScalingMode(mNativeObject, scalingMode);
