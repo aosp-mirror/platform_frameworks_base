@@ -285,10 +285,12 @@ final class InputMonitor {
         inputWindowHandle.dispatchingTimeoutMillis = child.getInputDispatchingTimeoutMillis();
         inputWindowHandle.visible = isVisible;
         inputWindowHandle.focusable = focusable;
+        inputWindowHandle.touchOcclusionMode = child.getTouchOcclusionMode();
         inputWindowHandle.hasWallpaper = hasWallpaper;
         inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
         inputWindowHandle.ownerPid = child.mSession.mPid;
         inputWindowHandle.ownerUid = child.mSession.mUid;
+        inputWindowHandle.packageName = child.getOwningPackage();
         inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
         inputWindowHandle.displayId = child.getDisplayId();
 

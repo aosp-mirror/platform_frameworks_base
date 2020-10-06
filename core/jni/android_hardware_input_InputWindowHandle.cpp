@@ -60,8 +60,10 @@ static struct {
     jfieldID hasWallpaper;
     jfieldID paused;
     jfieldID trustedOverlay;
+    jfieldID touchOcclusionMode;
     jfieldID ownerPid;
     jfieldID ownerUid;
+    jfieldID packageName;
     jfieldID inputFeatures;
     jfieldID displayId;
     jfieldID portalToDisplayId;
@@ -150,10 +152,13 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.paused = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.paused);
     mInfo.trustedOverlay = env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay);
+    mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
     mInfo.ownerPid = env->GetIntField(obj,
             gInputWindowHandleClassInfo.ownerPid);
     mInfo.ownerUid = env->GetIntField(obj,
             gInputWindowHandleClassInfo.ownerUid);
+    mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
     mInfo.inputFeatures = static_cast<InputWindowInfo::Feature>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
     mInfo.displayId = env->GetIntField(obj,
@@ -326,11 +331,16 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.trustedOverlay, clazz, "trustedOverlay", "Z");
 
+    GET_FIELD_ID(gInputWindowHandleClassInfo.touchOcclusionMode, clazz, "touchOcclusionMode", "I");
+
     GET_FIELD_ID(gInputWindowHandleClassInfo.ownerPid, clazz,
             "ownerPid", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ownerUid, clazz,
             "ownerUid", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.packageName, clazz, "packageName",
+                 "Ljava/lang/String;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputFeatures, clazz,
             "inputFeatures", "I");
