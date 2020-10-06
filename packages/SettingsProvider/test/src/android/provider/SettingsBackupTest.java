@@ -747,7 +747,8 @@ public class SettingsBackupTest {
                  Settings.Secure.WINDOW_MAGNIFICATION,
                  Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
                  Settings.Secure.SUPPRESS_DOZE,
-                 Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
+                 Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                 Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {
