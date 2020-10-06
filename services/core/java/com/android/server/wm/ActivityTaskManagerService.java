@@ -2187,19 +2187,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void setFocusedStack(int stackId) {
-        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setFocusedStack()");
-        ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedStack: stackId=%d", stackId);
+    public void setFocusedRootTask(int taskId) {
+        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setFocusedRootTask()");
+        ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedRootTask: taskId=%d", taskId);
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final Task stack = mRootWindowContainer.getStack(stackId);
-                if (stack == null) {
-                    Slog.w(TAG, "setFocusedStack: No stack with id=" + stackId);
+                final Task task = mRootWindowContainer.getStack(taskId);
+                if (task == null) {
+                    Slog.w(TAG, "setFocusedRootTask: No task with id=" + taskId);
                     return;
                 }
-                final ActivityRecord r = stack.topRunningActivity();
-                if (r != null && r.moveFocusableActivityToTop("setFocusedStack")) {
+                final ActivityRecord r = task.topRunningActivity();
+                if (r != null && r.moveFocusableActivityToTop("setFocusedRootTask")) {
                     mRootWindowContainer.resumeFocusedStacksTopActivities();
                 }
             }
@@ -2253,8 +2253,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mStackSupervisor.removeTaskById(taskId, true, REMOVE_FROM_RECENTS,
-                        "remove-task");
+                final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+                if (task == null) {
+                    Slog.w(TAG, "removeTask: No task remove with id=" + taskId);
+                    return false;
+                }
+
+                if (task.isLeafTask()) {
+                    mStackSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task");
+                } else {
+                    mStackSupervisor.removeRootTask(task);
+                }
+                return true;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2750,31 +2761,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
+    public void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToRootTask()");
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId);
                 if (task == null) {
-                    Slog.w(TAG, "moveTaskToStack: No task for id=" + taskId);
+                    Slog.w(TAG, "moveTaskToRootTask: No task for id=" + taskId);
                     return;
                 }
 
-                ProtoLog.d(WM_DEBUG_TASKS, "moveTaskToStack: moving task=%d to "
-                        + "stackId=%d toTop=%b", taskId, stackId, toTop);
+                ProtoLog.d(WM_DEBUG_TASKS, "moveTaskToRootTask: moving task=%d to "
+                        + "rootTaskId=%d toTop=%b", taskId, rootTaskId, toTop);
 
-                final Task stack = mRootWindowContainer.getStack(stackId);
-                if (stack == null) {
+                final Task rootTask = mRootWindowContainer.getStack(rootTaskId);
+                if (rootTask == null) {
                     throw new IllegalStateException(
-                            "moveTaskToStack: No stack for stackId=" + stackId);
+                            "moveTaskToRootTask: No rootTask for rootTaskId=" + rootTaskId);
                 }
-                if (!stack.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("moveTaskToStack: Attempt to move task "
-                            + taskId + " to stack " + stackId);
+                if (!rootTask.isActivityTypeStandardOrUndefined()) {
+                    throw new IllegalArgumentException("moveTaskToRootTask: Attempt to move task "
+                            + taskId + " to rootTask " + rootTaskId);
                 }
-                task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
-                        "moveTaskToStack");
+                task.reparent(rootTask, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
+                        "moveTaskToRootTask");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2862,18 +2873,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * Removes root tasks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
     @Override
-    public void removeStacksInWindowingModes(int[] windowingModes) {
+    public void removeRootTasksInWindowingModes(int[] windowingModes) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "removeStacksInWindowingModes()");
+                "removeRootTasksInWindowingModes()");
 
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                mRootWindowContainer.removeStacksInWindowingModes(windowingModes);
+                mRootWindowContainer.removeRootTasksInWindowingModes(windowingModes);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2881,14 +2892,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void removeStacksWithActivityTypes(int[] activityTypes) {
+    public void removeRootTasksWithActivityTypes(int[] activityTypes) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "removeStacksWithActivityTypes()");
+                "removeRootTasksWithActivityTypes()");
 
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                mRootWindowContainer.removeStacksWithActivityTypes(activityTypes);
+                mRootWindowContainer.removeRootTasksWithActivityTypes(activityTypes);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2962,14 +2973,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
+    public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "cancelRecentsAnimation()");
         final long callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 // Cancel the recents animation synchronously (do not hold the WM lock)
-                mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
+                mWindowManager.cancelRecentsAnimation(restoreHomeRootTaskPosition
                         ? REORDER_MOVE_TO_ORIGINAL_POSITION
                         : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation/uid=" + callingUid);
             }
@@ -3047,7 +3058,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             // When a task is locked, dismiss the pinned stack if it exists
-            mRootWindowContainer.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
+            mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
 
             getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
@@ -3469,37 +3480,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void removeStack(int stackId) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "removeStack()");
-        synchronized (mGlobalLock) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                final Task stack = mRootWindowContainer.getStack(stackId);
-                if (stack == null) {
-                    Slog.w(TAG, "removeStack: No stack with id=" + stackId);
-                    return;
-                }
-                if (!stack.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException(
-                            "Removing non-standard stack is not allowed.");
-                }
-                mStackSupervisor.removeStack(stack);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
-    public void moveStackToDisplay(int stackId, int displayId) {
-        mAmInternal.enforceCallingPermission(INTERNAL_SYSTEM_WINDOW, "moveStackToDisplay()");
+    public void moveRootTaskToDisplay(int taskId, int displayId) {
+        mAmInternal.enforceCallingPermission(INTERNAL_SYSTEM_WINDOW, "moveRootTaskToDisplay()");
 
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                ProtoLog.d(WM_DEBUG_TASKS, "moveStackToDisplay: moving stackId=%d to "
-                        + "displayId=%d", stackId, displayId);
-                mRootWindowContainer.moveStackToDisplay(stackId, displayId, ON_TOP);
+                ProtoLog.d(WM_DEBUG_TASKS, "moveRootTaskToDisplay: moving taskId=%d to "
+                        + "displayId=%d", taskId, displayId);
+                mRootWindowContainer.moveStackToDisplay(taskId, displayId, ON_TOP);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3993,26 +3982,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Moves the top activity in the input stackId to the pinned stack.
+     * Moves the top activity in the input rootTaskId to the pinned root task.
      *
-     * @param stackId Id of stack to move the top activity to pinned stack.
-     * @param bounds  Bounds to use for pinned stack.
-     * @return True if the top activity of the input stack was successfully moved to the pinned
-     * stack.
+     * @param rootTaskId Id of root task to move the top activity to pinned root task.
+     * @param bounds     Bounds to use for pinned root task.
+     * @return True if the top activity of the input stack was successfully moved to the pinned root
+     * task.
      */
     @Override
-    public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
+    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, Rect bounds) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "moveTopActivityToPinnedStack()");
+                "moveTopActivityToPinnedRootTask()");
         synchronized (mGlobalLock) {
             if (!mSupportsPictureInPicture) {
-                throw new IllegalStateException("moveTopActivityToPinnedStack:"
+                throw new IllegalStateException("moveTopActivityToPinnedRootTask:"
                         + "Device doesn't support picture-in-picture mode");
             }
 
             long ident = Binder.clearCallingIdentity();
             try {
-                return mRootWindowContainer.moveTopStackActivityToPinnedStack(stackId);
+                return mRootWindowContainer.moveTopStackActivityToPinnedRootTask(rootTaskId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4184,10 +4173,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     // TODO(b/149338177): remove when CTS no-longer requires it
     @Override
-    public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
+    public void resizePrimarySplitScreen(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds,
             Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizeDockedStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizePrimarySplitScreen()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -4710,7 +4699,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (disableNonVrUi) {
                     // If we are in a VR mode where Picture-in-Picture mode is unsupported,
                     // then remove the pinned stack.
-                    mRootWindowContainer.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
+                    mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
                 }
             }
         });
@@ -6286,8 +6275,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
-            ActivityTaskManagerService.this.cancelRecentsAnimation(restoreHomeStackPosition);
+        public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
+            ActivityTaskManagerService.this.cancelRecentsAnimation(restoreHomeRootTaskPosition);
         }
 
         @Override

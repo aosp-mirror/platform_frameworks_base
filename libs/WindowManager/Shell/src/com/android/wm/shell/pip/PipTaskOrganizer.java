@@ -415,7 +415,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             wct.setBounds(mToken, null);
             mTaskOrganizer.applyTransaction(wct);
 
-            ActivityTaskManager.getService().removeStacksInWindowingModes(
+            ActivityTaskManager.getService().removeRootTasksInWindowingModes(
                     new int[]{ WINDOWING_MODE_PINNED });
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to remove PiP", e);
@@ -606,7 +606,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /**
      * Note that dismissing PiP is now originated from SystemUI, see {@link #exitPip(int)}.
      * Meanwhile this callback is invoked whenever the task is removed. For instance:
-     *   - as a result of removeStacksInWindowingModes from WM
+     *   - as a result of removeRootTasksInWindowingModes from WM
      *   - activity itself is died
      * Nevertheless, we simply update the internal state here as all the heavy lifting should
      * have been done in WM.

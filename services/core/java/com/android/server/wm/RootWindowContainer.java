@@ -2038,7 +2038,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Also dismiss the pinned stack whenever we switch users. Removing the pinned stack will
         // also cause all tasks to be moved to the fullscreen stack at a position that is
         // appropriate.
-        removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
+        removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
         mCurrentUser = userId;
@@ -2141,27 +2141,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         moveStackToTaskDisplayArea(stackId, displayContent.getDefaultTaskDisplayArea(), onTop);
     }
 
-    boolean moveTopStackActivityToPinnedStack(int stackId) {
-        final Task stack = getStack(stackId);
-        if (stack == null) {
+    boolean moveTopStackActivityToPinnedRootTask(int rootTaskId) {
+        final Task rootTask = getStack(rootTaskId);
+        if (rootTask == null) {
             throw new IllegalArgumentException(
-                    "moveTopStackActivityToPinnedStack: Unknown stackId=" + stackId);
+                    "moveTopStackActivityToPinnedRootTask: Unknown rootTaskId=" + rootTaskId);
         }
 
-        final ActivityRecord r = stack.topRunningActivity();
+        final ActivityRecord r = rootTask.topRunningActivity();
         if (r == null) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedStack: No top running activity"
-                    + " in stack=" + stack);
+            Slog.w(TAG, "moveTopStackActivityToPinnedRootTask: No top running activity"
+                    + " in rootTask=" + rootTask);
             return false;
         }
 
         if (!mService.mForceResizableActivities && !r.supportsPictureInPicture()) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedStack: Picture-In-Picture not supported for "
-                    + " r=" + r);
+            Slog.w(TAG, "moveTopStackActivityToPinnedRootTask: Picture-In-Picture not supported "
+                    + "for r=" + r);
             return false;
         }
 
-        moveActivityToPinnedStack(r, "moveTopActivityToPinnedStack");
+        moveActivityToPinnedStack(r, "moveTopStackActivityToPinnedRootTask");
         return true;
     }
 
@@ -3310,18 +3310,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * Removes root tasks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
-    void removeStacksInWindowingModes(int... windowingModes) {
+    void removeRootTasksInWindowingModes(int... windowingModes) {
         for (int i = getChildCount() - 1; i >= 0; --i) {
-            getChildAt(i).removeStacksInWindowingModes(windowingModes);
+            getChildAt(i).removeRootTasksInWindowingModes(windowingModes);
         }
     }
 
-    void removeStacksWithActivityTypes(int... activityTypes) {
+    void removeRootTasksWithActivityTypes(int... activityTypes) {
         for (int i = getChildCount() - 1; i >= 0; --i) {
-            getChildAt(i).removeStacksWithActivityTypes(activityTypes);
+            getChildAt(i).removeRootTasksWithActivityTypes(activityTypes);
         }
     }
 

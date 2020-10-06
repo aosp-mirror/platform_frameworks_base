@@ -1154,22 +1154,22 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     private void doTestRecentTasksApis(boolean expectCallable) {
-        assertSecurityException(expectCallable, () -> mAtm.removeStack(INVALID_STACK_ID));
+        assertSecurityException(expectCallable, () -> mAtm.removeTask(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
-                () -> mAtm.removeStacksInWindowingModes(
+                () -> mAtm.removeRootTasksInWindowingModes(
                         new int[]{WINDOWING_MODE_UNDEFINED}));
         assertSecurityException(expectCallable,
-                () -> mAtm.removeStacksWithActivityTypes(
+                () -> mAtm.removeRootTasksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
         assertSecurityException(expectCallable, () -> mAtm.removeTask(0));
         assertSecurityException(expectCallable,
                 () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
-                () -> mAtm.moveTaskToStack(0, INVALID_STACK_ID, true));
+                () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.setTaskWindowingModeSplitScreenPrimary(0, true));
         assertSecurityException(expectCallable,
-                () -> mAtm.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+                () -> mAtm.moveTopActivityToPinnedRootTask(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());
         assertSecurityException(expectCallable,
                 () -> mAtm.getRootTaskInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));

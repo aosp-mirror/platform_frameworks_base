@@ -283,7 +283,7 @@ public abstract class ActivityTaskManagerInternal {
     /**
      * Cancels any currently running recents animation.
      */
-    public abstract void cancelRecentsAnimation(boolean restoreHomeStackPosition);
+    public abstract void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
 
     /**
      * This enforces {@code func} can only be called if either the caller is Recents activity or

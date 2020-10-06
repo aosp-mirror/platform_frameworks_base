@@ -300,15 +300,15 @@ public class ActivityDisplayTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveStackInWindowingModes() {
-        removeStackTests(() -> mRootWindowContainer.removeStacksInWindowingModes(
+    public void testRemoveRootTaskInWindowingModes() {
+        removeStackTests(() -> mRootWindowContainer.removeRootTasksInWindowingModes(
                 WINDOWING_MODE_FULLSCREEN));
     }
 
     @Test
     public void testRemoveStackWithActivityTypes() {
-        removeStackTests(
-                () -> mRootWindowContainer.removeStacksWithActivityTypes(ACTIVITY_TYPE_STANDARD));
+        removeStackTests(() -> mRootWindowContainer.removeRootTasksWithActivityTypes(
+                ACTIVITY_TYPE_STANDARD));
     }
 
     private void removeStackTests(Runnable runnable) {

@@ -1468,13 +1468,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    private void removeStackInSurfaceTransaction(Task stack) {
-        if (stack.getWindowingMode() == WINDOWING_MODE_PINNED) {
-            removePinnedStackInSurfaceTransaction(stack);
+    private void removeRootTaskInSurfaceTransaction(Task rootTask) {
+        if (rootTask.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            removePinnedStackInSurfaceTransaction(rootTask);
         } else {
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStackSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
-            stack.forAllLeafTasks(c, true /* traverseTopToBottom */);
+            rootTask.forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         }
     }
@@ -1484,12 +1484,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     /**
-     * Removes the stack associated with the given {@param stack}. If the {@param stack} is the
-     * pinned stack, then its tasks are not explicitly removed when the stack is destroyed, but
-     * instead moved back onto the fullscreen stack.
+     * Removes the root task associated with the given {@param task}. If the {@param task} is the
+     * pinned task, then its child tasks are not explicitly removed when the root task is
+     * destroyed, but instead moved back onto the TaskDisplayArea.
      */
-    void removeStack(Task stack) {
-        mWindowManager.inSurfaceTransaction(() -> removeStackInSurfaceTransaction(stack));
+    void removeRootTask(Task task) {
+        mWindowManager.inSurfaceTransaction(() -> removeRootTaskInSurfaceTransaction(task));
     }
 
     /**
