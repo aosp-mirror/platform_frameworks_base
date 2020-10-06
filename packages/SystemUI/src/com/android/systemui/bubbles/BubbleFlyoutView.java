@@ -34,6 +34,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -210,6 +211,14 @@ public class BubbleFlyoutView extends FrameLayout {
         renderBackground(canvas);
         invalidateOutline();
         super.onDraw(canvas);
+    }
+
+    void updateFontSize(float fontScale) {
+        final float fontSize = mContext.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.text_size_body_2_material);
+        final float newFontSize = fontSize * fontScale;
+        mMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newFontSize);
+        mSenderText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newFontSize);
     }
 
     /** Configures the flyout, collapsed into to dot form. */
