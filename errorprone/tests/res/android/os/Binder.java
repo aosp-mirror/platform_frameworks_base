@@ -20,4 +20,12 @@ public class Binder {
     public static int getCallingUid() {
         throw new UnsupportedOperationException();
     }
+
+    public static long clearCallingIdentity() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static void restoreCallingIdentity(long token) {
+        throw new UnsupportedOperationException();
+    }
 }
