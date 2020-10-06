@@ -25,12 +25,12 @@ import com.android.internal.util.DataClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.List;
 
 /**
  * A typed checksum.
  *
- * @see PackageInstaller.Session#addChecksums(String, List)
+ * @see ApkChecksum
+ * @see PackageManager#requestChecksums
  */
 @DataClass(genConstDefs = false)
 public final class Checksum implements Parcelable {
@@ -43,93 +43,93 @@ public final class Checksum implements Parcelable {
      * Can be used by kernel to enforce authenticity and integrity of the APK.
      * <a href="https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/tree/Documentation/filesystems/fsverity.rst#">See fs-verity for details</a>
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
+     * @see PackageManager#requestChecksums
      */
-    public static final int WHOLE_MERKLE_ROOT_4K_SHA256 = 0x00000001;
+    public static final int TYPE_WHOLE_MERKLE_ROOT_4K_SHA256 = 0x00000001;
 
     /**
      * MD5 hash computed over all file bytes.
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
-     * @deprecated Use SHA2 family of hashes (SHA256/SHA512) instead.
-     *             MD5 is cryptographically broken and unsuitable for further use.
+     * @see PackageManager#requestChecksums
+     * @deprecated Not platform enforced. Cryptographically broken and unsuitable for further use.
+     *             Use platform enforced digests e.g. {@link #TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}.
      *             Provided for completeness' sake and to support legacy usecases.
      */
     @Deprecated
-    public static final int WHOLE_MD5 = 0x00000002;
+    public static final int TYPE_WHOLE_MD5 = 0x00000002;
 
     /**
      * SHA1 hash computed over all file bytes.
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
-     * @deprecated Use SHA2 family of hashes (SHA256/SHA512) instead.
-     *             SHA1 is broken and should not be used.
+     * @see PackageManager#requestChecksums
+     * @deprecated Not platform enforced. Broken and should not be used.
+     *             Use platform enforced digests e.g. {@link #TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}.
      *             Provided for completeness' sake and to support legacy usecases.
      */
     @Deprecated
-    public static final int WHOLE_SHA1 = 0x00000004;
+    public static final int TYPE_WHOLE_SHA1 = 0x00000004;
 
     /**
      * SHA256 hash computed over all file bytes.
+     * @deprecated Not platform enforced.
+     *             Use platform enforced digests e.g. {@link #TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}.
+     *             Provided for completeness' sake and to support legacy usecases.
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
+     * @see PackageManager#requestChecksums
      */
-    public static final int WHOLE_SHA256 = 0x00000008;
+    @Deprecated
+    public static final int TYPE_WHOLE_SHA256 = 0x00000008;
 
     /**
      * SHA512 hash computed over all file bytes.
+     * @deprecated Not platform enforced.
+     *             Use platform enforced digests e.g. {@link #TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}.
+     *             Provided for completeness' sake and to support legacy usecases.
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
+     * @see PackageManager#requestChecksums
      */
-    public static final int WHOLE_SHA512 = 0x00000010;
+    @Deprecated
+    public static final int TYPE_WHOLE_SHA512 = 0x00000010;
 
     /**
      * Root SHA256 hash of a 1M Merkle tree computed over protected content.
      * Excludes signing block.
      * <a href="https://source.android.com/security/apksigning/v2">See APK Signature Scheme V2</a>.
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
+     * @see PackageManager#requestChecksums
      */
-    public static final int PARTIAL_MERKLE_ROOT_1M_SHA256 = 0x00000020;
+    public static final int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256 = 0x00000020;
 
     /**
      * Root SHA512 hash of a 1M Merkle tree computed over protected content.
      * Excludes signing block.
      * <a href="https://source.android.com/security/apksigning/v2">See APK Signature Scheme V2</a>.
      *
-     * @see PackageManager#getChecksums
-     * @see PackageInstaller.Session#addChecksums
+     * @see PackageManager#requestChecksums
      */
-    public static final int PARTIAL_MERKLE_ROOT_1M_SHA512 = 0x00000040;
+    public static final int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512 = 0x00000040;
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"WHOLE_", "PARTIAL_"}, value = {
-            WHOLE_MERKLE_ROOT_4K_SHA256,
-            WHOLE_MD5,
-            WHOLE_SHA1,
-            WHOLE_SHA256,
-            WHOLE_SHA512,
-            PARTIAL_MERKLE_ROOT_1M_SHA256,
-            PARTIAL_MERKLE_ROOT_1M_SHA512,
+    @IntDef(flag = true, prefix = {"TYPE_"}, value = {
+            TYPE_WHOLE_MERKLE_ROOT_4K_SHA256,
+            TYPE_WHOLE_MD5,
+            TYPE_WHOLE_SHA1,
+            TYPE_WHOLE_SHA256,
+            TYPE_WHOLE_SHA512,
+            TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256,
+            TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Kind {}
+    public @interface Type {}
 
     /**
-     * Checksum kind.
+     * Checksum type.
      */
-    private final @Checksum.Kind int mKind;
+    private final @Checksum.Type int mType;
     /**
      * Checksum value.
      */
     private final @NonNull byte[] mValue;
-
 
 
 
@@ -149,18 +149,18 @@ public final class Checksum implements Parcelable {
     /**
      * Creates a new Checksum.
      *
-     * @param kind
-     *   Checksum kind.
+     * @param type
+     *   Checksum type.
      * @param value
      *   Checksum value.
      */
     @DataClass.Generated.Member
     public Checksum(
-            @Checksum.Kind int kind,
+            @Checksum.Type int type,
             @NonNull byte[] value) {
-        this.mKind = kind;
+        this.mType = type;
         com.android.internal.util.AnnotationValidations.validate(
-                Checksum.Kind.class, null, mKind);
+                Checksum.Type.class, null, mType);
         this.mValue = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mValue);
@@ -169,11 +169,11 @@ public final class Checksum implements Parcelable {
     }
 
     /**
-     * Checksum kind.
+     * Checksum type.
      */
     @DataClass.Generated.Member
-    public @Checksum.Kind int getKind() {
-        return mKind;
+    public @Checksum.Type int getType() {
+        return mType;
     }
 
     /**
@@ -190,7 +190,7 @@ public final class Checksum implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
-        dest.writeInt(mKind);
+        dest.writeInt(mType);
         dest.writeByteArray(mValue);
     }
 
@@ -205,12 +205,12 @@ public final class Checksum implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
-        int kind = in.readInt();
+        int type = in.readInt();
         byte[] value = in.createByteArray();
 
-        this.mKind = kind;
+        this.mType = type;
         com.android.internal.util.AnnotationValidations.validate(
-                Checksum.Kind.class, null, mKind);
+                Checksum.Type.class, null, mType);
         this.mValue = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mValue);
@@ -233,10 +233,10 @@ public final class Checksum implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1600717052366L,
+            time = 1601955017774L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/content/pm/Checksum.java",
-            inputSignatures = "public static final  int WHOLE_MERKLE_ROOT_4K_SHA256\npublic static final @java.lang.Deprecated int WHOLE_MD5\npublic static final @java.lang.Deprecated int WHOLE_SHA1\npublic static final  int WHOLE_SHA256\npublic static final  int WHOLE_SHA512\npublic static final  int PARTIAL_MERKLE_ROOT_1M_SHA256\npublic static final  int PARTIAL_MERKLE_ROOT_1M_SHA512\nprivate final @android.content.pm.Checksum.Kind int mKind\nprivate final @android.annotation.NonNull byte[] mValue\nclass Checksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstDefs=false)")
+            inputSignatures = "public static final  int TYPE_WHOLE_MERKLE_ROOT_4K_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_MD5\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA1\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA512\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512\nprivate final @android.content.pm.Checksum.Type int mType\nprivate final @android.annotation.NonNull byte[] mValue\nclass Checksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

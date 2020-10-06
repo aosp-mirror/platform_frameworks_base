@@ -1222,13 +1222,15 @@ public class PackageInstaller {
          * Adds installer-provided checksums for the APK file in session.
          *
          * @param name      previously written as part of this session.
+         *                  {@link #openWrite}
          * @param checksums installer intends to make available via
-         *                  {@link PackageManager#getChecksums(String, boolean, int, List,
-         *                  IntentSender)}.
+         *                  {@link PackageManager#requestChecksums}.
          * @throws SecurityException if called after the session has been
          *                           committed or abandoned.
-         * @deprecated  use platform-enforced checksums e.g.
-         *              {@link Checksum#WHOLE_MERKLE_ROOT_4K_SHA256}
+         * @deprecated  do not use installer-provided checksums,
+         *              use platform-enforced checksums
+         *              e.g. {@link Checksum#TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}
+         *              in {@link PackageManager#requestChecksums}.
          */
         @Deprecated
         public void addChecksums(@NonNull String name, @NonNull List<Checksum> checksums)
