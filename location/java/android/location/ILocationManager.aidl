@@ -106,11 +106,12 @@ interface ILocationManager
     boolean isProviderEnabledForUser(String provider, int userId);
     boolean isLocationEnabledForUser(int userId);
     void setLocationEnabledForUser(boolean enabled, int userId);
+
     void addTestProvider(String name, in ProviderProperties properties, String packageName, String attributionTag);
     void removeTestProvider(String provider, String packageName, String attributionTag);
     void setTestProviderLocation(String provider, in Location location, String packageName, String attributionTag);
     void setTestProviderEnabled(String provider, boolean enabled, String packageName, String attributionTag);
-    List<LocationRequest> getTestProviderCurrentRequests(String provider);
+
     LocationTime getGnssTimeMillis();
 
     void sendExtraCommand(String provider, String command, inout Bundle extras);
