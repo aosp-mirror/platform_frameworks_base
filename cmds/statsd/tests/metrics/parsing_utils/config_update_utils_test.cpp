@@ -27,6 +27,7 @@
 #include "src/condition/CombinationConditionTracker.h"
 #include "src/condition/SimpleConditionTracker.h"
 #include "src/matchers/CombinationAtomMatchingTracker.h"
+#include "src/metrics/GaugeMetricProducer.h"
 #include "src/metrics/parsing_utils/metrics_manager_util.h"
 #include "tests/statsd_test_util.h"
 
@@ -134,6 +135,23 @@ CountMetric createCountMetric(string name, int64_t what, optional<int64_t> condi
     for (const int64_t state : states) {
         metric.add_slice_by_state(state);
     }
+    return metric;
+}
+
+GaugeMetric createGaugeMetric(string name, int64_t what, GaugeMetric::SamplingType samplingType,
+                              optional<int64_t> condition, optional<int64_t> triggerEvent) {
+    GaugeMetric metric;
+    metric.set_id(StringToId(name));
+    metric.set_what(what);
+    metric.set_bucket(TEN_MINUTES);
+    metric.set_sampling_type(samplingType);
+    if (condition) {
+        metric.set_condition(condition.value());
+    }
+    if (triggerEvent) {
+        metric.set_trigger_event(triggerEvent.value());
+    }
+    metric.mutable_gauge_fields_filter()->set_include_all(true);
     return metric;
 }
 
@@ -1278,11 +1296,8 @@ TEST_F(ConfigUpdateTest, TestGaugeMetricPreserve) {
     Predicate predicate = CreateScreenIsOnPredicate();
     *config.add_predicate() = predicate;
 
-    GaugeMetric* metric = config.add_gauge_metric();
-    metric->set_id(12345);
-    metric->set_what(whatMatcher.id());
-    metric->set_condition(predicate.id());
-    metric->mutable_gauge_fields_filter()->set_include_all(true);
+    *config.add_gauge_metric() = createGaugeMetric(
+            "GAUGE1", whatMatcher.id(), GaugeMetric::RANDOM_ONE_SAMPLE, predicate.id(), nullopt);
 
     EXPECT_TRUE(initConfig(config));
 
@@ -1300,15 +1315,13 @@ TEST_F(ConfigUpdateTest, TestGaugeMetricDefinitionChange) {
     AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
     *config.add_atom_matcher() = whatMatcher;
 
-    GaugeMetric* metric = config.add_gauge_metric();
-    metric->set_id(12345);
-    metric->set_what(whatMatcher.id());
-    metric->mutable_gauge_fields_filter()->set_include_all(true);
+    *config.add_gauge_metric() = createGaugeMetric(
+            "GAUGE1", whatMatcher.id(), GaugeMetric::RANDOM_ONE_SAMPLE, nullopt, nullopt);
 
     EXPECT_TRUE(initConfig(config));
 
     // Change split bucket on app upgrade, which should change the proto, causing replacement.
-    metric->set_split_bucket_for_app_upgrade(false);
+    config.mutable_gauge_metric(0)->set_split_bucket_for_app_upgrade(false);
 
     unordered_map<int64_t, int> metricToActivationMap;
     vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
@@ -1324,10 +1337,8 @@ TEST_F(ConfigUpdateTest, TestGaugeMetricWhatChanged) {
     AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
     *config.add_atom_matcher() = whatMatcher;
 
-    GaugeMetric* metric = config.add_gauge_metric();
-    metric->set_id(12345);
-    metric->set_what(whatMatcher.id());
-    metric->mutable_gauge_fields_filter()->set_include_all(true);
+    *config.add_gauge_metric() = createGaugeMetric(
+            "GAUGE1", whatMatcher.id(), GaugeMetric::RANDOM_ONE_SAMPLE, nullopt, nullopt);
 
     EXPECT_TRUE(initConfig(config));
 
@@ -1352,11 +1363,8 @@ TEST_F(ConfigUpdateTest, TestGaugeMetricConditionChanged) {
     Predicate predicate = CreateScreenIsOnPredicate();
     *config.add_predicate() = predicate;
 
-    GaugeMetric* metric = config.add_gauge_metric();
-    metric->set_id(12345);
-    metric->set_what(whatMatcher.id());
-    metric->set_condition(predicate.id());
-    metric->mutable_gauge_fields_filter()->set_include_all(true);
+    *config.add_gauge_metric() = createGaugeMetric(
+            "GAUGE1", whatMatcher.id(), GaugeMetric::RANDOM_ONE_SAMPLE, predicate.id(), nullopt);
 
     EXPECT_TRUE(initConfig(config));
 
@@ -1376,14 +1384,9 @@ TEST_F(ConfigUpdateTest, TestGaugeMetricTriggerEventChanged) {
     AtomMatcher whatMatcher = CreateTemperatureAtomMatcher();
     *config.add_atom_matcher() = whatMatcher;
 
-    GaugeMetric* metric = config.add_gauge_metric();
-    metric->set_id(12345);
-    metric->set_what(whatMatcher.id());
-    metric->set_trigger_event(triggerEvent.id());
-    metric->mutable_gauge_fields_filter()->set_include_all(true);
-    metric->set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
+    *config.add_gauge_metric() = createGaugeMetric(
+            "GAUGE1", whatMatcher.id(), GaugeMetric::FIRST_N_SAMPLES, nullopt, triggerEvent.id());
 
-    // Create an initial config.
     EXPECT_TRUE(initConfig(config));
 
     unordered_map<int64_t, int> metricToActivationMap;
@@ -1856,6 +1859,221 @@ TEST_F(ConfigUpdateTest, TestUpdateCountMetrics) {
     EXPECT_EQ(screenState.mValue.int_value, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
 }
 
+TEST_F(ConfigUpdateTest, TestUpdateGaugeMetrics) {
+    StatsdConfig config;
+
+    // Add atom matchers/predicates/states. These are mostly needed for initStatsdConfig.
+    AtomMatcher matcher1 = CreateScreenTurnedOnAtomMatcher();
+    int64_t matcher1Id = matcher1.id();
+    *config.add_atom_matcher() = matcher1;
+
+    AtomMatcher matcher2 = CreateScreenTurnedOffAtomMatcher();
+    int64_t matcher2Id = matcher2.id();
+    *config.add_atom_matcher() = matcher2;
+
+    AtomMatcher matcher3 = CreateStartScheduledJobAtomMatcher();
+    int64_t matcher3Id = matcher3.id();
+    *config.add_atom_matcher() = matcher3;
+
+    AtomMatcher matcher4 = CreateTemperatureAtomMatcher();
+    int64_t matcher4Id = matcher4.id();
+    *config.add_atom_matcher() = matcher4;
+
+    AtomMatcher matcher5 = CreateSimpleAtomMatcher("SubsystemSleep", util::SUBSYSTEM_SLEEP_STATE);
+    int64_t matcher5Id = matcher5.id();
+    *config.add_atom_matcher() = matcher5;
+
+    Predicate predicate1 = CreateScreenIsOnPredicate();
+    int64_t predicate1Id = predicate1.id();
+    *config.add_predicate() = predicate1;
+
+    // Add a few gauge metrics.
+    // Will be preserved.
+    GaugeMetric gauge1 = createGaugeMetric("GAUGE1", matcher4Id, GaugeMetric::FIRST_N_SAMPLES,
+                                           predicate1Id, matcher1Id);
+    int64_t gauge1Id = gauge1.id();
+    *config.add_gauge_metric() = gauge1;
+
+    // Will be replaced.
+    GaugeMetric gauge2 =
+            createGaugeMetric("GAUGE2", matcher1Id, GaugeMetric::FIRST_N_SAMPLES, nullopt, nullopt);
+    int64_t gauge2Id = gauge2.id();
+    *config.add_gauge_metric() = gauge2;
+
+    // Will be replaced.
+    GaugeMetric gauge3 = createGaugeMetric("GAUGE3", matcher5Id, GaugeMetric::FIRST_N_SAMPLES,
+                                           nullopt, matcher3Id);
+    int64_t gauge3Id = gauge3.id();
+    *config.add_gauge_metric() = gauge3;
+
+    // Will be replaced.
+    GaugeMetric gauge4 = createGaugeMetric("GAUGE4", matcher3Id, GaugeMetric::RANDOM_ONE_SAMPLE,
+                                           predicate1Id, nullopt);
+    int64_t gauge4Id = gauge4.id();
+    *config.add_gauge_metric() = gauge4;
+
+    // Will be deleted.
+    GaugeMetric gauge5 =
+            createGaugeMetric("GAUGE5", matcher2Id, GaugeMetric::RANDOM_ONE_SAMPLE, nullopt, {});
+    int64_t gauge5Id = gauge5.id();
+    *config.add_gauge_metric() = gauge5;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Used later to ensure the condition wizard is replaced. Get it before doing the update.
+    sp<EventMatcherWizard> oldMatcherWizard =
+            static_cast<GaugeMetricProducer*>(oldMetricProducers[0].get())->mEventMatcherWizard;
+    EXPECT_EQ(oldMatcherWizard->getStrongCount(), 6);
+
+    // Change gauge2, causing it to be replaced.
+    gauge2.set_max_num_gauge_atoms_per_bucket(50);
+
+    // Mark matcher 3 as replaced. Causes gauge3 and gauge4 to be replaced.
+    set<int64_t> replacedMatchers = {matcher3Id};
+
+    // New gauge metric.
+    GaugeMetric gauge6 = createGaugeMetric("GAUGE6", matcher5Id, GaugeMetric::FIRST_N_SAMPLES,
+                                           predicate1Id, matcher3Id);
+    int64_t gauge6Id = gauge6.id();
+
+    // Map the matchers and predicates in reverse order to force the indices to change.
+    std::unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    const int matcher5Index = 0;
+    newAtomMatchingTrackerMap[matcher5Id] = 0;
+    const int matcher4Index = 1;
+    newAtomMatchingTrackerMap[matcher4Id] = 1;
+    const int matcher3Index = 2;
+    newAtomMatchingTrackerMap[matcher3Id] = 2;
+    const int matcher2Index = 3;
+    newAtomMatchingTrackerMap[matcher2Id] = 3;
+    const int matcher1Index = 4;
+    newAtomMatchingTrackerMap[matcher1Id] = 4;
+    // Use the existing matchers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(5);
+    std::reverse_copy(oldAtomMatchingTrackers.begin(), oldAtomMatchingTrackers.end(),
+                      newAtomMatchingTrackers.begin());
+
+    std::unordered_map<int64_t, int> newConditionTrackerMap;
+    const int predicate1Index = 0;
+    newConditionTrackerMap[predicate1Id] = 0;
+    // Use the existing conditionTrackers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<ConditionTracker>> newConditionTrackers(1);
+    std::reverse_copy(oldConditionTrackers.begin(), oldConditionTrackers.end(),
+                      newConditionTrackers.begin());
+    // Say that predicate1 is unknown since the initial condition never changed.
+    vector<ConditionState> conditionCache = {ConditionState::kUnknown};
+
+    StatsdConfig newConfig;
+    *newConfig.add_gauge_metric() = gauge6;
+    const int gauge6Index = 0;
+    *newConfig.add_gauge_metric() = gauge3;
+    const int gauge3Index = 1;
+    *newConfig.add_gauge_metric() = gauge1;
+    const int gauge1Index = 2;
+    *newConfig.add_gauge_metric() = gauge4;
+    const int gauge4Index = 3;
+    *newConfig.add_gauge_metric() = gauge2;
+    const int gauge2Index = 4;
+
+    // Output data structures to validate.
+    unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int, vector<int>> conditionToMetricMap;
+    unordered_map<int, vector<int>> trackerToMetricMap;
+    set<int64_t> noReportMetricIds;
+    unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
+    vector<int> metricsWithActivation;
+    EXPECT_TRUE(updateMetrics(
+            key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
+            oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
+            newAtomMatchingTrackers, newConditionTrackerMap, /*replacedConditions=*/{},
+            newConditionTrackers, conditionCache, /*stateAtomIdMap=*/{}, /*allStateGroupMaps=*/{},
+            /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
+            newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+            metricsWithActivation));
+
+    unordered_map<int64_t, int> expectedMetricProducerMap = {
+            {gauge1Id, gauge1Index}, {gauge2Id, gauge2Index}, {gauge3Id, gauge3Index},
+            {gauge4Id, gauge4Index}, {gauge6Id, gauge6Index},
+    };
+    EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+
+    // Make sure preserved metrics are the same.
+    ASSERT_EQ(newMetricProducers.size(), 5);
+    EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(gauge1Id)],
+              newMetricProducers[newMetricProducerMap.at(gauge1Id)]);
+
+    // Make sure replaced metrics are different.
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(gauge2Id)],
+              newMetricProducers[newMetricProducerMap.at(gauge2Id)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(gauge3Id)],
+              newMetricProducers[newMetricProducerMap.at(gauge3Id)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(gauge4Id)],
+              newMetricProducers[newMetricProducerMap.at(gauge4Id)]);
+
+    // Verify the conditionToMetricMap.
+    ASSERT_EQ(conditionToMetricMap.size(), 1);
+    const vector<int>& condition1Metrics = conditionToMetricMap[predicate1Index];
+    EXPECT_THAT(condition1Metrics, UnorderedElementsAre(gauge1Index, gauge4Index, gauge6Index));
+
+    // Verify the trackerToMetricMap.
+    ASSERT_EQ(trackerToMetricMap.size(), 4);
+    const vector<int>& matcher1Metrics = trackerToMetricMap[matcher1Index];
+    EXPECT_THAT(matcher1Metrics, UnorderedElementsAre(gauge1Index, gauge2Index));
+    const vector<int>& matcher3Metrics = trackerToMetricMap[matcher3Index];
+    EXPECT_THAT(matcher3Metrics, UnorderedElementsAre(gauge3Index, gauge4Index, gauge6Index));
+    const vector<int>& matcher4Metrics = trackerToMetricMap[matcher4Index];
+    EXPECT_THAT(matcher4Metrics, UnorderedElementsAre(gauge1Index));
+    const vector<int>& matcher5Metrics = trackerToMetricMap[matcher5Index];
+    EXPECT_THAT(matcher5Metrics, UnorderedElementsAre(gauge3Index, gauge6Index));
+
+    // Verify event activation/deactivation maps.
+    ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(deactivationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(metricsWithActivation.size(), 0);
+
+    // Verify tracker indices/ids/conditions/states are correct.
+    GaugeMetricProducer* gaugeProducer1 =
+            static_cast<GaugeMetricProducer*>(newMetricProducers[gauge1Index].get());
+    EXPECT_EQ(gaugeProducer1->getMetricId(), gauge1Id);
+    EXPECT_EQ(gaugeProducer1->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(gaugeProducer1->mCondition, ConditionState::kUnknown);
+    EXPECT_EQ(gaugeProducer1->mWhatMatcherIndex, matcher4Index);
+    GaugeMetricProducer* gaugeProducer2 =
+            static_cast<GaugeMetricProducer*>(newMetricProducers[gauge2Index].get());
+    EXPECT_EQ(gaugeProducer2->getMetricId(), gauge2Id);
+    EXPECT_EQ(gaugeProducer2->mConditionTrackerIndex, -1);
+    EXPECT_EQ(gaugeProducer2->mCondition, ConditionState::kTrue);
+    EXPECT_EQ(gaugeProducer2->mWhatMatcherIndex, matcher1Index);
+    GaugeMetricProducer* gaugeProducer3 =
+            static_cast<GaugeMetricProducer*>(newMetricProducers[gauge3Index].get());
+    EXPECT_EQ(gaugeProducer3->getMetricId(), gauge3Id);
+    EXPECT_EQ(gaugeProducer3->mConditionTrackerIndex, -1);
+    EXPECT_EQ(gaugeProducer3->mCondition, ConditionState::kTrue);
+    EXPECT_EQ(gaugeProducer3->mWhatMatcherIndex, matcher5Index);
+    GaugeMetricProducer* gaugeProducer4 =
+            static_cast<GaugeMetricProducer*>(newMetricProducers[gauge4Index].get());
+    EXPECT_EQ(gaugeProducer4->getMetricId(), gauge4Id);
+    EXPECT_EQ(gaugeProducer4->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(gaugeProducer4->mCondition, ConditionState::kUnknown);
+    EXPECT_EQ(gaugeProducer4->mWhatMatcherIndex, matcher3Index);
+    GaugeMetricProducer* gaugeProducer6 =
+            static_cast<GaugeMetricProducer*>(newMetricProducers[gauge6Index].get());
+    EXPECT_EQ(gaugeProducer6->getMetricId(), gauge6Id);
+    EXPECT_EQ(gaugeProducer6->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(gaugeProducer6->mCondition, ConditionState::kUnknown);
+    EXPECT_EQ(gaugeProducer6->mWhatMatcherIndex, matcher5Index);
+
+    sp<EventMatcherWizard> newMatcherWizard = gaugeProducer1->mEventMatcherWizard;
+    EXPECT_NE(newMatcherWizard, oldMatcherWizard);
+    EXPECT_EQ(newMatcherWizard->getStrongCount(), 6);
+    oldMetricProducers.clear();
+    // Only reference to the old wizard should be the one in the test.
+    EXPECT_EQ(oldMatcherWizard->getStrongCount(), 1);
+}
+
 TEST_F(ConfigUpdateTest, TestUpdateMetricActivations) {
     StatsdConfig config;
     // Add atom matchers
@@ -1995,6 +2213,10 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     int64_t matcher2Id = matcher2.id();
     *config.add_atom_matcher() = matcher2;
 
+    AtomMatcher matcher3 = CreateTemperatureAtomMatcher();
+    int64_t matcher3Id = matcher3.id();
+    *config.add_atom_matcher() = matcher3;
+
     Predicate predicate1 = CreateScreenIsOnPredicate();
     int64_t predicate1Id = predicate1.id();
     *config.add_predicate() = predicate1;
@@ -2010,24 +2232,35 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     int64_t eventMetricId = eventMetric.id();
     *config.add_event_metric() = eventMetric;
 
+    // Will be replaced because the definition changes - a predicate is added.
+    GaugeMetric gaugeMetric = createGaugeMetric("GAUGE1", matcher3Id,
+                                                GaugeMetric::RANDOM_ONE_SAMPLE, nullopt, nullopt);
+    int64_t gaugeMetricId = gaugeMetric.id();
+    *config.add_gauge_metric() = gaugeMetric;
+
     EXPECT_TRUE(initConfig(config));
 
     // Used later to ensure the condition wizard is replaced. Get it before doing the update.
     sp<ConditionWizard> oldConditionWizard = oldMetricProducers[0]->mWizard;
-    EXPECT_EQ(oldConditionWizard->getStrongCount(), 3);
+    EXPECT_EQ(oldConditionWizard->getStrongCount(), 4);
 
     // Mark matcher 2 as replaced. Causes eventMetric to be replaced.
     set<int64_t> replacedMatchers;
     replacedMatchers.insert(matcher2Id);
 
+    // Add predicate1 as a predicate on gaugeMetric, causing it to be replaced.
+    gaugeMetric.set_condition(predicate1Id);
+
     // Map the matchers and predicates in reverse order to force the indices to change.
     std::unordered_map<int64_t, int> newAtomMatchingTrackerMap;
-    const int matcher2Index = 0;
-    newAtomMatchingTrackerMap[matcher2Id] = 0;
-    const int matcher1Index = 1;
-    newAtomMatchingTrackerMap[matcher1Id] = 1;
+    const int matcher3Index = 0;
+    newAtomMatchingTrackerMap[matcher3Id] = 0;
+    const int matcher2Index = 1;
+    newAtomMatchingTrackerMap[matcher2Id] = 1;
+    const int matcher1Index = 2;
+    newAtomMatchingTrackerMap[matcher1Id] = 2;
     // Use the existing matchers. A bit hacky, but saves code and we don't rely on them.
-    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(2);
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(3);
     std::reverse_copy(oldAtomMatchingTrackers.begin(), oldAtomMatchingTrackers.end(),
                       newAtomMatchingTrackers.begin());
 
@@ -2045,6 +2278,8 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     const int countMetricIndex = 0;
     *newConfig.add_event_metric() = eventMetric;
     const int eventMetricIndex = 1;
+    *newConfig.add_gauge_metric() = gaugeMetric;
+    const int gaugeMetricIndex = 2;
 
     // Output data structures to validate.
     unordered_map<int64_t, int> newMetricProducerMap;
@@ -2068,29 +2303,34 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {countMetricId, countMetricIndex},
             {eventMetricId, eventMetricIndex},
+            {gaugeMetricId, gaugeMetricIndex},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
 
     // Make sure preserved metrics are the same.
-    ASSERT_EQ(newMetricProducers.size(), 2);
+    ASSERT_EQ(newMetricProducers.size(), 3);
     EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(countMetricId)],
               newMetricProducers[newMetricProducerMap.at(countMetricId)]);
 
     // Make sure replaced metrics are different.
     EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(eventMetricId)],
               newMetricProducers[newMetricProducerMap.at(eventMetricId)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(gaugeMetricId)],
+              newMetricProducers[newMetricProducerMap.at(gaugeMetricId)]);
 
     // Verify the conditionToMetricMap.
     ASSERT_EQ(conditionToMetricMap.size(), 1);
     const vector<int>& condition1Metrics = conditionToMetricMap[predicate1Index];
-    EXPECT_THAT(condition1Metrics, UnorderedElementsAre(countMetricIndex));
+    EXPECT_THAT(condition1Metrics, UnorderedElementsAre(countMetricIndex, gaugeMetricIndex));
 
     // Verify the trackerToMetricMap.
-    ASSERT_EQ(trackerToMetricMap.size(), 2);
+    ASSERT_EQ(trackerToMetricMap.size(), 3);
     const vector<int>& matcher1Metrics = trackerToMetricMap[matcher1Index];
     EXPECT_THAT(matcher1Metrics, UnorderedElementsAre(countMetricIndex));
     const vector<int>& matcher2Metrics = trackerToMetricMap[matcher2Index];
     EXPECT_THAT(matcher2Metrics, UnorderedElementsAre(eventMetricIndex));
+    const vector<int>& matcher3Metrics = trackerToMetricMap[matcher3Index];
+    EXPECT_THAT(matcher3Metrics, UnorderedElementsAre(gaugeMetricIndex));
 
     // Verify event activation/deactivation maps.
     ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 0);
@@ -2104,10 +2344,13 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     EXPECT_EQ(newMetricProducers[eventMetricIndex]->getMetricId(), eventMetricId);
     EXPECT_EQ(newMetricProducers[eventMetricIndex]->mConditionTrackerIndex, -1);
     EXPECT_EQ(newMetricProducers[eventMetricIndex]->mCondition, ConditionState::kTrue);
+    EXPECT_EQ(newMetricProducers[gaugeMetricIndex]->getMetricId(), gaugeMetricId);
+    EXPECT_EQ(newMetricProducers[gaugeMetricIndex]->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(newMetricProducers[gaugeMetricIndex]->mCondition, ConditionState::kUnknown);
 
     sp<ConditionWizard> newConditionWizard = newMetricProducers[0]->mWizard;
     EXPECT_NE(newConditionWizard, oldConditionWizard);
-    EXPECT_EQ(newConditionWizard->getStrongCount(), 3);
+    EXPECT_EQ(newConditionWizard->getStrongCount(), 4);
     oldMetricProducers.clear();
     // Only reference to the old wizard should be the one in the test.
     EXPECT_EQ(oldConditionWizard->getStrongCount(), 1);
