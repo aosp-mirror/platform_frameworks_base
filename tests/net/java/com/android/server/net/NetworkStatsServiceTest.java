@@ -35,7 +35,6 @@ import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
-import static android.net.NetworkStats.STATS_PER_IFACE;
 import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
@@ -1006,20 +1005,18 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // Traffic seen by kernel counters (includes software tethering).
         final NetworkStats ifaceStats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 1536L, 12L, 384L, 3L);
-        // Hardware tethering traffic, not seen by kernel counters.
-        final NetworkStats tetherStatsHardware = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 512L, 4L, 128L, 1L);
+                .insertEntry(TEST_IFACE, 2048L, 16L, 512L, 4L);
+        // TODO: add hardware tethering traffic, not seen by kernel counters.
 
         // Traffic for UID_RED.
         final NetworkStats uidStats = new NetworkStats(getElapsedRealtime(), 1)
                 .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 0L);
-        // All tethering traffic, both hardware and software.
+        // All software tethering traffic.
         final NetworkStats tetherStats = new NetworkStats(getElapsedRealtime(), 1)
                 .insertEntry(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1920L, 14L, 384L, 2L,
                         0L);
 
-        expectNetworkStatsSummary(ifaceStats, tetherStatsHardware);
+        expectNetworkStatsSummary(ifaceStats);
         expectNetworkStatsUidDetail(uidStats, tetherStats);
         forcePollAndWaitForIdle();
 
@@ -1362,12 +1359,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
-        expectNetworkStatsSummary(summary, new NetworkStats(0L, 0));
-    }
-
-    private void expectNetworkStatsSummary(NetworkStats summary, NetworkStats tetherStats)
-            throws Exception {
-        expectNetworkStatsTethering(STATS_PER_IFACE, tetherStats);
         expectNetworkStatsSummaryDev(summary.clone());
         expectNetworkStatsSummaryXt(summary.clone());
     }
@@ -1378,11 +1369,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     private void expectNetworkStatsSummaryXt(NetworkStats summary) throws Exception {
         when(mStatsFactory.readNetworkStatsSummaryXt()).thenReturn(summary);
-    }
-
-    private void expectNetworkStatsTethering(int how, NetworkStats stats)
-            throws Exception {
-        when(mNetManager.getNetworkStatsTethering(how)).thenReturn(stats);
     }
 
     private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
