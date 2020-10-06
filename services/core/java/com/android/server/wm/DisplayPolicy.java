@@ -2659,6 +2659,14 @@ public class DisplayPolicy {
         }
 
         win.computeFrame(displayFrames);
+
+        // When system bars are added to the Android device through {@link #layoutStatusBar} and
+        // {@link #layoutNavigationBar}, the displayFrames are adjusted to take the system bars into
+        // account. The call below adjusts the display frames for system bars which use flexible
+        // insets mapping instead of {@link #layoutStatusbar} and {@link #layoutNavigationBar}. Note
+        // that this call is a no-op if not using flexible insets mapping.
+        adjustDisplayFramesForFlexibleInsets(win, displayFrames);
+
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (type == TYPE_INPUT_METHOD && win.isVisibleLw()
@@ -2668,6 +2676,40 @@ public class DisplayPolicy {
         if (type == TYPE_VOICE_INTERACTION && win.isVisibleLw()
                 && !win.getGivenInsetsPendingLw()) {
             offsetVoiceInputWindowLw(win, displayFrames);
+        }
+    }
+
+    private void adjustDisplayFramesForFlexibleInsets(WindowState win,
+            DisplayFrames displayFrames) {
+        if (win == mStatusBarAlt) {
+            adjustDisplayFramesForWindow(win, mStatusBarAltPosition, displayFrames);
+        } else if (win == mNavigationBarAlt) {
+            adjustDisplayFramesForWindow(win, mNavigationBarAltPosition, displayFrames);
+        } else if (win == mClimateBarAlt) {
+            adjustDisplayFramesForWindow(win, mClimateBarAltPosition, displayFrames);
+        } else if (win == mExtraNavBarAlt) {
+            adjustDisplayFramesForWindow(win, mExtraNavBarAltPosition, displayFrames);
+        }
+    }
+
+    private static void adjustDisplayFramesForWindow(WindowState win,
+            @WindowManagerPolicy.AltBarPosition int position, DisplayFrames displayFrames) {
+        final Rect frame = win.getFrameLw();
+
+        // Note: This doesn't take into account display cutouts.
+        switch (position) {
+            case ALT_BAR_TOP:
+                displayFrames.mStable.top = frame.bottom;
+                break;
+            case ALT_BAR_BOTTOM:
+                displayFrames.mStable.bottom = displayFrames.mStableFullscreen.bottom = frame.top;
+                break;
+            case ALT_BAR_LEFT:
+                displayFrames.mStable.left = displayFrames.mStableFullscreen.left = frame.right;
+                break;
+            case ALT_BAR_RIGHT:
+                displayFrames.mStable.right = displayFrames.mStableFullscreen.right = frame.left;
+                break;
         }
     }
 
