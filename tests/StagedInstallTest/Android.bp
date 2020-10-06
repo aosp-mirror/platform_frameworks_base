@@ -28,6 +28,7 @@ java_test_host {
         "testng",
         "compatibility-tradefed",
         "module_test_util",
+        "frameworks-base-hostutils",
     ],
     data: [
         ":com.android.apex.cts.shim.v2_prebuilt",
