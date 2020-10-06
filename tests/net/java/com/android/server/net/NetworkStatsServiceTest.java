@@ -993,7 +993,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     public void testTethering() throws Exception {
         // pretend first mobile network comes online
         expectDefaultSettings();
-        NetworkState[] states = new NetworkState[] {buildMobile3gState(IMSI_1)};
+        final NetworkState[] states = new NetworkState[]{buildMobile3gState(IMSI_1)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
@@ -1003,21 +1003,39 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectDefaultSettings();
 
-        // Traffic seen by kernel counters (includes software tethering).
-        final NetworkStats ifaceStats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 2048L, 16L, 512L, 4L);
-        // TODO: add hardware tethering traffic, not seen by kernel counters.
+        // Register custom provider and retrieve callback.
+        final TestableNetworkStatsProviderBinder provider =
+                new TestableNetworkStatsProviderBinder();
+        final INetworkStatsProviderCallback cb =
+                mService.registerNetworkStatsProvider("TEST-TETHERING-OFFLOAD", provider);
+        assertNotNull(cb);
+        final long now = getElapsedRealtime();
 
-        // Traffic for UID_RED.
-        final NetworkStats uidStats = new NetworkStats(getElapsedRealtime(), 1)
+        // Traffic seen by kernel counters (includes software tethering).
+        final NetworkStats swIfaceStats = new NetworkStats(now, 1)
+                .insertEntry(TEST_IFACE, 1536L, 12L, 384L, 3L);
+        // Hardware tethering traffic, not seen by kernel counters.
+        final NetworkStats tetherHwIfaceStats = new NetworkStats(now, 1)
+                .insertEntry(new NetworkStats.Entry(TEST_IFACE, UID_ALL, SET_DEFAULT,
+                        TAG_NONE, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
+                        512L, 4L, 128L, 1L, 0L));
+        final NetworkStats tetherHwUidStats = new NetworkStats(now, 1)
+                .insertEntry(new NetworkStats.Entry(TEST_IFACE, UID_TETHERING, SET_DEFAULT,
+                        TAG_NONE, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
+                        512L, 4L, 128L, 1L, 0L));
+        cb.notifyStatsUpdated(0 /* unused */, tetherHwIfaceStats, tetherHwUidStats);
+
+        // Fake some traffic done by apps on the device (as opposed to tethering), and record it
+        // into UID stats (as opposed to iface stats).
+        final NetworkStats localUidStats = new NetworkStats(now, 1)
                 .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 0L);
-        // All software tethering traffic.
-        final NetworkStats tetherStats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1920L, 14L, 384L, 2L,
+        // Software per-uid tethering traffic.
+        final NetworkStats tetherSwUidStats = new NetworkStats(now, 1)
+                .insertEntry(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1408L, 10L, 256L, 1L,
                         0L);
 
-        expectNetworkStatsSummary(ifaceStats);
-        expectNetworkStatsUidDetail(uidStats, tetherStats);
+        expectNetworkStatsSummary(swIfaceStats);
+        expectNetworkStatsUidDetail(localUidStats, tetherSwUidStats);
         forcePollAndWaitForIdle();
 
         // verify service recorded history
