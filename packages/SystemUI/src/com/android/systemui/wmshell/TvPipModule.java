@@ -46,20 +46,24 @@ import dagger.Provides;
  */
 @Module
 public abstract class TvPipModule {
-
     @SysUISingleton
     @Provides
-    static Pip providePipController(Context context,
+    static Optional<Pip> providePip(
+            Context context,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             WindowManagerShellWrapper windowManagerShellWrapper) {
-        return new PipController(context, pipBoundsHandler, pipTaskOrganizer,
-                windowManagerShellWrapper);
+        return Optional.of(
+                new PipController(
+                        context,
+                        pipBoundsHandler,
+                        pipTaskOrganizer,
+                        windowManagerShellWrapper));
     }
 
     @SysUISingleton
     @Provides
-    static PipControlsViewController providePipControlsViewContrller(
+    static PipControlsViewController providePipControlsViewController(
             PipControlsView pipControlsView, PipController pipController,
             LayoutInflater layoutInflater, Handler handler) {
         return new PipControlsViewController(pipControlsView, pipController, layoutInflater,
