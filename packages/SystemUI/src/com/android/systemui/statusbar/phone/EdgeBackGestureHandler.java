@@ -592,6 +592,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             return;
         }
         mLogGesture = false;
+        String logPackageName = "";
+        // Due to privacy, only top 100 most used apps by all users can be logged.
+        if (mUseMLModel && mVocab.containsKey(mPackageName) && mVocab.get(mPackageName) < 100) {
+            logPackageName = mPackageName;
+        }
         SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backType,
                 (int) mDownPoint.y, mIsOnLeftEdge
                         ? SysUiStatsLog.BACK_GESTURE__X_LOCATION__LEFT
@@ -600,7 +605,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 (int) mEndPoint.x, (int) mEndPoint.y,
                 mEdgeWidthLeft + mLeftInset,
                 mDisplaySize.x - (mEdgeWidthRight + mRightInset),
-                mUseMLModel ? mMLResults : -2);
+                mUseMLModel ? mMLResults : -2, logPackageName);
     }
 
     private void onMotionEvent(MotionEvent ev) {

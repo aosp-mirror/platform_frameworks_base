@@ -3038,8 +3038,9 @@ message BackGesture {
     optional int32 end_y = 7;  // Y coordinate for ACTION_MOVE event.
     optional int32 left_boundary = 8;  // left edge width + left inset
     optional int32 right_boundary = 9;  // screen width - (right edge width + right inset)
-    optional float ml_model_score = 10;  // The score between 0 and 1 which is the prediction output
-        // for the Back Gesture model.
+    // The score between 0 and 1 which is the prediction output for the Back Gesture model.
+    optional float ml_model_score = 10;
+    optional string package_name = 11;  // The name of the top 100 most used package by all users.
 
     enum WindowHorizontalLocation {
         DEFAULT_LOCATION = 0;
