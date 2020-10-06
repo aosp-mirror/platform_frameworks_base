@@ -434,7 +434,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Usually empty. Set to the task's tempInsetFrame. See
-     *{@link android.app.IActivityTaskManager#resizeDockedStack}.
+     *{@link android.app.IActivityTaskManager#resizePrimarySplitScreen}.
      */
     private final Rect mInsetFrame = new Rect();
 

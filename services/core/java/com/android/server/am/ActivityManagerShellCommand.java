@@ -2587,9 +2587,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             case "info":
                 return runRootTaskInfo(pw);
             case "move-top-activity-to-pinned-stack":
-                return runMoveTopActivityToPinnedStack(pw);
+                return runMoveTopActivityToPinnedRootTask(pw);
             case "remove":
-                return runStackRemove(pw);
+                return runRootTaskRemove(pw);
             default:
                 getErrPrintWriter().println("Error: unknown command '" + op + "'");
                 return -1;
@@ -2626,19 +2626,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runDisplayMoveStack(PrintWriter pw) throws RemoteException {
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
+        String rootTaskIdStr = getNextArgRequired();
+        int rootTaskId = Integer.parseInt(rootTaskIdStr);
         String displayIdStr = getNextArgRequired();
         int displayId = Integer.parseInt(displayIdStr);
-        mTaskInterface.moveStackToDisplay(stackId, displayId);
+        mTaskInterface.moveRootTaskToDisplay(rootTaskId, displayId);
         return 0;
     }
 
     int runStackMoveTask(PrintWriter pw) throws RemoteException {
         String taskIdStr = getNextArgRequired();
         int taskId = Integer.parseInt(taskIdStr);
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
+        String rootTaskIdStr = getNextArgRequired();
+        int rootTaskId = Integer.parseInt(rootTaskIdStr);
         String toTopStr = getNextArgRequired();
         final boolean toTop;
         if ("true".equals(toTopStr)) {
@@ -2650,7 +2650,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
+        mTaskInterface.moveTaskToRootTask(taskId, rootTaskId, toTop);
         return 0;
     }
 
@@ -2670,22 +2670,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    int runStackRemove(PrintWriter pw) throws RemoteException {
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
-        mTaskInterface.removeStack(stackId);
+    int runRootTaskRemove(PrintWriter pw) throws RemoteException {
+        String taskIdStr = getNextArgRequired();
+        int taskId = Integer.parseInt(taskIdStr);
+        mTaskInterface.removeTask(taskId);
         return 0;
     }
 
-    int runMoveTopActivityToPinnedStack(PrintWriter pw) throws RemoteException {
-        int stackId = Integer.parseInt(getNextArgRequired());
+    int runMoveTopActivityToPinnedRootTask(PrintWriter pw) throws RemoteException {
+        int rootTaskId = Integer.parseInt(getNextArgRequired());
         final Rect bounds = getBounds();
         if (bounds == null) {
             getErrPrintWriter().println("Error: invalid input bounds");
             return -1;
         }
 
-        if (!mTaskInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
+        if (!mTaskInterface.moveTopActivityToPinnedRootTask(rootTaskId, bounds)) {
             getErrPrintWriter().println("Didn't move top activity to pinned stack.");
             return -1;
         }

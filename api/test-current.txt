@@ -136,12 +136,12 @@ package android.app {
   public class ActivityTaskManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
     method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void moveTaskToStack(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeStacksInWindowingModes(int[]) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeStacksWithActivityTypes(int[]) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void moveTaskToRootTask(int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void requestPictureInPictureMode(@NonNull android.os.IBinder);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeDockedStack(android.graphics.Rect, android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeTask(int, android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setDisplayToSingleTaskInstance(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
