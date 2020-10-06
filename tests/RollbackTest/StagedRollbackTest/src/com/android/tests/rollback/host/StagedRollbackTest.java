@@ -453,6 +453,43 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
+    /**
+     * Tests that data in DE apk data directory is restored when apk is rolled back.
+     */
+    @Test
+    public void testRollbackApkDataDirectories_De() throws Exception {
+        // Install version 1 of TESTAPP_A
+        runPhase("testRollbackApkDataDirectories_Phase1");
+
+        // Push files to apk data directory
+        String oldFilePath1 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_1;
+        String oldFilePath2 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_2;
+        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
+        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+
+        // Install version 2 of TESTAPP_A with rollback enabled
+        runPhase("testRollbackApkDataDirectories_Phase2");
+        getDevice().reboot();
+
+        // Replace files in data directory
+        getDevice().deleteFile(oldFilePath1);
+        getDevice().deleteFile(oldFilePath2);
+        String newFilePath3 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_3;
+        String newFilePath4 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_4;
+        assertTrue(getDevice().pushString(TEST_STRING_3, newFilePath3));
+        assertTrue(getDevice().pushString(TEST_STRING_4, newFilePath4));
+
+        // Roll back the APK
+        runPhase("testRollbackApkDataDirectories_Phase3");
+        getDevice().reboot();
+
+        // Verify that old files have been restored and new files are gone
+        assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
+        assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
+        assertNull(getDevice().pullFile(newFilePath3));
+        assertNull(getDevice().pullFile(newFilePath4));
+    }
+
     @Test
     public void testExpireApexRollback() throws Exception {
         List<String> before = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
@@ -501,6 +538,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     private static String apexDataDirCe(String apexName, int userId) {
         return String.format("/data/misc_ce/%d/apexdata/%s", userId, apexName);
+    }
+
+    private static String apkDataDirDe(String apexName, int userId) {
+        return String.format("/data/user_de/%d/%s", userId, apexName);
     }
 
     private List<String> getSnapshotDirectories(String baseDir) {
