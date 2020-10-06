@@ -30,6 +30,8 @@ import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.autofill.Helper.containsCharsInOrder;
+import static com.android.server.autofill.Helper.createSanitizers;
 import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -543,6 +545,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return ids;
     }
 
+    /**
+     * Returns the String value of an {@link AutofillValue} by {@link AutofillId id} if it is of
+     * type {@code AUTOFILL_TYPE_TEXT} or {@code AUTOFILL_TYPE_LIST}.
+     */
     @Override
     @Nullable
     public String findByAutofillId(@NonNull AutofillId id) {
@@ -704,7 +710,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Autofill provider).
      */
     private boolean isInlineSuggestionsEnabledByAutofillProviderLocked() {
-        return mService.isInlineSuggestionsEnabled();
+        return mService.isInlineSuggestionsEnabledLocked();
     }
 
     private boolean isViewFocusedLocked(int flags) {
@@ -765,7 +771,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // triggers a new partition and we end up with many duplicate partitions. This is
         // enhanced as the focus change can be much faster than the taking of the assist structure.
         // Hence remove the currently queued request and replace it with the one queued after the
-        // structure is taken. This causes only one fill request per bust of focus changes.
+        // structure is taken. This causes only one fill request per burst of focus changes.
         cancelCurrentRequestLocked();
 
         // Only ask IME to create inline suggestions request if Autofill provider supports it and
@@ -778,7 +784,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 && isViewFocusedLocked(flags)) {
             Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer =
                     mAssistReceiver.newAutofillRequestLocked(viewState,
-                            /*isInlineRequest=*/ true);
+                            /* isInlineRequest= */ true);
             if (inlineSuggestionsRequestConsumer != null) {
                 final AutofillId focusedId = mCurrentViewId;
                 remoteRenderService.getInlineSuggestionsRendererInfo(
@@ -792,8 +798,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 viewState.setState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
             }
         } else {
-            mAssistReceiver.newAutofillRequestLocked(viewState,
-                    /*isInlineRequest=*/ false);
+            mAssistReceiver.newAutofillRequestLocked(viewState, /* isInlineRequest= */ false);
         }
 
         // Now request the assist structure data.
@@ -1170,7 +1175,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return null;
     }
 
-    // FillServiceCallbacks
+    // VultureCallback
+    @Override
+    public void onServiceDied(@NonNull RemoteFillService service) {
+        Slog.w(TAG, "removing session because service died");
+        forceRemoveSelfLocked();
+    }
+
+    // AutoFillUiCallback
     @Override
     public void authenticate(int requestId, int datasetIndex, IntentSender intent, Bundle extras,
             boolean authenticateInline) {
@@ -1198,13 +1210,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHandler.sendMessage(obtainMessage(
                 Session::startAuthentication,
                 this, authenticationId, intent, fillInIntent, authenticateInline));
-    }
-
-    // VultureCallback
-    @Override
-    public void onServiceDied(@NonNull RemoteFillService service) {
-        Slog.w(TAG, "removing session because service died");
-        forceRemoveSelfLocked();
     }
 
     // AutoFillUiCallback
@@ -1280,6 +1285,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    // AutoFillUiCallback
     @Override
     public void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent) {
         synchronized (mLock) {
@@ -2240,31 +2246,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @Nullable
-    private ArrayMap<AutofillId, InternalSanitizer> createSanitizers(@Nullable SaveInfo saveInfo) {
-        if (saveInfo == null) return null;
-
-        final InternalSanitizer[] sanitizerKeys = saveInfo.getSanitizerKeys();
-        if (sanitizerKeys == null) return null;
-
-        final int size = sanitizerKeys.length ;
-        final ArrayMap<AutofillId, InternalSanitizer> sanitizers = new ArrayMap<>(size);
-        if (sDebug) Slog.d(TAG, "Service provided " + size + " sanitizers");
-        final AutofillId[][] sanitizerValues = saveInfo.getSanitizerValues();
-        for (int i = 0; i < size; i++) {
-            final InternalSanitizer sanitizer = sanitizerKeys[i];
-            final AutofillId[] ids = sanitizerValues[i];
-            if (sDebug) {
-                Slog.d(TAG, "sanitizer #" + i + " (" + sanitizer + ") for ids "
-                        + Arrays.toString(ids));
-            }
-            for (AutofillId id : ids) {
-                sanitizers.put(id, sanitizer);
-            }
-        }
-        return sanitizers;
-    }
-
-    @Nullable
     private AutofillValue getSanitizedValue(
             @Nullable ArrayMap<AutofillId, InternalSanitizer> sanitizers,
             @NonNull AutofillId id,
@@ -2328,12 +2309,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     @Nullable
-    private CharSequence[] getAutofillOptionsFromContextsLocked(AutofillId id) {
+    private CharSequence[] getAutofillOptionsFromContextsLocked(@NonNull AutofillId autofillId) {
         final int numContexts = mContexts.size();
-
         for (int i = numContexts - 1; i >= 0; i--) {
             final FillContext context = mContexts.get(i);
-            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(), id);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
+                    autofillId);
             if (node != null && node.getAutofillOptions() != null) {
                 return node.getAutofillOptions();
             }
@@ -2439,7 +2420,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // TODO(b/113281366): rather than merge it here, it might be better to simply reuse the old
     // session instead of creating a new one. But we need to consider what would happen on corner
     // cases such as "Main Activity M -> activity A with username -> activity B with password"
-    // If user follows the normal workflow, than session A would be merged with session B as
+    // If user follows the normal workflow, then session A would be merged with session B as
     // expected. But if when on Activity A the user taps back or somehow launches another activity,
     // session A could be merged with the wrong session.
     /**
@@ -2532,11 +2513,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_PARTITION, flags);
             return true;
-        } else {
-            if (sVerbose) {
-                Slog.v(TAG, "Not starting new partition for view " + id + ": "
-                        + viewState.getStateAsString());
-            }
+        }
+
+        if (sVerbose) {
+            Slog.v(TAG, "Not starting new partition for view " + id + ": "
+                    + viewState.getStateAsString());
         }
         return false;
     }
@@ -2895,21 +2876,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // Characters were added or replaced.
             viewState.setState(ViewState.STATE_INLINE_DISABLED);
         }
-    }
-
-    /**
-     * Returns true if {@code s1} contains all characters of {@code s2}, in order.
-     */
-    private static boolean containsCharsInOrder(String s1, String s2) {
-        int prevIndex = -1;
-        for (char ch : s2.toCharArray()) {
-            int index = TextUtils.indexOf(s1, ch, prevIndex + 1);
-            if (index == -1) {
-                return false;
-            }
-            prevIndex = index;
-        }
-        return true;
     }
 
     @Override
@@ -3380,7 +3346,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mInlineSessionController.getInlineSuggestionsRequestLocked().orElse(null));
         }
         if (mAugmentedAutofillDestroyer == null) {
-            mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest();
+            mAugmentedAutofillDestroyer = remoteService::onDestroyAutofillWindowsRequest;
         }
         return mAugmentedAutofillDestroyer;
     }
