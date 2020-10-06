@@ -97,6 +97,7 @@ public:
         metricsWithActivation.clear();
         oldStateHashes.clear();
         noReportMetricIds.clear();
+        StateManager::getInstance().clear();
     }
 };
 
@@ -117,6 +118,21 @@ EventMetric createEventMetric(string name, int64_t what, optional<int64_t> condi
     metric.set_what(what);
     if (condition) {
         metric.set_condition(condition.value());
+    }
+    return metric;
+}
+
+CountMetric createCountMetric(string name, int64_t what, optional<int64_t> condition,
+                              vector<int64_t> states) {
+    CountMetric metric;
+    metric.set_id(StringToId(name));
+    metric.set_what(what);
+    metric.set_bucket(TEN_MINUTES);
+    if (condition) {
+        metric.set_condition(condition.value());
+    }
+    for (const int64_t state : states) {
+        metric.add_slice_by_state(state);
     }
     return metric;
 }
@@ -1419,7 +1435,7 @@ TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
     EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(event1Id)],
               newMetricProducers[newMetricProducerMap.at(event1Id)]);
 
-    // Make sure replaced conditions are different and included in replacedConditions.
+    // Make sure replaced metrics are different.
     EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(event2Id)],
               newMetricProducers[newMetricProducerMap.at(event2Id)]);
     EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(event3Id)],
@@ -1476,6 +1492,239 @@ TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
     oldMetricProducers.clear();
     // Only reference to the old wizard should be the one in the test.
     EXPECT_EQ(oldConditionWizard->getStrongCount(), 1);
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateCountMetrics) {
+    StatsdConfig config;
+
+    // Add atom matchers/predicates/states. These are mostly needed for initStatsdConfig.
+    AtomMatcher matcher1 = CreateScreenTurnedOnAtomMatcher();
+    int64_t matcher1Id = matcher1.id();
+    *config.add_atom_matcher() = matcher1;
+
+    AtomMatcher matcher2 = CreateScreenTurnedOffAtomMatcher();
+    int64_t matcher2Id = matcher2.id();
+    *config.add_atom_matcher() = matcher2;
+
+    AtomMatcher matcher3 = CreateStartScheduledJobAtomMatcher();
+    int64_t matcher3Id = matcher3.id();
+    *config.add_atom_matcher() = matcher3;
+
+    AtomMatcher matcher4 = CreateFinishScheduledJobAtomMatcher();
+    int64_t matcher4Id = matcher4.id();
+    *config.add_atom_matcher() = matcher4;
+
+    AtomMatcher matcher5 = CreateBatterySaverModeStartAtomMatcher();
+    int64_t matcher5Id = matcher5.id();
+    *config.add_atom_matcher() = matcher5;
+
+    Predicate predicate1 = CreateScreenIsOnPredicate();
+    int64_t predicate1Id = predicate1.id();
+    *config.add_predicate() = predicate1;
+
+    State state1 = CreateScreenStateWithOnOffMap(0x123, 0x321);
+    int64_t state1Id = state1.id();
+    *config.add_state() = state1;
+
+    State state2 = CreateScreenState();
+    int64_t state2Id = state2.id();
+    *config.add_state() = state2;
+
+    // Add a few count metrics.
+    // Will be preserved.
+    CountMetric count1 = createCountMetric("COUNT1", matcher1Id, predicate1Id, {state1Id});
+    int64_t count1Id = count1.id();
+    *config.add_count_metric() = count1;
+
+    // Will be replaced.
+    CountMetric count2 = createCountMetric("COUNT2", matcher2Id, nullopt, {});
+    int64_t count2Id = count2.id();
+    *config.add_count_metric() = count2;
+
+    // Will be replaced.
+    CountMetric count3 = createCountMetric("COUNT3", matcher3Id, nullopt, {});
+    int64_t count3Id = count3.id();
+    *config.add_count_metric() = count3;
+
+    // Will be replaced.
+    CountMetric count4 = createCountMetric("COUNT4", matcher4Id, nullopt, {state2Id});
+    int64_t count4Id = count4.id();
+    *config.add_count_metric() = count4;
+
+    // Will be deleted.
+    CountMetric count5 = createCountMetric("COUNT5", matcher5Id, nullopt, {});
+    int64_t count5Id = count5.id();
+    *config.add_count_metric() = count5;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Change bucket size of count2, causing it to be replaced.
+    count2.set_bucket(ONE_HOUR);
+
+    // Mark matcher 3 as replaced. Causes count3 to be replaced.
+    set<int64_t> replacedMatchers;
+    replacedMatchers.insert(matcher3Id);
+
+    // Mark state 2 as replaced and change the state to be about a different atom.
+    // Causes count4 to be replaced.
+    set<int64_t> replacedStates;
+    replacedStates.insert(state2Id);
+    state2.set_atom_id(util::BATTERY_SAVER_MODE_STATE_CHANGED);
+
+    // Fake that predicate 1 is true for count metric 1.
+    ASSERT_EQ(oldMetricProducers[0]->getMetricId(), count1Id);
+    oldMetricProducers[0]->onConditionChanged(true, /*timestamp=*/0);
+    EXPECT_EQ(oldMetricProducers[0]->mCondition, ConditionState::kTrue);
+
+    EXPECT_EQ(StateManager::getInstance().getStateTrackersCount(), 1);
+    // Tell the StateManager that the screen is on.
+    unique_ptr<LogEvent> event =
+            CreateScreenStateChangedEvent(0, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    StateManager::getInstance().onLogEvent(*event);
+
+    // New count metric. Should have an initial condition of true since it depends on predicate1.
+    CountMetric count6 = createCountMetric("EVENT6", matcher2Id, predicate1Id, {state1Id});
+    int64_t count6Id = count6.id();
+
+    // Map the matchers and predicates in reverse order to force the indices to change.
+    std::unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    const int matcher5Index = 0;
+    newAtomMatchingTrackerMap[matcher5Id] = 0;
+    const int matcher4Index = 1;
+    newAtomMatchingTrackerMap[matcher4Id] = 1;
+    const int matcher3Index = 2;
+    newAtomMatchingTrackerMap[matcher3Id] = 2;
+    const int matcher2Index = 3;
+    newAtomMatchingTrackerMap[matcher2Id] = 3;
+    const int matcher1Index = 4;
+    newAtomMatchingTrackerMap[matcher1Id] = 4;
+    // Use the existing matchers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(5);
+    std::reverse_copy(oldAtomMatchingTrackers.begin(), oldAtomMatchingTrackers.end(),
+                      newAtomMatchingTrackers.begin());
+
+    std::unordered_map<int64_t, int> newConditionTrackerMap;
+    const int predicate1Index = 0;
+    newConditionTrackerMap[predicate1Id] = 0;
+    // Use the existing conditionTrackers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<ConditionTracker>> newConditionTrackers(1);
+    std::reverse_copy(oldConditionTrackers.begin(), oldConditionTrackers.end(),
+                      newConditionTrackers.begin());
+    // Fake that predicate1 is true for all new metrics.
+    vector<ConditionState> conditionCache = {ConditionState::kTrue};
+
+    StatsdConfig newConfig;
+    *newConfig.add_count_metric() = count6;
+    const int count6Index = 0;
+    *newConfig.add_count_metric() = count3;
+    const int count3Index = 1;
+    *newConfig.add_count_metric() = count1;
+    const int count1Index = 2;
+    *newConfig.add_count_metric() = count4;
+    const int count4Index = 3;
+    *newConfig.add_count_metric() = count2;
+    const int count2Index = 4;
+
+    *newConfig.add_state() = state1;
+    *newConfig.add_state() = state2;
+
+    unordered_map<int64_t, int> stateAtomIdMap;
+    unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
+    map<int64_t, uint64_t> stateProtoHashes;
+    EXPECT_TRUE(initStates(newConfig, stateAtomIdMap, allStateGroupMaps, stateProtoHashes));
+    EXPECT_EQ(stateAtomIdMap[state2Id], util::BATTERY_SAVER_MODE_STATE_CHANGED);
+
+    // Output data structures to validate.
+    unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int, vector<int>> conditionToMetricMap;
+    unordered_map<int, vector<int>> trackerToMetricMap;
+    set<int64_t> noReportMetricIds;
+    unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
+    vector<int> metricsWithActivation;
+    EXPECT_TRUE(updateMetrics(
+            key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
+            oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
+            newAtomMatchingTrackers, newConditionTrackerMap, /*replacedConditions=*/{},
+            newConditionTrackers, conditionCache, stateAtomIdMap, allStateGroupMaps, replacedStates,
+            oldMetricProducerMap, oldMetricProducers, newMetricProducerMap, newMetricProducers,
+            conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+            metricsWithActivation));
+
+    unordered_map<int64_t, int> expectedMetricProducerMap = {
+            {count1Id, count1Index}, {count2Id, count2Index}, {count3Id, count3Index},
+            {count4Id, count4Index}, {count6Id, count6Index},
+    };
+    EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+
+    // Make sure preserved metrics are the same.
+    ASSERT_EQ(newMetricProducers.size(), 5);
+    EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(count1Id)],
+              newMetricProducers[newMetricProducerMap.at(count1Id)]);
+
+    // Make sure replaced metrics are different.
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(count2Id)],
+              newMetricProducers[newMetricProducerMap.at(count2Id)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(count3Id)],
+              newMetricProducers[newMetricProducerMap.at(count3Id)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(count4Id)],
+              newMetricProducers[newMetricProducerMap.at(count4Id)]);
+
+    // Verify the conditionToMetricMap.
+    ASSERT_EQ(conditionToMetricMap.size(), 1);
+    const vector<int>& condition1Metrics = conditionToMetricMap[predicate1Index];
+    EXPECT_THAT(condition1Metrics, UnorderedElementsAre(count1Index, count6Index));
+
+    // Verify the trackerToMetricMap.
+    ASSERT_EQ(trackerToMetricMap.size(), 4);
+    const vector<int>& matcher1Metrics = trackerToMetricMap[matcher1Index];
+    EXPECT_THAT(matcher1Metrics, UnorderedElementsAre(count1Index));
+    const vector<int>& matcher2Metrics = trackerToMetricMap[matcher2Index];
+    EXPECT_THAT(matcher2Metrics, UnorderedElementsAre(count2Index, count6Index));
+    const vector<int>& matcher3Metrics = trackerToMetricMap[matcher3Index];
+    EXPECT_THAT(matcher3Metrics, UnorderedElementsAre(count3Index));
+    const vector<int>& matcher4Metrics = trackerToMetricMap[matcher4Index];
+    EXPECT_THAT(matcher4Metrics, UnorderedElementsAre(count4Index));
+
+    // Verify event activation/deactivation maps.
+    ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(deactivationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(metricsWithActivation.size(), 0);
+
+    // Verify tracker indices/ids/conditions/states are correct.
+    EXPECT_EQ(newMetricProducers[count1Index]->getMetricId(), count1Id);
+    EXPECT_EQ(newMetricProducers[count1Index]->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(newMetricProducers[count1Index]->mCondition, ConditionState::kTrue);
+    EXPECT_THAT(newMetricProducers[count1Index]->getSlicedStateAtoms(),
+                UnorderedElementsAre(util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(newMetricProducers[count2Index]->getMetricId(), count2Id);
+    EXPECT_EQ(newMetricProducers[count2Index]->mConditionTrackerIndex, -1);
+    EXPECT_EQ(newMetricProducers[count2Index]->mCondition, ConditionState::kTrue);
+    EXPECT_TRUE(newMetricProducers[count2Index]->getSlicedStateAtoms().empty());
+    EXPECT_EQ(newMetricProducers[count3Index]->getMetricId(), count3Id);
+    EXPECT_EQ(newMetricProducers[count3Index]->mConditionTrackerIndex, -1);
+    EXPECT_EQ(newMetricProducers[count3Index]->mCondition, ConditionState::kTrue);
+    EXPECT_TRUE(newMetricProducers[count3Index]->getSlicedStateAtoms().empty());
+    EXPECT_EQ(newMetricProducers[count4Index]->getMetricId(), count4Id);
+    EXPECT_EQ(newMetricProducers[count4Index]->mConditionTrackerIndex, -1);
+    EXPECT_EQ(newMetricProducers[count4Index]->mCondition, ConditionState::kTrue);
+    EXPECT_THAT(newMetricProducers[count4Index]->getSlicedStateAtoms(),
+                UnorderedElementsAre(util::BATTERY_SAVER_MODE_STATE_CHANGED));
+    EXPECT_EQ(newMetricProducers[count6Index]->getMetricId(), count6Id);
+    EXPECT_EQ(newMetricProducers[count6Index]->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(newMetricProducers[count6Index]->mCondition, ConditionState::kTrue);
+    EXPECT_THAT(newMetricProducers[count6Index]->getSlicedStateAtoms(),
+                UnorderedElementsAre(util::SCREEN_STATE_CHANGED));
+
+    oldMetricProducers.clear();
+    // Ensure that the screen state StateTracker did not get deleted and replaced.
+    EXPECT_EQ(StateManager::getInstance().getStateTrackersCount(), 2);
+    FieldValue screenState;
+    StateManager::getInstance().getStateValue(util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY,
+                                              &screenState);
+    EXPECT_EQ(screenState.mValue.int_value, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
 }
 
 TEST_F(ConfigUpdateTest, TestUpdateMetricActivations) {
@@ -1604,6 +1853,135 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricActivations) {
                 UnorderedElementsAre(matcher2Activation, matcher3Activation));
     EXPECT_THAT(producer->mEventDeactivationMap[matcher2Index],
                 UnorderedElementsAre(matcher4Activation));
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
+    StatsdConfig config;
+    // Add atom matchers/predicates/states. These are mostly needed for initStatsdConfig
+    AtomMatcher matcher1 = CreateScreenTurnedOnAtomMatcher();
+    int64_t matcher1Id = matcher1.id();
+    *config.add_atom_matcher() = matcher1;
+
+    AtomMatcher matcher2 = CreateScreenTurnedOffAtomMatcher();
+    int64_t matcher2Id = matcher2.id();
+    *config.add_atom_matcher() = matcher2;
+
+    Predicate predicate1 = CreateScreenIsOnPredicate();
+    int64_t predicate1Id = predicate1.id();
+    *config.add_predicate() = predicate1;
+
+    // Add a few count metrics.
+    // Will be preserved.
+    CountMetric countMetric = createCountMetric("COUNT1", matcher1Id, predicate1Id, {});
+    int64_t countMetricId = countMetric.id();
+    *config.add_count_metric() = countMetric;
+
+    // Will be replaced since matcher2 is replaced.
+    EventMetric eventMetric = createEventMetric("EVENT1", matcher2Id, nullopt);
+    int64_t eventMetricId = eventMetric.id();
+    *config.add_event_metric() = eventMetric;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Used later to ensure the condition wizard is replaced. Get it before doing the update.
+    sp<ConditionWizard> oldConditionWizard = oldMetricProducers[0]->mWizard;
+    EXPECT_EQ(oldConditionWizard->getStrongCount(), 3);
+
+    // Mark matcher 2 as replaced. Causes eventMetric to be replaced.
+    set<int64_t> replacedMatchers;
+    replacedMatchers.insert(matcher2Id);
+
+    // Map the matchers and predicates in reverse order to force the indices to change.
+    std::unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    const int matcher2Index = 0;
+    newAtomMatchingTrackerMap[matcher2Id] = 0;
+    const int matcher1Index = 1;
+    newAtomMatchingTrackerMap[matcher1Id] = 1;
+    // Use the existing matchers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(2);
+    std::reverse_copy(oldAtomMatchingTrackers.begin(), oldAtomMatchingTrackers.end(),
+                      newAtomMatchingTrackers.begin());
+
+    std::unordered_map<int64_t, int> newConditionTrackerMap;
+    const int predicate1Index = 0;
+    newConditionTrackerMap[predicate1Id] = 0;
+    // Use the existing conditionTrackers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<ConditionTracker>> newConditionTrackers(1);
+    std::reverse_copy(oldConditionTrackers.begin(), oldConditionTrackers.end(),
+                      newConditionTrackers.begin());
+    vector<ConditionState> conditionCache = {ConditionState::kUnknown};
+
+    StatsdConfig newConfig;
+    *newConfig.add_count_metric() = countMetric;
+    const int countMetricIndex = 0;
+    *newConfig.add_event_metric() = eventMetric;
+    const int eventMetricIndex = 1;
+
+    // Output data structures to validate.
+    unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int, vector<int>> conditionToMetricMap;
+    unordered_map<int, vector<int>> trackerToMetricMap;
+    set<int64_t> noReportMetricIds;
+    unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
+    vector<int> metricsWithActivation;
+    EXPECT_TRUE(updateMetrics(
+            key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
+            oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
+            newAtomMatchingTrackers, newConditionTrackerMap, /*replacedConditions=*/{},
+            newConditionTrackers, conditionCache, /*stateAtomIdMap*/ {}, /*allStateGroupMaps=*/{},
+            /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
+            newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+            metricsWithActivation));
+
+    unordered_map<int64_t, int> expectedMetricProducerMap = {
+            {countMetricId, countMetricIndex},
+            {eventMetricId, eventMetricIndex},
+    };
+    EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+
+    // Make sure preserved metrics are the same.
+    ASSERT_EQ(newMetricProducers.size(), 2);
+    EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(countMetricId)],
+              newMetricProducers[newMetricProducerMap.at(countMetricId)]);
+
+    // Make sure replaced metrics are different.
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(eventMetricId)],
+              newMetricProducers[newMetricProducerMap.at(eventMetricId)]);
+
+    // Verify the conditionToMetricMap.
+    ASSERT_EQ(conditionToMetricMap.size(), 1);
+    const vector<int>& condition1Metrics = conditionToMetricMap[predicate1Index];
+    EXPECT_THAT(condition1Metrics, UnorderedElementsAre(countMetricIndex));
+
+    // Verify the trackerToMetricMap.
+    ASSERT_EQ(trackerToMetricMap.size(), 2);
+    const vector<int>& matcher1Metrics = trackerToMetricMap[matcher1Index];
+    EXPECT_THAT(matcher1Metrics, UnorderedElementsAre(countMetricIndex));
+    const vector<int>& matcher2Metrics = trackerToMetricMap[matcher2Index];
+    EXPECT_THAT(matcher2Metrics, UnorderedElementsAre(eventMetricIndex));
+
+    // Verify event activation/deactivation maps.
+    ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(deactivationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(metricsWithActivation.size(), 0);
+
+    // Verify tracker indices/ids/conditions are correct.
+    EXPECT_EQ(newMetricProducers[countMetricIndex]->getMetricId(), countMetricId);
+    EXPECT_EQ(newMetricProducers[countMetricIndex]->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(newMetricProducers[countMetricIndex]->mCondition, ConditionState::kUnknown);
+    EXPECT_EQ(newMetricProducers[eventMetricIndex]->getMetricId(), eventMetricId);
+    EXPECT_EQ(newMetricProducers[eventMetricIndex]->mConditionTrackerIndex, -1);
+    EXPECT_EQ(newMetricProducers[eventMetricIndex]->mCondition, ConditionState::kTrue);
+
+    sp<ConditionWizard> newConditionWizard = newMetricProducers[0]->mWizard;
+    EXPECT_NE(newConditionWizard, oldConditionWizard);
+    EXPECT_EQ(newConditionWizard->getStrongCount(), 3);
+    oldMetricProducers.clear();
+    // Only reference to the old wizard should be the one in the test.
+    EXPECT_EQ(oldConditionWizard->getStrongCount(), 1);
 }
 }  // namespace statsd
 }  // namespace os
