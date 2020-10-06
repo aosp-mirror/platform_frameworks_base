@@ -16,14 +16,12 @@
 
 package com.android.tests.rollback.host;
 
-import com.android.ddmlib.Log;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
 import org.junit.rules.ExternalResource;
 
-public final class AbandonSessionsRule extends ExternalResource {
-    private static final String TAG = "AbandonSessionsRule";
+public class AbandonSessionsRule extends ExternalResource {
     private final BaseHostJUnit4Test mHost;
 
     public AbandonSessionsRule(BaseHostJUnit4Test host) {
@@ -39,9 +37,7 @@ public final class AbandonSessionsRule extends ExternalResource {
     protected void after() {
         try {
             abandonSessions(mHost.getDevice());
-        } catch (Exception e) {
-            mHost.getDevice().logOnDevice(TAG, Log.LogLevel.ERROR,
-                    "%s", "Failed to abandon sessions");
+        } catch (Exception ignore) {
         }
     }
 
