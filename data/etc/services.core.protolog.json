@@ -319,6 +319,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "-1729340764": {
+      "message": "setFinishTaskBounds(%d): bounds=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
+    },
     "-1715268616": {
       "message": "Last window, removing starting window %s",
       "level": "VERBOSE",
