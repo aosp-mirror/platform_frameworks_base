@@ -133,6 +133,7 @@ package android.test.mock {
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.os.Bundle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, int);
+    method public void sendBroadcastAsUserMultiplePermissions(android.content.Intent, android.os.UserHandle, java.lang.String[]);
     method public void sendBroadcastMultiplePermissions(android.content.Intent, java.lang.String[]);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
