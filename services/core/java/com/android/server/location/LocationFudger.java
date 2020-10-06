@@ -111,7 +111,7 @@ public class LocationFudger {
      */
     public Location createCoarse(Location fine) {
         synchronized (this) {
-            if (fine == mCachedFineLocation) {
+            if (fine == mCachedFineLocation || fine == mCachedCoarseLocation) {
                 return mCachedCoarseLocation;
             }
         }

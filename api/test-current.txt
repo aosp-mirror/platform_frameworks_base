@@ -1729,7 +1729,7 @@ package android.location {
   }
 
   public final class LocationRequest implements android.os.Parcelable {
-    method @Nullable public android.os.WorkSource getWorkSource();
+    method @NonNull public android.os.WorkSource getWorkSource();
     method public boolean isHiddenFromAppOps();
     method public boolean isLocationSettingsIgnored();
     method public boolean isLowPower();

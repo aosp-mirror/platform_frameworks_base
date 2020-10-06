@@ -4111,7 +4111,7 @@ package android.location {
     method @Deprecated @NonNull public String getProvider();
     method public int getQuality();
     method @Deprecated public float getSmallestDisplacement();
-    method @Nullable public android.os.WorkSource getWorkSource();
+    method @NonNull public android.os.WorkSource getWorkSource();
     method public boolean isHiddenFromAppOps();
     method public boolean isLocationSettingsIgnored();
     method public boolean isLowPower();
