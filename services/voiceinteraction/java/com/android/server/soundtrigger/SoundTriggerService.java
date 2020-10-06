@@ -899,7 +899,7 @@ public class SoundTriggerService extends SystemService {
                 mClient = new ISoundTriggerDetectionServiceClient.Stub() {
                     @Override
                     public void onOpFinished(int opId) {
-                        long token = Binder.clearCallingIdentity();
+                        final long token = Binder.clearCallingIdentity();
                         try {
                             synchronized (mRemoteServiceLock) {
                                 mRunningOpIds.remove(opId);
@@ -1013,7 +1013,7 @@ public class SoundTriggerService extends SystemService {
              * Verify that the service has the expected properties and then bind to the service
              */
             private void bind() {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     Intent i = new Intent();
                     i.setComponent(mServiceName);

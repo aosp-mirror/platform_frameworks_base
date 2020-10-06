@@ -845,7 +845,7 @@ public class VibratorService extends IVibratorService.Stub
                     return;
                 }
                 linkVibration(vib);
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     doCancelVibrateLocked();
                     startVibrationLocked(vib);
@@ -897,7 +897,7 @@ public class VibratorService extends IVibratorService.Stub
                 if (DEBUG) {
                     Slog.d(TAG, "Canceling vibration.");
                 }
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     doCancelVibrateLocked();
                 } finally {

@@ -261,7 +261,7 @@ public class LauncherAppsService extends SystemService {
             verifyCallingPackage(callingPackage);
             List<SessionInfo> sessionInfos = new ArrayList<>();
             int[] userIds = mUm.getEnabledProfileIds(getCallingUserId());
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 for (int userId : userIds) {
                     sessionInfos.addAll(getPackageInstallerService().getAllSessions(userId)
@@ -541,7 +541,7 @@ public class LauncherAppsService extends SystemService {
             }
 
             final int callingUid = injectBinderCallingUid();
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
@@ -615,7 +615,7 @@ public class LauncherAppsService extends SystemService {
             }
 
             final int callingUid = injectBinderCallingUid();
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
@@ -649,7 +649,7 @@ public class LauncherAppsService extends SystemService {
             }
 
             final int callingUid = injectBinderCallingUid();
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
@@ -928,7 +928,7 @@ public class LauncherAppsService extends SystemService {
             }
 
             final int callingUid = injectBinderCallingUid();
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 final int state = mIPM.getComponentEnabledSetting(component, user.getIdentifier());
                 switch (state) {
@@ -999,7 +999,7 @@ public class LauncherAppsService extends SystemService {
             boolean canLaunch = false;
 
             final int callingUid = injectBinderCallingUid();
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
@@ -1050,7 +1050,7 @@ public class LauncherAppsService extends SystemService {
             }
 
             final Intent intent;
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 String packageName = component.getPackageName();
                 intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,

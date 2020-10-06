@@ -114,7 +114,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         enforceSuggestManualTimePermission();
         Objects.requireNonNull(timeSignal);
 
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             return mTimeDetectorStrategy.suggestManualTime(timeSignal);
         } finally {

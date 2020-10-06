@@ -660,7 +660,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         @Override
         public String getDefaultSmsPackage(int userId) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return CollectionUtils.firstOrNull(
                         getRoleHoldersAsUser(RoleManager.ROLE_SMS, userId));
@@ -699,7 +699,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
 
         private int getUidForPackage(String packageName) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return getContext().getPackageManager().getApplicationInfo(packageName,
                         PackageManager.MATCH_ANY_USER).uid;

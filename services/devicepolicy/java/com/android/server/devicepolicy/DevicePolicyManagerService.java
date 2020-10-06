@@ -1124,7 +1124,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         boolean storageManagerIsNonDefaultBlockEncrypted() {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return StorageManager.isNonDefaultBlockEncrypted();
             } finally {

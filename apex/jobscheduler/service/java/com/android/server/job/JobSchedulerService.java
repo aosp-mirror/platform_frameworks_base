@@ -2673,7 +2673,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             validateJobFlags(job, uid);
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, null, uid, null, userId,
                         null);
@@ -2701,7 +2701,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             validateJobFlags(job, uid);
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, work, uid, null, userId,
                         null);
@@ -2732,7 +2732,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             validateJobFlags(job, callerUid);
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, null, callerUid,
                         packageName, userId, tag);
@@ -2745,7 +2745,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public ParceledListSlice<JobInfo> getAllPendingJobs() throws RemoteException {
             final int uid = Binder.getCallingUid();
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return new ParceledListSlice<>(JobSchedulerService.this.getPendingJobs(uid));
             } finally {
@@ -2757,7 +2757,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public JobInfo getPendingJob(int jobId) throws RemoteException {
             final int uid = Binder.getCallingUid();
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.getPendingJob(uid, jobId);
             } finally {
@@ -2768,7 +2768,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         @Override
         public void cancelAll() throws RemoteException {
             final int uid = Binder.getCallingUid();
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 JobSchedulerService.this.cancelJobsForUid(uid,
                         "cancelAll() called by app, callingUid=" + uid);
@@ -2781,7 +2781,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void cancel(int jobId) throws RemoteException {
             final int uid = Binder.getCallingUid();
 
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 JobSchedulerService.this.cancelJob(uid, jobId, uid);
             } finally {

@@ -2889,7 +2889,7 @@ public class UserBackupManagerService {
                     mBackupHandler.sendMessageDelayed(msg, TRANSPORT_RETRY_INTERVAL);
                     return;
                 }
-                long oldId = Binder.clearCallingIdentity();
+                final long oldId = Binder.clearCallingIdentity();
                 OnTaskFinishedListener listener =
                         caller ->
                                 mTransportManager.disposeOfTransportClient(transportClient, caller);
@@ -2910,7 +2910,7 @@ public class UserBackupManagerService {
     public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             final PowerSaveState result =
                     mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
@@ -2999,7 +2999,7 @@ public class UserBackupManagerService {
             }
         }
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             if (!mSetupComplete) {
                 Slog.i(TAG, addUserIdToLogMessage(mUserId, "Backup not supported before setup"));
@@ -3156,7 +3156,7 @@ public class UserBackupManagerService {
             throw new IllegalStateException("Restore supported only for the device owner");
         }
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
 
         try {
             if (!mSetupComplete) {
@@ -3287,7 +3287,7 @@ public class UserBackupManagerService {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "acknowledgeAdbBackupOrRestore");
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
 
             AdbParams params;
@@ -3348,7 +3348,7 @@ public class UserBackupManagerService {
 
         Slog.i(TAG, addUserIdToLogMessage(mUserId, "Backup enabled => " + enable));
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             boolean wasEnabled = mEnabled;
             synchronized (this) {
@@ -3477,7 +3477,7 @@ public class UserBackupManagerService {
     public ComponentName getCurrentTransportComponent() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "getCurrentTransportComponent");
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             return mTransportManager.getCurrentTransportComponent();
         } catch (TransportNotRegisteredException e) {
@@ -4165,7 +4165,7 @@ public class UserBackupManagerService {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "isAppEligibleForBackup");
 
-        long oldToken = Binder.clearCallingIdentity();
+        final long oldToken = Binder.clearCallingIdentity();
         try {
             String callerLogString = "BMS.isAppEligibleForBackup";
             TransportClient transportClient =
@@ -4187,7 +4187,7 @@ public class UserBackupManagerService {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "filterAppsEligibleForBackup");
 
-        long oldToken = Binder.clearCallingIdentity();
+        final long oldToken = Binder.clearCallingIdentity();
         try {
             String callerLogString = "BMS.filterAppsEligibleForBackup";
             TransportClient transportClient =
@@ -4221,7 +4221,7 @@ public class UserBackupManagerService {
 
     /** Prints service state for 'dumpsys backup'. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        long identityToken = Binder.clearCallingIdentity();
+        final long identityToken = Binder.clearCallingIdentity();
         try {
             if (args != null) {
                 for (String arg : args) {

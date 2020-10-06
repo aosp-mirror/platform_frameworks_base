@@ -505,7 +505,7 @@ class UsbUserPermissionManager {
             int uid,
             @NonNull Context userContext,
             @NonNull PendingIntent pi) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         Intent intent = new Intent();
         if (device != null) {
             intent.putExtra(UsbManager.EXTRA_DEVICE, device);

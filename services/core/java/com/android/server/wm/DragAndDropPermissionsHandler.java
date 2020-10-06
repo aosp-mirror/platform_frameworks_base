@@ -71,7 +71,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
     }
 
     private void doTake(IBinder permissionOwner) throws RemoteException {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             for (int i = 0; i < mUris.size(); i++) {
                 UriGrantsManager.getService().grantUriPermissionFromOwner(

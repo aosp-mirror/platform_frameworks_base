@@ -97,7 +97,7 @@ public class SystemUserInfoHelper extends UserInfoHelper {
     public int[] getRunningUserIds() {
         IActivityManager activityManager = getActivityManager();
         if (activityManager != null) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return activityManager.getRunningUserIds();
             } catch (RemoteException e) {
@@ -118,7 +118,7 @@ public class SystemUserInfoHelper extends UserInfoHelper {
     public boolean isCurrentUserId(@UserIdInt int userId) {
         ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
         if (activityManagerInternal != null) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return activityManagerInternal.isCurrentProfile(userId);
             } finally {
@@ -136,7 +136,7 @@ public class SystemUserInfoHelper extends UserInfoHelper {
         // if you're hitting this precondition then you are invoking this before the system is ready
         Preconditions.checkState(userManager != null);
 
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return userManager.getEnabledProfileIds(userId);
         } finally {

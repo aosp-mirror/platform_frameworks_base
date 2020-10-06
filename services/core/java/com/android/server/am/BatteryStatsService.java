@@ -2090,7 +2090,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             if (BatteryStatsHelper.checkWifiOnly(mContext)) {
                 flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
@@ -2250,7 +2250,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.BATTERY_STATS, null);
         }
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             // Wait for the completion of pending works if there is any
             awaitCompletion();
@@ -2277,7 +2277,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.BATTERY_STATS, null);
         }
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         int i=-1;
         try {
             // Wait for the completion of pending works if there is any

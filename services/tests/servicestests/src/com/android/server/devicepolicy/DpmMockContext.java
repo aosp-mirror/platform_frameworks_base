@@ -113,7 +113,7 @@ public class DpmMockContext extends MockContext {
         }
 
         public void withCleanCallingIdentity(@NonNull FunctionalUtils.ThrowingRunnable action) {
-            long callingIdentity = clearCallingIdentity();
+            final long callingIdentity = clearCallingIdentity();
             Throwable throwableToPropagate = null;
             try {
                 action.runOrThrow();

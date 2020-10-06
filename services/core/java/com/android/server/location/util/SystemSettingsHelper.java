@@ -123,7 +123,7 @@ public class SystemSettingsHelper extends SettingsHelper {
      */
     @Override
     public void setLocationEnabled(boolean enabled, int userId) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(
                     mContext.getContentResolver(),
@@ -314,7 +314,7 @@ public class SystemSettingsHelper extends SettingsHelper {
      */
     @Override
     public long getBackgroundThrottleProximityAlertIntervalMs() {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return Settings.Global.getLong(mContext.getContentResolver(),
                     LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
@@ -330,7 +330,7 @@ public class SystemSettingsHelper extends SettingsHelper {
      */
     @Override
     public float getCoarseLocationAccuracyM() {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         final ContentResolver cr = mContext.getContentResolver();
         try {
             return Settings.Secure.getFloatForUser(
@@ -458,7 +458,7 @@ public class SystemSettingsHelper extends SettingsHelper {
         }
 
         public int getValueForUser(int defaultValue, int userId) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return Settings.Secure.getIntForUser(mContext.getContentResolver(), mSettingName,
                         defaultValue, userId);
@@ -496,7 +496,7 @@ public class SystemSettingsHelper extends SettingsHelper {
 
             List<String> value = mCachedValue;
             if (userId != mCachedUserId) {
-                long identity = Binder.clearCallingIdentity();
+                final long identity = Binder.clearCallingIdentity();
                 try {
                     String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                             mSettingName, userId);
@@ -548,7 +548,7 @@ public class SystemSettingsHelper extends SettingsHelper {
         }
 
         public boolean getValue(boolean defaultValue) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return Settings.Global.getInt(mContext.getContentResolver(), mSettingName,
                         defaultValue ? 1 : 0) != 0;
@@ -574,7 +574,7 @@ public class SystemSettingsHelper extends SettingsHelper {
         }
 
         public long getValue(long defaultValue) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return Settings.Global.getLong(mContext.getContentResolver(), mSettingName,
                         defaultValue);
@@ -612,7 +612,7 @@ public class SystemSettingsHelper extends SettingsHelper {
         public synchronized Set<String> getValue() {
             ArraySet<String> value = mCachedValue;
             if (!mValid) {
-                long identity = Binder.clearCallingIdentity();
+                final long identity = Binder.clearCallingIdentity();
                 try {
                     value = new ArraySet<>(mBaseValuesSupplier.get());
                     String setting = Settings.Global.getString(mContext.getContentResolver(),

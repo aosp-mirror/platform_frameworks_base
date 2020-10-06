@@ -1814,7 +1814,7 @@ class UserController implements Handler.Callback {
     void sendUserSwitchBroadcasts(int oldUserId, int newUserId) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             Intent intent;
             if (oldUserId >= 0) {

@@ -456,7 +456,7 @@ public class AccessibilitySecurityPolicy {
     }
 
     private boolean isShellAllowedToRetrieveWindowLocked(int userId, int windowId) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             IBinder windowToken = mAccessibilityWindowManager
                     .getWindowTokenForUserAndWindowIdLocked(userId, windowId);

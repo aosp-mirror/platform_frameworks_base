@@ -3356,7 +3356,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ApplicationInfo appInfo;
         final boolean isInstantApp;
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
             synchronized(this) {
@@ -3497,7 +3497,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 userId, true, ALLOW_FULL_ONLY, "killBackgroundProcesses", null);
         final int[] userIds = mUserController.expandUserId(userId);
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
             for (int targetUserId : userIds) {
@@ -3596,7 +3596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingPid = Binder.getCallingPid();
         userId = mUserController.handleIncomingUser(callingPid, Binder.getCallingUid(),
                 userId, true, ALLOW_FULL_ONLY, "forceStopPackage", null);
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
             synchronized(this) {
@@ -6155,7 +6155,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.SET_DEBUG_APP,
                 "setDebugApp()");
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             // Note that this is not really thread safe if there are multiple
             // callers into it at the same time, but that's not a situation we
@@ -6256,7 +6256,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.SET_ALWAYS_FINISH,
                 "setAlwaysFinish()");
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             Settings.Global.putInt(
                     mContext.getContentResolver(),
@@ -7022,7 +7022,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + android.Manifest.permission.FORCE_STOP_PACKAGES);
         }
         int callerUid = Binder.getCallingUid();
-        long iden = Binder.clearCallingIdentity();
+        final long iden = Binder.clearCallingIdentity();
         try {
             mProcessList.killProcessesWhenImperceptible(pids, reason, callerUid);
         } finally {
@@ -7407,7 +7407,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     Intent intent = new Intent(Intent.ACTION_USER_STARTED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -8171,7 +8171,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int enforceDumpPermissionForPackage(String packageName, int userId, int callingUid,
             String function) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         int uid = Process.INVALID_UID;
         try {
             uid = mPackageManagerInt.getPackageUid(packageName,
@@ -8431,7 +8431,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
 
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
@@ -12699,7 +12699,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        long oldIdent = Binder.clearCallingIdentity();
+        final long oldIdent = Binder.clearCallingIdentity();
         try {
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -15060,7 +15060,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingPid = Binder.getCallingPid();
         userId = mUserController.handleIncomingUser(callingPid, Binder.getCallingUid(),
                 userId, true, ALLOW_FULL_ONLY, "makePackageIdle", null);
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         synchronized(this) {
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
@@ -16752,7 +16752,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "Cannot kill the dependents of a package without its name.");
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         IPackageManager pm = AppGlobals.getPackageManager();
         int pkgUid = -1;
         try {

@@ -1055,7 +1055,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 IBackupCallback callbackBinder,
                 int transportFlags) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
             BackupDataOutput output = new BackupDataOutput(
@@ -1112,7 +1112,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 ParcelFileDescriptor newState, int token, IBackupManager callbackBinder,
                 List<String> excludedKeys) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
 
@@ -1153,7 +1153,7 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doFullBackup(ParcelFileDescriptor data,
                 long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags) {
             // Ensure that we're running with the app's normal permission level
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doFullBackup() invoked");
 
@@ -1228,7 +1228,7 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doRestoreFile(ParcelFileDescriptor data, long size,
                 int type, String domain, String path, long mode, long mtime,
                 int token, IBackupManager callbackBinder) throws RemoteException {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestoreFile(data, size, type, domain, path, mode, mtime);
             } catch (IOException e) {
@@ -1255,7 +1255,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
         @Override
         public void doRestoreFinished(int token, IBackupManager callbackBinder) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestoreFinished();
             } catch (Exception e) {
@@ -1284,7 +1284,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 long backupDataBytes,
                 long quotaBytes,
                 IBackupCallback callbackBinder) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
 
             long result = RESULT_ERROR;
             try {

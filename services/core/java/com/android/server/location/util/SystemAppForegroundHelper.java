@@ -63,7 +63,7 @@ public class SystemAppForegroundHelper extends AppForegroundHelper {
     public boolean isAppForeground(int uid) {
         Preconditions.checkState(mActivityManager != null);
 
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return isForeground(mActivityManager.getUidImportance(uid));
         } finally {

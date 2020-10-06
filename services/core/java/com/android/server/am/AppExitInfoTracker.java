@@ -503,7 +503,7 @@ public final class AppExitInfoTracker {
     @VisibleForTesting
     void getExitInfo(final String packageName, final int filterUid,
             final int filterPid, final int maxNum, final ArrayList<ApplicationExitInfo> results) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 boolean emptyPackageName = TextUtils.isEmpty(packageName);

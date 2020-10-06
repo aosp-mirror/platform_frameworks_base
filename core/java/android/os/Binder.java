@@ -391,7 +391,7 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final void withCleanCallingIdentity(@NonNull ThrowingRunnable action) {
-        long callingIdentity = clearCallingIdentity();
+        final long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
             action.runOrThrow();
@@ -415,7 +415,7 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final <T> T withCleanCallingIdentity(@NonNull ThrowingSupplier<T> action) {
-        long callingIdentity = clearCallingIdentity();
+        final long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
             return action.getOrThrow();

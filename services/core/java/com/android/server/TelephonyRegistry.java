@@ -2418,7 +2418,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public static final String ACTION_SIGNAL_STRENGTH_CHANGED = "android.intent.action.SIG_STR";
 
     private void broadcastServiceStateChanged(ServiceState state, int phoneId, int subId) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneState(state.getState());
         } catch (RemoteException re) {
@@ -2442,7 +2442,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,
             int subId) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneSignalStrength(signalStrength);
         } catch (RemoteException e) {
@@ -2487,7 +2487,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      */
     private void broadcastCallStateChanged(int state, String incomingNumber, int phoneId,
                 int subId) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 mBatteryStats.notePhoneOff();
@@ -2676,7 +2676,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean validateEventsAndUserLocked(Record r, int events) {
         int foregroundUser;
-        long callingIdentity = Binder.clearCallingIdentity();
+        final long callingIdentity = Binder.clearCallingIdentity();
         boolean valid = false;
         try {
             foregroundUser = ActivityManager.getCurrentUser();

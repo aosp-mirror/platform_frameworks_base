@@ -2013,7 +2013,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void setTransparentRegionWindow(Session session, IWindow client, Region region) {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 WindowState w = windowForClientLocked(session, client, false);
@@ -2031,7 +2031,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void setInsetsWindow(Session session, IWindow client, int touchableInsets, Rect contentInsets,
             Rect visibleInsets, Region touchableRegion) {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 WindowState w = windowForClientLocked(session, client, false);
@@ -2110,7 +2110,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean configChanged;
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
@@ -3057,7 +3057,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires INTERACT_ACROSS_USERS permission");
         }
 
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             return mPolicy.isKeyguardSecure(userId);
         } finally {
@@ -3723,7 +3723,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + "rotation constant.");
         }
 
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final DisplayContent display = mRoot.getDisplayContent(displayId);
@@ -3758,7 +3758,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         ProtoLog.v(WM_DEBUG_ORIENTATION, "thawRotation: mRotation=%d", getDefaultDisplayRotation());
 
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final DisplayContent display = mRoot.getDisplayContent(displayId);
@@ -3811,7 +3811,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateRotation");
 
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
 
         try {
             synchronized (mGlobalLock) {
@@ -4104,7 +4104,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
 
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 mPolicy.setOverrideFoldedArea(area);
@@ -4118,7 +4118,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Get the display folded area.
      */
     @NonNull Rect getFoldedArea() {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 return mPolicy.getFoldedArea();
@@ -4135,7 +4135,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
         }
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mDisplayNotificationController.registerListener(listener);
         } finally {
@@ -7856,7 +7856,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void syncInputTransactions() {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             waitForAnimationsToComplete();
 
@@ -8054,7 +8054,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public boolean isLayerTracing() {
         mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
                 "isLayerTracing");
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
             Parcel reply = null;
@@ -8087,7 +8087,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setLayerTracing(boolean enabled) {
         mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
                 "setLayerTracing");
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
             try {
@@ -8114,7 +8114,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setLayerTracingFlags(int flags) {
         mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
                 "setLayerTracingFlags");
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
             try {

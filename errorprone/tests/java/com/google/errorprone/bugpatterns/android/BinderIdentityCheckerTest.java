@@ -89,7 +89,7 @@ public class BinderIdentityCheckerTest {
                         "  }",
                         "  void noFinal() {",
                         "    // BUG: Diagnostic contains:",
-                        "    long token = Binder.clearCallingIdentity();",
+                        "    final long token = Binder.clearCallingIdentity();",
                         "    try {",
                         "      FooService.class.toString();",
                         "    } finally {",
