@@ -96,6 +96,7 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1450,7 +1451,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         final int parentSessionId = Integer.parseInt(getNextArg());
 
-        List<Integer> otherSessionIds = new ArrayList<>();
+        IntArray otherSessionIds = new IntArray();
         String opt;
         while ((opt = getNextArg()) != null) {
             otherSessionIds.add(Integer.parseInt(opt));
@@ -1459,7 +1460,7 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Error: At least two sessions are required.");
             return 1;
         }
-        return doInstallAddSession(parentSessionId, ArrayUtils.convertToIntArray(otherSessionIds),
+        return doInstallAddSession(parentSessionId, otherSessionIds.toArray(),
                 true /*logSuccess*/);
     }
 
