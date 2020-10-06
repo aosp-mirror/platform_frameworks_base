@@ -10459,12 +10459,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        if (uid == Process.INVALID_UID) {
-            return Process.INVALID_UID;
-        }
+        // If the uid is Process.INVALID_UID, the below 'if' check will be always true
         if (UserHandle.getAppId(uid) != UserHandle.getAppId(callingUid)) {
             // Requires the DUMP permission if the target package doesn't belong
-            // to the caller.
+            // to the caller or it doesn't exist.
             enforceCallingPermission(android.Manifest.permission.DUMP, function);
         }
         return uid;
