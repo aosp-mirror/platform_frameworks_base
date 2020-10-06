@@ -311,6 +311,16 @@ public class PendingIntentController {
         }
     }
 
+    int getPendingIntentFlags(IIntentSender target) {
+        if (!(target instanceof PendingIntentRecord)) {
+            Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
+            return 0;
+        }
+        synchronized (mLock) {
+            return ((PendingIntentRecord) target).key.flags;
+        }
+    }
+
     private void makeIntentSenderCanceled(PendingIntentRecord rec) {
         rec.canceled = true;
         final RemoteCallbackList<IResultReceiver> callbacks = rec.detachCancelListenersLocked();

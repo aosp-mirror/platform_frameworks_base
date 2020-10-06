@@ -15789,6 +15789,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public int getPendingIntentFlags(IIntentSender target) {
+            return mPendingIntentController.getPendingIntentFlags(target);
+        }
+
+        @Override
         public void setPendingIntentAllowBgActivityStarts(IIntentSender target,
                 IBinder whitelistToken, int flags) {
             if (!(target instanceof PendingIntentRecord)) {
