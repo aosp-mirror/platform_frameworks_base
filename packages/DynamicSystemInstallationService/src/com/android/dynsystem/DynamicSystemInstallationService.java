@@ -321,6 +321,9 @@ public class DynamicSystemInstallationService extends Service
 
         if (!isDynamicSystemInstalled() && (getStatus() != STATUS_READY)) {
             Log.e(TAG, "Trying to discard AOT while there is no complete installation");
+            // Stop foreground state and dismiss stale notification.
+            stopForeground(STOP_FOREGROUND_REMOVE);
+            resetTaskAndStop();
             return;
         }
 
