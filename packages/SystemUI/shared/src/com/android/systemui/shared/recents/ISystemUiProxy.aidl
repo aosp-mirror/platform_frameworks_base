@@ -16,6 +16,9 @@
 
 package com.android.systemui.shared.recents;
 
+import android.app.PictureInPictureParams;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -166,4 +169,27 @@ interface ISystemUiProxy {
      * Notifies to expand notification panel.
      */
     void expandNotificationPanel() = 29;
+
+    /**
+     * Notifies that Activity is about to be swiped to home with entering PiP transition and
+     * queries the destination bounds for PiP depends on Launcher's rotation and shelf height.
+     *
+     * @param componentName ComponentName represents the Activity
+     * @param activityInfo ActivityInfo tied to the Activity
+     * @param pictureInPictureParams PictureInPictureParams tied to the Activity
+     * @param launcherRotation Launcher rotation to calculate the PiP destination bounds
+     * @param shelfHeight Shelf height of launcher to calculate the PiP destination bounds
+     * @return destination bounds the PiP window should land into
+     */
+    Rect startSwipePipToHome(in ComponentName componentName, in ActivityInfo activityInfo,
+                in PictureInPictureParams pictureInPictureParams,
+                int launcherRotation, int shelfHeight) = 30;
+
+    /**
+     * Notifies the swiping Activity to PiP onto home transition is finished
+     *
+     * @param componentName ComponentName represents the Activity
+     * @param destinationBounds the destination bounds the PiP window lands into
+     */
+    void stopSwipePipToHome(in ComponentName componentName, in Rect destinationBounds) = 31;
 }
