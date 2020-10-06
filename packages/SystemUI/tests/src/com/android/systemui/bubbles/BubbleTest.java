@@ -24,12 +24,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -37,8 +39,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,8 +52,10 @@ import org.mockito.MockitoAnnotations;
 public class BubbleTest extends SysuiTestCase {
     @Mock
     private Notification mNotif;
+    @Mock
+    private StatusBarNotification mSbn;
 
-    private NotificationEntry mEntry;
+    private BubbleEntry mBubbleEntry;
     private Bundle mExtras;
     private Bubble mBubble;
 
@@ -67,18 +69,16 @@ public class BubbleTest extends SysuiTestCase {
         mExtras = new Bundle();
         mNotif.extras = mExtras;
 
-        mEntry = new NotificationEntryBuilder()
-                .setNotification(mNotif)
-                .build();
-
-        mBubble = new Bubble(mEntry, mSuppressionListener, null);
-
         Intent target = new Intent(mContext, BubblesTestActivity.class);
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
                 PendingIntent.getActivity(mContext, 0, target, 0),
                         Icon.createWithResource(mContext, R.drawable.android))
                 .build();
-        mEntry.setBubbleMetadata(metadata);
+        when(mSbn.getNotification()).thenReturn(mNotif);
+        when(mNotif.getBubbleMetadata()).thenReturn(metadata);
+        when(mSbn.getKey()).thenReturn("mock");
+        mBubbleEntry = new BubbleEntry(mSbn, null, true, false, false, false);
+        mBubble = new Bubble(mBubbleEntry, mSuppressionListener, null);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class BubbleTest extends SysuiTestCase {
         final String msg = "Hello there!";
         doReturn(Notification.Style.class).when(mNotif).getNotificationStyle();
         mExtras.putCharSequence(Notification.EXTRA_TEXT, msg);
-        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+        assertEquals(msg, Bubble.extractFlyoutMessage(mBubbleEntry).message);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class BubbleTest extends SysuiTestCase {
         mExtras.putCharSequence(Notification.EXTRA_BIG_TEXT, msg);
 
         // Should be big text, not the small text.
-        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+        assertEquals(msg, Bubble.extractFlyoutMessage(mBubbleEntry).message);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class BubbleTest extends SysuiTestCase {
         doReturn(Notification.MediaStyle.class).when(mNotif).getNotificationStyle();
 
         // Media notifs don't get update messages.
-        assertNull(BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+        assertNull(Bubble.extractFlyoutMessage(mBubbleEntry).message);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class BubbleTest extends SysuiTestCase {
 
         // Should be the last one only.
         assertEquals("Really? I prefer them that way.",
-                BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+                Bubble.extractFlyoutMessage(mBubbleEntry).message);
     }
 
     @Test
@@ -136,8 +136,8 @@ public class BubbleTest extends SysuiTestCase {
                                 "Oh, hello!", 0, "Mady").toBundle()});
 
         // Should be the last one only.
-        assertEquals("Oh, hello!", BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
-        assertEquals("Mady", BubbleViewInfoTask.extractFlyoutMessage(mEntry).senderName);
+        assertEquals("Oh, hello!", Bubble.extractFlyoutMessage(mBubbleEntry).message);
+        assertEquals("Mady", Bubble.extractFlyoutMessage(mBubbleEntry).senderName);
     }
 
     @Test

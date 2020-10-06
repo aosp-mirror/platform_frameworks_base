@@ -23,7 +23,6 @@ import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.bubbles.BubbleDataRepository;
 import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
@@ -59,7 +58,6 @@ public interface BubbleModule {
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,
             ShadeController shadeController,
-            BubbleData data,
             ConfigurationController configurationController,
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
@@ -77,12 +75,11 @@ public interface BubbleModule {
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps) {
-        return new BubbleController(
+        return BubbleController.create(
                 context,
                 notificationShadeWindowController,
                 statusBarStateController,
                 shadeController,
-                data,
                 null /* synchronizer */,
                 configurationController,
                 interruptionStateProvider,
