@@ -42,6 +42,12 @@ public interface TvGlobalRootComponent extends GlobalRootComponent {
         TvGlobalRootComponent build();
     }
 
+    /**
+     * Builder for a WMComponent.
+     */
+    @Override
+    TvWMComponent.Builder getWMComponentBuilder();
+
     @Override
     TvSysUIComponent.Builder getSysUIComponent();
 }

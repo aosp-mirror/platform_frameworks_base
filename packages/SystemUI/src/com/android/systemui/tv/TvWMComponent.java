@@ -16,14 +16,25 @@
 
 package com.android.systemui.tv;
 
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.wmshell.TvPipModule;
+import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.dagger.WMSingleton;
+import com.android.systemui.wmshell.TvWMShellModule;
 
-import dagger.Binds;
-import dagger.Module;
+import dagger.Subcomponent;
 
-@Module
-interface TvSystemUIBinder {
-    @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
+
+/**
+ * Dagger Subcomponent for WindowManager.
+ */
+@WMSingleton
+@Subcomponent(modules = {TvWMShellModule.class})
+public interface TvWMComponent extends WMComponent {
+
+    /**
+     * Builder for a SysUIComponent.
+     */
+    @Subcomponent.Builder
+    interface Builder extends WMComponent.Builder {
+        TvWMComponent build();
+    }
 }

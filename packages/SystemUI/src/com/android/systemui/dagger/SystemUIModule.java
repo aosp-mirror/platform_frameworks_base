@@ -21,6 +21,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
@@ -124,6 +125,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract StatusBar optionalStatusBar();
+
+    @BindsOptionalOf
+    abstract Bubbles optionalBubbles();
 
     @SysUISingleton
     @Binds

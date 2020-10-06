@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -54,10 +54,9 @@ import dagger.Provides;
  * Provides dependencies from {@link com.android.wm.shell} which could be customized among different
  * branches of SystemUI.
  */
-// TODO(b/162923491): Move most of these dependencies into WMSingleton scope.
 @Module(includes = WMShellBaseModule.class)
 public class WMShellModule {
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
             DisplayController displayController, @Main Executor mainExecutor,
@@ -66,7 +65,7 @@ public class WMShellModule {
                 transactionPool);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
@@ -77,7 +76,7 @@ public class WMShellModule {
                 displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static Optional<Pip> providePip(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsHandler pipBoundsHandler,
@@ -90,26 +89,26 @@ public class WMShellModule {
                 windowManagerShellWrapper));
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipBoundsState providePipBoundsState() {
         return new PipBoundsState();
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipBoundsHandler providePipBoundsHandler(Context context) {
         return new PipBoundsHandler(context);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipMenuActivityController providePipMenuActivityController(Context context,
             PipMediaController pipMediaController, PipTaskOrganizer pipTaskOrganizer) {
         return new PipMenuActivityController(context, pipMediaController, pipTaskOrganizer);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipTouchHandler providePipTouchHandler(Context context,
             PipMenuActivityController menuActivityController, PipBoundsHandler pipBoundsHandler,
@@ -121,7 +120,7 @@ public class WMShellModule {
                 pipBoundsState, pipTaskOrganizer, floatingContentCoordinator, pipUiEventLogger);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             PipBoundsState pipBoundsState,

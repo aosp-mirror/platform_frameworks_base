@@ -19,7 +19,7 @@ package com.android.systemui.tv;
 import dagger.Module;
 
 /**
- * Dagger module for including the WMComponent.
+ * Dagger module for including the SysUIComponent.
  */
 @Module(subcomponents = {TvSysUIComponent.class})
 public abstract class TvSysUIComponentModule {
