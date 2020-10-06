@@ -1453,6 +1453,21 @@ static void nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */,
     im->getInputManager()->getDispatcher()->setInTouchMode(inTouchMode);
 }
 
+static void nativeSetMaximumObscuringOpacityForTouch(JNIEnv* /* env */, jclass /* clazz */,
+                                                     jlong ptr, jfloat opacity) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getDispatcher()->setMaximumObscuringOpacityForTouch(opacity);
+}
+
+static void nativeSetBlockUntrustedTouchesMode(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                               jint mode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getDispatcher()->setBlockUntrustedTouchesMode(
+            static_cast<BlockUntrustedTouchesMode>(mode));
+}
+
 static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         jlong ptr, jobject inputEventObj, jint injectorPid, jint injectorUid,
         jint syncMode, jint timeoutMillis, jint policyFlags) {
@@ -1790,6 +1805,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},
         {"nativeSetInputFilterEnabled", "(JZ)V", (void*)nativeSetInputFilterEnabled},
         {"nativeSetInTouchMode", "(JZ)V", (void*)nativeSetInTouchMode},
+        {"nativeSetMaximumObscuringOpacityForTouch", "(JF)V",
+         (void*)nativeSetMaximumObscuringOpacityForTouch},
+        {"nativeSetBlockUntrustedTouchesMode", "(JI)V", (void*)nativeSetBlockUntrustedTouchesMode},
         {"nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
          (void*)nativeInjectInputEvent},
         {"nativeVerifyInputEvent", "(JLandroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
