@@ -539,7 +539,6 @@ package android.app {
 
   public final class UiAutomation {
     method public void destroy();
-    method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRw(@NonNull String);
     method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String);
     method @Deprecated public boolean grantRuntimePermission(String, String, android.os.UserHandle);
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
