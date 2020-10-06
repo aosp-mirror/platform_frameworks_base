@@ -2160,6 +2160,8 @@
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
+  <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
+  <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
