@@ -28,6 +28,8 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+import static android.content.pm.PackageManager.INSTALL_STAGED;
+import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
@@ -1458,7 +1460,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mChildSessionsRemaining.removeAt(sessionIndex);
                     if (mChildSessionsRemaining.size() == 0) {
                         destroyInternal();
-                        dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED,
+                        dispatchSessionFinished(INSTALL_SUCCEEDED,
                                 "Session installed", null);
                     }
                 } else if (PackageInstaller.STATUS_PENDING_USER_ACTION == status) {
@@ -1533,7 +1535,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
-            assertPreparedAndNotDestroyedLocked("commit");
+            assertPreparedAndNotDestroyedLocked("commit of session " + sessionId);
             assertNoWriteFileTransfersOpenLocked();
 
             final boolean isSecureFrpEnabled =
@@ -1663,7 +1665,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws PackageManagerException {
         try {
             assertNoWriteFileTransfersOpenLocked();
-            assertPreparedAndNotDestroyedLocked("sealing of session");
+            assertPreparedAndNotDestroyedLocked("sealing of session " + sessionId);
             mSealed = true;
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
@@ -1699,6 +1701,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
         }
+    }
+
+    private void onSessionInstallationFailure(int error, String detailedMessage) {
+        Slog.e(TAG, "Install of session " + sessionId + " failed: " + detailedMessage);
+        destroyInternal();
+        dispatchSessionFinished(error, detailedMessage, null);
     }
 
     private void onStorageHealthStatusChanged(int status) {
@@ -1757,15 +1765,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 sealLocked();
 
-                if (isApexSession()) {
-                    // APEX installations rely on certain fields to be populated after reboot.
-                    // E.g. mPackageName.
-                    validateApexInstallLocked();
-                } else {
-                    // Populate mPackageName for this APK session which is required by the staging
-                    // manager to check duplicate apk-in-apex.
-                    PackageInstallerSession parent = allSessions.get(mParentSessionId);
-                    if (parent != null && parent.isStagedSessionReady()) {
+                // Session that are staged, ready and not multi package will be installed during
+                // this boot. As such, we need populate all the fields for successful installation.
+                if (isMultiPackage()) {
+                    return;
+                }
+                final PackageInstallerSession root = hasParentSessionId()
+                        ? allSessions.get(getParentSessionId())
+                        : this;
+                if (root != null && root.isStagedSessionReady()) {
+                    if (isApexSession()) {
+                        validateApexInstallLocked();
+                    } else {
                         validateApkInstallLocked();
                     }
                 }
@@ -1829,7 +1840,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagingManager.commitSession(this);
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
-            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
+            dispatchSessionFinished(INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
 
@@ -1911,12 +1922,53 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * Installs apks of staged session while skipping the verification process for a committed and
+     * ready session.
+     */
+    void installStagedSession(IntentSender statusReceiver) {
+        assertCallerIsOwnerOrRootOrSystemLocked();
+        Preconditions.checkArgument(!hasParentSessionId()); // Don't allow installing child sessions
+        Preconditions.checkArgument(isCommitted() && isStagedSessionReady());
+
+        // Since staged sessions are installed during boot, the original reference to status
+        // receiver from the owner has already been lost. We can safely replace it with a
+        // status receiver from the system without effecting the flow.
+        updateRemoteStatusReceiver(statusReceiver);
+        install();
+    }
+
+    private void updateRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
+        synchronized (mLock) {
+            mRemoteStatusReceiver = remoteStatusReceiver;
+            if (isMultiPackage()) {
+                final IntentSender childIntentSender =
+                        new ChildStatusIntentReceiver(mChildSessions.clone(), remoteStatusReceiver)
+                                .getIntentSender();
+                for (int i = mChildSessions.size() - 1; i >= 0; --i) {
+                    mChildSessions.valueAt(i).mRemoteStatusReceiver = childIntentSender;
+                }
+            }
+        }
+    }
+
+    private void install() {
+        try {
+            installNonStaged();
+        } catch (PackageManagerException e) {
+            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+            onSessionInstallationFailure(e.error, completeMsg);
+        }
+    }
+
     private void installNonStaged()
             throws PackageManagerException {
-        final PackageManagerService.InstallParams installingSession =
-                makeInstallParams();
+        Preconditions.checkArgument(containsApkSession());
+
+        final PackageManagerService.InstallParams installingSession = makeInstallParams();
         if (installingSession == null) {
-            return;
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session should contain at least one apk session for installation");
         }
         if (isMultiPackage()) {
             final List<PackageInstallerSession> childSessions;
@@ -2084,7 +2136,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 @Override
                 public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                         Bundle extras) {
-                    if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                    if (returnCode == INSTALL_SUCCEEDED) {
                         onVerificationComplete();
                     } else {
                         onSessionVerificationFailure(returnCode, msg);
@@ -2126,20 +2178,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        try {
-            installNonStaged();
-        } catch (PackageManagerException e) {
-            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-            Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
-            destroyInternal();
-            dispatchSessionFinished(e.error, completeMsg, null);
-        }
+        install();
     }
 
     /**
      * Stages this session for install and returns a
      * {@link PackageManagerService.InstallParams} representing this new staged state.
      */
+    @Nullable
     private PackageManagerService.InstallParams makeInstallParams()
             throws PackageManagerException {
         synchronized (mLock) {
@@ -2153,8 +2199,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // We've reached point of no return; call into PMS to install the stage.
-        // Regardless of success or failure we always destroy session.
+        // Do not try to install apex session. Parent session will have at least one apk session.
+        if (!isMultiPackage() && isApexSession()) {
+            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED,
+                    "Apex package should have been installed by apexd", null);
+            return null;
+        }
+
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
             @Override
             public void onUserActionRequired(Intent intent) {
@@ -2164,8 +2215,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @Override
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
-                destroyInternal();
-                dispatchSessionFinished(returnCode, msg, extras);
+                if (isStaged()) {
+                    sendUpdateToRemoteStatusReceiver(returnCode, msg, extras);
+                } else {
+                    // We've reached point of no return; call into PMS to install the stage.
+                    // Regardless of success or failure we always destroy session.
+                    destroyInternal();
+                    dispatchSessionFinished(returnCode, msg, extras);
+                }
             }
         };
 
@@ -2174,6 +2231,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             user = UserHandle.ALL;
         } else {
             user = new UserHandle(userId);
+        }
+
+        if (params.isStaged) {
+            params.installFlags |= INSTALL_STAGED;
         }
 
         synchronized (mLock) {
@@ -2952,7 +3013,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             handle = NativeLibraryHelper.Handle.create(packageDir);
             final int res = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libDir,
                     abiOverride, isIncrementalInstallation());
-            if (res != PackageManager.INSTALL_SUCCEEDED) {
+            if (res != INSTALL_SUCCEEDED) {
                 throw new PackageManagerException(res,
                         "Failed to extract native libraries, res=" + res);
             }
@@ -3586,31 +3647,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
-        final IntentSender statusReceiver;
-        final String packageName;
+        sendUpdateToRemoteStatusReceiver(returnCode, msg, extras);
+
         synchronized (mLock) {
             mFinalStatus = returnCode;
             mFinalMessage = msg;
-
-            statusReceiver = mRemoteStatusReceiver;
-            packageName = mPackageName;
         }
 
-        if (statusReceiver != null) {
-            // Execute observer.onPackageInstalled on different thread as we don't want callers
-            // inside the system server have to worry about catching the callbacks while they are
-            // calling into the session
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = packageName;
-            args.arg2 = msg;
-            args.arg3 = extras;
-            args.arg4 = statusReceiver;
-            args.argi1 = returnCode;
-
-            mHandler.obtainMessage(MSG_ON_PACKAGE_INSTALLED, args).sendToTarget();
-        }
-
-        final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);
+        final boolean success = (returnCode == INSTALL_SUCCEEDED);
 
         // Send broadcast to default launcher only if it's a new install
         // TODO(b/144270665): Secure the usage of this broadcast.
@@ -3622,6 +3666,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionFinished(this, success);
         if (isDataLoaderInstallation()) {
             logDataLoaderInstallationSession(returnCode);
+        }
+    }
+
+    private void sendUpdateToRemoteStatusReceiver(int returnCode, String msg, Bundle extras) {
+        final IntentSender statusReceiver;
+        final String packageName;
+        synchronized (mLock) {
+            statusReceiver = mRemoteStatusReceiver;
+            packageName = mPackageName;
+        }
+        if (statusReceiver != null) {
+            // Execute observer.onPackageInstalled on different thread as we don't want callers
+            // inside the system server have to worry about catching the callbacks while they are
+            // calling into the session
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = packageName;
+            args.arg2 = msg;
+            args.arg3 = extras;
+            args.arg4 = statusReceiver;
+            args.argi1 = returnCode;
+            mHandler.obtainMessage(MSG_ON_PACKAGE_INSTALLED, args).sendToTarget();
         }
     }
 
@@ -3834,7 +3899,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static void sendOnPackageInstalled(Context context, IntentSender target, int sessionId,
             boolean showNotification, int userId, String basePackageName, int returnCode,
             String msg, Bundle extras) {
-        if (PackageManager.INSTALL_SUCCEEDED == returnCode && showNotification) {
+        if (INSTALL_SUCCEEDED == returnCode && showNotification) {
             boolean update = (extras != null) && extras.getBoolean(Intent.EXTRA_REPLACING);
             Notification notification = PackageInstallerService.buildSuccessNotification(context,
                     context.getResources()
