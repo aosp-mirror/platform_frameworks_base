@@ -89,6 +89,16 @@ import java.util.function.Consumer;
 public class LocationManager {
 
     /**
+     * For apps targeting Android S and above, LocationRequest system APIs may not be used with
+     * PendingIntent location requests.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    public static final long PREVENT_PENDING_INTENT_SYSTEM_API_USAGE = 169887240L;
+
+    /**
      * For apps targeting Android S and above, location clients may receive historical locations
      * (from before the present time) under some circumstances.
      *

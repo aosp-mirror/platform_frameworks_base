@@ -17,12 +17,14 @@
 package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
+import static android.location.LocationManager.PREVENT_PENDING_INTENT_SYSTEM_API_USAGE;
 import static android.location.LocationRequest.LOW_POWER_EXCEPTIONS;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -75,7 +77,6 @@ import android.os.WorkSource.WorkChain;
 import android.stats.location.LocationStatsEnums;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ProviderProperties;
@@ -570,7 +571,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     new IllegalArgumentException());
         }
 
-        request = validateLocationRequest(request);
+        request = validateLocationRequest(request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -592,7 +593,21 @@ public class LocationManagerService extends ILocationManager.Stub {
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateLocationRequest(request);
+        // pending intents requests may not use system apis because we do not keep track if clients
+        // lose the relevant permissions, and thus should not get the benefit of those apis. its
+        // simplest to ensure these apis are simply never set for pending intent requests. the same
+        // does not apply for listener requests since those will have the process (including the
+        // listener) killed on permission removal
+        boolean usesSystemApi = request.isLowPower()
+                || request.isHiddenFromAppOps()
+                || request.isLocationSettingsIgnored()
+                || !request.getWorkSource().isEmpty();
+        if (usesSystemApi
+                && isChangeEnabled(PREVENT_PENDING_INTENT_SYSTEM_API_USAGE, identity.getUid())) {
+            throw new SecurityException("PendingIntent location requests may not use system APIs");
+        }
+
+        request = validateLocationRequest(request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -601,9 +616,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         manager.registerLocationRequest(request, identity, permissionLevel, pendingIntent);
     }
 
-    private LocationRequest validateLocationRequest(LocationRequest request) {
-        WorkSource workSource = request.getWorkSource();
-        if (workSource != null && !workSource.isEmpty()) {
+    private LocationRequest validateLocationRequest(LocationRequest request,
+            CallerIdentity identity) {
+        if (!request.getWorkSource().isEmpty()) {
             mContext.enforceCallingOrSelfPermission(
                     permission.UPDATE_DEVICE_STATS,
                     "setting a work source requires " + permission.UPDATE_DEVICE_STATS);
@@ -634,22 +649,24 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        if (request.getWorkSource() != null) {
-            if (request.getWorkSource().isEmpty()) {
-                sanitized.setWorkSource(null);
-            } else if (request.getWorkSource().getPackageName(0) == null) {
-                Log.w(TAG, "received (and ignoring) illegal worksource with no package name");
-                sanitized.setWorkSource(null);
-            } else {
-                List<WorkChain> workChains = request.getWorkSource().getWorkChains();
-                if (workChains != null && !workChains.isEmpty() && workChains.get(
-                        0).getAttributionTag() == null) {
-                    Log.w(TAG,
-                            "received (and ignoring) illegal worksource with no attribution tag");
-                    sanitized.setWorkSource(null);
-                }
+        WorkSource workSource = new WorkSource(request.getWorkSource());
+        if (workSource.size() > 0 && workSource.getPackageName(0) == null) {
+            Log.w(TAG, "received (and ignoring) illegal worksource with no package name");
+            workSource.clear();
+        } else {
+            List<WorkChain> workChains = workSource.getWorkChains();
+            if (workChains != null && !workChains.isEmpty()
+                    && workChains.get(0).getAttributionTag() == null) {
+                Log.w(TAG,
+                        "received (and ignoring) illegal worksource with no attribution tag");
+                workSource.clear();
             }
         }
+
+        if (workSource.isEmpty()) {
+            identity.addToWorkSource(workSource);
+        }
+        sanitized.setWorkSource(workSource);
 
         return sanitized.build();
     }
@@ -684,15 +701,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             return null;
         }
 
-        Location location = manager.getLastLocation(identity, permissionLevel, false);
-
-        // lastly - note app ops
-        if (!mInjector.getAppOpsHelper().noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
-                identity)) {
-            return null;
-        }
-
-        return location;
+        return manager.getLastLocation(identity, permissionLevel, false);
     }
 
     @Nullable
@@ -710,7 +719,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // clients in the system process must have an attribution tag set
         Preconditions.checkState(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateLocationRequest(request);
+        request = validateLocationRequest(request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -727,7 +736,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return null;
             }
 
-            // use fine permission level to avoid creating unnecessary coarse locations
             Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
                     PERMISSION_FINE, false, Long.MAX_VALUE);
             if (location == null) {
@@ -1116,9 +1124,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return;
         }
 
-        ipw.print("Location Manager State:");
+        ipw.println("Location Manager State:");
         ipw.increaseIndent();
-        ipw.println("Elapsed Realtime: " + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
 
         ipw.println("User Info:");
         ipw.increaseIndent();
