@@ -1474,14 +1474,6 @@ class Task extends WindowContainer<WindowContainer> {
         // Update task bounds if needed.
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
-        if (getWindowConfiguration().windowsAreScaleable()) {
-            // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
-            // while a resize is pending.
-            forceWindowsScaleable(true /* force */);
-        } else {
-            forceWindowsScaleable(false /* force */);
-        }
-
         mRootWindowContainer.updateUIDsPresentOnDisplay();
 
         // Resume next focusable stack after reparenting to another display if we aren't removing
@@ -3778,17 +3770,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         positionChildAt(position, child, false /* includeParents */);
-    }
-
-    void forceWindowsScaleable(boolean force) {
-        mWmService.openSurfaceTransaction();
-        try {
-            for (int i = mChildren.size() - 1; i >= 0; i--) {
-                mChildren.get(i).forceWindowsScaleableInTransaction(force);
-            }
-        } finally {
-            mWmService.closeSurfaceTransaction("forceWindowsScaleable");
-        }
     }
 
     void setTaskDescription(TaskDescription taskDescription) {
