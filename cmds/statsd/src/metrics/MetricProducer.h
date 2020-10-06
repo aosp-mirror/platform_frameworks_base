@@ -566,7 +566,9 @@ protected:
     FRIEND_TEST(MetricsManagerTest, TestInitialConditions);
 
     FRIEND_TEST(ConfigUpdateTest, TestUpdateMetricActivations);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateCountMetrics);
     FRIEND_TEST(ConfigUpdateTest, TestUpdateEventMetrics);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateMetricsMultipleTypes);
 };
 
 }  // namespace statsd
