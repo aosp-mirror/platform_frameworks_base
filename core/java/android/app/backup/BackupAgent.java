@@ -1054,14 +1054,15 @@ public abstract class BackupAgent extends ContextWrapper {
                 long quotaBytes,
                 IBackupCallback callbackBinder,
                 int transportFlags) throws RemoteException {
-            // Ensure that we're running with the app's normal permission level
-            final long ident = Binder.clearCallingIdentity();
-
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
+
             BackupDataOutput output = new BackupDataOutput(
                     data.getFileDescriptor(), quotaBytes, transportFlags);
 
             long result = RESULT_ERROR;
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
                 result = RESULT_SUCCESS;
@@ -1111,9 +1112,6 @@ public abstract class BackupAgent extends ContextWrapper {
         private void doRestoreInternal(ParcelFileDescriptor data, long appVersionCode,
                 ParcelFileDescriptor newState, int token, IBackupManager callbackBinder,
                 List<String> excludedKeys) throws RemoteException {
-            // Ensure that we're running with the app's normal permission level
-            final long ident = Binder.clearCallingIdentity();
-
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
 
             // Ensure that any side-effect SharedPreferences writes have landed *before*
@@ -1121,6 +1119,9 @@ public abstract class BackupAgent extends ContextWrapper {
             waitForSharedPrefs();
 
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestore(input, appVersionCode, newState,
                         excludedKeys != null ? new HashSet<>(excludedKeys)
@@ -1152,15 +1153,14 @@ public abstract class BackupAgent extends ContextWrapper {
         @Override
         public void doFullBackup(ParcelFileDescriptor data,
                 long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags) {
-            // Ensure that we're running with the app's normal permission level
-            final long ident = Binder.clearCallingIdentity();
-
             if (DEBUG) Log.v(TAG, "doFullBackup() invoked");
 
             // Ensure that any SharedPreferences writes have landed *before*
             // we potentially try to back up the underlying files directly.
             waitForSharedPrefs();
 
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onFullBackup(new FullBackupDataOutput(
                         data, quotaBytes, transportFlags));
@@ -1199,12 +1199,13 @@ public abstract class BackupAgent extends ContextWrapper {
 
         public void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder,
                 int transportFlags) {
-            // Ensure that we're running with the app's normal permission level
-            final long ident = Binder.clearCallingIdentity();
             FullBackupDataOutput measureOutput =
                     new FullBackupDataOutput(quotaBytes, transportFlags);
 
             waitForSharedPrefs();
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onFullBackup(measureOutput);
             } catch (IOException ex) {
@@ -1284,9 +1285,10 @@ public abstract class BackupAgent extends ContextWrapper {
                 long backupDataBytes,
                 long quotaBytes,
                 IBackupCallback callbackBinder) {
-            final long ident = Binder.clearCallingIdentity();
-
             long result = RESULT_ERROR;
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onQuotaExceeded(backupDataBytes, quotaBytes);
                 result = RESULT_SUCCESS;

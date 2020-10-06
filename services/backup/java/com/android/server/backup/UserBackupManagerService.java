@@ -2890,15 +2890,17 @@ public class UserBackupManagerService {
                     return;
                 }
                 final long oldId = Binder.clearCallingIdentity();
-                OnTaskFinishedListener listener =
-                        caller ->
-                                mTransportManager.disposeOfTransportClient(transportClient, caller);
-                mWakelock.acquire();
-                Message msg = mBackupHandler.obtainMessage(
-                        MSG_RUN_CLEAR,
-                        new ClearParams(transportClient, info, listener));
-                mBackupHandler.sendMessage(msg);
-                Binder.restoreCallingIdentity(oldId);
+                try {
+                    OnTaskFinishedListener listener = caller -> mTransportManager
+                            .disposeOfTransportClient(transportClient, caller);
+                    mWakelock.acquire();
+                    Message msg = mBackupHandler.obtainMessage(
+                            MSG_RUN_CLEAR,
+                            new ClearParams(transportClient, info, listener));
+                    mBackupHandler.sendMessage(msg);
+                } finally {
+                    Binder.restoreCallingIdentity(oldId);
+                }
             }
         }
     }

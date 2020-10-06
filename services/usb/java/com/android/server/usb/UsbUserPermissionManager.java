@@ -506,21 +506,22 @@ class UsbUserPermissionManager {
             @NonNull Context userContext,
             @NonNull PendingIntent pi) {
         final long identity = Binder.clearCallingIdentity();
-        Intent intent = new Intent();
-        if (device != null) {
-            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        } else {
-            intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        }
-        intent.putExtra(Intent.EXTRA_INTENT, pi);
-        intent.putExtra(Intent.EXTRA_UID, uid);
-        intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
-        intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
-        intent.setComponent(ComponentName.unflattenFromString(userContext.getResources().getString(
-                com.android.internal.R.string.config_usbPermissionActivity)));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
         try {
+            Intent intent = new Intent();
+            if (device != null) {
+                intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+            } else {
+                intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+            }
+            intent.putExtra(Intent.EXTRA_INTENT, pi);
+            intent.putExtra(Intent.EXTRA_UID, uid);
+            intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
+            intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
+            intent.setComponent(
+                    ComponentName.unflattenFromString(userContext.getResources().getString(
+                            com.android.internal.R.string.config_usbPermissionActivity)));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             userContext.startActivityAsUser(intent, mUser);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "unable to start UsbPermissionActivity");

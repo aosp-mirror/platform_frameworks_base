@@ -1412,8 +1412,8 @@ public class BackupManagerService extends IBackupManager.Stub {
             return null;
         }
         int callingUserId = Binder.getCallingUserHandle().getIdentifier();
-        final long oldId = Binder.clearCallingIdentity();
         final int[] userIds;
+        final long oldId = Binder.clearCallingIdentity();
         try {
             userIds = getUserManager().getProfileIds(callingUserId, false);
         } finally {
