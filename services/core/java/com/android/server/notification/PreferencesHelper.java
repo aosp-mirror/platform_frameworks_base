@@ -75,6 +75,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -172,6 +173,8 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
     private boolean mAllowInvalidShortcuts = false;
+
+    private Map<String, List<String>> mOemLockedApps = new HashMap();
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger,
@@ -314,6 +317,12 @@ public class PreferencesHelper implements RankingConfig {
                                         }
                                         channel.setImportanceLockedByCriticalDeviceFunction(
                                                 r.defaultAppLockedImportance);
+                                        channel.setImportanceLockedByOEM(r.oemLockedImportance);
+                                        if (!channel.isImportanceLockedByOEM()) {
+                                            if (r.oemLockedChannels.contains(channel.getId())) {
+                                                channel.setImportanceLockedByOEM(true);
+                                            }
+                                        }
                                         boolean isInvalidShortcutChannel =
                                                 channel.getConversationId() != null &&
                                                         channel.getConversationId().contains(
@@ -396,6 +405,14 @@ public class PreferencesHelper implements RankingConfig {
             r.visibility = visibility;
             r.showBadge = showBadge;
             r.bubblePreference = bubblePreference;
+            if (mOemLockedApps.containsKey(r.pkg)) {
+                List<String> channels = mOemLockedApps.get(r.pkg);
+                if (channels == null || channels.isEmpty()) {
+                    r.oemLockedImportance = true;
+                } else {
+                    r.oemLockedChannels = channels;
+                }
+            }
 
             try {
                 createDefaultChannelIfNeededLocked(r);
@@ -1149,8 +1166,10 @@ public class PreferencesHelper implements RankingConfig {
                     String channelId = appSplit.length == 2 ? appSplit[1] : null;
 
                     synchronized (mPackagePreferences) {
+                        boolean foundApp = false;
                         for (PackagePreferences r : mPackagePreferences.values()) {
                             if (r.pkg.equals(appName)) {
+                                foundApp = true;
                                 if (channelId == null) {
                                     // lock all channels for the app
                                     r.oemLockedImportance = true;
@@ -1167,6 +1186,14 @@ public class PreferencesHelper implements RankingConfig {
                                     r.oemLockedChannels.add(channelId);
                                 }
                             }
+                        }
+                        if (!foundApp) {
+                            List<String> channels =
+                                    mOemLockedApps.getOrDefault(appName, new ArrayList<>());
+                            if (channelId != null) {
+                                channels.add(channelId);
+                            }
+                            mOemLockedApps.put(appName, channels);
                         }
                     }
                 }
