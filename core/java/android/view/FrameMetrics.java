@@ -198,6 +198,7 @@ public final class FrameMetrics {
             Index.ANIMATION_START,
             Index.PERFORM_TRAVERSALS_START,
             Index.DRAW_START,
+            Index.FRAME_DEADLINE,
             Index.SYNC_QUEUED,
             Index.SYNC_START,
             Index.ISSUE_DRAW_COMMANDS_START,
@@ -216,13 +217,15 @@ public final class FrameMetrics {
         int ANIMATION_START = 7;
         int PERFORM_TRAVERSALS_START = 8;
         int DRAW_START = 9;
-        int SYNC_QUEUED = 10;
-        int SYNC_START = 11;
-        int ISSUE_DRAW_COMMANDS_START = 12;
-        int SWAP_BUFFERS = 13;
-        int FRAME_COMPLETED = 14;
+        int FRAME_DEADLINE = 10;
+        int SYNC_QUEUED = 11;
+        int SYNC_START = 12;
+        int ISSUE_DRAW_COMMANDS_START = 13;
+        int SWAP_BUFFERS = 14;
+        int FRAME_COMPLETED = 15;
 
-        int FRAME_STATS_COUNT = 18; // must always be last
+        int FRAME_STATS_COUNT = 19; // must always be last and in sync with
+                                    // FrameInfoIndex::NumIndexes in libs/hwui/FrameInfo.h
     }
 
     /*
