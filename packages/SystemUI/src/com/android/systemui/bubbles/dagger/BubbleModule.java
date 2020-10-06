@@ -21,9 +21,9 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.view.WindowManager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.bubbles.BubbleDataRepository;
 import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -68,13 +68,13 @@ public interface BubbleModule {
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
-            BubbleDataRepository bubbleDataRepository,
             SysUiState sysUiState,
             INotificationManager notifManager,
             IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            LauncherApps launcherApps) {
+            LauncherApps launcherApps,
+            UiEventLogger uiEventLogger) {
         return BubbleController.create(
                 context,
                 notificationShadeWindowController,
@@ -91,12 +91,12 @@ public interface BubbleModule {
                 featureFlags,
                 dumpManager,
                 floatingContentCoordinator,
-                bubbleDataRepository,
                 sysUiState,
                 notifManager,
                 statusBarService,
                 windowManager,
                 windowManagerShellWrapper,
-                launcherApps);
+                launcherApps,
+                uiEventLogger);
     }
 }

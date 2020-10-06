@@ -66,14 +66,15 @@ public class TestableBubbleController extends BubbleController {
             IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            LauncherApps launcherApps) {
+            LauncherApps launcherApps,
+            BubbleLogger bubbleLogger) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 data, Runnable::run, configurationController, interruptionStateProvider,
                 zenModeController, lockscreenUserManager, groupManager, entryManager,
                 notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
                 dataRepository, sysUiState, notificationManager, statusBarService,
-                windowManager, windowManagerShellWrapper, launcherApps);
+                windowManager, windowManagerShellWrapper, launcherApps, bubbleLogger);
         setInflateSynchronously(true);
     }
 }

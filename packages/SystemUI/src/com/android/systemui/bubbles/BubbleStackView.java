@@ -74,18 +74,13 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.Interpolators;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.AnimatableScaleMatrix;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
-import com.android.systemui.model.SysUiState;
-import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.util.RelativeTouchListener;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
@@ -120,6 +115,8 @@ public class BubbleStackView extends FrameLayout
 
     /** Duration of the flyout alpha animations. */
     private static final int FLYOUT_ALPHA_ANIMATION_DURATION = 100;
+
+    private static final int FADE_IN_DURATION = 320;
 
     /** Percent to darken the bubbles when they're in the dismiss target. */
     private static final float DARKEN_PERCENT = 0.3f;
@@ -323,8 +320,6 @@ public class BubbleStackView extends FrameLayout
     /** Callback to run when we want to unbubble the given notification's conversation. */
     private Consumer<String> mUnbubbleConversationCallback;
 
-    private SysUiState mSysUiState;
-
     private boolean mViewUpdatedRequested = false;
     private boolean mIsExpansionAnimating = false;
     private boolean mIsBubbleSwitchAnimating = false;
@@ -399,6 +394,11 @@ public class BubbleStackView extends FrameLayout
      * Bubbles window focusability flags with the WindowManager.
      */
     public final Consumer<Boolean> mOnImeVisibilityChanged;
+
+    /**
+     * Callback to run when the bubble expand status changes.
+     */
+    private final Consumer<Boolean> mOnBubbleExpandChanged;
 
     /**
      * Callback to run to ask BubbleController to hide the current IME.
@@ -660,7 +660,7 @@ public class BubbleStackView extends FrameLayout
                                     viewInitialX + dx, velX, velY) <= 0;
                     updateBubbleIcons();
                     logBubbleEvent(null /* no bubble associated with bubble stack move */,
-                            SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
+                            FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
                 }
                 mDismissView.hide();
             }
@@ -742,16 +742,14 @@ public class BubbleStackView extends FrameLayout
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState,
             Runnable allBubblesAnimatedOutAction,
             Consumer<Boolean> onImeVisibilityChanged,
-            Runnable hideCurrentInputMethodCallback) {
+            Runnable hideCurrentInputMethodCallback,
+            Consumer<Boolean> onBubbleExpandChanged) {
         super(context);
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
-
-        mSysUiState = sysUiState;
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
@@ -865,6 +863,7 @@ public class BubbleStackView extends FrameLayout
 
         mOnImeVisibilityChanged = onImeVisibilityChanged;
         mHideCurrentInputMethodCallback = hideCurrentInputMethodCallback;
+        mOnBubbleExpandChanged = onBubbleExpandChanged;
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             onImeVisibilityChanged.accept(insets.getInsets(WindowInsets.Type.ime()).bottom > 0);
@@ -974,7 +973,7 @@ public class BubbleStackView extends FrameLayout
 
         animate()
                 .setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED)
-                .setDuration(CollapsedStatusBarFragment.FADE_IN_DURATION);
+                .setDuration(FADE_IN_DURATION);
     }
 
     /**
@@ -1066,7 +1065,7 @@ public class BubbleStackView extends FrameLayout
                         mBubbleData.setExpanded(false);
                         mContext.startActivityAsUser(intent, bubble.getUser());
                         logBubbleEvent(bubble,
-                                SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
+                                FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
                     }
                 });
 
@@ -1082,8 +1081,7 @@ public class BubbleStackView extends FrameLayout
      * Whether the educational view should show for the expanded view "manage" menu.
      */
     private boolean shouldShowManageEdu() {
-        final boolean seen = Prefs.getBoolean(mContext,
-                Prefs.Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION, false /* default */);
+        final boolean seen = getPrefBoolean(ManageEducationViewKt.PREF_MANAGED_EDUCATION);
         final boolean shouldShow = (!seen || BubbleDebugConfig.forceShowUserEducation(mContext))
                 && mExpandedBubble != null;
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
@@ -1107,13 +1105,17 @@ public class BubbleStackView extends FrameLayout
      * Whether education view should show for the collapsed stack.
      */
     private boolean shouldShowStackEdu() {
-        final boolean seen = Prefs.getBoolean(getContext(),
-                Prefs.Key.HAS_SEEN_BUBBLES_EDUCATION, false /* default */);
+        final boolean seen = getPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION);
         final boolean shouldShow = !seen || BubbleDebugConfig.forceShowUserEducation(mContext);
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show stack edu: " + shouldShow);
         }
         return shouldShow;
+    }
+
+    private boolean getPrefBoolean(String key) {
+        return mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE)
+                .getBoolean(key, false /* default */);
     }
 
     /**
@@ -1488,7 +1490,7 @@ public class BubbleStackView extends FrameLayout
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         animateInFlyoutForBubble(bubble);
         requestUpdate();
-        logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
+        logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
     }
 
     // via BubbleData.Listener
@@ -1508,7 +1510,7 @@ public class BubbleStackView extends FrameLayout
                     bubble.cleanupViews();
                 }
                 updatePointerPosition();
-                logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
+                logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
                 return;
             }
         }
@@ -1526,7 +1528,7 @@ public class BubbleStackView extends FrameLayout
     void updateBubble(Bubble bubble) {
         animateInFlyoutForBubble(bubble);
         requestUpdate();
-        logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
+        logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
     }
 
     public void updateBubbleOrder(List<Bubble> bubbles) {
@@ -1622,8 +1624,9 @@ public class BubbleStackView extends FrameLayout
                 requestUpdate();
 
                 logBubbleEvent(previouslySelected,
-                        SysUiStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
-                logBubbleEvent(bubbleToSelect, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+                logBubbleEvent(bubbleToSelect,
+                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
                 notifyExpansionChanged(previouslySelected, false /* expanded */);
                 notifyExpansionChanged(bubbleToSelect, true /* expanded */);
             });
@@ -1653,18 +1656,17 @@ public class BubbleStackView extends FrameLayout
 
         hideCurrentInputMethod();
 
-        mSysUiState
-                .setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
-                .commitUpdate(mContext.getDisplayId());
+        mOnBubbleExpandChanged.accept(shouldExpand);
 
         if (mIsExpanded) {
             animateCollapse();
-            logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+            logBubbleEvent(mExpandedBubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
         } else {
             animateExpansion();
             // TODO: move next line to BubbleData
-            logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-            logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
+            logBubbleEvent(mExpandedBubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+            logBubbleEvent(mExpandedBubble,
+                    FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
         }
         notifyExpansionChanged(mExpandedBubble, mIsExpanded);
     }
@@ -2285,7 +2287,7 @@ public class BubbleStackView extends FrameLayout
         });
         mFlyout.removeCallbacks(mHideFlyout);
         mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
-        logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
+        logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
     }
 
     /** Hide the flyout immediately and cancel any pending hide runnables. */

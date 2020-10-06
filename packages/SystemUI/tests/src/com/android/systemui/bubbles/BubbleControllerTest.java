@@ -194,6 +194,8 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Mock private WindowManagerShellWrapper mWindowManagerShellWrapper;
 
+    @Mock private BubbleLogger mBubbleLogger;
+
     private BubbleData mBubbleData;
 
     private TestableLooper mTestableLooper;
@@ -249,7 +251,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         mock(Handler.class)
                 );
-        mBubbleData = new BubbleData(mContext);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger);
         when(mFeatureFlagsOldPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -273,7 +275,8 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mStatusBarService,
                 mWindowManager,
                 mWindowManagerShellWrapper,
-                mLauncherApps);
+                mLauncherApps,
+                mBubbleLogger);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         // Get a reference to the BubbleController's entry listener
