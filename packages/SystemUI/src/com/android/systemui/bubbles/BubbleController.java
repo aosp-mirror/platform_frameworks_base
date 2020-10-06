@@ -231,6 +231,11 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
      */
     private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
 
+    /**
+     * Last known font scale, used to detect font size changes in {@link #onConfigChanged}.
+     */
+    private float mFontScale = 0;
+
     /** Last known direction, used to detect layout direction changes @link #onConfigChanged}. */
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
 
@@ -989,6 +994,10 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 mDensityDpi = newConfig.densityDpi;
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
+            }
+            if (newConfig.fontScale != mFontScale) {
+                mFontScale = newConfig.fontScale;
+                mStackView.updateFlyout(mFontScale);
             }
             if (newConfig.getLayoutDirection() != mLayoutDirection) {
                 mLayoutDirection = newConfig.getLayoutDirection();
