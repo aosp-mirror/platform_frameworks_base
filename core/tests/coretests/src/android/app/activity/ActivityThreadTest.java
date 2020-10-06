@@ -51,12 +51,14 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
+import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -78,6 +80,8 @@ import java.util.concurrent.TimeUnit;
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
+@Presubmit
+@FlakyTest(detail = "Promote once confirmed non-flaky")
 public class ActivityThreadTest {
     private static final int TIMEOUT_SEC = 10;
 
@@ -545,14 +549,15 @@ public class ActivityThreadTest {
         rIntents.add(new ReferrerIntent(new Intent(), "android.app.activity"));
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            activityThread.executeTransaction(newNewIntentTransaction(activity, rIntents, false));
-        });
-        assertThat(activity.isResumed()).isFalse();
-
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             activityThread.executeTransaction(newNewIntentTransaction(activity, rIntents, true));
         });
         assertThat(activity.isResumed()).isTrue();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.executeTransaction(newStopTransaction(activity));
+            activityThread.executeTransaction(newNewIntentTransaction(activity, rIntents, false));
+        });
+        assertThat(activity.isResumed()).isFalse();
     }
 
     @Test
