@@ -32,6 +32,7 @@ class SkCanvasState;
 class SkVertices;
 
 namespace minikin {
+class Font;
 class Layout;
 class MeasuredText;
 enum class Bidi : uint8_t;
@@ -254,6 +255,9 @@ public:
      * Draws a VectorDrawable onto the canvas.
      */
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) = 0;
+
+    void drawGlyphs(const minikin::Font& font, const int* glyphIds, const float* positions,
+                    int glyphCount, const Paint& paint);
 
     /**
      * Converts utf16 text to glyphs, calculating position and boundary,
