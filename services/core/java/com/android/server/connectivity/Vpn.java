@@ -1130,7 +1130,13 @@ public class Vpn {
         return mNetworkInfo;
     }
 
-    public int getNetId() {
+    /**
+     * Return netId of current running VPN network.
+     *
+     * @return a netId if there is a running VPN network or NETID_UNSET if there is no running VPN
+     *         network or network is null.
+     */
+    public synchronized int getNetId() {
         final NetworkAgent agent = mNetworkAgent;
         if (null == agent) return NETID_UNSET;
         final Network network = agent.getNetwork();
@@ -1708,7 +1714,7 @@ public class Vpn {
     /**
      * Return the configuration of the currently running VPN.
      */
-    public VpnConfig getVpnConfig() {
+    public synchronized VpnConfig getVpnConfig() {
         enforceControlPermission();
         return mConfig;
     }
