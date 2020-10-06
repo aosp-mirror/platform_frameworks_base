@@ -13663,6 +13663,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case Intent.ACTION_PRE_BOOT_COMPLETED:
                     timeoutExempt = true;
                     break;
+                case Intent.ACTION_PACKAGE_UNSTARTABLE:
+                    final String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+                    forceStopPackageLocked(packageName, -1, false, true, true,
+                            false, false, userId, "package unstartable");
+                    break;
             }
 
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
