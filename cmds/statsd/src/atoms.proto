@@ -3777,6 +3777,7 @@ message AppStartOccurred {
         LAUNCHER = 1;
         NOTIFICATION = 2;
         LOCKSCREEN = 3;
+        RECENTS_ANIMATION = 4;
     }
     // The type of the startup source.
     optional SourceType source_type = 16;

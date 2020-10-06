@@ -44,26 +44,37 @@ public class InteractionJankMonitor {
     private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L);
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
-    public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 1;
-    public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE_LOCK = 0;
-    public static final int CUJ_NOTIFICATION_SHADE_SCROLL_FLING = 0;
-    public static final int CUJ_NOTIFICATION_SHADE_ROW_EXPAND = 0;
-    public static final int CUJ_NOTIFICATION_SHADE_ROW_SWIPE = 0;
-    public static final int CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE = 0;
-    public static final int CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE = 0;
-    public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS = 0;
-    public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON = 0;
-    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME = 0;
-    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_PIP = 0;
-    public static final int CUJ_LAUNCHER_QUICK_SWITCH = 0;
+    public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
+    public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE_LOCK = 1;
+    public static final int CUJ_NOTIFICATION_SHADE_SCROLL_FLING = 2;
+    public static final int CUJ_NOTIFICATION_SHADE_ROW_EXPAND = 3;
+    public static final int CUJ_NOTIFICATION_SHADE_ROW_SWIPE = 4;
+    public static final int CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE = 5;
+    public static final int CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE = 6;
+    public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS = 7;
+    public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON = 8;
+    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME = 9;
+    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_PIP = 10;
+    public static final int CUJ_LAUNCHER_QUICK_SWITCH = 11;
 
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
     // Use NO_STATSD_LOGGING in case the measurement for a given CUJ should not be logged to statsd.
-    private static final int[] CUJ_TO_STATSD_INTERACTION_TYPE = {
-            NO_STATSD_LOGGING,
+    @VisibleForTesting
+    public static final int[] CUJ_TO_STATSD_INTERACTION_TYPE = {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
+            NO_STATSD_LOGGING,
     };
 
     private static volatile InteractionJankMonitor sInstance;

@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
+import static android.content.pm.ActivityInfo.reverseOrientation;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -809,6 +810,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return parent != null ? parent.getDisplayArea() : null;
     }
 
+    /** Get the first node of type {@link RootDisplayArea} above or at this node. */
+    @Nullable
+    RootDisplayArea getRootDisplayArea() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.getRootDisplayArea() : null;
+    }
+
     boolean isAttached() {
         return getDisplayArea() != null;
     }
@@ -1154,17 +1162,30 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
     int getRequestedConfigurationOrientation() {
-        if (mOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
+        int requestedOrientation = mOrientation;
+        final RootDisplayArea root = getRootDisplayArea();
+        if (root != null && root.isOrientationDifferentFromDisplay()) {
+            // Reverse the requested orientation if the orientation of its root is different from
+            // the display, so that when the display rotates to the reversed orientation, the
+            // requested app will be in the requested orientation.
+            // For example, if the display is 1200x900 (landscape), and the DAG is 600x900
+            // (portrait).
+            // When an app below the DAG is requesting landscape, it should actually request the
+            // display to be portrait, so that the DAG and the app will be in landscape.
+            requestedOrientation = reverseOrientation(mOrientation);
+        }
+
+        if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
             // NOSENSOR means the display's "natural" orientation, so return that.
             if (mDisplayContent != null) {
                 return mDisplayContent.getNaturalOrientation();
             }
-        } else if (mOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
+        } else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
             // LOCKED means the activity's orientation remains unchanged, so return existing value.
             return getConfiguration().orientation;
-        } else if (isFixedOrientationLandscape(mOrientation)) {
+        } else if (isFixedOrientationLandscape(requestedOrientation)) {
             return ORIENTATION_LANDSCAPE;
-        } else if (isFixedOrientationPortrait(mOrientation)) {
+        } else if (isFixedOrientationPortrait(requestedOrientation)) {
             return ORIENTATION_PORTRAIT;
         }
         return ORIENTATION_UNDEFINED;

@@ -900,8 +900,13 @@ public final class TvInputManager {
         public void onTvInputInfoUpdated(TvInputInfo inputInfo) {
         }
 
-        /** @hide */
-        public void onCurrentTvChannelInfosUpdated(List<TvChannelInfo> tvChannelInfos) {
+        /**
+         * This is called when the information about current TV channels has been updated.
+         *
+         * @param tvChannelInfos a list of {@link TvChannelInfo} objects of new current channels.
+         * @hide
+         */
+        public void onCurrentTvChannelInfosUpdated(@NonNull List<TvChannelInfo> tvChannelInfos) {
         }
     }
 
@@ -1976,8 +1981,15 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns the list of TV channel information for {@link TvInputService.Session} that are
+     * currently in use.
+     * <p> Permission com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS is required to get
+     * the channel URIs. If the permission is not granted, {@link TvChannelInfo#getChannelUri()}
+     * returns {@code null}.
      * @hide
      */
+    @RequiresPermission("com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS")
+    @NonNull
     public List<TvChannelInfo> getCurrentTvChannelInfos() {
         try {
             return mService.getCurrentTvChannelInfos(mUserId);

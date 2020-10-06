@@ -126,6 +126,7 @@ package android {
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
+    field public static final String MANAGE_TIME_AND_ZONE_DETECTION = "android.permission.MANAGE_TIME_AND_ZONE_DETECTION";
     field public static final String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
@@ -1326,6 +1327,57 @@ package android.app.role {
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
     field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
+  }
+
+}
+
+package android.app.time {
+
+  public final class TimeManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void addTimeZoneDetectorListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void removeTimeZoneDetectorListener(@NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean updateTimeZoneConfiguration(@NonNull android.app.time.TimeZoneConfiguration);
+  }
+
+  @java.lang.FunctionalInterface public static interface TimeManager.TimeZoneDetectorListener {
+    method public void onChange();
+  }
+
+  public final class TimeZoneCapabilities implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConfigureAutoDetectionEnabledCapability();
+    method public int getConfigureGeoDetectionEnabledCapability();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CAPABILITY_NOT_ALLOWED = 20; // 0x14
+    field public static final int CAPABILITY_NOT_APPLICABLE = 30; // 0x1e
+    field public static final int CAPABILITY_NOT_SUPPORTED = 10; // 0xa
+    field public static final int CAPABILITY_POSSESSED = 40; // 0x28
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneCapabilities> CREATOR;
+  }
+
+  public final class TimeZoneCapabilitiesAndConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.app.time.TimeZoneCapabilities getCapabilities();
+    method @NonNull public android.app.time.TimeZoneConfiguration getConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneCapabilitiesAndConfig> CREATOR;
+  }
+
+  public final class TimeZoneConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isAutoDetectionEnabled();
+    method public boolean isGeoDetectionEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneConfiguration> CREATOR;
+  }
+
+  public static final class TimeZoneConfiguration.Builder {
+    ctor public TimeZoneConfiguration.Builder();
+    ctor public TimeZoneConfiguration.Builder(@NonNull android.app.time.TimeZoneConfiguration);
+    method @NonNull public android.app.time.TimeZoneConfiguration build();
+    method @NonNull public android.app.time.TimeZoneConfiguration.Builder setAutoDetectionEnabled(boolean);
+    method @NonNull public android.app.time.TimeZoneConfiguration.Builder setGeoDetectionEnabled(boolean);
   }
 
 }

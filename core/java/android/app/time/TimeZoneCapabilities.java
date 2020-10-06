@@ -19,6 +19,7 @@ package android.app.time;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TimeZoneDetector;
 import android.os.Parcel;
@@ -50,7 +51,7 @@ import java.util.Objects;
  *
  * @hide
  */
-// @SystemApi
+@SystemApi
 public final class TimeZoneCapabilities implements Parcelable {
 
     /** @hide */

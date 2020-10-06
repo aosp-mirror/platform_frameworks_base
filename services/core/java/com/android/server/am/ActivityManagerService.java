@@ -153,7 +153,6 @@ import android.app.ContentProviderHolder;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
-import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
@@ -286,7 +285,6 @@ import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.IRecentsAnimationRunner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -2838,18 +2836,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public final int startActivityFromRecents(int taskId, Bundle bOptions) {
         return mActivityTaskManager.startActivityFromRecents(taskId, bOptions);
-    }
-
-    @Override
-    public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
-            IRecentsAnimationRunner recentsAnimationRunner) {
-        mActivityTaskManager.startRecentsActivity(
-                intent, assistDataReceiver, recentsAnimationRunner);
-    }
-
-    @Override
-    public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
-        mActivityTaskManager.cancelRecentsAnimation(restoreHomeStackPosition);
     }
 
     /**
@@ -16492,7 +16478,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int getStorageMountMode(int pid, int uid) {
             if (uid == SHELL_UID || uid == ROOT_UID) {
-                return Zygote.MOUNT_EXTERNAL_FULL;
+                return Zygote.MOUNT_EXTERNAL_DEFAULT;
             }
             synchronized (mPidsSelfLocked) {
                 final ProcessRecord pr = mPidsSelfLocked.get(pid);

@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.CecMessage;
 import android.hardware.tv.cec.V1_0.HotplugEvent;
@@ -774,6 +776,7 @@ final class HdmiCecController {
         private IHdmiCec mHdmiCec;
         private final Object mLock = new Object();
         private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+        @Nullable private HdmiCecCallback mCallback;
 
         @Override
         public String nativeInit() {
@@ -782,7 +785,7 @@ final class HdmiCecController {
 
         boolean connectToHal() {
             try {
-                mHdmiCec = IHdmiCec.getService();
+                mHdmiCec = IHdmiCec.getService(true);
                 try {
                     mHdmiCec.linkToDeath(this, HDMI_CEC_HAL_DEATH_COOKIE);
                 } catch (RemoteException e) {
@@ -796,7 +799,8 @@ final class HdmiCecController {
         }
 
         @Override
-        public void setCallback(HdmiCecCallback callback) {
+        public void setCallback(@NonNull HdmiCecCallback callback) {
+            mCallback = callback;
             try {
                 mHdmiCec.setCallback(callback);
             } catch (RemoteException e) {
@@ -936,6 +940,10 @@ final class HdmiCecController {
             if (cookie == HDMI_CEC_HAL_DEATH_COOKIE) {
                 HdmiLogger.error("Service died cookie : " + cookie + "; reconnecting");
                 connectToHal();
+                // Reconnect the callback
+                if (mCallback != null) {
+                    setCallback(mCallback);
+                }
             }
         }
 

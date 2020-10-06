@@ -17,7 +17,6 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,13 +31,16 @@ import java.util.List;
  * Transfer a large list of Parcelable objects across an IPC.  Splits into
  * multiple transactions if needed.
  *
- * @see BaseMediaParceledListSlice
- *
  * TODO: Remove this from @SystemApi once all the MediaSession related classes are moved
  *       to apex (or ParceledListSlice moved to apex). This class is temporaily added to system API
  *       for moving classes step by step.
+ *
+ * @param <T> The type of the elements in the list.
+ * @see BaseMediaParceledListSlice
+ * @deprecated This is temporary marked as @SystemApi. Should be removed from the API surface.
  * @hide
  */
+@Deprecated
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class MediaParceledListSlice<T extends Parcelable>
         extends BaseMediaParceledListSlice<T> {
