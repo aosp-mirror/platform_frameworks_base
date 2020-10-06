@@ -342,7 +342,7 @@ public class KeyguardUserSwitcher {
                     }
                     v.setActivated(true);
                 }
-                switchTo(user);
+                onUserListItemClicked(user);
             }
         }
     }

@@ -155,7 +155,7 @@ public class UserDetailView extends PseudoGridView {
                     }
                     view.setActivated(true);
                 }
-                switchTo(tag);
+                onUserListItemClicked(tag);
             }
         }
     }
