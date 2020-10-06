@@ -524,16 +524,18 @@ class LocationProviderManager extends
                 }
             }
 
-            if (baseRequest.isLocationSettingsIgnored()) {
+            boolean locationSettingsIgnored = baseRequest.isLocationSettingsIgnored();
+            if (locationSettingsIgnored) {
                 // if we are not currently allowed use location settings ignored, disable it
                 if (!mSettingsHelper.getIgnoreSettingsPackageWhitelist().contains(
                         getIdentity().getPackageName()) && !mLocationManagerInternal.isProvider(
                         null, getIdentity())) {
                     builder.setLocationSettingsIgnored(false);
+                    locationSettingsIgnored = false;
                 }
             }
 
-            if (!baseRequest.isLocationSettingsIgnored() && !isThrottlingExempt()) {
+            if (!locationSettingsIgnored && !isThrottlingExempt()) {
                 // throttle in the background
                 if (!mForeground) {
                     builder.setIntervalMillis(max(baseRequest.getIntervalMillis(),
