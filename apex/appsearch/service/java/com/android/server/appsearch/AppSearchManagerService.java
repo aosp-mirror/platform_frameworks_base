@@ -19,20 +19,24 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchDocument;
 import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.IAppSearchManager;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.UserHandle;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localbackend.AppSearchImpl;
+import com.android.server.appsearch.external.localbackend.converter.SchemaToProtoConverter;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.SchemaProto;
+import com.google.android.icing.proto.SchemaTypeConfigProto;
 import com.google.android.icing.proto.ScoringSpecProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
@@ -59,19 +63,24 @@ public class AppSearchManagerService extends SystemService {
     private class Stub extends IAppSearchManager.Stub {
         @Override
         public void setSchema(
-                @NonNull byte[] schemaBytes,
+                @NonNull List<Bundle> schemaBundles,
                 boolean forceOverride,
                 @NonNull AndroidFuture<AppSearchResult> callback) {
-            Preconditions.checkNotNull(schemaBytes);
+            Preconditions.checkNotNull(schemaBundles);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             long callingIdentity = Binder.clearCallingIdentity();
             try {
-                SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
+                SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
+                for (int i = 0; i < schemaBundles.size(); i++) {
+                    AppSearchSchema schema = new AppSearchSchema(schemaBundles.get(i));
+                    SchemaTypeConfigProto schemaTypeProto = SchemaToProtoConverter.convert(schema);
+                    schemaProtoBuilder.addTypes(schemaTypeProto);
+                }
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
-                impl.setSchema(databaseName, schema, forceOverride);
+                impl.setSchema(databaseName, schemaProtoBuilder.build(), forceOverride);
                 callback.complete(AppSearchResult.newSuccessfulResult(/*value=*/ null));
             } catch (Throwable t) {
                 callback.complete(throwableToFailedResult(t));

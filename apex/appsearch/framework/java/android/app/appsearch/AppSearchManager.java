@@ -18,12 +18,12 @@ package android.app.appsearch;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.RemoteException;
 
 import com.android.internal.infra.AndroidFuture;
 
 import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.StatusProto;
@@ -133,19 +133,15 @@ public class AppSearchManager {
     @NonNull
     public AppSearchResult<Void> setSchema(
             @NonNull List<AppSearchSchema> schemas, boolean forceOverride) {
-        // Prepare the merged schema for transmission.
-        SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
-        for (AppSearchSchema schema : schemas) {
-            schemaProtoBuilder.addTypes(schema.getProto());
-        }
-
-        // Serialize and send the schema.
         // TODO: This should use com.android.internal.infra.RemoteStream or another mechanism to
         //  avoid binder limits.
-        byte[] schemaBytes = schemaProtoBuilder.build().toByteArray();
+        List<Bundle> schemaBundles = new ArrayList<>(schemas.size());
+        for (AppSearchSchema schema : schemas) {
+            schemaBundles.add(schema.getBundle());
+        }
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.setSchema(schemaBytes, forceOverride, future);
+            mService.setSchema(schemaBundles, forceOverride, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
