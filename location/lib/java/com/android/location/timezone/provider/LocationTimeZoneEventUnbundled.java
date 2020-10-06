@@ -18,7 +18,6 @@ package com.android.location.timezone.provider;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.location.timezone.LocationTimeZoneEvent;
 import android.os.SystemClock;
@@ -31,8 +30,6 @@ import java.util.Objects;
 /**
  * An event from a {@link LocationTimeZoneProviderBase} sent while determining a device's time zone
  * using its location.
- *
- * @hide
  */
 public final class LocationTimeZoneEventUnbundled {
 
@@ -69,7 +66,6 @@ public final class LocationTimeZoneEventUnbundled {
     /**
      * Returns the event type.
      */
-    @Nullable
     public @EventType int getEventType() {
         return mDelegate.getEventType();
     }
@@ -118,8 +114,6 @@ public final class LocationTimeZoneEventUnbundled {
 
     /**
      * A builder of {@link LocationTimeZoneEventUnbundled} instances.
-     *
-     * @hide
      */
     public static final class Builder {
 
