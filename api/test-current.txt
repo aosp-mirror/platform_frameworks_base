@@ -77,6 +77,7 @@ package android.app {
   }
 
   public class ActivityManager {
+    method @RequiresPermission("android.permission.SET_ACTIVITY_WATCHER") public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
@@ -86,6 +87,7 @@ package android.app {
     method @RequiresPermission("android.permission.INJECT_EVENTS") public void holdLock(int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void killProcessesWhenImperceptible(@NonNull int[], @NonNull String);
+    method @RequiresPermission("android.permission.SET_ACTIVITY_WATCHER") public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
@@ -454,6 +456,11 @@ package android.app {
     method @RequiresPermission("android.permission.WRITE_DREAM_STATE") public void setActiveDream(@NonNull android.content.ComponentName);
     method @RequiresPermission("android.permission.WRITE_DREAM_STATE") public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission("android.permission.WRITE_DREAM_STATE") public void stopDream();
+  }
+
+  public abstract class HomeVisibilityListener {
+    ctor public HomeVisibilityListener();
+    method public abstract void onHomeVisibilityChanged(boolean);
   }
 
   public final class NotificationChannel implements android.os.Parcelable {

@@ -1,8 +1,18 @@
 // Signature format: 2.0
 package android.app {
 
+  public class ActivityManager {
+    method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
+    method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
+  }
+
   public class AppOpsManager {
     field public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
+  }
+
+  public abstract class HomeVisibilityListener {
+    ctor public HomeVisibilityListener();
+    method public abstract void onHomeVisibilityChanged(boolean);
   }
 
   public class NotificationManager {
