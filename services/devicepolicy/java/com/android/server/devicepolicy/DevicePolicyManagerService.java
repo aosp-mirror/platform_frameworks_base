@@ -11045,9 +11045,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
-        public boolean isActiveAdminWithPolicy(int uid, int reqPolicy) {
+        public boolean isActiveDeviceOwner(int uid) {
             synchronized (getLockObject()) {
-                return getActiveAdminWithPolicyForUidLocked(null, reqPolicy, uid) != null;
+                return getActiveAdminWithPolicyForUidLocked(
+                        null, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, uid) != null;
+            }
+        }
+
+        @Override
+        public boolean isActiveProfileOwner(int uid) {
+            synchronized (getLockObject()) {
+                return getActiveAdminWithPolicyForUidLocked(
+                        null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, uid) != null;
             }
         }
 
@@ -11171,8 +11180,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return false;
             }
             if (isUserAffiliatedWithDevice(UserHandle.getUserId(callerUid))
-                    && isActiveAdminWithPolicy(callerUid,
-                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)) {
+                    && (isActiveProfileOwner(callerUid)
+                        || isActiveDeviceOwner(callerUid))) {
                 // device owner or a profile owner affiliated with the device owner
                 return true;
             }

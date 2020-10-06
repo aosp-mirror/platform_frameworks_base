@@ -137,7 +137,6 @@ import android.app.PendingIntent;
 import android.app.StatsManager;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
 import android.app.role.OnRoleHoldersChangedListener;
@@ -4543,11 +4542,11 @@ public class NotificationManagerService extends SystemService {
             } catch (NameNotFoundException e) {
                 return false;
             }
+            //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
             return checkPackagePolicyAccess(pkg)
                     || mListeners.isComponentEnabledForPackage(pkg)
-                    || (mDpm != null &&
-                            mDpm.isActiveAdminWithPolicy(Binder.getCallingUid(),
-                                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER));
+                    || (mDpm != null && (mDpm.isActiveProfileOwner(Binder.getCallingUid())
+                                || mDpm.isActiveDeviceOwner(Binder.getCallingUid())));
         }
 
         @Override
