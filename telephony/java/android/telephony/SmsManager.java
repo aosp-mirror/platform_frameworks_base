@@ -2091,17 +2091,25 @@ public final class SmsManager {
     }
 
     /**
-     * Gets the total capacity of SMS storage on RUIM and SIM cards
-     * <p>
-     * This is the number of 176 byte EF-SMS records which can be stored on the RUIM or SIM card.
-     * <p>
-     * See 3GPP TS 31.102 - 4.2.25 - EF-SMS for more information
+     * Gets the total capacity of SMS storage on the SIM card.
      *
-     * @return the total number of SMS records which can be stored on the RUIM or SIM cards.
-     * @hide
+     * <p>
+     * This is the number of 176 byte EF-SMS records which can be stored on the SIM card.
+     * See 3GPP TS 31.102 - 4.2.25 - EF-SMS for more information.
+     * </p>
+     *
+     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this method will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the operation
+     * is performed on the correct subscription.
+     * </p>
+     *
+     * @return the total number of SMS records which can be stored on the SIM card.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getSmsCapacityOnIcc() {
         int ret = 0;
         try {
@@ -2110,7 +2118,7 @@ public final class SmsManager {
                 ret = iccISms.getSmsCapacityOnIccForSubscriber(getSubscriptionId());
             }
         } catch (RemoteException ex) {
-            //ignore it
+            throw new RuntimeException(ex);
         }
         return ret;
     }
