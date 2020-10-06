@@ -879,11 +879,11 @@ public class NotificationManagerService extends SystemService {
                         Binder.restoreCallingIdentity(identity);
                     }
 
-                    identity = Binder.clearCallingIdentity();
+                    final long identity2 = Binder.clearCallingIdentity();
                     try {
                         mVibrator.cancel();
                     } finally {
-                        Binder.restoreCallingIdentity(identity);
+                        Binder.restoreCallingIdentity(identity2);
                     }
                 }
             }
