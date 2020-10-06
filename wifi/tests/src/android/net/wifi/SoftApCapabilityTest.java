@@ -16,10 +16,11 @@
 
 package android.net.wifi;
 
-import android.os.Build;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
 import androidx.test.filters.SmallTest;
 
@@ -92,14 +93,12 @@ public class SoftApCapabilityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetSupportedChannelListWithInvalidBand() {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+
         long testSoftApFeature = SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT
                 | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
         SoftApCapability capability = new SoftApCapability(testSoftApFeature);
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-            capability.getSupportedChannelList(
-                    SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ);
-        } else {
-            throw new IllegalArgumentException("API doesn't support in current SDK version");
-        }
+        capability.getSupportedChannelList(
+                SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ);
     }
 }
