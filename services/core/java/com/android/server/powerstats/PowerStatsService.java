@@ -16,6 +16,7 @@
 
 package com.android.server.powerstats;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Environment;
@@ -48,8 +49,11 @@ public class PowerStatsService extends SystemService {
 
     private Context mContext;
     private IPowerStatsHALWrapper mPowerStatsHALWrapper;
+    @Nullable
     private PowerStatsLogger mPowerStatsLogger;
+    @Nullable
     private BatteryTrigger mBatteryTrigger;
+    @Nullable
     private TimerTrigger mTimerTrigger;
 
     @VisibleForTesting
@@ -88,7 +92,11 @@ public class PowerStatsService extends SystemService {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             if (args.length > 0 && "--proto".equals(args[0])) {
-                mPowerStatsLogger.writeToFile(fd);
+                if (mPowerStatsLogger == null) {
+                    Log.e(TAG, "PowerStats HAL is not initialized.  No data available.");
+                } else {
+                    mPowerStatsLogger.writeToFile(fd);
+                }
             }
         }
     }
