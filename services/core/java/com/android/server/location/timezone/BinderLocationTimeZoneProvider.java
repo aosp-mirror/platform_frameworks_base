@@ -200,8 +200,8 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
         synchronized (mSharedLock) {
             return "BinderLocationTimeZoneProvider{"
                     + "mProviderName=" + mProviderName
-                    + "mCurrentState=" + mCurrentState
-                    + "mProxy=" + mProxy
+                    + ", mCurrentState=" + mCurrentState
+                    + ", mProxy=" + mProxy
                     + '}';
         }
     }
