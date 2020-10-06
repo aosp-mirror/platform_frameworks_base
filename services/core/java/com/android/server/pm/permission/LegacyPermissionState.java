@@ -32,7 +32,7 @@ import java.util.Objects;
  * Legacy permission state that was associated with packages or shared users.
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public final class AppIdPermissionState {
+public final class LegacyPermissionState {
     // Maps from user IDs to user states.
     @NonNull
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
@@ -48,7 +48,7 @@ public final class AppIdPermissionState {
      *
      * @hide
      */
-    public void copyFrom(@NonNull AppIdPermissionState other) {
+    public void copyFrom(@NonNull LegacyPermissionState other) {
         if (other == this) {
             return;
         }
@@ -88,7 +88,7 @@ public final class AppIdPermissionState {
         if (getClass() != object.getClass()) {
             return false;
         }
-        final AppIdPermissionState other = (AppIdPermissionState) object;
+        final LegacyPermissionState other = (LegacyPermissionState) object;
         return Objects.equals(mUserStates, other.mUserStates)
                 && Objects.equals(mMissing, other.mMissing);
     }
