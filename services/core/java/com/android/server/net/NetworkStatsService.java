@@ -1083,9 +1083,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (nativeIfaceStats == -1) {
             return nativeIfaceStats;
         } else {
-            // TODO: When tethering offload is in use, nativeIfaceStats does not contain usage from
-            //  offload, add it back here.
-            return nativeIfaceStats;
+            // When tethering offload is in use, nativeIfaceStats does not contain usage from
+            // offload, add it back here. Note that the included statistics might be stale
+            // since polling newest stats from hardware might impact system health and not
+            // suitable for TrafficStats API use cases.
+            return nativeIfaceStats + getProviderIfaceStats(iface, type);
         }
     }
 
@@ -1096,7 +1098,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return nativeTotalStats;
         } else {
             // Refer to comment in getIfaceStats
-            return nativeTotalStats;
+            return nativeTotalStats + getProviderIfaceStats(IFACE_ALL, type);
+        }
+    }
+
+    private long getProviderIfaceStats(@Nullable String iface, int type) {
+        final NetworkStats providerSnapshot = getNetworkStatsFromProviders(STATS_PER_IFACE);
+        final HashSet<String> limitIfaces;
+        if (iface == IFACE_ALL) {
+            limitIfaces = null;
+        } else {
+            limitIfaces = new HashSet<>();
+            limitIfaces.add(iface);
+        }
+        final NetworkStats.Entry entry = providerSnapshot.getTotal(null, limitIfaces);
+        switch (type) {
+            case TrafficStats.TYPE_RX_BYTES:
+                return entry.rxBytes;
+            case TrafficStats.TYPE_RX_PACKETS:
+                return entry.rxPackets;
+            case TrafficStats.TYPE_TX_BYTES:
+                return entry.txBytes;
+            case TrafficStats.TYPE_TX_PACKETS:
+                return entry.txPackets;
+            default:
+                return 0;
         }
     }
 
@@ -1464,29 +1490,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean persistUid = (flags & FLAG_PERSIST_UID) != 0;
         final boolean persistForce = (flags & FLAG_PERSIST_FORCE) != 0;
 
-        // Request asynchronous stats update from all providers for next poll. And wait a bit of
-        // time to allow providers report-in given that normally binder call should be fast. Note
-        // that size of list might be changed because addition/removing at the same time. For
-        // addition, the stats of the missed provider can only be collected in next poll;
-        // for removal, wait might take up to MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS
-        // once that happened.
-        // TODO: request with a valid token.
-        Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
-        final int registeredCallbackCount = mStatsProviderCbList.size();
-        mStatsProviderSem.drainPermits();
-        invokeForAllStatsProviderCallbacks(
-                (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
-        try {
-            mStatsProviderSem.tryAcquire(registeredCallbackCount,
-                    MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            // Strictly speaking it's possible a provider happened to deliver between the timeout
-            // and the log, and that doesn't matter too much as this is just a debug log.
-            Log.d(TAG, "requestStatsUpdate - providers responded "
-                    + mStatsProviderSem.availablePermits()
-                    + "/" + registeredCallbackCount + " : " + e);
-        }
-        Trace.traceEnd(TRACE_TAG_NETWORK);
+        performPollFromProvidersLocked();
 
         // TODO: consider marking "untrusted" times in historical stats
         final long currentTime = mClock.millis();
@@ -1528,6 +1532,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // finally, dispatch updated event to any listeners
         mHandler.sendMessage(mHandler.obtainMessage(MSG_BROADCAST_NETWORK_STATS_UPDATED));
 
+        Trace.traceEnd(TRACE_TAG_NETWORK);
+    }
+
+    @GuardedBy("mStatsLock")
+    private void performPollFromProvidersLocked() {
+        // Request asynchronous stats update from all providers for next poll. And wait a bit of
+        // time to allow providers report-in given that normally binder call should be fast. Note
+        // that size of list might be changed because addition/removing at the same time. For
+        // addition, the stats of the missed provider can only be collected in next poll;
+        // for removal, wait might take up to MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS
+        // once that happened.
+        // TODO: request with a valid token.
+        Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
+        final int registeredCallbackCount = mStatsProviderCbList.size();
+        mStatsProviderSem.drainPermits();
+        invokeForAllStatsProviderCallbacks(
+                (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
+        try {
+            mStatsProviderSem.tryAcquire(registeredCallbackCount,
+                    MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // Strictly speaking it's possible a provider happened to deliver between the timeout
+            // and the log, and that doesn't matter too much as this is just a debug log.
+            Log.d(TAG, "requestStatsUpdate - providers responded "
+                    + mStatsProviderSem.availablePermits()
+                    + "/" + registeredCallbackCount + " : " + e);
+        }
         Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
@@ -2183,6 +2214,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    // TODO: Remove unused definitions after removing JNI that fills these variables.
+    //  See {@code com_android_server_net_NetworkStatsService.cpp}.
     private static int TYPE_RX_BYTES;
     private static int TYPE_RX_PACKETS;
     private static int TYPE_TX_BYTES;
