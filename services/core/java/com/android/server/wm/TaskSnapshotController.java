@@ -368,7 +368,8 @@ class TaskSnapshotController {
 
         SurfaceControl[] excludeLayers;
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
-        if (imeWindow != null) {
+        // Exclude IME window snapshot when IME isn't proper to attach to app.
+        if (imeWindow != null && !task.getDisplayContent().isImeAttachedToApp()) {
             excludeLayers = new SurfaceControl[1];
             excludeLayers[0] = imeWindow.getSurfaceControl();
         } else {
