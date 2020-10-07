@@ -18,14 +18,12 @@ package com.android.server.power;
 
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -124,9 +122,6 @@ public class AttentionDetector {
     protected WindowManagerInternal mWindowManager;
 
     @VisibleForTesting
-    protected PackageManager mPackageManager;
-
-    @VisibleForTesting
     protected ContentResolver mContentResolver;
 
     /**
@@ -164,7 +159,6 @@ public class AttentionDetector {
     public void systemReady(Context context) {
         mContext = context;
         updateEnabledFromSettings(context);
-        mPackageManager = context.getPackageManager();
         mContentResolver = context.getContentResolver();
         mAttentionManager = LocalServices.getService(AttentionManagerInternal.class);
         mWindowManager = LocalServices.getService(WindowManagerInternal.class);
@@ -192,11 +186,8 @@ public class AttentionDetector {
     public long updateUserActivity(long nextScreenDimming, long dimDurationMillis) {
         if (nextScreenDimming == mLastActedOnNextScreenDimming
                 || !mIsSettingEnabled
+                || !isAttentionServiceSupported()
                 || mWindowManager.isKeyguardShowingAndNotOccluded()) {
-            return nextScreenDimming;
-        }
-
-        if (!isAttentionServiceSupported() || !serviceHasSufficientPermissions()) {
             return nextScreenDimming;
         }
 
@@ -298,18 +289,6 @@ public class AttentionDetector {
     @VisibleForTesting
     boolean isAttentionServiceSupported() {
         return mAttentionManager != null && mAttentionManager.isAttentionServiceSupported();
-    }
-
-    /**
-     * Returns {@code true} if the attention service has sufficient permissions, disables the
-     * depending features otherwise.
-     */
-    @VisibleForTesting
-    boolean serviceHasSufficientPermissions() {
-        final String attentionPackage = mPackageManager.getAttentionServicePackageName();
-        return attentionPackage != null && mPackageManager.checkPermission(
-                Manifest.permission.CAMERA, attentionPackage)
-                == PackageManager.PERMISSION_GRANTED;
     }
 
     public void dump(PrintWriter pw) {
