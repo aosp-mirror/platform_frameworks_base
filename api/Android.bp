@@ -150,3 +150,17 @@ genrule {
     tools: ["metalava"],
     cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
 }
+
+genrule {
+    name: "combined-removed-dex",
+    srcs: [
+        ":frameworks-base-api-removed-merged.txt",
+        ":frameworks-base-api-system-removed-merged.txt",
+        ":android.car-stubs-docs{.removed-api.txt}",
+        ":android.car-system-stubs-docs{.removed-api.txt}",
+    ],
+    tool_files: ["gen_combined_removed_dex.sh"],
+    tools: ["metalava"],
+    out: ["combined-removed-dex.txt"],
+    cmd: "$(location gen_combined_removed_dex.sh) $(location metalava) $(genDir) $(in) > $(out)",
+}
