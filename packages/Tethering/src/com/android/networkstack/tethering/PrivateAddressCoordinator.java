@@ -16,7 +16,9 @@
 package com.android.networkstack.tethering;
 
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_WIFI_P2P;
+import static android.net.util.PrefixUtils.asIpPrefix;
 
 import static java.util.Arrays.asList;
 
@@ -26,9 +28,9 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.Network;
 import android.net.ip.IpServer;
-import android.net.util.PrefixUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.SparseArray;
 
 import androidx.annotation.Nullable;
 
@@ -58,9 +60,6 @@ public class PrivateAddressCoordinator {
 
     private static final int MAX_UBYTE = 256;
     private static final int BYTE_MASK = 0xff;
-    // reserved for bluetooth tethering.
-    private static final int BLUETOOTH_RESERVED = 44;
-    private static final int WIFI_P2P_RESERVED = 49;
     private static final byte DEFAULT_ID = (byte) 42;
 
     // Upstream monitor would be stopped when tethering is down. When tethering restart, downstream
@@ -75,9 +74,12 @@ public class PrivateAddressCoordinator {
     // Tethering use 192.168.0.0/16 that has 256 contiguous class C network numbers.
     private static final String DEFAULT_TETHERING_PREFIX = "192.168.0.0/16";
     private static final String LEGACY_WIFI_P2P_IFACE_ADDRESS = "192.168.49.1/24";
+    private static final String LEGACY_BLUETOOTH_IFACE_ADDRESS = "192.168.44.1/24";
     private final IpPrefix mTetheringPrefix;
     private final ConnectivityManager mConnectivityMgr;
     private final TetheringConfiguration mConfig;
+    // keyed by downstream type(TetheringManager.TETHERING_*).
+    private final SparseArray<LinkAddress> mCachedAddresses;
 
     public PrivateAddressCoordinator(Context context, TetheringConfiguration config) {
         mDownstreams = new ArraySet<>();
@@ -86,6 +88,10 @@ public class PrivateAddressCoordinator {
         mConnectivityMgr = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         mConfig = config;
+        mCachedAddresses = new SparseArray<>();
+        // Reserved static addresses for bluetooth and wifi p2p.
+        mCachedAddresses.put(TETHERING_BLUETOOTH, new LinkAddress(LEGACY_BLUETOOTH_IFACE_ADDRESS));
+        mCachedAddresses.put(TETHERING_WIFI_P2P, new LinkAddress(LEGACY_WIFI_P2P_IFACE_ADDRESS));
     }
 
     /**
@@ -94,7 +100,8 @@ public class PrivateAddressCoordinator {
      * UpstreamNetworkState must have an already populated LinkProperties.
      */
     public void updateUpstreamPrefix(final UpstreamNetworkState ns) {
-        // Do not support VPN as upstream
+        // Do not support VPN as upstream. Normally, networkCapabilities is not expected to be null,
+        // but just checking to be sure.
         if (ns.networkCapabilities != null && ns.networkCapabilities.hasTransport(TRANSPORT_VPN)) {
             removeUpstreamPrefix(ns.network);
             return;
@@ -116,7 +123,7 @@ public class PrivateAddressCoordinator {
         for (LinkAddress address : linkAddresses) {
             if (!address.isIpv4()) continue;
 
-            list.add(PrefixUtils.asIpPrefix(address));
+            list.add(asIpPrefix(address));
         }
 
         return list;
@@ -155,19 +162,21 @@ public class PrivateAddressCoordinator {
         mUpstreamPrefixMap.removeAll(toBeRemoved);
     }
 
-    private boolean isReservedSubnet(final int subnet) {
-        return subnet == BLUETOOTH_RESERVED || subnet == WIFI_P2P_RESERVED;
-    }
-
     /**
      * Pick a random available address and mark its prefix as in use for the provided IpServer,
      * returns null if there is no available address.
      */
     @Nullable
-    public LinkAddress requestDownstreamAddress(final IpServer ipServer) {
+    public LinkAddress requestDownstreamAddress(final IpServer ipServer, boolean useLastAddress) {
         if (mConfig.shouldEnableWifiP2pDedicatedIp()
                 && ipServer.interfaceType() == TETHERING_WIFI_P2P) {
             return new LinkAddress(LEGACY_WIFI_P2P_IFACE_ADDRESS);
+        }
+
+        final LinkAddress cachedAddress = mCachedAddresses.get(ipServer.interfaceType());
+        if (useLastAddress && cachedAddress != null
+                && !isConflictWithUpstream(asIpPrefix(cachedAddress))) {
+            return cachedAddress;
         }
 
         // Address would be 192.168.[subAddress]/24.
@@ -177,9 +186,8 @@ public class PrivateAddressCoordinator {
         bytes[3] = getSanitizedAddressSuffix(subAddress, (byte) 0, (byte) 1, (byte) 0xff);
         for (int i = 0; i < MAX_UBYTE; i++) {
             final int newSubNet = (subNet + i) & BYTE_MASK;
-            if (isReservedSubnet(newSubNet)) continue;
-
             bytes[2] = (byte) newSubNet;
+
             final InetAddress addr;
             try {
                 addr = InetAddress.getByAddress(bytes);
@@ -187,18 +195,21 @@ public class PrivateAddressCoordinator {
                 throw new IllegalStateException("Invalid address, shouldn't happen.", e);
             }
 
-            final IpPrefix prefix = new IpPrefix(addr, PREFIX_LENGTH);
-            // Check whether this prefix is in use.
-            if (isDownstreamPrefixInUse(prefix)) continue;
-            // Check whether this prefix is conflict with any current upstream network.
-            if (isConflictWithUpstream(prefix)) continue;
+            if (isConflict(new IpPrefix(addr, PREFIX_LENGTH))) continue;
 
             mDownstreams.add(ipServer);
-            return new LinkAddress(addr, PREFIX_LENGTH);
+            final LinkAddress newAddress = new LinkAddress(addr, PREFIX_LENGTH);
+            mCachedAddresses.put(ipServer.interfaceType(), newAddress);
+            return newAddress;
         }
 
         // No available address.
         return null;
+    }
+
+    private boolean isConflict(final IpPrefix prefix) {
+        // Check whether this prefix is in use or conflict with any current upstream network.
+        return isDownstreamPrefixInUse(prefix) || isConflictWithUpstream(prefix);
     }
 
     /** Get random sub address value. Return value is in 0 ~ 0xffff. */
@@ -244,13 +255,24 @@ public class PrivateAddressCoordinator {
         return prefix1.contains(prefix2.getAddress());
     }
 
-    private boolean isDownstreamPrefixInUse(final IpPrefix source) {
+    // InUse Prefixes are prefixes of mCachedAddresses which are active downstream addresses, last
+    // downstream addresses(reserved for next time) and static addresses(e.g. bluetooth, wifi p2p).
+    private boolean isDownstreamPrefixInUse(final IpPrefix prefix) {
         // This class always generates downstream prefixes with the same prefix length, so
         // prefixes cannot be contained in each other. They can only be equal to each other.
-        for (IpServer downstream : mDownstreams) {
-            final IpPrefix prefix = getDownstreamPrefix(downstream);
-            if (source.equals(prefix)) return true;
+        for (int i = 0; i < mCachedAddresses.size(); i++) {
+            if (prefix.equals(asIpPrefix(mCachedAddresses.valueAt(i)))) return true;
         }
+
+        // IpServer may use manually-defined address (mStaticIpv4ServerAddr) which does not include
+        // in mCachedAddresses.
+        for (IpServer downstream : mDownstreams) {
+            final IpPrefix target = getDownstreamPrefix(downstream);
+            if (target == null) continue;
+
+            if (isConflictPrefix(prefix, target)) return true;
+        }
+
         return false;
     }
 
@@ -258,7 +280,7 @@ public class PrivateAddressCoordinator {
         final LinkAddress address = downstream.getAddress();
         if (address == null) return null;
 
-        return PrefixUtils.asIpPrefix(address);
+        return asIpPrefix(address);
     }
 
     void dump(final IndentingPrintWriter pw) {
@@ -268,10 +290,18 @@ public class PrivateAddressCoordinator {
             pw.println(mUpstreamPrefixMap.keyAt(i) + " - " + mUpstreamPrefixMap.valueAt(i));
         }
         pw.decreaseIndent();
+
         pw.println("mDownstreams:");
         pw.increaseIndent();
         for (IpServer ipServer : mDownstreams) {
             pw.println(ipServer.interfaceType() + " - " + ipServer.getAddress());
+        }
+        pw.decreaseIndent();
+
+        pw.println("mCachedAddresses:");
+        pw.increaseIndent();
+        for (int i = 0; i < mCachedAddresses.size(); i++) {
+            pw.println(mCachedAddresses.keyAt(i) + " - " + mCachedAddresses.valueAt(i));
         }
         pw.decreaseIndent();
     }
