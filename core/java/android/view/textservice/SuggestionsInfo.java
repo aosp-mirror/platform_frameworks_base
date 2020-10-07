@@ -45,6 +45,14 @@ public final class SuggestionsInfo implements Parcelable {
      * the result suggestions include highly recommended ones.
      */
     public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 0x0004;
+
+    /**
+     * Flag of the attributes of the suggestions that can be obtained by
+     * {@link #getSuggestionsAttributes}: this tells that the text service thinks the requested
+     * sentence contains a grammar error.
+     */
+    public static final int RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR = 0x0008;
+
     private final int mSuggestionsAttributes;
     private final String[] mSuggestions;
     private final boolean mSuggestionsAvailable;
