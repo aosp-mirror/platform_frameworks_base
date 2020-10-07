@@ -108,6 +108,18 @@ public class LogModule {
         return buffer;
     }
 
+    /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
+    @Provides
+    @SysUISingleton
+    @ToastLog
+    public static LogBuffer provideToastLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("ToastLog", 50, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton

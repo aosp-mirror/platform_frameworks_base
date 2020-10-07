@@ -54,7 +54,11 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.util.IntPair;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,6 +88,7 @@ public class ToastUITest extends SysuiTestCase {
     private static final String TEXT = "Hello World";
     private static final int MESSAGE_RES_ID = R.id.message;
 
+    private FakeExecutor mFakeDelayableExecutor = new FakeExecutor(new FakeSystemClock());
     private Context mContextSpy;
     private ToastUI mToastUI;
     @Mock private LayoutInflater mLayoutInflater;
@@ -91,6 +96,10 @@ public class ToastUITest extends SysuiTestCase {
     @Mock private WindowManager mWindowManager;
     @Mock private INotificationManager mNotificationManager;
     @Mock private IAccessibilityManager mAccessibilityManager;
+    @Mock private PluginManager mPluginManager;
+    @Mock private DumpManager mDumpManager;
+    @Mock private ToastLogger mToastLogger;
+
     @Mock private ITransientNotificationCallback mCallback;
     @Captor private ArgumentCaptor<View> mViewCaptor;
     @Captor private ArgumentCaptor<ViewGroup.LayoutParams> mParamsCaptor;
@@ -109,8 +118,10 @@ public class ToastUITest extends SysuiTestCase {
         mContextSpy = spy(mContext);
         doReturn(mContextSpy).when(mContextSpy).createContextAsUser(any(), anyInt());
 
+        doReturn(mContextSpy).when(mContextSpy).createContextAsUser(any(), anyInt());
         mToastUI = new ToastUI(mContextSpy, mCommandQueue, mNotificationManager,
-                mAccessibilityManager);
+                mAccessibilityManager, new ToastFactory(mPluginManager, mDumpManager),
+                mFakeDelayableExecutor, mToastLogger);
     }
 
     @Test
@@ -269,6 +280,29 @@ public class ToastUITest extends SysuiTestCase {
         verify(mWindowManager).removeViewImmediate(view);
         verify(mNotificationManager).finishToken(PACKAGE_NAME_1, TOKEN_1);
         verify(mCallback).onToastHidden();
+    }
+
+    @Test
+    public void testShowToast_logs() {
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                mCallback);
+
+        verify(mToastLogger).logOnShowToast(UID_1, PACKAGE_NAME_1, TEXT, TOKEN_1.toString());
+    }
+
+    @Test
+    public void testHideToast_logs() {
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                mCallback);
+        mToastUI.hideToast(PACKAGE_NAME_1, TOKEN_1);
+        verify(mToastLogger).logOnHideToast(PACKAGE_NAME_1, TOKEN_1.toString());
+    }
+
+    @Test
+    public void testHideToast_error_noLog() {
+        // no toast was shown, so this hide is invalid
+        mToastUI.hideToast(PACKAGE_NAME_1, TOKEN_1);
+        verify(mToastLogger, never()).logOnHideToast(PACKAGE_NAME_1, TOKEN_1.toString());
     }
 
     private View verifyWmAddViewAndAttachToParent() {
