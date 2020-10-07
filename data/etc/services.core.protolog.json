@@ -1405,12 +1405,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
-    "-444624452": {
-      "message": "REPARENT from: %s to: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
     "-443173857": {
       "message": "Moving pending starting from %s to %s",
       "level": "VERBOSE",
@@ -1518,12 +1512,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
-    },
-    "-324085783": {
-      "message": "SURFACE CROP %s: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "-322743468": {
       "message": "setInputMethodInputTarget %s",
@@ -1710,12 +1698,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
-    },
-    "-29233992": {
-      "message": "SURFACE CLEAR CROP: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "-21399771": {
       "message": "activity %s already destroying, skipping request with reason:%s",
@@ -2683,6 +2665,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1035154109": {
+      "message": "SURFACE backgroundBlur=%o: %s",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
     "1040675582": {
       "message": "Can't report activity configuration update - client not running, activityRecord=%s",
       "level": "WARN",
@@ -2814,12 +2802,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/WindowToken.java"
-    },
-    "1220075598": {
-      "message": "SURFACE SIZE %dx%d: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "1224184681": {
       "message": "No longer Stopped: %s",

@@ -2939,6 +2939,13 @@ public interface WindowManager extends ViewManager {
         public boolean preferMinimalPostProcessing = false;
 
         /**
+         * Indicates that this window wants to have blurred content behind it.
+         *
+         * @hide
+         */
+        public int backgroundBlurRadius = 0;
+
+        /**
          * The color mode requested by this window. The target display may
          * not be able to honor the request. When the color mode is not set
          * to {@link ActivityInfo#COLOR_MODE_DEFAULT}, it might override the
@@ -3262,6 +3269,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(mFitInsetsSides);
             out.writeBoolean(mFitInsetsIgnoringVisibility);
             out.writeBoolean(preferMinimalPostProcessing);
+            out.writeInt(backgroundBlurRadius);
             if (providesInsetsTypes != null) {
                 out.writeInt(providesInsetsTypes.length);
                 out.writeIntArray(providesInsetsTypes);
@@ -3329,6 +3337,7 @@ public interface WindowManager extends ViewManager {
             mFitInsetsSides = in.readInt();
             mFitInsetsIgnoringVisibility = in.readBoolean();
             preferMinimalPostProcessing = in.readBoolean();
+            backgroundBlurRadius = in.readInt();
             int insetsTypesLength = in.readInt();
             if (insetsTypesLength > 0) {
                 providesInsetsTypes = new int[insetsTypesLength];
@@ -3381,6 +3390,8 @@ public interface WindowManager extends ViewManager {
         public static final int INSET_FLAGS_CHANGED = 1 << 27;
         /** {@hide} */
         public static final int MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED = 1 << 28;
+        /** {@hide} */
+        public static final int BACKGROUND_BLUR_RADIUS_CHANGED = 1 << 29;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -3566,6 +3577,11 @@ public interface WindowManager extends ViewManager {
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
             }
 
+            if (backgroundBlurRadius != o.backgroundBlurRadius) {
+                backgroundBlurRadius = o.backgroundBlurRadius;
+                changes |= BACKGROUND_BLUR_RADIUS_CHANGED;
+            }
+
             // This can't change, it's only set at window creation time.
             hideTimeoutMilliseconds = o.hideTimeoutMilliseconds;
 
@@ -3728,6 +3744,10 @@ public interface WindowManager extends ViewManager {
             if (preferMinimalPostProcessing) {
                 sb.append(" preferMinimalPostProcessing=");
                 sb.append(preferMinimalPostProcessing);
+            }
+            if (backgroundBlurRadius != 0) {
+                sb.append(" backgroundBlurRadius=");
+                sb.append(backgroundBlurRadius);
             }
             sb.append(System.lineSeparator());
             sb.append(prefix).append("  fl=").append(
