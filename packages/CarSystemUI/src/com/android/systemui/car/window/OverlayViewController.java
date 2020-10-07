@@ -168,6 +168,19 @@ public class OverlayViewController {
     }
 
     /**
+     * Returns {@code true} if the window should use stable insets. Using stable insets means that
+     * even when system bars are temporarily not visible, inset from the system bars will still be
+     * applied.
+     *
+     * NOTE: When system bars are hidden in transient mode, insets from them will not be applied
+     * even when the system bars become visible. Setting the return value to {@true} here can
+     * prevent the OverlayView from overlapping with the system bars when that happens.
+     */
+    protected boolean shouldUseStableInsets() {
+        return false;
+    }
+
+    /**
      * Returns the insets types to fit to the sysui overlay window when this
      * {@link OverlayViewController} is in the foreground.
      */
