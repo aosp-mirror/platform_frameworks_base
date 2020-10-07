@@ -24,7 +24,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Reads /proc/UID/task/TID/time_in_state files to obtain statistics on CPU usage
@@ -34,10 +33,7 @@ public class SystemServerCpuThreadReader {
     private final KernelSingleProcessCpuThreadReader mKernelCpuThreadReader;
     private int[] mBinderThreadNativeTids = new int[0];  // Sorted
 
-    private long mProcessCpuTimeUs;
-    private long[] mThreadCpuTimesUs;
-    private long[] mBinderThreadCpuTimesUs;
-    private long mLastProcessCpuTimeUs;
+    private long[] mLastProcessCpuTimeUs;
     private long[] mLastThreadCpuTimesUs;
     private long[] mLastBinderThreadCpuTimesUs;
 
@@ -46,14 +42,15 @@ public class SystemServerCpuThreadReader {
      */
     public static class SystemServiceCpuThreadTimes {
         // The entire process
-        public long processCpuTimeUs;
+        public long[] processCpuTimesUs;
         // All threads
         public long[] threadCpuTimesUs;
         // Just the threads handling incoming binder calls
         public long[] binderThreadCpuTimesUs;
     }
 
-    private SystemServiceCpuThreadTimes mDeltaCpuThreadTimes = new SystemServiceCpuThreadTimes();
+    private final SystemServiceCpuThreadTimes mDeltaCpuThreadTimes =
+            new SystemServiceCpuThreadTimes();
 
     /**
      * Creates a configured instance of SystemServerCpuThreadReader.
@@ -83,58 +80,37 @@ public class SystemServerCpuThreadReader {
      */
     @Nullable
     public SystemServiceCpuThreadTimes readDelta() {
-        int numCpuFrequencies = mKernelCpuThreadReader.getCpuFrequencyCount();
-        if (mBinderThreadCpuTimesUs == null) {
-            mThreadCpuTimesUs = new long[numCpuFrequencies];
-            mBinderThreadCpuTimesUs = new long[numCpuFrequencies];
-
+        final int numCpuFrequencies = mKernelCpuThreadReader.getCpuFrequencyCount();
+        if (mLastProcessCpuTimeUs == null) {
+            mLastProcessCpuTimeUs = new long[numCpuFrequencies];
             mLastThreadCpuTimesUs = new long[numCpuFrequencies];
             mLastBinderThreadCpuTimesUs = new long[numCpuFrequencies];
 
+            mDeltaCpuThreadTimes.processCpuTimesUs = new long[numCpuFrequencies];
             mDeltaCpuThreadTimes.threadCpuTimesUs = new long[numCpuFrequencies];
             mDeltaCpuThreadTimes.binderThreadCpuTimesUs = new long[numCpuFrequencies];
         }
 
-        mProcessCpuTimeUs = 0;
-        Arrays.fill(mThreadCpuTimesUs, 0);
-        Arrays.fill(mBinderThreadCpuTimesUs, 0);
-
-        KernelSingleProcessCpuThreadReader.ProcessCpuUsage processCpuUsage =
-                mKernelCpuThreadReader.getProcessCpuUsage();
+        final KernelSingleProcessCpuThreadReader.ProcessCpuUsage processCpuUsage =
+                mKernelCpuThreadReader.getProcessCpuUsage(mBinderThreadNativeTids);
         if (processCpuUsage == null) {
             return null;
         }
 
-        mProcessCpuTimeUs = processCpuUsage.cpuTimeMillis * 1000;
-
-        List<KernelSingleProcessCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
-                processCpuUsage.threadCpuUsages;
-        int threadCpuUsagesSize = threadCpuUsages.size();
-        for (int i = 0; i < threadCpuUsagesSize; i++) {
-            KernelSingleProcessCpuThreadReader.ThreadCpuUsage tcu = threadCpuUsages.get(i);
-            boolean isBinderThread =
-                    Arrays.binarySearch(mBinderThreadNativeTids, tcu.threadId) >= 0;
-            for (int k = 0; k < numCpuFrequencies; k++) {
-                long usageTimeUs = tcu.usageTimesMillis[k] * 1000;
-                mThreadCpuTimesUs[k] += usageTimeUs;
-                if (isBinderThread) {
-                    mBinderThreadCpuTimesUs[k] += usageTimeUs;
-                }
-            }
-        }
-
-        for (int i = 0; i < mThreadCpuTimesUs.length; i++) {
-            mDeltaCpuThreadTimes.processCpuTimeUs =
-                    Math.max(0, mProcessCpuTimeUs - mLastProcessCpuTimeUs);
+        for (int i = numCpuFrequencies - 1; i >= 0; i--) {
+            long processCpuTimesUs = processCpuUsage.processCpuTimesMillis[i] * 1000;
+            long threadCpuTimesUs = processCpuUsage.threadCpuTimesMillis[i] * 1000;
+            long binderThreadCpuTimesUs = processCpuUsage.selectedThreadCpuTimesMillis[i] * 1000;
+            mDeltaCpuThreadTimes.processCpuTimesUs[i] =
+                    Math.max(0, processCpuTimesUs - mLastProcessCpuTimeUs[i]);
             mDeltaCpuThreadTimes.threadCpuTimesUs[i] =
-                    Math.max(0, mThreadCpuTimesUs[i] - mLastThreadCpuTimesUs[i]);
+                    Math.max(0, threadCpuTimesUs - mLastThreadCpuTimesUs[i]);
             mDeltaCpuThreadTimes.binderThreadCpuTimesUs[i] =
-                    Math.max(0, mBinderThreadCpuTimesUs[i] - mLastBinderThreadCpuTimesUs[i]);
-            mLastThreadCpuTimesUs[i] = mThreadCpuTimesUs[i];
-            mLastBinderThreadCpuTimesUs[i] = mBinderThreadCpuTimesUs[i];
+                    Math.max(0, binderThreadCpuTimesUs - mLastBinderThreadCpuTimesUs[i]);
+            mLastProcessCpuTimeUs[i] = processCpuTimesUs;
+            mLastThreadCpuTimesUs[i] = threadCpuTimesUs;
+            mLastBinderThreadCpuTimesUs[i] = binderThreadCpuTimesUs;
         }
-
-        mLastProcessCpuTimeUs = mProcessCpuTimeUs;
 
         return mDeltaCpuThreadTimes;
     }
