@@ -35,6 +35,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -879,6 +881,14 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
+
+    /**
+     * The subscription ID identifies the SIM card for which this network configuration is valid.
+     * See {@link SubscriptionInfo#getSubscriptionId()}
+     * @hide
+     */
+    @SystemApi
+    public int subscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     /**
      * @hide
@@ -2871,6 +2881,7 @@ public class WifiConfiguration implements Parcelable {
             requirePmf = source.requirePmf;
             updateIdentifier = source.updateIdentifier;
             carrierId = source.carrierId;
+            subscriptionId = source.subscriptionId;
             mPasspointUniqueId = source.mPasspointUniqueId;
         }
     }
@@ -2946,6 +2957,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeLong(randomizedMacLastModifiedTimeMs);
         dest.writeInt(carrierId);
         dest.writeString(mPasspointUniqueId);
+        dest.writeInt(subscriptionId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -3022,6 +3034,7 @@ public class WifiConfiguration implements Parcelable {
                 config.randomizedMacLastModifiedTimeMs = in.readLong();
                 config.carrierId = in.readInt();
                 config.mPasspointUniqueId = in.readString();
+                config.subscriptionId = in.readInt();
                 return config;
             }
 

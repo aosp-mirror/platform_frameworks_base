@@ -764,6 +764,32 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Verify that the builder creates the appropriate SIM credential suggestion with SubId, also
+     * verify {@link WifiNetworkSuggestion#equals(Object)} consider suggestion with different SubId
+     * as different suggestions.
+     */
+    @Test
+    public void testSimCredentialNetworkWithSubId() {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
+        enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        WifiNetworkSuggestion suggestion1 = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setSubscriptionId(1)
+                .build();
+        assertEquals(1, suggestion1.getSubscriptionId());
+        WifiNetworkSuggestion suggestion2 = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setSubscriptionId(2)
+                .build();
+        assertEquals(2, suggestion2.getSubscriptionId());
+        assertNotEquals(suggestion1, suggestion2);
+    }
+
+    /**
      * Check that parcel marshalling/unmarshalling works
      */
     @Test
