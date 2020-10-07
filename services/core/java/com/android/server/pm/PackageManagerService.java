@@ -17325,11 +17325,14 @@ public class PackageManagerService extends IPackageManager.Stub
             mIncrementalManager.unregisterCallback(mPathString, this);
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
+                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                if (ps == null) {
+                    return;
+                }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        getPackageSettingInternal(mPackageName, Process.SYSTEM_UID),
-                        mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.mPackages);
             }
-            Bundle extras = new Bundle(1);
+            Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUserId);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
             sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_LOADED, mPackageName,
@@ -17342,11 +17345,14 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageUnstartable(int reason) {
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
+                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                if (ps == null) {
+                    return;
+                }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        getPackageSettingInternal(mPackageName, Process.SYSTEM_UID),
-                        mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.mPackages);
             }
-            Bundle extras = new Bundle(1);
+            Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUserId);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
             extras.putInt(Intent.EXTRA_REASON, reason);
@@ -17361,11 +17367,14 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageStartable() {
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
+                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                if (ps == null) {
+                    return;
+                }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        getPackageSettingInternal(mPackageName, Process.SYSTEM_UID),
-                        mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.mPackages);
             }
-            Bundle extras = new Bundle(1);
+            Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUserId);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
             // send broadcast to users with this app installed
