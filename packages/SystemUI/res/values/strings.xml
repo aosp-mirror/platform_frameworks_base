@@ -2834,4 +2834,10 @@
     <string name="build_number_clip_data_label">Build number</string>
     <!-- Text to display when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_copy_toast">Build number copied to clipboard.</string>
+
+    <!-- Status for last interaction [CHAR LIMIT=120] -->
+    <string name="last_interaction_status" translatable="false">You last chatted <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
+    <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
+    <string name="basic_status" translatable="false">Open conversation</string>
+
 </resources>
