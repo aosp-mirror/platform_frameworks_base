@@ -1019,8 +1019,6 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     private LongSamplingCounterArray mSystemServerCpuTimesUs;
 
-    private long[] mTmpSystemServerCpuTimesUs;
-
     /**
      * Times spent by the system server threads grouped by cluster and CPU speed.
      */
@@ -12432,40 +12430,14 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        int numCpuClusters = mPowerProfile.getNumCpuClusters();
         if (mSystemServerCpuTimesUs == null) {
             mSystemServerCpuTimesUs = new LongSamplingCounterArray(mOnBatteryTimeBase);
             mSystemServerThreadCpuTimesUs = new LongSamplingCounterArray(mOnBatteryTimeBase);
             mBinderThreadCpuTimesUs = new LongSamplingCounterArray(mOnBatteryTimeBase);
         }
+        mSystemServerCpuTimesUs.addCountLocked(systemServiceCpuThreadTimes.processCpuTimesUs);
         mSystemServerThreadCpuTimesUs.addCountLocked(systemServiceCpuThreadTimes.threadCpuTimesUs);
         mBinderThreadCpuTimesUs.addCountLocked(systemServiceCpuThreadTimes.binderThreadCpuTimesUs);
-
-        long totalCpuTimeAllThreads = 0;
-        for (int index = systemServiceCpuThreadTimes.threadCpuTimesUs.length - 1; index >= 0;
-                index--) {
-            totalCpuTimeAllThreads += systemServiceCpuThreadTimes.threadCpuTimesUs[index];
-        }
-
-        // Estimate per cluster per frequency CPU time for the entire process
-        // by distributing the total process CPU time proportionately to how much
-        // CPU time its threads took on those clusters/frequencies.  This algorithm
-        // works more accurately when when we have equally distributed concurrency.
-        // TODO(b/169279846): obtain actual process CPU times from the kernel
-        long processCpuTime = systemServiceCpuThreadTimes.processCpuTimeUs;
-        if (mTmpSystemServerCpuTimesUs == null) {
-            mTmpSystemServerCpuTimesUs =
-                    new long[systemServiceCpuThreadTimes.threadCpuTimesUs.length];
-        }
-        for (int index = systemServiceCpuThreadTimes.threadCpuTimesUs.length - 1; index >= 0;
-                index--) {
-            mTmpSystemServerCpuTimesUs[index] =
-                    processCpuTime * systemServiceCpuThreadTimes.threadCpuTimesUs[index]
-                            / totalCpuTimeAllThreads;
-
-        }
-
-        mSystemServerCpuTimesUs.addCountLocked(mTmpSystemServerCpuTimesUs);
 
         if (DEBUG_BINDER_STATS) {
             Slog.d(TAG, "System server threads per CPU cluster (binder threads/total threads/%)");
@@ -12480,6 +12452,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final long[] binderThreadCpuTimesUs =
                     mBinderThreadCpuTimesUs.getCountsLocked(0);
             int index = 0;
+            int numCpuClusters = mPowerProfile.getNumCpuClusters();
             for (int cluster = 0; cluster < numCpuClusters; cluster++) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("cpu").append(cpuIndex).append(": [");

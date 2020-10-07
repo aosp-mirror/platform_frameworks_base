@@ -33,8 +33,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Iterates over all threads owned by a given process, and return the CPU usage for
@@ -151,7 +150,7 @@ public class KernelSingleProcessCpuThreadReader {
 
     /**
      * Get the CPU frequencies that correspond to the times reported in {@link
-     * ThreadCpuUsage#usageTimesMillis}
+     * ProcessCpuUsage#processCpuTimesMillis} etc.
      */
     public int getCpuFrequencyCount() {
         if (mFrequencyCount == 0) {
@@ -163,12 +162,20 @@ public class KernelSingleProcessCpuThreadReader {
     /**
      * Get the total and per-thread CPU usage of the process with the PID specified in the
      * constructor.
+     * @param selectedThreadIds a SORTED array of native Thread IDs whose CPU times should
+     *                          be aggregated as a group.  This is expected to be a subset
+     *                          of all thread IDs owned by the process.
      */
     @Nullable
-    public ProcessCpuUsage getProcessCpuUsage() {
+    public ProcessCpuUsage getProcessCpuUsage(int[] selectedThreadIds) {
         if (DEBUG) {
             Slog.d(TAG, "Reading CPU thread usages with directory " + mProcPath + " process ID "
                     + mPid);
+        }
+
+        if (!isSorted(selectedThreadIds)) {
+            throw new IllegalArgumentException("selectedThreadIds is not sorted: "
+                    + Arrays.toString(selectedThreadIds));
         }
 
         if (!Process.readProcFile(mProcessStatFilePath, PROCESS_FULL_STATS_FORMAT, null,
@@ -182,39 +189,43 @@ public class KernelSingleProcessCpuThreadReader {
 
         long processCpuTimeMillis = (utime + stime) * mJiffyMillis;
 
-        final ArrayList<ThreadCpuUsage> threadCpuUsages = new ArrayList<>();
+        int cpuFrequencyCount = getCpuFrequencyCount();
+        ProcessCpuUsage processCpuUsage = new ProcessCpuUsage(cpuFrequencyCount);
         try (DirectoryStream<Path> threadPaths = Files.newDirectoryStream(mThreadsDirectoryPath)) {
             for (Path threadDirectory : threadPaths) {
-                ThreadCpuUsage threadCpuUsage = getThreadCpuUsage(threadDirectory);
-                if (threadCpuUsage == null) {
-                    continue;
-                }
-                threadCpuUsages.add(threadCpuUsage);
+                readThreadCpuUsage(processCpuUsage, selectedThreadIds, threadDirectory);
             }
         } catch (IOException | DirectoryIteratorException e) {
             // Expected when a process finishes
             return null;
         }
 
-        // If we found no threads, then the process has exited while we were reading from it
-        if (threadCpuUsages.isEmpty()) {
-            return null;
+        // Estimate per cluster per frequency CPU time for the entire process
+        // by distributing the total process CPU time proportionately to how much
+        // CPU time its threads took on those clusters/frequencies.  This algorithm
+        // works more accurately when when we have equally distributed concurrency.
+        // TODO(b/169279846): obtain actual process CPU times from the kernel
+        long totalCpuTimeAllThreads = 0;
+        for (int i = cpuFrequencyCount - 1; i >= 0; i--) {
+            totalCpuTimeAllThreads += processCpuUsage.threadCpuTimesMillis[i];
         }
-        if (DEBUG) {
-            Slog.d(TAG, "Read CPU usage of " + threadCpuUsages.size() + " threads");
+
+        for (int i = cpuFrequencyCount - 1; i >= 0; i--) {
+            processCpuUsage.processCpuTimesMillis[i] =
+                    processCpuTimeMillis * processCpuUsage.threadCpuTimesMillis[i]
+                            / totalCpuTimeAllThreads;
         }
-        return new ProcessCpuUsage(processCpuTimeMillis, threadCpuUsages);
+
+        return processCpuUsage;
     }
 
     /**
-     * Get a thread's CPU usage
+     * Reads a thread's CPU usage and aggregates the per-cluster per-frequency CPU times.
      *
      * @param threadDirectory the {@code /proc} directory of the thread
-     * @return thread CPU usage. Null if the thread exited and its {@code proc} directory was
-     * removed while collecting information
      */
-    @Nullable
-    private ThreadCpuUsage getThreadCpuUsage(Path threadDirectory) {
+    private void readThreadCpuUsage(ProcessCpuUsage processCpuUsage, int[] selectedThreadIds,
+            Path threadDirectory) {
         // Get the thread ID from the directory name
         final int threadId;
         try {
@@ -222,38 +233,45 @@ public class KernelSingleProcessCpuThreadReader {
             threadId = Integer.parseInt(directoryName);
         } catch (NumberFormatException e) {
             Slog.w(TAG, "Failed to parse thread ID when iterating over /proc/*/task", e);
-            return null;
+            return;
         }
 
         // Get the CPU statistics from the directory
         final Path threadCpuStatPath = threadDirectory.resolve(CPU_STATISTICS_FILENAME);
         final long[] cpuUsages = mProcTimeInStateReader.getUsageTimesMillis(threadCpuStatPath);
         if (cpuUsages == null) {
-            return null;
+            return;
         }
 
-        return new ThreadCpuUsage(threadId, cpuUsages);
+        final int cpuFrequencyCount = getCpuFrequencyCount();
+        final boolean isSelectedThread = Arrays.binarySearch(selectedThreadIds, threadId) >= 0;
+        for (int i = cpuFrequencyCount - 1; i >= 0; i--) {
+            processCpuUsage.threadCpuTimesMillis[i] += cpuUsages[i];
+            if (isSelectedThread) {
+                processCpuUsage.selectedThreadCpuTimesMillis[i] += cpuUsages[i];
+            }
+        }
     }
 
-    /** CPU usage of a process and all of its threads */
+    /** CPU usage of a process, all of its threads and a selected subset of its threads */
     public static class ProcessCpuUsage {
-        public final long cpuTimeMillis;
-        public final List<ThreadCpuUsage> threadCpuUsages;
+        public long[] processCpuTimesMillis;
+        public long[] threadCpuTimesMillis;
+        public long[] selectedThreadCpuTimesMillis;
 
-        ProcessCpuUsage(long cpuTimeMillis, List<ThreadCpuUsage> threadCpuUsages) {
-            this.cpuTimeMillis = cpuTimeMillis;
-            this.threadCpuUsages = threadCpuUsages;
+        public ProcessCpuUsage(int cpuFrequencyCount) {
+            processCpuTimesMillis = new long[cpuFrequencyCount];
+            threadCpuTimesMillis = new long[cpuFrequencyCount];
+            selectedThreadCpuTimesMillis = new long[cpuFrequencyCount];
         }
     }
 
-    /** CPU usage of a thread */
-    public static class ThreadCpuUsage {
-        public final int threadId;
-        public final long[] usageTimesMillis;
-
-        ThreadCpuUsage(int threadId, long[] usageTimesMillis) {
-            this.threadId = threadId;
-            this.usageTimesMillis = usageTimesMillis;
+    private static boolean isSorted(int[] array) {
+        for (int i = 0; i < array.length - 1; i++) {
+            if (array[i] > array[i + 1]) {
+                return false;
+            }
         }
+        return true;
     }
 }

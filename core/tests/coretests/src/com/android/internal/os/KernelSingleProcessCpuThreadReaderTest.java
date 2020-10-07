@@ -38,8 +38,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -59,31 +57,21 @@ public class KernelSingleProcessCpuThreadReaderTest {
     }
 
     @Test
-    public void getThreadCpuUsage() throws IOException {
+    public void getProcessCpuUsage() throws IOException {
         setupDirectory(42,
                 new int[] {42, 1, 2, 3},
                 new int[] {1000, 2000},
                 // Units are 10ms aka 10000Us
-                new int[][] {{100, 200}, {0, 200}, {100, 300}, {0, 400}},
-                new int[] {1400, 1500});
+                new int[][] {{100, 200}, {0, 200}, {100, 300}, {0, 600}},
+                new int[] {4500, 500});
 
         KernelSingleProcessCpuThreadReader reader = new KernelSingleProcessCpuThreadReader(42,
                 mProcDirectory.toPath());
         KernelSingleProcessCpuThreadReader.ProcessCpuUsage processCpuUsage =
-                reader.getProcessCpuUsage();
-        assertThat(processCpuUsage.cpuTimeMillis).isEqualTo(29000);
-        List<KernelSingleProcessCpuThreadReader.ThreadCpuUsage> threadCpuUsage =
-                processCpuUsage.threadCpuUsages;
-        threadCpuUsage.sort(Comparator.comparingInt(o -> o.threadId));
-        assertThat(threadCpuUsage).hasSize(4);
-        assertThat(threadCpuUsage.get(0).threadId).isEqualTo(1);
-        assertThat(threadCpuUsage.get(0).usageTimesMillis).isEqualTo(new long[]{0, 2000});
-        assertThat(threadCpuUsage.get(1).threadId).isEqualTo(2);
-        assertThat(threadCpuUsage.get(1).usageTimesMillis).isEqualTo(new long[]{1000, 3000});
-        assertThat(threadCpuUsage.get(2).threadId).isEqualTo(3);
-        assertThat(threadCpuUsage.get(2).usageTimesMillis).isEqualTo(new long[]{0, 4000});
-        assertThat(threadCpuUsage.get(3).threadId).isEqualTo(42);
-        assertThat(threadCpuUsage.get(3).usageTimesMillis).isEqualTo(new long[]{1000, 2000});
+                reader.getProcessCpuUsage(new int[] {2, 3});
+        assertThat(processCpuUsage.threadCpuTimesMillis).isEqualTo(new long[] {2000, 13000});
+        assertThat(processCpuUsage.selectedThreadCpuTimesMillis).isEqualTo(new long[] {1000, 9000});
+        assertThat(processCpuUsage.processCpuTimesMillis).isEqualTo(new long[] {6666, 43333});
     }
 
     @Test
