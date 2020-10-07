@@ -46,6 +46,7 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -433,6 +434,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // Pull the Package Manager metadata from the restore set first
             mCurrentPackage = new PackageInfo();
             mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
+            mCurrentPackage.applicationInfo = new ApplicationInfo();
+            mCurrentPackage.applicationInfo.uid = Process.SYSTEM_UID;
             mPmAgent = backupManagerService.makeMetadataAgent(null);
             mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
             if (MORE_DEBUG) {
@@ -760,7 +763,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // Kick off the restore, checking for hung agents.  The timeout or
             // the operationComplete() callback will schedule the next step,
             // so we do not do that here.
-            long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
+            long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                    app.applicationInfo.uid);
             backupManagerService.prepareOperationTimeout(
                     mEphemeralOpToken, restoreAgentTimeoutMillis, this, OP_TYPE_RESTORE_WAIT);
             startedAgentRestore = true;
@@ -1122,7 +1126,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         } else {
             // We were invoked via an active restore session, not by the Package
             // Manager, so start up the session timeout again.
-            long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
+            long restoreAgentTimeoutMillis =
+                    mAgentTimeoutParameters.getRestoreSessionTimeoutMillis();
             backupManagerService.getBackupHandler().sendEmptyMessageDelayed(
                     MSG_RESTORE_SESSION_TIMEOUT,
                     restoreAgentTimeoutMillis);

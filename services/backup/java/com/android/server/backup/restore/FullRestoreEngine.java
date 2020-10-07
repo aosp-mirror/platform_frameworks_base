@@ -403,7 +403,8 @@ public class FullRestoreEngine extends RestoreEngine {
                         final boolean isSharedStorage = pkg.equals(SHARED_BACKUP_AGENT_PACKAGE);
                         final long timeout = isSharedStorage ?
                                 mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis() :
-                                mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
+                                mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
+                                        mTargetApp.uid);
                         try {
                             mBackupManagerService.prepareOperationTimeout(token,
                                     timeout,
