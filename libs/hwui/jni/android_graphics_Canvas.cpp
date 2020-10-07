@@ -30,6 +30,7 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedStringChars.h>
 
+#include "FontUtils.h"
 #include "Bitmap.h"
 #include "SkGraphics.h"
 #include "SkRegion.h"
@@ -540,6 +541,21 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong bitma
                                              colorA.ptr() + colorIndex, paint);
 }
 
+static void drawGlyphs(JNIEnv* env, jobject, jlong canvasHandle, jintArray glyphIds,
+                       jfloatArray positions, jint glyphOffset, jint positionOffset,
+                       jint glyphCount, jlong fontHandle, jlong paintHandle) {
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    AutoJavaIntArray glyphIdArray(env, glyphIds);
+    AutoJavaFloatArray positionArray(env, positions);
+    get_canvas(canvasHandle)->drawGlyphs(
+        *font->font.get(),
+        glyphIdArray.ptr() + glyphOffset,
+        positionArray.ptr() + positionOffset,
+        glyphCount,
+        *paint);
+}
+
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
                           jlong paintHandle) {
@@ -719,6 +735,7 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawBitmap","(JJFFJIII)V", (void*) CanvasJNI::drawBitmap},
     {"nDrawBitmap","(JJFFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
     {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+    {"nDrawGlyphs", "(J[I[FIIIJJ)V", (void*)CanvasJNI::drawGlyphs},
     {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
     {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},
     {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},

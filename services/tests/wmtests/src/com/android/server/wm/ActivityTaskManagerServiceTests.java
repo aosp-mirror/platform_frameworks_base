@@ -160,7 +160,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         };
         mAtm.mWindowManager.registerDisplayWindowListener(listener);
         // Check that existing displays call added
-        assertEquals(1, added.size());
+        assertEquals(mRootWindowContainer.getChildCount(), added.size());
         assertEquals(0, changed.size());
         assertEquals(0, removed.size());
         added.clear();

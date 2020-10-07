@@ -19,23 +19,29 @@ package com.android.server.pm;
 import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.permission.AppIdPermissionState;
+import com.android.server.pm.permission.LegacyPermissionState;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
 
-    protected final AppIdPermissionState mPermissionsState;
+    /**
+     * The legacy permission state that is read from package settings persistence for migration.
+     * This state here can not reflect the current permission state and should not be used for
+     * purposes other than migration.
+     */
+    @Deprecated
+    protected final LegacyPermissionState mLegacyPermissionsState;
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
         setPrivateFlags(pkgPrivateFlags);
-        mPermissionsState = new AppIdPermissionState();
+        mLegacyPermissionsState = new LegacyPermissionState();
     }
 
     SettingBase(SettingBase orig) {
-        mPermissionsState = new AppIdPermissionState();
+        mLegacyPermissionsState = new LegacyPermissionState();
         doCopy(orig);
     }
 
@@ -46,11 +52,12 @@ public abstract class SettingBase {
     private void doCopy(SettingBase orig) {
         pkgFlags = orig.pkgFlags;
         pkgPrivateFlags = orig.pkgPrivateFlags;
-        mPermissionsState.copyFrom(orig.mPermissionsState);
+        mLegacyPermissionsState.copyFrom(orig.mLegacyPermissionsState);
     }
 
-    public AppIdPermissionState getPermissionsState() {
-        return mPermissionsState;
+    @Deprecated
+    public LegacyPermissionState getLegacyPermissionState() {
+        return mLegacyPermissionsState;
     }
 
     void setFlags(int pkgFlags) {

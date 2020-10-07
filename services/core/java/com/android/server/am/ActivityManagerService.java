@@ -2395,8 +2395,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setFocusedStack(int stackId) {
-        mActivityTaskManager.setFocusedStack(stackId);
+    public void setFocusedRootTask(int taskId) {
+        mActivityTaskManager.setFocusedRootTask(taskId);
     }
 
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
@@ -5658,11 +5658,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void removeStack(int stackId) {
-        mActivityTaskManager.removeStack(stackId);
-    }
-
-    @Override
     public boolean removeTask(int taskId) {
         return mActivityTaskManager.removeTask(taskId);
     }
@@ -5698,8 +5693,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        mActivityTaskManager.moveTaskToStack(taskId, stackId, toTop);
+    public void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop) {
+        mActivityTaskManager.moveTaskToRootTask(taskId, rootTaskId, toTop);
     }
 
     @Override
@@ -5709,17 +5704,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Moves the top activity in the input stackId to the pinned stack.
+     * Moves the top activity in the input rootTaskId to the pinned root task.
      *
-     * @param stackId Id of stack to move the top activity to pinned stack.
-     * @param bounds Bounds to use for pinned stack.
+     * @param rootTaskId Id of root task to move the top activity to pinned root task.
+     * @param bounds Bounds to use for pinned root task.
      *
-     * @return True if the top activity of the input stack was successfully moved to the pinned
-     *          stack.
+     * @return True if the top activity of the input root task was successfully moved to the pinned
+     *          root task.
      */
     @Override
-    public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
-        return mActivityTaskManager.moveTopActivityToPinnedStack(stackId, bounds);
+    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, Rect bounds) {
+        return mActivityTaskManager.moveTopActivityToPinnedRootTask(rootTaskId, bounds);
     }
 
     @Override
@@ -8184,12 +8179,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        if (uid == Process.INVALID_UID) {
-            return Process.INVALID_UID;
-        }
+        // If the uid is Process.INVALID_UID, the below 'if' check will be always true
         if (UserHandle.getAppId(uid) != UserHandle.getAppId(callingUid)) {
             // Requires the DUMP permission if the target package doesn't belong
-            // to the caller.
+            // to the caller or it doesn't exist.
             enforceCallingPermission(android.Manifest.permission.DUMP, function);
         }
         return uid;
@@ -13669,6 +13662,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return ActivityManager.BROADCAST_SUCCESS;
                 case Intent.ACTION_PRE_BOOT_COMPLETED:
                     timeoutExempt = true;
+                    break;
+                case Intent.ACTION_PACKAGE_UNSTARTABLE:
+                    final String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+                    forceStopPackageLocked(packageName, -1, false, true, true,
+                            false, false, userId, "package unstartable");
                     break;
             }
 

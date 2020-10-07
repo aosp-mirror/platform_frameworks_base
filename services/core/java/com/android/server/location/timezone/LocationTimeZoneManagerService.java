@@ -198,9 +198,6 @@ public class LocationTimeZoneManagerService extends Binder {
         if (isInSimulationMode(SECONDARY_PROVIDER_NAME)) {
             proxy = new SimulatedLocationTimeZoneProviderProxy(mContext, mThreadingDomain);
         } else {
-            // TODO Uncomment this code in a later commit.
-            throw new UnsupportedOperationException("Not implemented");
-            /*
             proxy = RealLocationTimeZoneProviderProxy.createAndRegister(
                     mContext,
                     mThreadingDomain,
@@ -209,7 +206,6 @@ public class LocationTimeZoneManagerService extends Binder {
                     com.android.internal.R.string
                             .config_secondaryLocationTimeZoneProviderPackageName
             );
-            */
         }
         return createLocationTimeZoneProvider(SECONDARY_PROVIDER_NAME, proxy);
     }

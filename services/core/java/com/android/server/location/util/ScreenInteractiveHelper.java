@@ -16,6 +16,11 @@
 
 package com.android.server.location.util;
 
+import static com.android.server.location.LocationManagerService.D;
+import static com.android.server.location.LocationManagerService.TAG;
+
+import android.util.Log;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -55,6 +60,10 @@ public abstract class ScreenInteractiveHelper {
     }
 
     protected final void notifyScreenInteractiveChanged(boolean interactive) {
+        if (D) {
+            Log.d(TAG, "screen interactive is now " + interactive);
+        }
+
         for (ScreenInteractiveChangedListener listener : mListeners) {
             listener.onScreenInteractiveChanged(interactive);
         }

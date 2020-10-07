@@ -16,17 +16,22 @@
 
 package android.hardware.input;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.os.Binder;
+import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,8 +53,10 @@ import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -68,6 +75,13 @@ public final class InputManager {
     private static final int MSG_DEVICE_ADDED = 1;
     private static final int MSG_DEVICE_REMOVED = 2;
     private static final int MSG_DEVICE_CHANGED = 3;
+
+    /** @hide */
+    public static final int[] BLOCK_UNTRUSTED_TOUCHES_MODES = {
+            BlockUntrustedTouchesMode.DISABLED,
+            BlockUntrustedTouchesMode.PERMISSIVE,
+            BlockUntrustedTouchesMode.BLOCK
+    };
 
     private static InputManager sInstance;
 
@@ -166,6 +180,32 @@ public final class InputManager {
      * @hide
      */
     public static final int DEFAULT_POINTER_SPEED = 0;
+
+    /**
+     * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
+     * @hide
+     */
+    public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
+
+    /**
+     * Default mode of the block untrusted touches mode feature.
+     * @hide
+     */
+    @BlockUntrustedTouchesMode
+    public static final int DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE =
+            BlockUntrustedTouchesMode.DISABLED;
+
+    /**
+     * Prevent touches from being consumed by apps if these touches passed through a non-trusted
+     * window from a different UID and are considered unsafe.
+     *
+     * TODO(b/158002302): Turn the feature on by default
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L;
 
     /**
      * Input Event Injection Synchronization Mode: None.
@@ -829,6 +869,103 @@ public final class InputManager {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the maximum allowed obscuring opacity by UID to propagate touches.
+     *
+     * For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
+     * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
+     * above the touch-consuming window.
+     *
+     * @see #setMaximumObscuringOpacityForTouch(Context, float)
+     *
+     * @hide
+     */
+    @TestApi
+    public float getMaximumObscuringOpacityForTouch(@NonNull Context context) {
+        return Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
+                DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+    }
+
+    /**
+     * Sets the maximum allowed obscuring opacity by UID to propagate touches.
+     *
+     * For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
+     * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
+     * above the touch-consuming window.
+     *
+     * For a certain UID:
+     * <ul>
+     *     <li>If it's the same as the UID of the touch-consuming window, allow it to propagate
+     *     the touch.
+     *     <li>Otherwise take all its windows of eligible window types above the touch-consuming
+     *     window, compute their combined obscuring opacity considering that {@code
+     *     opacity(A, B) = 1 - (1 - opacity(A))*(1 - opacity(B))}. If the computed value is
+     *     lesser than or equal to this setting and there are no other windows preventing the
+     *     touch, allow the UID to propagate the touch.
+     * </ul>
+     *
+     * This value should be between 0 (inclusive) and 1 (inclusive).
+     *
+     * @see #getMaximumObscuringOpacityForTouch(Context)
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setMaximumObscuringOpacityForTouch(@NonNull Context context, float opacity) {
+        if (opacity < 0 || opacity > 1) {
+            throw new IllegalArgumentException(
+                    "Maximum obscuring opacity for touch should be >= 0 and <= 1");
+        }
+        Settings.Global.putFloat(context.getContentResolver(),
+                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
+    }
+
+    /**
+     * Returns the current mode of the block untrusted touches feature, one of:
+     * <ul>
+     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
+     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
+     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
+     * </ul>
+     *
+     * @hide
+     */
+    @TestApi
+    @BlockUntrustedTouchesMode
+    public int getBlockUntrustedTouchesMode(@NonNull Context context) {
+        int mode = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
+        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
+            Log.w(TAG, "Unknown block untrusted touches feature mode " + mode + ", using "
+                    + "default " + DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
+            return DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE;
+        }
+        return mode;
+    }
+
+    /**
+     * Sets the mode of the block untrusted touches feature to one of:
+     * <ul>
+     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
+     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
+     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
+     * </ul>
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setBlockUntrustedTouchesMode(@NonNull Context context,
+            @BlockUntrustedTouchesMode int mode) {
+        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
+            throw new IllegalArgumentException("Invalid feature mode " + mode);
+        }
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, mode);
     }
 
     /**

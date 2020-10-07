@@ -4929,18 +4929,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * Removes root tasks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
-    void removeStacksInWindowingModes(int... windowingModes) {
+    void removeRootTasksInWindowingModes(int... windowingModes) {
         forAllTaskDisplayAreas(taskDisplayArea -> {
-            taskDisplayArea.removeStacksInWindowingModes(windowingModes);
+            taskDisplayArea.removeRootTasksInWindowingModes(windowingModes);
         });
     }
 
-    void removeStacksWithActivityTypes(int... activityTypes) {
+    void removeRootTasksWithActivityTypes(int... activityTypes) {
         forAllTaskDisplayAreas(taskDisplayArea -> {
-            taskDisplayArea.removeStacksWithActivityTypes(activityTypes);
+            taskDisplayArea.removeRootTasksWithActivityTypes(activityTypes);
         });
     }
 

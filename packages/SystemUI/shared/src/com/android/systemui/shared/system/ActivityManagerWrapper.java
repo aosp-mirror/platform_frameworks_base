@@ -283,9 +283,9 @@ public class ActivityManagerWrapper {
     /**
      * Cancels the remote recents animation started from {@link #startRecentsActivity}.
      */
-    public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
+    public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
         try {
-            ActivityTaskManager.getService().cancelRecentsAnimation(restoreHomeStackPosition);
+            ActivityTaskManager.getService().cancelRecentsAnimation(restoreHomeRootTaskPosition);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to cancel recents animation", e);
         }

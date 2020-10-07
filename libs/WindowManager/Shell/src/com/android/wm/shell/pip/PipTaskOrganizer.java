@@ -58,6 +58,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -88,7 +89,7 @@ import java.util.function.Consumer;
  * This class is also responsible for general resize/offset PiP operations within SysUI component,
  * see also {@link PipMotionHelper}.
  */
-public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganizer.TaskListener,
+public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -104,7 +105,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         UNDEFINED(0),
         TASK_APPEARED(1),
         ENTERING_PIP(2),
-        EXITING_PIP(3);
+        ENTERED_PIP(3),
+        EXITING_PIP(4);
 
         private final int mStateValue;
 
@@ -149,15 +151,25 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             new PipAnimationController.PipAnimationCallback() {
         @Override
         public void onPipAnimationStart(PipAnimationController.PipTransitionAnimator animator) {
-            sendOnPipTransitionStarted(animator.getTransitionDirection());
+            final int direction = animator.getTransitionDirection();
+            if (direction == TRANSITION_DIRECTION_TO_PIP) {
+                InteractionJankMonitor.getInstance().begin(
+                        InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP, 2000);
+            }
+            sendOnPipTransitionStarted(direction);
         }
 
         @Override
         public void onPipAnimationEnd(SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
-            finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection(),
+            final int direction = animator.getTransitionDirection();
+            finishResize(tx, animator.getDestinationBounds(), direction,
                     animator.getAnimationType());
-            sendOnPipTransitionFinished(animator.getTransitionDirection());
+            sendOnPipTransitionFinished(direction);
+            if (direction == TRANSITION_DIRECTION_TO_PIP) {
+                InteractionJankMonitor.getInstance().end(
+                        InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP);
+            }
         }
 
         @Override
@@ -241,6 +253,14 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
      */
     private boolean mShouldDeferEnteringPip;
 
+    /**
+     * If set to {@code true}, no entering PiP transition would be kicked off and most likely
+     * it's due to the fact that Launcher is handling the transition directly when swiping
+     * auto PiP-able Activity to home.
+     * See also {@link #startSwipePipToHome(ComponentName, ActivityInfo, PictureInPictureParams)}.
+     */
+    private boolean mShouldIgnoreEnteringPipTransition;
+
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             Optional<SplitScreen> splitScreenOptional,
@@ -306,6 +326,27 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
      */
     public void setOneShotAnimationType(@PipAnimationController.AnimationType int animationType) {
         mOneShotAnimationType = animationType;
+    }
+
+    /**
+     * Callback when Launcher starts swipe-pip-to-home operation.
+     * @return {@link Rect} for destination bounds.
+     */
+    public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
+            PictureInPictureParams pictureInPictureParams) {
+        mShouldIgnoreEnteringPipTransition = true;
+        mState = State.ENTERING_PIP;
+        return mPipBoundsHandler.getDestinationBounds(componentName,
+                getAspectRatioOrDefault(pictureInPictureParams),
+                null /* bounds */, getMinimalSize(activityInfo));
+    }
+
+    /**
+     * Callback when launcher finishes swipe-pip-to-home operation.
+     * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
+     */
+    public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+        mLastReportedBounds.set(destinationBounds);
     }
 
     /**
@@ -415,7 +456,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             wct.setBounds(mToken, null);
             mTaskOrganizer.applyTransaction(wct);
 
-            ActivityTaskManager.getService().removeStacksInWindowingModes(
+            ActivityTaskManager.getService().removeRootTasksInWindowingModes(
                     new int[]{ WINDOWING_MODE_PINNED });
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to remove PiP", e);
@@ -434,6 +475,16 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
         mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
+
+        if (mShouldIgnoreEnteringPipTransition) {
+            // Animation has been finished together with Recents, directly apply the sync
+            // transaction to PiP here.
+            applyEnterPipSyncTransaction(mLastReportedBounds, () -> {
+                mState = State.ENTERED_PIP;
+            });
+            mShouldIgnoreEnteringPipTransition = false;
+            return;
+        }
 
         if (mShouldDeferEnteringPip) {
             if (DEBUG) Log.d(TAG, "Defer entering PiP animation, fixed rotation is ongoing");
@@ -489,6 +540,20 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
+        applyEnterPipSyncTransaction(destinationBounds, () -> {
+            mUpdateHandler.post(() -> mPipAnimationController
+                    .getAnimator(mLeash, destinationBounds, 0f, 1f)
+                    .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
+                    .setPipAnimationCallback(mPipAnimationCallback)
+                    .setDuration(durationMs)
+                    .start());
+            // mState is set right after the animation is kicked off to block any resize
+            // requests such as offsetPip that may have been called prior to the transition.
+            mState = State.ENTERING_PIP;
+        });
+    }
+
+    private void applyEnterPipSyncTransaction(Rect destinationBounds, Runnable runnable) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         wct.setBounds(mToken, destinationBounds);
@@ -497,15 +562,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             @Override
             public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                 t.apply();
-                mUpdateHandler.post(() -> mPipAnimationController
-                        .getAnimator(mLeash, destinationBounds, 0f, 1f)
-                        .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
-                        .setPipAnimationCallback(mPipAnimationCallback)
-                        .setDuration(durationMs)
-                        .start());
-                // mState is set right after the animation is kicked off to block any resize
-                // requests such as offsetPip that may have been called prior to the transition.
-                mState = State.ENTERING_PIP;
+                if (runnable != null) {
+                    runnable.run();
+                }
             }
         });
     }
@@ -523,6 +582,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
 
     private void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
+        if (direction == TRANSITION_DIRECTION_TO_PIP) {
+            mState = State.ENTERED_PIP;
+        }
         runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
@@ -606,7 +668,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
     /**
      * Note that dismissing PiP is now originated from SystemUI, see {@link #exitPip(int)}.
      * Meanwhile this callback is invoked whenever the task is removed. For instance:
-     *   - as a result of removeStacksInWindowingModes from WM
+     *   - as a result of removeRootTasksInWindowingModes from WM
      *   - activity itself is died
      * Nevertheless, we simply update the internal state here as all the heavy lifting should
      * have been done in WM.

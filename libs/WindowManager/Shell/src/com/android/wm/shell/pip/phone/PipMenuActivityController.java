@@ -156,20 +156,6 @@ public class PipMenuActivityController {
     }
 
     /**
-     * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
-     */
-    public void setDismissFraction(float fraction) {
-        final boolean isMenuVisible = isMenuVisible();
-        if (DEBUG) {
-            Log.d(TAG, "setDismissFraction() isMenuVisible=" + isMenuVisible
-                    + " fraction=" + fraction);
-        }
-        if (isMenuVisible) {
-            mPipMenuView.updateDismissFraction(fraction);
-        }
-    }
-
-    /**
      * Similar to {@link #showMenu(int, Rect, boolean, boolean, boolean)} but only show the menu
      * upon PiP window transition is finished.
      */

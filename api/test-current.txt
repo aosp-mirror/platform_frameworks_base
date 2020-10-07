@@ -45,6 +45,7 @@ package android {
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemGallery = 17039399; // 0x1040027
+    field public static final int config_systemVideoCall = 17039401; // 0x1040029
   }
 
 }
@@ -135,12 +136,12 @@ package android.app {
   public class ActivityTaskManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
     method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void moveTaskToStack(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeStacksInWindowingModes(int[]) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeStacksWithActivityTypes(int[]) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void moveTaskToRootTask(int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void requestPictureInPictureMode(@NonNull android.os.IBinder);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeDockedStack(android.graphics.Rect, android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeTask(int, android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setDisplayToSingleTaskInstance(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
@@ -1452,6 +1453,18 @@ package android.hardware.hdmi {
 
 }
 
+package android.hardware.input {
+
+  public final class InputManager {
+    method public int getBlockUntrustedTouchesMode(@NonNull android.content.Context);
+    method public float getMaximumObscuringOpacityForTouch(@NonNull android.content.Context);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setBlockUntrustedTouchesMode(@NonNull android.content.Context, int);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, float);
+    field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
+  }
+
+}
+
 package android.hardware.lights {
 
   public final class Light implements android.os.Parcelable {
@@ -1716,7 +1729,7 @@ package android.location {
   }
 
   public final class LocationRequest implements android.os.Parcelable {
-    method @Nullable public android.os.WorkSource getWorkSource();
+    method @NonNull public android.os.WorkSource getWorkSource();
     method public boolean isHiddenFromAppOps();
     method public boolean isLocationSettingsIgnored();
     method public boolean isLowPower();

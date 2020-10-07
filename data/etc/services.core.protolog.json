@@ -115,12 +115,6 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
-    "-1977793524": {
-      "message": "moveStackToDisplay: moving stackId=%d to displayId=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
     "-1976930686": {
       "message": "Attempted to add Accessibility overlay window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -582,6 +576,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1419762046": {
+      "message": "moveRootTaskToDisplay: moving taskId=%d to displayId=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-1413901262": {
       "message": "startRecentsActivity(): intent=%s",
@@ -1183,6 +1183,12 @@
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
+    "-677449371": {
+      "message": "moveTaskToRootTask: moving task=%d to rootTaskId=%d toTop=%b",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "-672228342": {
       "message": "resumeTopActivityLocked: Top activity resumed %s",
       "level": "DEBUG",
@@ -1554,12 +1560,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
-    },
-    "-300896109": {
-      "message": "moveTaskToStack: moving task=%d to stackId=%d toTop=%b",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-279436615": {
       "message": "Moving to PAUSING: %s",
@@ -1998,6 +1998,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "255339989": {
+      "message": "setFocusedRootTask: taskId=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "255692476": {
       "message": "**** GOOD TO GO",
@@ -3360,12 +3366,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "1975793405": {
-      "message": "setFocusedStack: stackId=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "1984470582": {
       "message": "Creating TaskScreenshotAnimatable: task: %s width: %d height: %d",

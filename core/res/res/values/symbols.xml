@@ -2160,6 +2160,8 @@
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
+  <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
+  <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
@@ -3545,6 +3547,7 @@
   <java-symbol type="id" name="bubble_button" />
   <java-symbol type="dimen" name="bubble_visible_padding_end" />
   <java-symbol type="dimen" name="bubble_gone_padding_end" />
+  <java-symbol type="dimen" name="text_size_body_2_material" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />

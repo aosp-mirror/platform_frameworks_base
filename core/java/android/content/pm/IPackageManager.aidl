@@ -749,7 +749,7 @@ interface IPackageManager {
 
     void notifyPackagesReplacedReceived(in String[] packages);
 
-    void getChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IntentSender statusReceiver, int userId);
+    void requestChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IntentSender statusReceiver, int userId);
 
     //------------------------------------------------------------------------
     //

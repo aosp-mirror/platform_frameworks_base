@@ -385,23 +385,20 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Flings the PiP to the closest snap target.
      */
     void flingToSnapTarget(
-            float velocityX, float velocityY,
-            @Nullable Runnable updateAction, @Nullable Runnable endAction) {
-        movetoTarget(velocityX, velocityY, updateAction, endAction, false /* isStash */);
+            float velocityX, float velocityY, @Nullable Runnable endAction) {
+        movetoTarget(velocityX, velocityY, endAction, false /* isStash */);
     }
 
     /**
      * Stash PiP to the closest edge.
      */
     void stashToEdge(
-            float velocityX, float velocityY,
-            @Nullable Runnable updateAction, @Nullable Runnable endAction) {
-        movetoTarget(velocityX, velocityY, updateAction, endAction, true /* isStash */);
+            float velocityX, float velocityY, @Nullable Runnable endAction) {
+        movetoTarget(velocityX, velocityY, endAction, true /* isStash */);
     }
 
     private void movetoTarget(
-            float velocityX, float velocityY,
-            @Nullable Runnable updateAction, @Nullable Runnable endAction, boolean isStash) {
+            float velocityX, float velocityY, @Nullable Runnable endAction, boolean isStash) {
         // If we're flinging to a snap target now, we're not springing to catch up to the touch
         // location now.
         mSpringingToTouch = false;
@@ -415,11 +412,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .flingThenSpring(
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig)
                 .withEndActions(endAction);
-
-        if (updateAction != null) {
-            mTemporaryBoundsPhysicsAnimator.addUpdateListener(
-                    (target, values) -> updateAction.run());
-        }
 
         final float offset = ((float) mBounds.width()) * (1.0f - STASH_RATIO);
         final float leftEdge = isStash ? mMovementBounds.left - offset : mMovementBounds.left;

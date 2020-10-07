@@ -1289,66 +1289,65 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     /**
-     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * Removes root tasks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
-    void removeStacksInWindowingModes(int... windowingModes) {
+    void removeRootTasksInWindowingModes(int... windowingModes) {
         if (windowingModes == null || windowingModes.length == 0) {
             return;
         }
 
-        // Collect the stacks that are necessary to be removed instead of performing the removal
-        // by looping mStacks, so that we don't miss any stacks after the stack size changed or
-        // stacks reordered.
-        final ArrayList<Task> stacks = new ArrayList<>();
+        // Collect the root tasks that are necessary to be removed instead of performing the removal
+        // by looping the children, so that we don't miss any root tasks after the children size
+        // changed or reordered.
+        final ArrayList<Task> rootTasks = new ArrayList<>();
         for (int j = windowingModes.length - 1; j >= 0; --j) {
             final int windowingMode = windowingModes[j];
-            for (int i = getStackCount() - 1; i >= 0; --i) {
-                final Task stack = getStackAt(i);
-                if (!stack.isActivityTypeStandardOrUndefined()) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final Task rootTask = mChildren.get(i);
+                if (rootTask.mCreatedByOrganizer
+                        || !rootTask.isActivityTypeStandardOrUndefined()
+                        || rootTask.getWindowingMode() != windowingMode) {
                     continue;
                 }
-                if (stack.getWindowingMode() != windowingMode) {
-                    continue;
-                }
-                stacks.add(stack);
+                rootTasks.add(rootTask);
             }
         }
 
-        for (int i = stacks.size() - 1; i >= 0; --i) {
-            mRootWindowContainer.mStackSupervisor.removeStack(stacks.get(i));
+        for (int i = rootTasks.size() - 1; i >= 0; --i) {
+            mRootWindowContainer.mStackSupervisor.removeRootTask(rootTasks.get(i));
         }
     }
 
-    void removeStacksWithActivityTypes(int... activityTypes) {
+    void removeRootTasksWithActivityTypes(int... activityTypes) {
         if (activityTypes == null || activityTypes.length == 0) {
             return;
         }
 
-        // Collect the stacks that are necessary to be removed instead of performing the removal
-        // by looping mStacks, so that we don't miss any stacks after the stack size changed or
-        // stacks reordered.
-        final ArrayList<Task> stacks = new ArrayList<>();
+        // Collect the root tasks that are necessary to be removed instead of performing the removal
+        // by looping the children, so that we don't miss any root tasks after the children size
+        // changed or reordered.
+        final ArrayList<Task> rootTasks = new ArrayList<>();
         for (int j = activityTypes.length - 1; j >= 0; --j) {
             final int activityType = activityTypes[j];
-            for (int i = getStackCount() - 1; i >= 0; --i) {
-                final Task stack = getStackAt(i);
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final Task rootTask = mChildren.get(i);
                 // Collect the root tasks that are currently being organized.
-                if (stack.mCreatedByOrganizer) {
-                    for (int k = stack.getChildCount() - 1; k >= 0; --k) {
-                        final Task childStack = (Task) stack.getChildAt(k);
-                        if (childStack.getActivityType() == activityType) {
-                            stacks.add(childStack);
+                if (rootTask.mCreatedByOrganizer) {
+                    for (int k = rootTask.getChildCount() - 1; k >= 0; --k) {
+                        final Task task = (Task) rootTask.getChildAt(k);
+                        if (task.getActivityType() == activityType) {
+                            rootTasks.add(task);
                         }
                     }
-                } else if (stack.getActivityType() == activityType) {
-                    stacks.add(stack);
+                } else if (rootTask.getActivityType() == activityType) {
+                    rootTasks.add(rootTask);
                 }
             }
         }
 
-        for (int i = stacks.size() - 1; i >= 0; --i) {
-            mRootWindowContainer.mStackSupervisor.removeStack(stacks.get(i));
+        for (int i = rootTasks.size() - 1; i >= 0; --i) {
+            mRootWindowContainer.mStackSupervisor.removeRootTask(rootTasks.get(i));
         }
     }
 

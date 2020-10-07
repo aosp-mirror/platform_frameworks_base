@@ -137,7 +137,6 @@ import android.app.PendingIntent;
 import android.app.StatsManager;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
 import android.app.role.OnRoleHoldersChangedListener;
@@ -3084,6 +3083,8 @@ public class NotificationManagerService extends SystemService {
                         UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
             }
 
+            mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
+                    enabled ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
             try {
                 getContext().sendBroadcastAsUser(
                         new Intent(ACTION_APP_BLOCK_STATE_CHANGED)
@@ -4541,11 +4542,11 @@ public class NotificationManagerService extends SystemService {
             } catch (NameNotFoundException e) {
                 return false;
             }
+            //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
             return checkPackagePolicyAccess(pkg)
                     || mListeners.isComponentEnabledForPackage(pkg)
-                    || (mDpm != null &&
-                            mDpm.isActiveAdminWithPolicy(Binder.getCallingUid(),
-                                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER));
+                    || (mDpm != null && (mDpm.isActiveProfileOwner(Binder.getCallingUid())
+                                || mDpm.isActiveDeviceOwner(Binder.getCallingUid())));
         }
 
         @Override

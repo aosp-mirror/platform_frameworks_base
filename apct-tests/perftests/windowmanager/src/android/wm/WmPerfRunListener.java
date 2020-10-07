@@ -115,7 +115,7 @@ public class WmPerfRunListener extends RunListener {
         runWithShellPermissionIdentity(() -> {
             final ActivityTaskManager atm = mContext.getSystemService(ActivityTaskManager.class);
             atm.removeAllVisibleRecentTasks();
-            atm.removeStacksWithActivityTypes(new int[] { ACTIVITY_TYPE_STANDARD,
+            atm.removeRootTasksWithActivityTypes(new int[] { ACTIVITY_TYPE_STANDARD,
                     ACTIVITY_TYPE_ASSISTANT, ACTIVITY_TYPE_RECENTS, ACTIVITY_TYPE_UNDEFINED });
         });
         PhoneWindow.sendCloseSystemWindows(mContext, "WmPerfTests");

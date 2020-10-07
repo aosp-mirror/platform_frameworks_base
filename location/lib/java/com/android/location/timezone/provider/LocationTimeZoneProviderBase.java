@@ -16,6 +16,7 @@
 
 package com.android.location.timezone.provider;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.IBinder;
@@ -55,8 +56,6 @@ import java.util.Objects;
  *
  * <p>IMPORTANT: This class is effectively a public API for unbundled applications, and must remain
  * API stable.
- *
- * @hide
  */
 public abstract class LocationTimeZoneProviderBase {
 
@@ -85,7 +84,8 @@ public abstract class LocationTimeZoneProviderBase {
     /**
      * Reports a new location time zone event from this provider.
      */
-    protected void reportLocationTimeZoneEvent(LocationTimeZoneEventUnbundled event) {
+    protected final void reportLocationTimeZoneEvent(
+            @NonNull LocationTimeZoneEventUnbundled event) {
         ILocationTimeZoneProviderManager manager = mManager;
         if (manager != null) {
             try {
@@ -102,7 +102,7 @@ public abstract class LocationTimeZoneProviderBase {
      * to start returning location time zones, or to stop returning location time zones, depending
      * on the parameters in the request.
      */
-    protected abstract void onSetRequest(LocationTimeZoneProviderRequestUnbundled request);
+    protected abstract void onSetRequest(@NonNull LocationTimeZoneProviderRequestUnbundled request);
 
     private final class Service extends ILocationTimeZoneProvider.Stub {
 

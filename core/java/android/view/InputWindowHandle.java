@@ -21,6 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.TouchOcclusionMode;
 
 import java.lang.ref.WeakReference;
 
@@ -82,9 +83,17 @@ public final class InputWindowHandle {
     // Window is trusted overlay.
     public boolean trustedOverlay;
 
+    // What effect this window has on touch occlusion if it lets touches pass through
+    // By default windows will block touches if they are untrusted and from a different UID due to
+    // security concerns
+    public int touchOcclusionMode = TouchOcclusionMode.BLOCK_UNTRUSTED;
+
     // Id of process and user that owns the window.
     public int ownerPid;
     public int ownerUid;
+
+    // Owner package of the window
+    public String packageName;
 
     // Window input features.
     public int inputFeatures;
