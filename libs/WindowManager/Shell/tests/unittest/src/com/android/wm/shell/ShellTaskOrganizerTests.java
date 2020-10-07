@@ -19,6 +19,9 @@ package com.android.wm.shell;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_WINDOW;
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,10 +105,10 @@ public class ShellTaskOrganizerTests {
     }
 
     @Test
-    public void testOneListenerPerMode() {
-        mOrganizer.addListener(new TrackingTaskListener(), WINDOWING_MODE_MULTI_WINDOW);
+    public void testOneListenerPerType() {
+        mOrganizer.addListener(new TrackingTaskListener(), TASK_LISTENER_TYPE_MULTI_WINDOW);
         try {
-            mOrganizer.addListener(new TrackingTaskListener(), WINDOWING_MODE_MULTI_WINDOW);
+            mOrganizer.addListener(new TrackingTaskListener(), TASK_LISTENER_TYPE_MULTI_WINDOW);
             fail("Expected exception due to already registered listener");
         } catch (Exception e) {
             // Expected failure
@@ -116,7 +119,7 @@ public class ShellTaskOrganizerTests {
     public void testAppearedVanished() {
         RunningTaskInfo taskInfo = createTaskInfo(WINDOWING_MODE_MULTI_WINDOW);
         TrackingTaskListener listener = new TrackingTaskListener();
-        mOrganizer.addListener(listener, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.addListener(listener, TASK_LISTENER_TYPE_MULTI_WINDOW);
         mOrganizer.onTaskAppeared(taskInfo, null);
         assertTrue(listener.appeared.contains(taskInfo));
 
@@ -130,7 +133,7 @@ public class ShellTaskOrganizerTests {
         mOrganizer.onTaskAppeared(taskInfo, null);
 
         TrackingTaskListener listener = new TrackingTaskListener();
-        mOrganizer.addListener(listener, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.addListener(listener, TASK_LISTENER_TYPE_MULTI_WINDOW);
         assertTrue(listener.appeared.contains(taskInfo));
     }
 
@@ -139,8 +142,8 @@ public class ShellTaskOrganizerTests {
         RunningTaskInfo taskInfo = createTaskInfo(WINDOWING_MODE_MULTI_WINDOW);
         TrackingTaskListener mwListener = new TrackingTaskListener();
         TrackingTaskListener pipListener = new TrackingTaskListener();
-        mOrganizer.addListener(mwListener, WINDOWING_MODE_MULTI_WINDOW);
-        mOrganizer.addListener(pipListener, WINDOWING_MODE_PINNED);
+        mOrganizer.addListener(mwListener, TASK_LISTENER_TYPE_MULTI_WINDOW);
+        mOrganizer.addListener(pipListener, TASK_LISTENER_TYPE_PIP);
         mOrganizer.onTaskAppeared(taskInfo, null);
         assertTrue(mwListener.appeared.contains(taskInfo));
         assertTrue(pipListener.appeared.isEmpty());

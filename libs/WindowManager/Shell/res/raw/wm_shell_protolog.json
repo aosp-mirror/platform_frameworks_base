@@ -1,6 +1,12 @@
 {
   "version": "1.0.0",
   "messages": {
+    "-1823823103": {
+      "message": "Add listener for types=%s listener=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
     "-1534364071": {
       "message": "onTransitionReady %s: %s",
       "level": "VERBOSE",
@@ -33,12 +39,6 @@
     },
     "-460572385": {
       "message": "Task appeared taskId=%d",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
-    },
-    "-242812822": {
-      "message": "Add listener for modes=%s listener=%s",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
