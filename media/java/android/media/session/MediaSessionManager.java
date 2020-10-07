@@ -493,43 +493,46 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Send a media key event. The receiver will be selected automatically.
+     * Sends a media key event. The receiver will be selected automatically.
      *
-     * @param keyEvent The KeyEvent to send.
+     * @param keyEvent the key event to send
      * @hide
      */
     public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent) {
-        dispatchMediaKeyEvent(keyEvent, false);
+        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/false, /*needWakeLock=*/false);
     }
 
     /**
-     * Send a media key event. The receiver will be selected automatically.
+     * Sends a media key event. The receiver will be selected automatically.
      *
-     * @param keyEvent The KeyEvent to send.
-     * @param needWakeLock True if a wake lock should be held while sending the key.
+     * @param keyEvent the key event to send
+     * @param needWakeLock true if a wake lock should be held while sending the key
      * @hide
      */
     public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent, boolean needWakeLock) {
-        dispatchMediaKeyEventInternal(false, keyEvent, needWakeLock);
+        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/false, needWakeLock);
     }
 
     /**
-     * Send a media key event as system component. The receiver will be selected automatically.
+     * Sends a media key event as system service. The receiver will be selected automatically.
      * <p>
      * Should be only called by the {@link com.android.internal.policy.PhoneWindow} or
      * {@link android.view.FallbackEventHandler} when the foreground activity didn't consume the key
      * from the hardware devices.
      *
-     * @param keyEvent The KeyEvent to send.
+     * @param keyEvent the key event to send
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchMediaKeyEventAsSystemService(@NonNull KeyEvent keyEvent) {
-        dispatchMediaKeyEventInternal(true, keyEvent, false);
+        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/true, /*needWakeLock=*/false);
     }
 
-    private void dispatchMediaKeyEventInternal(boolean asSystemService, @NonNull KeyEvent keyEvent,
+    private void dispatchMediaKeyEventInternal(KeyEvent keyEvent, boolean asSystemService,
             boolean needWakeLock) {
+        if (keyEvent == null) {
+            throw new NullPointerException("keyEvent shouldn't be null");
+        }
         try {
             mService.dispatchMediaKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
                     needWakeLock);
@@ -539,31 +542,31 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Dispatches the media button event as system service to the session.
+     * Sends a media key event as system service to the given session.
      * <p>
      * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
      * foreground activity didn't consume the key from the hardware devices.
      *
-     * @param sessionToken session token
-     * @param keyEvent media key event
+     * @param keyEvent the key event to send
+     * @param sessionToken the session token to which the key event should be dispatched
      * @return {@code true} if the event was sent to the session, {@code false} otherwise
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public boolean dispatchMediaKeyEventAsSystemService(@NonNull MediaSession.Token sessionToken,
-            @NonNull KeyEvent keyEvent) {
+    public boolean dispatchMediaKeyEventToSessionAsSystemService(@NonNull KeyEvent keyEvent,
+            @NonNull MediaSession.Token sessionToken) {
         if (sessionToken == null) {
-            throw new IllegalArgumentException("sessionToken shouldn't be null");
+            throw new NullPointerException("sessionToken shouldn't be null");
         }
         if (keyEvent == null) {
-            throw new IllegalArgumentException("keyEvent shouldn't be null");
+            throw new NullPointerException("keyEvent shouldn't be null");
         }
         if (!KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
             return false;
         }
         try {
-            return mService.dispatchMediaKeyEventToSessionAsSystemService(mContext.getPackageName(),
-                    sessionToken, keyEvent);
+            return mService.dispatchMediaKeyEventToSessionAsSystemService(
+                    mContext.getPackageName(), keyEvent, sessionToken);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send key event.", e);
         }
@@ -571,13 +574,16 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Send a volume key event. The receiver will be selected automatically.
+     * Sends a volume key event. The receiver will be selected automatically.
      *
-     * @param keyEvent The volume KeyEvent to send.
+     * @param keyEvent the volume key event to send
+     * @param streamType type of stream
+     * @param musicOnly true if key event should only be sent to music stream
      * @hide
      */
-    public void dispatchVolumeKeyEvent(@NonNull KeyEvent keyEvent, int stream, boolean musicOnly) {
-        dispatchVolumeKeyEventInternal(false, keyEvent, stream, musicOnly);
+    public void dispatchVolumeKeyEvent(@NonNull KeyEvent keyEvent, int streamType,
+            boolean musicOnly) {
+        dispatchVolumeKeyEventInternal(keyEvent, streamType, musicOnly, /*asSystemService=*/false);
     }
 
     /**
@@ -592,17 +598,21 @@ public final class MediaSessionManager {
      * Valid stream types include {@link AudioManager.PublicStreamTypes} and
      * {@link AudioManager#USE_DEFAULT_STREAM_TYPE}.
      *
-     * @param keyEvent volume key event
+     * @param keyEvent the volume key event to send
      * @param streamType type of stream
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchVolumeKeyEventAsSystemService(@NonNull KeyEvent keyEvent, int streamType) {
-        dispatchVolumeKeyEventInternal(true, keyEvent, streamType, false);
+        dispatchVolumeKeyEventInternal(keyEvent, streamType, /*musicOnly=*/false,
+                /*asSystemService=*/true);
     }
 
-    private void dispatchVolumeKeyEventInternal(boolean asSystemService, @NonNull KeyEvent keyEvent,
-            int stream, boolean musicOnly) {
+    private void dispatchVolumeKeyEventInternal(@NonNull KeyEvent keyEvent, int stream,
+            boolean musicOnly, boolean asSystemService) {
+        if (keyEvent == null) {
+            throw new NullPointerException("keyEvent shouldn't be null");
+        }
         try {
             mService.dispatchVolumeKeyEvent(mContext.getPackageName(), mContext.getOpPackageName(),
                     asSystemService, keyEvent, stream, musicOnly);
@@ -617,22 +627,22 @@ public final class MediaSessionManager {
      * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
      * foreground activity didn't consume the key from the hardware devices.
      *
-     * @param sessionToken sessionToken
-     * @param keyEvent volume key event
+     * @param keyEvent the volume key event to send
+     * @param sessionToken the session token to which the key event should be dispatched
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void dispatchVolumeKeyEventAsSystemService(@NonNull MediaSession.Token sessionToken,
-            @NonNull KeyEvent keyEvent) {
+    public void dispatchVolumeKeyEventToSessionAsSystemService(@NonNull KeyEvent keyEvent,
+            @NonNull MediaSession.Token sessionToken) {
         if (sessionToken == null) {
-            throw new IllegalArgumentException("sessionToken shouldn't be null");
+            throw new NullPointerException("sessionToken shouldn't be null");
         }
         if (keyEvent == null) {
-            throw new IllegalArgumentException("keyEvent shouldn't be null");
+            throw new NullPointerException("keyEvent shouldn't be null");
         }
         try {
             mService.dispatchVolumeKeyEventToSessionAsSystemService(mContext.getPackageName(),
-                    mContext.getOpPackageName(), sessionToken, keyEvent);
+                    mContext.getOpPackageName(), keyEvent, sessionToken);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling dispatchVolumeKeyEventAsSystemService", e);
         }

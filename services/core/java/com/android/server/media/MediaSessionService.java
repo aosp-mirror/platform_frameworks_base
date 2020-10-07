@@ -1397,7 +1397,7 @@ public class MediaSessionService extends SystemService implements Monitor {
          */
         @Override
         public boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
-                MediaSession.Token sessionToken, KeyEvent keyEvent) {
+                KeyEvent keyEvent, MediaSession.Token sessionToken) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1772,7 +1772,7 @@ public class MediaSessionService extends SystemService implements Monitor {
          */
         @Override
         public void dispatchVolumeKeyEventToSessionAsSystemService(String packageName,
-                String opPackageName, MediaSession.Token sessionToken, KeyEvent keyEvent) {
+                String opPackageName, KeyEvent keyEvent, MediaSession.Token sessionToken) {
             int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
