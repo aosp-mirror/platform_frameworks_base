@@ -771,8 +771,8 @@ class InstantAppRegistry {
             for (int i = 0; i < packageCount; i++) {
                 final String packageToDelete = packagesToDelete.get(i);
                 if (mService.deletePackageX(packageToDelete, PackageManager.VERSION_CODE_HIGHEST,
-                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS)
-                                == PackageManager.DELETE_SUCCEEDED) {
+                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
+                        true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
                     if (file.getUsableSpace() >= neededSpace) {
                         return true;
                     }
