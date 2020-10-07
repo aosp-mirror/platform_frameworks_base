@@ -16,6 +16,7 @@
 
 package com.android.location.timezone.provider;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 
 import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
@@ -27,8 +28,6 @@ import java.util.Objects;
  *
  * <p>IMPORTANT: This class is effectively a public API for unbundled code, and must remain API
  * stable.
- *
- * @hide
  */
 public final class LocationTimeZoneProviderRequestUnbundled {
 
@@ -54,6 +53,7 @@ public final class LocationTimeZoneProviderRequestUnbundled {
      * true}. Failure to send an event in this time (with some fuzz) may be interpreted as if the
      * provider is uncertain of the time zone, and/or it could lead to the provider being disabled.
      */
+    @IntRange(from = 0)
     public long getInitializationTimeoutMillis() {
         return mRequest.getInitializationTimeoutMillis();
     }

@@ -37,7 +37,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
@@ -1431,10 +1430,11 @@ public class UsageStatsService extends SystemService implements
         private boolean hasObserverPermission() {
             final int callingUid = Binder.getCallingUid();
             DevicePolicyManagerInternal dpmInternal = getDpmInternal();
+            //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
             if (callingUid == Process.SYSTEM_UID
                     || (dpmInternal != null
-                        && dpmInternal.isActiveAdminWithPolicy(callingUid,
-                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER))) {
+                        && (dpmInternal.isActiveProfileOwner(callingUid)
+                        || dpmInternal.isActiveDeviceOwner(callingUid)))) {
                 // Caller is the system or the profile owner, so proceed.
                 return true;
             }

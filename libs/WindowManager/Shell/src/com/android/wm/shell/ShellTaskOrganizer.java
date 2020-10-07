@@ -54,8 +54,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
     }
 
-    private final SparseArray<ArrayList<TaskListener>> mListenersByWindowingMode =
-            new SparseArray<>();
+    private final SparseArray<TaskListener> mListenerByWindowingMode = new SparseArray<>();
 
     // Keeps track of all the tasks reported to this organizer (changes in windowing mode will
     // require us to report to both old and new listeners)
@@ -86,16 +85,11 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Add listener for modes=%s listener=%s",
                 Arrays.toString(windowingModes), listener);
         for (int winMode : windowingModes) {
-            ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(winMode);
-            if (listeners == null) {
-                listeners = new ArrayList<>();
-                mListenersByWindowingMode.put(winMode, listeners);
+            if (mListenerByWindowingMode.get(winMode) != null) {
+                throw new IllegalArgumentException("Listener for winMode=" + winMode
+                        + " already exists");
             }
-            if (listeners.contains(listener)) {
-                Log.w(TAG, "Listener already exists");
-                return;
-            }
-            listeners.add(listener);
+            mListenerByWindowingMode.put(winMode, listener);
 
             // Notify the listener of all existing tasks in that windowing mode
             for (int i = mTasks.size() - 1; i >= 0; i--) {
@@ -113,9 +107,12 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      */
     public void removeListener(TaskListener listener) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Remove listener=%s", listener);
-        for (int i = 0; i < mListenersByWindowingMode.size(); i++) {
-            mListenersByWindowingMode.valueAt(i).remove(listener);
+        final int index = mListenerByWindowingMode.indexOfValue(listener);
+        if (index == -1) {
+            Log.w(TAG, "No registered listener found");
+            return;
         }
+        mListenerByWindowingMode.removeAt(index);
     }
 
     @Override
@@ -123,12 +120,9 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task appeared taskId=%d",
                 taskInfo.taskId);
         mTasks.put(taskInfo.taskId, new Pair<>(taskInfo, leash));
-        ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(
-                getWindowingMode(taskInfo));
-        if (listeners != null) {
-            for (int i = listeners.size() - 1; i >= 0; i--) {
-                listeners.get(i).onTaskAppeared(taskInfo, leash);
-            }
+        final TaskListener listener = mListenerByWindowingMode.get(getWindowingMode(taskInfo));
+        if (listener != null) {
+            listener.onTaskAppeared(taskInfo, leash);
         }
     }
 
@@ -136,32 +130,26 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task info changed taskId=%d",
                 taskInfo.taskId);
-        Pair<RunningTaskInfo, SurfaceControl> data = mTasks.get(taskInfo.taskId);
-        int winMode = getWindowingMode(taskInfo);
-        int prevWinMode = getWindowingMode(data.first);
+        final Pair<RunningTaskInfo, SurfaceControl> data = mTasks.get(taskInfo.taskId);
+        final int winMode = getWindowingMode(taskInfo);
+        final int prevWinMode = getWindowingMode(data.first);
         mTasks.put(taskInfo.taskId, new Pair<>(taskInfo, data.second));
         if (prevWinMode != -1 && prevWinMode != winMode) {
             // TODO: We currently send vanished/appeared as the task moves between win modes, but
             //       we should consider adding a different mode-changed callback
-            ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(prevWinMode);
-            if (listeners != null) {
-                for (int i = listeners.size() - 1; i >= 0; i--) {
-                    listeners.get(i).onTaskVanished(taskInfo);
-                }
+            TaskListener listener = mListenerByWindowingMode.get(prevWinMode);
+            if (listener != null) {
+                listener.onTaskVanished(taskInfo);
             }
-            listeners = mListenersByWindowingMode.get(winMode);
-            if (listeners != null) {
+            listener = mListenerByWindowingMode.get(winMode);
+            if (listener != null) {
                 SurfaceControl leash = data.second;
-                for (int i = listeners.size() - 1; i >= 0; i--) {
-                    listeners.get(i).onTaskAppeared(taskInfo, leash);
-                }
+                listener.onTaskAppeared(taskInfo, leash);
             }
         } else {
-            ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(winMode);
-            if (listeners != null) {
-                for (int i = listeners.size() - 1; i >= 0; i--) {
-                    listeners.get(i).onTaskInfoChanged(taskInfo);
-                }
+            final TaskListener listener = mListenerByWindowingMode.get(winMode);
+            if (listener != null) {
+                listener.onTaskInfoChanged(taskInfo);
             }
         }
     }
@@ -170,12 +158,9 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task root back pressed taskId=%d",
                 taskInfo.taskId);
-        ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(
-                getWindowingMode(taskInfo));
-        if (listeners != null) {
-            for (int i = listeners.size() - 1; i >= 0; i--) {
-                listeners.get(i).onBackPressedOnTaskRoot(taskInfo);
-            }
+        final TaskListener listener = mListenerByWindowingMode.get(getWindowingMode(taskInfo));
+        if (listener != null) {
+            listener.onBackPressedOnTaskRoot(taskInfo);
         }
     }
 
@@ -183,13 +168,11 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public void onTaskVanished(RunningTaskInfo taskInfo) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task vanished taskId=%d",
                 taskInfo.taskId);
-        int prevWinMode = getWindowingMode(mTasks.get(taskInfo.taskId).first);
+        final int prevWinMode = getWindowingMode(mTasks.get(taskInfo.taskId).first);
         mTasks.remove(taskInfo.taskId);
-        ArrayList<TaskListener> listeners = mListenersByWindowingMode.get(prevWinMode);
-        if (listeners != null) {
-            for (int i = listeners.size() - 1; i >= 0; i--) {
-                listeners.get(i).onTaskVanished(taskInfo);
-            }
+        final TaskListener listener = mListenerByWindowingMode.get(prevWinMode);
+        if (listener != null) {
+            listener.onTaskVanished(taskInfo);
         }
     }
 

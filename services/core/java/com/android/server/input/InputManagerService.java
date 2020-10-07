@@ -231,6 +231,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
     private static native void nativeSetInTouchMode(long ptr, boolean inTouchMode);
+    private static native void nativeSetMaximumObscuringOpacityForTouch(long ptr, float opacity);
+    private static native void nativeSetBlockUntrustedTouchesMode(long ptr, int mode);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
@@ -399,6 +401,8 @@ public class InputManagerService extends IInputManager.Stub
         registerShowTouchesSettingObserver();
         registerAccessibilityLargePointerSettingObserver();
         registerLongPressTimeoutObserver();
+        registerMaximumObscuringOpacityForTouchSettingObserver();
+        registerBlockUntrustedTouchesModeSettingObserver();
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -414,6 +418,8 @@ public class InputManagerService extends IInputManager.Stub
         updateShowTouchesFromSettings();
         updateAccessibilityLargePointerFromSettings();
         updateDeepPressStatusFromSettings("just booted");
+        updateMaximumObscuringOpacityForTouchFromSettings();
+        updateBlockUntrustedTouchesModeFromSettings();
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -1737,6 +1743,46 @@ public class InputManagerService extends IInputManager.Stub
                         updateDeepPressStatusFromSettings("timeout changed");
                     }
                 }, UserHandle.USER_ALL);
+    }
+
+    private void registerBlockUntrustedTouchesModeSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE),
+                /* notifyForDescendants */ true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateBlockUntrustedTouchesModeFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateBlockUntrustedTouchesModeFromSettings() {
+        final int mode = InputManager.getInstance().getBlockUntrustedTouchesMode(mContext);
+        nativeSetBlockUntrustedTouchesMode(mPtr, mode);
+    }
+
+    private void registerMaximumObscuringOpacityForTouchSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
+                /* notifyForDescendants */ true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateMaximumObscuringOpacityForTouchFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateMaximumObscuringOpacityForTouchFromSettings() {
+        final float opacity = InputManager.getInstance().getMaximumObscuringOpacityForTouch(
+                mContext);
+        if (opacity < 0 || opacity > 1) {
+            Log.e(TAG, "Invalid maximum obscuring opacity " + opacity
+                    + ", it should be >= 0 and <= 1, rejecting update.");
+            return;
+        }
+        nativeSetMaximumObscuringOpacityForTouch(mPtr, opacity);
     }
 
     private int getShowTouchesSetting(int defaultValue) {

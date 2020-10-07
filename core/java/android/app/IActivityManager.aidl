@@ -447,9 +447,8 @@ interface IActivityManager {
     void hang(in IBinder who, boolean allowRestart);
 
     List<ActivityTaskManager.RootTaskInfo> getAllRootTaskInfos();
-    @UnsupportedAppUsage
-    void moveTaskToStack(int taskId, int stackId, boolean toTop);
-    void setFocusedStack(int stackId);
+    void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop);
+    void setFocusedRootTask(int taskId);
     ActivityTaskManager.RootTaskInfo getFocusedRootTaskInfo();
     @UnsupportedAppUsage
     void restart();
@@ -507,15 +506,12 @@ interface IActivityManager {
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
     @UnsupportedAppUsage
     void suppressResizeConfigChanges(boolean suppress);
-    @UnsupportedAppUsage
-    boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);
+    boolean moveTopActivityToPinnedRootTask(int rootTaskId, in Rect bounds);
     boolean isAppStartModeDisabled(int uid, in String packageName);
     @UnsupportedAppUsage
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);
     void killPackageDependents(in String packageName, int userId);
-    @UnsupportedAppUsage
-    void removeStack(int stackId);
     void makePackageIdle(String packageName, int userId);
     int getMemoryTrimLevel();
     boolean isVrModePackageEnabled(in ComponentName packageName);

@@ -794,18 +794,18 @@ public class StagingManager {
 
     private void installApksInSession(PackageInstallerSession session)
             throws PackageManagerException {
-        final PackageInstallerSession apksToInstall = extractApksInSession(session);
-        if (apksToInstall == null) {
+        if (!session.containsApkSession()) {
             return;
         }
 
-        if ((apksToInstall.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+        if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
             // If rollback is available for this session, notify the rollback
             // manager of the apk session so it can properly enable rollback.
             final RollbackManagerInternal rm =
                     LocalServices.getService(RollbackManagerInternal.class);
             try {
-                rm.notifyStagedApkSession(session.sessionId, apksToInstall.sessionId);
+                // TODO(b/136257624): extra apk session id in rollback is now redundant.
+                rm.notifyStagedApkSession(session.sessionId, session.sessionId);
             } catch (RuntimeException re) {
                 Slog.e(TAG, "Failed to notifyStagedApkSession for session: "
                         + session.sessionId, re);
@@ -813,7 +813,7 @@ public class StagingManager {
         }
 
         final LocalIntentReceiverSync receiver = new LocalIntentReceiverSync();
-        apksToInstall.commit(receiver.getIntentSender(), false);
+        session.installStagedSession(receiver.getIntentSender());
         final Intent result = receiver.getResult();
         final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                 PackageInstaller.STATUS_FAILURE);

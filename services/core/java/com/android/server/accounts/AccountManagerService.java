@@ -42,7 +42,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
@@ -5736,8 +5735,8 @@ public class AccountManagerService
     private boolean isProfileOwner(int uid) {
         final DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
-        return (dpmi != null)
-                && dpmi.isActiveAdminWithPolicy(uid, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
+        return (dpmi != null) && (dpmi.isActiveProfileOwner(uid) || dpmi.isActiveDeviceOwner(uid));
     }
 
     @Override

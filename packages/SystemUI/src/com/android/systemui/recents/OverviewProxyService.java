@@ -35,12 +35,14 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_T
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
+import android.app.PictureInPictureParams;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -500,6 +502,38 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
+                PictureInPictureParams pictureInPictureParams,
+                int launcherRotation, int shelfHeight) {
+            if (!verifyCaller("startSwipePipToHome") || !mHasPipFeature) {
+                return null;
+            }
+            long binderToken = Binder.clearCallingIdentity();
+            try {
+                return mPipOptional.map(pip ->
+                        pip.startSwipePipToHome(componentName, activityInfo,
+                                pictureInPictureParams, launcherRotation, shelfHeight))
+                        .orElse(null);
+            } finally {
+                Binder.restoreCallingIdentity(binderToken);
+            }
+        }
+
+        @Override
+        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+            if (!verifyCaller("stopSwipePipToHome") || !mHasPipFeature) {
+                return;
+            }
+            long binderToken = Binder.clearCallingIdentity();
+            try {
+                mPipOptional.ifPresent(pip -> pip.stopSwipePipToHome(
+                        componentName, destinationBounds));
+            } finally {
+                Binder.restoreCallingIdentity(binderToken);
             }
         }
 

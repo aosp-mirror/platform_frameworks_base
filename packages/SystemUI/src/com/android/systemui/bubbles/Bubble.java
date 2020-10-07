@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -35,16 +36,18 @@ import android.graphics.Bitmap;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -169,11 +172,10 @@ class Bubble implements BubbleViewProvider {
     }
 
     @VisibleForTesting(visibility = PRIVATE)
-    Bubble(@NonNull final NotificationEntry e,
+    Bubble(@NonNull final BubbleEntry entry,
             @Nullable final BubbleController.NotificationSuppressionChangedListener listener,
             final BubbleController.PendingIntentCanceledListener intentCancelListener) {
-        Objects.requireNonNull(e);
-        mKey = e.getKey();
+        mKey = entry.getKey();
         mSuppressionListener = listener;
         mIntentCancelListener = intent -> {
             if (mIntent != null) {
@@ -181,7 +183,7 @@ class Bubble implements BubbleViewProvider {
             }
             intentCancelListener.onPendingIntentCanceled(this);
         };
-        setEntry(e);
+        setEntry(entry);
     }
 
     @Override
@@ -294,8 +296,8 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Sets whether this bubble is considered visually interruptive. Normally pulled from the
-     * {@link NotificationEntry}, this method is purely for testing.
+     * Sets whether this bubble is considered visually interruptive. This method is purely for
+     * testing.
      */
     @VisibleForTesting
     void setVisuallyInterruptiveForTest(boolean visuallyInterruptive) {
@@ -388,30 +390,28 @@ class Bubble implements BubbleViewProvider {
     /**
      * Sets the entry associated with this bubble.
      */
-    void setEntry(@NonNull final NotificationEntry entry) {
+    void setEntry(@NonNull final BubbleEntry entry) {
         Objects.requireNonNull(entry);
-        Objects.requireNonNull(entry.getSbn());
-        mLastUpdated = entry.getSbn().getPostTime();
-        mIsBubble = entry.getSbn().getNotification().isBubbleNotification();
-        mPackageName = entry.getSbn().getPackageName();
-        mUser = entry.getSbn().getUser();
+        mLastUpdated = entry.getStatusBarNotification().getPostTime();
+        mIsBubble = entry.getStatusBarNotification().getNotification().isBubbleNotification();
+        mPackageName = entry.getStatusBarNotification().getPackageName();
+        mUser = entry.getStatusBarNotification().getUser();
         mTitle = getTitle(entry);
-        mIsClearable = entry.isClearable();
-        mShouldSuppressNotificationDot = entry.shouldSuppressNotificationDot();
-        mShouldSuppressNotificationList = entry.shouldSuppressNotificationList();
-        mShouldSuppressPeek = entry.shouldSuppressPeek();
-        mChannelId = entry.getSbn().getNotification().getChannelId();
-        mNotificationId = entry.getSbn().getId();
-        mAppUid = entry.getSbn().getUid();
-        mInstanceId = entry.getSbn().getInstanceId();
-        mFlyoutMessage = BubbleViewInfoTask.extractFlyoutMessage(entry);
-        mShortcutInfo = (entry.getRanking() != null ? entry.getRanking().getShortcutInfo() : null);
-        mMetadataShortcutId = (entry.getBubbleMetadata() != null
-                ? entry.getBubbleMetadata().getShortcutId() : null);
+        mChannelId = entry.getStatusBarNotification().getNotification().getChannelId();
+        mNotificationId = entry.getStatusBarNotification().getId();
+        mAppUid = entry.getStatusBarNotification().getUid();
+        mInstanceId = entry.getStatusBarNotification().getInstanceId();
+        mFlyoutMessage = extractFlyoutMessage(entry);
         if (entry.getRanking() != null) {
+            mShortcutInfo = entry.getRanking().getShortcutInfo();
             mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
+            if (entry.getRanking().getChannel() != null) {
+                mIsImportantConversation =
+                        entry.getRanking().getChannel().isImportantConversation();
+            }
         }
         if (entry.getBubbleMetadata() != null) {
+            mMetadataShortcutId = entry.getBubbleMetadata().getShortcutId();
             mFlags = entry.getBubbleMetadata().getFlags();
             mDesiredHeight = entry.getBubbleMetadata().getDesiredHeight();
             mDesiredHeightResId = entry.getBubbleMetadata().getDesiredHeightResId();
@@ -433,8 +433,11 @@ class Bubble implements BubbleViewProvider {
             }
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
-        mIsImportantConversation =
-                entry.getChannel() != null && entry.getChannel().isImportantConversation();
+
+        mIsClearable = entry.isClearable();
+        mShouldSuppressNotificationDot = entry.shouldSuppressNotificationDot();
+        mShouldSuppressNotificationList = entry.shouldSuppressNotificationList();
+        mShouldSuppressPeek = entry.shouldSuppressPeek();
     }
 
     @Nullable
@@ -735,9 +738,75 @@ class Bubble implements BubbleViewProvider {
     }
 
     @Nullable
-    private static String getTitle(@NonNull final NotificationEntry e) {
-        final CharSequence titleCharSeq = e.getSbn().getNotification().extras.getCharSequence(
-                Notification.EXTRA_TITLE);
+    private static String getTitle(@NonNull final BubbleEntry e) {
+        final CharSequence titleCharSeq = e.getStatusBarNotification()
+                .getNotification().extras.getCharSequence(Notification.EXTRA_TITLE);
         return titleCharSeq == null ? null : titleCharSeq.toString();
+    }
+
+    /**
+     * Returns our best guess for the most relevant text summary of the latest update to this
+     * notification, based on its type. Returns null if there should not be an update message.
+     */
+    @NonNull
+    static Bubble.FlyoutMessage extractFlyoutMessage(BubbleEntry entry) {
+        Objects.requireNonNull(entry);
+        final Notification underlyingNotif = entry.getStatusBarNotification().getNotification();
+        final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
+
+        Bubble.FlyoutMessage bubbleMessage = new Bubble.FlyoutMessage();
+        bubbleMessage.isGroupChat = underlyingNotif.extras.getBoolean(
+                Notification.EXTRA_IS_GROUP_CONVERSATION);
+        try {
+            if (Notification.BigTextStyle.class.equals(style)) {
+                // Return the big text, it is big so probably important. If it's not there use the
+                // normal text.
+                CharSequence bigText =
+                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+                bubbleMessage.message = !TextUtils.isEmpty(bigText)
+                        ? bigText
+                        : underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
+                return bubbleMessage;
+            } else if (Notification.MessagingStyle.class.equals(style)) {
+                final List<Notification.MessagingStyle.Message> messages =
+                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(
+                                (Parcelable[]) underlyingNotif.extras.get(
+                                        Notification.EXTRA_MESSAGES));
+
+                final Notification.MessagingStyle.Message latestMessage =
+                        Notification.MessagingStyle.findLatestIncomingMessage(messages);
+                if (latestMessage != null) {
+                    bubbleMessage.message = latestMessage.getText();
+                    Person sender = latestMessage.getSenderPerson();
+                    bubbleMessage.senderName = sender != null ? sender.getName() : null;
+                    bubbleMessage.senderAvatar = null;
+                    bubbleMessage.senderIcon = sender != null ? sender.getIcon() : null;
+                    return bubbleMessage;
+                }
+            } else if (Notification.InboxStyle.class.equals(style)) {
+                CharSequence[] lines =
+                        underlyingNotif.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+
+                // Return the last line since it should be the most recent.
+                if (lines != null && lines.length > 0) {
+                    bubbleMessage.message = lines[lines.length - 1];
+                    return bubbleMessage;
+                }
+            } else if (Notification.MediaStyle.class.equals(style)) {
+                // Return nothing, media updates aren't typically useful as a text update.
+                return bubbleMessage;
+            } else {
+                // Default to text extra.
+                bubbleMessage.message =
+                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
+                return bubbleMessage;
+            }
+        } catch (ClassCastException | NullPointerException | ArrayIndexOutOfBoundsException e) {
+            // No use crashing, we'll just return null and the caller will assume there's no update
+            // message.
+            e.printStackTrace();
+        }
+
+        return bubbleMessage;
     }
 }

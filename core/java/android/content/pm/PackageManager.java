@@ -79,7 +79,6 @@ import com.android.internal.util.ArrayUtils;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -3309,7 +3308,7 @@ public abstract class PackageManager {
     /**
      * Extra field name for the ID of a package pending verification. Passed to
      * a package verifier and is used to call back to
-     * @see #getChecksums
+     * @see #requestChecksums
      */
     public static final String EXTRA_CHECKSUMS = "android.content.pm.extra.CHECKSUMS";
 
@@ -7987,19 +7986,20 @@ public abstract class PackageManager {
 
     /**
      * Trust any Installer to provide checksums for the package.
-     * @see #getChecksums
+     * @see #requestChecksums
      */
-    public static final @Nullable List<Certificate> TRUST_ALL = null;
+    public static final @Nullable List<Certificate> TRUST_ALL = Collections.singletonList(null);
 
     /**
      * Don't trust any Installer to provide checksums for the package.
      * This effectively disables optimized Installer-enforced checksums.
-     * @see #getChecksums
+     * @see #requestChecksums
      */
-    public static final @NonNull List<Certificate> TRUST_NONE = Collections.emptyList();
+    public static final @NonNull List<Certificate> TRUST_NONE = Collections.singletonList(null);
 
     /**
-     * Returns the checksums for APKs within a package.
+     * Requesting the checksums for APKs within a package.
+     * The checksums will be returned asynchronously via statusReceiver.
      *
      * By default returns all readily available checksums:
      * - enforced by platform,
@@ -8011,21 +8011,24 @@ public abstract class PackageManager {
      *
      * @param packageName whose checksums to return.
      * @param includeSplits whether to include checksums for non-base splits.
-     * @param required explicitly request the checksum kinds. Will incur significant
+     * @param required explicitly request the checksum types. May incur significant
      *                 CPU/memory/disk usage.
-     * @param trustedInstallers for checksums enforced by Installer, which ones to be trusted.
-     *                          {@link #TRUST_ALL} will return checksums from any Installer,
-     *                          {@link #TRUST_NONE} disables optimized Installer-enforced checksums.
+     * @param trustedInstallers for checksums enforced by installer, which installers are to be
+     *                          trusted.
+     *                          {@link #TRUST_ALL} will return checksums from any installer,
+     *                          {@link #TRUST_NONE} disables optimized installer-enforced checksums,
+     *                          otherwise the list has to be non-empty list of certificates.
      * @param statusReceiver called once when the results are available as
-     *                       {@link #EXTRA_CHECKSUMS} of type ApkChecksum[].
+     *                       {@link #EXTRA_CHECKSUMS} of type {@link ApkChecksum}[].
      * @throws CertificateEncodingException if an encoding error occurs for trustedInstallers.
+     * @throws IllegalArgumentException if the list of trusted installer certificates is empty.
      * @throws NameNotFoundException if a package with the given name cannot be found on the system.
      */
-    public void getChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Kind int required, @Nullable List<Certificate> trustedInstallers,
+    public void requestChecksums(@NonNull String packageName, boolean includeSplits,
+            @Checksum.Type int required, @NonNull List<Certificate> trustedInstallers,
             @NonNull IntentSender statusReceiver)
-            throws CertificateEncodingException, IOException, NameNotFoundException {
-        throw new UnsupportedOperationException("getChecksums not implemented in subclass");
+            throws CertificateEncodingException, NameNotFoundException {
+        throw new UnsupportedOperationException("requestChecksums not implemented in subclass");
     }
 
     /**

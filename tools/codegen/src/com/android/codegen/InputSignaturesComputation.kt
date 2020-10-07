@@ -41,7 +41,10 @@ private fun ClassPrinter.generateInputSignaturesForClass(classAst: ClassOrInterf
         }
     } + ("class ${classAst.nameAsString}" +
             " extends ${classAst.extendedTypes.map { getFullClassName(it) }.ifEmpty { listOf("java.lang.Object") }.joinToString(", ")}" +
-            " implements [${classAst.implementedTypes.joinToString(", ") { getFullClassName(it) }}]")
+            " implements [${classAst.implementedTypes.joinToString(", ") { getFullClassName(it) }}]") +
+    classAst.nestedNonDataClasses.flatMap { nestedClass ->
+        generateInputSignaturesForClass(nestedClass)
+    }
 }
 
 private fun ClassPrinter.annotationsToString(annotatedAst: NodeWithAnnotations<*>): String {
@@ -140,6 +143,8 @@ private fun ClassPrinter.getFullClassName(className: String): String {
     }
 
     if (className[0].isLowerCase()) return className //primitive
+
+    if (className[0] == '?') return className //wildcard
 
     return thisPackagePrefix + className
 }

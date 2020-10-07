@@ -361,6 +361,36 @@ public class InfoMediaManager extends MediaManager {
         return null;
     }
 
+    boolean shouldDisableMediaOutput(String packageName) {
+        boolean shouldDisableMediaOutput = false;
+        if (TextUtils.isEmpty(packageName)) {
+            Log.w(TAG, "shouldDisableMediaOutput() package name is null or empty!");
+            return false;
+        }
+        final List<MediaRoute2Info> infos = mRouterManager.getAvailableRoutes(packageName);
+        if (infos.size() == 1) {
+            final MediaRoute2Info info = infos.get(0);
+            final int deviceType = info.getType();
+            switch (deviceType) {
+                case TYPE_UNKNOWN:
+                case TYPE_REMOTE_TV:
+                case TYPE_REMOTE_SPEAKER:
+                case TYPE_GROUP:
+                    shouldDisableMediaOutput = true;
+                    break;
+                default:
+                    shouldDisableMediaOutput = false;
+                    break;
+            }
+        }
+        if (DEBUG) {
+            Log.d(TAG, "shouldDisableMediaOutput() MediaRoute2Info size : " + infos.size()
+                    + ", package name : " + packageName + ", shouldDisableMediaOutput : "
+                    + shouldDisableMediaOutput);
+        }
+        return shouldDisableMediaOutput;
+    }
+
     private void refreshDevices() {
         mMediaDevices.clear();
         mCurrentConnectedDevice = null;

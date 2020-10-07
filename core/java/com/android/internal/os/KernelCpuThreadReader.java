@@ -18,10 +18,10 @@ package com.android.internal.os;
 
 import android.annotation.Nullable;
 import android.os.Process;
+import android.util.IntArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
@@ -456,14 +456,14 @@ public class KernelCpuThreadReader {
          * cluster has started.
          */
         private static int[] getClusterStartIndices(long[] frequencies) {
-            ArrayList<Integer> indices = new ArrayList<>();
+            IntArray indices = new IntArray();
             indices.add(0);
             for (int i = 0; i < frequencies.length - 1; i++) {
                 if (frequencies[i] >= frequencies[i + 1]) {
                     indices.add(i + 1);
                 }
             }
-            return ArrayUtils.convertToIntArray(indices);
+            return indices.toArray();
         }
 
         /** Get the index in frequencies where each bucket starts */
@@ -477,7 +477,7 @@ public class KernelCpuThreadReader {
                 return Arrays.copyOfRange(clusterStartIndices, 0, targetNumBuckets);
             }
 
-            ArrayList<Integer> bucketStartIndices = new ArrayList<>();
+            IntArray bucketStartIndices = new IntArray();
             for (int clusterIdx = 0; clusterIdx < numClusters; clusterIdx++) {
                 final int clusterStartIdx = getLowerBound(clusterIdx, clusterStartIndices);
                 final int clusterEndIdx =
@@ -509,7 +509,7 @@ public class KernelCpuThreadReader {
                     bucketStartIndices.add(bucketStartIdx);
                 }
             }
-            return ArrayUtils.convertToIntArray(bucketStartIndices);
+            return bucketStartIndices.toArray();
         }
 
         private static int getLowerBound(int index, int[] startIndices) {

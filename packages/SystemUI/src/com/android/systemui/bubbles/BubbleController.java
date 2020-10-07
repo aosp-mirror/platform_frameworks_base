@@ -231,6 +231,11 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
      */
     private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
 
+    /**
+     * Last known font scale, used to detect font size changes in {@link #onConfigChanged}.
+     */
+    private float mFontScale = 0;
+
     /** Last known direction, used to detect layout direction changes @link #onConfigChanged}. */
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
 
@@ -345,7 +350,42 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
     /**
      * Injected constructor. See {@link BubbleModule}.
      */
-    public BubbleController(Context context,
+    public static BubbleController create(Context context,
+            NotificationShadeWindowController notificationShadeWindowController,
+            StatusBarStateController statusBarStateController,
+            ShadeController shadeController,
+            @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
+            ConfigurationController configurationController,
+            NotificationInterruptStateProvider interruptionStateProvider,
+            ZenModeController zenModeController,
+            NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManagerLegacy groupManager,
+            NotificationEntryManager entryManager,
+            NotifPipeline notifPipeline,
+            FeatureFlags featureFlags,
+            DumpManager dumpManager,
+            FloatingContentCoordinator floatingContentCoordinator,
+            BubbleDataRepository dataRepository,
+            SysUiState sysUiState,
+            INotificationManager notificationManager,
+            @Nullable IStatusBarService statusBarService,
+            WindowManager windowManager,
+            WindowManagerShellWrapper windowManagerShellWrapper,
+            LauncherApps launcherApps) {
+        return new BubbleController(context, notificationShadeWindowController,
+                statusBarStateController, shadeController, new BubbleData(context), synchronizer,
+                configurationController, interruptionStateProvider, zenModeController,
+                notifUserManager, groupManager, entryManager, notifPipeline, featureFlags,
+                dumpManager, floatingContentCoordinator, dataRepository, sysUiState,
+                notificationManager, statusBarService, windowManager, windowManagerShellWrapper,
+                launcherApps);
+    }
+
+    /**
+     * Testing constructor.
+     */
+    @VisibleForTesting
+    BubbleController(Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,
             ShadeController shadeController,
@@ -955,6 +995,10 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }
+            if (newConfig.fontScale != mFontScale) {
+                mFontScale = newConfig.fontScale;
+                mStackView.updateFlyout(mFontScale);
+            }
             if (newConfig.getLayoutDirection() != mLayoutDirection) {
                 mLayoutDirection = newConfig.getLayoutDirection();
                 mStackView.onLayoutDirectionChanged(mLayoutDirection);
@@ -1120,9 +1164,10 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
-            b.setEntry(notif);
+            b.setEntry(notifToBubbleEntry(notif));
         } else {
-            Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
+            Bubble bubble = mBubbleData.getOrCreateBubble(
+                    notifToBubbleEntry(notif), null /* persistedBubble */);
             inflateAndAdd(bubble, suppressFlyout, showInShade);
         }
     }
@@ -1208,8 +1253,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
             mBubbleData.removeSuppressedSummary(groupKey);
 
             // Remove any associated bubble children with the summary
-            final List<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(
-                    groupKey, mNotificationEntryManager);
+            final List<Bubble> bubbleChildren = getBubblesInGroup(groupKey);
             for (int i = 0; i < bubbleChildren.size(); i++) {
                 removeBubble(bubbleChildren.get(i).getKey(), DISMISS_GROUP_CANCELLED);
             }
@@ -1253,6 +1297,25 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 onEntryUpdated(entry);
             }
         }
+    }
+
+    /**
+     * Retrieves any bubbles that are part of the notification group represented by the provided
+     * group key.
+     */
+    private ArrayList<Bubble> getBubblesInGroup(@Nullable String groupKey) {
+        ArrayList<Bubble> bubbleChildren = new ArrayList<>();
+        if (groupKey == null) {
+            return bubbleChildren;
+        }
+        for (Bubble bubble : mBubbleData.getActiveBubbles()) {
+            final NotificationEntry entry =
+                    mNotificationEntryManager.getPendingOrActiveNotif(bubble.getKey());
+            if (entry != null && groupKey.equals(entry.getSbn().getGroupKey())) {
+                bubbleChildren.add(bubble);
+            }
+        }
+        return bubbleChildren;
     }
 
     private void setIsBubble(@NonNull final NotificationEntry entry, final boolean isBubble,
@@ -1365,8 +1428,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 }
                 if (entry != null) {
                     final String groupKey = entry.getSbn().getGroupKey();
-                    if (mBubbleData.getBubblesInGroup(
-                            groupKey, mNotificationEntryManager).isEmpty()) {
+                    if (getBubblesInGroup(groupKey).isEmpty()) {
                         // Time to potentially remove the summary
                         for (NotifCallback cb : mCallbacks) {
                             cb.maybeCancelSummary(entry);
@@ -1449,8 +1511,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
         }
 
         String groupKey = entry.getSbn().getGroupKey();
-        ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(
-                groupKey, mNotificationEntryManager);
+        ArrayList<Bubble> bubbleChildren = getBubblesInGroup(groupKey);
         boolean isSuppressedSummary = (mBubbleData.isSummarySuppressed(groupKey)
                 && mBubbleData.getSummaryKey(groupKey).equals(entry.getKey()));
         boolean isSummary = entry.getSbn().getNotification().isGroupSummary();
@@ -1693,5 +1754,11 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 mStackView.post(() -> mStackView.onImeVisibilityChanged(imeVisible, imeHeight));
             }
         }
+    }
+
+    static BubbleEntry notifToBubbleEntry(NotificationEntry e) {
+        return new BubbleEntry(e.getSbn(), e.getRanking(), e.isClearable(),
+                e.shouldSuppressNotificationDot(), e.shouldSuppressNotificationList(),
+                e.shouldSuppressPeek());
     }
 }

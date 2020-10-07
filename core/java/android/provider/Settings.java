@@ -81,6 +81,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -324,6 +325,21 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS =
             "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of Reduce Bright Colors.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REDUCE_BRIGHT_COLORS_SETTINGS =
+            "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
 
     /**
      * Activity Action: Show settings to control access to usage information.
@@ -7122,6 +7138,33 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS =
                 "accessibility_interactive_ui_timeout_ms";
+
+
+        /**
+         * Setting that specifies whether Reduce Bright Colors, or brightness dimming by color
+         * adjustment, is enabled.
+         *
+         * @hide
+         */
+        public static final String REDUCE_BRIGHT_COLORS_ACTIVATED =
+                "reduce_bright_colors_activated";
+
+        /**
+         * Setting that specifies the level of Reduce Bright Colors in intensity. The range is
+         * [0, 100].
+         *
+         * @hide
+         */
+        public static final String REDUCE_BRIGHT_COLORS_LEVEL =
+                "reduce_bright_colors_level";
+
+        /**
+         * Setting that specifies whether Reduce Bright Colors should persist across reboots.
+         *
+         * @hide
+         */
+        public static final String REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS =
+                "reduce_bright_colors_persist_across_reboots";
 
         /**
          * List of the enabled print services.
@@ -14485,6 +14528,48 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_PEOPLE_SPACE = "show_people_space";
+
+        /**
+         * Block untrusted touches mode.
+         *
+         * Can be one of:
+         * <ul>
+         *      <li>0 = {@link BlockUntrustedTouchesMode#DISABLED}: Feature is off.
+         *      <li>1 = {@link BlockUntrustedTouchesMode#PERMISSIVE}: Untrusted touches are flagged
+         *          but not blocked
+         *      <li>2 = {@link BlockUntrustedTouchesMode#BLOCK}: Untrusted touches are blocked
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String BLOCK_UNTRUSTED_TOUCHES_MODE = "block_untrusted_touches";
+
+        /**
+         * The maximum allowed obscuring opacity by UID to propagate touches.
+         *
+         * For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
+         * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
+         * above the touch-consuming window.
+         *
+         * For a certain UID:
+         * <ul>
+         *     <li>If it's the same as the UID of the touch-consuming window, allow it to propagate
+         *     the touch.
+         *     <li>Otherwise take all its windows of eligible window types above the touch-consuming
+         *     window, compute their combined obscuring opacity considering that {@code
+         *     opacity(A, B) = 1 - (1 - opacity(A))*(1 - opacity(B))}. If the computed value is
+         *     lesser than or equal to this setting and there are no other windows preventing the
+         *     touch, allow the UID to propagate the touch.
+         * </ul>
+         *
+         * @see android.hardware.input.InputManager#getMaximumObscuringOpacityForTouch(Context)
+         * @see android.hardware.input.InputManager#setMaximumObscuringOpacityForTouch(Context,
+         * float)
+         *
+         * @hide
+         */
+        public static final String MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH =
+                "maximum_obscuring_opacity_for_touch";
     }
 
     /**

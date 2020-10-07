@@ -393,6 +393,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["protected-broadcast"];
   manifest_action["adopt-permissions"];
   manifest_action["uses-permission"];
+  manifest_action["uses-permission"]["required-feature"].Action(RequiredNameIsNotEmpty);
+  manifest_action["uses-permission"]["required-not-feature"].Action(RequiredNameIsNotEmpty);
   manifest_action["uses-permission-sdk-23"];
   manifest_action["permission"];
   manifest_action["permission"]["meta-data"] = meta_data_action;

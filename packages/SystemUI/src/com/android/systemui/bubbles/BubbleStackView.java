@@ -1156,6 +1156,10 @@ public class BubbleStackView extends FrameLayout
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
+    void updateFlyout(float fontScale) {
+        mFlyout.updateFontSize(fontScale);
+    }
+
     private void updateOverflow() {
         mBubbleOverflow.update();
         mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),

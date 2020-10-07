@@ -39,6 +39,8 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.STATUS_BAR" />
     <uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT" />
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
 
     <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
     <application android:debuggable="true"

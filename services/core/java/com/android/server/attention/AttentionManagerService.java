@@ -172,7 +172,7 @@ public class AttentionManagerService extends SystemService {
      */
     @VisibleForTesting
     protected boolean isAttentionServiceSupported() {
-        return isServiceEnabled() && isServiceConfigured(mContext);
+        return isServiceEnabled();
     }
 
     private boolean isServiceEnabled() {

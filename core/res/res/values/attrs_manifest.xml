@@ -2016,6 +2016,22 @@
         <attr name="requiredNotFeature" format="string" />
     </declare-styleable>
 
+    <!-- <code>required-feature</code> and <code>required-not-feature</code> elements inside
+         <code>uses-permission<code/> can be used to request the permission based on the fact
+         whether the system supports or does not support certain features.
+         If multiple <code>required-feature</code> and/or <code>required-not-feature</code> elements
+         are present, the permission will be “requested” only if the system supports all of the
+         listed "required-features" and does not support any of the "required-not-features".
+         -->
+    <declare-styleable name="AndroidManifestRequiredFeature">
+        <!-- The name of the feature. -->
+        <attr name="name" />
+    </declare-styleable>
+    <declare-styleable name="AndroidManifestRequiredNotFeature">
+        <!-- The name of the feature. -->
+        <attr name="name" />
+    </declare-styleable>
+
     <!-- The <code>uses-configuration</code> tag specifies
          a specific hardware configuration value used by the application.
          For example an application might specify that it requires

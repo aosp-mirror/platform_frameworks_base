@@ -1080,14 +1080,57 @@ public class ParsingPackageUtils {
                 }
             }
 
-            final String requiredFeature = sa.getNonConfigurationString(
-                    R.styleable.AndroidManifestUsesPermission_requiredFeature, 0);
-
-            final String requiredNotfeature = sa.getNonConfigurationString(
-                    R.styleable.AndroidManifestUsesPermission_requiredNotFeature,
+            final ArraySet<String> requiredFeatures = new ArraySet<>();
+            String feature = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifestUsesPermission_requiredFeature,
                     0);
+            if (feature != null) {
+                requiredFeatures.add(feature);
+            }
 
-            XmlUtils.skipCurrentTag(parser);
+            final ArraySet<String> requiredNotFeatures = new ArraySet<>();
+            feature = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable
+                            .AndroidManifestUsesPermission_requiredNotFeature,
+                    0);
+            if (feature != null) {
+                requiredNotFeatures.add(feature);
+            }
+
+            final int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG
+                    || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+
+                final ParseResult<?> result;
+                switch (parser.getName()) {
+                    case "required-feature":
+                        result = parseRequiredFeature(input, res, parser);
+                        if (result.isSuccess()) {
+                            requiredFeatures.add((String) result.getResult());
+                        }
+                        break;
+
+                    case "required-not-feature":
+                        result = parseRequiredNotFeature(input, res, parser);
+                        if (result.isSuccess()) {
+                            requiredNotFeatures.add((String) result.getResult());
+                        }
+                        break;
+
+                    default:
+                        result = ParsingUtils.unknownTag("<uses-permission>", pkg, parser, input);
+                        break;
+                }
+
+                if (result.isError()) {
+                    return input.error(result);
+                }
+            }
 
             // Can only succeed from here on out
             ParseResult<ParsingPackage> success = input.success(pkg);
@@ -1100,17 +1143,22 @@ public class ParsingPackageUtils {
                 return success;
             }
 
-            // Only allow requesting this permission if the platform supports the given feature.
-            if (requiredFeature != null && mCallback != null && !mCallback.hasFeature(
-                    requiredFeature)) {
-                return success;
-            }
+            if (mCallback != null) {
+                // Only allow requesting this permission if the platform supports all of the
+                // "required-feature"s.
+                for (int i = requiredFeatures.size() - 1; i >= 0; i--) {
+                    if (!mCallback.hasFeature(requiredFeatures.valueAt(i))) {
+                        return success;
+                    }
+                }
 
-            // Only allow requesting this permission if the platform doesn't support the given
-            // feature.
-            if (requiredNotfeature != null && mCallback != null
-                    && mCallback.hasFeature(requiredNotfeature)) {
-                return success;
+                // Only allow requesting this permission if the platform does not supports any of
+                // the "required-not-feature"s.
+                for (int i = requiredNotFeatures.size() - 1; i >= 0; i--) {
+                    if (mCallback.hasFeature(requiredNotFeatures.valueAt(i))) {
+                        return success;
+                    }
+                }
             }
 
             if (!pkg.getRequestedPermissions().contains(name)) {
@@ -1122,6 +1170,36 @@ public class ParsingPackageUtils {
             }
 
             return success;
+        } finally {
+            sa.recycle();
+        }
+    }
+
+    private ParseResult<String> parseRequiredFeature(ParseInput input, Resources res,
+            AttributeSet attrs) {
+        final TypedArray sa = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestRequiredFeature);
+        try {
+            final String featureName = sa.getString(
+                    R.styleable.AndroidManifestRequiredFeature_name);
+            return TextUtils.isEmpty(featureName)
+                    ? input.error("Feature name is missing from <required-feature> tag.")
+                    : input.success(featureName);
+        } finally {
+            sa.recycle();
+        }
+    }
+
+    private ParseResult<String> parseRequiredNotFeature(ParseInput input, Resources res,
+            AttributeSet attrs) {
+        final TypedArray sa = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestRequiredNotFeature);
+        try {
+            final String featureName = sa.getString(
+                    R.styleable.AndroidManifestRequiredNotFeature_name);
+            return TextUtils.isEmpty(featureName)
+                    ? input.error("Feature name is missing from <required-not-feature> tag.")
+                    : input.success(featureName);
         } finally {
             sa.recycle();
         }

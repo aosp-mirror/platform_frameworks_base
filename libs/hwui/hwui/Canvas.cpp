@@ -135,6 +135,26 @@ private:
     float totalAdvance;
 };
 
+void Canvas::drawGlyphs(const minikin::Font& font, const int* glyphIds, const float* positions,
+                        int glyphCount, const Paint& paint) {
+    // Minikin modify skFont for auto-fakebold/auto-fakeitalic.
+    Paint copied(paint);
+
+    auto glyphFunc = [&](uint16_t* outGlyphIds, float* outPositions) {
+        for (uint32_t i = 0; i < glyphCount; ++i) {
+            outGlyphIds[i] = static_cast<uint16_t>(glyphIds[i]);
+        }
+        memcpy(outPositions, positions, sizeof(float) * 2 * glyphCount);
+    };
+
+    const minikin::MinikinFont* minikinFont = font.typeface().get();
+    SkFont* skfont = &copied.getSkFont();
+    MinikinFontSkia::populateSkFont(skfont, minikinFont, minikin::FontFakery());
+
+    // total advance is used for drawing underline. We do not support underlyine by glyph drawing.
+    drawGlyphs(glyphFunc, glyphCount, copied, 0 /* x */, 0 /* y */, 0 /* total Advance */);
+}
+
 void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, int contextStart,
                       int contextCount, float x, float y, minikin::Bidi bidiFlags,
                       const Paint& origPaint, const Typeface* typeface, minikin::MeasuredText* mt) {

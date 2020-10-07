@@ -36,8 +36,6 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -51,8 +49,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import javax.inject.Inject;
 
 /**
  * Keeps track of active bubbles.
@@ -154,12 +150,11 @@ public class BubbleData {
      * associated with it). This list is used to check if the summary should be hidden from the
      * shade.
      *
-     * Key: group key of the NotificationEntry
-     * Value: key of the NotificationEntry
+     * Key: group key of the notification
+     * Value: key of the notification
      */
     private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
 
-    @Inject
     public BubbleData(Context context) {
         mContext = context;
         mBubbles = new ArrayList<>();
@@ -205,6 +200,11 @@ public class BubbleData {
         return mSelectedBubble;
     }
 
+    /** Return a read-only current active bubble lists. */
+    public List<Bubble> getActiveBubbles() {
+        return Collections.unmodifiableList(mBubbles);
+    }
+
     public void setExpanded(boolean expanded) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setExpanded: " + expanded);
@@ -235,8 +235,8 @@ public class BubbleData {
      * @param persistedBubble The bubble to use, only non-null if it's a bubble being promoted from
      *              the overflow that was persisted over reboot.
      */
-    Bubble getOrCreateBubble(NotificationEntry entry, Bubble persistedBubble) {
-        String key = entry != null ? entry.getKey() : persistedBubble.getKey();
+    public Bubble getOrCreateBubble(BubbleEntry entry, Bubble persistedBubble) {
+        String key = persistedBubble != null ? persistedBubble.getKey() : entry.getKey();
         Bubble bubbleToReturn = getBubbleInStackWithKey(key);
 
         if (bubbleToReturn == null) {
@@ -266,7 +266,7 @@ public class BubbleData {
     /**
      * When this method is called it is expected that all info in the bubble has completed loading.
      * @see Bubble#inflate(BubbleViewInfoTask.Callback, Context,
-     * BubbleStackView, BubbleIconFactory).
+     * BubbleStackView, BubbleIconFactory, boolean).
      */
     void notificationEntryUpdated(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
         if (DEBUG_BUBBLE_DATA) {
@@ -329,7 +329,7 @@ public class BubbleData {
      * Retrieves the notif entry key of the summary associated with the provided group key.
      *
      * @param groupKey the group to look up
-     * @return the key for the {@link NotificationEntry} that is the summary of this group.
+     * @return the key for the notification that is the summary of this group.
      */
     String getSummaryKey(String groupKey) {
         return mSuppressedGroupKeys.get(groupKey);
@@ -347,25 +347,6 @@ public class BubbleData {
      */
     boolean isSummarySuppressed(String groupKey) {
         return mSuppressedGroupKeys.containsKey(groupKey);
-    }
-
-    /**
-     * Retrieves any bubbles that are part of the notification group represented by the provided
-     * group key.
-     */
-    ArrayList<Bubble> getBubblesInGroup(@Nullable String groupKey, @NonNull
-            NotificationEntryManager nem) {
-        ArrayList<Bubble> bubbleChildren = new ArrayList<>();
-        if (groupKey == null) {
-            return bubbleChildren;
-        }
-        for (Bubble b : mBubbles) {
-            final NotificationEntry entry = nem.getPendingOrActiveNotif(b.getKey());
-            if (entry != null && groupKey.equals(entry.getSbn().getGroupKey())) {
-                bubbleChildren.add(b);
-            }
-        }
-        return bubbleChildren;
     }
 
     /**

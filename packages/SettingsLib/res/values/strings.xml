@@ -1354,6 +1354,11 @@
     <string name="user_set_lock_button">Set lock</string>
     <!-- Label for switching to other user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
+    <!-- Dialog message when creating a new user [CHAR LIMIT=40] -->
+    <string name="creating_new_user_dialog_message">Creating new user…</string>
+
+    <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
+    <string name="user_nickname">Nickname</string>
 
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_new_guest">Add guest</string>
@@ -1361,6 +1366,13 @@
     <string name="guest_exit_guest">Remove guest</string>
     <!-- Name for the guest user [CHAR LIMIT=35] -->
     <string name="guest_nickname">Guest</string>
+
+    <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
+    <string name="user_image_take_photo">Take a photo</string>
+    <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
+    <string name="user_image_choose_photo">Choose an image</string>
+    <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
+    <string name="user_image_photo_selector">Select photo</string>
 
     <!-- List entry in developer settings to choose default device/system behavior for the app freezer [CHAR LIMIT=30]-->
     <string name="cached_apps_freezer_device_default">Device default</string>

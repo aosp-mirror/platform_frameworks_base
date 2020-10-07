@@ -31,6 +31,7 @@ import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
 import static com.android.internal.location.ProviderRequest.EMPTY_REQUEST;
+import static com.android.internal.location.ProviderRequest.INTERVAL_DISABLED;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -238,8 +239,7 @@ class LocationProviderManager extends
     protected abstract class Registration extends RemoteListenerRegistration<LocationRequest,
             LocationTransport, LocationListenerOperation> {
 
-        @PermissionLevel protected final int mPermissionLevel;
-        private final WorkSource mWorkSource;
+        private final @PermissionLevel int mPermissionLevel;
 
         // we cache these values because checking/calculating on the fly is more expensive
         private boolean mPermitted;
@@ -247,22 +247,17 @@ class LocationProviderManager extends
         private LocationRequest mProviderLocationRequest;
         private boolean mIsUsingHighPower;
 
-        @Nullable private Location mLastLocation = null;
+        private @Nullable Location mLastLocation = null;
 
         protected Registration(LocationRequest request, CallerIdentity identity,
                 LocationTransport transport, @PermissionLevel int permissionLevel) {
             super(Objects.requireNonNull(request), identity, transport);
 
             Preconditions.checkArgument(permissionLevel > PERMISSION_NONE);
+            Preconditions.checkArgument(!request.getWorkSource().isEmpty());
+
             mPermissionLevel = permissionLevel;
-
-            if (request.getWorkSource() != null && !request.getWorkSource().isEmpty()) {
-                mWorkSource = request.getWorkSource();
-            } else {
-                mWorkSource = identity.addToWorkSource(null);
-            }
-
-            mProviderLocationRequest = super.getRequest();
+            mProviderLocationRequest = request;
         }
 
         @GuardedBy("mLock")
@@ -376,6 +371,10 @@ class LocationProviderManager extends
             return mLastLocation;
         }
 
+        public @PermissionLevel int getPermissionLevel() {
+            return mPermissionLevel;
+        }
+
         public final boolean isForeground() {
             return mForeground;
         }
@@ -387,10 +386,6 @@ class LocationProviderManager extends
         @Override
         protected final LocationProviderManager getOwner() {
             return LocationProviderManager.this;
-        }
-
-        protected final WorkSource getWorkSource() {
-            return mWorkSource;
         }
 
         @GuardedBy("mLock")
@@ -609,7 +604,7 @@ class LocationProviderManager extends
             mWakeLock = Objects.requireNonNull(mContext.getSystemService(PowerManager.class))
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
             mWakeLock.setReferenceCounted(true);
-            mWakeLock.setWorkSource(getWorkSource());
+            mWakeLock.setWorkSource(request.getWorkSource());
         }
 
         @Override
@@ -628,7 +623,7 @@ class LocationProviderManager extends
                 onAlarm();
             } else if (mExpirationRealtimeMs < Long.MAX_VALUE) {
                 mAlarmHelper.setDelayedAlarm(mExpirationRealtimeMs - registerTimeMs, this,
-                        getWorkSource());
+                        getRequest().getWorkSource());
             }
 
             // start listening for provider enabled/disabled events
@@ -690,7 +685,7 @@ class LocationProviderManager extends
                 if (maxLocationAgeMs > MIN_REQUEST_DELAY_MS) {
                     Location lastLocation = getLastLocationUnsafe(
                             getIdentity().getUserId(),
-                            PERMISSION_FINE, // acceptLocationChange() handles coarsening this
+                            getPermissionLevel(),
                             getRequest().isLocationSettingsIgnored(),
                             maxLocationAgeMs);
                     if (lastLocation != null) {
@@ -732,18 +727,8 @@ class LocationProviderManager extends
                 return null;
             }
 
-            Location location;
-            switch (mPermissionLevel) {
-                case PERMISSION_FINE:
-                    location = fineLocation;
-                    break;
-                case PERMISSION_COARSE:
-                    location = mLocationFudger.createCoarse(fineLocation);
-                    break;
-                default:
-                    // shouldn't be possible to have a client added without location permissions
-                    throw new AssertionError();
-            }
+            Location location = Objects.requireNonNull(
+                    getPermittedLocation(fineLocation, getPermissionLevel()));
 
             Location lastDeliveredLocation = getLastDeliveredLocation();
             if (lastDeliveredLocation != null) {
@@ -765,7 +750,7 @@ class LocationProviderManager extends
             }
 
             // note app ops
-            if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(mPermissionLevel),
+            if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(getPermissionLevel()),
                     getIdentity())) {
                 if (D) {
                     Log.w(TAG, "noteOp denied for " + getIdentity());
@@ -962,7 +947,7 @@ class LocationProviderManager extends
     }
 
     protected final class GetCurrentLocationListenerRegistration extends Registration implements
-            IBinder.DeathRecipient, ProviderEnabledListener, OnAlarmListener {
+            IBinder.DeathRecipient, OnAlarmListener {
 
         private volatile LocationTransport mTransport;
 
@@ -972,11 +957,6 @@ class LocationProviderManager extends
                 CallerIdentity identity, LocationTransport transport, int permissionLevel) {
             super(request, identity, transport, permissionLevel);
             mTransport = transport;
-        }
-
-        @GuardedBy("mLock")
-        void deliverLocation(@Nullable Location location) {
-            executeSafely(getExecutor(), () -> mTransport, acceptLocationChange(location));
         }
 
         @Override
@@ -1001,35 +981,51 @@ class LocationProviderManager extends
                 onAlarm();
             } else if (mExpirationRealtimeMs < Long.MAX_VALUE) {
                 mAlarmHelper.setDelayedAlarm(mExpirationRealtimeMs - registerTimeMs, this,
-                        getWorkSource());
-            }
-
-            // if this request is ignoring location settings, then we don't want to immediately fail
-            // it if the provider is disabled or becomes disabled.
-            if (!getRequest().isLocationSettingsIgnored()) {
-                // start listening for provider enabled/disabled events
-                addEnabledListener(this);
-
-                // if the provider is currently disabled fail immediately
-                int userId = getIdentity().getUserId();
-                if (!isEnabled(userId)) {
-                    deliverLocation(null);
-                }
+                        getRequest().getWorkSource());
             }
         }
 
         @GuardedBy("mLock")
         @Override
         protected void onProviderListenerUnregister() {
-            // stop listening for provider enabled/disabled events
-            removeEnabledListener(this);
-
             // remove alarm for expiration
             if (mExpirationRealtimeMs < Long.MAX_VALUE) {
                 mAlarmHelper.cancel(this);
             }
 
             ((IBinder) getKey()).unlinkToDeath(this, 0);
+        }
+
+        @GuardedBy("mLock")
+        @Override
+        protected LocationListenerOperation onProviderListenerActive() {
+            Location lastLocation = getLastLocationUnsafe(
+                    getIdentity().getUserId(),
+                    getPermissionLevel(),
+                    getRequest().isLocationSettingsIgnored(),
+                    MAX_CURRENT_LOCATION_AGE_MS);
+            if (lastLocation != null) {
+                return acceptLocationChange(lastLocation);
+            }
+
+            return null;
+        }
+
+        @GuardedBy("mLock")
+        @Override
+        protected LocationListenerOperation onProviderListenerInactive() {
+            if (!getRequest().isLocationSettingsIgnored()) {
+                // if we go inactive for any reason, fail immediately
+                return acceptLocationChange(null);
+            }
+
+            return null;
+        }
+
+        void deliverNull() {
+            synchronized (mLock) {
+                executeSafely(getExecutor(), () -> mTransport, acceptLocationChange(null));
+            }
         }
 
         @Override
@@ -1041,9 +1037,10 @@ class LocationProviderManager extends
             }
 
             synchronized (mLock) {
-                deliverLocation(null);
                 // no need to remove alarm after it's fired
                 mExpirationRealtimeMs = Long.MAX_VALUE;
+
+                deliverNull();
             }
         }
 
@@ -1062,28 +1059,15 @@ class LocationProviderManager extends
             }
 
             // lastly - note app ops
-            Location location;
-            if (fineLocation == null) {
-                location = null;
-            } else if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(mPermissionLevel),
+            if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(getPermissionLevel()),
                     getIdentity())) {
                 if (D) {
                     Log.w(TAG, "noteOp denied for " + getIdentity());
                 }
-                location = null;
-            } else {
-                switch (mPermissionLevel) {
-                    case PERMISSION_FINE:
-                        location = fineLocation;
-                        break;
-                    case PERMISSION_COARSE:
-                        location = mLocationFudger.createCoarse(fineLocation);
-                        break;
-                    default:
-                        // shouldn't be possible to have a client added without location permissions
-                        throw new AssertionError();
-                }
+                fineLocation = null;
             }
+
+            Location location = getPermittedLocation(fineLocation, getPermissionLevel());
 
             return new LocationListenerOperation() {
                 @Override
@@ -1117,22 +1101,6 @@ class LocationProviderManager extends
                     }
                 }
             };
-        }
-
-        @Override
-        public void onProviderEnabledChanged(String provider, int userId, boolean enabled) {
-            Preconditions.checkState(mName.equals(provider));
-
-            if (userId != getIdentity().getUserId()) {
-                return;
-            }
-
-            // if the provider is disabled we give up on current location immediately
-            if (!getRequest().isLocationSettingsIgnored() && !enabled) {
-                synchronized (mLock) {
-                    deliverLocation(null);
-                }
-            }
         }
 
         @Override
@@ -1449,24 +1417,34 @@ class LocationProviderManager extends
             }
         }
 
-        Location location = getLastLocationUnsafe(identity.getUserId(), permissionLevel,
-                ignoreLocationSettings, Long.MAX_VALUE);
+        // lastly - note app ops
+        if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
+                identity)) {
+            return null;
+        }
 
-        // we don't note op here because we don't know what the client intends to do with the
-        // location, the client is responsible for noting if necessary
+        Location location = getPermittedLocation(
+                getLastLocationUnsafe(
+                        identity.getUserId(),
+                        permissionLevel,
+                        ignoreLocationSettings,
+                        Long.MAX_VALUE),
+                permissionLevel);
 
-        if (identity.getPid() == Process.myPid() && location != null) {
+        if (location != null && identity.getPid() == Process.myPid()) {
             // if delivering to the same process, make a copy of the location first (since
             // location is mutable)
-            return new Location(location);
-        } else {
-            return location;
+            location = new Location(location);
         }
+
+        return location;
     }
 
     /**
      * This function does not perform any permissions or safety checks, by calling it you are
-     * committing to performing all applicable checks yourself.
+     * committing to performing all applicable checks yourself. This always returns a "fine"
+     * location, even if the permissionLevel is coarse. You are responsible for coarsening the
+     * location if necessary.
      */
     @Nullable
     public Location getLastLocationUnsafe(int userId, @PermissionLevel int permissionLevel,
@@ -1535,11 +1513,10 @@ class LocationProviderManager extends
                 mLastLocations.put(userId, lastLocation);
             }
 
-            Location coarseLocation = mLocationFudger.createCoarse(location);
             if (isEnabled(userId)) {
-                lastLocation.set(location, coarseLocation);
+                lastLocation.set(location);
             }
-            lastLocation.setBypass(location, coarseLocation);
+            lastLocation.setBypass(location);
         }
     }
 
@@ -1560,51 +1537,26 @@ class LocationProviderManager extends
                         permissionLevel);
 
         synchronized (mLock) {
-            // shortcut various failure conditions so that we can return immediately rather than
-            // waiting for location to timeout
-            if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
-                    identity.getPackageName())) {
-                registration.deliverLocation(null);
-                return null;
-            }
-            if (!request.isLocationSettingsIgnored()) {
-                if (!isEnabled(identity.getUserId())) {
-                    registration.deliverLocation(null);
-                    return null;
-                }
-                if (!identity.isSystem() && !mUserHelper.isCurrentUserId(identity.getUserId())) {
-                    registration.deliverLocation(null);
-                    return null;
-                }
-            }
-
-            Location lastLocation = getLastLocationUnsafe(
-                    identity.getUserId(),
-                    permissionLevel,
-                    request.isLocationSettingsIgnored(),
-                    MAX_CURRENT_LOCATION_AGE_MS);
-            if (lastLocation != null) {
-                registration.deliverLocation(lastLocation);
-                return null;
-            }
-
-            // if last location isn't good enough then we add a location request
             long ident = Binder.clearCallingIdentity();
             try {
                 addRegistration(callback.asBinder(), registration);
+                if (!registration.isActive()) {
+                    // if the registration never activated, fail it immediately
+                    registration.deliverNull();
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
 
         ICancellationSignal cancelTransport = CancellationSignal.createTransport();
-        CancellationSignal cancellationSignal = CancellationSignal.fromTransport(cancelTransport);
-        cancellationSignal.setOnCancelListener(SingleUseCallback.wrap(
-                () -> {
-                    synchronized (mLock) {
-                        removeRegistration(callback.asBinder(), registration);
-                    }
-                }));
+        CancellationSignal.fromTransport(cancelTransport)
+                .setOnCancelListener(SingleUseCallback.wrap(
+                        () -> {
+                            synchronized (mLock) {
+                                removeRegistration(callback.asBinder(), registration);
+                            }
+                        }));
         return cancelTransport;
     }
 
@@ -1619,16 +1571,16 @@ class LocationProviderManager extends
 
     public void registerLocationRequest(LocationRequest request, CallerIdentity identity,
             @PermissionLevel int permissionLevel, ILocationListener listener) {
+        LocationListenerRegistration registration = new LocationListenerRegistration(
+                request,
+                identity,
+                new LocationListenerTransport(listener),
+                permissionLevel);
+
         synchronized (mLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                addRegistration(
-                        listener.asBinder(),
-                        new LocationListenerRegistration(
-                                request,
-                                identity,
-                                new LocationListenerTransport(listener),
-                                permissionLevel));
+                addRegistration(listener.asBinder(), registration);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1637,16 +1589,16 @@ class LocationProviderManager extends
 
     public void registerLocationRequest(LocationRequest request, CallerIdentity callerIdentity,
             @PermissionLevel int permissionLevel, PendingIntent pendingIntent) {
+        LocationPendingIntentRegistration registration = new LocationPendingIntentRegistration(
+                request,
+                callerIdentity,
+                new LocationPendingIntentTransport(mContext, pendingIntent),
+                permissionLevel);
+
         synchronized (mLock) {
             long identity = Binder.clearCallingIdentity();
             try {
-                addRegistration(
-                        pendingIntent,
-                        new LocationPendingIntentRegistration(
-                                request,
-                                callerIdentity,
-                                new LocationPendingIntentTransport(mContext, pendingIntent),
-                                permissionLevel));
+                addRegistration(pendingIntent, registration);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1897,7 +1849,7 @@ class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        long intervalMs = Long.MAX_VALUE;
+        long intervalMs = INTERVAL_DISABLED;
         boolean locationSettingsIgnored = false;
         boolean lowPower = true;
         ArrayList<LocationRequest> locationRequests = new ArrayList<>(registrations.size());
@@ -1916,12 +1868,18 @@ class LocationProviderManager extends
             locationRequests.add(request);
         }
 
+        if (intervalMs == INTERVAL_DISABLED) {
+            return EMPTY_REQUEST;
+        }
+
         // calculate who to blame for power in a somewhat arbitrary fashion. we pick a threshold
         // interval slightly higher that the minimum interval, and spread the blame across all
         // contributing registrations under that threshold (since worksource does not allow us to
         // represent differing power blame ratios).
-        long thresholdIntervalMs = (intervalMs + 1000) * 3 / 2;
-        if (thresholdIntervalMs < 0 || thresholdIntervalMs >= PASSIVE_INTERVAL) {
+        long thresholdIntervalMs;
+        try {
+            thresholdIntervalMs = Math.multiplyExact(Math.addExact(intervalMs, 1000) / 2, 3);
+        } catch (ArithmeticException e) {
             // check for and handle overflow by setting to one below the passive interval so passive
             // requests are automatically skipped
             thresholdIntervalMs = PASSIVE_INTERVAL - 1;
@@ -1930,7 +1888,7 @@ class LocationProviderManager extends
         WorkSource workSource = new WorkSource();
         for (Registration registration : registrations) {
             if (registration.getRequest().getIntervalMillis() <= thresholdIntervalMs) {
-                workSource.add(registration.getWorkSource());
+                workSource.add(registration.getRequest().getWorkSource());
             }
         }
 
@@ -1963,7 +1921,7 @@ class LocationProviderManager extends
                 // location for our calculations instead. this prevents spammy add/remove behavior
                 last = getLastLocationUnsafe(
                         registration.getIdentity().getUserId(),
-                        PERMISSION_FINE,
+                        registration.getPermissionLevel(),
                         false,
                         locationRequest.getIntervalMillis());
             }
@@ -2256,6 +2214,20 @@ class LocationProviderManager extends
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
+    @Nullable
+    private Location getPermittedLocation(@Nullable Location fineLocation,
+            @PermissionLevel int permissionLevel) {
+        switch (permissionLevel) {
+            case PERMISSION_FINE:
+                return fineLocation;
+            case PERMISSION_COARSE:
+                return fineLocation != null ? mLocationFudger.createCoarse(fineLocation) : null;
+            default:
+                // shouldn't be possible to have a client added without location permissions
+                throw new AssertionError();
+        }
+    }
+
     public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
         synchronized (mLock) {
             ipw.print(mName);
@@ -2306,10 +2278,14 @@ class LocationProviderManager extends
         public void clearMock() {
             if (mFineLocation != null && mFineLocation.isFromMockProvider()) {
                 mFineLocation = null;
+            }
+            if (mCoarseLocation != null && mCoarseLocation.isFromMockProvider()) {
                 mCoarseLocation = null;
             }
             if (mFineBypassLocation != null && mFineBypassLocation.isFromMockProvider()) {
                 mFineBypassLocation = null;
+            }
+            if (mCoarseBypassLocation != null && mCoarseBypassLocation.isFromMockProvider()) {
                 mCoarseBypassLocation = null;
             }
         }
@@ -2340,14 +2316,14 @@ class LocationProviderManager extends
             }
         }
 
-        public void set(Location fineLocation, Location coarseLocation) {
-            mFineLocation = calculateNextFine(mFineLocation, fineLocation);
-            mCoarseLocation = calculateNextCoarse(mCoarseLocation, coarseLocation);
+        public void set(Location location) {
+            mFineLocation = calculateNextFine(mFineLocation, location);
+            mCoarseLocation = calculateNextCoarse(mCoarseLocation, location);
         }
 
-        public void setBypass(Location fineLocation, Location coarseLocation) {
-            mFineBypassLocation = calculateNextFine(mFineBypassLocation, fineLocation);
-            mCoarseBypassLocation = calculateNextCoarse(mCoarseBypassLocation, coarseLocation);
+        public void setBypass(Location location) {
+            mFineBypassLocation = calculateNextFine(mFineBypassLocation, location);
+            mCoarseBypassLocation = calculateNextCoarse(mCoarseBypassLocation, location);
         }
 
         private Location calculateNextFine(@Nullable Location oldFine, Location newFine) {
@@ -2369,8 +2345,8 @@ class LocationProviderManager extends
             }
 
             // update last coarse interval only if enough time has passed
-            if (newCoarse.getElapsedRealtimeNanos() - MIN_COARSE_INTERVAL_MS
-                    > oldCoarse.getElapsedRealtimeNanos()) {
+            if (newCoarse.getElapsedRealtimeMillis() - MIN_COARSE_INTERVAL_MS
+                    > oldCoarse.getElapsedRealtimeMillis()) {
                 return newCoarse;
             } else {
                 return oldCoarse;

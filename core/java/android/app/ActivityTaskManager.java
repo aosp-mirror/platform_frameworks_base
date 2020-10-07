@@ -211,23 +211,23 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Removes stacks in the windowing modes from the system if they are of activity type
+     * Removes root tasks in the windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void removeStacksInWindowingModes(int[] windowingModes) throws SecurityException {
+    public void removeRootTasksInWindowingModes(@NonNull int[] windowingModes) {
         try {
-            getService().removeStacksInWindowingModes(windowingModes);
+            getService().removeRootTasksInWindowingModes(windowingModes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    /** Removes stack of the activity types from the system. */
+    /** Removes root tasks of the activity types from the system. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void removeStacksWithActivityTypes(int[] activityTypes) throws SecurityException {
+    public void removeRootTasksWithActivityTypes(@NonNull int[] activityTypes) {
         try {
-            getService().removeStacksWithActivityTypes(activityTypes);
+            getService().removeRootTasksWithActivityTypes(activityTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -310,15 +310,15 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Moves the top activity in the input stackId to the pinned stack.
-     * @param stackId Id of stack to move the top activity to pinned stack.
-     * @param bounds Bounds to use for pinned stack.
-     * @return True if the top activity of stack was successfully moved to the pinned stack.
+     * Moves the top activity in the input rootTaskId to the pinned root task.
+     * @param rootTaskId Id of root task to move the top activity to pinned root task.
+     * @param bounds Bounds to use for pinned root task.
+     * @return True if the top activity of root task was successfully moved to the pinned root task.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
+    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, @NonNull Rect bounds) {
         try {
-            return getService().moveTopActivityToPinnedStack(stackId, bounds);
+            return getService().moveTopActivityToPinnedRootTask(rootTaskId, bounds);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -350,15 +350,15 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Move task to stack with given id.
+     * Move task to root task with given id.
      * @param taskId Id of the task to move.
-     * @param stackId Id of the stack for task moving.
+     * @param rootTaskId Id of the rootTask for task moving.
      * @param toTop Whether the given task should shown to top of stack.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+    public void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop) {
         try {
-            getService().moveTaskToStack(taskId, stackId, toTop);
+            getService().moveTaskToRootTask(taskId, rootTaskId, toTop);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -380,13 +380,13 @@ public class ActivityTaskManager {
 
     /**
      * Resize docked stack & its task to given stack & task bounds.
-     * @param stackBounds Bounds to resize stack.
+     * @param rootTaskBounds Bounds to resize stack.
      * @param taskBounds Bounds to resize task.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void resizeDockedStack(Rect stackBounds, Rect taskBounds) {
+    public void resizePrimarySplitScreen(@NonNull Rect rootTaskBounds, @NonNull Rect taskBounds) {
         try {
-            getService().resizeDockedStack(stackBounds, taskBounds, null, null, null);
+            getService().resizePrimarySplitScreen(rootTaskBounds, taskBounds, null, null, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
 import com.android.systemui.tuner.dagger.TunerModule;
+import com.android.systemui.user.UserModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.sensors.SensorModule;
@@ -76,6 +77,7 @@ import dagger.Provides;
             StatusBarPolicyModule.class,
             SysUIConcurrencyModule.class,
             TunerModule.class,
+            UserModule.class,
             UtilModule.class,
             VolumeModule.class
         },

@@ -19,10 +19,12 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.fonts.Font;
 import android.graphics.text.MeasuredText;
 import android.os.Build;
 
@@ -2045,6 +2047,43 @@ public class Canvas extends BaseCanvas {
     public void drawDoubleRoundRect(@NonNull RectF outer, @NonNull float[] outerRadii,
             @NonNull RectF inner, @NonNull float[] innerRadii, @NonNull Paint paint) {
         super.drawDoubleRoundRect(outer, outerRadii, inner, innerRadii, paint);
+    }
+
+    /**
+     * Draw array of glyphs with specified font.
+     *
+     * @param glyphIds Array of glyph IDs. The length of array must be greater than or equal to
+     *                 {@code glyphStart + glyphCount}.
+     * @param glyphIdOffset Number of elements to skip before drawing in <code>glyphIds</code>
+     *                     array.
+     * @param positions A flattened X and Y position array. The first glyph X position must be
+     *                  stored at {@code positionOffset}. The first glyph Y position must be stored
+     *                  at {@code positionOffset + 1}, then the second glyph X position must be
+     *                  stored at {@code positionOffset + 2}.
+     *                 The length of array must be greater than or equal to
+     *                 {@code positionOffset + glyphCount * 2}.
+     * @param positionOffset Number of elements to skip before drawing in {@code positions}.
+     *                       The first glyph X position must be stored at {@code positionOffset}.
+     *                       The first glyph Y position must be stored at
+     *                       {@code positionOffset + 1}, then the second glyph X position must be
+     *                       stored at {@code positionOffset + 2}.
+     * @param glyphCount Number of glyphs to be drawn.
+     * @param font Font used for drawing.
+     * @param paint Paint used for drawing. The typeface set to this paint is ignored.
+     *
+     * @see android.graphics.text.TextShaper
+     * @see android.text.StyledTextShaper
+     */
+    public void drawGlyphs(
+            @NonNull int[] glyphIds,
+            @IntRange(from = 0) int glyphIdOffset,
+            @NonNull float[] positions,
+            @IntRange(from = 0) int positionOffset,
+            @IntRange(from = 0) int glyphCount,
+            @NonNull Font font,
+            @NonNull Paint paint) {
+        super.drawGlyphs(glyphIds, glyphIdOffset, positions, positionOffset, glyphCount, font,
+                paint);
     }
 
     /**
