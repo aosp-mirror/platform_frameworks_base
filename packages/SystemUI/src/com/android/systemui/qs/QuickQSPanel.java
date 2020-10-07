@@ -28,7 +28,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -36,10 +35,7 @@ import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,15 +118,8 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Dependency.get(TunerService.class).addTunable(mNumTiles, NUM_QUICK_TILES);
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(TunerService.class).removeTunable(mNumTiles);
     }
 
     @Override
@@ -160,12 +149,6 @@ public class QuickQSPanel extends QSPanel {
         super.drawTile(r, state);
     }
 
-    @Override
-    public void setHost(QSTileHost host, QSCustomizer customizer) {
-        super.setHost(host, customizer);
-        setTiles(mHost.getTiles());
-    }
-
     public void setMaxTiles(int maxTiles) {
         mMaxTiles = maxTiles;
         if (mHost != null) {
@@ -192,13 +175,6 @@ public class QuickQSPanel extends QSPanel {
         }
         super.setTiles(quickTiles, true);
     }
-
-    private final Tunable mNumTiles = new Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            setMaxTiles(parseNumTiles(newValue));
-        }
-    };
 
     public int getNumQuickTiles() {
         return mMaxTiles;

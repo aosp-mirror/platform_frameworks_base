@@ -325,26 +325,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        final TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable(this, QS_SHOW_BRIGHTNESS);
-
-        if (mHost != null) {
-            setTiles(mHost.getTiles());
-        }
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.addCallback(this);
-        }
-        mDumpManager.registerDumpable(getDumpableTag(), this);
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
-        Dependency.get(TunerService.class).removeTunable(this);
-        if (mHost != null) {
-            mHost.removeCallback(this);
-        }
         if (mTileLayout != null) {
             mTileLayout.setListening(false);
         }
@@ -352,10 +333,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             record.tile.removeCallbacks();
         }
         mRecords.clear();
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.removeCallback(this);
-        }
-        mDumpManager.unregisterDumpable(getDumpableTag());
         super.onDetachedFromWindow();
     }
 
@@ -422,10 +399,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mCallback = callback;
     }
 
-    public void setHost(QSTileHost host, QSCustomizer customizer) {
+    void setHost(QSTileHost host) {
         mHost = host;
         mHost.addCallback(this);
         setTiles(mHost.getTiles());
+    }
+
+    void setCustomizer(QSCustomizer customizer) {
         mCustomizePanel = customizer;
         if (mCustomizePanel != null) {
             mCustomizePanel.setHost(mHost);
