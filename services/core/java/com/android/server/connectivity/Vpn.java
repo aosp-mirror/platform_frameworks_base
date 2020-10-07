@@ -380,8 +380,8 @@ public class Vpn {
             }
         }
 
-        public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
-            return vpn.jniCheck(iface) == 0;
+        public boolean isInterfacePresent(final Vpn vpn, final String iface) {
+            return vpn.jniCheck(iface) != 0;
         }
     }
 
@@ -2995,7 +2995,7 @@ public class Vpn {
                     checkInterruptAndDelay(false);
 
                     // Check if the interface is gone while we are waiting.
-                    if (mDeps.checkInterfacePresent(Vpn.this, mConfig.interfaze)) {
+                    if (!mDeps.isInterfacePresent(Vpn.this, mConfig.interfaze)) {
                         throw new IllegalStateException(mConfig.interfaze + " is gone");
                     }
 
