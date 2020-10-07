@@ -135,7 +135,6 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final int mHeight;
         final Point mOutSurfaceSize = new Point();
         final SurfaceControl mOutSurfaceControl;
-        final SurfaceControl mOutBlastSurfaceControl = new SurfaceControl();
 
         final IntSupplier mViewVisibility;
 
@@ -158,7 +157,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
                 session.relayout(mWindow, mParams, mWidth, mHeight,
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrames,
                         mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
-                        mOutSurfaceSize, mOutBlastSurfaceControl);
+                        mOutSurfaceSize);
             }
         }
     }

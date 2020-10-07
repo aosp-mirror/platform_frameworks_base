@@ -467,7 +467,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                 Transaction t = new SurfaceControl.Transaction();
                                 t.setAlpha(mSurfaceControl, alpha);
                                 t.deferTransactionUntil(mSurfaceControl,
-                                        viewRoot.getRenderSurfaceControl(), frame);
+                                        viewRoot.getSurfaceControl(), frame);
                                 t.apply();
                             }
                         }
@@ -827,7 +827,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
                         updateRelativeZ(t);
                         t.deferTransactionUntil(mSurfaceControl,
-                                viewRoot.getRenderSurfaceControl(), frame);
+                                viewRoot.getSurfaceControl(), frame);
                         t.apply();
                     }
                 }
@@ -1352,7 +1352,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             Rect position, long frameNumber) {
         final ViewRootImpl viewRoot = getViewRootImpl();
         if (frameNumber > 0 && viewRoot != null && !viewRoot.useBLAST()) {
-            t.deferTransactionUntil(surface, viewRoot.getRenderSurfaceControl(),
+            t.deferTransactionUntil(surface, viewRoot.getSurfaceControl(),
                     frameNumber);
         }
 
@@ -1470,7 +1470,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 } else {
                     if (frameNumber > 0 && viewRoot != null && viewRoot.mSurface.isValid()) {
                         mRtTransaction.deferTransactionUntil(mSurfaceControl,
-                                viewRoot.getRenderSurfaceControl(), frameNumber);
+                                viewRoot.getSurfaceControl(), frameNumber);
                     }
                     mRtTransaction.hide(mSurfaceControl);
                     if (mRtReleaseSurfaces) {

@@ -5779,7 +5779,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     SurfaceControl getClientViewRootSurface() {
-        return mWinAnimator.getClientViewRootSurface();
+        return mWinAnimator.getSurfaceControl();
     }
 
     @Override
