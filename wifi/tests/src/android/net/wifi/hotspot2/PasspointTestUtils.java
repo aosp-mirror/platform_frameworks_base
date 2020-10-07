@@ -30,6 +30,7 @@ import java.util.Map;
 
 public class PasspointTestUtils {
     private static final int CERTIFICATE_FINGERPRINT_BYTES = 32;
+    private static final int TEST_SUB_ID = 1;
 
     /**
      * Utility function for creating a {@link android.net.wifi.hotspot2.pps.HomeSP}.
@@ -156,6 +157,7 @@ public class PasspointTestUtils {
         friendlyNames.put("en", "ServiceName1");
         friendlyNames.put("kr", "ServiceName2");
         config.setServiceFriendlyNames(friendlyNames);
+        config.setSubscriptionId(TEST_SUB_ID);
         return config;
     }
 
