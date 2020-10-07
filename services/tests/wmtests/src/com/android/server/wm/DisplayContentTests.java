@@ -526,7 +526,8 @@ public class DisplayContentTests extends WindowTestsBase {
         for (int i = 0; i < types.length; i++) {
             final int type = types[i];
             windows[i] = createWindow(null /* parent */, type, displayContent, "window-" + type);
-            windows[i].mHasSurface = false;
+            windows[i].setHasSurface(true);
+            windows[i].mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
         }
         return windows;
     }
