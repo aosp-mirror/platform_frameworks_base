@@ -1263,7 +1263,7 @@ public class VpnTest {
         }
 
         @Override
-        public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
+        public boolean isInterfacePresent(final Vpn vpn, final String iface) {
             return true;
         }
     }
