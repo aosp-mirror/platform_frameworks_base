@@ -16,13 +16,15 @@
 
 package android.security.keystore2;
 
-import android.security.Credentials;
+import android.annotation.NonNull;
 import android.security.GateKeeper;
 import android.security.KeyStore;
-import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyInfo;
+import android.security.keystore.KeyProperties;
+import android.system.keystore2.Authorization;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -64,137 +66,161 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
         }
         AndroidKeyStoreKey keystoreKey = (AndroidKeyStoreKey) key;
-        String keyAliasInKeystore = keystoreKey.getAlias();
-        String entryAlias;
-        if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
-            entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
-        } else if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)){
-            // key has legacy prefix
-            entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
-        } else {
-            throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
-        }
 
-        return getKeyInfo(mKeyStore, entryAlias, keyAliasInKeystore, keystoreKey.getUid());
+        return getKeyInfo(keystoreKey);
     }
 
-    static KeyInfo getKeyInfo(KeyStore keyStore, String entryAlias, String keyAliasInKeystore,
-            int keyUid) {
-        KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
-        int errorCode = keyStore.getKeyCharacteristics(
-                keyAliasInKeystore, null, null, keyUid, keyCharacteristics);
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw new ProviderException("Failed to obtain information about key."
-                    + " Keystore error: " + errorCode);
-        }
+    static @NonNull KeyInfo getKeyInfo(@NonNull AndroidKeyStoreKey key) {
 
-        boolean insideSecureHardware;
-        @KeyProperties.OriginEnum int origin;
-        int keySize;
-        @KeyProperties.PurposeEnum int purposes;
+        @KeyProperties.SecurityLevelEnum int securityLevel =
+                KeyProperties.SECURITY_LEVEL_SOFTWARE;
+        boolean insideSecureHardware = false;
+        @KeyProperties.OriginEnum int origin = -1;
+        int keySize = -1;
+        @KeyProperties.PurposeEnum int purposes = 0;
         String[] encryptionPaddings;
         String[] signaturePaddings;
-        @KeyProperties.DigestEnum String[] digests;
-        @KeyProperties.BlockModeEnum String[] blockModes;
-        int keymasterSwEnforcedUserAuthenticators;
-        int keymasterHwEnforcedUserAuthenticators;
-        List<BigInteger> keymasterSecureUserIds;
+        List<String> digestsList = new ArrayList<>();
+        List<String> blockModesList = new ArrayList<>();
+        int keymasterSwEnforcedUserAuthenticators = 0;
+        int keymasterHwEnforcedUserAuthenticators = 0;
+        List<BigInteger> keymasterSecureUserIds = new ArrayList<BigInteger>();
+        List<String> encryptionPaddingsList = new ArrayList<String>();
+        List<String> signaturePaddingsList = new ArrayList<String>();
+        Date keyValidityStart = null;
+        Date keyValidityForOriginationEnd = null;
+        Date keyValidityForConsumptionEnd = null;
+        long userAuthenticationValidityDurationSeconds = 0;
+        boolean userAuthenticationRequired = true;
+        boolean userAuthenticationValidWhileOnBody = false;
+        boolean trustedUserPresenceRequired = false;
+        boolean trustedUserConfirmationRequired = false;
         try {
-            if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
-                insideSecureHardware = true;
-                origin = KeyProperties.Origin.fromKeymaster(
-                        keyCharacteristics.hwEnforced.getEnum(KeymasterDefs.KM_TAG_ORIGIN, -1));
-            } else if (keyCharacteristics.swEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
-                insideSecureHardware = false;
-                origin = KeyProperties.Origin.fromKeymaster(
-                        keyCharacteristics.swEnforced.getEnum(KeymasterDefs.KM_TAG_ORIGIN, -1));
-            } else {
-                throw new ProviderException("Key origin not available");
-            }
-            long keySizeUnsigned =
-                    keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
-            if (keySizeUnsigned == -1) {
-                throw new ProviderException("Key size not available");
-            } else if (keySizeUnsigned > Integer.MAX_VALUE) {
-                throw new ProviderException("Key too large: " + keySizeUnsigned + " bits");
-            }
-            keySize = (int) keySizeUnsigned;
-            purposes = KeyProperties.Purpose.allFromKeymaster(
-                    keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_PURPOSE));
-
-            List<String> encryptionPaddingsList = new ArrayList<String>();
-            List<String> signaturePaddingsList = new ArrayList<String>();
-            // Keymaster stores both types of paddings in the same array -- we split it into two.
-            for (int keymasterPadding : keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_PADDING)) {
-                try {
-                    @KeyProperties.EncryptionPaddingEnum String jcaPadding =
-                            KeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
-                    encryptionPaddingsList.add(jcaPadding);
-                } catch (IllegalArgumentException e) {
-                    try {
-                        @KeyProperties.SignaturePaddingEnum String padding =
-                                KeyProperties.SignaturePadding.fromKeymaster(keymasterPadding);
-                        signaturePaddingsList.add(padding);
-                    } catch (IllegalArgumentException e2) {
-                        throw new ProviderException(
-                                "Unsupported encryption padding: " + keymasterPadding);
-                    }
+            for (Authorization a : key.getAuthorizations()) {
+                switch (a.keyParameter.tag) {
+                    case KeymasterDefs.KM_TAG_ORIGIN:
+                        insideSecureHardware =
+                                KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
+                        securityLevel = a.securityLevel;
+                        origin = KeyProperties.Origin.fromKeymaster(a.keyParameter.integer);
+                        break;
+                    case KeymasterDefs.KM_TAG_KEY_SIZE:
+                        long keySizeUnsigned = KeyStore2ParameterUtils.getUnsignedInt(a);
+                        if (keySizeUnsigned > Integer.MAX_VALUE) {
+                            throw new ProviderException(
+                                    "Key too large: " + keySizeUnsigned + " bits");
+                        }
+                        keySize = (int) keySizeUnsigned;
+                        break;
+                    case KeymasterDefs.KM_TAG_PURPOSE:
+                        purposes |= KeyProperties.Purpose.fromKeymaster(a.keyParameter.integer);
+                        break;
+                    case KeymasterDefs.KM_TAG_PADDING:
+                        try {
+                            if (a.keyParameter.integer == KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN
+                                    || a.keyParameter.integer == KeymasterDefs.KM_PAD_RSA_PSS) {
+                                @KeyProperties.SignaturePaddingEnum String padding =
+                                        KeyProperties.SignaturePadding.fromKeymaster(
+                                                a.keyParameter.integer);
+                                signaturePaddingsList.add(padding);
+                            } else {
+                                @KeyProperties.EncryptionPaddingEnum String jcaPadding =
+                                        KeyProperties.EncryptionPadding.fromKeymaster(
+                                                a.keyParameter.integer);
+                                encryptionPaddingsList.add(jcaPadding);
+                            }
+                        } catch (IllegalArgumentException e) {
+                            throw new ProviderException("Unsupported padding: "
+                                                + a.keyParameter.integer);
+                        }
+                        break;
+                    case KeymasterDefs.KM_TAG_DIGEST:
+                        digestsList.add(KeyProperties.Digest.fromKeymaster(a.keyParameter.integer));
+                        break;
+                    case KeymasterDefs.KM_TAG_BLOCK_MODE:
+                        blockModesList.add(
+                                KeyProperties.BlockMode.fromKeymaster(a.keyParameter.integer)
+                        );
+                        break;
+                    case KeymasterDefs.KM_TAG_USER_AUTH_TYPE:
+                        if (KeyStore2ParameterUtils.isSecureHardware(a.securityLevel)) {
+                            keymasterHwEnforcedUserAuthenticators = a.keyParameter.integer;
+                        } else {
+                            keymasterSwEnforcedUserAuthenticators = a.keyParameter.integer;
+                        }
+                        break;
+                    case KeymasterDefs.KM_TAG_USER_SECURE_ID:
+                        keymasterSecureUserIds.add(
+                                KeymasterArguments.toUint64(a.keyParameter.longInteger));
+                        break;
+                    case KeymasterDefs.KM_TAG_ACTIVE_DATETIME:
+                        keyValidityStart = KeyStore2ParameterUtils.getDate(a);
+                        break;
+                    case KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME:
+                        keyValidityForOriginationEnd =
+                                KeyStore2ParameterUtils.getDate(a);
+                        break;
+                    case KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME:
+                        keyValidityForConsumptionEnd =
+                                KeyStore2ParameterUtils.getDate(a);
+                        break;
+                    case KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED:
+                        userAuthenticationRequired = false;
+                        break;
+                    case KeymasterDefs.KM_TAG_AUTH_TIMEOUT:
+                        userAuthenticationValidityDurationSeconds =
+                                KeyStore2ParameterUtils.getUnsignedInt(a);
+                        if (userAuthenticationValidityDurationSeconds > Integer.MAX_VALUE) {
+                            throw new ProviderException(
+                                    "User authentication timeout validity too long: "
+                                    + userAuthenticationValidityDurationSeconds + " seconds");
+                        }
+                        break;
+                    case KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY:
+                        userAuthenticationValidWhileOnBody =
+                                KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
+                        break;
+                    case KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED:
+                        trustedUserPresenceRequired =
+                                KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
+                        break;
+                    case KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED:
+                        trustedUserConfirmationRequired =
+                                KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
+                        break;
                 }
-
             }
-            encryptionPaddings =
-                    encryptionPaddingsList.toArray(new String[encryptionPaddingsList.size()]);
-            signaturePaddings =
-                    signaturePaddingsList.toArray(new String[signaturePaddingsList.size()]);
-
-            digests = KeyProperties.Digest.allFromKeymaster(
-                    keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_DIGEST));
-            blockModes = KeyProperties.BlockMode.allFromKeymaster(
-                    keyCharacteristics.getEnums(KeymasterDefs.KM_TAG_BLOCK_MODE));
-            keymasterSwEnforcedUserAuthenticators =
-                    keyCharacteristics.swEnforced.getEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-            keymasterHwEnforcedUserAuthenticators =
-                    keyCharacteristics.hwEnforced.getEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-            keymasterSecureUserIds =
-                keyCharacteristics.getUnsignedLongs(KeymasterDefs.KM_TAG_USER_SECURE_ID);
         } catch (IllegalArgumentException e) {
             throw new ProviderException("Unsupported key characteristic", e);
         }
-
-        Date keyValidityStart = keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME);
-        Date keyValidityForOriginationEnd =
-                keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME);
-        Date keyValidityForConsumptionEnd =
-                keyCharacteristics.getDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME);
-        boolean userAuthenticationRequired =
-                !keyCharacteristics.getBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        long userAuthenticationValidityDurationSeconds =
-                keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, 0);
-        if (userAuthenticationValidityDurationSeconds > Integer.MAX_VALUE) {
-            throw new ProviderException("User authentication timeout validity too long: "
-                    + userAuthenticationValidityDurationSeconds + " seconds");
+        if (keySize == -1) {
+            throw new ProviderException("Key size not available");
         }
+        if (origin == -1) {
+            throw new ProviderException("Key origin not available");
+        }
+
+        encryptionPaddings =
+                encryptionPaddingsList.toArray(new String[0]);
+        signaturePaddings =
+                signaturePaddingsList.toArray(new String[0]);
+
         boolean userAuthenticationRequirementEnforcedBySecureHardware = (userAuthenticationRequired)
                 && (keymasterHwEnforcedUserAuthenticators != 0)
                 && (keymasterSwEnforcedUserAuthenticators == 0);
-        boolean userAuthenticationValidWhileOnBody =
-                keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
-        boolean trustedUserPresenceRequired =
-                keyCharacteristics.hwEnforced.getBoolean(
-                    KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
+
+        String[] digests = digestsList.toArray(new String[0]);
+        String[] blockModes = blockModesList.toArray(new String[0]);
 
         boolean invalidatedByBiometricEnrollment = false;
         if (keymasterSwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_BIOMETRIC
             || keymasterHwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_BIOMETRIC) {
             // Fingerprint-only key; will be invalidated if the root SID isn't in the SID list.
-            invalidatedByBiometricEnrollment = keymasterSecureUserIds != null
-                    && !keymasterSecureUserIds.isEmpty()
+            invalidatedByBiometricEnrollment = !keymasterSecureUserIds.isEmpty()
                     && !keymasterSecureUserIds.contains(getGateKeeperSecureUserId());
         }
 
-        boolean userConfirmationRequired = keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
-
-        return new KeyInfo(entryAlias,
+        return new KeyInfo(key.getUserKeyDescriptor().alias,
                 insideSecureHardware,
                 origin,
                 keySize,
@@ -213,11 +239,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 userAuthenticationValidWhileOnBody,
                 trustedUserPresenceRequired,
                 invalidatedByBiometricEnrollment,
-                userConfirmationRequired,
-                // Keystore 1.0 does not tell us the exact security level of the key
-                // so we assume TEE if the key is in secure hardware.
-                insideSecureHardware ? KeyProperties.SecurityLevelEnum.TRUSTED_ENVIRONMENT
-                        : KeyProperties.SecurityLevelEnum.SOFTWARE);
+                trustedUserConfirmationRequired,
+                securityLevel);
     }
 
     private static BigInteger getGateKeeperSecureUserId() throws ProviderException {

@@ -16,7 +16,6 @@
 
 package android.security.keystore2;
 
-import android.security.Credentials;
 import android.security.KeyStore;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyInfo;
@@ -64,18 +63,9 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
                         "Unsupported key type: " + key.getClass().getName()
                         + ". KeyInfo can be obtained only for Android Keystore private keys");
             }
-            AndroidKeyStorePrivateKey
-                    keystorePrivateKey = (AndroidKeyStorePrivateKey) key;
-            String keyAliasInKeystore = keystorePrivateKey.getAlias();
-            String entryAlias;
-            if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
-                entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
-            } else {
-                throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
-            }
+            AndroidKeyStorePrivateKey keystorePrivateKey = (AndroidKeyStorePrivateKey) key;
             @SuppressWarnings("unchecked")
-            T result = (T) AndroidKeyStoreSecretKeyFactorySpi.getKeyInfo(
-                    mKeyStore, entryAlias, keyAliasInKeystore, keystorePrivateKey.getUid());
+            T result = (T) AndroidKeyStoreSecretKeyFactorySpi.getKeyInfo(keystorePrivateKey);
             return result;
         } else if (X509EncodedKeySpec.class.equals(keySpecClass)) {
             if (!(key instanceof AndroidKeyStorePublicKey)) {
@@ -98,8 +88,7 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
             }
         } else if (RSAPublicKeySpec.class.equals(keySpecClass)) {
             if (key instanceof AndroidKeyStoreRSAPublicKey) {
-                AndroidKeyStoreRSAPublicKey
-                        rsaKey = (AndroidKeyStoreRSAPublicKey) key;
+                AndroidKeyStoreRSAPublicKey rsaKey = (AndroidKeyStoreRSAPublicKey) key;
                 @SuppressWarnings("unchecked")
                 T result =
                         (T) new RSAPublicKeySpec(rsaKey.getModulus(), rsaKey.getPublicExponent());
@@ -112,8 +101,7 @@ public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
             }
         } else if (ECPublicKeySpec.class.equals(keySpecClass)) {
             if (key instanceof AndroidKeyStoreECPublicKey) {
-                AndroidKeyStoreECPublicKey
-                        ecKey = (AndroidKeyStoreECPublicKey) key;
+                AndroidKeyStoreECPublicKey ecKey = (AndroidKeyStoreECPublicKey) key;
                 @SuppressWarnings("unchecked")
                 T result = (T) new ECPublicKeySpec(ecKey.getW(), ecKey.getParams());
                 return result;
