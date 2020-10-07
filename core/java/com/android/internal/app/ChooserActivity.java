@@ -1855,6 +1855,7 @@ public class ChooserActivity extends ResolverActivity implements
 
     @VisibleForTesting
     protected void queryTargetServices(ChooserListAdapter adapter) {
+
         mQueriedTargetServicesTimeMs = System.currentTimeMillis();
 
         Context selectedProfileContext = createContextAsUser(
@@ -1871,15 +1872,14 @@ public class ChooserActivity extends ResolverActivity implements
                 continue;
             }
             final ActivityInfo ai = dri.getResolveInfo().activityInfo;
-            if (ChooserFlags.USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS
-                    && sm.hasShareTargets(ai.packageName)) {
+            if (sm.hasShareTargets(ai.packageName)) {
                 // Share targets will be queried from ShortcutManager
                 continue;
             }
             final Bundle md = ai.metaData;
             final String serviceName = md != null ? convertServiceName(ai.packageName,
                     md.getString(ChooserTargetService.META_DATA_NAME)) : null;
-            if (serviceName != null) {
+            if (serviceName != null && ChooserFlags.USE_SERVICE_TARGETS_FOR_DIRECT_TARGETS) {
                 final ComponentName serviceComponent = new ComponentName(
                         ai.packageName, serviceName);
 
@@ -2883,8 +2883,7 @@ public class ChooserActivity extends ResolverActivity implements
             return;
         }
 
-        if (ChooserFlags.USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS
-                || ChooserFlags.USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+        if (ChooserFlags.USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
             if (DEBUG) {
                 Log.d(TAG, "querying direct share targets from ShortcutManager");
             }
