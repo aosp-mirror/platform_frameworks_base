@@ -701,6 +701,11 @@ public final class ViewRootImpl implements ViewParent,
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
+    /**
+     * Increment this value when the surface has been replaced.
+     */
+    private int mSurfaceSequenceId = 0;
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -2608,7 +2613,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean surfaceSizeChanged = false;
         boolean surfaceCreated = false;
         boolean surfaceDestroyed = false;
-        /* True if surface generation id changes. */
+        // True if surface generation id changes or relayout result is RELAYOUT_RES_SURFACE_CHANGED.
         boolean surfaceReplaced = false;
 
         final boolean windowAttributesChanged = mWindowAttributesChanged;
@@ -2703,6 +2708,7 @@ public final class ViewRootImpl implements ViewParent,
                 updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();
                 surfaceDestroyed = hadSurface && !mSurface.isValid();
+
                 // When using Blast, the surface generation id may not change when there's a new
                 // SurfaceControl. In that case, we also check relayout flag
                 // RELAYOUT_RES_SURFACE_CHANGED since it should indicate that WMS created a new
@@ -2711,6 +2717,9 @@ public final class ViewRootImpl implements ViewParent,
                         || (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
                         == RELAYOUT_RES_SURFACE_CHANGED)
                         && mSurface.isValid();
+                if (surfaceReplaced) {
+                    mSurfaceSequenceId++;
+                }
 
                 if (cutoutChanged) {
                     mAttachInfo.mDisplayCutout.set(mPendingDisplayCutout);
@@ -9878,5 +9887,9 @@ public final class ViewRootImpl implements ViewParent,
 
     boolean useBLAST() {
         return mUseBLASTAdapter && !mForceDisableBLAST;
+    }
+
+    int getSurfaceSequenceId() {
+        return mSurfaceSequenceId;
     }
 }
