@@ -3717,13 +3717,24 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final DisplayContent display = mRoot.getDisplayContent(displayId);
                 if (display == null) {
-                    Slog.w(TAG, "Trying to set rotate for app for a missing display.");
+                    Slog.w(TAG, "Trying to set fixed to user rotation for a missing display.");
                     return;
                 }
                 display.getDisplayRotation().setFixedToUserRotation(fixedToUserRotation);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    int getFixedToUserRotation(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                Slog.w(TAG, "Trying to get fixed to user rotation for a missing display.");
+                return -1;
+            }
+            return display.getDisplayRotation().getFixedToUserRotationMode();
         }
     }
 
@@ -3843,10 +3854,21 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             final DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display == null) {
-                Slog.w(TAG, "Trying to thaw rotation for a missing display.");
+                Slog.w(TAG, "Trying to check if rotation is frozen on a missing display.");
                 return false;
             }
             return display.getDisplayRotation().isRotationFrozen();
+        }
+    }
+
+    int getDisplayUserRotation(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                Slog.w(TAG, "Trying to get user rotation of a missing display.");
+                return -1;
+            }
+            return display.getDisplayRotation().getUserRotation();
         }
     }
 

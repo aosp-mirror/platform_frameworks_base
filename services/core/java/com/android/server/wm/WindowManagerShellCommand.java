@@ -28,7 +28,6 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
 import android.view.IWindowManager;
-import android.view.Surface;
 import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
@@ -102,10 +101,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                         }
                     }
                     return result;
-                case "set-user-rotation":
-                    return runSetDisplayUserRotation(pw);
-                case "set-fix-to-user-rotation":
-                    return runSetFixToUserRotation(pw);
+                case "user-rotation":
+                    return runDisplayUserRotation(pw);
+                case "fixed-to-user-rotation":
+                    return runFixedToUserRotation(pw);
                 case "set-ignore-orientation-request":
                     return runSetIgnoreOrientationRequest(pw);
                 case "get-ignore-orientation-request":
@@ -313,14 +312,21 @@ public class WindowManagerShellCommand extends ShellCommand {
         return Integer.parseInt(s);
     }
 
-    private int runSetDisplayUserRotation(PrintWriter pw) {
-        final String lockMode = getNextArgRequired();
-
+    private int runDisplayUserRotation(PrintWriter pw) {
         int displayId = Display.DEFAULT_DISPLAY;
         String arg = getNextArg();
+        if (arg == null) {
+            return printDisplayUserRotation(pw, displayId);
+        }
+
         if ("-d".equals(arg)) {
             displayId = Integer.parseInt(getNextArgRequired());
             arg = getNextArg();
+        }
+
+        final String lockMode = arg;
+        if (lockMode == null) {
+            return printDisplayUserRotation(pw, displayId);
         }
 
         if ("free".equals(lockMode)) {
@@ -328,13 +334,15 @@ public class WindowManagerShellCommand extends ShellCommand {
             return 0;
         }
 
-        if (!lockMode.equals("lock")) {
-            getErrPrintWriter().println("Error: lock mode needs to be either free or lock.");
+        if (!"lock".equals(lockMode)) {
+            getErrPrintWriter().println("Error: argument needs to be either -d, free or lock.");
             return -1;
         }
 
+        arg = getNextArg();
         try {
-            final int rotation = arg != null ? Integer.parseInt(arg) : Surface.ROTATION_0;
+            final int rotation =
+                    arg != null ? Integer.parseInt(arg) : -1 /* lock to current rotation */;
             mInternal.freezeDisplayRotation(displayId, rotation);
             return 0;
         } catch (IllegalArgumentException e) {
@@ -343,12 +351,36 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runSetFixToUserRotation(PrintWriter pw) throws RemoteException {
+    private int printDisplayUserRotation(PrintWriter pw, int displayId) {
+        final int displayUserRotation = mInternal.getDisplayUserRotation(displayId);
+        if (displayUserRotation < 0) {
+            getErrPrintWriter().println("Error: check logcat for more details.");
+            return -1;
+        }
+        if (!mInternal.isDisplayRotationFrozen(displayId)) {
+            pw.println("free");
+            return 0;
+        }
+        pw.print("lock ");
+        pw.println(displayUserRotation);
+        return 0;
+    }
+
+    private int runFixedToUserRotation(PrintWriter pw) throws RemoteException {
         int displayId = Display.DEFAULT_DISPLAY;
-        String arg = getNextArgRequired();
+        String arg = getNextArg();
+        if (arg == null) {
+            printFixedToUserRotation(pw, displayId);
+            return 0;
+        }
+
         if ("-d".equals(arg)) {
             displayId = Integer.parseInt(getNextArgRequired());
-            arg = getNextArgRequired();
+            arg = getNextArg();
+        }
+
+        if (arg == null) {
+            return printFixedToUserRotation(pw, displayId);
         }
 
         final int fixedToUserRotation;
@@ -370,6 +402,24 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         mInterface.setFixedToUserRotation(displayId, fixedToUserRotation);
         return 0;
+    }
+
+    private int printFixedToUserRotation(PrintWriter pw, int displayId) {
+        int fixedToUserRotationMode = mInternal.getFixedToUserRotation(displayId);
+        switch (fixedToUserRotationMode) {
+            case IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT:
+                pw.println("default");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_DISABLED:
+                pw.println("disabled");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_ENABLED:
+                pw.println("enabled");
+                return 0;
+            default:
+                getErrPrintWriter().println("Error: check logcat for more details.");
+                return -1;
+        }
     }
 
     private int runSetIgnoreOrientationRequest(PrintWriter pw) throws RemoteException {
@@ -474,12 +524,12 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
-        pw.println("  set-user-rotation [free|lock] [-d DISPLAY_ID] [rotation]");
-        pw.println("    Set user rotation mode and user rotation.");
+        pw.println("  user-rotation [-d DISPLAY_ID] [free|lock] [rotation]");
+        pw.println("    Print or set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
-        pw.println("  set-fix-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
-        pw.println("    Enable or disable rotating display for app requested orientation.");
+        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
+        pw.println("    Print or set rotating display for app requested orientation.");
         pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
         pw.println("    If app requested orientation should be ignored.");
