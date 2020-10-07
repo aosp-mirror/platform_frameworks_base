@@ -1677,6 +1677,13 @@ public class BridgeContext extends Context {
     }
 
     @Override
+    public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            String[] receiverPermissions) {
+        // pass
+
+    }
+
+    @Override
     public void sendBroadcast(Intent arg0, String arg1, Bundle arg2) {
         // pass
 
