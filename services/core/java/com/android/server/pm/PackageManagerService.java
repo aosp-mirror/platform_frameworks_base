@@ -94,6 +94,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
+import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
 import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
@@ -685,6 +686,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
     private static final String PACKAGE_SCHEME = "package";
+
+    private static final String COMPANION_PACKAGE_NAME = "com.android.companiondevicemanager";
 
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
@@ -22062,6 +22065,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    dexopt: dump dexopt state");
                 pw.println("    compiler-stats: dump compiler statistics");
                 pw.println("    service-permissions: dump permissions required by services");
+                pw.println("    known-packages: dump known packages");
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
@@ -22206,6 +22210,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_CHANGES);
             } else if ("service-permissions".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_SERVICE_PERMISSIONS);
+            } else if ("known-packages".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_KNOWN_PACKAGES);
             } else if ("write".equals(cmd)) {
                 synchronized (mLock) {
                     writeSettingsLPrTEMP();
@@ -22228,6 +22234,37 @@ public class PackageManagerService extends IPackageManager.Stub
                     pw.println("Database versions:");
                     mSettings.dumpVersionLPr(new IndentingPrintWriter(pw, "  "));
                 }
+            }
+
+            if (!checkin
+                    && dumpState.isDumping(DumpState.DUMP_KNOWN_PACKAGES)
+                    && packageName == null) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println("Known Packages:");
+                ipw.increaseIndent();
+                for (int i = 0; i < LAST_KNOWN_PACKAGE; i++) {
+                    final String knownPackage = mPmInternal.knownPackageToString(i);
+                    if ("Unknown".equals(knownPackage)) {
+                        continue;
+                    }
+                    ipw.print(knownPackage);
+                    ipw.println(":");
+                    final String[] pkgNames = mPmInternal.getKnownPackageNames(i,
+                            UserHandle.USER_SYSTEM);
+                    ipw.increaseIndent();
+                    if (ArrayUtils.isEmpty(pkgNames)) {
+                        ipw.println("none");
+                    } else {
+                        for (String name : pkgNames) {
+                            ipw.println(name);
+                        }
+                    }
+                    ipw.decreaseIndent();
+                }
+                ipw.decreaseIndent();
             }
 
             if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
@@ -24719,7 +24756,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 case PackageManagerInternal.PACKAGE_APP_PREDICTOR:
                     return filterOnlySystemPackages(mAppPredictionServicePackage);
                 case PackageManagerInternal.PACKAGE_COMPANION:
-                    return filterOnlySystemPackages("com.android.companiondevicemanager");
+                    return filterOnlySystemPackages(COMPANION_PACKAGE_NAME);
                 case PackageManagerInternal.PACKAGE_RETAIL_DEMO:
                     return TextUtils.isEmpty(mRetailDemoPackage)
                             ? ArrayUtils.emptyArray(String.class)
