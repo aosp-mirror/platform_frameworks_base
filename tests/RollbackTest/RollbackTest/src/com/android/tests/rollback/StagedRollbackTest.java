@@ -482,6 +482,26 @@ public class StagedRollbackTest {
     }
 
     @Test
+    public void testRollbackApkDataDirectories_Phase1() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+        Install.single(TestApp.A1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+    }
+
+    @Test
+    public void testRollbackApkDataDirectories_Phase2() throws Exception {
+        Install.single(TestApp.A2).setStaged().setEnableRollback().commit();
+    }
+
+    @Test
+    public void testRollbackApkDataDirectories_Phase3() throws Exception {
+        RollbackInfo available = RollbackUtils.getAvailableRollback(TestApp.A);
+        RollbackUtils.rollback(available.getRollbackId(), TestApp.A2);
+        RollbackInfo committed = RollbackUtils.getCommittedRollbackById(available.getRollbackId());
+        InstallUtils.waitForSessionReady(committed.getCommittedSessionId());
+    }
+
+    @Test
     public void isCheckpointSupported() {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
         StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
