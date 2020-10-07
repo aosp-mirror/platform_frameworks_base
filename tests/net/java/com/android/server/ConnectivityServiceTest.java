@@ -251,6 +251,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -449,6 +450,13 @@ public class ConnectivityServiceTest {
             if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             if (Context.ETHERNET_SERVICE.equals(name)) return mEthernetManager;
             return super.getSystemService(name);
+        }
+
+        @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            final Context asUser = mock(Context.class, AdditionalAnswers.delegatesTo(this));
+            doReturn(user).when(asUser).getUser();
+            return asUser;
         }
 
         @Override
@@ -4992,22 +5000,22 @@ public class ConnectivityServiceTest {
         // simulate that situation and check if ConnectivityService could filter that case.
         mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
         waitForIdle();
-        verify(mNotificationManager, timeout(TIMEOUT_MS).times(1)).notifyAsUser(anyString(),
-                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), any(), eq(UserHandle.ALL));
+        verify(mNotificationManager, timeout(TIMEOUT_MS).times(1)).notify(anyString(),
+                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), any());
         // If private DNS resolution successful, the PRIVATE_DNS_BROKEN notification shouldn't be
         // shown.
         mWiFiNetworkAgent.setNetworkValid(true /* isStrictMode */);
         mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
         waitForIdle();
-        verify(mNotificationManager, timeout(TIMEOUT_MS).times(1)).cancelAsUser(anyString(),
-                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), eq(UserHandle.ALL));
+        verify(mNotificationManager, timeout(TIMEOUT_MS).times(1)).cancel(anyString(),
+                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId));
         // If private DNS resolution failed again, the PRIVATE_DNS_BROKEN notification should be
         // shown again.
         mWiFiNetworkAgent.setNetworkInvalid(true /* isStrictMode */);
         mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
         waitForIdle();
-        verify(mNotificationManager, timeout(TIMEOUT_MS).times(2)).notifyAsUser(anyString(),
-                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), any(), eq(UserHandle.ALL));
+        verify(mNotificationManager, timeout(TIMEOUT_MS).times(2)).notify(anyString(),
+                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), any());
     }
 
     @Test
