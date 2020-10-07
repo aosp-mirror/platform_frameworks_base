@@ -16,25 +16,27 @@
 
 package com.android.systemui.toast;
 
+import android.animation.Animator;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.ITransientNotificationCallback;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
+import android.widget.Toast;
 import android.widget.ToastPresenter;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.Objects;
 
@@ -45,35 +47,53 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
+    // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
+    private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
+    private static final int TOAST_SHORT_TIME = 2000; // 2 seconds
+
     private static final String TAG = "ToastUI";
 
     private final CommandQueue mCommandQueue;
     private final INotificationManager mNotificationManager;
-    private final IAccessibilityManager mAccessibilityManager;
-    private final int mGravity;
-    private final int mY;
+    private final IAccessibilityManager mIAccessibilityManager;
+    private final AccessibilityManager mAccessibilityManager;
+    private final ToastFactory mToastFactory;
+    private final DelayableExecutor mMainExecutor;
+    private final ToastLogger mToastLogger;
+    private SystemUIToast mToast;
     @Nullable private ToastPresenter mPresenter;
     @Nullable private ITransientNotificationCallback mCallback;
 
     @Inject
-    public ToastUI(Context context, CommandQueue commandQueue) {
+    public ToastUI(
+            Context context,
+            CommandQueue commandQueue,
+            ToastFactory toastFactory,
+            @Main DelayableExecutor mainExecutor,
+            ToastLogger toastLogger) {
         this(context, commandQueue,
                 INotificationManager.Stub.asInterface(
                         ServiceManager.getService(Context.NOTIFICATION_SERVICE)),
                 IAccessibilityManager.Stub.asInterface(
-                        ServiceManager.getService(Context.ACCESSIBILITY_SERVICE)));
+                        ServiceManager.getService(Context.ACCESSIBILITY_SERVICE)),
+                toastFactory,
+                mainExecutor,
+                toastLogger);
     }
 
     @VisibleForTesting
     ToastUI(Context context, CommandQueue commandQueue, INotificationManager notificationManager,
-            @Nullable IAccessibilityManager accessibilityManager) {
+            @Nullable IAccessibilityManager accessibilityManager,
+            ToastFactory toastFactory, DelayableExecutor mainExecutor, ToastLogger toastLogger
+    ) {
         super(context);
         mCommandQueue = commandQueue;
         mNotificationManager = notificationManager;
-        mAccessibilityManager = accessibilityManager;
-        Resources resources = mContext.getResources();
-        mGravity = resources.getInteger(R.integer.config_toastDefaultGravity);
-        mY = resources.getDimensionPixelSize(R.dimen.toast_y_offset);
+        mIAccessibilityManager = accessibilityManager;
+        mToastFactory = toastFactory;
+        mMainExecutor = mainExecutor;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
+        mToastLogger = toastLogger;
     }
 
     @Override
@@ -88,12 +108,31 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         if (mPresenter != null) {
             hideCurrentToast();
         }
-        Context context = mContext.createContextAsUser(UserHandle.getUserHandleForUid(uid), 0);
-        View view = ToastPresenter.getTextToastView(context, text);
+        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        Context context = mContext.createContextAsUser(userHandle, 0);
+        mToast = mToastFactory.createToast(context, text, packageName, userHandle.getIdentifier());
+
+        if (mToast.hasCustomAnimation()) {
+            if (mToast.getInAnimation() != null) {
+                mToast.getInAnimation().start();
+            }
+            final Animator hideAnimator = mToast.getOutAnimation();
+            if (hideAnimator != null) {
+                final long durationMillis = duration == Toast.LENGTH_LONG
+                        ? TOAST_LONG_TIME : TOAST_SHORT_TIME;
+                final long updatedDuration = mAccessibilityManager.getRecommendedTimeoutMillis(
+                        (int) durationMillis, AccessibilityManager.FLAG_CONTENT_TEXT);
+                mMainExecutor.executeDelayed(() -> hideAnimator.start(),
+                        updatedDuration - hideAnimator.getTotalDuration());
+            }
+        }
         mCallback = callback;
-        mPresenter = new ToastPresenter(context, mAccessibilityManager, mNotificationManager,
+        mPresenter = new ToastPresenter(context, mIAccessibilityManager, mNotificationManager,
                 packageName);
-        mPresenter.show(view, token, windowToken, duration, mGravity, 0, mY, 0, 0, mCallback);
+        mToastLogger.logOnShowToast(uid, packageName, text.toString(), token.toString());
+        mPresenter.show(mToast.getView(), token, windowToken, duration, mToast.getGravity(),
+                mToast.getXOffset(), mToast.getYOffset(), mToast.getHorizontalMargin(),
+                mToast.getVerticalMargin(), mCallback, mToast.hasCustomAnimation());
     }
 
     @Override
@@ -104,6 +143,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
             Log.w(TAG, "Attempt to hide non-current toast from package " + packageName);
             return;
         }
+        mToastLogger.logOnHideToast(packageName, token.toString());
         hideCurrentToast();
     }
 

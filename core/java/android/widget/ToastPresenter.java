@@ -48,6 +48,8 @@ import com.android.internal.util.ArrayUtils;
 public class ToastPresenter {
     private static final String TAG = "ToastPresenter";
     private static final String WINDOW_TITLE = "Toast";
+
+    // exclusively used to guarantee window timeouts
     private static final long SHORT_DURATION_TIMEOUT = 4000;
     private static final long LONG_DURATION_TIMEOUT = 7000;
 
@@ -145,7 +147,7 @@ public class ToastPresenter {
      */
     private void adjustLayoutParams(WindowManager.LayoutParams params, IBinder windowToken,
             int duration, int gravity, int xOffset, int yOffset, float horizontalMargin,
-            float verticalMargin) {
+            float verticalMargin, boolean removeWindowAnimations) {
         Configuration config = mResources.getConfiguration();
         int absGravity = Gravity.getAbsoluteGravity(gravity, config.getLayoutDirection());
         params.gravity = absGravity;
@@ -163,6 +165,10 @@ public class ToastPresenter {
         params.hideTimeoutMilliseconds =
                 (duration == Toast.LENGTH_LONG) ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;
         params.token = windowToken;
+
+        if (removeWindowAnimations && params.windowAnimations == R.style.Animation_Toast) {
+            params.windowAnimations = 0;
+        }
     }
 
     /**
@@ -193,16 +199,28 @@ public class ToastPresenter {
 
     /**
      * Shows the toast in {@code view} with the parameters passed and callback {@code callback}.
+     * Uses window animations to animate the toast.
      */
     public void show(View view, IBinder token, IBinder windowToken, int duration, int gravity,
             int xOffset, int yOffset, float horizontalMargin, float verticalMargin,
             @Nullable ITransientNotificationCallback callback) {
+        show(view, token, windowToken, duration, gravity, xOffset, yOffset, horizontalMargin,
+                verticalMargin, callback, false /* removeWindowAnimations */);
+    }
+
+    /**
+     * Shows the toast in {@code view} with the parameters passed and callback {@code callback}.
+     * Can optionally remove window animations from the toast window.
+     */
+    public void show(View view, IBinder token, IBinder windowToken, int duration, int gravity,
+            int xOffset, int yOffset, float horizontalMargin, float verticalMargin,
+            @Nullable ITransientNotificationCallback callback, boolean removeWindowAnimations) {
         checkState(mView == null, "Only one toast at a time is allowed, call hide() first.");
         mView = view;
         mToken = token;
 
         adjustLayoutParams(mParams, windowToken, duration, gravity, xOffset, yOffset,
-                horizontalMargin, verticalMargin);
+                horizontalMargin, verticalMargin, removeWindowAnimations);
         if (mView.getParent() != null) {
             mWindowManager.removeView(mView);
         }
@@ -247,7 +265,8 @@ public class ToastPresenter {
             try {
                 callback.onToastHidden();
             } catch (RemoteException e) {
-                Log.w(TAG, "Error calling back " + mPackageName + " to notify onToastHide()", e);
+                Log.w(TAG, "Error calling back " + mPackageName + " to notify onToastHide()",
+                        e);
             }
         }
         mView = null;
