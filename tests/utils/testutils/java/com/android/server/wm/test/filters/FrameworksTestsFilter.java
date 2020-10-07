@@ -49,7 +49,8 @@ public final class FrameworksTestsFilter extends SelectTest {
             "android.view.WindowMetricsTest",
             "android.view.PendingInsetsControllerTest",
             "android.app.WindowContextTest",
-            "android.window.WindowMetricsHelperTest"
+            "android.window.WindowMetricsHelperTest",
+            "android.app.activity.ActivityThreadTest"
     };
 
     public FrameworksTestsFilter(Bundle testArgs) {
