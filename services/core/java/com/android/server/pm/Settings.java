@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
@@ -29,7 +28,6 @@ import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
-import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
@@ -108,6 +106,7 @@ import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -131,6 +130,7 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -147,7 +147,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -283,9 +282,9 @@ public final class Settings implements Watchable, Snappable {
             "persistent-preferred-activities";
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
-    private static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
+    public static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
     private static final String TAG_DEFAULT_APPS = "default-apps";
-    private static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
+    public static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
             "all-intent-filter-verifications";
     private static final String TAG_DEFAULT_BROWSER = "default-browser";
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
@@ -390,12 +389,6 @@ public final class Settings implements Watchable, Snappable {
     private final WatchedSparseArray<ArraySet<String>> mBlockUninstallPackages =
             new WatchedSparseArray<>();
 
-    // Set of restored intent-filter verification states
-    @Watched
-    private final WatchedArrayMap<String, IntentFilterVerificationInfo>
-            mRestoredIntentFilterVerifications =
-            new WatchedArrayMap<String, IntentFilterVerificationInfo>();
-
     private static final class KernelPackageState {
         int appId;
         int[] excludedUserIds;
@@ -487,7 +480,10 @@ public final class Settings implements Watchable, Snappable {
     @Watched
     final WatchedSparseArray<String> mDefaultBrowserApp = new WatchedSparseArray<String>();
 
+    // TODO(b/161161364): This seems unused, and is probably not relevant in the new API, but should
+    //  verify.
     // App-link priority tracking, per-user
+    @NonNull
     @Watched
     final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
 
@@ -511,6 +507,8 @@ public final class Settings implements Watchable, Snappable {
     final LegacyPermissionSettings mPermissions;
 
     private final LegacyPermissionDataProvider mPermissionDataProvider;
+
+    private final IntentFilterVerificationManager mIntentFilterVerificationManager;
 
     /**
      * The observer that watches for changes from array members
@@ -538,13 +536,12 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
-
+        mIntentFilterVerificationManager = null;
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
         mDisabledSysPackages.registerObserver(mObserver);
         mBlockUninstallPackages.registerObserver(mObserver);
-        mRestoredIntentFilterVerifications.registerObserver(mObserver);
         mVersion.registerObserver(mObserver);
         mPreferredActivities.registerObserver(mObserver);
         mPersistentPreferredActivities.registerObserver(mObserver);
@@ -560,7 +557,8 @@ public final class Settings implements Watchable, Snappable {
     }
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
-            LegacyPermissionDataProvider permissionDataProvider, Object lock) {
+            LegacyPermissionDataProvider permissionDataProvider,
+            IntentFilterVerificationManager intentFilterVerificationManager, Object lock)  {
         mLock = lock;
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();
@@ -587,12 +585,13 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
 
+        mIntentFilterVerificationManager = intentFilterVerificationManager;
+
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
         mDisabledSysPackages.registerObserver(mObserver);
         mBlockUninstallPackages.registerObserver(mObserver);
-        mRestoredIntentFilterVerifications.registerObserver(mObserver);
         mVersion.registerObserver(mObserver);
         mPreferredActivities.registerObserver(mObserver);
         mPersistentPreferredActivities.registerObserver(mObserver);
@@ -629,11 +628,12 @@ public final class Settings implements Watchable, Snappable {
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
 
+        mIntentFilterVerificationManager = r.mIntentFilterVerificationManager;
+
         mInstallerPackages.addAll(r.mInstallerPackages);
         mKernelMapping.putAll(r.mKernelMapping);
         mDisabledSysPackages.putAll(r.mDisabledSysPackages);
         mBlockUninstallPackages.snapshot(r.mBlockUninstallPackages);
-        mRestoredIntentFilterVerifications.putAll(r.mRestoredIntentFilterVerifications);
         mVersion.putAll(r.mVersion);
         mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
         WatchedSparseArray.snapshot(
@@ -1169,13 +1169,10 @@ public final class Settings implements Watchable, Snappable {
             }
         }
 
-        IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.get(p.name);
-        if (ivi != null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.i(TAG, "Applying restored IVI for " + p.name + " : " + ivi.getStatusString());
-            }
-            mRestoredIntentFilterVerifications.remove(p.name);
-            p.setIntentFilterVerificationInfo(ivi);
+        IntentFilterVerificationInfo info =
+                mIntentFilterVerificationManager.getRestoredIntentFilterVerificationInfo(p.name);
+        if (info != null) {
+            p.setIntentFilterVerificationInfo(info);
         }
     }
 
@@ -1305,129 +1302,6 @@ public final class Settings implements Watchable, Snappable {
             mCrossProfileIntentResolvers.put(userId, cpir);
         }
         return cpir;
-    }
-
-    /**
-     * The following functions suppose that you have a lock for managing access to the
-     * mIntentFiltersVerifications map.
-     */
-
-    /* package protected */
-    IntentFilterVerificationInfo getIntentFilterVerificationLPr(String packageName) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return null;
-        }
-        return ps.getIntentFilterVerificationInfo();
-    }
-
-    /* package protected */
-    IntentFilterVerificationInfo createIntentFilterVerificationIfNeededLPw(String packageName,
-            ArraySet<String> domains) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return null;
-        }
-        IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-        if (ivi == null) {
-            ivi = new IntentFilterVerificationInfo(packageName, domains);
-            ps.setIntentFilterVerificationInfo(ivi);
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(PackageManagerService.TAG,
-                        "Creating new IntentFilterVerificationInfo for pkg: " + packageName);
-            }
-        } else {
-            ivi.setDomains(domains);
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(PackageManagerService.TAG,
-                        "Setting domains to existing IntentFilterVerificationInfo for pkg: " +
-                                packageName + " and with domains: " + ivi.getDomainsString());
-            }
-        }
-        return ivi;
-    }
-
-    int getIntentFilterVerificationStatusLPr(String packageName, int userId) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-        }
-        return (int)(ps.getDomainVerificationStatusForUser(userId) >> 32);
-    }
-
-    boolean updateIntentFilterVerificationStatusLPw(String packageName, final int status, int userId) {
-        // Update the status for the current package
-        PackageSetting current = mPackages.get(packageName);
-        if (current == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return false;
-        }
-
-        final int alwaysGeneration;
-        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-            alwaysGeneration = mNextAppLinkGeneration.get(userId) + 1;
-            mNextAppLinkGeneration.put(userId, alwaysGeneration);
-        } else {
-            alwaysGeneration = 0;
-        }
-
-        current.setDomainVerificationStatusForUser(status, alwaysGeneration, userId);
-        return true;
-    }
-
-    /**
-     * Used for Settings App and PackageManagerService dump. Should be read only.
-     */
-    List<IntentFilterVerificationInfo> getIntentFilterVerificationsLPr(
-            String packageName) {
-        if (packageName == null) {
-            return Collections.<IntentFilterVerificationInfo>emptyList();
-        }
-        ArrayList<IntentFilterVerificationInfo> result = new ArrayList<>();
-        for (PackageSetting ps : mPackages.values()) {
-            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-            if (ivi == null || TextUtils.isEmpty(ivi.getPackageName()) ||
-                    !ivi.getPackageName().equalsIgnoreCase(packageName)) {
-                continue;
-            }
-            result.add(ivi);
-        }
-        return result;
-    }
-
-    boolean removeIntentFilterVerificationLPw(String packageName, int userId,
-            boolean alsoResetStatus) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return false;
-        }
-        if (alsoResetStatus) {
-            ps.clearDomainVerificationStatusForUser(userId);
-        }
-        ps.setIntentFilterVerificationInfo(null);
-        return true;
-    }
-
-    boolean removeIntentFilterVerificationLPw(String packageName, int[] userIds) {
-        boolean result = false;
-        for (int userId : userIds) {
-            result |= removeIntentFilterVerificationLPw(packageName, userId, true);
-        }
-        return result;
     }
 
     String removeDefaultBrowserPackageNameLPw(int userId) {
@@ -1591,40 +1465,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void readDomainVerificationLPw(TypedXmlPullParser parser,
-            PackageSettingBase packageSetting) throws XmlPullParserException, IOException {
-        IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
-        packageSetting.setIntentFilterVerificationInfo(ivi);
-        if (DEBUG_PARSER) {
-            Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
-        }
-    }
-
-    private void readRestoredIntentFilterVerifications(TypedXmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            final String tagName = parser.getName();
-            if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
-                if (DEBUG_DOMAIN_VERIFICATION) {
-                    Slog.i(TAG, "Restored IVI for " + ivi.getPackageName()
-                            + " status=" + ivi.getStatusString());
-                }
-                mRestoredIntentFilterVerifications.put(ivi.getPackageName(), ivi);
-            } else {
-                Slog.w(TAG, "Unknown element: " + tagName);
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    void readDefaultAppsLPw(TypedXmlPullParser parser, int userId)
+    void readDefaultAppsLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -2038,77 +1879,7 @@ public final class Settings implements Watchable, Snappable {
         serializer.endTag(null, TAG_CROSS_PROFILE_INTENT_FILTERS);
     }
 
-    void writeDomainVerificationsLPr(TypedXmlSerializer serializer,
-                                     IntentFilterVerificationInfo verificationInfo)
-            throws IllegalArgumentException, IllegalStateException, IOException {
-        if (verificationInfo != null && verificationInfo.getPackageName() != null) {
-            serializer.startTag(null, TAG_DOMAIN_VERIFICATION);
-            verificationInfo.writeToXml(serializer);
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(TAG, "Wrote domain verification for package: "
-                        + verificationInfo.getPackageName());
-            }
-            serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
-        }
-    }
-
-    // Specifically for backup/restore
-    void writeAllDomainVerificationsLPr(TypedXmlSerializer serializer, int userId)
-            throws IllegalArgumentException, IllegalStateException, IOException {
-        serializer.startTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
-        final int N = mPackages.size();
-        for (int i = 0; i < N; i++) {
-            PackageSetting ps = mPackages.valueAt(i);
-            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-            if (ivi != null) {
-                writeDomainVerificationsLPr(serializer, ivi);
-            }
-        }
-        serializer.endTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
-    }
-
-    // Specifically for backup/restore
-    void readAllDomainVerificationsLPr(TypedXmlPullParser parser, int userId)
-            throws XmlPullParserException, IOException {
-        mRestoredIntentFilterVerifications.clear();
-
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
-                final String pkgName = ivi.getPackageName();
-                final PackageSetting ps = mPackages.get(pkgName);
-                if (ps != null) {
-                    // known/existing package; update in place
-                    ps.setIntentFilterVerificationInfo(ivi);
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.d(TAG, "Restored IVI for existing app " + pkgName
-                                + " status=" + ivi.getStatusString());
-                    }
-                } else {
-                    mRestoredIntentFilterVerifications.put(pkgName, ivi);
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.d(TAG, "Restored IVI for pending app " + pkgName
-                                + " status=" + ivi.getStatusString());
-                    }
-                }
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element under <all-intent-filter-verification>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    void writeDefaultAppsLPr(TypedXmlSerializer serializer, int userId)
+    void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_DEFAULT_APPS);
         String defaultBrowser = mDefaultBrowserApp.get(userId);
@@ -2569,22 +2340,7 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            final int numIVIs = mRestoredIntentFilterVerifications.size();
-            if (numIVIs > 0) {
-                if (DEBUG_DOMAIN_VERIFICATION) {
-                    Slog.i(TAG, "Writing restored-ivi entries to packages.xml");
-                }
-                serializer.startTag(null, "restored-ivi");
-                for (int i = 0; i < numIVIs; i++) {
-                    IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.valueAt(i);
-                    writeDomainVerificationsLPr(serializer, ivi);
-                }
-                serializer.endTag(null, "restored-ivi");
-            } else {
-                if (DEBUG_DOMAIN_VERIFICATION) {
-                    Slog.i(TAG, "  no restored IVI entries to write");
-                }
-            }
+            mIntentFilterVerificationManager.writeRestoredIntentFilterVerifications(serializer);
 
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
@@ -2973,7 +2729,8 @@ public final class Settings implements Watchable, Snappable {
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
-        writeDomainVerificationsLPr(serializer, pkg.verificationInfo);
+        mIntentFilterVerificationManager.writeDomainVerificationsLPr(serializer,
+                pkg.verificationInfo);
         writeMimeGroupLPr(serializer, pkg.mimeGroups);
 
         serializer.endTag(null, "package");
@@ -3105,7 +2862,7 @@ public final class Settings implements Watchable, Snappable {
                         mRenamedPackages.put(nname, oname);
                     }
                 } else if (tagName.equals("restored-ivi")) {
-                    readRestoredIntentFilterVerifications(parser);
+                    mIntentFilterVerificationManager.readRestoredIntentFilterVerifications(parser);
                 } else if (tagName.equals("last-platform-version")) {
                     // Upgrade from older XML schema
                     final VersionInfo internal = findOrCreateVersion(
@@ -3946,7 +3703,12 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.installSource =
                             packageSetting.installSource.setInitiatingPackageSignatures(signatures);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                    readDomainVerificationLPw(parser, packageSetting);
+                    IntentFilterVerificationInfo ivi =
+                            mIntentFilterVerificationManager.readDomainVerificationLPw(parser);
+                    packageSetting.setIntentFilterVerificationInfo(ivi);
+                    if (DEBUG_PARSER) {
+                        Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
+                    }
                 } else if (tagName.equals(TAG_MIME_GROUP)) {
                     packageSetting.mimeGroups = readMimeGroupLPw(parser, packageSetting.mimeGroups);
                 } else if (tagName.equals(TAG_USES_STATIC_LIB)) {
