@@ -59,6 +59,7 @@ import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -7100,8 +7101,15 @@ public class NotificationManagerService extends SystemService {
                     // so need to check the notification still valide for vibrate.
                     synchronized (mNotificationLock) {
                         if (mNotificationsByKey.get(record.getKey()) != null) {
+                            // Vibrator checks the appops for the op package, not the caller,
+                            // so we need to add the bypass dnd flag to be heard. it's ok to
+                            // always add this flag here because we've already checked that we can
+                            // bypass dnd
+                            AudioAttributes.Builder aab =
+                                    new AudioAttributes.Builder(record.getAudioAttributes())
+                                    .setFlags(FLAG_BYPASS_INTERRUPTION_POLICY);
                             mVibrator.vibrate(record.getSbn().getUid(), record.getSbn().getOpPkg(),
-                                    effect, "Notification (delayed)", record.getAudioAttributes());
+                                    effect, "Notification (delayed)", aab.build());
                         } else {
                             Slog.e(TAG, "No vibration for canceled notification : "
                                     + record.getKey());
