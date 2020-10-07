@@ -80,6 +80,8 @@ class DisplayFoldController {
     }
 
     void setDeviceFolded(boolean folded) {
+        mDisplayManagerInternal.setDeviceFolded(folded);
+
         if (mFolded != null && mFolded == folded) {
             return;
         }

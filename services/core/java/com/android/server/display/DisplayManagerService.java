@@ -324,7 +324,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
-        mLogicalDisplayMapper = new LogicalDisplayMapper(mDisplayDeviceRepo,
+        mLogicalDisplayMapper = new LogicalDisplayMapper(context, mDisplayDeviceRepo,
                 new LogicalDisplayListener(), mPersistentDataStore);
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
         Resources resources = mContext.getResources();
@@ -576,6 +576,7 @@ public final class DisplayManagerService extends SystemService {
                     Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestGlobalDisplayState("
                             + Display.stateToString(state)
                             + ", brightness=" + brightnessState + ")");
+
                     mGlobalDisplayState = state;
                     mGlobalDisplayBrightness = brightnessState;
                     applyGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
@@ -983,6 +984,15 @@ public final class DisplayManagerService extends SystemService {
         scheduleTraversalLocked(false);
     }
 
+    private void handleLogicalDisplaySwappedLocked(@NonNull LogicalDisplay display) {
+        final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+        final Runnable work = updateDisplayStateLocked(device);
+        if (work != null) {
+            mHandler.post(work);
+        }
+        handleLogicalDisplayChangedLocked(display);
+    }
+
     private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
         mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
             Runnable runnable = updateDisplayStateLocked(device);
@@ -997,10 +1007,15 @@ public final class DisplayManagerService extends SystemService {
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-            // TODO - multi-display - The rules regarding what display state to apply to each
+            // TODO - b/170498827 The rules regarding what display state to apply to each
             // display will depend on the configuration/mapping of logical displays.
-            return device.requestDisplayStateLocked(
-                    mGlobalDisplayState, mGlobalDisplayBrightness);
+            // Clean up LogicalDisplay.isEnabled() mechanism once this is fixed.
+            int state = mGlobalDisplayState;
+            final LogicalDisplay display = mLogicalDisplayMapper.getLocked(device);
+            if (display != null && !display.isEnabled()) {
+                state = Display.STATE_OFF;
+            }
+            return device.requestDisplayStateLocked(state, mGlobalDisplayBrightness);
         }
         return null;
     }
@@ -1343,6 +1358,12 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 mDisplayPowerController.setAmbientColorTemperatureOverride(cct);
             }
+        }
+    }
+
+    void setFoldOverride(Boolean isFolded) {
+        synchronized (mSyncRoot) {
+            mLogicalDisplayMapper.setFoldOverrideLocked(isFolded);
         }
     }
 
@@ -1697,6 +1718,10 @@ public final class DisplayManagerService extends SystemService {
 
                 case LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED:
                     handleLogicalDisplayRemovedLocked(display);
+                    break;
+
+                case LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_SWAPPED:
+                    handleLogicalDisplaySwappedLocked(display);
                     break;
             }
         }
@@ -2537,6 +2562,13 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void ignoreProximitySensorUntilChanged() {
             mDisplayPowerController.ignoreProximitySensorUntilChanged();
+        }
+
+        @Override
+        public void setDeviceFolded(boolean isFolded) {
+            synchronized (mSyncRoot) {
+                mLogicalDisplayMapper.setDeviceFoldedLocked(isFolded);
+            }
         }
     }
 

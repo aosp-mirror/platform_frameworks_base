@@ -4443,4 +4443,13 @@
 
     <!-- WindowsManager JetPack display features -->
     <string name="config_display_features" translatable="false" />
+
+    <!-- Physical Display IDs of the display-devices that are swapped when a folding device folds.
+         This list is expected to contain two elements: the first is the display to use
+         when the device is folded, the second is the display to use when unfolded. If the array
+         is empty or the display IDs are not recognized, this feature is turned off and the value
+         ignored.
+         TODO: b/170470621 - remove once we can have multiple Internal displays in DMS as
+               well as a notification from DisplayStateManager. -->
+    <string-array name="config_internalFoldedPhysicalDisplayIds" translatable="false" />
 </resources>

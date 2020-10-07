@@ -56,6 +56,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayWhiteBalanceLoggingEnabled(false);
             case "dwb-set-cct":
                 return setAmbientColorTemperatureOverride();
+            case "set-fold":
+                return setFoldOverride();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -82,6 +84,8 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Disable display white-balance logging.");
         pw.println("  dwb-set-cct CCT");
         pw.println("    Sets the ambient color temperature override to CCT (use -1 to disable).");
+        pw.println("  set-fold [fold|unfold|reset]");
+        pw.println("    Simulates the 'fold' state of a device. 'reset' for default behavior.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
@@ -146,6 +150,28 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.setAmbientColorTemperatureOverride(cct);
+        return 0;
+    }
+
+    private int setFoldOverride() {
+        String state = getNextArg();
+        if (state == null) {
+            getErrPrintWriter().println("Error: no parameter specified for set-fold");
+            return 1;
+        }
+        final Boolean isFolded;
+        if ("fold".equals(state)) {
+            isFolded = true;
+        } else if ("unfold".equals(state)) {
+            isFolded = false;
+        } else if ("reset".equals(state)) {
+            isFolded = null;
+        } else {
+            getErrPrintWriter().println("Error: Invalid fold state request: " + state);
+            return 1;
+        }
+
+        mService.setFoldOverride(isFolded);
         return 0;
     }
 }
