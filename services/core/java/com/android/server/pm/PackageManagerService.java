@@ -2151,7 +2151,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (succeeded) {
             // Send the removed broadcasts
             if (res.removedInfo != null) {
-                res.removedInfo.sendPackageRemovedBroadcasts(killApp);
+                res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
             // Allowlist any restricted permissions first as some may be runtime
@@ -5316,8 +5316,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final VersionedPackage pkgToDelete = packagesToDelete.get(i);
                 // Delete the package synchronously (will fail of the lib used for any user).
                 if (deletePackageX(pkgToDelete.getPackageName(), pkgToDelete.getLongVersionCode(),
-                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS)
-                                == PackageManager.DELETE_SUCCEEDED) {
+                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
+                        true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
                     if (volume.getUsableSpace() >= neededSpace) {
                         return true;
                     }
@@ -13306,7 +13306,7 @@ public class PackageManagerService extends IPackageManager.Stub
         info.removedUsers = new int[] {userId};
         info.broadcastUsers = new int[] {userId};
         info.uid = UserHandle.getUid(userId, pkgSetting.appId);
-        info.sendPackageRemovedBroadcasts(true /*killApp*/);
+        info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/);
     }
 
     private void sendDistractingPackagesChanged(String[] pkgList, int[] uidList, int userId,
@@ -18581,21 +18581,21 @@ public class PackageManagerService extends IPackageManager.Stub
             if (doDeletePackage) {
                 if (!deleteAllUsers) {
                     returnCode = deletePackageX(internalPackageName, versionCode,
-                            userId, deleteFlags);
+                            userId, deleteFlags, false /*removedBySystem*/);
                 } else {
                     int[] blockUninstallUserIds = getBlockUninstallForUsers(
                             internalPackageName, users);
                     // If nobody is blocking uninstall, proceed with delete for all users
                     if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
                         returnCode = deletePackageX(internalPackageName, versionCode,
-                                userId, deleteFlags);
+                                userId, deleteFlags, false /*removedBySystem*/);
                     } else {
                         // Otherwise uninstall individually for users with blockUninstalls=false
                         final int userFlags = deleteFlags & ~PackageManager.DELETE_ALL_USERS;
                         for (int userId1 : users) {
                             if (!ArrayUtils.contains(blockUninstallUserIds, userId1)) {
                                 returnCode = deletePackageX(internalPackageName, versionCode,
-                                        userId1, userFlags);
+                                        userId1, userFlags, false /*removedBySystem*/);
                                 if (returnCode != PackageManager.DELETE_SUCCEEDED) {
                                     Slog.w(TAG, "Package delete failed for user " + userId1
                                             + ", returnCode " + returnCode);
@@ -18822,8 +18822,12 @@ public class PackageManagerService extends IPackageManager.Stub
      *  updating mSettings to reflect current status
      *  persisting settings for later use
      *  sending a broadcast if necessary
+     *
+     *  @param removedBySystem A boolean to indicate the package was removed automatically without
+     *                         the user-initiated action.
      */
-    int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags) {
+    int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags,
+            boolean removedBySystem) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
         final boolean res;
 
@@ -18920,7 +18924,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (res) {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
-            info.sendPackageRemovedBroadcasts(killApp);
+            info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
             info.sendSystemPackageUpdatedBroadcasts();
         }
         // Force a gc here.
@@ -18996,8 +19000,8 @@ public class PackageManagerService extends IPackageManager.Stub
             this.packageSender = packageSender;
         }
 
-        void sendPackageRemovedBroadcasts(boolean killApp) {
-            sendPackageRemovedBroadcastInternal(killApp);
+        void sendPackageRemovedBroadcasts(boolean killApp, boolean removedBySystem) {
+            sendPackageRemovedBroadcastInternal(killApp, removedBySystem);
         }
 
         void sendSystemPackageUpdatedBroadcasts() {
@@ -19026,7 +19030,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        private void sendPackageRemovedBroadcastInternal(boolean killApp) {
+        private void sendPackageRemovedBroadcastInternal(boolean killApp, boolean removedBySystem) {
             // Don't send static shared library removal broadcasts as these
             // libs are visible only the the apps that depend on them an one
             // cannot remove the library if it has a dependency.
@@ -19038,6 +19042,7 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putInt(Intent.EXTRA_UID, removedUid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, dataRemoved);
             extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
+            extras.putBoolean(Intent.EXTRA_REMOVED_BY_SYSTEM, removedBySystem);
             if (isUpdate || isRemovedPackageSystemUpdate) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
@@ -23982,7 +23987,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 //end run
                 mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
-                        userId, 0));
+                        userId, 0, true /*removedBySystem*/));
             }
         }
     }
@@ -24212,7 +24217,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // It is currently possible that the package will be deleted even if it is installed
             // after this method returns.
             mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
-                    0, PackageManager.DELETE_ALL_USERS));
+                    0, PackageManager.DELETE_ALL_USERS, true /*removedBySystem*/));
         }
     }
 
