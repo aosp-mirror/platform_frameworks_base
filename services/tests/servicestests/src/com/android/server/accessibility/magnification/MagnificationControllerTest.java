@@ -250,6 +250,17 @@ public class MagnificationControllerTest {
         verify(mScreenMagnificationController).setUserId(CURRENT_USER_ID);
         verify(mWindowMagnificationManager).setUserId(CURRENT_USER_ID);
     }
+
+    @Test
+    public void onMagnificationRequest_windowMagnifying_disableWindow() throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onRequestMagnificationSpec(TEST_DISPLAY, 1);
+        mMockConnection.invokeCallbacks();
+
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+    }
+
     private void setMagnificationEnabled(int mode) throws RemoteException {
 
         setMagnificationEnabled(mode, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
