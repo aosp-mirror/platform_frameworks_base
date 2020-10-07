@@ -18,13 +18,21 @@ package android.telephony.ims.stub;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.telephony.ims.DelegateMessageCallback;
+import android.telephony.ims.DelegateRequest;
+import android.telephony.ims.DelegateStateCallback;
+import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.aidl.ISipTransport;
 
 import java.util.concurrent.Executor;
 
 /**
- * Manages the creation and destruction of SipDelegates in order to proxy SIP traffic to other
- * IMS applications in order to support IMS single registration.
+ * The ImsService implements this class to manage the creation and destruction of
+ * {@link SipDelegate}s.
+ *
+ * {@link SipDelegate}s allow the ImsService to forward SIP traffic generated and consumed by IMS
+ * applications as a delegate to the associated carrier's IMS Network in order to support using a
+ * single IMS registration for all MMTEL and RCS signalling traffic.
  * @hide
  */
 @SystemApi
@@ -46,6 +54,36 @@ public class SipTransportImplBase {
         }
 
         mBinderExecutor = executor;
+    }
+
+    /**
+     * The ImsService implements this method to handle requests to create a new {@link SipDelegate}
+     * for subscription associated with it.
+     *
+     * @param request A SIP delegate request containing the parameters that the remote RCS
+     * application wishes to use.
+     * @param dc A callback back to the remote application to be used to communicate state callbacks
+     *           for the SipDelegate.
+     * @param mc A callback back to the remote application to be used to send SIP messages to the
+     *           remote application and acknowledge the sending of outgoing SIP messages.
+     * @hide
+     */
+    public void createSipDelegate(@NonNull DelegateRequest request,
+            @NonNull DelegateStateCallback dc, @NonNull DelegateMessageCallback mc) {
+
+    }
+
+    /**
+     * Destroys the SipDelegate associated with a remote IMS application. After the delegate is
+     * destroyed, SipDelegate#onDestroy should be called to notify listeners of its destruction to
+     * release resources.
+     * @param delegate The delegate to be modified.
+     * @param reason The reason the remote connection to this SipDelegate is being destroyed.
+     * @hide
+     */
+    public void destroySipDelegate(@NonNull SipDelegate delegate,
+            @SipDelegateManager.SipDelegateDestroyReason int reason) {
+
     }
 
     /**

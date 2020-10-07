@@ -128,13 +128,15 @@ public class ImsManager {
     }
 
     /**
-     * Create an instance of SipDelegateManager for the subscription id specified.
+     * Create an instance of {@link SipDelegateManager} for the subscription id specified.
      * <p>
-     * Used for RCS single registration cases, where an IMS application needs to forward SIP
-     * traffic through the device's IMS service.
-     * @param subscriptionId The ID of the subscription that this SipDelegateManager will use.
+     * Allows an IMS application to forward SIP traffic through the device's IMS service,
+     * which is used for cellular carriers that require the device to share a single IMS
+     * registration for both MMTEL and RCS features.
+     * @param subscriptionId The ID of the subscription that this {@link SipDelegateManager} will
+     *                       be bound to.
      * @throws IllegalArgumentException if the subscription is invalid.
-     * @return a SipDelegateManager instance for the specified subscription ID.
+     * @return a {@link SipDelegateManager} instance for the specified subscription ID.
      * @hide
      */
     @SystemApi
