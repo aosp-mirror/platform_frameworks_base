@@ -344,8 +344,24 @@ public abstract class Vibrator {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public abstract void vibrate(int uid, String opPkg, VibrationEffect vibe,
-            String reason, AudioAttributes attributes);
+    public final void vibrate(int uid, String opPkg, VibrationEffect vibe,
+            String reason, AudioAttributes attributes) {
+        if (attributes == null) {
+            attributes = new AudioAttributes.Builder().build();
+        }
+        VibrationAttributes attr = new VibrationAttributes.Builder(attributes, vibe).build();
+        vibrate(uid, opPkg, vibe, reason, attr);
+    }
+
+    /**
+     * Like {@link #vibrate(int, String, VibrationEffect, String, AudioAttributes)}, but allows the
+     * caller to specify {@link VibrationAttributes} instead of {@link AudioAttributes}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public abstract void vibrate(int uid, String opPkg, @NonNull VibrationEffect vibe,
+            String reason, @NonNull VibrationAttributes attributes);
 
     /**
      * Query whether the vibrator supports the given effects.
