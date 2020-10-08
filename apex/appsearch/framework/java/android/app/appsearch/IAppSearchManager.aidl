@@ -15,6 +15,8 @@
  */
 package android.app.appsearch;
 
+import android.os.Bundle;
+
 import com.android.internal.infra.AndroidFuture;
 
 parcelable AppSearchResult;
@@ -25,14 +27,16 @@ interface IAppSearchManager {
     /**
      * Sets the schema.
      *
-     * @param schemaBytes Serialized SchemaProto.
+     * @param schemaBundles List of AppSearchSchema bundles.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt&gt;.
      *     The results of the call.
      */
     void setSchema(
-        in byte[] schemaBytes, boolean forceOverride, in AndroidFuture<AppSearchResult> callback);
+        in List<Bundle> schemaBundles,
+        boolean forceOverride,
+        in AndroidFuture<AppSearchResult> callback);
 
     /**
      * Inserts documents into the index.

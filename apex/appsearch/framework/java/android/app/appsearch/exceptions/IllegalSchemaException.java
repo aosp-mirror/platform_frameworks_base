@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package android.app.appsearch;
+package android.app.appsearch.exceptions;
 
 import android.annotation.NonNull;
+
 
 /**
  * Indicates that a {@link android.app.appsearch.AppSearchSchema} has logical inconsistencies such
@@ -24,6 +25,7 @@ import android.annotation.NonNull;
  *
  * @hide
  */
+
 public class IllegalSchemaException extends IllegalArgumentException {
     /**
      * Constructs a new {@link IllegalSchemaException}.

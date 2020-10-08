@@ -18,6 +18,7 @@ package android.app.appsearch;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.appsearch.exceptions.IllegalSearchSpecException;
 
 import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.ScoringSpecProto;
