@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
@@ -82,8 +83,8 @@ public class FingerprintEnrollClient extends EnrollClient<ISession> implements U
     protected void startHalOperation() {
         UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         try {
-            // TODO(b/170163175): Need a way to convert byte arrays to HardwareAuthToken
-            getFreshDaemon().enroll(mSequentialId, null /* hat */);
+            getFreshDaemon().enroll(mSequentialId,
+                    HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
