@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -30,6 +31,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RuntimeShader;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.view.View;
 
@@ -59,9 +61,10 @@ public class ColorFiltersMutateActivity extends Activity {
         private int mPorterDuffColor = 0;
 
         static final String sSkSL =
-                "uniform float param1;\n"
-                + "void main(float2 xy, inout half4 color) {\n"
-                + "color = half4(color.r, half(param1), color.b, 1.0);\n"
+                "in shader bitmapShader;\n"
+                + "uniform float param1;\n"
+                + "half4 main(float2 xy) {\n"
+                + "  return half4(sample(bitmapShader, xy).rgb, param1);\n"
                 + "}\n";
 
         private byte[] mUniforms = new byte[4];
@@ -84,7 +87,9 @@ public class ColorFiltersMutateActivity extends Activity {
             mBlendPaint.setColorFilter(new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_OVER));
 
             mShaderPaint = new Paint();
-            mShaderPaint.setShader(new RuntimeShader(sSkSL, mUniforms, true));
+            Shader[] inputShaders = { new BitmapShader(mBitmap1, Shader.TileMode.CLAMP,
+                                                       Shader.TileMode.CLAMP) };
+            mShaderPaint.setShader(new RuntimeShader(sSkSL, mUniforms, inputShaders, true));
             setShaderParam1(0.0f);
 
             ObjectAnimator sat = ObjectAnimator.ofFloat(this, "saturation", 1.0f);
