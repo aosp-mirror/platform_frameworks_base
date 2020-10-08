@@ -162,7 +162,7 @@ public class TouchExplorerTest {
         goFromStateClearTo(STATE_DRAGGING_2FINGERS);
 
         assertState(STATE_DRAGGING);
-        assertCapturedEvents(MotionEvent.ACTION_DOWN);
+        assertCapturedEvents(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE);
         assertCapturedEventsNoHistory();
     }
 
@@ -174,6 +174,7 @@ public class TouchExplorerTest {
         assertState(STATE_DELEGATING);
         assertCapturedEvents(
                 /* goto dragging state */ MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_MOVE,
                 /* leave dragging state */ MotionEvent.ACTION_UP,
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN);
