@@ -650,7 +650,6 @@ public class AccessibilityServiceInfo implements Parcelable {
                     0);
             flags = asAttributes.getInt(
                     com.android.internal.R.styleable.AccessibilityService_accessibilityFlags, 0);
-            flags |= FLAG_REQUEST_2_FINGER_PASSTHROUGH;
             mSettingsActivityName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityService_settingsActivity);
             if (asAttributes.getBoolean(com.android.internal.R.styleable
