@@ -2380,7 +2380,7 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 DisplayBlanker blanker = new DisplayBlanker() {
                     @Override
-                    public void requestDisplayState(int state, float brightness) {
+                    public void requestDisplayState(int displayId, int state, float brightness) {
                         // The order of operations is important for legacy reasons.
                         if (state == Display.STATE_OFF) {
                             requestGlobalDisplayStateInternal(state, brightness);
@@ -2393,11 +2393,9 @@ public final class DisplayManagerService extends SystemService {
                         }
                     }
                 };
-                LogicalDisplay defaultDisplay =
-                        mLogicalDisplayMapper.getLocked(Display.DEFAULT_DISPLAY);
-                DisplayDevice defaultDevice = defaultDisplay.getPrimaryDisplayDeviceLocked();
                 mDisplayPowerController = new DisplayPowerController(
-                        mContext, callbacks, handler, sensorManager, blanker, defaultDevice);
+                        mContext, callbacks, handler, sensorManager, blanker,
+                        Display.DEFAULT_DISPLAY);
                 mSensorManager = sensorManager;
             }
 
