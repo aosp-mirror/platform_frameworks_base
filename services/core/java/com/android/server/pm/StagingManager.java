@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
@@ -46,8 +45,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
-import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -80,7 +77,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -96,7 +92,6 @@ public class StagingManager {
 
     private static final String TAG = "StagingManager";
 
-    private final PackageInstallerService mPi;
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
     private final Context mContext;
@@ -116,9 +111,7 @@ public class StagingManager {
     @GuardedBy("mSuccessfulStagedSessionIds")
     private final List<Integer> mSuccessfulStagedSessionIds = new ArrayList<>();
 
-    StagingManager(PackageInstallerService pi, Context context,
-            Supplier<PackageParser2> packageParserSupplier) {
-        mPi = pi;
+    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier) {
         mContext = context;
         mPackageParserSupplier = packageParserSupplier;
 
@@ -648,118 +641,6 @@ public class StagingManager {
             return "Session reverted due to crashing native process: " + mNativeFailureReason;
         }
         return "";
-    }
-
-    private List<String> findAPKsInDir(File stageDir) {
-        List<String> ret = new ArrayList<>();
-        if (stageDir != null && stageDir.exists()) {
-            for (File file : stageDir.listFiles()) {
-                if (file.getAbsolutePath().toLowerCase().endsWith(".apk")) {
-                    ret.add(file.getAbsolutePath());
-                }
-            }
-        }
-        return ret;
-    }
-
-    private PackageInstallerSession createAndWriteApkSession(
-            PackageInstallerSession originalSession) throws PackageManagerException {
-        final int errorCode = SessionInfo.STAGED_SESSION_ACTIVATION_FAILED;
-        if (originalSession.stageDir == null) {
-            Slog.wtf(TAG, "Attempting to install a staged APK session with no staging dir");
-            throw new PackageManagerException(errorCode,
-                    "Attempting to install a staged APK session with no staging dir");
-        }
-        List<String> apkFilePaths = findAPKsInDir(originalSession.stageDir);
-        if (apkFilePaths.isEmpty()) {
-            Slog.w(TAG, "Can't find staged APK in " + originalSession.stageDir.getAbsolutePath());
-            throw new PackageManagerException(errorCode,
-                    "Can't find staged APK in " + originalSession.stageDir.getAbsolutePath());
-        }
-
-        PackageInstaller.SessionParams params = originalSession.params.copy();
-        params.isStaged = false;
-        params.installFlags |= PackageManager.INSTALL_STAGED;
-        params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
-        try {
-            int apkSessionId = mPi.createSession(
-                    params, originalSession.getInstallerPackageName(),
-                    originalSession.getInstallerAttributionTag(), originalSession.userId);
-            PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
-            apkSession.open();
-            for (int i = 0, size = apkFilePaths.size(); i < size; i++) {
-                final String apkFilePath = apkFilePaths.get(i);
-                File apkFile = new File(apkFilePath);
-                ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
-                        ParcelFileDescriptor.MODE_READ_ONLY);
-                long sizeBytes = (pfd == null) ? -1 : pfd.getStatSize();
-                if (sizeBytes < 0) {
-                    Slog.e(TAG, "Unable to get size of: " + apkFilePath);
-                    throw new PackageManagerException(errorCode,
-                            "Unable to get size of: " + apkFilePath);
-                }
-                apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
-            }
-            return apkSession;
-        } catch (IOException | ParcelableException e) {
-            Slog.e(TAG, "Failure to install APK staged session " + originalSession.sessionId, e);
-            throw new PackageManagerException(errorCode, "Failed to create/write APK session", e);
-        }
-    }
-
-    /**
-     * Extract apks in the given session into a new session. Returns {@code null} if there is no
-     * apks in the given session. Only parent session is returned for multi-package session.
-     */
-    @Nullable
-    private PackageInstallerSession extractApksInSession(PackageInstallerSession session)
-            throws PackageManagerException {
-        if (!session.isMultiPackage() && !session.isApexSession()) {
-            return createAndWriteApkSession(session);
-        } else if (session.isMultiPackage()) {
-            // For multi-package staged sessions containing APKs, we identify which child sessions
-            // contain an APK, and with those then create a new multi-package group of sessions,
-            // carrying over all the session parameters and unmarking them as staged. On commit the
-            // sessions will be installed atomically.
-            final List<PackageInstallerSession> childSessions = new ArrayList<>();
-            for (PackageInstallerSession s : session.getChildSessions()) {
-                if (!s.isApexSession()) {
-                    childSessions.add(s);
-                }
-            }
-            if (childSessions.isEmpty()) {
-                // APEX-only multi-package staged session, nothing to do.
-                return null;
-            }
-            final PackageInstaller.SessionParams params = session.params.copy();
-            params.isStaged = false;
-            final int apkParentSessionId = mPi.createSession(
-                    params, session.getInstallerPackageName(), session.getInstallerAttributionTag(),
-                    session.userId);
-            final PackageInstallerSession apkParentSession = mPi.getSession(apkParentSessionId);
-            try {
-                apkParentSession.open();
-            } catch (IOException e) {
-                Slog.e(TAG, "Unable to prepare multi-package session for staged session "
-                        + session.sessionId);
-                throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Unable to prepare multi-package session for staged session");
-            }
-
-            for (int i = 0, size = childSessions.size(); i < size; i++) {
-                final PackageInstallerSession apkChildSession = createAndWriteApkSession(
-                        childSessions.get(i));
-                try {
-                    apkParentSession.addChildSessionId(apkChildSession.sessionId);
-                } catch (IllegalStateException e) {
-                    Slog.e(TAG, "Failed to add a child session for installing the APK files", e);
-                    throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                            "Failed to add a child session " + apkChildSession.sessionId);
-                }
-            }
-            return apkParentSession;
-        }
-        return null;
     }
 
     /**

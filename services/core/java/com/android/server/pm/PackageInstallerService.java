@@ -244,7 +244,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir.mkdirs();
 
         mApexManager = ApexManager.getInstance();
-        mStagingManager = new StagingManager(this, context, apexParserSupplier);
+        mStagingManager = new StagingManager(context, apexParserSupplier);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
