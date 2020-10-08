@@ -48,6 +48,7 @@ genrule {
     name: "frameworks-base-api-current-merged.txt",
     srcs: [
         ":conscrypt.module.public.api{.public.api.txt}",
+        ":framework-appsearch{.public.api.txt}",
         ":framework-graphics{.public.api.txt}",
         ":framework-media{.public.api.txt}",
         ":framework-mediaprovider{.public.api.txt}",
@@ -67,6 +68,8 @@ genrule {
     name: "frameworks-base-api-removed-merged.txt",
     srcs: [
         ":conscrypt.module.public.api{.public.removed-api.txt}",
+        ":framework-appsearch{.public.removed-api.txt}",
+        ":framework-graphics{.public.removed-api.txt}",
         ":framework-media{.public.removed-api.txt}",
         ":framework-mediaprovider{.public.removed-api.txt}",
         ":framework-permission{.public.removed-api.txt}",
@@ -84,6 +87,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current-merged.txt",
     srcs: [
+        ":framework-appsearch{.system.api.txt}",
         ":framework-graphics{.system.api.txt}",
         ":framework-media{.system.api.txt}",
         ":framework-mediaprovider{.system.api.txt}",
@@ -102,6 +106,8 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-removed-merged.txt",
     srcs: [
+        ":framework-appsearch{.system.removed-api.txt}",
+        ":framework-graphics{.system.removed-api.txt}",
         ":framework-media{.system.removed-api.txt}",
         ":framework-mediaprovider{.system.removed-api.txt}",
         ":framework-permission{.system.removed-api.txt}",
@@ -119,6 +125,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-current-merged.txt",
     srcs: [
+        ":framework-appsearch{.module-lib.api.txt}",
         ":framework-graphics{.module-lib.api.txt}",
         ":framework-media{.module-lib.api.txt}",
         ":framework-mediaprovider{.module-lib.api.txt}",
@@ -137,6 +144,8 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-removed-merged.txt",
     srcs: [
+        ":framework-appsearch{.module-lib.removed-api.txt}",
+        ":framework-graphics{.module-lib.removed-api.txt}",
         ":framework-media{.module-lib.removed-api.txt}",
         ":framework-mediaprovider{.module-lib.removed-api.txt}",
         ":framework-permission{.module-lib.removed-api.txt}",
