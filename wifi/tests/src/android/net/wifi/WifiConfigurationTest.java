@@ -48,6 +48,7 @@ import org.junit.Test;
  */
 @SmallTest
 public class WifiConfigurationTest {
+    private static final String TEST_PASSPOINT_UNIQUE_ID = "uniqueId";
 
     @Before
     public void setUp() {
@@ -388,6 +389,79 @@ public class WifiConfigurationTest {
         config.allowedKeyManagement.set(KeyMgmt.WAPI_CERT);
         assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_CERT],
                 config.getSsidAndSecurityTypeString());
+    }
+
+    /**
+     * Verifies that getMacRandomKey returns the correct String for networks of
+     * various different security types, the result should be stable.
+     */
+    @Test
+    public void testGetMacRandomKeyString() {
+        WifiConfiguration config = new WifiConfiguration();
+        final String mSsid = "TestAP";
+        config.SSID = mSsid;
+
+        // Test various combinations
+        config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WPA_PSK],
+                config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WPA_EAP],
+                config.getMacRandomKey());
+
+        config.wepKeys[0] = "TestWep";
+        config.allowedKeyManagement.clear();
+        assertEquals(mSsid + "WEP", config.getMacRandomKey());
+
+        // set WEP key and give a valid index.
+        config.wepKeys[0] = null;
+        config.wepKeys[2] = "TestWep";
+        config.wepTxKeyIndex = 2;
+        config.allowedKeyManagement.clear();
+        assertEquals(mSsid + "WEP", config.getMacRandomKey());
+
+        // set WEP key but does not give a valid index.
+        config.wepKeys[0] = null;
+        config.wepKeys[2] = "TestWep";
+        config.wepTxKeyIndex = 0;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.OWE], config.getMacRandomKey());
+
+        config.wepKeys[0] = null;
+        config.wepTxKeyIndex = 0;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.OWE], config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SAE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.SAE], config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SUITE_B_192);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.SUITE_B_192],
+                config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.NONE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.NONE], config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_PSK);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_PSK],
+                config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_CERT);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_CERT],
+                config.getMacRandomKey());
+
+        config.allowedKeyManagement.clear();
+        config.setPasspointUniqueId(TEST_PASSPOINT_UNIQUE_ID);
+        assertEquals(TEST_PASSPOINT_UNIQUE_ID, config.getMacRandomKey());
     }
 
     /**
