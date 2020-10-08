@@ -79,8 +79,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.commonProps.maxEnrollmentsPerUser,
                             prop.sensorType,
                             true /* resetLockoutRequiresHardwareAuthToken */);
-            final Sensor sensor = new Sensor(getTag() + "/" + sensorId, internalProp,
-                    gestureAvailabilityDispatcher);
+            final Sensor sensor = new Sensor(getTag() + "/" + sensorId, mContext, mHandler,
+                    internalProp, gestureAvailabilityDispatcher);
 
             mSensors.put(sensorId, sensor);
             Slog.d(getTag(), "Added: " + internalProp);

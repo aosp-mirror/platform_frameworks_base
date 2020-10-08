@@ -31,6 +31,10 @@ public final class Fingerprint extends BiometricAuthenticator.Identifier {
         mGroupId = groupId;
     }
 
+    public Fingerprint(CharSequence name, int fingerId, long deviceId) {
+        super(name, fingerId, deviceId);
+    }
+
     private Fingerprint(Parcel in) {
         super(in.readString(), in.readInt(), in.readLong());
         mGroupId = in.readInt();
