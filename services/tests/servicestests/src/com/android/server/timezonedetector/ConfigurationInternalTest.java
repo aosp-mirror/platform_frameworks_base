@@ -91,7 +91,7 @@ public class ConfigurationInternalTest {
             TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
-            assertEquals(CAPABILITY_POSSESSED,
+            assertEquals(CAPABILITY_NOT_APPLICABLE,
                     capabilities.getConfigureGeoDetectionEnabledCapability());
             assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getSuggestManualTimeZoneCapability());
