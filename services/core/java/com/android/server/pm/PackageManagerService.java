@@ -2232,8 +2232,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Send installed broadcasts if the package is not a static shared lib.
             if (res.pkg.getStaticSharedLibName() == null) {
-                mProcessLoggingHandler.invalidateProcessLoggingBaseApkHash(
-                        res.pkg.getBaseApkPath());
+                mProcessLoggingHandler.invalidateBaseApkHash(res.pkg.getBaseApkPath());
 
                 // Send added for users that see the package for the first time
                 // sendPackageAddedForNewUsers also deals with system apps
@@ -2494,13 +2493,6 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0, size = applicationInfo.splitNames.length; i < size; ++i) {
                 filesToChecksum.add(Pair.create(applicationInfo.splitNames[i],
                         new File(applicationInfo.splitSourceDirs[i])));
-            }
-        }
-
-        for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
-            final File file = filesToChecksum.get(i).second;
-            if (!file.exists()) {
-                throw new IllegalStateException("File not found: " + file.getPath());
             }
         }
 
@@ -25806,25 +25798,16 @@ public class PackageManagerService extends IPackageManager.Stub
      * @hide
      */
     @Override
-    public void logAppProcessStartIfNeeded(String processName, int uid, String seinfo,
-            String apkFile, int pid) {
+    public void logAppProcessStartIfNeeded(String packageName, String processName, int uid,
+            String seinfo, String apkFile, int pid) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
         if (!SecurityLog.isLoggingEnabled()) {
             return;
         }
-        Bundle data = new Bundle();
-        data.putLong("startTimestamp", System.currentTimeMillis());
-        data.putString("processName", processName);
-        data.putInt("uid", uid);
-        data.putString("seinfo", seinfo);
-        data.putString("apkFile", apkFile);
-        data.putInt("pid", pid);
-        Message msg = mProcessLoggingHandler.obtainMessage(
-                ProcessLoggingHandler.LOG_APP_PROCESS_START_MSG);
-        msg.setData(data);
-        mProcessLoggingHandler.sendMessage(msg);
+        mProcessLoggingHandler.logAppProcessStart(mContext, this, apkFile, packageName, processName,
+                uid, seinfo, pid);
     }
 
     public CompilerStats.PackageStats getCompilerPackageStats(String pkgName) {
