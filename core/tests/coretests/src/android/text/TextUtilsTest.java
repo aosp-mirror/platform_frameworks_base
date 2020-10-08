@@ -792,5 +792,6 @@ public class TextUtilsTest {
         assertEquals("ABC...", TextUtils.trimToLengthWithEllipsis("ABCDEF", 3));
         assertEquals("ABC", TextUtils.trimToLengthWithEllipsis("ABC", 3));
         assertEquals("", TextUtils.trimToLengthWithEllipsis("", 3));
+        assertNull(TextUtils.trimToLengthWithEllipsis(null, 3));
     }
 }
