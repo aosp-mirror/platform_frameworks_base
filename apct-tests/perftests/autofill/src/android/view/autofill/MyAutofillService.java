@@ -15,6 +15,7 @@
  */
 package android.view.autofill;
 
+import android.app.assist.AssistStructure.ViewNode;
 import android.os.CancellationSignal;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
@@ -126,25 +127,31 @@ public class MyAutofillService extends AutofillService {
             onError("ignoring onFillRequest(): response not set", callback);
             return;
         }
-        // TODO(b/162216576): fix error FillResponse
         Dataset.Builder dataset = new Dataset.Builder(newDatasetPresentation("dataset"));
         boolean hasData = false;
         if (response.mUsername != null) {
             hasData = true;
-            dataset.setValue(response.mUsername.first,
-                    AutofillValue.forText(response.mUsername.second));
+            AutofillId autofillId = getAutofillIdByResourceId(request, response.mUsername.first);
+            AutofillValue value = AutofillValue.forText(response.mUsername.second);
+            dataset.setValue(autofillId, value, newDatasetPresentation("dataset"));
         }
         if (response.mPassword != null) {
             hasData = true;
-            dataset.setValue(response.mPassword.first,
-                    AutofillValue.forText(response.mPassword.second));
+            AutofillId autofillId = getAutofillIdByResourceId(request, response.mPassword.first);
+            AutofillValue value = AutofillValue.forText(response.mPassword.second);
+            dataset.setValue(autofillId, value, newDatasetPresentation("dataset"));
         }
         if (hasData) {
             FillResponse.Builder fillResponse = new FillResponse.Builder();
             if (response.mIgnoredIds != null) {
-                fillResponse.setIgnoredIds(response.mIgnoredIds);
+                int length = response.mIgnoredIds.length;
+                AutofillId[] requiredIds = new AutofillId[length];
+                for (int i = 0; i < length; i++) {
+                    String resourceId = response.mIgnoredIds[i];
+                    requiredIds[i] = getAutofillIdByResourceId(request, resourceId);
+                }
+                fillResponse.setIgnoredIds(requiredIds);
             }
-
             callback.onSuccess(fillResponse.addDataset(dataset.build()).build());
         } else {
             callback.onSuccess(null);
@@ -152,6 +159,16 @@ public class MyAutofillService extends AutofillService {
         if (!sFillRequests.offer(request, TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
             Log.w(TAG, "could not offer request in " + TIMEOUT_MS + "ms");
         }
+    }
+
+    private AutofillId getAutofillIdByResourceId(FillRequest request, String resourceId)
+            throws Exception {
+        ViewNode node = AutofillTestHelper.findNodeByResourceId(request.getFillContexts(),
+                resourceId);
+        if (node == null) {
+            throw new AssertionError("No node with resource id " + resourceId);
+        }
+        return node.getAutofillId();
     }
 
     @Override
@@ -162,9 +179,9 @@ public class MyAutofillService extends AutofillService {
     }
 
     static final class CannedResponse {
-        private final Pair<AutofillId, String> mUsername;
-        private final Pair<AutofillId, String> mPassword;
-        private final AutofillId[] mIgnoredIds;
+        private final Pair<String, String> mUsername;
+        private final Pair<String, String> mPassword;
+        private final String[] mIgnoredIds;
 
         private CannedResponse(@NonNull Builder builder) {
             mUsername = builder.mUsername;
@@ -173,24 +190,24 @@ public class MyAutofillService extends AutofillService {
         }
 
         static class Builder {
-            private Pair<AutofillId, String> mUsername;
-            private Pair<AutofillId, String> mPassword;
-            private AutofillId[] mIgnoredIds;
+            private Pair<String, String> mUsername;
+            private Pair<String, String> mPassword;
+            private String[] mIgnoredIds;
 
             @NonNull
-            Builder setUsername(@NonNull AutofillId id, @NonNull String value) {
+            Builder setUsername(@NonNull String id, @NonNull String value) {
                 mUsername = new Pair<>(id, value);
                 return this;
             }
 
             @NonNull
-            Builder setPassword(@NonNull AutofillId id, @NonNull String value) {
+            Builder setPassword(@NonNull String id, @NonNull String value) {
                 mPassword = new Pair<>(id, value);
                 return this;
             }
 
             @NonNull
-            Builder setIgnored(AutofillId... ids) {
+            Builder setIgnored(String... ids) {
                 mIgnoredIds = ids;
                 return this;
             }
