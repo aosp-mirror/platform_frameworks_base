@@ -366,8 +366,9 @@ public class UserInfo implements Parcelable {
      * @return true if this user can be switched to.
      **/
     public boolean supportsSwitchTo() {
-        if (isEphemeral() && !isEnabled()) {
-            // Don't support switching to an ephemeral user with removal in progress.
+        if (partial || !isEnabled()) {
+            // Don't support switching to disabled or partial users, which includes users with
+            // removal in progress.
             return false;
         }
         if (preCreated) {
