@@ -59,7 +59,7 @@ public class SearchResultsTest {
 
     @Test
     public void buildSearchSpecWithoutTermMatchType() {
-        assertThrows(RuntimeException.class, () -> SearchSpec.newBuilder()
+        assertThrows(RuntimeException.class, () -> new SearchSpec.Builder()
                 .setSchemaTypes("testSchemaType")
                 .build());
     }

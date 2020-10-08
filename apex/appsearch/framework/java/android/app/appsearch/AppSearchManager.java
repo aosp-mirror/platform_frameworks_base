@@ -25,7 +25,6 @@ import com.android.internal.infra.AndroidFuture;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.SearchResultProto;
-import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.StatusProto;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -294,13 +293,7 @@ public class AppSearchManager {
         //     them in one big list.
         AndroidFuture<AppSearchResult> searchResultFuture = new AndroidFuture<>();
         try {
-            SearchSpecProto searchSpecProto = searchSpec.getSearchSpecProto();
-            searchSpecProto = searchSpecProto.toBuilder().setQuery(queryExpression).build();
-            mService.query(
-                    searchSpecProto.toByteArray(),
-                    searchSpec.getResultSpecProto().toByteArray(),
-                    searchSpec.getScoringSpecProto().toByteArray(),
-                    searchResultFuture);
+            mService.query(queryExpression, searchSpec.getBundle(), searchResultFuture);
         } catch (RemoteException e) {
             searchResultFuture.completeExceptionally(e);
         }
