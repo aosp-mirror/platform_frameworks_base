@@ -7112,6 +7112,7 @@ package android.app.admin {
     method @NonNull public android.os.Bundle getUserRestrictions(@NonNull android.content.ComponentName);
     method @Nullable public String getWifiMacAddress(@NonNull android.content.ComponentName);
     method public boolean grantKeyPairToApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
+    method public boolean grantKeyPairToWifiAuth(@NonNull String);
     method public boolean hasCaCertInstalled(@Nullable android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(@NonNull android.content.ComponentName, int);
     method public boolean hasKeyPair(@NonNull String);
@@ -7134,6 +7135,7 @@ package android.app.admin {
     method public boolean isDeviceIdAttestationSupported();
     method public boolean isDeviceOwnerApp(String);
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
+    method public boolean isKeyPairGrantedToWifiAuth(@NonNull String);
     method public boolean isLockTaskPermitted(String);
     method public boolean isLogoutEnabled();
     method public boolean isManagedProfile(@NonNull android.content.ComponentName);
@@ -7169,6 +7171,7 @@ package android.app.admin {
     method @Nullable public java.util.List<android.app.admin.SecurityLog.SecurityEvent> retrievePreRebootSecurityLogs(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<android.app.admin.SecurityLog.SecurityEvent> retrieveSecurityLogs(@NonNull android.content.ComponentName);
     method public boolean revokeKeyPairFromApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
+    method public boolean revokeKeyPairFromWifiAuth(@NonNull String);
     method public void setAccountManagementDisabled(@NonNull android.content.ComponentName, String, boolean);
     method public void setAffiliationIds(@NonNull android.content.ComponentName, @NonNull java.util.Set<java.lang.String>);
     method public void setAlwaysOnVpnPackage(@NonNull android.content.ComponentName, @Nullable String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;

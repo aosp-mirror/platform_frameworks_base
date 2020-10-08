@@ -5458,6 +5458,42 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean setKeyGrantToWifiAuth(String callerPackage, String alias, boolean hasGrant) {
+        Preconditions.checkStringNotEmpty(alias, "Alias to grant cannot be empty");
+
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+
+        return setKeyChainGrantInternal(alias, hasGrant, Process.WIFI_UID, caller.getUserHandle());
+    }
+
+    @Override
+    public boolean isKeyPairGrantedToWifiAuth(String callerPackage, String alias) {
+        Preconditions.checkStringNotEmpty(alias, "Alias to check cannot be empty");
+
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            try (KeyChainConnection keyChainConnection =
+                         KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
+                final List<String> result = new ArrayList<>();
+                final int[] granteeUids = keyChainConnection.getService().getGrants(alias);
+
+                for (final int uid : granteeUids) {
+                    if (uid == Process.WIFI_UID) {
+                        return true;
+                    }
+                }
+                return false;
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Querying grant to wifi auth.    ", e);
+                return false;
+            }
+        });
+    }
+
+    @Override
     public boolean setKeyGrantForApp(ComponentName who, String callerPackage, String alias,
             String packageName, boolean hasGrant) {
         Preconditions.checkStringNotEmpty(alias, "Alias to grant cannot be empty");
@@ -5479,19 +5515,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalStateException("Failure getting grantee uid", e);
         }
 
+        return setKeyChainGrantInternal(alias, hasGrant, granteeUid, caller.getUserHandle());
+    }
+
+    private boolean setKeyChainGrantInternal(String alias, boolean hasGrant, int granteeUid,
+            UserHandle userHandle) {
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            final KeyChainConnection keyChainConnection =
-                    KeyChain.bindAsUser(mContext, caller.getUserHandle());
-            try {
+            try (KeyChainConnection keyChainConnection =
+                         KeyChain.bindAsUser(mContext, userHandle)) {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 keyChain.setGrant(granteeUid, alias, hasGrant);
                 return true;
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Setting grant for package.", e);
-                return  false;
-            } finally {
-                keyChainConnection.close();
+                return false;
             }
         } catch (InterruptedException e) {
             Log.w(LOG_TAG, "Interrupted while setting key grant", e);
