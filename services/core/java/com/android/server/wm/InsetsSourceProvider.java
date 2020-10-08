@@ -23,6 +23,21 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
+import static com.android.server.wm.InsetsSourceProviderProto.CLIENT_VISIBLE;
+import static com.android.server.wm.InsetsSourceProviderProto.CONTROL;
+import static com.android.server.wm.InsetsSourceProviderProto.CONTROLLABLE;
+import static com.android.server.wm.InsetsSourceProviderProto.CONTROL_TARGET;
+import static com.android.server.wm.InsetsSourceProviderProto.FAKE_CONTROL;
+import static com.android.server.wm.InsetsSourceProviderProto.FAKE_CONTROL_TARGET;
+import static com.android.server.wm.InsetsSourceProviderProto.FINISH_SEAMLESS_ROTATE_FRAME_NUMBER;
+import static com.android.server.wm.InsetsSourceProviderProto.FRAME;
+import static com.android.server.wm.InsetsSourceProviderProto.IME_OVERRIDDEN_FRAME;
+import static com.android.server.wm.InsetsSourceProviderProto.IS_LEASH_READY_FOR_DISPATCHING;
+import static com.android.server.wm.InsetsSourceProviderProto.PENDING_CONTROL_TARGET;
+import static com.android.server.wm.InsetsSourceProviderProto.SEAMLESS_ROTATING;
+import static com.android.server.wm.InsetsSourceProviderProto.SERVER_VISIBLE;
+import static com.android.server.wm.InsetsSourceProviderProto.SOURCE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
 import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED;
 
@@ -450,6 +465,36 @@ class InsetsSourceProvider {
                 mFakeControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
             }
         }
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId, @WindowTraceLogLevel int logLevel) {
+        final long token = proto.start(fieldId);
+        mSource.dumpDebug(proto, SOURCE);
+        mTmpRect.dumpDebug(proto, FRAME);
+        mFakeControl.dumpDebug(proto, FAKE_CONTROL);
+        if (mControl != null) {
+            mControl.dumpDebug(proto, CONTROL);
+        }
+        if (mControlTarget != null && mControlTarget.getWindow() != null) {
+            mControlTarget.getWindow().dumpDebug(proto, CONTROL_TARGET, logLevel);
+        }
+        if (mPendingControlTarget != null && mPendingControlTarget.getWindow() != null) {
+            mPendingControlTarget.getWindow().dumpDebug(proto, PENDING_CONTROL_TARGET, logLevel);
+        }
+        if (mFakeControlTarget != null && mFakeControlTarget.getWindow() != null) {
+            mFakeControlTarget.getWindow().dumpDebug(proto, FAKE_CONTROL_TARGET, logLevel);
+        }
+        if (mAdapter != null && mAdapter.mCapturedLeash != null) {
+            mAdapter.mCapturedLeash.dumpDebug(proto, CAPTURED_LEASH);
+        }
+        mImeOverrideFrame.dumpDebug(proto, IME_OVERRIDDEN_FRAME);
+        proto.write(IS_LEASH_READY_FOR_DISPATCHING, mIsLeashReadyForDispatching);
+        proto.write(CLIENT_VISIBLE, mClientVisible);
+        proto.write(SERVER_VISIBLE, mServerVisible);
+        proto.write(SEAMLESS_ROTATING, mSeamlessRotating);
+        proto.write(FINISH_SEAMLESS_ROTATE_FRAME_NUMBER, mFinishSeamlessRotateFrameNumber);
+        proto.write(CONTROLLABLE, mControllable);
+        proto.end(token);
     }
 
     private class ControlAdapter implements AnimationAdapter {

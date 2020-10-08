@@ -15,10 +15,36 @@
 
 package com.android.server.inputmethod;
 
+import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD;
+import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
+import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ATTRIBUTE;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_CLIENT;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCUSED_WINDOW_NAME;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ID;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_METHOD_ID;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_SEQ;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_TOKEN;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_TOKEN_DISPLAY_ID;
+import static android.server.inputmethod.InputMethodManagerServiceProto.HAVE_CONNECTION;
+import static android.server.inputmethod.InputMethodManagerServiceProto.IME_WINDOW_VISIBILITY;
+import static android.server.inputmethod.InputMethodManagerServiceProto.INPUT_SHOWN;
+import static android.server.inputmethod.InputMethodManagerServiceProto.IN_FULLSCREEN_MODE;
+import static android.server.inputmethod.InputMethodManagerServiceProto.IS_INTERACTIVE;
+import static android.server.inputmethod.InputMethodManagerServiceProto.LAST_IME_TARGET_WINDOW_NAME;
+import static android.server.inputmethod.InputMethodManagerServiceProto.LAST_SWITCH_USER_ID;
+import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_EXPLICITLY_REQUESTED;
+import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FORCED;
+import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_IME_WITH_HARD_KEYBOARD;
+import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_REQUESTED;
+import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_READY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.CLIENTS;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ELAPSED_REALTIME_NANOS;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.INPUT_METHOD_MANAGER_SERVICE;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.INPUT_METHOD_SERVICE;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorTraceFileProto.ENTRY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -70,6 +96,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.LocaleList;
@@ -711,6 +738,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
     private final String mSlotIme;
+
+    private HandlerThread mTracingThread;
 
     /**
      * Registered {@link InputMethodListListener}.
@@ -1683,6 +1712,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
+
+        mTracingThread = new HandlerThread("android.tracing", Process.THREAD_PRIORITY_BACKGROUND);
+        mTracingThread.start();
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -3989,46 +4021,103 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @BinderThread
     @Override
+    @GuardedBy("mMethodMap")
     public void startProtoDump(byte[] clientProtoDump) {
-        if (!ImeTracing.getInstance().isAvailable() || !ImeTracing.getInstance().isEnabled()) {
-            return;
-        }
-        if (clientProtoDump == null && mCurClient == null) {
-            return;
-        }
+        mTracingThread.getThreadHandler().post(() -> {
+            if (!ImeTracing.getInstance().isAvailable() || !ImeTracing.getInstance().isEnabled()) {
+                return;
+            }
+            if (clientProtoDump == null && mCurClient == null) {
+                return;
+            }
 
-        ProtoOutputStream proto = new ProtoOutputStream();
-        final long token = proto.start(ENTRY);
-        proto.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
-        // TODO: get server side dump
-        if (clientProtoDump != null) {
-            proto.write(CLIENTS, clientProtoDump);
-        } else {
-            IBinder client = null;
+            ProtoOutputStream proto = new ProtoOutputStream();
+            final long token = proto.start(ENTRY);
+            proto.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
+            dumpDebug(proto, INPUT_METHOD_MANAGER_SERVICE);
 
+            IBinder service = null;
             synchronized (mMethodMap) {
-                if (mCurClient != null && mCurClient.client != null) {
-                    client = mCurClient.client.asBinder();
+                if (mCurMethod != null) {
+                    service = mCurMethod.asBinder();
                 }
             }
 
-            if (client != null) {
+            if (service != null) {
                 try {
-                    proto.write(CLIENTS,
-                            TransferPipe.dumpAsync(client, ImeTracing.PROTO_ARG));
+                    proto.write(INPUT_METHOD_SERVICE,
+                            TransferPipe.dumpAsync(service, ImeTracing.PROTO_ARG));
                 } catch (IOException | RemoteException e) {
-                    Log.e(TAG, "Exception while collecting client side ime dump", e);
+                    Log.e(TAG, "Exception while collecting ime process dump", e);
                 }
             }
-        }
-        proto.end(token);
-        ImeTracing.getInstance().addToBuffer(proto);
+
+            if (clientProtoDump != null) {
+                proto.write(CLIENTS, clientProtoDump);
+            } else {
+                IBinder client = null;
+                synchronized (mMethodMap) {
+                    if (mCurClient != null && mCurClient.client != null) {
+                        client = mCurClient.client.asBinder();
+                    }
+                }
+
+                if (client != null) {
+                    try {
+                        proto.write(CLIENTS,
+                                TransferPipe.dumpAsync(client, ImeTracing.PROTO_ARG));
+                    } catch (IOException | RemoteException e) {
+                        Log.e(TAG, "Exception while collecting client side ime dump", e);
+                    }
+                }
+            }
+            proto.end(token);
+            ImeTracing.getInstance().addToBuffer(proto);
+        });
     }
 
     @BinderThread
     @Override
     public boolean isImeTraceEnabled() {
         return ImeTracing.getInstance().isEnabled();
+    }
+
+    @GuardedBy("mMethodMap")
+    private void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        synchronized (mMethodMap) {
+            final long token = proto.start(fieldId);
+            proto.write(CUR_METHOD_ID, mCurMethodId);
+            proto.write(CUR_SEQ, mCurSeq);
+            proto.write(CUR_CLIENT, Objects.toString(mCurClient));
+            proto.write(CUR_FOCUSED_WINDOW_NAME,
+                    mWindowManagerInternal.getWindowName(mCurFocusedWindow));
+            proto.write(LAST_IME_TARGET_WINDOW_NAME,
+                    mWindowManagerInternal.getWindowName(mLastImeTargetWindow));
+            proto.write(CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE,
+                    InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
+            if (mCurAttribute != null) {
+                mCurAttribute.dumpDebug(proto, CUR_ATTRIBUTE);
+            }
+            proto.write(CUR_ID, mCurId);
+            proto.write(SHOW_REQUESTED, mShowRequested);
+            proto.write(SHOW_EXPLICITLY_REQUESTED, mShowExplicitlyRequested);
+            proto.write(SHOW_FORCED, mShowForced);
+            proto.write(INPUT_SHOWN, mInputShown);
+            proto.write(IN_FULLSCREEN_MODE, mInFullscreenMode);
+            proto.write(CUR_TOKEN, Objects.toString(mCurToken));
+            proto.write(CUR_TOKEN_DISPLAY_ID, mCurTokenDisplayId);
+            proto.write(SYSTEM_READY, mSystemReady);
+            proto.write(LAST_SWITCH_USER_ID, mLastSwitchUserId);
+            proto.write(HAVE_CONNECTION, mHaveConnection);
+            proto.write(BOUND_TO_METHOD, mBoundToMethod);
+            proto.write(IS_INTERACTIVE, mIsInteractive);
+            proto.write(BACK_DISPOSITION, mBackDisposition);
+            proto.write(IME_WINDOW_VISIBILITY, mImeWindowVis);
+            proto.write(SHOW_IME_WITH_HARD_KEYBOARD, mMenuController.getShowImeWithHardKeyboard());
+            proto.write(ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD,
+                    mAccessibilityRequestingNoSoftKeyboard);
+            proto.end(token);
+        }
     }
 
     @BinderThread

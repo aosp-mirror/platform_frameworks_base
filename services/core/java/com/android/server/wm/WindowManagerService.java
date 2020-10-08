@@ -120,6 +120,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_DISPLAY_ID;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
+import static com.android.server.wm.WindowManagerServiceDumpProto.HARD_KEYBOARD_AVAILABLE;
 import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
 import static com.android.server.wm.WindowManagerServiceDumpProto.LAST_ORIENTATION;
 import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
@@ -6000,6 +6001,7 @@ public class WindowManagerService extends IWindowManager.Stub
         proto.write(ROTATION, defaultDisplayContent.getRotation());
         proto.write(LAST_ORIENTATION, defaultDisplayContent.getLastOrientation());
         proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
+        proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
