@@ -6150,6 +6150,7 @@ package android.net {
     method public void close();
     method @NonNull public String getInterfaceName();
     method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void setUnderlyingNetwork(@NonNull android.net.Network) throws java.io.IOException;
   }
 
   public static class IpSecTransform.Builder {
