@@ -29,6 +29,7 @@ import static android.app.AppOpsManager.KEY_BG_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_FG_SERVICE_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_TOP_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.NoteOpEvent;
@@ -132,6 +133,7 @@ import android.util.AtomicFile;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
 import android.util.Pair;
+import android.util.Pools;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -408,14 +410,26 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         InProgressStartOpEvent acquire(long startTime, long elapsedTime, @NonNull IBinder clientId,
-                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+                @NonNull Runnable onDeath, int proxyUid, @Nullable String proxyPackageName,
+                @Nullable String proxyAttributionTag, @AppOpsManager.UidState int uidState,
+                @OpFlags int flags) throws RemoteException {
+
             InProgressStartOpEvent recycled = acquire();
+
+            OpEventProxyInfo proxyInfo = null;
+            if (proxyUid != Process.INVALID_UID) {
+                proxyInfo = mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
+                        proxyAttributionTag);
+            }
+
             if (recycled != null) {
-                recycled.reinit(startTime, elapsedTime, clientId, onDeath, uidState);
+                recycled.reinit(startTime, elapsedTime, clientId, onDeath, uidState, flags,
+                        proxyInfo, mOpEventProxyInfoPool);
                 return recycled;
             }
 
-            return new InProgressStartOpEvent(startTime, elapsedTime, clientId, onDeath, uidState);
+            return new InProgressStartOpEvent(startTime, elapsedTime, clientId, onDeath, uidState,
+                    proxyInfo, flags);
         }
     }
 
@@ -670,6 +684,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         /** uidstate used when calling startOp */
         private @AppOpsManager.UidState int mUidState;
 
+        /** Proxy information of the startOp event */
+        private @Nullable OpEventProxyInfo mProxy;
+
+        /** Proxy flag information */
+        private @OpFlags int mFlags;
+
         /** How many times the op was started but not finished yet */
         int numUnfinishedStarts;
 
@@ -681,17 +701,22 @@ public class AppOpsService extends IAppOpsService.Stub {
          * @param clientId The client id of the caller of {@link #startOperation}
          * @param onDeath The code to execute on client death
          * @param uidState The uidstate of the app {@link #startOperation} was called for
+         * @param proxy The proxy information, if {@link #startProxyOperation} was called
+         * @param flags The trusted/nontrusted/self flags.
          *
          * @throws RemoteException If the client is dying
          */
         private InProgressStartOpEvent(long startTime, long startElapsedTime,
-                @NonNull IBinder clientId, @NonNull Runnable onDeath, int uidState)
-                throws RemoteException {
+                @NonNull IBinder clientId, @NonNull Runnable onDeath,
+                @AppOpsManager.UidState int uidState, @Nullable OpEventProxyInfo proxy,
+                @OpFlags int flags) throws RemoteException {
             mStartTime = startTime;
             mStartElapsedTime = startElapsedTime;
             mClientId = clientId;
             mOnDeath = onDeath;
             mUidState = uidState;
+            mProxy = proxy;
+            mFlags = flags;
 
             clientId.linkToDeath(this, 0);
         }
@@ -714,16 +739,27 @@ public class AppOpsService extends IAppOpsService.Stub {
          * @param clientId The client id of the caller of {@link #startOperation}
          * @param onDeath The code to execute on client death
          * @param uidState The uidstate of the app {@link #startOperation} was called for
+         * @param flags The flags relating to the proxy
+         * @param proxy The proxy information, if {@link #startProxyOperation} was called
+         * @param proxyPool The pool to release previous {@link OpEventProxyInfo} to
          *
          * @throws RemoteException If the client is dying
          */
         public void reinit(long startTime, long startElapsedTime, @NonNull IBinder clientId,
-                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+                @NonNull Runnable onDeath, @AppOpsManager.UidState int uidState, @OpFlags int flags,
+                @Nullable OpEventProxyInfo proxy, @NonNull Pools.Pool<OpEventProxyInfo> proxyPool
+        ) throws RemoteException {
             mStartTime = startTime;
             mStartElapsedTime = startElapsedTime;
             mClientId = clientId;
             mOnDeath = onDeath;
             mUidState = uidState;
+            mFlags = flags;
+
+            if (mProxy != null) {
+                proxyPool.release(mProxy);
+            }
+            mProxy = proxy;
 
             clientId.linkToDeath(this, 0);
         }
@@ -744,8 +780,18 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         /** @return uidstate used when calling startOp */
-        public int getUidState() {
+        public @AppOpsManager.UidState int getUidState() {
             return mUidState;
+        }
+
+        /** @return proxy info for the access */
+        public @Nullable OpEventProxyInfo getProxy() {
+            return mProxy;
+        }
+
+        /** @return flags used for the access */
+        public @OpFlags int getFlags() {
+            return mFlags;
         }
     }
 
@@ -876,14 +922,22 @@ public class AppOpsService extends IAppOpsService.Stub {
          * Update state when start was called
          *
          * @param clientId Id of the startOp caller
+         * @param proxyUid The UID of the proxy app
+         * @param proxyPackageName The package name of the proxy app
+         * @param proxyAttributionTag The attribution tag of the proxy app
          * @param uidState UID state of the app startOp is called for
+         * @param flags The proxy flags
          */
-        public void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState)
-                throws RemoteException {
-            started(clientId, uidState, true);
+        public void started(@NonNull IBinder clientId, int proxyUid,
+                @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
+                @AppOpsManager.UidState int uidState, @OpFlags int flags) throws RemoteException {
+            started(clientId, proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags,
+                    true);
         }
 
-        private void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState,
+        private void started(@NonNull IBinder clientId, int proxyUid,
+                @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
+                @AppOpsManager.UidState int uidState, @OpFlags int flags,
                 boolean triggerCallbackIfNeeded) throws RemoteException {
             if (triggerCallbackIfNeeded && !parent.isRunning()) {
                 scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
@@ -899,7 +953,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 event = mInProgressStartOpEventPool.acquire(System.currentTimeMillis(),
                         SystemClock.elapsedRealtime(), clientId,
                         PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
-                        uidState);
+                        proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags);
                 mInProgressEvents.put(clientId, event);
             } else {
                 if (uidState != event.mUidState) {
@@ -909,9 +963,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             event.numUnfinishedStarts++;
 
-            // startOp events don't support proxy, hence use flags==SELF
             mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, OP_FLAG_SELF);
+                    tag, uidState, flags);
         }
 
         /**
@@ -945,14 +998,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                     mAccessEvents = new LongSparseArray<>(1);
                 }
 
-                // startOp events don't support proxy, hence use flags==SELF
+                OpEventProxyInfo proxyCopy = event.getProxy() != null
+                        ? new OpEventProxyInfo(event.getProxy()) : null;
+
                 NoteOpEvent finishedEvent = new NoteOpEvent(event.getStartTime(),
-                        SystemClock.elapsedRealtime() - event.getStartElapsedTime(), null);
-                mAccessEvents.put(makeKey(event.getUidState(), OP_FLAG_SELF), finishedEvent);
+                        SystemClock.elapsedRealtime() - event.getStartElapsedTime(), proxyCopy);
+                mAccessEvents.put(makeKey(event.getUidState(), event.getFlags()),
+                        finishedEvent);
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
                         parent.packageName, tag, event.getUidState(),
-                        AppOpsManager.OP_FLAG_SELF, finishedEvent.getDuration());
+                        event.getFlags(), finishedEvent.getDuration());
 
                 mInProgressStartOpEventPool.release(event);
 
@@ -1010,9 +1066,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                         event.numUnfinishedStarts = 1;
                         finished(event.getClientId(), false);
 
+                        OpEventProxyInfo proxy = event.getProxy();
+
                         // Call started() to add a new start event object and then add the
                         // previously removed unfinished start counts back
-                        started(event.getClientId(), newState, false);
+                        if (proxy != null) {
+                            started(event.getClientId(), proxy.getUid(), proxy.getPackageName(),
+                                    proxy.getAttributionTag(), newState, event.getFlags(), false);
+                        } else {
+                            started(event.getClientId(), Process.INVALID_UID, null, null, newState,
+                                    OP_FLAG_SELF, false);
+                        }
                         event.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
@@ -1116,10 +1180,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 for (int i = 0; i < numInProgressEvents; i++) {
                     InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
 
-                    // startOp events don't support proxy
-                    accessEvents.append(makeKey(event.getUidState(), OP_FLAG_SELF),
+                    accessEvents.append(makeKey(event.getUidState(), event.getFlags()),
                             new NoteOpEvent(event.getStartTime(), now - event.getStartElapsedTime(),
-                                    null));
+                                    event.getProxy()));
                 }
             }
 
@@ -2182,14 +2245,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (mode == defaultMode) {
                     return;
                 }
-                previousMode = AppOpsManager.MODE_DEFAULT;
+                previousMode = MODE_DEFAULT;
                 uidState = new UidState(uid);
                 uidState.opModes = new SparseIntArray();
                 uidState.opModes.put(code, mode);
                 mUidStates.put(uid, uidState);
                 scheduleWriteLocked();
             } else if (uidState.opModes == null) {
-                previousMode = AppOpsManager.MODE_DEFAULT;
+                previousMode = MODE_DEFAULT;
                 if (mode != defaultMode) {
                     uidState.opModes = new SparseIntArray();
                     uidState.opModes.put(code, mode);
@@ -2430,7 +2493,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return;
         }
 
-        int previousMode = AppOpsManager.MODE_DEFAULT;
+        int previousMode = MODE_DEFAULT;
         synchronized (this) {
             UidState uidState = getUidStateLocked(uid, false);
             Op op = getOpLocked(code, uid, packageName, null, bypass, true);
@@ -3409,7 +3472,75 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return result;
             }
         }
+        return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
+                Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, false);
 
+    }
+
+    @Override
+    public int startProxyOperation(IBinder clientId, int code, int proxiedUid,
+            String proxiedPackageName, @Nullable String proxiedAttributionTag, int proxyUid,
+            String proxyPackageName, @Nullable String proxyAttributionTag,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+            boolean shouldCollectMessage) {
+        verifyIncomingUid(proxyUid);
+        verifyIncomingOp(code);
+        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
+        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
+
+        String resolvedProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
+        if (resolvedProxyPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+
+        final boolean isProxyTrusted = mContext.checkPermission(
+                Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
+                == PackageManager.PERMISSION_GRANTED;
+
+        final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
+                : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
+
+        String resolvedProxiedPackageName = resolvePackageName(proxiedUid, proxiedPackageName);
+        if (resolvedProxiedPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+        final int proxiedFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXIED
+                : AppOpsManager.OP_FLAG_UNTRUSTED_PROXIED;
+
+        // Test if the proxied operation will succeed before starting the proxy operation
+        final int testProxiedMode = startOperationUnchecked(clientId, code, proxiedUid,
+                resolvedProxiedPackageName, proxiedAttributionTag, proxyUid,
+                resolvedProxyPackageName, proxyAttributionTag, proxiedFlags, startIfModeDefault,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, true);
+        if (!shouldStartForMode(testProxiedMode, startIfModeDefault)) {
+            return testProxiedMode;
+        }
+
+        final int proxyMode = startOperationUnchecked(clientId, code, proxyUid,
+                resolvedProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
+                proxyFlags, startIfModeDefault, !isProxyTrusted, "proxy " + message,
+                shouldCollectMessage, false);
+        if (!shouldStartForMode(proxyMode, startIfModeDefault)
+                || Binder.getCallingUid() == proxiedUid) {
+            return proxyMode;
+        }
+
+        return startOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
+                proxiedAttributionTag, proxyUid, resolvedProxyPackageName, proxyAttributionTag,
+                proxiedFlags, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                shouldCollectMessage, false);
+    }
+
+    private boolean shouldStartForMode(int mode, boolean startIfModeDefault) {
+        return (mode == MODE_ALLOWED || (mode == MODE_DEFAULT && startIfModeDefault));
+    }
+
+    private int startOperationUnchecked(IBinder clientId, int code, int uid,
+            @NonNull String packageName, @Nullable String attributionTag, int proxyUid,
+            String proxyPackageName, @Nullable String proxyAttributionTag, @OpFlags int flags,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @Nullable String message,
+            boolean shouldCollectMessage, boolean dryRun) {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag);
@@ -3419,19 +3550,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         synchronized (this) {
-            final Ops ops = getOpsLocked(uid, resolvedPackageName, attributionTag, bypass,
-                    true /* edit */);
+            final Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass, true /* edit */);
             if (ops == null) {
-                scheduleOpStartedIfNeededLocked(code, uid, packageName, AppOpsManager.MODE_IGNORED);
+                if (!dryRun) {
+                    scheduleOpStartedIfNeededLocked(code, uid, packageName,
+                            AppOpsManager.MODE_IGNORED);
+                }
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
-                        + " package " + resolvedPackageName);
+                        + " package " + packageName);
                 return AppOpsManager.MODE_ERRORED;
             }
             final Op op = getOpLocked(ops, code, uid, true);
-            if (isOpRestrictedLocked(uid, code, resolvedPackageName, bypass)) {
-                scheduleOpStartedIfNeededLocked(code, uid, packageName, AppOpsManager.MODE_IGNORED);
+            if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
+                if (!dryRun) {
+                    scheduleOpStartedIfNeededLocked(code, uid, packageName,
+                            AppOpsManager.MODE_IGNORED);
+                }
                 return AppOpsManager.MODE_IGNORED;
             }
+
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
@@ -3439,13 +3576,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
                 final int uidMode = uidState.evalMode(code, uidState.opModes.get(switchCode));
-                if (uidMode != AppOpsManager.MODE_ALLOWED
-                        && (!startIfModeDefault || uidMode != AppOpsManager.MODE_DEFAULT)) {
-                    if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
-                            + switchCode + " (" + code + ") uid " + uid + " package "
-                            + resolvedPackageName);
-                    attributedOp.rejected(uidState.state, AppOpsManager.OP_FLAG_SELF);
-                    scheduleOpStartedIfNeededLocked(code, uid, packageName, uidMode);
+                if (!shouldStartForMode(uidMode, startIfModeDefault)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName);
+                    }
+                    if (!dryRun) {
+                        attributedOp.rejected(uidState.state, flags);
+                        scheduleOpStartedIfNeededLocked(code, uid, packageName, uidMode);
+                    }
                     return uidMode;
                 }
             } else {
@@ -3453,26 +3593,31 @@ public class AppOpsService extends IAppOpsService.Stub {
                         : op;
                 final int mode = switchOp.evalMode();
                 if (mode != AppOpsManager.MODE_ALLOWED
-                        && (!startIfModeDefault || mode != AppOpsManager.MODE_DEFAULT)) {
+                        && (!startIfModeDefault || mode != MODE_DEFAULT)) {
                     if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
-                            + resolvedPackageName);
-                    attributedOp.rejected(uidState.state, AppOpsManager.OP_FLAG_SELF);
-                    scheduleOpStartedIfNeededLocked(code, uid, packageName, mode);
+                            + packageName);
+                    if (!dryRun) {
+                        attributedOp.rejected(uidState.state, flags);
+                        scheduleOpStartedIfNeededLocked(code, uid, packageName, mode);
+                    }
                     return mode;
                 }
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
-                    + " package " + resolvedPackageName);
-            scheduleOpStartedIfNeededLocked(code, uid, packageName, AppOpsManager.MODE_ALLOWED);
-            try {
-                attributedOp.started(clientId, uidState.state);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                    + " package " + packageName);
+            if (!dryRun) {
+                scheduleOpStartedIfNeededLocked(code, uid, packageName, AppOpsManager.MODE_ALLOWED);
+                try {
+                    attributedOp.started(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
+                            uidState.state, flags);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
-        if (shouldCollectAsyncNotedOp) {
+        if (shouldCollectAsyncNotedOp && !dryRun) {
             collectAsyncNotedOp(uid, packageName, code, attributionTag, AppOpsManager.OP_FLAG_SELF,
                     message, shouldCollectMessage);
         }
@@ -3492,6 +3637,37 @@ public class AppOpsService extends IAppOpsService.Stub {
             return;
         }
 
+        finishOperationUnchecked(clientId, code, uid, resolvedPackageName, attributionTag);
+    }
+
+    @Override
+    public void finishProxyOperation(IBinder clientId, int code, int proxiedUid,
+            String proxiedPackageName, @Nullable String proxiedAttributionTag, int proxyUid,
+            @Nullable String proxyPackageName, @Nullable String proxyAttributionTag) {
+        verifyIncomingUid(proxyUid);
+        verifyIncomingOp(code);
+        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
+        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
+
+        String resolvedProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
+        if (resolvedProxyPackageName == null) {
+            return;
+        }
+
+        finishOperationUnchecked(clientId, code, proxyUid, resolvedProxyPackageName,
+                proxyAttributionTag);
+
+        String resolvedProxiedPackageName = resolvePackageName(proxiedUid, proxiedPackageName);
+        if (resolvedProxiedPackageName == null) {
+            return;
+        }
+
+        finishOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
+                proxiedAttributionTag);
+    }
+
+    private void finishOperationUnchecked(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag) {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag);
@@ -3501,7 +3677,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         synchronized (this) {
-            Op op = getOpLocked(code, uid, resolvedPackageName, attributionTag, bypass, true);
+            Op op = getOpLocked(code, uid, packageName, attributionTag, bypass, true);
             if (op == null) {
                 Slog.e(TAG, "Operation not found: uid=" + uid + " pkg=" + packageName + "("
                         + attributionTag + ") op=" + AppOpsManager.opToName(code));
