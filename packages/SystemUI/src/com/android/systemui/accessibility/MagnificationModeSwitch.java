@@ -16,11 +16,14 @@
 
 package com.android.systemui.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.util.MathUtils;
 import android.view.Gravity;
@@ -28,6 +31,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -71,6 +76,29 @@ class MagnificationModeSwitch {
         applyResourcesValues();
         mImageView.setImageResource(getIconResId(mMagnificationMode));
         mImageView.setOnTouchListener(this::onTouch);
+        mImageView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.setStateDescription(formatStateDescription());
+                info.setContentDescription(mContext.getResources().getString(
+                        R.string.magnification_mode_switch_description));
+                final AccessibilityAction clickAction = new AccessibilityAction(
+                        AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
+                        R.string.magnification_mode_switch_click_label));
+                info.addAction(clickAction);
+                info.setClickable(true);
+            }
+
+            @Override
+            public boolean performAccessibilityAction(View host, int action, Bundle args) {
+                if (action == AccessibilityAction.ACTION_CLICK.getId()) {
+                    handleSingleTap();
+                    return true;
+                }
+                return super.performAccessibilityAction(host, action, args);
+            }
+        });
 
         mAnimationTask = () -> {
             mImageView.animate()
@@ -79,6 +107,13 @@ class MagnificationModeSwitch {
                     .withEndAction(() -> removeButton())
                     .start();
         };
+    }
+
+    private CharSequence formatStateDescription() {
+        final int stringId = mMagnificationMode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+                ? R.string.magnification_mode_switch_state_window
+                : R.string.magnification_mode_switch_state_full_screen;
+        return mContext.getResources().getString(stringId);
     }
 
     private void applyResourcesValues() {
