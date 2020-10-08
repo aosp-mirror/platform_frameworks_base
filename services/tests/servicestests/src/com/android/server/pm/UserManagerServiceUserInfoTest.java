@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.UserInfo.FLAG_DEMO;
+import static android.content.pm.UserInfo.FLAG_DISABLED;
 import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_GUEST;
@@ -164,6 +165,23 @@ public class UserManagerServiceUserInfoTest {
         UserInfo userInfo = createUser(testId, 0, typeName);
         mUserManagerService.putUserInfo(userInfo);
         assertTrue(mUserManagerService.isUserOfType(testId, typeName));
+    }
+
+    /** Test UserInfo.supportsSwitchTo() for partial user. */
+    @Test
+    public void testSupportSwitchTo_partial() throws Exception {
+        UserInfo userInfo = createUser(100, FLAG_FULL, null);
+        userInfo.partial = true;
+        assertFalse("Switching to a partial user should be disabled",
+                userInfo.supportsSwitchTo());
+    }
+
+    /** Test UserInfo.supportsSwitchTo() for disabled user. */
+    @Test
+    public void testSupportSwitchTo_disabled() throws Exception {
+        UserInfo userInfo = createUser(100, FLAG_DISABLED, null);
+        assertFalse("Switching to a DISABLED user should be disabled",
+                userInfo.supportsSwitchTo());
     }
 
     /** Test UserInfo.supportsSwitchTo() for precreated users. */
