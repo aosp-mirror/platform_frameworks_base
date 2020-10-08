@@ -499,7 +499,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10087
+    // Next: 10088
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -599,6 +599,7 @@ message Atom {
         GeneralExternalStorageAccessStats general_external_storage_access_stats =
             10085 [(module) = "mediaprovider"];
         IncomingSms incoming_sms = 10086 [(module) = "telephony"];
+        OutgoingSms outgoing_sms = 10087 [(module) = "telephony"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -10516,6 +10517,61 @@ message IncomingSms {
 
     // Random message ID.
     optional int64 message_id = 14;
+}
+
+/**
+ * Pulls information for a single outgoing SMS.
+ *
+ * Each pull creates multiple atoms, one for each SMS. The sequence is randomized when pulled.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
+ */
+message OutgoingSms {
+    // Format of the SMS (3GPP or 3GPP2).
+    optional android.telephony.SmsFormatEnum sms_format = 1;
+
+    // Technology of the SMS (CS or IMS).
+    optional android.telephony.SmsTechEnum sms_tech = 2;
+
+    // Radio access technology (RAT) used for the SMS. It can be IWLAN in case of IMS.
+    optional android.telephony.NetworkTypeEnum rat = 3;
+
+    // Result of the SMS sending.
+    optional android.telephony.SmsSendResultEnum send_result = 4;
+
+    // Error code
+    // For IMS technology, see @SmsManager.Result in
+    // http://cs/android/frameworks/base/telephony/java/android/telephony/SmsManager.java
+    // For CS technology:
+    //  - GSM format: see GsmSmsErrorCode (3GPP 27.005 clause 3.2.5)
+    //  - CDMA format: see CdmaSmsErrorCode (3GPP2 N.S0005 (IS-41-C) Table 171)
+    optional int32 error_code = 5;
+
+    // Whether the SMS was sent while roaming.
+    optional bool is_roaming = 6;
+
+    // Whether the default SMS application generated the SMS (regardless of which application).
+    optional bool is_from_default_app = 7;
+
+    // Index of the SIM is used, 0 for single-SIM devices.
+    optional int32 sim_slot_index = 8;
+
+    // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
+    optional bool is_multi_sim = 9;
+
+    // Whether the message was sent with an eSIM profile.
+    optional bool is_esim = 10;
+
+    // Carrier ID of the SIM card used for the SMS.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 11;
+
+    // Random message ID.
+    optional int64 message_id = 12;
+
+    // Retry count: 0 for the first attempt and then increasing for each attempt.
+    optional int32 retry_id = 13;
 }
 
 /**
