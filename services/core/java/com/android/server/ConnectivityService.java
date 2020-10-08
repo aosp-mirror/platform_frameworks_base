@@ -1126,7 +1126,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Listen to package add and removal events for all users.
         intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
