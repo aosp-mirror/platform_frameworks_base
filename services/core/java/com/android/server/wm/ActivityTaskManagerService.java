@@ -386,16 +386,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** All processes we currently have running mapped by pid and uid */
     final WindowProcessControllerMap mProcessMap = new WindowProcessControllerMap();
     /** This is the process holding what we currently consider to be the "home" activity. */
-    WindowProcessController mHomeProcess;
+    volatile WindowProcessController mHomeProcess;
     /** The currently running heavy-weight process, if any. */
-    WindowProcessController mHeavyWeightProcess = null;
+    volatile WindowProcessController mHeavyWeightProcess;
     boolean mHasHeavyWeightFeature;
     boolean mHasLeanbackFeature;
+    /** The process of the top most activity. */
+    volatile WindowProcessController mTopApp;
     /**
      * This is the process holding the activity the user last visited that is in a different process
      * from the one they are currently in.
      */
-    WindowProcessController mPreviousProcess;
+    volatile WindowProcessController mPreviousProcess;
     /** The time at which the previous process was last visible. */
     long mPreviousProcessVisibleTime;
 
@@ -593,7 +595,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Whether mSleeping can quickly toggled between true/false without the device actually
      * display changing states is undefined.
      */
-    private boolean mSleeping = false;
+    private volatile boolean mSleeping;
 
     /**
      * The mDreaming state is set by the {@link DreamManagerService} when it receives a request to
@@ -606,7 +608,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * The process state used for processes that are running the top activities.
      * This changes between TOP and TOP_SLEEPING to following mSleeping.
      */
-    int mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
+    volatile int mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -5569,6 +5571,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mH.sendMessage(m);
     }
 
+    void updateTopApp(ActivityRecord topResumedActivity) {
+        final ActivityRecord top = topResumedActivity != null ? topResumedActivity
+                // If there is no resumed activity, it will choose the pausing activity.
+                : mRootWindowContainer.getTopResumedActivity();
+        mTopApp = top != null ? top.app : null;
+    }
+
     void updateActivityUsageStats(ActivityRecord activity, int event) {
         ComponentName taskRoot = null;
         final Task task = activity.getTask();
@@ -6368,17 +6377,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public int getTopProcessState() {
-            synchronized (mGlobalLockWithoutBoost) {
-                return mTopProcessState;
-            }
-        }
-
-        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-        @Override
-        public boolean isHeavyWeightProcess(WindowProcessController proc) {
-            synchronized (mGlobalLockWithoutBoost) {
-                return proc == mHeavyWeightProcess;
-            }
+            return mTopProcessState;
         }
 
         @HotPath(caller = HotPath.PROCESS_CHANGE)
@@ -6410,9 +6409,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public boolean isSleeping() {
-            synchronized (mGlobalLockWithoutBoost) {
-                return isSleepingLocked();
-            }
+            return mSleeping;
         }
 
         @Override
@@ -7206,15 +7203,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public WindowProcessController getTopApp() {
-            synchronized (mGlobalLockWithoutBoost) {
-                if (mRootWindowContainer == null) {
-                    // Return null if mRootWindowContainer not yet initialize, while update
-                    // oomadj after AMS created.
-                    return null;
-                }
-                final ActivityRecord top = mRootWindowContainer.getTopResumedActivity();
-                return top != null ? top.app : null;
-            }
+            return mTopApp;
         }
 
         @Override

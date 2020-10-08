@@ -101,7 +101,7 @@ final class VrController {
     //      - Calls to setPersistentVrThread will fail.
     //      - No threads will have elevated scheduling priority for VR.
     //
-    private int mVrState = FLAG_NON_VR_MODE;
+    private volatile int mVrState = FLAG_NON_VR_MODE;
 
     // The single VR render thread on the device that is given elevated scheduling priority.
     private int mVrRenderThreadTid = 0;
@@ -143,6 +143,14 @@ final class VrController {
         if (vrManagerInternal != null) {
             vrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
         }
+    }
+
+    /**
+     * Called without lock to determine whether to call {@link #onTopProcChangedLocked} in lock. It
+     * is used to optimize performance for the path that may have lock contention frequently.
+     */
+    boolean isInterestingToSchedGroup() {
+        return (mVrState & (FLAG_VR_MODE | FLAG_PERSISTENT_VR_MODE)) != 0;
     }
 
     /**

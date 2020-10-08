@@ -3561,7 +3561,7 @@ public final class ProcessList {
             int clientTargetSdk) {
         outInfo.pid = app.pid;
         outInfo.uid = app.info.uid;
-        if (mService.mAtmInternal.isHeavyWeightProcess(app.getWindowProcessController())) {
+        if (app.getWindowProcessController().isHeavyWeightProcess()) {
             outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
         }
         if (app.isPersistent()) {
