@@ -54,13 +54,13 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
-import com.android.systemui.statusbar.policy.SmartReplyConstants;
+import com.android.systemui.statusbar.policy.InflatedSmartReplies;
+import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -87,6 +87,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
 
     @Mock private NotifRemoteViewCache mCache;
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
+    @Mock private InflatedSmartReplies mInflatedSmartReplies;
+
+    private final SmartRepliesAndActionsInflater mSmartRepliesAndActionsInflater =
+            (sysuiContext, notifPackageContext, entry, existingRepliesAndAction) ->
+                    mInflatedSmartReplies;
 
     @Before
     public void setUp() throws Exception {
@@ -103,16 +108,13 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         ExpandableNotificationRow row = helper.createRow(mBuilder.build());
         mRow = spy(row);
 
-        final SmartReplyConstants smartReplyConstants = mock(SmartReplyConstants.class);
-        final SmartReplyController smartReplyController = mock(SmartReplyController.class);
         mNotificationInflater = new NotificationContentInflater(
                 mCache,
                 mock(NotificationRemoteInputManager.class),
-                () -> smartReplyConstants,
-                () -> smartReplyController,
                 mConversationNotificationProcessor,
                 mock(MediaFeatureFlag.class),
-                mock(Executor.class));
+                mock(Executor.class),
+                mSmartRepliesAndActionsInflater);
     }
 
     @Test
@@ -120,13 +122,15 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         BindParams params = new BindParams();
         params.usesIncreasedHeadsUpHeight = true;
         Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(mRow.getEntry(),
+        mNotificationInflater.inflateNotificationViews(
+                mRow.getEntry(),
                 mRow,
                 params,
                 true /* inflateSynchronously */,
                 FLAG_CONTENT_VIEW_ALL,
                 builder,
-                mContext);
+                mContext,
+                mSmartRepliesAndActionsInflater);
         verify(builder).createHeadsUpContentView(true);
     }
 
@@ -135,13 +139,15 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         BindParams params = new BindParams();
         params.usesIncreasedHeight = true;
         Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(mRow.getEntry(),
+        mNotificationInflater.inflateNotificationViews(
+                mRow.getEntry(),
                 mRow,
                 params,
                 true /* inflateSynchronously */,
                 FLAG_CONTENT_VIEW_ALL,
                 builder,
-                mContext);
+                mContext,
+                mSmartRepliesAndActionsInflater);
         verify(builder).createContentView(true);
     }
 
@@ -366,7 +372,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         }
     }
 
-    private class AsyncFailRemoteView extends RemoteViews {
+    private static class AsyncFailRemoteView extends RemoteViews {
         Handler mHandler = Handler.createAsync(Looper.getMainLooper());
 
         public AsyncFailRemoteView(String packageName, int layoutId) {
