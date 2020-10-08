@@ -58,8 +58,7 @@ Expected interface: [ClockPlugin](/frameworks/base/packages/SystemUI/plugin/src/
 Use: Allows replacement of the keyguard main clock.
 
 ### Action: com.android.systemui.action.PLUGIN_TOAST
-Expected interface: [ToastPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android
-/systemui/plugins/ClockPlugin.java)
+Expected interface: [ToastPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/ToastPlugin.java)
 
 Use: Allows replacement of uncustomized toasts created via Toast.makeText().
 
