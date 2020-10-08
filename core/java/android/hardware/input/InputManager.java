@@ -35,6 +35,7 @@ import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.InputEventInjectionSync;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -212,7 +213,7 @@ public final class InputManager {
      * Never blocks.  Injection is asynchronous and is assumed always to be successful.
      * @hide
      */
-    public static final int INJECT_INPUT_EVENT_MODE_ASYNC = 0; // see InputDispatcher.h
+    public static final int INJECT_INPUT_EVENT_MODE_ASYNC = InputEventInjectionSync.NONE;
 
     /**
      * Input Event Injection Synchronization Mode: Wait for result.
@@ -222,7 +223,8 @@ public final class InputManager {
      * by the application.
      * @hide
      */
-    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT = 1;  // see InputDispatcher.h
+    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT =
+            InputEventInjectionSync.WAIT_FOR_RESULT;
 
     /**
      * Input Event Injection Synchronization Mode: Wait for finish.
@@ -230,7 +232,8 @@ public final class InputManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
+    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH =
+            InputEventInjectionSync.WAIT_FOR_FINISHED;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -1022,9 +1025,9 @@ public final class InputManager {
      *
      * @param event The event to inject.
      * @param mode The synchronization mode.  One of:
-     * {@link #INJECT_INPUT_EVENT_MODE_ASYNC},
-     * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT}, or
-     * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH}.
+     * {@link android.os.InputEventInjectionSync.NONE},
+     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
      * @return True if input event injection succeeded.
      *
      * @hide
@@ -1034,9 +1037,9 @@ public final class InputManager {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
-        if (mode != INJECT_INPUT_EVENT_MODE_ASYNC
-                && mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
-                && mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT) {
+        if (mode != InputEventInjectionSync.NONE
+                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
+                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
             throw new IllegalArgumentException("mode is invalid");
         }
 
