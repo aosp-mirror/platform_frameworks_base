@@ -1623,10 +1623,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDisplayInfoChanged()")) {
             return;
         }
+        String str = "notifyDisplayInfoChanged: PhoneId=" + phoneId + " subId=" + subId
+                + " telephonyDisplayInfo=" + telephonyDisplayInfo;
         if (VDBG) {
-            log("notifyDisplayInfoChanged: PhoneId=" + phoneId
-                    + " subId=" + subId + " telephonyDisplayInfo=" + telephonyDisplayInfo);
+            log(str);
         }
+        mLocalLog.log(str);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mTelephonyDisplayInfos[phoneId] = telephonyDisplayInfo;
@@ -2354,10 +2356,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mOutgoingCallEmergencyNumber=" + mOutgoingCallEmergencyNumber[i]);
                 pw.println("mOutgoingSmsEmergencyNumber=" + mOutgoingSmsEmergencyNumber[i]);
                 pw.println("mBarringInfo=" + mBarringInfo.get(i));
+                pw.println("mTelephonyDisplayInfo=" + mTelephonyDisplayInfos[i]);
                 pw.decreaseIndent();
             }
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);
-
             pw.println("mPhoneCapability=" + mPhoneCapability);
             pw.println("mActiveDataSubId=" + mActiveDataSubId);
             pw.println("mRadioPowerState=" + mRadioPowerState);
