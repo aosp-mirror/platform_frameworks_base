@@ -3472,10 +3472,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
 
                 fout.println();
-                fout.print("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
-                fout.print("mRestrictBackgroundBeforeBsm: " + mRestrictBackgroundBeforeBsm);
-                fout.print("mLoadedRestrictBackground: " + mLoadedRestrictBackground);
-                fout.print("mRestrictBackgroundChangedInBsm: " + mRestrictBackgroundChangedInBsm);
+                fout.println("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
+                fout.println("mRestrictBackgroundBeforeBsm: " + mRestrictBackgroundBeforeBsm);
+                fout.println("mLoadedRestrictBackground: " + mLoadedRestrictBackground);
+                fout.println("mRestrictBackgroundChangedInBsm: " + mRestrictBackgroundChangedInBsm);
 
                 fout.println();
                 fout.println("Network policies:");
