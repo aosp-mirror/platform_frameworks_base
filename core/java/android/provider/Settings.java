@@ -6827,6 +6827,12 @@ public final class Settings {
         /**
          * Whether to draw text in bold.
          *
+         * <p>Values:
+         *  1 - Text is not displayed in bold. (Default)
+         *  2 - Text is displayed in bold.
+         *
+         * @see Configuration#FORCE_BOLD_TEXT_NO
+         * @see Configuration#FORCE_BOLD_TEXT_YES
          * @hide
          */
         public static final String FORCE_BOLD_TEXT = "force_bold_text";
