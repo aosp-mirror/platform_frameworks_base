@@ -35,7 +35,7 @@ class VulkanManager;
 class VulkanSurface {
 public:
     static VulkanSurface* Create(ANativeWindow* window, ColorMode colorMode, SkColorType colorType,
-                                 sk_sp<SkColorSpace> colorSpace, GrContext* grContext,
+                                 sk_sp<SkColorSpace> colorSpace, GrDirectContext* grContext,
                                  const VulkanManager& vkManager, uint32_t extraBuffers);
     ~VulkanSurface();
 
@@ -101,7 +101,7 @@ private:
         SkMatrix preTransform;
     };
 
-    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrContext* grContext);
+    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrDirectContext* grContext);
     static bool InitializeWindowInfoStruct(ANativeWindow* window, ColorMode colorMode,
                                            SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
                                            const VulkanManager& vkManager, uint32_t extraBuffers,
@@ -119,7 +119,7 @@ private:
 
     sp<ANativeWindow> mNativeWindow;
     WindowInfo mWindowInfo;
-    GrContext* mGrContext;
+    GrDirectContext* mGrContext;
 
     uint32_t mPresentCount = 0;
     NativeBufferInfo* mCurrentBufferInfo = nullptr;

@@ -61,7 +61,7 @@ CacheManager::CacheManager()
     SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
 }
 
-void CacheManager::reset(sk_sp<GrContext> context) {
+void CacheManager::reset(sk_sp<GrDirectContext> context) {
     if (context != mGrContext) {
         destroy();
     }
