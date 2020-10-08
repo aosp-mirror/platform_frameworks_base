@@ -1521,7 +1521,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void sessionCreated(IInputMethodSession session) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 mParentIMMS.onSessionCreated(mMethod, session, mChannel);
             } finally {
@@ -4207,7 +4207,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledWithValidTokenLocked(token)) {
                 return;
             }
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 hideCurrentInputLocked(
                         mLastImeTargetWindow, flags, null,
@@ -4225,7 +4225,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledWithValidTokenLocked(token)) {
                 return;
             }
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 showCurrentInputLocked(mLastImeTargetWindow, flags, null,
                         SoftInputShowHideReason.SHOW_MY_SOFT_INPUT);

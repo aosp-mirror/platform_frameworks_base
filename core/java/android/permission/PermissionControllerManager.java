@@ -308,7 +308,7 @@ public final class PermissionControllerManager {
                     revokeRuntimePermissionsResult);
             return revokeRuntimePermissionsResult;
         }).whenCompleteAsync((revoked, err) -> {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
                     Log.e(TAG, "Failure when revoking runtime permissions " + revoked, err);
@@ -358,7 +358,7 @@ public final class PermissionControllerManager {
                     setRuntimePermissionGrantStateResult);
             return setRuntimePermissionGrantStateResult;
         }).whenCompleteAsync((setRuntimePermissionGrantStateResult, err) -> {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
                     Log.e(TAG, "Error setting permissions state for device admin " + packageName,
@@ -477,7 +477,7 @@ public final class PermissionControllerManager {
                     applyStagedRuntimePermissionBackupResult);
             return applyStagedRuntimePermissionBackupResult;
         }).whenCompleteAsync((applyStagedRuntimePermissionBackupResult, err) -> {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
                     Log.e(TAG, "Error restoring delayed permissions for " + packageName, err);
@@ -623,7 +623,7 @@ public final class PermissionControllerManager {
                 Log.e(TAG, "Error getting permission usages", err);
                 callback.onPermissionUsageResult(Collections.emptyList());
             } else {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     callback.onPermissionUsageResult(
                             CollectionUtils.emptyIfNull(getPermissionUsagesResult));

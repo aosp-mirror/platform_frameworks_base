@@ -234,7 +234,7 @@ public class Searchables {
         List<ResolveInfo> searchList;
         final Intent intent = new Intent(Intent.ACTION_SEARCH);
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             searchList = queryIntentActivities(intent,
                     PackageManager.GET_META_DATA | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);

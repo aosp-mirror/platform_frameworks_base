@@ -58,7 +58,7 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         synchronized (mService.mGlobalLock) {
-            long origId = Binder.clearCallingIdentity();
+            final long origId = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
                 if (!mService.mStackSupervisor.removeTaskById(mTaskId, false,
@@ -76,7 +76,7 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         synchronized (mService.mGlobalLock) {
-            long origId = Binder.clearCallingIdentity();
+            final long origId = Binder.clearCallingIdentity();
             try {
                 Task task = mService.mRootWindowContainer.anyTaskForId(mTaskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
@@ -162,7 +162,7 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         synchronized (mService.mGlobalLock) {
-            long origId = Binder.clearCallingIdentity();
+            final long origId = Binder.clearCallingIdentity();
             try {
                 Task task = mService.mRootWindowContainer.anyTaskForId(mTaskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);

@@ -2407,7 +2407,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
             intent.setComponent(provider.info.provider);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 provider.broadcast = PendingIntent.getBroadcastAsUser(mContext, 1, intent,
                         PendingIntent.FLAG_UPDATE_CURRENT, provider.info.getProfile());
@@ -3615,7 +3615,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private boolean isProfileWithLockedParent(int userId) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             UserInfo userInfo = mUserManager.getUserInfo(userId);
             if (userInfo != null && userInfo.isProfile()) {

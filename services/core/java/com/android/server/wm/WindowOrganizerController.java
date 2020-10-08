@@ -120,7 +120,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     public IBinder startTransition(int type, @Nullable IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
         enforceStackPermission("startTransition()");
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 Transition transition = Transition.fromBinder(transitionToken);
@@ -147,7 +147,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             @Nullable WindowContainerTransaction t,
             @Nullable IWindowContainerTransactionCallback callback) {
         enforceStackPermission("finishTransition()");
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 int syncId = -1;
@@ -176,7 +176,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new IllegalArgumentException(
                     "Null transaction passed to applySyncTransaction");
         }
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 int effects = 0;
@@ -589,7 +589,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @Override
     public void registerTransitionPlayer(ITransitionPlayer player) {
         enforceStackPermission("registerTransitionPlayer()");
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 mTransitionController.registerTransitionPlayer(player);

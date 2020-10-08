@@ -1027,7 +1027,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // internalClearGlobalStateLocked() cleans up the telephony and power save listeners.
     private void internalClearGlobalStateLocked() {
         // Unregister from call state changes.
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
         } finally {
@@ -1100,7 +1100,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (mRecognitionRequested) {
             return;
         }
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             // Get the current call state synchronously for the first recognition.
             mCallActive = mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;

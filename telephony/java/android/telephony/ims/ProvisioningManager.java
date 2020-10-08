@@ -879,7 +879,7 @@ public class ProvisioningManager {
 
             @Override
             public final void onIntConfigChanged(int item, int value) {
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() ->
                             mLocalConfigurationCallback.onProvisioningIntChanged(item, value));
@@ -890,7 +890,7 @@ public class ProvisioningManager {
 
             @Override
             public final void onStringConfigChanged(int item, String value) {
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() ->
                             mLocalConfigurationCallback.onProvisioningStringChanged(item, value));

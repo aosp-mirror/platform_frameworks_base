@@ -281,7 +281,7 @@ public class UsbService extends IUsbManager.Stub {
                 int pid = Binder.getCallingPid();
                 int user = UserHandle.getUserId(uid);
 
-                long ident = clearCallingIdentity();
+                final long ident = clearCallingIdentity();
                 try {
                     synchronized (mLock) {
                         if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
@@ -318,7 +318,7 @@ public class UsbService extends IUsbManager.Stub {
             int uid = Binder.getCallingUid();
             int user = UserHandle.getUserId(uid);
 
-            long ident = clearCallingIdentity();
+            final long ident = clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {

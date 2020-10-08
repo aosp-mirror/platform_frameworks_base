@@ -189,7 +189,7 @@ public class AppPredictionManagerService extends
                 throw new SecurityException(msg);
             }
 
-            long origId = Binder.clearCallingIdentity();
+            final long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     final AppPredictionPerUserService service = getServiceForUserLocked(userId);

@@ -1006,8 +1006,12 @@ public final class HdmiControlManager {
         return new IHdmiHotplugEventListener.Stub() {
             @Override
             public void onReceived(HdmiHotplugEvent event) {
-                Binder.clearCallingIdentity();
-                executor.execute(() -> listener.onReceived(event));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onReceived(event));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
     }
@@ -1098,8 +1102,12 @@ public final class HdmiControlManager {
         return new IHdmiControlStatusChangeListener.Stub() {
             @Override
             public void onStatusChange(boolean isCecEnabled, boolean isCecAvailable) {
-                Binder.clearCallingIdentity();
-                executor.execute(() -> listener.onStatusChange(isCecEnabled, isCecAvailable));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onStatusChange(isCecEnabled, isCecAvailable));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
     }
@@ -1171,8 +1179,12 @@ public final class HdmiControlManager {
         return new android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener.Stub() {
             @Override
             public void onHdmiCecVolumeControlFeature(boolean enabled) {
-                Binder.clearCallingIdentity();
-                executor.execute(() -> listener.onHdmiCecVolumeControlFeature(enabled));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onHdmiCecVolumeControlFeature(enabled));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
     }

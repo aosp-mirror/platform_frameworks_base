@@ -171,7 +171,7 @@ public class WebViewUpdateService extends SystemService {
                 return;
             }
 
-            long callingId = Binder.clearCallingIdentity();
+            final long callingId = Binder.clearCallingIdentity();
             try {
                 WebViewUpdateService.this.mImpl.notifyRelroCreationCompleted();
             } finally {
@@ -232,7 +232,7 @@ public class WebViewUpdateService extends SystemService {
                 throw new SecurityException(msg);
             }
 
-            long callingId = Binder.clearCallingIdentity();
+            final long callingId = Binder.clearCallingIdentity();
             try {
                 return WebViewUpdateService.this.mImpl.changeProviderAndSetting(
                         newProvider);
@@ -285,7 +285,7 @@ public class WebViewUpdateService extends SystemService {
                 throw new SecurityException(msg);
             }
 
-            long callingId = Binder.clearCallingIdentity();
+            final long callingId = Binder.clearCallingIdentity();
             try {
                 WebViewUpdateService.this.mImpl.enableMultiProcess(enable);
             } finally {

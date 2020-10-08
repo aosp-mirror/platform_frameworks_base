@@ -255,7 +255,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mService.mPolicy.performHapticFeedback(mUid, mPackageName,
                         effectId, always, null);
@@ -313,7 +313,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         if (DEBUG_TASK_POSITIONING) Slog.d(
                 TAG_WM, "startMovingTask: {" + startX + "," + startY + "}");
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mService.mTaskPositioningController.startMovingTask(window, startX, startY);
         } finally {
@@ -325,7 +325,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void finishMovingTask(IWindow window) {
         if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishMovingTask");
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mService.mTaskPositioningController.finishTaskPositioning(window);
         } finally {
@@ -335,7 +335,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void reportSystemGestureExclusionChanged(IWindow window, List<Rect> exclusionRects) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mService.reportSystemGestureExclusionChanged(this, window, exclusionRects);
         } finally {
@@ -352,7 +352,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void setWallpaperPosition(IBinder window, float x, float y, float xStep, float yStep) {
         synchronized (mService.mGlobalLock) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 actionOnWallpaper(window, (wpController, windowState) ->
                         wpController.setWindowWallpaperPosition(windowState, x, y, xStep, yStep));
@@ -369,7 +369,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                     + zoom);
         }
         synchronized (mService.mGlobalLock) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 actionOnWallpaper(window, (wpController, windowState) ->
                         wpController.setWallpaperZoomOut(windowState, zoom));
@@ -398,7 +398,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void setWallpaperDisplayOffset(IBinder window, int x, int y) {
         synchronized (mService.mGlobalLock) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 actionOnWallpaper(window, (wpController, windowState) ->
                         wpController.setWindowWallpaperDisplayOffset(windowState, x, y));
@@ -412,7 +412,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         synchronized (mService.mGlobalLock) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 final WindowState windowState = mService.windowForClientLocked(this, window, true);
                 return windowState.getDisplayContent().mWallpaperController

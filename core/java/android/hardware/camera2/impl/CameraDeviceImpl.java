@@ -1587,7 +1587,7 @@ public class CameraDeviceImpl extends CameraDevice
             }
 
             switch (errorCode) {
-                case CameraDeviceCallbacks.ERROR_CAMERA_DISCONNECTED:
+                case CameraDeviceCallbacks.ERROR_CAMERA_DISCONNECTED: {
                     final long ident = Binder.clearCallingIdentity();
                     try {
                         mDeviceExecutor.execute(mCallOnDisconnected);
@@ -1595,6 +1595,7 @@ public class CameraDeviceImpl extends CameraDevice
                         Binder.restoreCallingIdentity(ident);
                     }
                     break;
+                }
                 case CameraDeviceCallbacks.ERROR_CAMERA_REQUEST:
                 case CameraDeviceCallbacks.ERROR_CAMERA_RESULT:
                 case CameraDeviceCallbacks.ERROR_CAMERA_BUFFER:

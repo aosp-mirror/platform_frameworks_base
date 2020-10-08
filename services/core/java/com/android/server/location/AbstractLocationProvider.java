@@ -222,7 +222,7 @@ public abstract class AbstractLocationProvider {
         // we know that we only updated the state, so the listener for the old state is the same as
         // the listener for the new state.
         if (oldInternalState.listener != null) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 oldInternalState.listener.onStateChanged(oldInternalState.state, newState);
             } finally {
@@ -246,7 +246,7 @@ public abstract class AbstractLocationProvider {
         // we know that we only updated the state, so the listener for the old state is the same as
         // the listener for the new state.
         if (oldInternalState.listener != null) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 oldInternalState.listener.onStateChanged(oldInternalState.state, newState);
             } finally {
@@ -305,7 +305,7 @@ public abstract class AbstractLocationProvider {
     protected void reportLocation(Location location) {
         Listener listener = mInternalState.get().listener;
         if (listener != null) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 // copy location so if provider makes further changes they do not propagate
                 listener.onReportLocation(new Location(location));
@@ -321,7 +321,7 @@ public abstract class AbstractLocationProvider {
     protected void reportLocation(List<Location> locations) {
         Listener listener = mInternalState.get().listener;
         if (listener != null) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 // copy location so if provider makes further changes they do not propagate
                 ArrayList<Location> copy = new ArrayList<>(locations.size());

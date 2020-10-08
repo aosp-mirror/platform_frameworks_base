@@ -54,7 +54,7 @@ public class SystemLocationPermissionsHelper extends LocationPermissionsHelper {
 
     @Override
     protected boolean hasPermission(String permission, CallerIdentity callerIdentity) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return mContext.checkPermission(permission, callerIdentity.getPid(),
                     callerIdentity.getUid()) == PERMISSION_GRANTED;

@@ -73,7 +73,7 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
     }
 
     private void doTakeLocked(@NonNull IBinder permissionOwner) {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             try {
                 UriGrantsManager.getService().grantUriPermissionFromOwner(

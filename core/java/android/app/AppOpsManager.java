@@ -8477,7 +8477,7 @@ public class AppOpsManager {
             public void opNoted(AsyncNotedAppOp op) {
                 Objects.requireNonNull(op);
 
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     getAsyncNotedExecutor().execute(() -> onAsyncNoted(op));
                 } finally {

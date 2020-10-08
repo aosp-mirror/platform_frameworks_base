@@ -168,7 +168,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("startScreenPinning")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
                     mStatusBarOptionalLazy.ifPresent(
@@ -185,7 +185,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("stopScreenPinning")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
                     try {
@@ -205,7 +205,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("onStatusBarMotionEvent")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 // TODO move this logic to message queue
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
@@ -240,7 +240,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("onOverviewShown")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
                     for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
@@ -257,7 +257,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("getNonMinimizedSplitScreenSecondaryBounds")) {
                 return null;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 return mSplitScreenOptional.map(splitScreen ->
                         splitScreen.getDividerView().getNonMinimizedSplitScreenSecondaryBounds())
@@ -272,7 +272,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("setNavBarButtonAlpha")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mNavBarButtonAlpha = alpha;
                 mHandler.post(() -> notifyNavBarButtonAlphaChanged(alpha, animate));
@@ -291,7 +291,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("onAssistantProgress")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> notifyAssistantProgress(progress));
             } finally {
@@ -304,7 +304,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("onAssistantGestureCompletion")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> notifyAssistantGestureCompletion(velocity));
             } finally {
@@ -317,7 +317,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("startAssistant")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> notifyStartAssistant(bundle));
             } finally {
@@ -330,7 +330,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("monitorGestureInput")) {
                 return null;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 final InputMonitor monitor =
                         InputManager.getInstance().monitorGestureInput(name, displayId);
@@ -348,7 +348,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("notifyAccessibilityButtonClicked")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 AccessibilityManager.getInstance(mContext)
                         .notifyAccessibilityButtonClicked(displayId);
@@ -362,7 +362,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("notifyAccessibilityButtonLongClicked")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 final Intent intent =
                         new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
@@ -382,7 +382,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                         "ByPass setShelfHeight, FEATURE_PICTURE_IN_PICTURE:" + mHasPipFeature);
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mPipOptional.ifPresent(
                         pip -> pip.setShelfHeight(visible, shelfHeight));
@@ -410,7 +410,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                         + mHasPipFeature);
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mPipOptional.ifPresent(
                         pip -> pip.setPinnedStackAnimationType(
@@ -428,7 +428,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 return;
             }
             mIPinnedStackAnimationListener = listener;
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mPipOptional.ifPresent(
                         pip -> pip.setPinnedStackAnimationListener(mPinnedStackAnimationCallback));
@@ -442,7 +442,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("onQuickSwitchToNewTask")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> notifyQuickSwitchToNewTask(rotation));
             } finally {
@@ -455,7 +455,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("startOneHandedMode")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mOneHandedOptional.ifPresent(oneHanded -> oneHanded.startOneHanded());
             } finally {
@@ -468,7 +468,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("stopOneHandedMode")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mOneHandedOptional.ifPresent(oneHanded -> oneHanded.stopOneHanded(
                                 OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT));
@@ -497,7 +497,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("expandNotificationPanel")) {
                 return;
             }
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
             } finally {
@@ -512,7 +512,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("startSwipePipToHome") || !mHasPipFeature) {
                 return null;
             }
-            long binderToken = Binder.clearCallingIdentity();
+            final long binderToken = Binder.clearCallingIdentity();
             try {
                 return mPipOptional.map(pip ->
                         pip.startSwipePipToHome(componentName, activityInfo,
@@ -528,7 +528,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             if (!verifyCaller("stopSwipePipToHome") || !mHasPipFeature) {
                 return;
             }
-            long binderToken = Binder.clearCallingIdentity();
+            final long binderToken = Binder.clearCallingIdentity();
             try {
                 mPipOptional.ifPresent(pip -> pip.stopSwipePipToHome(
                         componentName, destinationBounds));

@@ -884,7 +884,7 @@ class ProcessRecord implements WindowProcessListener {
                     Slog.w(TAG, "scheduleCrash: trying to crash system process!");
                     return;
                 }
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     thread.scheduleCrash(message);
                 } catch (RemoteException e) {

@@ -868,7 +868,7 @@ public class NotificationManagerService extends SystemService {
                         (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
                 if (disableNotificationEffects(null) != null) {
                     // cancel whatever's going on
-                    long identity = Binder.clearCallingIdentity();
+                    final long identity = Binder.clearCallingIdentity();
                     try {
                         final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
                         if (player != null) {
@@ -879,11 +879,11 @@ public class NotificationManagerService extends SystemService {
                         Binder.restoreCallingIdentity(identity);
                     }
 
-                    identity = Binder.clearCallingIdentity();
+                    final long identity2 = Binder.clearCallingIdentity();
                     try {
                         mVibrator.cancel();
                     } finally {
-                        Binder.restoreCallingIdentity(identity);
+                        Binder.restoreCallingIdentity(identity2);
                     }
                 }
             }
@@ -1339,7 +1339,7 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     void clearSoundLocked() {
         mSoundNotificationKey = null;
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
             if (player != null) {
@@ -1354,7 +1354,7 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     void clearVibrateLocked() {
         mVibrateNotificationKey = null;
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             mVibrator.cancel();
         } finally {
@@ -2865,7 +2865,7 @@ public class NotificationManagerService extends SystemService {
                     callingUid);
 
             final boolean appIsForeground;
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 appIsForeground = mActivityManager.getUidImportance(callingUid)
                         == IMPORTANCE_FOREGROUND;
@@ -2885,7 +2885,7 @@ public class NotificationManagerService extends SystemService {
             if (isAppRenderedToast && !isSystemToast && !isPackageInForegroundForToast(pkg,
                     callingUid)) {
                 boolean block;
-                long id = Binder.clearCallingIdentity();
+                final long id = Binder.clearCallingIdentity();
                 try {
                     // CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK is gated on targetSdk, so block will be
                     // false for apps with targetSdk < R. For apps with targetSdk R+, text toasts
@@ -2911,7 +2911,7 @@ public class NotificationManagerService extends SystemService {
 
             synchronized (mToastQueue) {
                 int callingPid = Binder.getCallingPid();
-                long callingId = Binder.clearCallingIdentity();
+                final long callingId = Binder.clearCallingIdentity();
                 try {
                     ToastRecord record;
                     int index = indexOfToastLocked(pkg, token);
@@ -2990,7 +2990,7 @@ public class NotificationManagerService extends SystemService {
             }
 
             synchronized (mToastQueue) {
-                long callingId = Binder.clearCallingIdentity();
+                final long callingId = Binder.clearCallingIdentity();
                 try {
                     int index = indexOfToastLocked(pkg, token);
                     if (index >= 0) {
@@ -3008,7 +3008,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void finishToken(String pkg, IBinder token) {
             synchronized (mToastQueue) {
-                long callingId = Binder.clearCallingIdentity();
+                final long callingId = Binder.clearCallingIdentity();
                 try {
                     int index = indexOfToastLocked(pkg, token);
                     if (index >= 0) {
@@ -3950,7 +3950,7 @@ public class NotificationManagerService extends SystemService {
         public void cancelNotificationsFromListener(INotificationListener token, String[] keys) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
@@ -3988,7 +3988,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void requestBindListener(ComponentName component) {
             checkCallerIsSystemOrSameApp(component.getPackageName());
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 ManagedServices manager =
                         mAssistants.isComponentEnabledForCurrentProfiles(component)
@@ -4002,7 +4002,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void requestUnbindListener(INotificationListener token) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 // allow bound services to disable themselves
                 synchronized (mNotificationLock) {
@@ -4016,7 +4016,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationsShownFromListener(INotificationListener token, String[] keys) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
@@ -4075,7 +4075,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void snoozeNotificationUntilContextFromListener(INotificationListener token,
                 String key, String snoozeCriterionId) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
@@ -4094,7 +4094,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void snoozeNotificationUntilFromListener(INotificationListener token, String key,
                 long duration) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
@@ -4112,7 +4112,7 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void unsnoozeNotificationFromAssistant(INotificationListener token, String key) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info =
@@ -4132,7 +4132,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void unsnoozeNotificationFromSystemListener(INotificationListener token,
                 String key) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info =
@@ -4159,7 +4159,7 @@ public class NotificationManagerService extends SystemService {
                 String tag, int id) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
@@ -4456,7 +4456,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void requestUnbindProvider(IConditionProvider provider) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 // allow bound services to disable themselves
                 final ManagedServiceInfo info = mConditionProviders.checkServiceToken(provider);
@@ -4469,7 +4469,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void requestBindProvider(ComponentName component) {
             checkCallerIsSystemOrSameApp(component.getPackageName());
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mConditionProviders.setComponentState(component, true);
             } finally {
@@ -5036,7 +5036,7 @@ public class NotificationManagerService extends SystemService {
 
         private int getUidForPackageAndUser(String pkg, UserHandle user) throws RemoteException {
             int uid = 0;
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 uid = mPackageManager.getPackageUid(pkg, 0, user.getIdentifier());
             } finally {
@@ -7111,7 +7111,7 @@ public class NotificationManagerService extends SystemService {
             boolean delayVibForSound) {
         // Escalate privileges so we can use the vibrator even if the
         // notifying app does not have the VIBRATE permission.
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             final VibrationEffect effect;
             try {
@@ -7719,7 +7719,7 @@ public class NotificationManagerService extends SystemService {
             // vibrate
             if (canceledKey.equals(mVibrateNotificationKey)) {
                 mVibrateNotificationKey = null;
-                long identity = Binder.clearCallingIdentity();
+                final long identity = Binder.clearCallingIdentity();
                 try {
                     mVibrator.cancel();
                 }
@@ -8644,7 +8644,7 @@ public class NotificationManagerService extends SystemService {
         if (mCompanionManager == null) {
             return false;
         }
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             List<String> associations = mCompanionManager.getAssociations(
                     info.component.getPackageName(), info.userid);
