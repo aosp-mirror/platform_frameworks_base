@@ -2111,7 +2111,13 @@ public final class Call {
 
     /**
      * Obtains a list of canned, pre-configured message responses to present to the user as
-     * ways of rejecting this {@code Call} using via a text message.
+     * ways of rejecting an incoming {@code Call} using via a text message.
+     * <p>
+     * <em>Note:</em> Since canned responses may be loaded from the file system, they are not
+     * guaranteed to be present when this {@link Call} is first added to the {@link InCallService}
+     * via {@link InCallService#onCallAdded(Call)}.  The callback
+     * {@link Call.Callback#onCannedTextResponsesLoaded(Call, List)} will be called when/if canned
+     * responses for the call become available.
      *
      * @see #reject(boolean, String)
      *
