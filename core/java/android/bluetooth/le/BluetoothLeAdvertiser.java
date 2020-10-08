@@ -567,6 +567,9 @@ public final class BluetoothLeAdvertiser {
                         + num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
             }
         }
+        for (TransportDiscoveryData transportDiscoveryData : data.getTransportDiscoveryData()) {
+            size += OVERHEAD_BYTES_PER_FIELD + transportDiscoveryData.totalBytes();
+        }
         for (ParcelUuid uuid : data.getServiceData().keySet()) {
             int uuidLen = BluetoothUuid.uuidToBytes(uuid).length;
             size += OVERHEAD_BYTES_PER_FIELD + uuidLen

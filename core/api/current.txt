@@ -9546,6 +9546,7 @@ package android.bluetooth.le {
     method public java.util.Map<android.os.ParcelUuid,byte[]> getServiceData();
     method @NonNull public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
+    method @NonNull public java.util.List<android.bluetooth.le.TransportDiscoveryData> getTransportDiscoveryData();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
   }
@@ -9556,6 +9557,7 @@ package android.bluetooth.le {
     method public android.bluetooth.le.AdvertiseData.Builder addServiceData(android.os.ParcelUuid, byte[]);
     method @NonNull public android.bluetooth.le.AdvertiseData.Builder addServiceSolicitationUuid(@NonNull android.os.ParcelUuid);
     method public android.bluetooth.le.AdvertiseData.Builder addServiceUuid(android.os.ParcelUuid);
+    method @NonNull public android.bluetooth.le.AdvertiseData.Builder addTransportDiscoveryData(@NonNull android.bluetooth.le.TransportDiscoveryData);
     method public android.bluetooth.le.AdvertiseData build();
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeDeviceName(boolean);
     method public android.bluetooth.le.AdvertiseData.Builder setIncludeTxPowerLevel(boolean);
@@ -9813,6 +9815,31 @@ package android.bluetooth.le {
     method public android.bluetooth.le.ScanSettings.Builder setPhy(int);
     method public android.bluetooth.le.ScanSettings.Builder setReportDelay(long);
     method public android.bluetooth.le.ScanSettings.Builder setScanMode(int);
+  }
+
+  public final class TransportBlock implements android.os.Parcelable {
+    ctor public TransportBlock(int, int, int, @Nullable byte[]);
+    method public int describeContents();
+    method public int getOrgId();
+    method public int getTdsFlags();
+    method @Nullable public byte[] getTransportData();
+    method public int getTransportDataLength();
+    method @Nullable public byte[] toByteArray();
+    method public int totalBytes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.TransportBlock> CREATOR;
+  }
+
+  public final class TransportDiscoveryData implements android.os.Parcelable {
+    ctor public TransportDiscoveryData(int, @NonNull java.util.List<android.bluetooth.le.TransportBlock>);
+    ctor public TransportDiscoveryData(@NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.bluetooth.le.TransportBlock> getTransportBlocks();
+    method public int getTransportDataType();
+    method @Nullable public byte[] toByteArray();
+    method public int totalBytes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.TransportDiscoveryData> CREATOR;
   }
 
 }
