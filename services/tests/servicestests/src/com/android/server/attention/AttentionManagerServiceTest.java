@@ -20,7 +20,6 @@ import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
 import static com.android.server.attention.AttentionManagerService.ATTENTION_CACHE_BUFFER_SIZE;
 import static com.android.server.attention.AttentionManagerService.DEFAULT_STALE_AFTER_MILLIS;
-import static com.android.server.attention.AttentionManagerService.DEVICE_CONFIG_MAX_STALENESS_MILLIS;
 import static com.android.server.attention.AttentionManagerService.KEY_STALE_AFTER_MILLIS;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -40,7 +39,6 @@ import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.service.attention.IAttentionCallback;
 import android.service.attention.IAttentionService;
@@ -118,7 +116,7 @@ public class AttentionManagerServiceTest {
 
     @Test
     public void testCheckAttention_returnFalseWhenPowerManagerNotInteract() throws RemoteException {
-        doReturn(true).when(mSpyAttentionManager).isAttentionServiceSupported();
+        mSpyAttentionManager.mIsServiceEnabled = true;
         doReturn(false).when(mMockIPowerManager).isInteractive();
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
         assertThat(mSpyAttentionManager.checkAttention(mTimeout, callback)).isFalse();
@@ -126,7 +124,7 @@ public class AttentionManagerServiceTest {
 
     @Test
     public void testCheckAttention_callOnSuccess() throws RemoteException {
-        doReturn(true).when(mSpyAttentionManager).isAttentionServiceSupported();
+        mSpyAttentionManager.mIsServiceEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
         doNothing().when(mSpyAttentionManager).freeIfInactiveLocked();
@@ -205,38 +203,6 @@ public class AttentionManagerServiceTest {
                 KEY_STALE_AFTER_MILLIS, "15_000L", false);
         assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
                 DEFAULT_STALE_AFTER_MILLIS);
-    }
-
-    @Test
-    public void testEnsureDeviceConfigCachedValuesFreshness_doesNotCallDeviceConfigTooFrequently() {
-        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                KEY_STALE_AFTER_MILLIS, String.valueOf(DEFAULT_STALE_AFTER_MILLIS), false);
-        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
-                DEFAULT_STALE_AFTER_MILLIS);
-
-        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                KEY_STALE_AFTER_MILLIS, "123", false);
-
-        // New value is ignored
-        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
-                DEFAULT_STALE_AFTER_MILLIS);
-    }
-
-
-    @Test
-    public void testEnsureDeviceConfigCachedValuesFreshness_refreshesWhenStale() {
-        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                KEY_STALE_AFTER_MILLIS, String.valueOf(DEFAULT_STALE_AFTER_MILLIS), false);
-        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
-                DEFAULT_STALE_AFTER_MILLIS);
-
-        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                KEY_STALE_AFTER_MILLIS, "123", false);
-        mSpyAttentionManager.mLastReadDeviceConfigMillis =
-                SystemClock.elapsedRealtime() - (DEVICE_CONFIG_MAX_STALENESS_MILLIS + 1);
-
-        // Values are refreshed
-        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(123);
     }
 
     private class MockIAttentionService implements IAttentionService {
