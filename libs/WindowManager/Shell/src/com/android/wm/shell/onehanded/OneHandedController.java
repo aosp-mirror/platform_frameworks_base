@@ -77,7 +77,7 @@ public class OneHandedController implements OneHanded {
     private final DisplayChangeController.OnDisplayChangingListener mRotationController =
             (display, fromRotation, toRotation, wct) -> {
                 if (mDisplayAreaOrganizer != null) {
-                    mDisplayAreaOrganizer.onRotateDisplay(fromRotation, toRotation);
+                    mDisplayAreaOrganizer.onRotateDisplay(fromRotation, toRotation, wct);
                 }
             };
 

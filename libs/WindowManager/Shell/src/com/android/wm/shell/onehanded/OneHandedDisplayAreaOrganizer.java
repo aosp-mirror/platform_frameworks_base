@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
@@ -42,7 +43,6 @@ import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -76,7 +76,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private int mEnterExitAnimationDurationMs;
 
     @VisibleForTesting
-    HashMap<DisplayAreaInfo, SurfaceControl> mDisplayAreaMap = new HashMap();
+    ArrayMap<DisplayAreaInfo, SurfaceControl> mDisplayAreaMap = new ArrayMap();
     private DisplayController mDisplayController;
     private OneHandedAnimationController mAnimationController;
     private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
@@ -117,12 +117,13 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private Handler.Callback mUpdateCallback = (msg) -> {
         SomeArgs args = (SomeArgs) msg.obj;
         final Rect currentBounds = args.arg1 != null ? (Rect) args.arg1 : mDefaultDisplayBounds;
+        final WindowContainerTransaction wctFromRotate = (WindowContainerTransaction) args.arg2;
         final int yOffset = args.argi2;
         final int direction = args.argi3;
 
         switch (msg.what) {
             case MSG_RESET_IMMEDIATE:
-                resetWindowsOffset();
+                resetWindowsOffset(wctFromRotate);
                 mDefaultDisplayBounds.set(currentBounds);
                 mLastVisualDisplayBounds.set(currentBounds);
                 finishOffset(0, TRANSITION_DIRECTION_EXIT);
@@ -165,47 +166,44 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             @NonNull SurfaceControl leash) {
         Objects.requireNonNull(displayAreaInfo, "displayAreaInfo must not be null");
         Objects.requireNonNull(leash, "leash must not be null");
-
-        if (displayAreaInfo.featureId != FEATURE_ONE_HANDED) {
-            Log.w(TAG, "Bypass onDisplayAreaAppeared()! displayAreaInfo=" + displayAreaInfo);
-            return;
+        synchronized (this) {
+            if (mDisplayAreaMap.get(displayAreaInfo) == null) {
+                // mDefaultDisplayBounds may out of date after removeDisplayChangingController()
+                mDefaultDisplayBounds.set(getDisplayBounds());
+                mDisplayAreaMap.put(displayAreaInfo, leash);
+            }
         }
-        // mDefaultDisplayBounds may out of date after removeDisplayChangingController()
-        mDefaultDisplayBounds.set(getDisplayBounds());
-        mDisplayAreaMap.put(displayAreaInfo, leash);
     }
 
     @Override
     public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
         Objects.requireNonNull(displayAreaInfo,
                 "Requires valid displayArea, and displayArea must not be null");
-
-        if (!mDisplayAreaMap.containsKey(displayAreaInfo)) {
-            Log.w(TAG, "Unrecognized token: " + displayAreaInfo.token);
-            return;
+        synchronized (this) {
+            if (!mDisplayAreaMap.containsKey(displayAreaInfo)) {
+                Log.w(TAG, "Unrecognized token: " + displayAreaInfo.token);
+                return;
+            }
+            mDisplayAreaMap.remove(displayAreaInfo);
         }
-        mDisplayAreaMap.remove(displayAreaInfo);
     }
 
     @Override
     public void unregisterOrganizer() {
         super.unregisterOrganizer();
-        resetWindowsOffset();
-
-        // Ensure all cached instance are cleared after resetWindowsOffset
-        mUpdateHandler.post(() -> {
-            if (mDisplayAreaMap != null && !mDisplayAreaMap.isEmpty()) {
-                mDisplayAreaMap.clear();
-            }
-        });
+        mUpdateHandler.post(() -> resetWindowsOffset(null));
     }
 
     /**
      * Handler for display rotation changes by below policy which
-     * handles 90 degree display rotation changes {@link Surface.Rotation}
+     * handles 90 degree display rotation changes {@link Surface.Rotation}.
      *
+     * @param fromRotation starting rotation of the display.
+     * @param toRotation target rotation of the display (after rotating).
+     * @param wct A task transaction {@link WindowContainerTransaction} from
+     *        {@link DisplayChangeController} to populate.
      */
-    public void onRotateDisplay(int fromRotation, int toRotation) {
+    public void onRotateDisplay(int fromRotation, int toRotation, WindowContainerTransaction wct) {
         // Stop one handed without animation and reset cropped size immediately
         final Rect newBounds = new Rect(mDefaultDisplayBounds);
         final boolean isOrientationDiff = Math.abs(fromRotation - toRotation) % 2 == 1;
@@ -214,6 +212,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             newBounds.set(newBounds.left, newBounds.top, newBounds.bottom, newBounds.right);
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = newBounds;
+            args.arg2 = wct;
             args.argi1 = 0 /* xOffset */;
             args.argi2 = 0 /* yOffset */;
             args.argi3 = TRANSITION_DIRECTION_EXIT;
@@ -239,18 +238,19 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             throw new RuntimeException("Callers should call scheduleOffset() instead of this "
                     + "directly");
         }
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mDisplayAreaMap.forEach(
-                (key, leash) -> {
-                    animateWindows(leash, fromBounds, toBounds, direction,
-                            durationMs);
-                    wct.setBounds(key.token, toBounds);
-                });
-        applyTransaction(wct);
+        synchronized (this) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mDisplayAreaMap.forEach(
+                    (key, leash) -> {
+                        animateWindows(leash, fromBounds, toBounds, direction, durationMs);
+                        wct.setBounds(key.token, toBounds);
+                    });
+            applyTransaction(wct);
+        }
     }
 
-    private void resetWindowsOffset() {
-        mUpdateHandler.post(() -> {
+    private void resetWindowsOffset(WindowContainerTransaction wct) {
+        synchronized (this) {
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();
             mDisplayAreaMap.forEach(
@@ -262,9 +262,13 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         }
                         tx.setPosition(leash, 0, 0)
                                 .setWindowCrop(leash, -1/* reset */, -1/* reset */);
+                        // DisplayRotationController will applyTransaction() after finish rotating
+                        if (wct != null) {
+                            wct.setBounds(key.token, null/* reset */);
+                        }
                     });
             tx.apply();
-        });
+        }
     }
 
     private void animateWindows(SurfaceControl leash, Rect fromBounds, Rect toBounds,
