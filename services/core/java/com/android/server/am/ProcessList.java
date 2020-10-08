@@ -2540,8 +2540,8 @@ public final class ProcessList {
                 app.hostingRecord.getName() != null ? app.hostingRecord.getName() : "");
 
         try {
-            AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
-                    app.seInfo, app.info.sourceDir, pid);
+            AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.info.packageName,
+                    app.processName, app.uid, app.seInfo, app.info.sourceDir, pid);
         } catch (RemoteException ex) {
             // Ignore
         }
