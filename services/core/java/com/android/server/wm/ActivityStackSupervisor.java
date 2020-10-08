@@ -2058,6 +2058,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // Update the current top activity.
         mTopResumedActivity = topStack.mResumedActivity;
         scheduleTopResumedActivityStateIfNeeded();
+
+        mService.updateTopApp(mTopResumedActivity);
     }
 
     /** Schedule top resumed state change if previous top activity already reported back. */
