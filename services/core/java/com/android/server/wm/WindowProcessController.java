@@ -702,28 +702,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    @Nullable
-    TaskDisplayArea getTopActivityDisplayArea() {
-        if (mActivities.isEmpty()) {
-            return null;
-        }
-
-        int topActivityIndex = mActivities.size() - 1;
-        ActivityRecord topRecord = mActivities.get(topActivityIndex);
-        TaskDisplayArea displayArea = topRecord.getDisplayArea();
-
-        for (int index = topActivityIndex - 1; index >= 0; --index) {
-            ActivityRecord nextRecord = mActivities.get(index);
-            TaskDisplayArea nextDisplayArea = nextRecord.getDisplayArea();
-            if (nextRecord.compareTo(topRecord) > 0 && nextDisplayArea != null) {
-                topRecord = nextRecord;
-                displayArea = nextDisplayArea;
-            }
-        }
-
-        return displayArea;
-    }
-
     private boolean hasActivityInVisibleTask() {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             Task task = mActivities.get(i).getTask();
