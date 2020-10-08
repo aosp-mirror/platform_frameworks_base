@@ -53,6 +53,7 @@ public class SystemUIOverlayWindowController implements
     private boolean mIsAttached = false;
     private boolean mVisible = false;
     private boolean mFocusable = false;
+    private boolean mUsingStableInsets = false;
 
     @Inject
     public SystemUIOverlayWindowController(
@@ -115,6 +116,7 @@ public class SystemUIOverlayWindowController implements
     /** Sets the types of insets to fit. Note: This should be rarely used. */
     public void setFitInsetsTypes(@WindowInsets.Type.InsetsType int types) {
         mLpChanged.setFitInsetsTypes(types);
+        mLpChanged.setFitInsetsIgnoringVisibility(mUsingStableInsets);
         updateWindow();
     }
 
@@ -157,6 +159,10 @@ public class SystemUIOverlayWindowController implements
 
     public boolean isWindowFocusable() {
         return mFocusable;
+    }
+
+    protected void setUsingStableInsets(boolean useStableInsets) {
+        mUsingStableInsets = useStableInsets;
     }
 
     private void updateWindow() {
