@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -33,11 +35,11 @@ import java.util.Map;
  * @param <ValueType> The type of result objects associated with the keys.
  * @hide
  */
-public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
+public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     @NonNull private final Map<KeyType, ValueType> mSuccesses;
     @NonNull private final Map<KeyType, AppSearchResult<ValueType>> mFailures;
 
-    private AppSearchBatchResult(
+    AppSearchBatchResult(
             @NonNull Map<KeyType, ValueType> successes,
             @NonNull Map<KeyType, AppSearchResult<ValueType>> failures) {
         mSuccesses = successes;
@@ -61,8 +63,8 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     }
 
     /**
-     * Returns a {@link Map} of all successful keys mapped to the successful {@link ValueType}
-     * values they produced.
+     * Returns a {@link Map} of all successful keys mapped to the successful
+     * {@link AppSearchResult}s they produced.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
@@ -80,6 +82,22 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     @NonNull
     public Map<KeyType, AppSearchResult<ValueType>> getFailures() {
         return mFailures;
+    }
+
+    /**
+     * Asserts that this {@link AppSearchBatchResult} has no failures.
+     * @hide
+     */
+    public void checkSuccess() {
+        if (!isSuccess()) {
+            throw new IllegalStateException("AppSearchBatchResult has failures: " + this);
+        }
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return "{\n  successes: " + mSuccesses + "\n  failures: " + mFailures + "\n}";
     }
 
     @Override
@@ -112,16 +130,18 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     public static final class Builder<KeyType, ValueType> {
         private final Map<KeyType, ValueType> mSuccesses = new ArrayMap<>();
         private final Map<KeyType, AppSearchResult<ValueType>> mFailures = new ArrayMap<>();
-
-        /** Creates a new {@link Builder} for this {@link AppSearchBatchResult}. */
-        public Builder() {}
+        private boolean mBuilt = false;
 
         /**
          * Associates the {@code key} with the given successful return value.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
          */
-        public Builder setSuccess(@NonNull KeyType key, @Nullable ValueType result) {
+        @NonNull
+        public Builder<KeyType, ValueType> setSuccess(
+                @NonNull KeyType key, @Nullable ValueType result) {
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            Preconditions.checkNotNull(key);
             return setResult(key, AppSearchResult.newSuccessfulResult(result));
         }
 
@@ -130,10 +150,13 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
          */
-        public Builder setFailure(
+        @NonNull
+        public Builder<KeyType, ValueType> setFailure(
                 @NonNull KeyType key,
                 @AppSearchResult.ResultCode int resultCode,
                 @Nullable String errorMessage) {
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            Preconditions.checkNotNull(key);
             return setResult(key, AppSearchResult.newFailedResult(resultCode, errorMessage));
         }
 
@@ -143,7 +166,11 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
          */
         @NonNull
-        public Builder setResult(@NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {
+        public Builder<KeyType, ValueType> setResult(
+                @NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            Preconditions.checkNotNull(key);
+            Preconditions.checkNotNull(result);
             if (result.isSuccess()) {
                 mSuccesses.put(key, result.getResultValue());
                 mFailures.remove(key);
@@ -157,6 +184,8 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
         /** Builds an {@link AppSearchBatchResult} from the contents of this {@link Builder}. */
         @NonNull
         public AppSearchBatchResult<KeyType, ValueType> build() {
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            mBuilt = true;
             return new AppSearchBatchResult<>(mSuccesses, mFailures);
         }
     }

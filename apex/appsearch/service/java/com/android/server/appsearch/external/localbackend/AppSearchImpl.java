@@ -18,7 +18,6 @@ package com.android.server.appsearch.external.localbackend;
 
 import android.util.Log;
 
-import android.annotation.AnyThread;
 import com.android.internal.annotations.GuardedBy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +26,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.exceptions.AppSearchException;
+import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.IcingSearchEngine;
 import com.google.android.icing.proto.DeleteByNamespaceResultProto;
@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -66,8 +65,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Manages interaction with the native IcingSearchEngine and other components to implement AppSearch
  * functionality.
  *
- * <p>Callers should call {@link #initialize} before using the AppSearchImpl instance. Never create
- * two instances using the same folder.
+ * <p>Never create two instances using the same folder.
  *
  * <p>A single instance of {@link AppSearchImpl} can support all databases. Schemas and documents
  * are physically saved together in {@link IcingSearchEngine}, but logically isolated:
@@ -106,9 +104,7 @@ public final class AppSearchImpl {
     static final int CHECK_OPTIMIZE_INTERVAL = 100;
 
     private final ReadWriteLock mReadWriteLock = new ReentrantReadWriteLock();
-    private final CountDownLatch mInitCompleteLatch = new CountDownLatch(1);
-    private final File mIcingDir;
-    private IcingSearchEngine mIcingSearchEngine;
+    private final IcingSearchEngine mIcingSearchEngine;
 
     // The map contains schemaTypes and namespaces for all database. All values in the map have
     // been already added database name prefix.
@@ -121,33 +117,24 @@ public final class AppSearchImpl {
      */
     private int mOptimizeIntervalCount = 0;
 
-    /** Creates an instance of {@link AppSearchImpl} which writes data to the given folder. */
-    @AnyThread
-    public AppSearchImpl(@NonNull File icingDir) {
-        mIcingDir = icingDir;
+    /**
+     * Creates and initializes an instance of {@link AppSearchImpl} which writes data to the given
+     * folder.
+     */
+    @NonNull
+    public static AppSearchImpl create(@NonNull File icingDir) throws AppSearchException {
+        Preconditions.checkNotNull(icingDir);
+        return new AppSearchImpl(icingDir);
     }
 
-    /**
-     * Initializes the underlying IcingSearchEngine.
-     *
-     * <p>This method belongs to mutate group.
-     *
-     * @throws AppSearchException on IcingSearchEngine error.
-     */
-    public void initialize() throws AppSearchException {
-        if (isInitialized()) {
-            return;
-        }
+    private AppSearchImpl(@NonNull File icingDir) throws AppSearchException {
         boolean isReset = false;
         mReadWriteLock.writeLock().lock();
         try {
-        // We synchronize here because we don't want to call IcingSearchEngine.initialize() more
-        // than once. It's unnecessary and can be a costly operation.
-            if (isInitialized()) {
-                return;
-            }
+            // We synchronize here because we don't want to call IcingSearchEngine.initialize() more
+            // than once. It's unnecessary and can be a costly operation.
             IcingSearchEngineOptions options = IcingSearchEngineOptions.newBuilder()
-                    .setBaseDir(mIcingDir.getAbsolutePath()).build();
+                    .setBaseDir(icingDir.getAbsolutePath()).build();
             mIcingSearchEngine = new IcingSearchEngine(options);
 
             InitializeResultProto initializeResultProto = mIcingSearchEngine.initialize();
@@ -170,19 +157,14 @@ public final class AppSearchImpl {
             for (String qualifiedNamespace : getAllNamespacesResultProto.getNamespacesList()) {
                 addToMap(mNamespaceMap, getDatabaseName(qualifiedNamespace), qualifiedNamespace);
             }
-            mInitCompleteLatch.countDown();
+            // TODO(b/155939114): It's possible to optimize after init, which would reduce the time
+            //   to when we're able to serve queries. Consider moving this optimize call out.
             if (!isReset) {
                 checkForOptimize(/* force= */ true);
             }
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
-    }
-
-    /** Checks if the internal state of {@link AppSearchImpl} has been initialized. */
-    @AnyThread
-    public boolean isInitialized() {
-        return mInitCompleteLatch.getCount() == 0;
     }
 
     /**
@@ -195,12 +177,9 @@ public final class AppSearchImpl {
      * @param forceOverride Whether to force-apply the schema even if it is incompatible. Documents
      *                      which do not comply with the new schema will be deleted.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     public void setSchema(@NonNull String databaseName, @NonNull SchemaProto origSchema,
-            boolean forceOverride) throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            boolean forceOverride) throws AppSearchException {
         SchemaProto schemaProto = getSchemaProto();
 
         SchemaProto.Builder existingSchemaBuilder = schemaProto.toBuilder();
@@ -212,10 +191,32 @@ public final class AppSearchImpl {
         SetSchemaResultProto setSchemaResultProto;
         mReadWriteLock.writeLock().lock();
         try {
-            setSchemaResultProto = mIcingSearchEngine.setSchema(existingSchemaBuilder.build(),
-                    forceOverride);
-            checkSuccess(setSchemaResultProto.getStatus());
+            // Apply schema
+            setSchemaResultProto =
+                    mIcingSearchEngine.setSchema(existingSchemaBuilder.build(), forceOverride);
+
+            // Determine whether it succeeded.
+            try {
+                checkSuccess(setSchemaResultProto.getStatus());
+            } catch (AppSearchException e) {
+                // Improve the error message by merging in information about incompatible types.
+                if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
+                        || setSchemaResultProto.getIncompatibleSchemaTypesCount() > 0) {
+                    String newMessage = e.getMessage()
+                            + "\n  Deleted types: "
+                            + setSchemaResultProto.getDeletedSchemaTypesList()
+                            + "\n  Incompatible types: "
+                            + setSchemaResultProto.getIncompatibleSchemaTypesList();
+                    throw new AppSearchException(e.getResultCode(), newMessage, e.getCause());
+                } else {
+                    throw e;
+                }
+            }
+
+            // Update derived data structures.
             mSchemaMap.put(databaseName, newTypeNames);
+
+            // Determine whether to schedule an immediate optimize.
             if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
                     || (setSchemaResultProto.getIncompatibleSchemaTypesCount() > 0
                     && forceOverride)) {
@@ -237,12 +238,9 @@ public final class AppSearchImpl {
      * @param databaseName The databaseName this document resides in.
      * @param document     The document to index.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     public void putDocument(@NonNull String databaseName, @NonNull DocumentProto document)
-            throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            throws AppSearchException {
         DocumentProto.Builder documentBuilder = document.toBuilder();
         rewriteDocumentTypes(getDatabasePrefix(databaseName), documentBuilder, /*add=*/ true);
 
@@ -270,12 +268,10 @@ public final class AppSearchImpl {
      * @param uri          The URI of the document to get.
      * @return The Document contents, or {@code null} if no such URI exists in the system.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     @Nullable
     public DocumentProto getDocument(@NonNull String databaseName, @NonNull String namespace,
-            @NonNull String uri) throws AppSearchException, InterruptedException {
-        awaitInitialized();
+            @NonNull String uri) throws AppSearchException {
         GetResultProto getResultProto;
         mReadWriteLock.readLock().lock();
         try {
@@ -303,16 +299,13 @@ public final class AppSearchImpl {
      * @return The results of performing this search  The proto might have no {@code results} if no
      * documents matched the query.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     @NonNull
     public SearchResultProto query(
             @NonNull String databaseName,
             @NonNull SearchSpecProto searchSpec,
             @NonNull ResultSpecProto resultSpec,
-            @NonNull ScoringSpecProto scoringSpec) throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            @NonNull ScoringSpecProto scoringSpec) throws AppSearchException {
         SearchSpecProto.Builder searchSpecBuilder = searchSpec.toBuilder();
         SearchResultProto searchResultProto;
         mReadWriteLock.readLock().lock();
@@ -347,13 +340,10 @@ public final class AppSearchImpl {
      * @param nextPageToken The token of pre-loaded results of previously executed query.
      * @return The next page of results of previously executed query.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     @NonNull
     public SearchResultProto getNextPage(@NonNull String databaseName, long nextPageToken)
-            throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            throws AppSearchException {
         SearchResultProto searchResultProto = mIcingSearchEngine.getNextPage(nextPageToken);
         checkSuccess(searchResultProto.getStatus());
         if (searchResultProto.getResultsCount() == 0) {
@@ -367,8 +357,7 @@ public final class AppSearchImpl {
      * @param nextPageToken The token of pre-loaded results of previously executed query to be
      *                      Invalidated.
      */
-    public void invalidateNextPageToken(long nextPageToken) throws InterruptedException {
-        awaitInitialized();
+    public void invalidateNextPageToken(long nextPageToken) {
         mIcingSearchEngine.invalidateNextPageToken(nextPageToken);
     }
 
@@ -381,12 +370,9 @@ public final class AppSearchImpl {
      * @param namespace    Namespace of the document to remove.
      * @param uri          URI of the document to remove.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     public void remove(@NonNull String databaseName, @NonNull String namespace,
-            @NonNull String uri) throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            @NonNull String uri) throws AppSearchException {
         String qualifiedNamespace = getDatabasePrefix(databaseName) + namespace;
         DeleteResultProto deleteResultProto;
         mReadWriteLock.writeLock().lock();
@@ -407,12 +393,9 @@ public final class AppSearchImpl {
      * @param databaseName The databaseName that contains documents of schemaType.
      * @param schemaType   The schemaType of documents to remove.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     public void removeByType(@NonNull String databaseName, @NonNull String schemaType)
-            throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            throws AppSearchException {
         String qualifiedType = getDatabasePrefix(databaseName) + schemaType;
         DeleteBySchemaTypeResultProto deleteBySchemaTypeResultProto;
         mReadWriteLock.writeLock().lock();
@@ -437,12 +420,9 @@ public final class AppSearchImpl {
      * @param databaseName The databaseName that contains documents of namespace.
      * @param namespace    The namespace of documents to remove.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     public void removeByNamespace(@NonNull String databaseName, @NonNull String namespace)
-            throws AppSearchException, InterruptedException {
-        awaitInitialized();
-
+            throws AppSearchException {
         String qualifiedNamespace = getDatabasePrefix(databaseName) + namespace;
         DeleteByNamespaceResultProto deleteByNamespaceResultProto;
         mReadWriteLock.writeLock().lock();
@@ -469,11 +449,9 @@ public final class AppSearchImpl {
      *
      * @param databaseName The databaseName to remove all documents from.
      * @throws AppSearchException on IcingSearchEngine error.
-     * @throws InterruptedException if the current thread was interrupted during execution.
      */
     public void removeAll(@NonNull String databaseName)
-            throws AppSearchException, InterruptedException {
-        awaitInitialized();
+            throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
             Set<String> existingNamespaces = mNamespaceMap.get(databaseName);
@@ -730,15 +708,6 @@ public final class AppSearchImpl {
             map.put(databaseName, values);
         }
         values.add(prefixedValue);
-    }
-
-    /**
-     * Waits for the instance to become initialized.
-     *
-     * @throws InterruptedException if the current thread was interrupted during waiting.
-     */
-    private void awaitInitialized() throws InterruptedException {
-        mInitCompleteLatch.await();
     }
 
     /**
