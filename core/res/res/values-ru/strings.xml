@@ -438,23 +438,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"Изменение настроек аудио"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Приложение сможет изменять системные настройки звука, например уровень громкости и активный динамик."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"Запись аудио"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Когда приложение используется, оно может записывать аудио с помощью микрофона."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"Записывать аудио в фоновом режиме"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Приложение может в любое время записывать аудио с помощью микрофона."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"Отправка команд SIM-карте"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Приложение сможет отправлять команды SIM-карте (данное разрешение представляет большую угрозу)."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"распознавать физическую активность"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Приложение может распознавать физическую активность."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"Фото- и видеосъемка"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Когда приложение используется, оно может делать фотографии и снимать видео с помощью камеры."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"Делать фотографии и снимать видео в фоновом режиме"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Приложение может в любое время делать фотографии и снимать видео с помощью камеры."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Доступ приложения или сервиса к системным настройкам камеры, позволяющим снимать фото и видео"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Это привилегированное или системное приложение может в любое время делать фотографии и записывать видео с помощью камеры. Для этого приложению также требуется разрешение android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Разрешить приложению или сервису получать обратные вызовы при открытии и закрытии камер"</string>

@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ඔබගේ ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ශබ්දය ආදී ගෝලීය ශබ්ද සැකසීම් වෙනස් කිරීමට සහ ප්‍රතිදානය සඳහා භාවිත කරන්නේ කුමන නාදකය දැයි තේරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ශබ්ද පටිගත කරන්න"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"මෙම යෙදුමට එය භාවිතයෙහි ඇති අතරතුර මයික්‍රෆෝනය භාවිත කර ඕඩියෝ පටිගත කිරීමට හැකිය."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"පසුබිමෙහි ඕඩියෝ පටිගත කරන්න"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"මෙම යෙදුමට ඕනෑම වේලාවක මයික්‍රෆෝනය භාවිත කර ඕඩියෝ පටිගත කිරීමට හැකිය."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM වෙත විධාන යැවීම"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM වෙත විධාන ගෙන යාමට යෙදුමට අවසර දෙයි. මෙය ඉතා භයානක වේ."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ශාරීරික ක්‍රියාකාරකම හඳුනා ගන්න"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"මෙම යෙදුමට ඔබේ ශාරීරික ක්‍රියාකාරකම හඳුනා ගැනීමට නොහැකිය"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"පින්තූර සහ වීඩියෝ ගන්න"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"මෙම යෙදුමට එය භාවිතයෙහි ඇති අතරතුර කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"පසුබිමෙහි පින්තූර සහ වීඩියෝ ගන්න"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"මෙම යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"පින්තූර සහ වීඩියෝ ගැනීමට පද්ධති කැමරාවලට යෙදුමකට හෝ සේවාවකට ප්‍රවේශය ඉඩ දෙන්න"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"මෙම වරප්‍රසාද ලත් හෝ පද්ධති යෙදුමට ඕනෑම වේලාවක පද්ධති කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය. යෙදුම විසින් රඳවා තබා ගැනීමට android.permission.CAMERA ප්‍රවේශයද අවශ්‍ය වේ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"විවෘත වෙමින් හෝ වැසෙමින් පවතින කැමරා උපාංග පිළිබඳ පසු ඇමතුම් ලබා ගැනීමට යෙදුමකට හෝ සේවාවකට ඉඩ දෙන්න."</string>

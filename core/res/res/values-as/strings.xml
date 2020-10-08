@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"আপোনাৰ অডিঅ\' ছেটিংসমূহ সলনি কৰক"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"এপটোক ভলিউমৰ দৰে গ্ল\'বেল অডিঅ\' ছেটিংসমূহ যাৰ স্পীকাৰক আউটপুটৰ বাবে ব্যৱহাৰ হয় তাক সলনি কৰিবলৈ অনুমতি দিয়ে৷"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"অডিঅ\' ৰেকর্ড কৰক"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"এই এপ্‌টোৱে ইয়াক ব্যৱহাৰ কৰি থাকোঁতে মাইক্ৰ’ফ’ন ব্যৱহাৰ কৰি অডিঅ’ ৰেকর্ড কৰিব পাৰে।"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"নেপথ্যত অডিঅ’ ৰেকৰ্ড কৰক"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"এই এপ্‌টোৱে যিকোনো সময়তে মাইক্ৰ’ফ’ন ব্যৱহাৰ কৰি অডিঅ’ ৰেকৰ্ড কৰিব পাৰে।"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ছিমলৈ নিৰ্দেশ পঠিয়াব পাৰে"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ছিমলৈ নিৰ্দেশসমূহ প্ৰেৰণ কৰিবলৈ এপক অনুমতি দিয়ে। ই অতি ক্ষতিকাৰক।"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰক"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"এই এপটোৱে আপোনাৰ শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰিব পাৰে।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ফট\' তোলা আৰু ভিডিঅ\' ৰেকৰ্ড কৰা"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"এই এপ্‌টোৱে ইয়াক ব্যৱহাৰ কৰি থাকোঁতে কেমেৰা ব্যৱহাৰ কৰি ফট’ তুলিব আৰু ভিডিঅ’ ৰেকর্ড কৰিব পাৰে।"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"নেপথ্যত ফট’ তোলক আৰু ভিডিঅ’ ৰেকৰ্ড কৰক"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"এই এপ্‌টোৱে যিকোনো সময়তে কেমেৰা ব্যৱহাৰ কৰি ফট’ তুলিব আৰু ভিডিঅ’ ৰেকর্ড কৰিব পাৰে।"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ফট’ উঠাবলৈ আৰু ভিডিঅ’ ৰেকৰ্ড কৰিবলৈ এটা এপ্লিকেশ্বন অথবা সেৱাক ছিষ্টেম কেমেৰাসমূহ এক্সেছ কৰিবলৈ দিয়ক"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"এই বিশেষাধিকাৰ প্ৰাপ্ত অথবা ছিষ্টেম এপ্‌টোৱে এটা ছিষ্টেম কেমেৰা ব্যৱহাৰ কৰি যিকোনো সময়তে ফট’ উঠাব পাৰে আৰু ভিডিঅ’ ৰেকৰ্ড কৰিব পাৰে। লগতে এপ্‌টোৰো android.permission.CAMERAৰ অনুমতি থকাটো প্ৰয়োজনীয়"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনো এপ্লিকেশ্বন অথবা সেৱাক কেমেৰা ডিভাইচসমূহ খোলা অথবা বন্ধ কৰাৰ বিষয়ে কলবেকসমূহ গ্ৰহণ কৰিবলৈ অনুমতি দিয়ক।"</string>

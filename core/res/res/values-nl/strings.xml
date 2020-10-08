@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"je audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"audio opnemen"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Deze app kan audio opnemen met de microfoon als de app wordt gebruikt."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"audio opnemen op de achtergrond"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Deze app kan altijd audio opnemen met de microfoon."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"opdrachten verzenden naar de simkaart"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Hiermee kan de app opdrachten verzenden naar de simkaart. Dit is erg gevaarlijk."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"fysieke activiteit herkennen"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Deze app kan je fysieke activiteit herkennen."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"foto\'s en video\'s maken"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Deze app kan foto\'s maken en video\'s opnemen met de camera als de app wordt gebruikt."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"foto\'s maken en video\'s opnemen op de achtergrond"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Deze app kan altijd foto\'s maken en video\'s opnemen met de camera."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Een app of service toegang tot systeemcamera\'s geven om foto\'s en video\'s te maken"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Deze gemachtigde app of systeem-app kan op elk gewenst moment foto\'s maken en video\'s opnemen met een systeemcamera. De app moet ook het recht android.permission.CAMERA hebben."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Een app of service toestaan callbacks te ontvangen over camera-apparaten die worden geopend of gesloten."</string>

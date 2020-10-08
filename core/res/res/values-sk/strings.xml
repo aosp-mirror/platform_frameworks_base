@@ -438,23 +438,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"meniť nastavenia zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikácii upraviť globálne nastavenia zvuku, ako je hlasitosť, alebo určiť, z ktorého reproduktora bude zvuk vychádzať."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"nahrávať zvuk"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Táto aplikácia môže nahrávať zvuk pomocou mikrofónu, keď ju používate."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"nahrávanie zvuku na pozadí"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Táto aplikácia môže kedykoľvek nahrávať zvuk pomocou mikrofónu."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"posielanie príkazov do SIM karty"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Umožňuje aplikácii odosielať príkazy na SIM kartu. Toto je veľmi nebezpečné povolenie."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"rozpoznávanie fyzickej aktivity"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Táto aplikácia dokáže rozpoznať vašu fyzickú aktivitu."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotiť a nakrúcať videá"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Táto aplikácia môže fotiť a nahrávať videá pomocou fotoaparátu, keď ju používate."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"fotenie a nahrávanie videí na pozadí"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Táto aplikácia môže kedykoľvek fotiť a nahrávať videá pomocou fotoaparátu."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Povoľte aplikácii alebo službe prístup k fotoaparátom systému na snímanie fotiek a videí"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Táto oprávnená alebo systémová aplikácia môže kedykoľvek fotiť a nahrávať videá fotoaparátom systému. Aplikácia musí mať tiež povolenie android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Povoliť aplikácii alebo službe prijímať spätné volanie, keď sú zariadenia s kamerou otvorené alebo zatvorené."</string>
