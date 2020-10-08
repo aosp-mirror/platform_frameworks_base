@@ -572,6 +572,13 @@
             </intent-filter>
         </activity>
 
+        <!-- People Space UI Screen -->
+        <activity
+            android:name=".people.PeopleSpaceActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Material.NoActionBar">
+        </activity>
+
         <!-- a gallery of delicious treats -->
         <service
             android:name=".DessertCaseDream"
@@ -605,6 +612,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".user.CreateUserActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.CreateUser" />
 
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"

@@ -26,6 +26,7 @@ import com.android.systemui.settings.BrightnessDialog;
 import com.android.systemui.tuner.TunerActivity;
 import com.android.systemui.usb.UsbDebuggingActivity;
 import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
+import com.android.systemui.user.CreateUserActivity;
 
 import dagger.Binds;
 import dagger.Module;
@@ -85,4 +86,10 @@ public abstract class DefaultActivityBinder {
     @ClassKey(UsbDebuggingSecondaryUserActivity.class)
     public abstract Activity bindUsbDebuggingSecondaryUserActivity(
             UsbDebuggingSecondaryUserActivity activity);
+
+    /** Inject into CreateUserActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(CreateUserActivity.class)
+    public abstract Activity bindCreateUserActivity(CreateUserActivity activity);
 }

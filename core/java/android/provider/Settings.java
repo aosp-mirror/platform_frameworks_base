@@ -327,6 +327,21 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Reduce Bright Colors.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REDUCE_BRIGHT_COLORS_SETTINGS =
+            "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
+
+    /**
      * Activity Action: Show settings to control access to usage information.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -7123,6 +7138,33 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS =
                 "accessibility_interactive_ui_timeout_ms";
+
+
+        /**
+         * Setting that specifies whether Reduce Bright Colors, or brightness dimming by color
+         * adjustment, is enabled.
+         *
+         * @hide
+         */
+        public static final String REDUCE_BRIGHT_COLORS_ACTIVATED =
+                "reduce_bright_colors_activated";
+
+        /**
+         * Setting that specifies the level of Reduce Bright Colors in intensity. The range is
+         * [0, 100].
+         *
+         * @hide
+         */
+        public static final String REDUCE_BRIGHT_COLORS_LEVEL =
+                "reduce_bright_colors_level";
+
+        /**
+         * Setting that specifies whether Reduce Bright Colors should persist across reboots.
+         *
+         * @hide
+         */
+        public static final String REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS =
+                "reduce_bright_colors_persist_across_reboots";
 
         /**
          * List of the enabled print services.

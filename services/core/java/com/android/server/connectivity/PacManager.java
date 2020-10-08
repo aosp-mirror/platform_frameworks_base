@@ -154,7 +154,7 @@ public class PacManager {
         mNetThreadHandler = new Handler(netThread.getLooper());
 
         mPacRefreshIntent = PendingIntent.getBroadcast(
-                context, 0, new Intent(ACTION_PAC_REFRESH), 0);
+                context, 0, new Intent(ACTION_PAC_REFRESH), PendingIntent.FLAG_IMMUTABLE);
         context.registerReceiver(new PacRefreshIntentReceiver(),
                 new IntentFilter(ACTION_PAC_REFRESH));
         mConnectivityHandler = handler;

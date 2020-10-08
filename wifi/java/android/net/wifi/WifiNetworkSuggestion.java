@@ -29,6 +29,8 @@ import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -121,6 +123,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
         private int mCarrierId;
 
         /**
+         * The Subscription ID identifies the SIM card for which this network configuration is
+         * valid.
+         */
+        private int mSubscriptionId;
+
+        /**
          * Whether this network is shared credential with user to allow user manually connect.
          */
         private boolean mIsSharedWithUser;
@@ -185,6 +193,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsNetworkOemPaid = false;
             mPriorityGroup = 0;
             mIsEnhancedMacRandomizationEnabled = false;
+            mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
 
         /**
@@ -353,6 +362,27 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
 
         /**
+         * Set the subscription ID of the SIM card for which this suggestion is targeted.
+         * The suggestion will only apply to that SIM card.
+         * <p>
+         * The subscription ID must belong to a carrier ID which meets either of the following
+         * conditions:
+         * <li>The carrier ID specified by the cross carrier provider, or</li>
+         * <li>The carrier ID which is used to validate the suggesting carrier-privileged app, see
+         * {@link TelephonyManager#hasCarrierPrivileges()}</li>
+         *
+         * @param subId subscription ID see {@link SubscriptionInfo#getSubscriptionId()}
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setSubscriptionId(int subId) {
+            if (!SdkLevelUtil.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
+            mSubscriptionId = subId;
+            return this;
+        }
+
+        /**
          * Set the priority group ID, {@link #setPriority(int)} will only impact the network
          * suggestions from the same priority group within the same app.
          *
@@ -360,6 +390,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
         public @NonNull Builder setPriorityGroup(int priorityGroup) {
+            if (!SdkLevelUtil.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
             mPriorityGroup = priorityGroup;
             return this;
         }
@@ -675,6 +708,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
                     ? WifiConfiguration.RANDOMIZATION_ENHANCED
                     : WifiConfiguration.RANDOMIZATION_PERSISTENT;
+            wifiConfiguration.subscriptionId = mSubscriptionId;
             return wifiConfiguration;
         }
 
@@ -704,7 +738,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.meteredOverride = mMeteredOverride;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             wifiConfiguration.oemPaid = mIsNetworkOemPaid;
+            wifiConfiguration.subscriptionId = mSubscriptionId;
             mPasspointConfiguration.setCarrierId(mCarrierId);
+            mPasspointConfiguration.setSubscriptionId(mSubscriptionId);
             mPasspointConfiguration.setMeteredOverride(wifiConfiguration.meteredOverride);
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
                     ? WifiConfiguration.RANDOMIZATION_ENHANCED
@@ -946,7 +982,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
-                wifiConfiguration.allowedKeyManagement, wifiConfiguration.getKey());
+                wifiConfiguration.allowedKeyManagement, wifiConfiguration.getKey(),
+                wifiConfiguration.subscriptionId, wifiConfiguration.carrierId);
     }
 
     /**
@@ -970,7 +1007,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
                 lhs.wifiConfiguration.allowedKeyManagement)
                 && TextUtils.equals(this.wifiConfiguration.getKey(),
-                lhs.wifiConfiguration.getKey());
+                lhs.wifiConfiguration.getKey())
+                && this.wifiConfiguration.carrierId == lhs.wifiConfiguration.carrierId
+                && this.wifiConfiguration.subscriptionId == lhs.wifiConfiguration.subscriptionId;
     }
 
     @Override
@@ -1123,6 +1162,19 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * @see Builder#setPriorityGroup(int)
      */
     public int getPriorityGroup() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
         return priorityGroup;
+    }
+
+    /**
+     * @see Builder#setSubscriptionId(int)
+     */
+    public int getSubscriptionId() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return wifiConfiguration.subscriptionId;
     }
 }

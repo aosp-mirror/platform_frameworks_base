@@ -637,6 +637,13 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
+    <style name="Theme.CreateUser" parent="@style/Theme.SystemUI">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">#33000000</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <style name="TextAppearance.Control">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>

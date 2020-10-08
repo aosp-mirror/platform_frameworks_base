@@ -492,6 +492,7 @@ package android.net.wifi {
     method @IntRange(from=0) public int getPriority();
     method public int getPriorityGroup();
     method @Nullable public String getSsid();
+    method public int getSubscriptionId();
     method public boolean isAppInteractionRequired();
     method public boolean isCredentialSharedWithUser();
     method public boolean isEnhancedOpen();
@@ -520,6 +521,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setPriority(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setPriorityGroup(int);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setSsid(@NonNull String);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setSubscriptionId(int);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setUntrusted(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWapiEnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWapiPassphrase(@NonNull String);

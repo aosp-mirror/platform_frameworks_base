@@ -390,7 +390,7 @@ public class BackupHandler extends Handler {
                     // Done: reset the session timeout clock
                     removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
                     sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
-                            mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
+                            mAgentTimeoutParameters.getRestoreSessionTimeoutMillis());
 
                     params.listener.onFinished(callerLogString);
                 }

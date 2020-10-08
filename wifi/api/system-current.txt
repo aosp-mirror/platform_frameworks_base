@@ -350,6 +350,7 @@ package android.net.wifi {
     field @Deprecated public int numScorerOverrideAndSwitchedNetwork;
     field @Deprecated public boolean requirePmf;
     field @Deprecated public boolean shared;
+    field @Deprecated public int subscriptionId;
     field @Deprecated public boolean useExternalScores;
   }
 

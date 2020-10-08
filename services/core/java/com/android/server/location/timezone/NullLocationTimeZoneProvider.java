@@ -92,7 +92,7 @@ class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
         synchronized (mSharedLock) {
             return "NullLocationTimeZoneProvider{"
                     + "mProviderName='" + mProviderName + '\''
-                    + "mCurrentState='" + mCurrentState + '\''
+                    + ", mCurrentState='" + mCurrentState + '\''
                     + '}';
         }
     }
