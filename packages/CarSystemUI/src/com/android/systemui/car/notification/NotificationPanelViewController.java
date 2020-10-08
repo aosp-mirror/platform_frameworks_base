@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -82,7 +83,6 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private final StatusBarStateController mStatusBarStateController;
     private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
     private final NotificationVisibilityLogger mNotificationVisibilityLogger;
-    private final int mNavBarHeight;
 
     private float mInitialBackgroundAlpha;
     private float mBackgroundAlphaDiff;
@@ -97,6 +97,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private boolean mNotificationListAtEndAtTimeOfTouch;
     private boolean mIsSwipingVerticallyToClose;
     private boolean mIsNotificationCardSwiping;
+    private boolean mImeVisible = false;
 
     private OnUnseenCountUpdateListener mUnseenCountUpdateListener;
 
@@ -138,8 +139,6 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         mNotificationClickHandlerFactory = notificationClickHandlerFactory;
         mStatusBarStateController = statusBarStateController;
         mNotificationVisibilityLogger = notificationVisibilityLogger;
-
-        mNavBarHeight = mResources.getDimensionPixelSize(R.dimen.car_bottom_navigation_bar_height);
 
         mCommandQueue.addCallback(this);
 
@@ -189,19 +188,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         if (mContext.getDisplayId() != displayId) {
             return;
         }
-        boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
-        int bottomMargin = isKeyboardVisible ? 0 : mNavBarHeight;
-        ViewGroup container = (ViewGroup) getLayout();
-        if (container == null) {
-            // Notification panel hasn't been inflated before. We shouldn't try to update the layout
-            // params.
-            return;
-        }
-
-        ViewGroup.MarginLayoutParams params =
-                (ViewGroup.MarginLayoutParams) container.getLayoutParams();
-        params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, bottomMargin);
-        container.setLayoutParams(params);
+        mImeVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
     }
 
     // OverlayViewController
@@ -229,12 +216,18 @@ public class NotificationPanelViewController extends OverlayPanelViewController
 
     @Override
     protected int getInsetTypesToFit() {
-        return 0;
+        return WindowInsets.Type.navigationBars();
     }
 
     @Override
     protected boolean shouldShowHUN() {
         return mEnableHeadsUpNotificationWhenNotificationShadeOpen;
+    }
+
+    @Override
+    protected boolean shouldUseStableInsets() {
+        // When IME is visible, then the inset from the nav bar should not be applied.
+        return !mImeVisible;
     }
 
     /** Reinflates the view. */
