@@ -3831,6 +3831,12 @@ message AppStartFullyDrawn {
     // App startup time (until call to Activity#reportFullyDrawn()).
     optional int64 app_startup_time_millis = 6;
 
+    // The compiler filter used when when the package was optimized.
+    optional int32 package_optimization_compilation_filter = 7;
+
+    // The reason why the package was optimized.
+    optional int32 package_optimization_compilation_reason = 8;
+
     enum SourceType {
         UNAVAILABLE = 0;
         LAUNCHER = 1;
@@ -3838,11 +3844,11 @@ message AppStartFullyDrawn {
         LOCKSCREEN = 3;
     }
     // The type of the startup source.
-    optional SourceType source_type = 7;
+    optional SourceType source_type = 9;
 
     // The time from the startup source to the beginning of handling the startup event.
     // -1 means not available.
-    optional int32 source_event_delay_millis = 8;
+    optional int32 source_event_delay_millis = 10;
 }
 
 /**
