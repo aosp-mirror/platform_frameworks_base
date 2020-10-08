@@ -402,31 +402,33 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     private void verifyNeverVibrate() {
-        verify(mVibrator, never()).vibrate(anyInt(), anyString(), any(), anyString(), any());
+        verify(mVibrator, never()).vibrate(anyInt(), anyString(), any(), anyString(),
+                any(AudioAttributes.class));
     }
 
     private void verifyVibrate() {
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateOnceMatcher),
-                anyString(), any());
+                anyString(), any(AudioAttributes.class));
     }
 
     private void verifyVibrate(int times) {
-        verify(mVibrator, times(times)).vibrate(anyInt(), anyString(), any(), anyString(), any());
+        verify(mVibrator, times(times)).vibrate(anyInt(), anyString(), any(), anyString(),
+                any(AudioAttributes.class));
     }
 
     private void verifyVibrateLooped() {
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateLoopMatcher),
-                anyString(), any());
+                anyString(), any(AudioAttributes.class));
     }
 
     private void verifyDelayedVibrateLooped() {
         verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                argThat(mVibrateLoopMatcher), anyString(), any());
+                argThat(mVibrateLoopMatcher), anyString(), any(AudioAttributes.class));
     }
 
     private void verifyDelayedVibrate() {
         verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                argThat(mVibrateOnceMatcher), anyString(), any());
+                argThat(mVibrateOnceMatcher), anyString(), any(AudioAttributes.class));
     }
 
     private void verifyStopVibrate() {
