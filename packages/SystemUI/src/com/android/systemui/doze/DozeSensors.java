@@ -42,6 +42,9 @@ import android.view.Display;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -57,14 +60,13 @@ import java.util.function.Consumer;
 public class DozeSensors {
 
     private static final boolean DEBUG = DozeService.DEBUG;
-
     private static final String TAG = "DozeSensors";
+    private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
     private final AsyncSensorManager mSensorManager;
     private final ContentResolver mResolver;
-    private final TriggerSensor mPickupSensor;
     private final DozeParameters mDozeParameters;
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
@@ -78,7 +80,23 @@ public class DozeSensors {
     private long mDebounceFrom;
     private boolean mSettingRegistered;
     private boolean mListening;
-    private boolean mPaused;
+
+    @VisibleForTesting
+    public enum DozeSensorsUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "User performs pickup gesture that activates the ambient display")
+        ACTION_AMBIENT_GESTURE_PICKUP(459);
+
+        private final int mId;
+
+        DozeSensorsUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
 
     public DozeSensors(Context context, AlarmManager alarmManager, AsyncSensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
@@ -93,6 +111,7 @@ public class DozeSensors {
         mProxCallback = proxCallback;
         mResolver = mContext.getContentResolver();
         mCallback = callback;
+        mProximitySensor = proximitySensor;
 
         boolean alwaysOn = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mSensors = new TriggerSensor[] {
@@ -102,7 +121,7 @@ public class DozeSensors {
                         dozeParameters.getPulseOnSigMotion(),
                         DozeLog.PULSE_REASON_SENSOR_SIGMOTION, false /* touchCoords */,
                         false /* touchscreen */, dozeLog),
-                mPickupSensor = new TriggerSensor(
+                new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PICK_UP_GESTURE,
                         true /* settingDef */,
@@ -155,7 +174,6 @@ public class DozeSensors {
                         dozeLog),
         };
 
-        mProximitySensor = proximitySensor;
         setProxListening(false);  // Don't immediately start listening when we register.
         mProximitySensor.register(
                 proximityEvent -> {
@@ -163,6 +181,17 @@ public class DozeSensors {
                         mProxCallback.accept(!proximityEvent.getBelow());
                     }
                 });
+    }
+
+    /**
+     *  Unregister any sensors.
+     */
+    public void destroy() {
+        // Unregisters everything, which is enough to allow gc.
+        for (TriggerSensor triggerSensor : mSensors) {
+            triggerSensor.setListening(false);
+        }
+        mProximitySensor.pause();
     }
 
     /**
@@ -198,18 +227,6 @@ public class DozeSensors {
             return;
         }
         mListening = listen;
-        updateListening();
-    }
-
-    /**
-     * Unregister sensors, when listening, unless they are prox gated.
-     * @see #setListening(boolean)
-     */
-    public void setPaused(boolean paused) {
-        if (mPaused == paused) {
-            return;
-        }
-        mPaused = paused;
         updateListening();
     }
 
@@ -280,10 +297,6 @@ public class DozeSensors {
             }
         }
     };
-
-    public void setDisableSensorsInterferingWithProximity(boolean disable) {
-        mPickupSensor.setDisabled(disable);
-    }
 
     /** Ignore the setting value of only the sensors that require the touchscreen. */
     public void ignoreTouchScreenSensorsSettingInterferingWithDocking(boolean ignore) {
@@ -414,6 +427,7 @@ public class DozeSensors {
                     MetricsLogger.action(
                             mContext, MetricsProto.MetricsEvent.ACTION_AMBIENT_GESTURE,
                             subType);
+                    UI_EVENT_LOGGER.log(DozeSensorsUiEvent.ACTION_AMBIENT_GESTURE_PICKUP);
                 }
 
                 mRegistered = false;
