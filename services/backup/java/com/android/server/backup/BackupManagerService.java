@@ -478,7 +478,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 if (getUserManager().isUserUnlocked(userId)) {
                     // Clear calling identity as initialization enforces the system identity but we
                     // can be coming from shell.
-                    long oldId = Binder.clearCallingIdentity();
+                    final long oldId = Binder.clearCallingIdentity();
                     try {
                         startServiceForUser(userId);
                     } finally {
@@ -1412,8 +1412,8 @@ public class BackupManagerService extends IBackupManager.Stub {
             return null;
         }
         int callingUserId = Binder.getCallingUserHandle().getIdentifier();
-        long oldId = Binder.clearCallingIdentity();
         final int[] userIds;
+        final long oldId = Binder.clearCallingIdentity();
         try {
             userIds = getUserManager().getProfileIds(callingUserId, false);
         } finally {

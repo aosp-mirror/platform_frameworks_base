@@ -966,7 +966,7 @@ public class Vpn {
     /** Prepare the VPN for the given package. Does not perform permission checks. */
     @GuardedBy("this")
     private void prepareInternal(String newPackage) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             // Reset the interface.
             if (mInterface != null) {
@@ -1251,7 +1251,7 @@ public class Vpn {
         mNetworkCapabilities.setAdministratorUids(new int[] {mOwnerUID});
         mNetworkCapabilities.setUids(createUserAndRestrictedProfilesRanges(mUserId,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE /* logtag */,
                     mNetworkInfo, mNetworkCapabilities, lp,
@@ -1270,7 +1270,7 @@ public class Vpn {
     }
 
     private boolean canHaveRestrictedProfile(int userId) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             return UserManager.get(mContext).canHaveRestrictedProfile(userId);
         } finally {
@@ -1317,7 +1317,7 @@ public class Vpn {
         // Check if the service is properly declared.
         Intent intent = new Intent(VpnConfig.SERVICE_INTERFACE);
         intent.setClassName(mPackage, config.user);
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             // Restricted users are not allowed to create VPNs, they are tied to Owner
             enforceNotRestrictedUser();
@@ -2045,7 +2045,7 @@ public class Vpn {
      */
     public void startLegacyVpn(VpnProfile profile, KeyStore keyStore, LinkProperties egress) {
         enforceControlPermission();
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             startLegacyVpnPrivileged(profile, keyStore, egress);
         } finally {

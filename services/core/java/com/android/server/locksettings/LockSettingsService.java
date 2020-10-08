@@ -1388,7 +1388,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Now we have unlocked the parent user and attempted to unlock the profile we should
             // show notifications if the profile is still locked.
             if (!alreadyUnlocked) {
-                long ident = clearCallingIdentity();
+                final long ident = clearCallingIdentity();
                 try {
                     maybeShowEncryptionNotificationForUser(profile.id);
                 } finally {
@@ -2227,7 +2227,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final IStorageManager service = mInjector.getStorageManager();
         // TODO(b/120484642): Update vold to return a password as a byte array
         String password;
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             password = service.getPassword();
             service.clearPassword();
@@ -3447,7 +3447,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         @Override
         public PasswordMetrics getUserPasswordMetrics(int userHandle) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 if (isManagedProfileWithUnifiedLock(userHandle)) {
                     // A managed profile with unified challenge is supposed to be protected by the

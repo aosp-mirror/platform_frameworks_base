@@ -1682,7 +1682,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return addPowerSaveWhitelistAppsInternal(packageNames);
             } finally {
@@ -1696,7 +1696,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 if (!removePowerSaveWhitelistAppInternal(name)
                         && mPowerSaveWhitelistAppsExceptIdle.containsKey(name)) {
@@ -1713,7 +1713,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 removeSystemPowerWhitelistAppInternal(name);
             } finally {
@@ -1727,7 +1727,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 restoreSystemPowerWhitelistAppInternal(name);
             } finally {
@@ -1815,7 +1815,7 @@ public class DeviceIdleController extends SystemService
         @Override public void exitIdle(String reason) {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 exitIdleInternal(reason);
             } finally {
@@ -1826,7 +1826,7 @@ public class DeviceIdleController extends SystemService
         @Override public int setPreIdleTimeoutMode(int mode) {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return DeviceIdleController.this.setPreIdleTimeoutMode(mode);
             } finally {
@@ -1837,7 +1837,7 @@ public class DeviceIdleController extends SystemService
         @Override public void resetPreIdleTimeoutMode() {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 DeviceIdleController.this.resetPreIdleTimeoutMode();
             } finally {
@@ -4031,7 +4031,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     if (arg == null || "deep".equals(arg)) {
@@ -4052,7 +4052,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     if (arg == null || "deep".equals(arg)) {
@@ -4100,7 +4100,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     mForceIdle = true;
                     becomeInactiveIfAppropriateLocked();
@@ -4116,7 +4116,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     exitForceIdleLocked();
                     pw.print("Light state: ");
@@ -4133,7 +4133,7 @@ public class DeviceIdleController extends SystemService
             synchronized (this) {
                 String arg = shell.getNextArg();
                 if (arg != null) {
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         switch (arg) {
                             case "light": pw.println(lightStateToString(mLightState)); break;
@@ -4156,7 +4156,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     boolean becomeActive = false;
@@ -4193,7 +4193,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     boolean becomeInactive = false;
@@ -4242,7 +4242,7 @@ public class DeviceIdleController extends SystemService
             if (arg != null) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     do {
                         if (arg.length() < 1 || (arg.charAt(0) != '-'
@@ -4418,7 +4418,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     motionLocked();
                     pw.print("Light state: ");
@@ -4433,7 +4433,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 int ret  = SET_IDLE_FACTOR_RESULT_UNINIT;
                 try {
                     String arg = shell.getNextArg();
@@ -4468,7 +4468,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     resetPreIdleTimeoutMode();
                 } finally {

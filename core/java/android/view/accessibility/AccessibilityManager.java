@@ -606,7 +606,7 @@ public final class AccessibilityManager {
             // it is possible that this manager is in the same process as the service but
             // client using it is called through Binder from another process. Example: MMS
             // app adds a SMS notification and the NotificationManagerService calls this method
-            long identityToken = Binder.clearCallingIdentity();
+            final long identityToken = Binder.clearCallingIdentity();
             try {
                 service.sendAccessibilityEvent(dispatchedEvent, userId);
             } finally {

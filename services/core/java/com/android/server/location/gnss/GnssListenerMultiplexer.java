@@ -229,7 +229,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
      */
     protected void addListener(TRequest request, CallerIdentity callerIdentity,
             TListener listener) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             addRegistration(listener.asBinder(),
                     new GnssListenerRegistration(request, callerIdentity, listener));
@@ -242,7 +242,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
      * Removes the given listener.
      */
     public void removeListener(TListener listener) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             removeRegistration(listener.asBinder());
         } finally {

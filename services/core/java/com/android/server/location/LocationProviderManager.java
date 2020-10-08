@@ -1232,7 +1232,7 @@ class LocationProviderManager extends
             mUserHelper.addListener(mUserChangedListener);
             mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 // initialize enabled state
                 onUserStarted(UserHandle.USER_ALL);
@@ -1249,7 +1249,7 @@ class LocationProviderManager extends
 
             mStarted = false;
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 onEnabledChanged(UserHandle.USER_ALL);
                 removeRegistrationIf(key -> true);
@@ -1317,7 +1317,7 @@ class LocationProviderManager extends
         synchronized (mLock) {
             Preconditions.checkState(mStarted);
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mProvider.setRealProvider(provider);
             } finally {
@@ -1332,7 +1332,7 @@ class LocationProviderManager extends
 
             mLocationEventLog.logProviderMocked(mName, provider != null);
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mProvider.setMockProvider(provider);
             } finally {
@@ -1359,7 +1359,7 @@ class LocationProviderManager extends
                 throw new IllegalArgumentException(mName + " provider is not a test provider");
             }
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mProvider.setMockProviderAllowed(enabled);
             } finally {
@@ -1374,7 +1374,7 @@ class LocationProviderManager extends
                 throw new IllegalArgumentException(mName + " provider is not a test provider");
             }
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 String locationProvider = location.getProvider();
                 if (!TextUtils.isEmpty(locationProvider) && !mName.equals(locationProvider)) {
@@ -1537,7 +1537,7 @@ class LocationProviderManager extends
                         permissionLevel);
 
         synchronized (mLock) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 addRegistration(callback.asBinder(), registration);
                 if (!registration.isActive()) {
@@ -1561,7 +1561,7 @@ class LocationProviderManager extends
     }
 
     public void sendExtraCommand(int uid, int pid, String command, Bundle extras) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             mProvider.sendExtraCommand(uid, pid, command, extras);
         } finally {
@@ -1578,7 +1578,7 @@ class LocationProviderManager extends
                 permissionLevel);
 
         synchronized (mLock) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 addRegistration(listener.asBinder(), registration);
             } finally {
@@ -1596,7 +1596,7 @@ class LocationProviderManager extends
                 permissionLevel);
 
         synchronized (mLock) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 addRegistration(pendingIntent, registration);
             } finally {
@@ -1607,7 +1607,7 @@ class LocationProviderManager extends
 
     public void unregisterLocationRequest(ILocationListener listener) {
         synchronized (mLock) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 removeRegistration(listener.asBinder());
             } finally {
@@ -1618,7 +1618,7 @@ class LocationProviderManager extends
 
     public void unregisterLocationRequest(PendingIntent pendingIntent) {
         synchronized (mLock) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 removeRegistration(pendingIntent);
             } finally {
@@ -2394,7 +2394,7 @@ class LocationProviderManager extends
                 return;
             }
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 callback.run();
             } catch (RuntimeException e) {

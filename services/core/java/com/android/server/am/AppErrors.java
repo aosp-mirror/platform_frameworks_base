@@ -546,7 +546,7 @@ class AppErrors {
                 }
             }
             if (res == AppErrorDialog.FORCE_QUIT) {
-                long orig = Binder.clearCallingIdentity();
+                final long orig = Binder.clearCallingIdentity();
                 try {
                     // Kill it with fire!
                     mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());

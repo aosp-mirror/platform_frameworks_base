@@ -5702,7 +5702,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
 
-                    long identity = Binder.clearCallingIdentity();
+                    final long identity = Binder.clearCallingIdentity();
                     try {
                         PackageInfo packageInfo = getPackageInfoVersioned(declaringPackage, flags
                                 | PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
@@ -7635,7 +7635,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isUserEnabled(int userId) {
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             UserInfo userInfo = mUserManager.getUserInfo(userId);
             return userInfo != null && userInfo.isEnabled();
@@ -8046,7 +8046,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter,
             int sourceUserId, int targetUserId) {
         ResolveInfo forwardingResolveInfo = new ResolveInfo();
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         boolean targetIsProfile;
         try {
             targetIsProfile = mUserManager.getUserInfo(targetUserId).isManagedProfile();
@@ -10181,7 +10181,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mPackageUsage.maybeWriteAsync(mSettings.mPackages);
             mCompilerStats.maybeWriteAsync();
         }
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mInstallLock) {
                 return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
@@ -13176,7 +13176,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             boolean sendAdded = false;
             boolean sendRemoved = false;
@@ -13343,7 +13343,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 true /* requireFullPermission */, false /* checkShell */,
                 "getApplicationHidden for user " + userId);
         PackageSetting ps;
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             // writer
             synchronized (mLock) {
@@ -13398,7 +13398,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             boolean installed = false;
             final boolean instantApp =
@@ -14489,7 +14489,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // was never set.
                 EventLog.writeEvent(0x534e4554, "150857253", callingUid, "");
 
-                long binderToken = Binder.clearCallingIdentity();
+                final long binderToken = Binder.clearCallingIdentity();
                 try {
                     if (mInjector.getCompatibility().isChangeEnabledByUid(
                             THROW_EXCEPTION_ON_REQUIRE_INSTALL_PACKAGES_TO_ADD_INSTALLER_PACKAGE,
@@ -21157,7 +21157,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
                 PackageInfo packageInfo = getPackageInfo(packageName, 0, UserHandle.USER_SYSTEM);
@@ -21518,7 +21518,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             if (sendNow) {
                 int packageUid = UserHandle.getUid(userId, pkgSetting.appId);

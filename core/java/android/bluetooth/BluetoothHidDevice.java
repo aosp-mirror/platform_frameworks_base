@@ -342,44 +342,72 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         @Override
         public void onAppStatusChanged(BluetoothDevice pluggedDevice, boolean registered) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onAppStatusChanged(pluggedDevice, registered));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onAppStatusChanged(pluggedDevice, registered));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onConnectionStateChanged(BluetoothDevice device, int state) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onConnectionStateChanged(device, state));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onConnectionStateChanged(device, state));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onGetReport(BluetoothDevice device, byte type, byte id, int bufferSize) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onGetReport(device, type, id, bufferSize));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onGetReport(device, type, id, bufferSize));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onSetReport(BluetoothDevice device, byte type, byte id, byte[] data) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onSetReport(device, type, id, data));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onSetReport(device, type, id, data));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onSetProtocol(BluetoothDevice device, byte protocol) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onSetProtocol(device, protocol));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onSetProtocol(device, protocol));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onInterruptData(BluetoothDevice device, byte reportId, byte[] data) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onInterruptData(device, reportId, data));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onInterruptData(device, reportId, data));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onVirtualCableUnplug(BluetoothDevice device) {
-            clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onVirtualCableUnplug(device));
+            final long token = clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onVirtualCableUnplug(device));
+            } finally {
+                restoreCallingIdentity(token);
+            }
         }
     }
 

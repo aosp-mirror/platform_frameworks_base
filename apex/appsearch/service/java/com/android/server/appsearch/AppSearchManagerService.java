@@ -70,7 +70,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
                 for (int i = 0; i < schemaBundles.size(); i++) {
@@ -97,7 +97,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -128,7 +128,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -170,7 +170,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 SearchSpecProto searchSpecProto = SearchSpecProto.parseFrom(searchSpecBytes);
                 ResultSpecProto resultSpecProto = ResultSpecProto.parseFrom(resultSpecBytes);
@@ -203,7 +203,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -233,7 +233,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -261,7 +261,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);

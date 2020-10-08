@@ -133,7 +133,7 @@ public class NotificationShellCmd extends ShellCommand {
         }
         String callingPackage = null;
         final int callingUid = Binder.getCallingUid();
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             if (callingUid == Process.ROOT_UID) {
                 callingPackage = NotificationManagerService.ROOT_PKG;

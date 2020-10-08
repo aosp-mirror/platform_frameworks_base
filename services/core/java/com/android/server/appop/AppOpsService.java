@@ -2356,7 +2356,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 + permissionInfo.backgroundPermission);
                     }
 
-                    long identity = Binder.clearCallingIdentity();
+                    final long identity = Binder.clearCallingIdentity();
                     try {
                         packageManager.updatePermissionFlags(permissionInfo.backgroundPermission,
                                 packageName, PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
@@ -2380,7 +2380,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         + switchCode + ", mode=" + mode + ", permission=" + permissionName);
             }
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 packageManager.updatePermissionFlags(permissionName, packageName,
                         PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, isRevokedCompat
@@ -3261,7 +3261,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         int callingUid = Binder.getCallingUid();
 
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
@@ -4937,7 +4937,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 case "write-settings": {
                     shell.mInternal.enforceManageAppOpsModes(Binder.getCallingPid(),
                             Binder.getCallingUid(), -1);
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         synchronized (shell.mInternal) {
                             shell.mInternal.mHandler.removeCallbacks(shell.mInternal.mWriteRunner);
@@ -4952,7 +4952,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 case "read-settings": {
                     shell.mInternal.enforceManageAppOpsModes(Binder.getCallingPid(),
                             Binder.getCallingUid(), -1);
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         shell.mInternal.readState();
                         pw.println("Last settings read.");

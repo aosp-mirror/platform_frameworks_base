@@ -916,7 +916,7 @@ public final class BatteryService extends SystemService {
                 mHealthInfo.chargerAcOnline = false;
                 mHealthInfo.chargerUsbOnline = false;
                 mHealthInfo.chargerWirelessOnline = false;
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     mUpdatesStopped = true;
                     processValuesFromShellLocked(pw, opts);
@@ -979,7 +979,7 @@ public final class BatteryService extends SystemService {
                             break;
                     }
                     if (update) {
-                        long ident = Binder.clearCallingIdentity();
+                        final long ident = Binder.clearCallingIdentity();
                         try {
                             mUpdatesStopped = true;
                             processValuesFromShellLocked(pw, opts);
@@ -996,7 +996,7 @@ public final class BatteryService extends SystemService {
                 int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
-                long ident = Binder.clearCallingIdentity();
+                final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mUpdatesStopped) {
                         mUpdatesStopped = false;

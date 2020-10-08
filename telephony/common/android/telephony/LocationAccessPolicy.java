@@ -377,7 +377,7 @@ public final class LocationAccessPolicy {
     }
 
     private static boolean isCurrentProfile(@NonNull Context context, int uid) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             if (UserHandle.getUserHandleForUid(uid).getIdentifier()
                     == ActivityManager.getCurrentUser()) {

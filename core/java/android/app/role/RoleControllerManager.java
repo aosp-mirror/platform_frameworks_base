@@ -258,7 +258,7 @@ public class RoleControllerManager {
             Consumer<Boolean> destination) {
         operation.orTimeout(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
                 .whenComplete((res, err) -> executor.execute(() -> {
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         if (err != null) {
                             Log.e(LOG_TAG, "Error calling " + opName + "()", err);
@@ -276,7 +276,7 @@ public class RoleControllerManager {
             RemoteCallback destination) {
         operation.orTimeout(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
                 .whenComplete((res, err) -> {
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         if (err != null) {
                             Log.e(LOG_TAG, "Error calling " + opName + "()", err);

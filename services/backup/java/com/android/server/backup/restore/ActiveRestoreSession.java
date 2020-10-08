@@ -98,7 +98,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             return -1;
         }
 
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             TransportClient transportClient =
                     mTransportManager.getTransportClient(
@@ -173,7 +173,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         synchronized (mBackupManagerService.getQueueLock()) {
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
-                    long oldId = Binder.clearCallingIdentity();
+                    final long oldId = Binder.clearCallingIdentity();
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -265,7 +265,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         synchronized (mBackupManagerService.getQueueLock()) {
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
-                    long oldId = Binder.clearCallingIdentity();
+                    final long oldId = Binder.clearCallingIdentity();
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -341,7 +341,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         // So far so good; we're allowed to try to restore this package.
-        long oldId = Binder.clearCallingIdentity();
+        final long oldId = Binder.clearCallingIdentity();
         try {
             // Check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
