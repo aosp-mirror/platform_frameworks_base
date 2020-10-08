@@ -616,7 +616,7 @@ public class IpServer extends StateMachine {
         if (VDBG) Log.d(TAG, "configureIPv4(" + enabled + ")");
 
         if (enabled) {
-            mIpv4Address = requestIpv4Address();
+            mIpv4Address = requestIpv4Address(true /* useLastAddress */);
         }
 
         if (mIpv4Address == null) {
@@ -661,14 +661,14 @@ public class IpServer extends StateMachine {
         return configureDhcp(enabled, mIpv4Address, mStaticIpv4ClientAddr);
     }
 
-    private LinkAddress requestIpv4Address() {
+    private LinkAddress requestIpv4Address(final boolean useLastAddress) {
         if (mStaticIpv4ServerAddr != null) return mStaticIpv4ServerAddr;
 
         if (mInterfaceType == TetheringManager.TETHERING_BLUETOOTH) {
             return new LinkAddress(BLUETOOTH_IFACE_ADDR);
         }
 
-        return mPrivateAddressCoordinator.requestDownstreamAddress(this);
+        return mPrivateAddressCoordinator.requestDownstreamAddress(this, useLastAddress);
     }
 
     private boolean startIPv6() {
@@ -957,7 +957,7 @@ public class IpServer extends StateMachine {
         }
 
         final LinkAddress deprecatedLinkAddress = mIpv4Address;
-        mIpv4Address = requestIpv4Address();
+        mIpv4Address = requestIpv4Address(false);
         if (mIpv4Address == null) {
             mLog.e("Fail to request a new downstream prefix");
             return;

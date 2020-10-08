@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
-import android.content.pm.PackageManager;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
@@ -64,8 +63,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
     private static final long DEFAULT_DIM_DURATION_MILLIS = 6_000L;
 
     @Mock
-    private PackageManager mPackageManager;
-    @Mock
     private AttentionManagerInternal mAttentionManagerInternal;
     @Mock
     private WindowManagerInternal mWindowManagerInternal;
@@ -80,9 +77,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mPackageManager.getAttentionServicePackageName()).thenReturn("com.google.android.as");
-        when(mPackageManager.checkPermission(any(), any())).thenReturn(
-                PackageManager.PERMISSION_GRANTED);
         when(mAttentionManagerInternal.checkAttention(anyLong(), any()))
                 .thenReturn(true);
         when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(false);
@@ -150,16 +144,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Test
     public void testOnUserActivity_doesntCheckIfInLockscreen() {
         when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(true);
-
-        long when = registerAttention();
-        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
-        assertThat(mNextDimming).isEqualTo(when);
-    }
-
-    @Test
-    public void testOnUserActivity_doesntCheckIfNotSufficientPermissions() {
-        when(mPackageManager.checkPermission(any(), any())).thenReturn(
-                PackageManager.PERMISSION_DENIED);
 
         long when = registerAttention();
         verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
@@ -452,7 +436,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
             super(AttentionDetectorTest.this.mOnUserAttention, new Object());
             mAttentionManager = mAttentionManagerInternal;
             mWindowManager = mWindowManagerInternal;
-            mPackageManager = AttentionDetectorTest.this.mPackageManager;
             mContentResolver = getContext().getContentResolver();
         }
 

@@ -267,7 +267,7 @@ public final class SurfaceControl implements Parcelable {
 
     private WeakReference<View> mLocalOwnerView;
 
-    static Transaction sGlobalTransaction;
+    static GlobalTransactionWrapper sGlobalTransaction;
     static long sTransactionNestCount = 0;
 
     /**
@@ -1453,7 +1453,7 @@ public final class SurfaceControl implements Parcelable {
     public static void openTransaction() {
         synchronized (SurfaceControl.class) {
             if (sGlobalTransaction == null) {
-                sGlobalTransaction = new Transaction();
+                sGlobalTransaction = new GlobalTransactionWrapper();
             }
             synchronized(SurfaceControl.class) {
                 sTransactionNestCount++;
@@ -1487,7 +1487,7 @@ public final class SurfaceControl implements Parcelable {
             } else if (--sTransactionNestCount > 0) {
                 return;
             }
-            sGlobalTransaction.apply();
+            sGlobalTransaction.applyGlobalTransaction(false);
         }
     }
 
@@ -2555,7 +2555,10 @@ public final class SurfaceControl implements Parcelable {
             nativeApplyTransaction(mNativeObject, sync);
         }
 
-        private void applyResizedSurfaces() {
+        /**
+         * @hide
+         */
+        protected void applyResizedSurfaces() {
             for (int i = mResizedSurfaces.size() - 1; i >= 0; i--) {
                 final Point size = mResizedSurfaces.valueAt(i);
                 final SurfaceControl surfaceControl = mResizedSurfaces.keyAt(i);
@@ -2567,7 +2570,10 @@ public final class SurfaceControl implements Parcelable {
             mResizedSurfaces.clear();
         }
 
-        private void notifyReparentedSurfaces() {
+        /**
+         * @hide
+         */
+        protected void notifyReparentedSurfaces() {
             final int reparentCount = mReparentedSurfaces.size();
             for (int i = reparentCount - 1; i >= 0; i--) {
                 final SurfaceControl child = mReparentedSurfaces.keyAt(i);
@@ -3403,6 +3409,26 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * As part of eliminating usage of the global Transaction we expose
+     * a SurfaceControl.getGlobalTransaction function. However calling
+     * apply on this global transaction (rather than using closeTransaction)
+     * would be very dangerous. So for the global transaction we use this
+     * subclass of Transaction where the normal apply throws an exception.
+     */
+    private static class GlobalTransactionWrapper extends SurfaceControl.Transaction {
+        void applyGlobalTransaction(boolean sync) {
+            applyResizedSurfaces();
+            notifyReparentedSurfaces();
+            nativeApplyTransaction(mNativeObject, sync);
+        }
+
+        @Override
+        public void apply(boolean sync) {
+            throw new RuntimeException("Global transaction must be applied from closeTransaction");
+        }
+    }
+
+    /**
      * Acquire a frame rate flexibility token, which allows surface flinger to freely switch display
      * frame rates. This is used by CTS tests to put the device in a consistent state. See
      * ISurfaceComposer::acquireFrameRateFlexibilityToken(). The caller must have the
@@ -3421,5 +3447,18 @@ public final class SurfaceControl implements Parcelable {
     @TestApi
     public static void releaseFrameRateFlexibilityToken(long token) {
         nativeReleaseFrameRateFlexibilityToken(token);
+    }
+
+    /**
+     * This is a refactoring utility function to enable lower levels of code to be refactored
+     * from using the global transaction (and instead use a passed in Transaction) without
+     * having to refactor the higher levels at the same time.
+     * The returned global transaction can't be applied, it must be applied from closeTransaction
+     * Unless you are working on removing Global Transaction usage in the WindowManager, this
+     * probably isn't a good function to use.
+     * @hide
+     */
+    public static Transaction getGlobalTransaction() {
+        return sGlobalTransaction;
     }
 }

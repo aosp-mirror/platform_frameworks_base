@@ -21,7 +21,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Process.INVALID_UID;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
@@ -32,8 +34,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -175,5 +180,32 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doNothing().when(mWm.mAtmService.mStackSupervisor).wakeUp(anyString());
         mWm.dismissKeyguard(null, "test-dismiss-keyguard");
         verify(mWm.mAtmService.mStackSupervisor).wakeUp(anyString());
+    }
+
+    @Test
+    public void testMoveWindowTokenToDisplay_NullToken_DoNothing() {
+        mWm.moveWindowTokenToDisplay(null, mDisplayContent.getDisplayId());
+
+        verify(mDisplayContent, never()).reParentWindowToken(any());
+    }
+
+    @Test
+    public void testMoveWindowTokenToDisplay_SameDisplay_DoNothing() {
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD_DIALOG,
+                mDisplayContent);
+
+        mWm.moveWindowTokenToDisplay(windowToken.token, mDisplayContent.getDisplayId());
+
+        verify(mDisplayContent, never()).reParentWindowToken(any());
+    }
+
+    @Test
+    public void testMoveWindowTokenToDisplay_DifferentDisplay_DoMoveDisplay() {
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD_DIALOG,
+                mDisplayContent);
+
+        mWm.moveWindowTokenToDisplay(windowToken.token, DEFAULT_DISPLAY);
+
+        assertThat(windowToken.getDisplayContent()).isEqualTo(mDefaultDisplay);
     }
 }

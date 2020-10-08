@@ -76,6 +76,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
     public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 16;
+    public static final int LAST_KNOWN_PACKAGE = PACKAGE_OVERLAY_CONFIG_SIGNATURE;
 
     @IntDef(flag = true, prefix = "RESOLVE_", value = {
             RESOLVE_NON_BROWSER_ONLY,
@@ -1014,6 +1015,51 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean unregisterInstalledLoadingProgressCallback(@NonNull String packageName,
             @NonNull InstalledLoadingProgressCallback callback);
+
+    /**
+     * Returns the string representation of a known package. For example,
+     * {@link #PACKAGE_SETUP_WIZARD} is represented by the string Setup Wizard.
+     *
+     * @param knownPackage The known package.
+     * @return The string representation.
+     */
+    public static @NonNull String knownPackageToString(@KnownPackage int knownPackage) {
+        switch (knownPackage) {
+            case PACKAGE_SYSTEM:
+                return "System";
+            case PACKAGE_SETUP_WIZARD:
+                return "Setup Wizard";
+            case PACKAGE_INSTALLER:
+                return "Installer";
+            case PACKAGE_VERIFIER:
+                return "Verifier";
+            case PACKAGE_BROWSER:
+                return "Browser";
+            case PACKAGE_SYSTEM_TEXT_CLASSIFIER:
+                return "System Text Classifier";
+            case PACKAGE_PERMISSION_CONTROLLER:
+                return "Permission Controller";
+            case PACKAGE_WELLBEING:
+                return "Wellbeing";
+            case PACKAGE_DOCUMENTER:
+                return "Documenter";
+            case PACKAGE_CONFIGURATOR:
+                return "Configurator";
+            case PACKAGE_INCIDENT_REPORT_APPROVER:
+                return "Incident Report Approver";
+            case PACKAGE_APP_PREDICTOR:
+                return "App Predictor";
+            case PACKAGE_WIFI:
+                return "Wi-Fi";
+            case PACKAGE_COMPANION:
+                return "Companion";
+            case PACKAGE_RETAIL_DEMO:
+                return "Retail Demo";
+            case PACKAGE_OVERLAY_CONFIG_SIGNATURE:
+                return "Overlay Config Signature";
+        }
+        return "Unknown";
+    }
 
     /**
      * Callback to listen for loading progress of a package installed on Incremental File System.

@@ -73,6 +73,8 @@ public class WifiConfigurationTest {
         config.fromWifiNetworkSuggestion = true;
         config.setRandomizedMacAddress(MacAddressUtils.createRandomUnicastAddress());
         MacAddress macBeforeParcel = config.getRandomizedMacAddress();
+        config.subscriptionId = 1;
+        config.carrierId = 1189;
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
         byte[] bytes = parcelW.marshall();

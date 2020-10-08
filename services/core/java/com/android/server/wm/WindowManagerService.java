@@ -2723,6 +2723,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** @see WindowManagerInternal#moveWindowTokenToDisplay(IBinder, int)  */
+    public void moveWindowTokenToDisplay(IBinder binder, int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                ProtoLog.w(WM_ERROR, "moveWindowTokenToDisplay: Attempted to move token: %s"
+                        + " to non-exiting displayId=%d", binder, displayId);
+                return;
+            }
+            final WindowToken token = mRoot.getWindowToken(binder);
+            if (token == null) {
+                ProtoLog.w(WM_ERROR,
+                        "moveWindowTokenToDisplay: Attempted to move non-existing token: %s",
+                        binder);
+                return;
+            }
+            if (token.getDisplayContent() == dc) {
+                ProtoLog.w(WM_ERROR,
+                        "moveWindowTokenToDisplay: Cannot move to the original display "
+                                + "for token: %s", binder);
+                return;
+            }
+            dc.reParentWindowToken(token);
+        }
+    }
+
     void setNewDisplayOverrideConfiguration(Configuration overrideConfig,
             @NonNull DisplayContent dc) {
         if (dc.mWaitingForConfig) {
@@ -7353,6 +7379,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 WindowManagerService.this.removeWindowToken(binder, displayId);
             }
+        }
+
+        @Override
+        public void moveWindowTokenToDisplay(IBinder binder, int displayId) {
+            WindowManagerService.this.moveWindowTokenToDisplay(binder, displayId);
         }
 
         // TODO(multi-display): currently only used by PWM to notify keyguard transitions as well

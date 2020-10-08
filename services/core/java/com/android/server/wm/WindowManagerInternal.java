@@ -597,4 +597,9 @@ public abstract class WindowManagerInternal {
      * @return The corresponding {@link WindowState#getName()}
      */
     public abstract @Nullable String getImeTargetNameForLogging(int displayId);
+
+    /**
+     * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.
+     */
+    public abstract void moveWindowTokenToDisplay(IBinder binder, int displayId);
 }

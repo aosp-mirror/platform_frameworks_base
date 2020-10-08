@@ -79,6 +79,8 @@ public class FullScreenMagnificationController {
 
     private final ScreenStateObserver mScreenStateObserver;
 
+    private final MagnificationRequestObserver mMagnificationRequestObserver;
+
     private int mUserId;
 
     private final long mMainThreadId;
@@ -479,6 +481,8 @@ public class FullScreenMagnificationController {
             sendSpecToAnimation(mCurrentMagnificationSpec, animationCallback);
             if (isMagnifying() && (id != INVALID_ID)) {
                 mIdOfLastServiceToMagnify = id;
+                mMagnificationRequestObserver.onRequestMagnificationSpec(mDisplayId,
+                        mIdOfLastServiceToMagnify);
             }
             return changed;
         }
@@ -609,22 +613,27 @@ public class FullScreenMagnificationController {
      * FullScreenMagnificationController Constructor
      */
     public FullScreenMagnificationController(@NonNull Context context,
-            @NonNull AccessibilityManagerService ams, @NonNull Object lock) {
+            @NonNull AccessibilityManagerService ams, @NonNull Object lock,
+            @NonNull MagnificationRequestObserver magnificationRequestObserver) {
         this(new ControllerContext(context, ams,
                 LocalServices.getService(WindowManagerInternal.class),
                 new Handler(context.getMainLooper()),
-                context.getResources().getInteger(R.integer.config_longAnimTime)), lock);
+                context.getResources().getInteger(R.integer.config_longAnimTime)), lock,
+                magnificationRequestObserver);
     }
 
     /**
      * Constructor for tests
      */
     @VisibleForTesting
-    public FullScreenMagnificationController(@NonNull ControllerContext ctx, @NonNull Object lock) {
+    public FullScreenMagnificationController(@NonNull ControllerContext ctx,
+            @NonNull Object lock,
+            @NonNull MagnificationRequestObserver magnificationRequestObserver) {
         mControllerCtx = ctx;
         mLock = lock;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
         mScreenStateObserver = new ScreenStateObserver(mControllerCtx.getContext(), this);
+        mMagnificationRequestObserver = magnificationRequestObserver;
     }
 
     /**
@@ -1486,5 +1495,17 @@ public class FullScreenMagnificationController {
     @Nullable
     private static MagnificationAnimationCallback transformToStubCallback(boolean animate) {
         return animate ? STUB_ANIMATION_CALLBACK : null;
+    }
+
+    interface  MagnificationRequestObserver {
+
+        /**
+         * Called when the {@link MagnificationSpec} is changed with non-default
+         * scale by the service.
+         *
+         * @param displayId the logical display id
+         * @param serviceId the ID of the service requesting the change
+         */
+        void onRequestMagnificationSpec(int displayId, int serviceId);
     }
 }

@@ -429,6 +429,14 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String BACK_GESTURE_ML_MODEL_THRESHOLD = "back_gesture_ml_model_threshold";
 
+    /**
+     * (boolean) Sharesheet - Whether to use the deprecated
+     * {@link android.service.chooser.ChooserTargetService} API for
+     *  direct share targets. If true, both CTS and Shortcuts will be used to find Direct
+     *  Share targets. If false, only Shortcuts will be used.
+     */
+    public static final String SHARE_USE_SERVICE_TARGETS = "share_use_service_targets";
+
 
     private SystemUiDeviceConfigFlags() {
     }

@@ -236,10 +236,6 @@ class WindowSurfaceController {
         }
     }
 
-    void setPositionInTransaction(float left, float top, boolean recoveringMemory) {
-        setPosition(null, left, top, recoveringMemory);
-    }
-
     void setPosition(SurfaceControl.Transaction t, float left, float top,
             boolean recoveringMemory) {
         final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
@@ -251,11 +247,7 @@ class WindowSurfaceController {
                 ProtoLog.i(WM_SHOW_TRANSACTIONS,
                         "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s", left, top, title);
 
-                if (t == null) {
-                    mSurfaceControl.setPosition(left, top);
-                } else {
-                    t.setPosition(mSurfaceControl, left, top);
-                }
+                t.setPosition(mSurfaceControl, left, top);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error positioning surface of " + this
                         + " pos=(" + left + "," + top + ")", e);
@@ -264,11 +256,6 @@ class WindowSurfaceController {
                 }
             }
         }
-    }
-
-    void setMatrixInTransaction(float dsdx, float dtdx, float dtdy, float dsdy,
-            boolean recoveringMemory) {
-        setMatrix(null, dsdx, dtdx, dtdy, dsdy, false);
     }
 
     void setMatrix(SurfaceControl.Transaction t, float dsdx, float dtdx,
@@ -287,11 +274,7 @@ class WindowSurfaceController {
         try {
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE MATRIX [%f,%f,%f,%f]: %s",
                     dsdx, dtdx, dtdy, dsdy, title);
-            if (t == null) {
-                mSurfaceControl.setMatrix(dsdx, dtdx, dtdy, dsdy);
-            } else {
-                t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
-            }
+            t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
         } catch (RuntimeException e) {
             // If something goes wrong with the surface (such
             // as running out of memory), don't take down the
