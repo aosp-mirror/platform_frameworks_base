@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,36 +18,25 @@ package android.app.appsearch;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.testng.Assert.assertThrows;
-
-import android.app.appsearch.proto.DocumentProto;
-import android.app.appsearch.proto.PropertyProto;
-import android.app.appsearch.protobuf.ByteString;
-
-import androidx.test.filters.SmallTest;
-
+import static org.testng.Assert.expectThrows;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-@SmallTest
-public class AppSearchDocumentTest {
+public class GenericDocumentTest {
     private static final byte[] sByteArray1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
-    private static final byte[] sByteArray2 = new byte[]{(byte) 4, (byte) 5, (byte) 6};
-    private static final AppSearchDocument sDocumentProperties1 = new AppSearchDocument
+    private static final byte[] sByteArray2 = new byte[]{(byte) 4, (byte) 5, (byte) 6, (byte) 7};
+    private static final GenericDocument sDocumentProperties1 = new GenericDocument
             .Builder("sDocumentProperties1", "sDocumentPropertiesSchemaType1")
+            .setCreationTimestampMillis(12345L)
             .build();
-    private static final AppSearchDocument sDocumentProperties2 = new AppSearchDocument
+    private static final GenericDocument sDocumentProperties2 = new GenericDocument
             .Builder("sDocumentProperties2", "sDocumentPropertiesSchemaType2")
+            .setCreationTimestampMillis(6789L)
             .build();
 
     @Test
     public void testDocumentEquals_Identical() {
-        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setTtlMillis(1L)
                 .setProperty("longKey1", 1L, 2L, 3L)
@@ -57,7 +46,7 @@ public class AppSearchDocumentTest {
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
                 .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
-        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setTtlMillis(1L)
                 .setProperty("longKey1", 1L, 2L, 3L)
@@ -73,7 +62,7 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_DifferentOrder() {
-        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("byteKey1", sByteArray1, sByteArray2)
@@ -84,7 +73,7 @@ public class AppSearchDocumentTest {
                 .build();
 
         // Create second document with same parameter but different order.
-        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, false, true)
                 .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
@@ -99,13 +88,13 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_Failure() {
-        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .build();
 
         // Create second document with same order but different value.
-        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 4L) // Different
                 .build();
@@ -115,13 +104,13 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentEquals_Failure_RepeatedFieldOrder() {
-        AppSearchDocument document1 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, false, true)
                 .build();
 
         // Create second document with same order but different value.
-        AppSearchDocument document2 = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("booleanKey1", true, true, false) // Different
                 .build();
@@ -131,11 +120,10 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentGetSingleValue() {
-        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setScore(1)
                 .setTtlMillis(1L)
-                .setScore(1)
                 .setProperty("longKey1", 1L)
                 .setProperty("doubleKey1", 1.0)
                 .setProperty("booleanKey1", true)
@@ -159,7 +147,7 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentGetArrayValues() {
-        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setProperty("longKey1", 1L, 2L, 3L)
                 .setProperty("doubleKey1", 1.0, 2.0, 3.0)
@@ -185,8 +173,51 @@ public class AppSearchDocumentTest {
     }
 
     @Test
+    public void testDocument_ToString() throws Exception {
+        GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
+                .setCreationTimestampMillis(5L)
+                .setProperty("longKey1", 1L, 2L, 3L)
+                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
+                .setProperty("booleanKey1", true, false, true)
+                .setProperty("stringKey1", "String1", "String2", "String3")
+                .setProperty("byteKey1", sByteArray1, sByteArray2)
+                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .build();
+        String exceptedString = "{ key: 'creationTimestampMillis' value: 5 } "
+                + "{ key: 'namespace' value:  } "
+                + "{ key: 'properties' value: "
+                +       "{ key: 'booleanKey1' value: [ 'true' 'false' 'true' ] } "
+                +       "{ key: 'byteKey1' value: "
+                +             "{ key: 'byteArray' value: [ '1' '2' '3' ] } "
+                +             "{ key: 'byteArray' value: [ '4' '5' '6' '7' ] }  } "
+                +       "{ key: 'documentKey1' value: [ '"
+                +             "{ key: 'creationTimestampMillis' value: 12345 } "
+                +             "{ key: 'namespace' value:  } "
+                +             "{ key: 'properties' value:  } "
+                +             "{ key: 'schemaType' value: sDocumentPropertiesSchemaType1 } "
+                +             "{ key: 'score' value: 0 } "
+                +             "{ key: 'ttlMillis' value: 0 } "
+                +             "{ key: 'uri' value: sDocumentProperties1 } ' '"
+                +             "{ key: 'creationTimestampMillis' value: 6789 } "
+                +             "{ key: 'namespace' value:  } "
+                +             "{ key: 'properties' value:  } "
+                +             "{ key: 'schemaType' value: sDocumentPropertiesSchemaType2 } "
+                +             "{ key: 'score' value: 0 } "
+                +             "{ key: 'ttlMillis' value: 0 } "
+                +             "{ key: 'uri' value: sDocumentProperties2 } ' ] } "
+                +       "{ key: 'doubleKey1' value: [ '1.0' '2.0' '3.0' ] } "
+                +       "{ key: 'longKey1' value: [ '1' '2' '3' ] } "
+                +       "{ key: 'stringKey1' value: [ 'String1' 'String2' 'String3' ] }  } "
+                + "{ key: 'schemaType' value: schemaType1 } "
+                + "{ key: 'score' value: 0 } "
+                + "{ key: 'ttlMillis' value: 0 } "
+                + "{ key: 'uri' value: uri1 } ";
+        assertThat(document.toString()).isEqualTo(exceptedString);
+    }
+
+    @Test
     public void testDocumentGetValues_DifferentTypes() {
-        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
+        GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
                 .setScore(1)
                 .setProperty("longKey1", 1L)
                 .setProperty("booleanKey1", true, false, true)
@@ -213,53 +244,8 @@ public class AppSearchDocumentTest {
 
     @Test
     public void testDocumentInvalid() {
-        AppSearchDocument.Builder builder = new AppSearchDocument.Builder("uri1", "schemaType1");
-        assertThrows(
+        GenericDocument.Builder builder = new GenericDocument.Builder("uri1", "schemaType1");
+        expectThrows(
                 IllegalArgumentException.class, () -> builder.setProperty("test", new boolean[]{}));
-    }
-
-    @Test
-    public void testDocumentProtoPopulation() {
-        AppSearchDocument document = new AppSearchDocument.Builder("uri1", "schemaType1")
-                .setCreationTimestampMillis(5L)
-                .setScore(1)
-                .setTtlMillis(1L)
-                .setProperty("longKey1", 1L)
-                .setProperty("doubleKey1", 1.0)
-                .setProperty("booleanKey1", true)
-                .setProperty("stringKey1", "test-value1")
-                .setProperty("byteKey1", sByteArray1)
-                .setProperty("documentKey1", sDocumentProperties1)
-                .build();
-
-        // Create the Document proto. Need to sort the property order by key.
-        DocumentProto.Builder documentProtoBuilder = DocumentProto.newBuilder()
-                .setUri("uri1")
-                .setSchema("schemaType1")
-                .setCreationTimestampMs(5L)
-                .setScore(1)
-                .setTtlMs(1L)
-                .setNamespace("");
-        HashMap<String, PropertyProto.Builder> propertyProtoMap = new HashMap<>();
-        propertyProtoMap.put("longKey1",
-                PropertyProto.newBuilder().setName("longKey1").addInt64Values(1L));
-        propertyProtoMap.put("doubleKey1",
-                PropertyProto.newBuilder().setName("doubleKey1").addDoubleValues(1.0));
-        propertyProtoMap.put("booleanKey1",
-                PropertyProto.newBuilder().setName("booleanKey1").addBooleanValues(true));
-        propertyProtoMap.put("stringKey1",
-                PropertyProto.newBuilder().setName("stringKey1").addStringValues("test-value1"));
-        propertyProtoMap.put("byteKey1",
-                PropertyProto.newBuilder().setName("byteKey1").addBytesValues(
-                        ByteString.copyFrom(sByteArray1)));
-        propertyProtoMap.put("documentKey1",
-                PropertyProto.newBuilder().setName("documentKey1")
-                        .addDocumentValues(sDocumentProperties1.getProto()));
-        List<String> sortedKey = new ArrayList<>(propertyProtoMap.keySet());
-        Collections.sort(sortedKey);
-        for (int i = 0; i < sortedKey.size(); i++) {
-            documentProtoBuilder.addProperties(propertyProtoMap.get(sortedKey.get(i)));
-        }
-        assertThat(document.getProto()).isEqualTo(documentProtoBuilder.build());
     }
 }

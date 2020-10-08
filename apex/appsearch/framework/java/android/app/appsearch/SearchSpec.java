@@ -249,8 +249,10 @@ public final class SearchSpec {
         /**
          * Only the first {@code snippetCount} documents based on the ranking strategy
          * will have snippet information provided.
-         * <p>If set to 0 (default), snippeting is disabled and
-         * {@link SearchResults.Result#getMatches} will return {@code null} for that result.
+         *
+         * <p>If set to 0 (default), snippeting is disabled and {@link SearchResult#getMatches} will
+         * return {@code null} for that result.
+         *
          * <p>The value should be set in range[0, 10k].
          */
         @NonNull
@@ -264,8 +266,10 @@ public final class SearchSpec {
         /**
          * Only the first {@code matchesCountPerProperty} matches for a every property of
          * {@link GenericDocument} will contain snippet information.
-         * <p>If set to 0, snippeting is disabled and {@link SearchResults.Result#getMatches}
-         * will return {@code null} for that result.
+         *
+         * <p>If set to 0, snippeting is disabled and {@link SearchResult#getMatches} will return
+         * {@code null} for that result.
+         *
          * <p>The value should be set in range[0, 10k].
          */
         @NonNull
