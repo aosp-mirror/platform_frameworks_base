@@ -96,6 +96,7 @@ static struct {
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
     jmethodID notifyFocusChanged;
+    jmethodID notifyUntrustedTouch;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptMotionBeforeQueueingNonInteractive;
@@ -253,6 +254,7 @@ public:
             const sp<IBinder>& token, const std::string& reason) override;
     void notifyInputChannelBroken(const sp<IBinder>& token) override;
     void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
+    void notifyUntrustedTouch(const std::string& obscuringPackage) override;
     bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
     void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
     void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) override;
@@ -750,6 +752,17 @@ void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
                 tokenObj);
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
     }
+}
+
+void NativeInputManager::notifyUntrustedTouch(const std::string& obscuringPackage) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifyUntrustedTouch - obscuringPackage=%s", obscuringPackage.c_str());
+#endif
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    jstring jPackage = env->NewStringUTF(obscuringPackage.c_str());
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyUntrustedTouch, jPackage);
+    checkAndClearExceptionFromCallback(env, "notifyUntrustedTouch");
 }
 
 void NativeInputManager::notifyFocusChanged(const sp<IBinder>& oldToken,
@@ -1886,6 +1899,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyFocusChanged, clazz,
             "notifyFocusChanged", "(Landroid/os/IBinder;Landroid/os/IBinder;)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyUntrustedTouch, clazz, "notifyUntrustedTouch",
+                  "(Ljava/lang/String;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",

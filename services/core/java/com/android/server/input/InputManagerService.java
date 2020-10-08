@@ -2093,6 +2093,16 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
+    // Native callback
+    private void notifyUntrustedTouch(String packageName) {
+        // TODO(b/169067926): Remove toast after gathering feedback on dogfood.
+        DisplayThread.getHandler().post(() ->
+                Toast.makeText(mContext,
+                        "Touch obscured by " + packageName
+                                + " will be blocked. Check go/s-untrusted-touches",
+                        Toast.LENGTH_SHORT).show());
+    }
+
     // Native callback.
     private long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
             String reason) {
