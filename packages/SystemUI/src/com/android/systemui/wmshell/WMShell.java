@@ -419,8 +419,8 @@ public final class WMShell extends SystemUI
         if (handleLoggingCommand(args, pw)) {
             return;
         }
-
         // Dump WMShell stuff here if no commands were handled
+        mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));
     }
 
     @Override
