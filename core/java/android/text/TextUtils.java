@@ -2173,7 +2173,7 @@ public class TextUtils {
     public static <T extends CharSequence> T trimToLengthWithEllipsis(@Nullable T text,
             @IntRange(from = 1) int size) {
         T trimmed = trimToSize(text, size);
-        if (trimmed.length() < text.length()) {
+        if (text != null && trimmed.length() < text.length()) {
             trimmed = (T) (trimmed.toString() + "...");
         }
         return trimmed;
