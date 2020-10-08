@@ -14530,6 +14530,15 @@ public final class Settings {
         public static final String SHOW_PEOPLE_SPACE = "show_people_space";
 
         /**
+         * Whether to show new lockscreen & AOD UI.
+         * Values are:
+         * 0: Disabled (default)
+         * 1: Enabled
+         * @hide
+         */
+        public static final String SHOW_NEW_LOCKSCREEN = "show_new_lockscreen";
+
+        /**
          * Block untrusted touches mode.
          *
          * Can be one of:
