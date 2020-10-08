@@ -15,7 +15,7 @@
  */
 
 #include "ShaderCache.h"
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <log/log.h>
 #include <openssl/sha.h>
 #include <algorithm>
@@ -206,7 +206,7 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
     }
 }
 
-void ShaderCache::onVkFrameFlushed(GrContext* context) {
+void ShaderCache::onVkFrameFlushed(GrDirectContext* context) {
     {
         std::lock_guard<std::mutex> lock(mMutex);
 

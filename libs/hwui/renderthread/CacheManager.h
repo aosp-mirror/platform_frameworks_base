@@ -18,7 +18,7 @@
 #define CACHEMANAGER_H
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #endif
 #include <SkSurface.h>
 #include <utils/String8.h>
@@ -58,13 +58,13 @@ private:
     explicit CacheManager();
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    void reset(sk_sp<GrContext> grContext);
+    void reset(sk_sp<GrDirectContext> grContext);
 #endif
     void destroy();
 
     const size_t mMaxSurfaceArea;
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    sk_sp<GrContext> mGrContext;
+    sk_sp<GrDirectContext> mGrContext;
 #endif
 
     const size_t mMaxResourceBytes;

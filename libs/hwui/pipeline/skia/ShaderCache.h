@@ -80,7 +80,7 @@ public:
      * Pipeline cache is saved on disk only if the size of the data has changed or there was
      * a new shader compiled.
      */
-    void onVkFrameFlushed(GrContext* context);
+    void onVkFrameFlushed(GrDirectContext* context);
 
 private:
     // Creation and (the lack of) destruction is handled internally.
