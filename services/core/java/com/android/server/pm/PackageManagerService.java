@@ -14781,20 +14781,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return mUser;
         }
 
-        /**
-         * Gets the user handle for the user that the rollback agent should
-         * use to look up information about this installation when enabling
-         * rollback.
-         */
-        UserHandle getRollbackUser() {
-            // The session for packages installed for "all" users is
-            // associated with the "system" user.
-            if (mUser == UserHandle.ALL) {
-                return UserHandle.SYSTEM;
-            }
-            return mUser;
-        }
-
         HandlerParams setTraceMethod(String traceMethod) {
             this.traceMethod = traceMethod;
             return this;
