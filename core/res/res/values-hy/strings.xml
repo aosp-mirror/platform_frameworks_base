@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"փոխել ձեր աուդիո կարգավորումները"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ՝ ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ձայնագրել աուդիո ֆայլ"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Այս հավելվածը կարող է օգտագործել խոսափողը՝ ձայնագրություններ անելու համար, միայն երբ հավելվածն ակտիվ է։"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ձայնագրել ֆոնային ռեժիմում"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Այս հավելվածը կարող է ցանկացած ժամանակ օգտագործել խոսափողը՝ ձայնագրություններ անելու համար։"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ուղարկել հրամաններ SIM քարտին"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Թույլ է տալիս հավելվածին հրամաններ ուղարկել SIM-ին: Սա շատ վտանգավոր է:"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ֆիզիկական ակտիվության ճանաչում"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Հավելվածը կարող է ճանաչել ձեր ֆիզիկական ակտիվությունը:"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"լուսանկարել և տեսանկարել"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Այս հավելվածը կարող է օգտագործել տեսախցիկը՝ լուսանկարելու և տեսագրելու համար, միայն երբ հավելվածն ակտիվ է։"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"լուսանկարել և տեսագրել ֆոնային ռեժիմում"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Այս հավելվածը կարող է ցանկացած ժամանակ օգտագործել տեսախցիկը՝ լուսանկարելու և տեսագրելու համար։"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Թույլատրել որևէ հավելվածի կամ ծառայության օգտագործել համակարգի տեսախցիկները՝ լուսանկարելու և տեսանկարելու համար"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Այս արտոնյալ կամ համակարգային հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով համակարգի տեսախցիկները։ Հավելվածին նաև անհրաժեշտ է android.permission.CAMERA թույլտվությունը։"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Թույլատրել հավելվածին կամ ծառայությանը հետզանգեր ստանալ՝ տեսախցիկների բացվելու և փակվելու դեպքում։"</string>

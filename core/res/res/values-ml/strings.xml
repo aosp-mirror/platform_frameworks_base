@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"നിങ്ങളുടെ ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"വോളിയവും ഔട്ട്പുട്ടിനായി ഉപയോഗിച്ച സ്‌പീക്കറും പോലുള്ള ആഗോള ഓഡിയോ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"ആപ്പ് ഉപയോഗത്തിലായിരിക്കുമ്പോൾ മൈക്രോഫോൺ ഉപയോഗിച്ച് ഓഡിയോ റെക്കോർഡ് ചെയ്യാൻ ഈ ആപ്പിന് കഴിയും."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"പശ്ചാത്തലത്തിൽ ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ഈ ആപ്പിന് ഏത് സമയത്തും മൈക്രോഫോൺ ഉപയോഗിച്ച് ഓഡിയോ റെക്കോർഡ് ചെയ്യാൻ കഴിയും."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM-ലേക്ക് കമാൻഡുകൾ അയയ്ക്കുക"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"സിമ്മിലേക്ക് കമാൻഡുകൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ശാരീരിക പ്രവർത്തനം തിരിച്ചറിയുക"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ഈ ആപ്പിന് തിരിച്ചറിയാനാവും."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"ആപ്പ് ഉപയോഗത്തിലായിരിക്കുമ്പോൾ ക്യാമറ ഉപയോഗിച്ച് ചിത്രങ്ങളെടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"പശ്ചാത്തലത്തിൽ ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"ഏതുസമയത്തും ക്യാമറ ഉപയോഗിച്ച് ചിത്രങ്ങൾ എടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കാൻ, സിസ്‌റ്റം ക്യാമറ ആക്‌സസ് ചെയ്യുന്നതിന് ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"സിസ്‌റ്റം ക്യാമറ ഉപയോഗിച്ച് ഏത് സമയത്തും ചിത്രങ്ങളെടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ വിശേഷാധികാര അല്ലെങ്കിൽ സിസ്‌റ്റം ആപ്പിന് കഴിയും. ആപ്പിലും android.permission.CAMERA അനുമതി ഉണ്ടായിരിക്കണം"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ക്യാമറയുള്ള ഉപകരണങ്ങൾ ഓണാക്കുന്നതിനെയോ അടയ്ക്കുന്നതിനെയോ കുറിച്ചുള്ള കോൾബാക്കുകൾ സ്വീകരിക്കാൻ ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക."</string>

@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"neem klank op"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Hierdie die program kan oudio met die mikrofoon opneem terwyl die program gebruik word."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"neem oudio op die agtergrond op"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Hierdie program kan enige tyd oudio met die mikrofoon opneem."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"stuur bevele na die SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Laat die program toe om bevele na die SIM te stuur. Dit is baie gevaarlik."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"herken fisieke aktiwiteit"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Hierdie program kan jou fisieke aktiwiteit herken."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"neem foto\'s en video\'s"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Hierdie program kan met die kamera foto\'s neem en video\'s opneem terwyl die program gebruik word."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"neem foto\'s en video\'s op die agtergrond"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Hierdie program kan enige tyd met die kamera foto\'s neem en video\'s opneem."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Gee \'n program of diens toegang tot stelselkameras om foto\'s en video\'s te neem"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Hierdie bevoorregte of stelselprogram kan enige tyd met \'n stelselkamera foto\'s neem en video\'s opneem. Vereis dat die program ook die android.permission.CAMERA-toestemming het"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>

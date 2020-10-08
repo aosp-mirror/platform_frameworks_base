@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"మీ ఆడియో సెట్టింగ్‌లను మార్చడం"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"వాల్యూమ్ మరియు అవుట్‌పుట్ కోసం ఉపయోగించాల్సిన స్పీకర్ వంటి సార్వజనీన ఆడియో సెట్టింగ్‌లను సవరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ఆడియోను రికార్డ్ చేయడం"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"యాప్ ఉపయోగంలో ఉన్నపుడు మైక్రోఫోన్‌ను ఉపయోగించి ఈ యాప్, ఆడియోను రికార్డ్ చేయగలదు."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"బ్యాక్‌గ్రౌండ్‌లో ఆడియోను రికార్డ్ చేయగలదు"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"మైక్రోఫోన్‌ను ఉపయోగించి ఈ యాప్ ఎప్పుడైనా ఆడియోను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIMకి ఆదేశాలను పంపడం"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"సిమ్‌కు ఆదేశాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"భౌతిక కార్యాకలాపాన్ని గుర్తించండి"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ఈ యాప్ మీ భౌతిక కార్యాకలాపాన్ని గుర్తించగలదు."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"యాప్ ఉపయోగంలో ఉన్నపుడు కెమెరాను ఉపయోగించి ఈ యాప్ ఎప్పుడైనా ఫోటోలను తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"బ్యాక్‌గ్రౌండ్‌లో ఫోటోలు, వీడియోలను తీయగలదు"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"కెమెరాను ఉపయోగించి ఈ యాప్ ఎప్పుడైనా ఫోటోలను తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ఫోటోలు, వీడియోలు తీయడానికి సిస్టమ్ కెమెరాలకు యాప్, లేదా సేవా యాక్సెస్‌ను అనుమతించండి"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ఈ విశేష లేదా సిస్టమ్ యాప్ ఎప్పుడైనా సిస్టమ్ కెమెరాను ఉపయోగించి ఫోటోలు తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు. యాప్‌కు android.permission.CAMERA అనుమతి ఇవ్వడం కూడా అవసరం"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>

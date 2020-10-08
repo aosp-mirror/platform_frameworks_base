@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"hangbeállítások módosítása"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Lehetővé teszi az alkalmazás számára az általános hangbeállítások, például a hangerő és a használni kívánt kimeneti hangszóró módosítását."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"hanganyag rögzítése"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Az alkalmazás a mikrofon használatával akkor készíthet hangfelvételt, amikor az alkalmazás használatban van."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"hangfelvétel készítése a háttérben"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Az alkalmazás a mikrofon használatával bármikor készíthet hangfelvételt."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"parancsok küldése a SIM-kártyára"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Engedélyezi, hogy az alkalmazás parancsokat küldjön a SIM kártyára. Ez rendkívül veszélyes lehet."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"testmozgás felismerése"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Az alkalmazás képes felismerni a testmozgást."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotók és videók készítése"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Az alkalmazás a kamera használatával akkor készíthet fényképeket és videókat, amikor az alkalmazás használatban van."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"fényképek és videók készítése a háttérben"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és videókat."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"A rendszerkamerákhoz való hozzáférés, illetve képek és videók rögzítésének engedélyezése alkalmazás vagy szolgáltatás számára"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"A rendszerkamera használatával ez az előnyben részesített vagy rendszeralkalmazás bármikor készíthet fényképeket és videókat. Az alkalmazásnak az „android.permission.CAMERA” engedéllyel is rendelkeznie kell."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>

@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"baguhin ang mga setting ng iyong audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Pinapayagan ang app na baguhin ang mga pandaigdigang setting ng audio gaya ng volume at kung aling speaker ang ginagamit para sa output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"mag-record ng audio"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Makakapag-record ng audio ang app na ito gamit ang mikropono habang ginagamit ang app."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"mag-record ng audio sa background"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Makakapag-record ng audio ang app na ito gamit ang mikropono anumang oras."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"magpadala ng mga command sa SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Pinapahintulutang magpadala ang app ng mga command sa SIM. Napakapanganib nito."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"tukuyin ang pisikal na aktibidad"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Matutukoy ng app na ito ang iyong pisikal na aktibidad."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"kumuha ng mga larawan at video"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Makakakuha ng mga larawan at makakapag-record ng mga video ang app na ito gamit ang camera habang ginagamit ang app."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"kumuha ng mga larawan at video sa background"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Makakakuha ng mga larawan at makakapag-record ng mga video ang app na ito gamit ang camera anumang oras."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Bigyan ang isang application o serbisyo ng access sa mga camera ng system para kumuha ng mga larawan at video"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ang may pribilehiyong app o system app na ito ay makakakuha ng mga larawan at makakapag-record ng mga video gamit ang isang camera ng system anumang oras. Kinakailangang may android.permission.CAMERA na pahintulot din ang app"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Payagan ang isang application o serbisyo na makatanggap ng mga callback tungkol sa pagbubukas o pagsasara ng mga camera device."</string>

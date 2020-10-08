@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"səs yaz"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Bu tətbiq istifadə edilən zaman mikrofondan istifadə edərək audio yaza bilər."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"arxa fonda audio yazmaq"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Bu tətbiq istənilən zaman mikrofondan istifadə edərək audio yaza bilər."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"əmrləri SIM\'ə göndərin"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Tətbiqə SIM-ə əmrlər göndərməyə imkan verir. Bu, çox təhlükəlidir."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"fiziki fəaliyyəti tanıyın"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Bu tətbiq fiziki fəaliyyətinizi tanıya bilər."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"şəkil və video çəkmək"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Bu tətbiq istifadə edilən zaman kameradan istifadə edərək şəkil çəkə və video yaza bilər."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"arxa fonda şəkillər və videolar çəkmək"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Bu tətbiq istənilən zaman kameradan istifadə edərək şəkil çəkə və video yaza bilər."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Şəkil və video çəkmək üçün tətbiq və ya xidmətlərin sistem kameralarına girişinə icazə verin"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Bu icazəli və ya sistem tətbiqi istənilən vaxt sistem kamerasından istifadə edərək şəkil və videolar çəkə bilər. android.permission.CAMERA icazəsinin də tətbiq tərəfindən saxlanılmasını tələb edir"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tətbiqə və ya xidmətə kamera cihazlarının açılması və ya bağlanması haqqında geri zənglər qəbul etməyə icazə verin."</string>
@@ -714,7 +708,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Bəzi ekran kilidi funksiyalarını deaktiv edin"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Bəzi ekran funksiyaları istifadəsinin qarşısını alın."</string>
   <string-array name="phoneTypes">
-    <item msgid="8996339953292723951">"Əsas səhifə"</item>
+    <item msgid="8996339953292723951">"Ev"</item>
     <item msgid="7740243458912727194">"Mobil"</item>
     <item msgid="8526146065496663766">"İş"</item>
     <item msgid="8150904584178569699">"İş Faksı"</item>
@@ -724,19 +718,19 @@
     <item msgid="6216981255272016212">"Şəxsi"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="7786349763648997741">"Ana səhifə"</item>
+    <item msgid="7786349763648997741">"Ev"</item>
     <item msgid="435564470865989199">"İş"</item>
     <item msgid="4199433197875490373">"Digər"</item>
     <item msgid="3233938986670468328">"Fərdi"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="3861463339764243038">"Əsas səhifə"</item>
+    <item msgid="3861463339764243038">"Ev"</item>
     <item msgid="5472578890164979109">"İş"</item>
     <item msgid="5718921296646594739">"Digər"</item>
     <item msgid="5523122236731783179">"Düzənləyin"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="588088543406993772">"Əsas səhifə"</item>
+    <item msgid="588088543406993772">"Ev"</item>
     <item msgid="5503060422020476757">"İş"</item>
     <item msgid="2530391194653760297">"Digər"</item>
     <item msgid="7640927178025203330">"Fərdi"</item>
@@ -782,16 +776,16 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"İldönümü"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Digər"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Fərdi"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"Əsas səhifə"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"Şəxsi"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"İş"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Digər"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Mobil"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"Fərdi"</string>
-    <string name="postalTypeHome" msgid="7562272480949727912">"Əsas səhifə"</string>
+    <string name="postalTypeHome" msgid="7562272480949727912">"Ev"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"İş"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"Digər"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"Fərdi"</string>
-    <string name="imTypeHome" msgid="6996507981044278216">"Ana səhifə"</string>
+    <string name="imTypeHome" msgid="6996507981044278216">"Ev"</string>
     <string name="imTypeWork" msgid="2099668940169903123">"İş"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"Digər"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"Şəxsi"</string>
@@ -823,7 +817,7 @@
     <string name="relationTypeSister" msgid="3721676005094140671">"Bacı"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"Həyat yoldaşı"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Fərdi"</string>
-    <string name="sipAddressTypeHome" msgid="5918441930656878367">"Əsas səhifə"</string>
+    <string name="sipAddressTypeHome" msgid="5918441930656878367">"Ev"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"İş"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Digər"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Bu kontakta baxmaq üçün heç bir tətbiq tapılmadı."</string>
