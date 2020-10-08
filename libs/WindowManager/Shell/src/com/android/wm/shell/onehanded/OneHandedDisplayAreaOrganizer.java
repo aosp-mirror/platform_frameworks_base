@@ -339,8 +339,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     }
 
     @VisibleForTesting
-    Handler getUpdateHandler() {
-        return mUpdateHandler;
+    void setUpdateHandler(Handler updateHandler) {
+        mUpdateHandler = updateHandler;
     }
 
     /**
