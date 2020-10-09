@@ -329,6 +329,12 @@
     <!-- Permission needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
 
+    <!-- Permission required for CTS test - android.server.biometrics -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <!-- Permission required for CTS test - android.server.biometrics -->
+    <uses-permission android:name="android.permission.TEST_BIOMETRIC" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

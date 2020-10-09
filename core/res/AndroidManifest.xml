@@ -4541,6 +4541,12 @@
     <permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT"
         android:protectionLevel="signature" />
 
+    <!-- Allows access to TestApis for various components in the biometric stack, including
+         FingerprintService, FaceService, BiometricService. Used by com.android.server.biometrics
+         CTS tests. @hide @TestApi -->
+    <permission android:name="android.permission.TEST_BIOMETRIC"
+        android:protectionLevel="signature" />
+
     <!-- Allows direct access to the <Biometric>Service interfaces. Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_BIOMETRIC"
         android:protectionLevel="signature" />

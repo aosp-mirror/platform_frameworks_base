@@ -23,6 +23,7 @@ package android {
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
+    field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
@@ -1223,6 +1224,35 @@ package android.graphics.drawable {
 
 }
 
+package android.hardware.biometrics {
+
+  public class BiometricManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession getTestSession();
+  }
+
+  public class BiometricTestSession implements java.lang.AutoCloseable {
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void authenticateReject(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void authenticateSuccess(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void close();
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enableTestHal(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enrollFinish(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enrollStart(int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void internalCleanup(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int, int);
+  }
+
+  public class SensorProperties {
+    method public int getSensorId();
+    method public int getSensorStrength();
+    field public static final int STRENGTH_CONVENIENCE = 0; // 0x0
+    field public static final int STRENGTH_STRONG = 2; // 0x2
+    field public static final int STRENGTH_WEAK = 1; // 0x1
+  }
+
+}
+
 package android.hardware.camera2 {
 
   public abstract class CameraDevice implements java.lang.AutoCloseable {
@@ -1324,6 +1354,14 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
     field public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1024; // 0x400
+  }
+
+}
+
+package android.hardware.fingerprint {
+
+  @Deprecated public class FingerprintManager {
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession getTestSession();
   }
 
 }
