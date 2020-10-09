@@ -216,7 +216,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final LocalService mLocalService;
 
     private final GeofenceManager mGeofenceManager;
-    @Nullable private volatile GnssManagerService mGnssManagerService = null;
+    private volatile @Nullable GnssManagerService mGnssManagerService = null;
     private GeocoderProxy mGeocodeProvider;
 
     @GuardedBy("mLock")
@@ -604,7 +604,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 || !request.getWorkSource().isEmpty();
         if (usesSystemApi
                 && isChangeEnabled(PREVENT_PENDING_INTENT_SYSTEM_API_USAGE, identity.getUid())) {
-            throw new SecurityException("PendingIntent location requests may not use system APIs");
+            throw new SecurityException(
+                    "PendingIntent location requests may not use system APIs: " + request);
         }
 
         request = validateLocationRequest(request, identity);
@@ -1088,19 +1089,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         manager.setMockProviderAllowed(enabled);
-    }
-
-    @Override
-    @NonNull
-    public List<LocationRequest> getTestProviderCurrentRequests(String provider) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
-
-        LocationProviderManager manager = getLocationProviderManager(provider);
-        if (manager == null) {
-            throw new IllegalArgumentException("provider doesn't exist: " + provider);
-        }
-
-        return manager.getMockProviderRequests();
     }
 
     @Override

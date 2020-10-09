@@ -1391,16 +1391,6 @@ class LocationProviderManager extends
         }
     }
 
-    public List<LocationRequest> getMockProviderRequests() {
-        synchronized (mLock) {
-            if (!mProvider.isMock()) {
-                throw new IllegalArgumentException(mName + " provider is not a test provider");
-            }
-
-            return mProvider.getCurrentRequest().getLocationRequests();
-        }
-    }
-
     @Nullable
     public Location getLastLocation(CallerIdentity identity, @PermissionLevel int permissionLevel,
             boolean ignoreLocationSettings) {
