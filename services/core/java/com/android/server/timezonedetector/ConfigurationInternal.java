@@ -138,7 +138,7 @@ public final class ConfigurationInternal {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_SUPPORTED;
         } else if (!allowConfigDateTime) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_ALLOWED;
-        } else if (!isLocationEnabled()) {
+        } else if (!mAutoDetectionEnabled || !isLocationEnabled()) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_APPLICABLE;
         } else {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_POSSESSED;
