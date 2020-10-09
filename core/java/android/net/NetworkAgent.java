@@ -337,35 +337,6 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
 
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score) {
-        this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
-        // Register done by the constructor called in the previous line
-    }
-
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config) {
-        this(looper, context, logTag, ni, nc, lp, score, config, NetworkProvider.ID_NONE);
-        // Register done by the constructor called in the previous line
-    }
-
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, int providerId) {
-        this(looper, context, logTag, ni, nc, lp, score, null, providerId);
-        // Register done by the constructor called in the previous line
-    }
-
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
-            int providerId) {
-        this(looper, context, logTag, nc, lp, score, config, providerId, ni, true /* legacy */);
-        register();
-    }
-
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         // The subtype can be changed with (TODO) setLegacySubtype, but it starts
         // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
