@@ -207,7 +207,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     public boolean isReservedSupported(String volumeUuid, String callingPackage) {
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
             return SystemProperties.getBoolean(StorageManager.PROP_HAS_RESERVED, false)
-                    || Build.IS_CONTAINER;
+                    || Build.IS_ARC;
         } else {
             return false;
         }
