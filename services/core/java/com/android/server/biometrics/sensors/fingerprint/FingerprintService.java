@@ -33,10 +33,9 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
-import android.hardware.biometrics.ITestService;
-import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -53,6 +52,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
@@ -91,54 +92,52 @@ public class FingerprintService extends SystemService {
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull private List<ServiceProvider> mServiceProviders;
-    @Nullable private TestService mTestService;
+    @NonNull private final ArrayMap<Integer, TestSession> mTestSessions;
 
-    private final class TestService extends ITestService.Stub {
+    private final class TestSession extends ITestSession.Stub {
+        private final int mSensorId;
 
-        @Override
-        public List<SensorPropertiesInternal> getSensorPropertiesInternal(
-                String opPackageName) {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-            return null;
+        TestSession(int sensorId) {
+            mSensorId = sensorId;
         }
 
         @Override
-        public void enableTestHal(int sensorId, boolean enableTestHal) {
+        public void enableTestHal(boolean enableTestHal) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void enrollStart(int sensorId, int userId) {
+        public void startEnroll(int userId) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void enrollFinish(int sensorId, int userId) {
+        public void finishEnroll(int userId) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void authenticateSuccess(int sensorId, int userId)  {
+        public void acceptAuthentication(int userId)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void authenticateReject(int sensorId, int userId)  {
+        public void rejectAuthentication(int userId)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void notifyAcquired(int sensorId, int userId)  {
+        public void notifyAcquired(int userId)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void notifyError(int sensorId, int userId)  {
+        public void notifyError(int userId)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void internalCleanup(int sensorId, int userId)  {
+        public void cleanupInternalState(int userId)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
     }
@@ -148,15 +147,17 @@ public class FingerprintService extends SystemService {
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
         @Override
-        public ITestService getTestService(String opPackageName) {
+        public ITestSession createTestSession(int sensorId, String opPackageName) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
-            synchronized (this) {
-                if (mTestService == null) {
-                    mTestService = new TestService();
+            final TestSession session;
+            synchronized (mTestSessions) {
+                if (!mTestSessions.containsKey(sensorId)) {
+                    mTestSessions.put(sensorId, new TestSession(sensorId));
                 }
+                session = mTestSessions.get(sensorId);
             }
-            return mTestService;
+            return session;
         }
 
         @Override // Binder call
@@ -619,6 +620,7 @@ public class FingerprintService extends SystemService {
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
+        mTestSessions = new ArrayMap<>();
 
         initializeAidlHals();
     }
