@@ -30,7 +30,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
 import android.os.Trace;
@@ -62,7 +61,6 @@ class WindowSurfaceController {
     private float mSurfaceY = 0;
     private int mSurfaceW = 0;
     private int mSurfaceH = 0;
-    private Rect mSurfaceCrop = new Rect(0, 0, -1, -1);
 
     // Initialize to the identity matrix.
     private float mLastDsdx = 1;
@@ -74,13 +72,6 @@ class WindowSurfaceController {
 
     private int mSurfaceLayer = 0;
 
-    // Surface flinger doesn't support crop rectangles where width or height is non-positive.
-    // However, we need to somehow handle the situation where the cropping would completely hide
-    // the window. We achieve this by explicitly hiding the surface and not letting it be shown.
-    private boolean mHiddenForCrop = false;
-
-    // Initially a surface is hidden after just being created.
-    private boolean mHiddenForOtherReasons = true;
     private final String title;
 
     private final WindowManagerService mService;
@@ -140,13 +131,6 @@ class WindowSurfaceController {
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    void reparentChildrenInTransaction(WindowSurfaceController other) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "REPARENT from: %s to: %s", this, other);
-        if ((mSurfaceControl != null) && (other.mSurfaceControl != null)) {
-            mSurfaceControl.reparentChildren(other.mSurfaceControl);
-        }
-    }
-
     void detachChildren() {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SEVER CHILDREN");
         mChildrenDetached = true;
@@ -157,7 +141,6 @@ class WindowSurfaceController {
 
     void hide(SurfaceControl.Transaction transaction, String reason) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE HIDE ( %s ): %s", reason, title);
-        mHiddenForOtherReasons = true;
 
         mAnimator.destroyPreservedSurfaceLocked();
         if (mSurfaceShown) {
@@ -191,47 +174,6 @@ class WindowSurfaceController {
             mSurfaceControl = null;
             if (mBLASTSurfaceControl != null) {
                 mBLASTSurfaceControl.release();
-            }
-        }
-    }
-
-    void setCropInTransaction(Rect clipRect, boolean recoveringMemory) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE CROP %s: %s", clipRect.toShortString(), title);
-        try {
-            if (clipRect.width() > 0 && clipRect.height() > 0) {
-                if (!clipRect.equals(mSurfaceCrop)) {
-                    mSurfaceControl.setWindowCrop(clipRect);
-                    mSurfaceCrop.set(clipRect);
-                }
-                mHiddenForCrop = false;
-                updateVisibility();
-            } else {
-                mHiddenForCrop = true;
-                mAnimator.destroyPreservedSurfaceLocked();
-                updateVisibility();
-            }
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error setting crop surface of " + this
-                    + " crop=" + clipRect.toShortString(), e);
-            if (!recoveringMemory) {
-                mAnimator.reclaimSomeSurfaceMemory("crop", true);
-            }
-        }
-    }
-
-    void clearCropInTransaction(boolean recoveringMemory) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE CLEAR CROP: %s", title);
-        try {
-            Rect clipRect = new Rect(0, 0, -1, -1);
-            if (mSurfaceCrop.equals(clipRect)) {
-                return;
-            }
-            mSurfaceControl.setWindowCrop(clipRect);
-            mSurfaceCrop.set(clipRect);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error setting clearing crop of " + this, e);
-            if (!recoveringMemory) {
-                mAnimator.reclaimSomeSurfaceMemory("crop", true);
             }
         }
     }
@@ -285,31 +227,6 @@ class WindowSurfaceController {
                 mAnimator.reclaimSomeSurfaceMemory("matrix", true);
             }
         }
-    }
-
-    boolean setBufferSizeInTransaction(int width, int height, boolean recoveringMemory) {
-        final boolean surfaceResized = mSurfaceW != width || mSurfaceH != height;
-        if (surfaceResized) {
-            mSurfaceW = width;
-            mSurfaceH = height;
-
-            try {
-                ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SIZE %dx%d: %s", width, height, title);
-                mSurfaceControl.setBufferSize(width, height);
-            } catch (RuntimeException e) {
-                // If something goes wrong with the surface (such
-                // as running out of memory), don't take down the
-                // entire system.
-                Slog.e(TAG, "Error resizing surface of " + title
-                        + " size=(" + width + "x" + height + ")", e);
-                if (!recoveringMemory) {
-                    mAnimator.reclaimSomeSurfaceMemory("size", true);
-                }
-                return false;
-            }
-            return true;
-        }
-        return false;
     }
 
     boolean prepareToShowInTransaction(float alpha,
@@ -404,35 +321,15 @@ class WindowSurfaceController {
         }
     }
 
-    void getContainerRect(Rect rect) {
-        mAnimator.getContainerRect(rect);
-    }
-
     boolean showRobustlyInTransaction() {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", title);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
-        mHiddenForOtherReasons = false;
-        return updateVisibility();
-    }
 
-    private boolean updateVisibility() {
-        if (mHiddenForCrop || mHiddenForOtherReasons) {
-            if (mSurfaceShown) {
-                hideSurface(mTmpTransaction);
-                SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
-            }
-            return false;
-        } else {
-            if (!mSurfaceShown) {
-                return showSurface();
-            } else {
-                return true;
-            }
+        if (mSurfaceShown) {
+            return true;
         }
-    }
 
-    private boolean showSurface() {
         try {
             setShown(true);
             mSurfaceControl.show();
@@ -442,13 +339,7 @@ class WindowSurfaceController {
         }
 
         mAnimator.reclaimSomeSurfaceMemory("show", true);
-
         return false;
-    }
-
-    void deferTransactionUntil(SurfaceControl barrier, long frame) {
-        // TODO: Logging
-        mSurfaceControl.deferTransactionUntil(barrier, frame);
     }
 
     void forceScaleableInTransaction(boolean force) {
@@ -472,7 +363,6 @@ class WindowSurfaceController {
         return mSurfaceControl.getContentFrameStats(outStats);
     }
 
-
     boolean hasSurface() {
         return mSurfaceControl != null;
     }
@@ -485,10 +375,6 @@ class WindowSurfaceController {
         if (mBLASTSurfaceControl != null) {
             outSurfaceControl.copyFrom(mBLASTSurfaceControl, "WindowSurfaceController.getBLASTSurfaceControl");
         }
-    }
-
-    int getLayer() {
-        return mSurfaceLayer;
     }
 
     boolean getShown() {
@@ -505,14 +391,6 @@ class WindowSurfaceController {
         if (mWindowSession != null) {
             mWindowSession.onWindowSurfaceVisibilityChanged(this, mSurfaceShown, mWindowType);
         }
-    }
-
-    float getX() {
-        return mSurfaceX;
-    }
-
-    float getY() {
-        return mSurfaceY;
     }
 
     int getWidth() {
