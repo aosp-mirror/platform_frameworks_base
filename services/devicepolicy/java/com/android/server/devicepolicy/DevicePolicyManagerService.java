@@ -480,38 +480,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final int STATUS_BAR_DISABLE2_MASK =
             StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
-    private static final Set<String> SECURE_SETTINGS_WHITELIST;
-    private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
-    private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
+    private static final Set<String> SECURE_SETTINGS_ALLOWLIST;
+    private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_ALLOWLIST;
+    private static final Set<String> GLOBAL_SETTINGS_ALLOWLIST;
     private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
-    private static final Set<String> SYSTEM_SETTINGS_WHITELIST;
+    private static final Set<String> SYSTEM_SETTINGS_ALLOWLIST;
     private static final Set<Integer> DA_DISALLOWED_POLICIES;
     // A collection of user restrictions that are deprecated and should simply be ignored.
     private static final Set<String> DEPRECATED_USER_RESTRICTIONS;
     private static final String AB_DEVICE_KEY = "ro.build.ab_update";
 
     static {
-        SECURE_SETTINGS_WHITELIST = new ArraySet<>();
-        SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
-        SECURE_SETTINGS_WHITELIST.add(Settings.Secure.SKIP_FIRST_USE_HINTS);
-        SECURE_SETTINGS_WHITELIST.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
+        SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
+        SECURE_SETTINGS_ALLOWLIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
+        SECURE_SETTINGS_ALLOWLIST.add(Settings.Secure.SKIP_FIRST_USE_HINTS);
+        SECURE_SETTINGS_ALLOWLIST.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
 
-        SECURE_SETTINGS_DEVICEOWNER_WHITELIST = new ArraySet<>();
-        SECURE_SETTINGS_DEVICEOWNER_WHITELIST.addAll(SECURE_SETTINGS_WHITELIST);
-        SECURE_SETTINGS_DEVICEOWNER_WHITELIST.add(Settings.Secure.LOCATION_MODE);
+        SECURE_SETTINGS_DEVICEOWNER_ALLOWLIST = new ArraySet<>();
+        SECURE_SETTINGS_DEVICEOWNER_ALLOWLIST.addAll(SECURE_SETTINGS_ALLOWLIST);
+        SECURE_SETTINGS_DEVICEOWNER_ALLOWLIST.add(Settings.Secure.LOCATION_MODE);
 
-        GLOBAL_SETTINGS_WHITELIST = new ArraySet<>();
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_WIFI_ENABLED);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_SLEEP_POLICY);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.PRIVATE_DNS_MODE);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.PRIVATE_DNS_SPECIFIER);
+        GLOBAL_SETTINGS_ALLOWLIST = new ArraySet<>();
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.ADB_ENABLED);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.ADB_WIFI_ENABLED);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.AUTO_TIME);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.AUTO_TIME_ZONE);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.DATA_ROAMING);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.WIFI_SLEEP_POLICY);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.PRIVATE_DNS_MODE);
+        GLOBAL_SETTINGS_ALLOWLIST.add(Settings.Global.PRIVATE_DNS_SPECIFIER);
 
         GLOBAL_SETTINGS_DEPRECATED = new ArraySet<>();
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.BLUETOOTH_ON);
@@ -520,11 +520,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.NETWORK_PREFERENCE);
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.WIFI_ON);
 
-        SYSTEM_SETTINGS_WHITELIST = new ArraySet<>();
-        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS);
-        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
-        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
-        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
+        SYSTEM_SETTINGS_ALLOWLIST = new ArraySet<>();
+        SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS);
+        SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
+        SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
+        SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
 
         DA_DISALLOWED_POLICIES = new ArraySet<>();
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA);
@@ -1231,13 +1231,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         String startUserSessionMessage = null;
         String endUserSessionMessage = null;
 
-        // The whitelist of packages that can access cross profile calendar APIs.
-        // This whitelist should be in default an empty list, which indicates that no package
-        // is whitelisted.
+        // The allowlist of packages that can access cross profile calendar APIs.
+        // This allowlist should be in default an empty list, which indicates that no package
+        // is allowed.
         List<String> mCrossProfileCalendarPackages = Collections.emptyList();
 
-        // The whitelist of packages that the admin has enabled to be able to request consent from
-        // the user to communicate cross-profile. By default, no packages are whitelisted, which is
+        // The allowlist of packages that the admin has enabled to be able to request consent from
+        // the user to communicate cross-profile. By default, no packages are allowed, which is
         // represented as an empty list.
         List<String> mCrossProfilePackages = Collections.emptyList();
 
@@ -2818,7 +2818,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
-            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+            public void send(int code, Intent intent, String resolvedType, IBinder allowlistToken,
                     IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
                 final int status = intent.getIntExtra(
                         PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
@@ -7067,7 +7067,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public boolean setAlwaysOnVpnPackage(ComponentName who, String vpnPackage, boolean lockdown,
-            List<String> lockdownWhitelist)
+            List<String> lockdownAllowlist)
             throws SecurityException {
         enforceProfileOrDeviceOwner(who);
 
@@ -7079,10 +7079,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         DevicePolicyManager.ERROR_VPN_PACKAGE_NOT_FOUND, vpnPackage);
             }
 
-            if (vpnPackage != null && lockdown && lockdownWhitelist != null) {
-                for (String packageName : lockdownWhitelist) {
+            if (vpnPackage != null && lockdown && lockdownAllowlist != null) {
+                for (String packageName : lockdownAllowlist) {
                     if (!isPackageInstalledForUser(packageName, userId)) {
-                        Slog.w(LOG_TAG, "Non-existent package in VPN whitelist: " + packageName);
+                        Slog.w(LOG_TAG, "Non-existent package in VPN allowlist: " + packageName);
                         throw new ServiceSpecificException(
                                 DevicePolicyManager.ERROR_VPN_PACKAGE_NOT_FOUND, packageName);
                     }
@@ -7090,7 +7090,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             // If some package is uninstalled after the check above, it will be ignored by CM.
             if (!mInjector.getConnectivityManager().setAlwaysOnVpnPackageForUser(
-                    userId, vpnPackage, lockdown, lockdownWhitelist)) {
+                    userId, vpnPackage, lockdown, lockdownAllowlist)) {
                 throw new UnsupportedOperationException();
             }
             DevicePolicyEventLogger
@@ -7098,7 +7098,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .setAdmin(who)
                     .setStrings(vpnPackage)
                     .setBoolean(lockdown)
-                    .setInt(lockdownWhitelist != null ? lockdownWhitelist.size() : 0)
+                    .setInt(lockdownAllowlist != null ? lockdownAllowlist.size() : 0)
                     .write();
         });
         synchronized (getLockObject()) {
@@ -7151,7 +7151,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> getAlwaysOnVpnLockdownWhitelist(ComponentName admin)
+    public List<String> getAlwaysOnVpnLockdownAllowlist(ComponentName admin)
             throws SecurityException {
         enforceProfileOrDeviceOwner(admin);
 
@@ -11911,7 +11911,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return;
             }
 
-            if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)
+            if (!GLOBAL_SETTINGS_ALLOWLIST.contains(setting)
                     && !UserManager.isDeviceInDemoMode(mContext)) {
                 throw new SecurityException(String.format(
                         "Permission denial: device owners cannot update %1$s", setting));
@@ -11939,7 +11939,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            if (!SYSTEM_SETTINGS_WHITELIST.contains(setting)) {
+            if (!SYSTEM_SETTINGS_ALLOWLIST.contains(setting)) {
                 throw new SecurityException(String.format(
                         "Permission denial: device owners cannot update %1$s", setting));
             }
@@ -12083,12 +12083,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             if (isDeviceOwner(who, callingUserId)) {
-                if (!SECURE_SETTINGS_DEVICEOWNER_WHITELIST.contains(setting)
+                if (!SECURE_SETTINGS_DEVICEOWNER_ALLOWLIST.contains(setting)
                         && !isCurrentUserDemo()) {
                     throw new SecurityException(String.format(
                             "Permission denial: Device owners cannot update %1$s", setting));
                 }
-            } else if (!SECURE_SETTINGS_WHITELIST.contains(setting) && !isCurrentUserDemo()) {
+            } else if (!SECURE_SETTINGS_ALLOWLIST.contains(setting) && !isCurrentUserDemo()) {
                 throw new SecurityException(String.format(
                         "Permission denial: Profile owners cannot update %1$s", setting));
             }
@@ -13859,7 +13859,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void markProfileOwnerOnOrganizationOwnedDevice(ComponentName who, int userId) {
         // As the caller is the system, it must specify the component name of the profile owner
-        // as a sanity / safety check.
+        // as a safety check.
         Objects.requireNonNull(who);
 
         if (!mHasFeature) {
@@ -13895,7 +13895,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @GuardedBy("getLockObject()")
     private void markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(
             ComponentName who, int userId) {
-        // Sanity check: Make sure that the user has a profile owner and that the specified
+        // Make sure that the user has a profile owner and that the specified
         // component is the profile owner of that user.
         if (!isProfileOwner(who, userId)) {
             throw new IllegalArgumentException(String.format(
