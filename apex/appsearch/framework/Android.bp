@@ -21,60 +21,17 @@ filegroup {
     path: "java",
 }
 
-java_library {
+java_sdk_library {
     name: "framework-appsearch",
-    installable: true,
+    srcs: [ ":framework-appsearch-sources" ],
     sdk_version: "core_platform", // TODO(b/146218515) should be module_current
-    srcs: [":framework-appsearch-sources"],
-    hostdex: true, // for hiddenapi check
-    libs: [
-        "framework-minus-apex",  // TODO(b/146218515) should be removed
-    ],
+    impl_only_libs: ["framework-minus-apex"], // TODO(b/146218515) should be removed
     static_libs: ["icing-java-proto-lite"],
-    visibility: [
-        // TODO(b/146218515) remove this when framework is built with the stub of appsearch
-        "//frameworks/base",
-        "//frameworks/base/apex/appsearch:__subpackages__",
-    ],
-    jarjar_rules: "jarjar-rules.txt",
+    defaults: ["framework-module-defaults"],
     permitted_packages: ["android.app.appsearch"],
+    jarjar_rules: "jarjar-rules.txt",
+    aidl: {
+        include_dirs: ["frameworks/base/core/java"], // TODO(b/146218515) should be removed
+    },
     apex_available: ["com.android.appsearch"],
-}
-
-metalava_appsearch_docs_args =
-    "--hide-package com.android.server " +
-    "--error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide MissingPermission " +
-    "--hide BroadcastBehavior " +
-    "--hide HiddenSuperclass " +
-    "--hide DeprecationMismatch " +
-    "--hide UnavailableSymbol " +
-    "--hide SdkConstant " +
-    "--hide HiddenTypeParameter " +
-    "--hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant " +
-    "--show-annotation android.annotation.SystemApi "
-
-droidstubs {
-    name: "framework-appsearch-stubs-srcs",
-    srcs: [":framework-appsearch-sources"],
-    libs: ["framework-annotations-lib"],
-    aidl: {
-        include_dirs: ["frameworks/base/core/java"],
-    },
-    args: metalava_appsearch_docs_args,
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "framework-appsearch-stubs",
-    srcs: [":framework-appsearch-stubs-srcs"],
-    aidl: {
-        export_include_dirs: [
-            "java",
-        ],
-    },
-    sdk_version: "module_current",
-    installable: false,
 }
