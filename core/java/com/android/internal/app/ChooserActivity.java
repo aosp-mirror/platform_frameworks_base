@@ -1655,18 +1655,24 @@ public class ChooserActivity extends ResolverActivity implements
     private void showTargetDetails(DisplayResolveInfo ti) {
         if (ti == null) return;
 
-        List<DisplayResolveInfo> targetList;
+        ArrayList<DisplayResolveInfo> targetList;
 
         // For multiple targets, include info on all targets
         if (ti instanceof MultiDisplayResolveInfo) {
             MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) ti;
             targetList = mti.getTargets();
         } else {
-            targetList = Collections.singletonList(ti);
+            targetList = new ArrayList<DisplayResolveInfo>();
+            targetList.add(ti);
         }
 
-        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment(
-                targetList, mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
+        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment();
+        Bundle b = new Bundle();
+        b.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
+                mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
+        b.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
+                targetList);
+        f.setArguments(b);
 
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
@@ -1725,9 +1731,14 @@ public class ChooserActivity extends ResolverActivity implements
         if (targetInfo instanceof MultiDisplayResolveInfo) {
             MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
             if (!mti.hasSelected()) {
-                ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment(
-                        mti, which,
+                ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment();
+                Bundle b = new Bundle();
+                b.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
                         mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
+                b.putObject(ChooserStackedAppDialogFragment.MULTI_DRI_KEY,
+                        mti);
+                b.putInt(ChooserStackedAppDialogFragment.WHICH_KEY, which);
+                f.setArguments(b);
 
                 f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
                 return;
