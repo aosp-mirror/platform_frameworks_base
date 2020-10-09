@@ -709,6 +709,8 @@ public class StagingManager {
     }
 
     void commitSession(@NonNull PackageInstallerSession session) {
+        // Store this parent session which will be used to check overlapping later
+        createSession(session);
         mPreRebootVerificationHandler.startPreRebootVerification(session);
     }
 
@@ -738,14 +740,16 @@ public class StagingManager {
      * </ul>
      * @throws PackageManagerException if session fails the check
      */
-    void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
+    private void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
             throws PackageManagerException {
         if (session.isMultiPackage()) {
             // We cannot say a parent session overlaps until we process its children
             return;
         }
-        if (session.getPackageName() == null) {
-            throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
+
+        String packageName = session.getPackageName();
+        if (packageName == null) {
+            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Cannot stage session " + session.sessionId + " with package name null");
         }
 
@@ -757,40 +761,26 @@ public class StagingManager {
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
-                if (!stagedSession.isCommitted() || stagedSession.isStagedAndInTerminalState()
+                if (stagedSession.hasParentSessionId() || !stagedSession.isCommitted()
+                        || stagedSession.isStagedAndInTerminalState()
                         || stagedSession.isDestroyed()) {
                     continue;
                 }
-                if (stagedSession.isMultiPackage()) {
-                    // This active parent staged session is useless as it doesn't have a package
-                    // name and the session we are checking is not a parent session either.
-                    continue;
-                }
-                // Check if stagedSession has an active parent session or not
-                if (stagedSession.hasParentSessionId()) {
-                    final int parentId = stagedSession.getParentSessionId();
-                    final PackageInstallerSession parentSession = mStagedSessions.get(parentId);
-                    if (parentSession == null || parentSession.isStagedAndInTerminalState()
-                            || parentSession.isDestroyed()) {
-                        // Parent session has been abandoned or terminated already
-                        continue;
-                    }
-                }
 
-                // From here on, stagedSession is a non-parent active staged session
+                // From here on, stagedSession is a parent active staged session
 
                 // Check if session is one of the active sessions
-                if (session.sessionId == stagedSession.sessionId) {
+                if (getSessionIdForParentOrSelf(session) == stagedSession.sessionId) {
                     Slog.w(TAG, "Session " + session.sessionId + " is already staged");
                     continue;
                 }
 
                 // New session cannot have same package name as one of the active sessions
-                if (session.getPackageName().equals(stagedSession.getPackageName())) {
+                if (stagedSession.sessionContains(s -> s.getPackageName().equals(packageName))) {
                     if (isRollback) {
                         // If the new session is a rollback, then it gets priority. The existing
                         // session is failed to unblock rollback.
-                        final PackageInstallerSession root = getParentSessionOrSelf(stagedSession);
+                        final PackageInstallerSession root = stagedSession;
                         if (!ensureActiveApexSessionIsAborted(root)) {
                             Slog.e(TAG, "Failed to abort apex session " + root.sessionId);
                             // Safe to ignore active apex session abort failure since session
@@ -804,7 +794,7 @@ public class StagingManager {
                                 + "blocking rollback session: " + session.sessionId);
                     } else {
                         throw new PackageManagerException(
-                                PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                                 "Package: " + session.getPackageName() + " in session: "
                                         + session.sessionId + " has been staged already by session:"
                                         + " " + stagedSession.sessionId, null);
@@ -814,17 +804,16 @@ public class StagingManager {
                 // Staging multiple root sessions is not allowed if device doesn't support
                 // checkpoint. If session and stagedSession do not have common ancestor, they are
                 // from two different root sessions.
-                if (!supportsCheckpoint && getSessionIdForParentOrSelf(session)
-                        != getSessionIdForParentOrSelf(stagedSession)) {
+                if (!supportsCheckpoint) {
                     throw new PackageManagerException(
-                            PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "Cannot stage multiple sessions without checkpoint support", null);
                 }
             }
         }
     }
 
-    void createSession(@NonNull PackageInstallerSession sessionInfo) {
+    private void createSession(@NonNull PackageInstallerSession sessionInfo) {
         synchronized (mStagedSessions) {
             mStagedSessions.append(sessionInfo.sessionId, sessionInfo);
         }
@@ -900,16 +889,15 @@ public class StagingManager {
     }
 
     void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
-        PackageInstallerSession sessionToResume = session;
-        synchronized (mStagedSessions) {
-            mStagedSessions.append(session.sessionId, session);
-            if (session.hasParentSessionId()) {
-                // Only parent sessions can be restored
-                return;
-            }
+        if (session.hasParentSessionId()) {
+            // Only parent sessions can be restored
+            return;
         }
+        // Store this parent session which will be used to check overlapping later
+        createSession(session);
         // The preconditions used during pre-reboot verification might have changed when device
         // is upgrading. Updated staged sessions to activation failed before we resume the session.
+        PackageInstallerSession sessionToResume = session;
         if (isDeviceUpgrading && !sessionToResume.isStagedAndInTerminalState()) {
             sessionToResume.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "Build fingerprint has changed");
@@ -1160,6 +1148,19 @@ public class StagingManager {
          * See {@link PreRebootVerificationHandler} to see all nodes of pre reboot verification
          */
         private void handlePreRebootVerification_Start(@NonNull PackageInstallerSession session) {
+            try {
+                if (session.isMultiPackage()) {
+                    for (PackageInstallerSession s : session.getChildSessions()) {
+                        checkNonOverlappingWithStagedSessions(s);
+                    }
+                } else {
+                    checkNonOverlappingWithStagedSessions(session);
+                }
+            } catch (PackageManagerException e) {
+                onPreRebootVerificationFailure(session, e.error, e.getMessage());
+                return;
+            }
+
             int rollbackId = -1;
             if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
                 // If rollback is enabled for this session, we call through to the RollbackManager
