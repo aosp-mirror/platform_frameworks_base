@@ -23,8 +23,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ScrollCaptureCallback;
 import android.view.ScrollCaptureSession;
 import android.view.Surface;
@@ -46,7 +46,11 @@ import java.util.function.Consumer;
  */
 public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCallback {
 
+    public static final long NO_FRAME_PRODUCED = -1;
+
     private static final String TAG = "ScrollCaptureViewSupport";
+
+    private static final boolean WAIT_FOR_ANIMATION = true;
 
     private final WeakReference<V> mWeakView;
     private final ScrollCaptureViewHelper<V> mViewHelper;
@@ -99,12 +103,16 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         V view = mWeakView.get();
         if (view == null || !view.isVisibleToUser()) {
             // Signal to the controller that we have a problem and can't continue.
-            session.notifyBufferSent(0, null);
+            session.notifyBufferSent(NO_FRAME_PRODUCED, new Rect());
             return;
         }
         // Ask the view to scroll as needed to bring this area into view.
         ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
                 requestRect);
+        if (scrollResult.availableArea.isEmpty()) {
+            session.notifyBufferSent(NO_FRAME_PRODUCED, scrollResult.availableArea);
+            return;
+        }
         view.invalidate(); // don't wait for vsync
 
         // For image capture, shift back by scrollDelta to arrive at the location within the view
@@ -112,8 +120,19 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         Rect viewCaptureArea = new Rect(scrollResult.availableArea);
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
-        mRenderer.renderView(view, viewCaptureArea, mUiHandler,
-                (frameNumber) -> session.notifyBufferSent(frameNumber, scrollResult.availableArea));
+        if (WAIT_FOR_ANIMATION) {
+            Log.d(TAG, "render: delaying until animation");
+            view.postOnAnimation(() ->  {
+                Log.d(TAG, "postOnAnimation(): rendering now");
+                long resultFrame = mRenderer.renderView(view, viewCaptureArea);
+                Log.d(TAG, "notifyBufferSent: " + scrollResult.availableArea);
+
+                session.notifyBufferSent(resultFrame, new Rect(scrollResult.availableArea));
+            });
+        } else {
+            long resultFrame = mRenderer.renderView(view, viewCaptureArea);
+            session.notifyBufferSent(resultFrame, new Rect(scrollResult.availableArea));
+        }
     }
 
     @Override
@@ -132,8 +151,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
 
     /**
      * Internal helper class which assists in rendering sections of the view hierarchy relative to a
-     * given view. Used by framework implementations of ScrollCaptureHandler to render and dispatch
-     * image requests.
+     * given view.
      */
     static final class ViewRenderer {
         // alpha, "reasonable default" from Javadoc
@@ -157,14 +175,11 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         private final Matrix mTempMatrix = new Matrix();
         private final int[] mTempLocation = new int[2];
         private long mLastRenderedSourceDrawingId = -1;
-
-
-        public interface FrameCompleteListener {
-            void onFrameComplete(long frameNumber);
-        }
+        private Surface mSurface;
 
         ViewRenderer() {
             mRenderer = new HardwareRenderer();
+            mRenderer.setName("ScrollCapture");
             mCaptureRenderNode = new RenderNode("ScrollCaptureRoot");
             mRenderer.setContentRoot(mCaptureRenderNode);
 
@@ -173,6 +188,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         }
 
         public void setSurface(Surface surface) {
+            mSurface = surface;
             mRenderer.setSurface(surface);
         }
 
@@ -223,20 +239,38 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mCaptureRenderNode.endRecording();
         }
 
-        public void renderView(View view, Rect sourceRect, Handler handler,
-                FrameCompleteListener frameListener) {
+        public long renderView(View view, Rect sourceRect) {
             if (updateForView(view)) {
                 setupLighting(view);
             }
             view.invalidate();
             updateRootNode(view, sourceRect);
             HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
-            request.setVsyncTime(SystemClock.elapsedRealtimeNanos());
-            // private API b/c request.setFrameCommitCallback does not provide access to frameNumber
-            mRenderer.setFrameCompleteCallback(
-                    frameNr -> handler.post(() -> frameListener.onFrameComplete(frameNr)));
+            long timestamp = System.nanoTime();
+            request.setVsyncTime(timestamp);
+
+            // Would be nice to access nextFrameNumber from HwR without having to hold on to Surface
+            final long frameNumber = mSurface.getNextFrameNumber();
+
+            // Block until a frame is presented to the Surface
             request.setWaitForPresent(true);
-            request.syncAndDraw();
+
+            switch (request.syncAndDraw()) {
+                case HardwareRenderer.SYNC_OK:
+                case HardwareRenderer.SYNC_REDRAW_REQUESTED:
+                    return frameNumber;
+
+                case HardwareRenderer.SYNC_FRAME_DROPPED:
+                    Log.e(TAG, "syncAndDraw(): SYNC_FRAME_DROPPED !");
+                    break;
+                case HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND:
+                    Log.e(TAG, "syncAndDraw(): SYNC_LOST_SURFACE !");
+                    break;
+                case HardwareRenderer.SYNC_CONTEXT_IS_STOPPED:
+                    Log.e(TAG, "syncAndDraw(): SYNC_CONTEXT_IS_STOPPED !");
+                    break;
+            }
+            return NO_FRAME_PRODUCED;
         }
 
         public void trimMemory() {
@@ -244,6 +278,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         }
 
         public void destroy() {
+            mSurface = null;
             mRenderer.destroy();
         }
 
@@ -254,6 +289,5 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mTempMatrix.mapRect(mTempRectF);
             mTempRectF.round(outRect);
         }
-
     }
 }

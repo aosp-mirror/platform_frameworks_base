@@ -17,7 +17,6 @@
 package com.android.internal.view;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.view.View;
 
@@ -62,8 +61,8 @@ interface ScrollCaptureViewHelper<V extends View> {
      * @param view the view being captured
      * @return true if the callback should respond to a request with scroll bounds
      */
-    default boolean onAcceptSession(@Nullable V view) {
-        return view != null && view.isVisibleToUser()
+    default boolean onAcceptSession(@NonNull V view) {
+        return view.isVisibleToUser()
                 && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
     }
 
@@ -73,7 +72,7 @@ interface ScrollCaptureViewHelper<V extends View> {
      *
      * @param view the view being captured
      */
-    default Rect onComputeScrollBounds(@Nullable V view) {
+    @NonNull default Rect onComputeScrollBounds(@NonNull V view) {
         return new Rect(view.getPaddingLeft(), view.getPaddingTop(),
                 view.getWidth() - view.getPaddingRight(),
                 view.getHeight() - view.getPaddingBottom());
@@ -88,7 +87,7 @@ interface ScrollCaptureViewHelper<V extends View> {
      * @param view         the view being captured
      * @param scrollBounds the bounds within {@code view} where content scrolls
      */
-    void onPrepareForStart(@NonNull V view, Rect scrollBounds);
+    void onPrepareForStart(@NonNull V view, @NonNull Rect scrollBounds);
 
     /**
      * Map the request onto the screen.
@@ -105,7 +104,9 @@ interface ScrollCaptureViewHelper<V extends View> {
      *                     content to capture for the request
      * @return the result of the request as a {@link ScrollResult}
      */
-    ScrollResult onScrollRequested(@NonNull V view, Rect scrollBounds, Rect requestRect);
+    @NonNull
+    ScrollResult onScrollRequested(@NonNull V view, @NonNull Rect scrollBounds,
+            @NonNull Rect requestRect);
 
     /**
      * Restore the target after capture.
