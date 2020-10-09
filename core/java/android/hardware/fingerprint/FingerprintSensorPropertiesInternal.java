@@ -85,4 +85,9 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
                 return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return "ID: " + sensorId + ", Strength: " + sensorStrength + ", Type: " + sensorType;
+    }
 }

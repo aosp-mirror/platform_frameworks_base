@@ -73,7 +73,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
         T getDaemon();
     }
 
-    private final int mSequentialId;
+    protected final int mSequentialId;
     @NonNull private final Context mContext;
     @NonNull protected final LazyDaemon<T> mLazyDaemon;
     private final int mTargetUserId;

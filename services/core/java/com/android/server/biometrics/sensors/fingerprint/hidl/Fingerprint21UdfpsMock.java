@@ -461,7 +461,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onFingerDown(int sensorId, int x, int y, float minor, float major) {
+    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerDown");
             final AuthenticationConsumer lastAuthenticatedConsumer =
@@ -508,7 +508,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onFingerUp(int sensorId) {
+    public void onPointerUp(int sensorId) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerUp");
 
