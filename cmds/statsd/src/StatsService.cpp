@@ -484,7 +484,8 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  Clear cached puller data.\n");
     dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats print-logs\n");
-    dprintf(out, "      Only works on eng build\n");
+    dprintf(out, "  Requires root privileges.\n");
+    dprintf(out, "  Can be disabled by calling adb shell cmd stats print-logs 0\n");
 }
 
 status_t StatsService::cmd_trigger_broadcast(int out, Vector<String8>& args) {
@@ -865,18 +866,19 @@ status_t StatsService::cmd_clear_puller_cache(int out) {
 }
 
 status_t StatsService::cmd_print_logs(int out, const Vector<String8>& args) {
-    VLOG("StatsService::cmd_print_logs with Pid %i, Uid %i", AIBinder_getCallingPid(),
-         AIBinder_getCallingUid());
-    if (checkPermission(kPermissionDump)) {
-        bool enabled = true;
-        if (args.size() >= 2) {
-            enabled = atoi(args[1].c_str()) != 0;
-        }
-        mProcessor->setPrintLogs(enabled);
-        return NO_ERROR;
-    } else {
+    Status status = checkUid(AID_ROOT);
+    if (!status.isOk()) {
         return PERMISSION_DENIED;
     }
+
+    VLOG("StatsService::cmd_print_logs with pid %i, uid %i", AIBinder_getCallingPid(),
+         AIBinder_getCallingUid());
+    bool enabled = true;
+    if (args.size() >= 2) {
+        enabled = atoi(args[1].c_str()) != 0;
+    }
+    mProcessor->setPrintLogs(enabled);
+    return NO_ERROR;
 }
 
 bool StatsService::getUidFromArgs(const Vector<String8>& args, size_t uidArgIndex, int32_t& uid) {
