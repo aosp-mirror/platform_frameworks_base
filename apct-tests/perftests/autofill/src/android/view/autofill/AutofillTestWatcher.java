@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.Timeout;
+
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
@@ -50,6 +52,7 @@ final class AutofillTestWatcher extends TestWatcher {
         final String testName = description.getDisplayName();
         Log.i(TAG, "Starting " + testName);
 
+        prepareDevice();
         enableVerboseLog();
         // Prepare the service before each test.
         // Disable the current AutofillService.
@@ -81,10 +84,21 @@ final class AutofillTestWatcher extends TestWatcher {
      * Uses the {@code settings} binary to set the autofill service.
      */
     void setAutofillService() {
+        String serviceName = MyAutofillService.COMPONENT_NAME;
         SettingsHelper.syncSet(InstrumentationRegistry.getTargetContext(),
                 SettingsHelper.NAMESPACE_SECURE,
                 Settings.Secure.AUTOFILL_SERVICE,
-                MyAutofillService.COMPONENT_NAME);
+                serviceName);
+        // Waits until the service is actually enabled.
+        Timeout timeout = new Timeout("CONNECTION_TIMEOUT", GENERIC_TIMEOUT_MS, 2F,
+                GENERIC_TIMEOUT_MS);
+        try {
+            timeout.run("Enabling Autofill service", () -> {
+                return isAutofillServiceEnabled(serviceName) ? serviceName : null;
+            });
+        } catch (Exception e) {
+            throw new AssertionError("Enabling Autofill service failed.");
+        }
     }
 
     /**
@@ -94,6 +108,26 @@ final class AutofillTestWatcher extends TestWatcher {
         SettingsHelper.syncDelete(InstrumentationRegistry.getTargetContext(),
                 SettingsHelper.NAMESPACE_SECURE,
                 Settings.Secure.AUTOFILL_SERVICE);
+    }
+
+    /**
+     * Checks whether the given service is set as the autofill service for the default user.
+     */
+    private boolean isAutofillServiceEnabled(String serviceName) {
+        String actualName = SettingsHelper.get(SettingsHelper.NAMESPACE_SECURE,
+                Settings.Secure.AUTOFILL_SERVICE);
+        return serviceName.equals(actualName);
+    }
+
+    private void prepareDevice() {
+        // Unlock screen.
+        runShellCommand("input keyevent KEYCODE_WAKEUP");
+
+        // Dismiss keyguard, in case it's set as "Swipe to unlock".
+        runShellCommand("wm dismiss-keyguard");
+
+        // Collapse notifications.
+        runShellCommand("cmd statusbar collapse");
     }
 
     private void enableMyAutofillService() {

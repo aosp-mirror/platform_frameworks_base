@@ -2540,8 +2540,8 @@ public final class ProcessList {
                 app.hostingRecord.getName() != null ? app.hostingRecord.getName() : "");
 
         try {
-            AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
-                    app.seInfo, app.info.sourceDir, pid);
+            AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.info.packageName,
+                    app.processName, app.uid, app.seInfo, app.info.sourceDir, pid);
         } catch (RemoteException ex) {
             // Ignore
         }
@@ -3561,7 +3561,7 @@ public final class ProcessList {
             int clientTargetSdk) {
         outInfo.pid = app.pid;
         outInfo.uid = app.info.uid;
-        if (mService.mAtmInternal.isHeavyWeightProcess(app.getWindowProcessController())) {
+        if (app.getWindowProcessController().isHeavyWeightProcess()) {
             outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
         }
         if (app.isPersistent()) {

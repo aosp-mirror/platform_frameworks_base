@@ -280,6 +280,10 @@ public class InputMethodMenuController {
         return mSwitchingDialog;
     }
 
+    boolean getShowImeWithHardKeyboard() {
+        return mShowImeWithHardKeyboard;
+    }
+
     boolean isisInputMethodPickerShownForTestLocked() {
         if (mSwitchingDialog == null) {
             return false;

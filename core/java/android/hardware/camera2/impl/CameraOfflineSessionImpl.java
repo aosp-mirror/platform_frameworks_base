@@ -147,7 +147,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                     case CameraDeviceCallbacks.ERROR_CAMERA_BUFFER:
                         onCaptureErrorLocked(errorCode, resultExtras);
                         break;
-                    default:
+                    default: {
                         Runnable errorDispatch = new Runnable() {
                             @Override
                             public void run() {
@@ -164,6 +164,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
+                    }
                 }
             }
         }

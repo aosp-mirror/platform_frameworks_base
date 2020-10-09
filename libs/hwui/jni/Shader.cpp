@@ -211,14 +211,26 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlong matrixPtr,
-        jbyteArray inputs, jlong colorSpaceHandle, jboolean isOpaque) {
+        jbyteArray inputs, jlongArray inputShaders, jlong colorSpaceHandle, jboolean isOpaque) {
     SkRuntimeEffect* effect = reinterpret_cast<SkRuntimeEffect*>(shaderFactory);
     AutoJavaByteArray arInputs(env, inputs);
+
+    std::vector<sk_sp<SkShader>> shaderVector;
+    if (inputShaders) {
+        jsize shaderCount = env->GetArrayLength(inputShaders);
+        shaderVector.resize(shaderCount);
+        jlong* arrayPtr = env->GetLongArrayElements(inputShaders, NULL);
+        for (int i = 0; i < shaderCount; i++) {
+            shaderVector[i] = sk_ref_sp(reinterpret_cast<SkShader*>(arrayPtr[i]));
+        }
+        env->ReleaseLongArrayElements(inputShaders, arrayPtr, 0);
+    }
 
     sk_sp<SkData> fData;
     fData = SkData::MakeWithCopy(arInputs.ptr(), arInputs.length());
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
-    sk_sp<SkShader> shader = effect->makeShader(fData, nullptr, 0, matrix, isOpaque == JNI_TRUE);
+    sk_sp<SkShader> shader = effect->makeShader(fData, shaderVector.data(), shaderVector.size(),
+                                                matrix, isOpaque == JNI_TRUE);
     ThrowIAE_IfNull(env, shader);
 
     return reinterpret_cast<jlong>(shader.release());
@@ -280,7 +292,7 @@ static const JNINativeMethod gComposeShaderMethods[] = {
 
 static const JNINativeMethod gRuntimeShaderMethods[] = {
     { "nativeGetFinalizer",   "()J",    (void*)RuntimeShader_getNativeFinalizer },
-    { "nativeCreate",     "(JJ[BJZ)J",  (void*)RuntimeShader_create     },
+    { "nativeCreate",     "(JJ[B[JJZ)J",  (void*)RuntimeShader_create     },
     { "nativeCreateShaderFactory",     "(Ljava/lang/String;)J",
       (void*)RuntimeShader_createShaderFactory     },
 };

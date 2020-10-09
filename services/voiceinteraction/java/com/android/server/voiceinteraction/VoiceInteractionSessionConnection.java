@@ -309,7 +309,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         if (!"content".equals(uri.getScheme())) {
             return;
         }
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException for us.
             mUgmInternal.checkGrantUriPermission(srcUid, null,

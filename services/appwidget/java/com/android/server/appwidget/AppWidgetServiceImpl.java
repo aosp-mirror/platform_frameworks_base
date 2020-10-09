@@ -630,8 +630,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         final long identity = Binder.clearCallingIdentity();
         try {
             if (provider.maskedBySuspendedPackage) {
-                UserInfo userInfo = mUserManager.getUserInfo(providerUserId);
-                showBadge = userInfo.isManagedProfile();
+                showBadge = mUserManager.hasBadge(providerUserId);
                 final String suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
                         providerPackage, providerUserId);
                 if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
@@ -2408,7 +2407,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
             intent.setComponent(provider.info.provider);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 provider.broadcast = PendingIntent.getBroadcastAsUser(mContext, 1, intent,
                         PendingIntent.FLAG_UPDATE_CURRENT, provider.info.getProfile());
@@ -3616,10 +3615,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private boolean isProfileWithLockedParent(int userId) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             UserInfo userInfo = mUserManager.getUserInfo(userId);
-            if (userInfo != null && userInfo.isManagedProfile()) {
+            if (userInfo != null && userInfo.isProfile()) {
                 UserInfo parentInfo = mUserManager.getProfileParent(userId);
                 if (parentInfo != null
                         && !isUserRunningAndUnlocked(parentInfo.getUserHandle().getIdentifier())) {
@@ -3634,7 +3633,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private boolean isProfileWithUnlockedParent(int userId) {
         UserInfo userInfo = mUserManager.getUserInfo(userId);
-        if (userInfo != null && userInfo.isManagedProfile()) {
+        if (userInfo != null && userInfo.isProfile()) {
             UserInfo parentInfo = mUserManager.getProfileParent(userId);
             if (parentInfo != null
                     && mUserManager.isUserUnlockingOrUnlocked(parentInfo.getUserHandle())) {

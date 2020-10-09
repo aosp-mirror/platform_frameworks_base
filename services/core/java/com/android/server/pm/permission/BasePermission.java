@@ -433,18 +433,6 @@ public final class BasePermission {
         throw new SecurityException("No permission tree found for " + permName);
     }
 
-    public void enforceDeclaredUsedAndRuntimeOrDevelopment(AndroidPackage pkg,
-            UidPermissionState uidState) {
-        if (!uidState.hasPermissionState(name) && !pkg.getRequestedPermissions().contains(name)) {
-            throw new SecurityException("Package " + pkg.getPackageName()
-                    + " has not requested permission " + name);
-        }
-        if (!isRuntime() && !isDevelopment()) {
-            throw new SecurityException("Permission " + name + " requested by "
-                    + pkg.getPackageName() + " is not a changeable permission type");
-        }
-    }
-
     private static BasePermission findPermissionTree(
             Collection<BasePermission> permissionTrees, String permName) {
         for (BasePermission bp : permissionTrees) {

@@ -28,6 +28,9 @@ import android.view.SurfaceControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public class LogicalDisplayTest {
     private static final int DISPLAY_ID = 0;
     private static final int LAYER_STACK = 0;
@@ -50,13 +53,21 @@ public class LogicalDisplayTest {
         when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(displayDeviceInfo);
 
         DisplayDeviceRepository repo = new DisplayDeviceRepository(
-                new DisplayManagerService.SyncRoot(), new DisplayDeviceRepository.Listener() {
+                new DisplayManagerService.SyncRoot(),
+                new PersistentDataStore(new PersistentDataStore.Injector() {
                     @Override
-                    public void onDisplayDeviceEventLocked(DisplayDevice device, int event) {}
+                    public InputStream openRead() {
+                        return null;
+                    }
 
                     @Override
-                    public void onTraversalRequested() {}
-                });
+                    public OutputStream startWrite() {
+                        return null;
+                    }
+
+                    @Override
+                    public void finishWrite(OutputStream os, boolean success) {}
+                }));
         repo.onDisplayDeviceEvent(mDisplayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
         mLogicalDisplay.updateLocked(repo);
     }

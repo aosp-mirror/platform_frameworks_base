@@ -312,10 +312,6 @@ public final class WMShell extends SystemUI
 
     @VisibleForTesting
     void initOneHanded(OneHanded oneHanded) {
-        if (!oneHanded.hasOneHandedFeature()) {
-            return;
-        }
-
         int currentMode = mNavigationModeController.addListener(mode ->
                 oneHanded.setThreeButtonModeEnabled(mode == NAV_BAR_MODE_3BUTTON));
         oneHanded.setThreeButtonModeEnabled(currentMode == NAV_BAR_MODE_3BUTTON);
@@ -423,8 +419,8 @@ public final class WMShell extends SystemUI
         if (handleLoggingCommand(args, pw)) {
             return;
         }
-
         // Dump WMShell stuff here if no commands were handled
+        mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));
     }
 
     @Override

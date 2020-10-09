@@ -3,7 +3,10 @@ package com.android.codegen
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
-import com.github.javaparser.ast.expr.*
+import com.github.javaparser.ast.expr.AnnotationExpr
+import com.github.javaparser.ast.expr.ArrayInitializerExpr
+import com.github.javaparser.ast.expr.LiteralExpr
+import com.github.javaparser.ast.expr.UnaryExpr
 import java.io.File
 
 
@@ -703,7 +706,7 @@ fun ClassPrinter.generateSetters() {
 
             generateFieldJavadoc(forceHide = FeatureFlag.SETTERS.hidden)
             +GENERATED_MEMBER_HEADER
-            "public $ClassType set$NameUpperCamel($annotatedTypeForSetterParam value)" {
+            "public @$NonNull $ClassType set$NameUpperCamel($annotatedTypeForSetterParam value)" {
                 generateSetFrom("value")
                 +"return this;"
             }

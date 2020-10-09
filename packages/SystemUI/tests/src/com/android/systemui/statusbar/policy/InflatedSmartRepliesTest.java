@@ -67,16 +67,20 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
     private static final Intent WHITELISTED_TEST_INTENT =
             new Intent("com.android.WHITELISTED_TEST_ACTION");
 
-    @Mock SmartReplyConstants mSmartReplyConstants;
-    @Mock Notification mNotification;
-    NotificationEntry mEntry;
-    @Mock RemoteInput mRemoteInput;
-    @Mock RemoteInput mFreeFormRemoteInput;
-    @Mock ActivityManagerWrapper mActivityManagerWrapper;
-    @Mock PackageManagerWrapper mPackageManagerWrapper;
-    @Mock DevicePolicyManagerWrapper mDevicePolicyManagerWrapper;
+    @Mock private SmartReplyConstants mSmartReplyConstants;
+    @Mock private Notification mNotification;
+    @Mock private RemoteInput mRemoteInput;
+    @Mock private RemoteInput mFreeFormRemoteInput;
+    @Mock private ActivityManagerWrapper mActivityManagerWrapper;
+    @Mock private PackageManagerWrapper mPackageManagerWrapper;
+    @Mock private DevicePolicyManagerWrapper mDevicePolicyManagerWrapper;
+    @Mock private SmartRepliesAndActions mSmartRepliesAndActions;
+    @Mock private SmartReplyInflater mSmartReplyInflater;
+    @Mock private SmartActionInflater mSmartActionInflater;
 
     private Icon mActionIcon;
+    private NotificationEntry mEntry;
+    private SmartRepliesAndActionsInflaterImpl mSmartRepliesInflater;
 
     @Before
     @UiThreadTest
@@ -96,6 +100,14 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
 
         when(mActivityManagerWrapper.isLockTaskKioskModeActive()).thenReturn(false);
+
+        mSmartRepliesInflater = new SmartRepliesAndActionsInflaterImpl(
+                mSmartReplyConstants,
+                mActivityManagerWrapper,
+                mPackageManagerWrapper,
+                mDevicePolicyManagerWrapper,
+                mSmartReplyInflater,
+                mSmartActionInflater);
     }
 
     @Test
@@ -107,7 +119,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         when(mSmartReplyConstants.isEnabled()).thenReturn(false);
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies).isNull();
         assertThat(repliesAndActions.smartActions).isNull();
@@ -123,7 +135,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         when(mSmartReplyConstants.isEnabled()).thenReturn(false);
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies).isNull();
         assertThat(repliesAndActions.smartActions).isNull();
@@ -135,7 +147,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         setupAppGeneratedReplies(smartReplies);
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(Arrays.asList(smartReplies));
         assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
@@ -150,7 +162,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         setupAppGeneratedSuggestions(smartReplies, smartActions);
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(Arrays.asList(smartReplies));
         assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
@@ -169,7 +181,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .build();
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
                 mEntry.getSmartReplies());
@@ -187,7 +199,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
                 .build();
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies).isNull();
         assertThat(repliesAndActions.smartActions).isNull();
@@ -202,8 +214,9 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         modifyRanking(mEntry)
                 .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
                 .build();
+
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies).isNull();
         assertThat(repliesAndActions.smartActions.actions)
@@ -226,7 +239,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .build();
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices)
                 .isEqualTo(Arrays.asList(appGenSmartReplies));
@@ -248,7 +261,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .build();
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartActions).isNull();
         assertThat(repliesAndActions.smartReplies).isNull();
@@ -270,7 +283,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .build();
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
                 mEntry.getSmartReplies());
@@ -306,7 +319,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .build();
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         // Only the action for the whitelisted package should be allowed.
         assertThat(repliesAndActions.smartActions.actions.size()).isEqualTo(1);
@@ -329,7 +342,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .build();
 
         SmartRepliesAndActions repliesAndActions =
-                InflatedSmartReplies.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
         // We don't restrict replies or actions in screen pinning mode.
         assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
@@ -356,8 +369,10 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
                 new SmartActions(rightActions, false /* fromAssistant */));
 
-        assertThat(InflatedSmartReplies.areSuggestionsSimilar(
-                leftRepliesAndActions, rightRepliesAndActions)).isTrue();
+        assertThat(
+                SmartRepliesAndActionsInflaterKt
+                        .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
+                .isTrue();
     }
 
     @Test
@@ -378,7 +393,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
                 new SmartActions(rightActions, false /* fromAssistant */));
 
-        assertThat(InflatedSmartReplies.areSuggestionsSimilar(
+        assertThat(SmartRepliesAndActionsInflaterKt.areSuggestionsSimilar(
                 leftRepliesAndActions, rightRepliesAndActions)).isFalse();
     }
 
@@ -400,7 +415,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
                 new SmartActions(rightActions, false /* fromAssistant */));
 
-        assertThat(InflatedSmartReplies.areSuggestionsSimilar(
+        assertThat(SmartRepliesAndActionsInflaterKt.areSuggestionsSimilar(
                 leftRepliesAndActions, rightRepliesAndActions)).isFalse();
     }
 

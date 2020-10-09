@@ -1124,7 +1124,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         boolean storageManagerIsNonDefaultBlockEncrypted() {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return StorageManager.isNonDefaultBlockEncrypted();
             } finally {
@@ -1148,10 +1148,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return mContext.getSystemService(WifiManager.class);
         }
 
+        @SuppressWarnings("AndroidFrameworkBinderIdentity")
         long binderClearCallingIdentity() {
             return Binder.clearCallingIdentity();
         }
 
+        @SuppressWarnings("AndroidFrameworkBinderIdentity")
         void binderRestoreCallingIdentity(long token) {
             Binder.restoreCallingIdentity(token);
         }

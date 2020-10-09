@@ -379,8 +379,7 @@ interface IPackageManager {
     /**
      * Logs process start information (including APK hash) to the security log.
      */
-    void logAppProcessStartIfNeeded(String processName, int uid, String seinfo, String apkFile,
-            int pid);
+    void logAppProcessStartIfNeeded(String packageName, String processName, int uid, String seinfo, String apkFile, int pid);
 
     /**
      * As per {@link android.content.pm.PackageManager#flushPackageRestrictionsAsUser}.

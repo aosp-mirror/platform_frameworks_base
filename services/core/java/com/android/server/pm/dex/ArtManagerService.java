@@ -501,7 +501,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             }
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                     ") to " + outDexFile);
-            long callingId = Binder.clearCallingIdentity();
+            final long callingId = Binder.clearCallingIdentity();
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,

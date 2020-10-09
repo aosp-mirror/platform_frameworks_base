@@ -2627,6 +2627,25 @@ public class WifiConfiguration implements Parcelable {
         return key;
     }
 
+    /**
+     * Get a key for this WifiConfig to generate Persist random Mac Address.
+     * @hide
+     */
+    public String getMacRandomKey() {
+        // Passpoint ephemeral networks have their unique identifier set. Return it as is to be
+        // able to match internally.
+        if (mPasspointUniqueId != null) {
+            return mPasspointUniqueId;
+        }
+
+        String key = getSsidAndSecurityTypeString();
+        if (!shared) {
+            key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
+        }
+
+        return key;
+    }
+
     /** @hide
      *  return the SSID + security type in String format.
      */

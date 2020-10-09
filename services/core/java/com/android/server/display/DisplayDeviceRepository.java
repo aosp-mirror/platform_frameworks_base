@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.annotation.NonNull;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.display.DisplayManagerService.SyncRoot;
@@ -48,15 +49,27 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
     @GuardedBy("mSyncRoot")
     private final List<DisplayDevice> mDisplayDevices = new ArrayList<>();
 
-    /** Listener for {link DisplayDevice} events. */
-    private final Listener mListener;
+    /** Listeners for {link DisplayDevice} events. */
+    @GuardedBy("mSyncRoot")
+    private final List<Listener> mListeners = new ArrayList<>();
 
     /** Global lock object from {@link DisplayManagerService}. */
     private final SyncRoot mSyncRoot;
 
-    DisplayDeviceRepository(@NonNull SyncRoot syncRoot, @NonNull Listener listener) {
+    private final PersistentDataStore mPersistentDataStore;
+
+    /**
+     * @param syncRoot The global lock for DisplayManager related objects.
+     * @param persistentDataStore Settings data store from {@link DisplayManagerService}.
+     */
+    DisplayDeviceRepository(@NonNull SyncRoot syncRoot,
+            @NonNull PersistentDataStore persistentDataStore) {
         mSyncRoot = syncRoot;
-        mListener = listener;
+        mPersistentDataStore = persistentDataStore;
+    }
+
+    public void addListener(@NonNull Listener listener) {
+        mListeners.add(listener);
     }
 
     @Override
@@ -78,7 +91,10 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
 
     @Override
     public void onTraversalRequested() {
-        mListener.onTraversalRequested();
+        final int size = mListeners.size();
+        for (int i = 0; i < size; i++) {
+            mListeners.get(i).onTraversalRequested();
+        }
     }
 
     public boolean containsLocked(DisplayDevice d) {
@@ -107,18 +123,37 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
             device.mDebugLastLoggedDeviceInfo = info;
 
             mDisplayDevices.add(device);
-            mListener.onDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
+            sendEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
         }
     }
 
     private void handleDisplayDeviceChanged(DisplayDevice device) {
         synchronized (mSyncRoot) {
-            DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+            final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
             if (!mDisplayDevices.contains(device)) {
                 Slog.w(TAG, "Attempted to change non-existent display device: " + info);
                 return;
             }
-            mListener.onDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
+
+            int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
+            if (diff == DisplayDeviceInfo.DIFF_STATE) {
+                Slog.i(TAG, "Display device changed state: \"" + info.name
+                        + "\", " + Display.stateToString(info.state));
+            } else if (diff != 0) {
+                Slog.i(TAG, "Display device changed: " + info);
+            }
+
+            if ((diff & DisplayDeviceInfo.DIFF_COLOR_MODE) != 0) {
+                try {
+                    mPersistentDataStore.setColorMode(device, info.colorMode);
+                } finally {
+                    mPersistentDataStore.saveIfNeeded();
+                }
+            }
+            device.mDebugLastLoggedDeviceInfo = info;
+
+            device.applyPendingDisplayDeviceInfoChangesLocked();
+            sendEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
         }
     }
 
@@ -132,14 +167,21 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
 
             Slog.i(TAG, "Display device removed: " + info);
             device.mDebugLastLoggedDeviceInfo = info;
-            mListener.onDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
+            sendEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
+        }
+    }
+
+    private void sendEventLocked(DisplayDevice device, int event) {
+        final int size = mListeners.size();
+        for (int i = 0; i < size; i++) {
+            mListeners.get(i).onDisplayDeviceEventLocked(device, event);
         }
     }
 
     /**
      * Listens to {@link DisplayDevice} events from {@link DisplayDeviceRepository}.
      */
-    interface Listener {
+    public interface Listener {
         void onDisplayDeviceEventLocked(DisplayDevice device, int event);
 
         // TODO: multi-display - Try to remove the need for requestTraversal...it feels like

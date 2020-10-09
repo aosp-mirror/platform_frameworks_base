@@ -153,15 +153,23 @@ public class WifiNl80211Manager {
         @Override
         public void OnScanResultReady() {
             Log.d(TAG, "Scan result ready event");
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onScanResultReady());
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onScanResultReady());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void OnScanFailed() {
             Log.d(TAG, "Scan failed event");
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onScanFailed());
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onScanFailed());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 
@@ -345,15 +353,23 @@ public class WifiNl80211Manager {
         @Override
         public void OnPnoNetworkFound() {
             Log.d(TAG, "Pno scan result event");
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onScanResultReady());
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onScanResultReady());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void OnPnoScanFailed() {
             Log.d(TAG, "Pno Scan failed event");
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mCallback.onScanFailed());
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onScanFailed());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 
@@ -376,15 +392,24 @@ public class WifiNl80211Manager {
                         + client.getMacAddress() + " isConnected: " + isConnected);
             }
 
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mSoftApListener.onConnectedClientsChanged(client, isConnected));
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mSoftApListener.onConnectedClientsChanged(client, isConnected));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void onSoftApChannelSwitched(int frequency, int bandwidth) {
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mSoftApListener.onSoftApChannelSwitched(frequency,
-                    toFrameworkBandwidth(bandwidth)));
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mSoftApListener.onSoftApChannelSwitched(frequency,
+                        toFrameworkBandwidth(bandwidth)));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         private @WifiAnnotations.Bandwidth int toFrameworkBandwidth(int bandwidth) {
@@ -437,8 +462,12 @@ public class WifiNl80211Manager {
                 if (mVerboseLoggingEnabled) {
                     Log.e(TAG, "Timed out waiting for ACK");
                 }
-                Binder.clearCallingIdentity();
-                mExecutor.execute(() -> mCallback.onFailure(SEND_MGMT_FRAME_ERROR_TIMEOUT));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onFailure(SEND_MGMT_FRAME_ERROR_TIMEOUT));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             });
             mWasCalled = false;
 
@@ -453,8 +482,12 @@ public class WifiNl80211Manager {
             // post to main thread
             mEventHandler.post(() -> runIfFirstCall(() -> {
                 mAlarmManager.cancel(mTimeoutCallback);
-                Binder.clearCallingIdentity();
-                mExecutor.execute(() -> mCallback.onAck(elapsedTimeMs));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onAck(elapsedTimeMs));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }));
         }
 
@@ -464,8 +497,12 @@ public class WifiNl80211Manager {
             // post to main thread
             mEventHandler.post(() -> runIfFirstCall(() -> {
                 mAlarmManager.cancel(mTimeoutCallback);
-                Binder.clearCallingIdentity();
-                mExecutor.execute(() -> mCallback.onFailure(reason));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onFailure(reason));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }));
         }
     }

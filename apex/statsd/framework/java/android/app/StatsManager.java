@@ -547,7 +547,7 @@ public final class StatsManager {
 
         @Override
         public void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver) {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> {
                     List<StatsEvent> data = new ArrayList<>();

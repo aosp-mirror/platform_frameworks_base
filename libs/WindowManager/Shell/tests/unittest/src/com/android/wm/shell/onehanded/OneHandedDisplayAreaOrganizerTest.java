@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,18 +39,17 @@ import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -65,6 +65,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     OneHandedAnimationController.OneHandedTransitionAnimator mFakeAnimator;
     WindowContainerToken mToken;
     SurfaceControl mLeash;
+    TestableLooper mTestableLooper;
     @Mock
     IWindowContainerToken mMockRealToken;
     @Mock
@@ -77,12 +78,16 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     DisplayController mMockDisplayController;
     @Mock
     SurfaceControl mMockLeash;
-    @Spy
-    Handler mUpdateHandler;
+    @Mock
+    WindowContainerTransaction mMockWindowContainerTransaction;
+
+    Handler mSpyUpdateHandler;
+    Handler.Callback mUpdateCallback = (msg) -> false;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mTestableLooper = TestableLooper.get(this);
         mToken = new WindowContainerToken(mMockRealToken);
         mLeash = new SurfaceControl();
         mDisplay = mContext.getDisplay();
@@ -107,17 +112,14 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockDisplayController,
                 mMockAnimationController,
                 mTutorialHandler);
-        mUpdateHandler = mDisplayAreaOrganizer.getUpdateHandler();
-    }
-
-    @Test
-    public void testGetDisplayAreaUpdateHandler_isNotNull() {
-        assertThat(mUpdateHandler).isNotNull();
+        mSpyUpdateHandler = spy(new Handler(OneHandedThread.get().getLooper(), mUpdateCallback));
+        mDisplayAreaOrganizer.setUpdateHandler(mSpyUpdateHandler);
     }
 
     @Test
     public void testOnDisplayAreaAppeared() {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
+        mTestableLooper.processAllMessages();
 
         verify(mMockAnimationController, never()).getAnimator(any(), any(), any());
     }
@@ -125,162 +127,195 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Test
     public void testOnDisplayAreaVanished() {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
+        mTestableLooper.processAllMessages();
         mDisplayAreaOrganizer.onDisplayAreaVanished(mDisplayAreaInfo);
+
+        assertThat(mDisplayAreaOrganizer.mDisplayAreaMap).isEmpty();
     }
 
-    @Test
-    public void testOnDisplayAreaInfoChanged_updateDisplayAreaInfo() {
-        final DisplayAreaInfo newDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY,
-                FEATURE_ONE_HANDED);
-        mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mDisplayAreaOrganizer.onDisplayAreaInfoChanged(newDisplayAreaInfo);
-
-        assertThat(mDisplayAreaOrganizer.mDisplayAreaMap.containsKey(mDisplayAreaInfo)).isTrue();
-    }
-
-    @Ignore("b/160848002")
     @Test
     public void testScheduleOffset() {
         final int xOffSet = 0;
         final int yOffSet = 100;
-
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
         mDisplayAreaOrganizer.scheduleOffset(xOffSet, yOffSet);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_OFFSET_ANIMATE)).isEqualTo(true);
+        verify(mSpyUpdateHandler).sendMessage(any());
     }
 
-    @Ignore("b/160848002")
     @Test
-    public void testRotation_portraitToLandscape() {
+    public void testRotation_portrait_0_to_landscape_90() {
         when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 0 -> 90
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_90);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_90,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
-
-        // Rotate 0 -> 270
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_270);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
-
-        // Rotate 180 -> 90
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_90);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
-
-        // Rotate 180 -> 270
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_270);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
+        verify(mSpyUpdateHandler).sendMessage(any());
     }
 
-    @Ignore("b/160848002")
     @Test
-    public void testRotation_landscapeToPortrait() {
+    public void testRotation_portrait_0_to_seascape_270() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 0 -> 270
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_270,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_portrait_180_to_landscape_90() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 180 -> 90
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_90,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_portrait_180_to_seascape_270() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 180 -> 270
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_270,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_landscape_90_to_portrait_0() {
         when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 90 -> 0
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_0);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_0,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
-
-        // Rotate 90 -> 180
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_180);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
-
-        // Rotate 270 -> 0
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_0);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
-
-        // Rotate 270 -> 180
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_180);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(true);
+        verify(mSpyUpdateHandler).sendMessage(any());
     }
 
-    @Ignore("b/160848002")
     @Test
-    public void testRotation_portraitToPortrait() {
+    public void testRotation_landscape_90_to_portrait_180() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 90 -> 180
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_180,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_Seascape_270_to_portrait_0() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 270 -> 0
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_0,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_seascape_90_to_portrait_180() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 270 -> 180
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_180,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_portrait_0_to_portrait_0() {
         when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 0 -> 0
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_0);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_0,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
-
-        // Rotate 0 -> 180
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_180);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
-
-        // Rotate 180 -> 180
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_180);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
-
-        // Rotate 180 -> 180
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_0);
-
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
     }
 
-    @Ignore("b/160848002")
     @Test
-    public void testRotation_landscapeToLandscape() {
+    public void testRotation_portrait_0_to_portrait_180() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 0 -> 180
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_180,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_portrait_180_to_portrait_180() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 180 -> 180
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_180,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_portrait_180_to_portrait_0() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 180 -> 0
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_0,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
+    }
+
+    @Test
+    public void testRotation_landscape_90_to_landscape_90() {
         when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 90 -> 90
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_90);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_90,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
+    }
 
+    @Test
+    public void testRotation_landscape_90_to_seascape_270() {
+        when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 90 -> 270
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_270);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_270,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
+    }
 
+    @Test
+    public void testRotation_seascape_270_to_seascape_270() {
+        when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 270 -> 270
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_270);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_270,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
+    }
 
+    @Test
+    public void testRotation_seascape_90_to_landscape_90() {
+        when(mMockLeash.isValid()).thenReturn(false);
         // Rotate 270 -> 90
-        TestableLooper.get(this).processAllMessages();
-        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_90);
+        mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_90,
+                mMockWindowContainerTransaction);
+        mTestableLooper.processAllMessages();
 
-        assertThat(mUpdateHandler.hasMessages(
-                OneHandedDisplayAreaOrganizer.MSG_RESET_IMMEDIATE)).isEqualTo(false);
+        verify(mSpyUpdateHandler, never()).sendMessage(any());
     }
 }

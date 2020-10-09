@@ -302,7 +302,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     private void readSnoozed() {
         synchronized (mSnoozedForAlarm) {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 final String setting = Settings.Secure.getStringForUser(
                         mContext.getContentResolver(),

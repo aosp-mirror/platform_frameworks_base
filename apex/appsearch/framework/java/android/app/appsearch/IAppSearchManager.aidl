@@ -15,6 +15,8 @@
  */
 package android.app.appsearch;
 
+import android.os.Bundle;
+
 import com.android.internal.infra.AndroidFuture;
 
 parcelable AppSearchResult;
@@ -25,14 +27,16 @@ interface IAppSearchManager {
     /**
      * Sets the schema.
      *
-     * @param schemaBytes Serialized SchemaProto.
+     * @param schemaBundles List of AppSearchSchema bundles.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt&gt;.
      *     The results of the call.
      */
     void setSchema(
-        in byte[] schemaBytes, boolean forceOverride, in AndroidFuture<AppSearchResult> callback);
+        in List<Bundle> schemaBundles,
+        boolean forceOverride,
+        in AndroidFuture<AppSearchResult> callback);
 
     /**
      * Inserts documents into the index.
@@ -63,14 +67,14 @@ interface IAppSearchManager {
     /**
      * Searches a document based on a given specifications.
      *
-     * @param searchSpecBytes Serialized SearchSpecProto.
-     * @param resultSpecBytes Serialized SearchResultsProto.
-     * @param scoringSpecBytes Serialized ScoringSpecProto.
+     * @param queryExpression String to search for
+     * @param searchSpecBundle SearchSpec bundle
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link byte[]}&gt;&gt;
      *     Will be completed with a serialized {@link SearchResultsProto}.
      */
     void query(
-        in byte[] searchSpecBytes, in byte[] resultSpecBytes, in byte[] scoringSpecBytes,
+        in String queryExpression,
+        in Bundle searchSpecBundle,
         in AndroidFuture<AppSearchResult> callback);
 
     /**

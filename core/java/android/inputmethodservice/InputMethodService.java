@@ -17,6 +17,37 @@
 package android.inputmethodservice;
 
 import static android.graphics.Color.TRANSPARENT;
+import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VIEW_STARTED;
+import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VISIBILITY;
+import static android.inputmethodservice.InputMethodServiceProto.CAN_PRE_RENDER;
+import static android.inputmethodservice.InputMethodServiceProto.CONFIGURATION;
+import static android.inputmethodservice.InputMethodServiceProto.DECOR_VIEW_VISIBLE;
+import static android.inputmethodservice.InputMethodServiceProto.DECOR_VIEW_WAS_VISIBLE;
+import static android.inputmethodservice.InputMethodServiceProto.EXTRACTED_TOKEN;
+import static android.inputmethodservice.InputMethodServiceProto.EXTRACT_VIEW_HIDDEN;
+import static android.inputmethodservice.InputMethodServiceProto.FULLSCREEN_APPLIED;
+import static android.inputmethodservice.InputMethodServiceProto.INPUT_BINDING;
+import static android.inputmethodservice.InputMethodServiceProto.INPUT_EDITOR_INFO;
+import static android.inputmethodservice.InputMethodServiceProto.INPUT_STARTED;
+import static android.inputmethodservice.InputMethodServiceProto.INPUT_VIEW_STARTED;
+import static android.inputmethodservice.InputMethodServiceProto.IN_SHOW_WINDOW;
+import static android.inputmethodservice.InputMethodServiceProto.IS_FULLSCREEN;
+import static android.inputmethodservice.InputMethodServiceProto.IS_INPUT_VIEW_SHOWN;
+import static android.inputmethodservice.InputMethodServiceProto.IS_PRE_RENDERED;
+import static android.inputmethodservice.InputMethodServiceProto.InsetsProto.CONTENT_TOP_INSETS;
+import static android.inputmethodservice.InputMethodServiceProto.InsetsProto.TOUCHABLE_INSETS;
+import static android.inputmethodservice.InputMethodServiceProto.InsetsProto.TOUCHABLE_REGION;
+import static android.inputmethodservice.InputMethodServiceProto.InsetsProto.VISIBLE_TOP_INSETS;
+import static android.inputmethodservice.InputMethodServiceProto.LAST_COMPUTED_INSETS;
+import static android.inputmethodservice.InputMethodServiceProto.LAST_SHOW_INPUT_REQUESTED;
+import static android.inputmethodservice.InputMethodServiceProto.SETTINGS_OBSERVER;
+import static android.inputmethodservice.InputMethodServiceProto.SHOW_INPUT_FLAGS;
+import static android.inputmethodservice.InputMethodServiceProto.SHOW_INPUT_REQUESTED;
+import static android.inputmethodservice.InputMethodServiceProto.SOFT_INPUT_WINDOW;
+import static android.inputmethodservice.InputMethodServiceProto.STATUS_ICON;
+import static android.inputmethodservice.InputMethodServiceProto.TOKEN;
+import static android.inputmethodservice.InputMethodServiceProto.VIEWS_CREATED;
+import static android.inputmethodservice.InputMethodServiceProto.WINDOW_VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
@@ -59,6 +90,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -104,6 +136,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * InputMethodService provides a standard implementation of an InputMethod,
@@ -1041,6 +1074,15 @@ public class InputMethodService extends AbstractInputMethodService {
          * or {@link #TOUCHABLE_INSETS_REGION}.
          */
         public int touchableInsets;
+
+        private void dumpDebug(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            proto.write(CONTENT_TOP_INSETS, contentTopInsets);
+            proto.write(VISIBLE_TOP_INSETS, visibleTopInsets);
+            proto.write(TOUCHABLE_INSETS, touchableInsets);
+            proto.write(TOUCHABLE_REGION, touchableRegion.toString());
+            proto.end(token);
+        }
     }
 
     /**
@@ -1380,7 +1422,7 @@ public class InputMethodService extends AbstractInputMethodService {
     public AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface() {
         return new InputMethodSessionImpl();
     }
-    
+
     public LayoutInflater getLayoutInflater() {
         return mInflater;
     }
@@ -3294,7 +3336,7 @@ public class InputMethodService extends AbstractInputMethodService {
         } else {
             p.println("  mInputEditorInfo: null");
         }
-        
+
         p.println("  mShowInputRequested=" + mShowInputRequested
                 + " mLastShowInputRequested=" + mLastShowInputRequested
                 + " mCanPreRender=" + mCanPreRender
@@ -3304,7 +3346,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mFullscreenApplied=" + mFullscreenApplied
                 + " mIsFullscreen=" + mIsFullscreen
                 + " mExtractViewHidden=" + mExtractViewHidden);
-        
+
         if (mExtractedText != null) {
             p.println("  mExtractedText:");
             p.println("    text=" + mExtractedText.text.length() + " chars"
@@ -3324,5 +3366,43 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " touchableInsets=" + mTmpInsets.touchableInsets
                 + " touchableRegion=" + mTmpInsets.touchableRegion);
         p.println(" mSettingsObserver=" + mSettingsObserver);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    final void dumpProtoInternal(FileDescriptor fd, String[] args) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        mWindow.dumpDebug(proto, SOFT_INPUT_WINDOW);
+        proto.write(VIEWS_CREATED, mViewsCreated);
+        proto.write(DECOR_VIEW_VISIBLE, mDecorViewVisible);
+        proto.write(DECOR_VIEW_WAS_VISIBLE, mDecorViewWasVisible);
+        proto.write(WINDOW_VISIBLE, mWindowVisible);
+        proto.write(IN_SHOW_WINDOW, mInShowWindow);
+        proto.write(CONFIGURATION, getResources().getConfiguration().toString());
+        proto.write(TOKEN, Objects.toString(mToken));
+        proto.write(INPUT_BINDING, Objects.toString(mInputBinding));
+        proto.write(INPUT_STARTED, mInputStarted);
+        proto.write(INPUT_VIEW_STARTED, mInputViewStarted);
+        proto.write(CANDIDATES_VIEW_STARTED, mCandidatesViewStarted);
+        if (mInputEditorInfo != null) {
+            mInputEditorInfo.dumpDebug(proto, INPUT_EDITOR_INFO);
+        }
+        proto.write(SHOW_INPUT_REQUESTED, mShowInputRequested);
+        proto.write(LAST_SHOW_INPUT_REQUESTED, mLastShowInputRequested);
+        proto.write(CAN_PRE_RENDER, mCanPreRender);
+        proto.write(IS_PRE_RENDERED, mIsPreRendered);
+        proto.write(SHOW_INPUT_FLAGS, mShowInputFlags);
+        proto.write(CANDIDATES_VISIBILITY, mCandidatesVisibility);
+        proto.write(FULLSCREEN_APPLIED, mFullscreenApplied);
+        proto.write(IS_FULLSCREEN, mIsFullscreen);
+        proto.write(EXTRACT_VIEW_HIDDEN, mExtractViewHidden);
+        proto.write(EXTRACTED_TOKEN, mExtractedToken);
+        proto.write(IS_INPUT_VIEW_SHOWN, mIsInputViewShown);
+        proto.write(STATUS_ICON, mStatusIcon);
+        mTmpInsets.dumpDebug(proto, LAST_COMPUTED_INSETS);
+        proto.write(SETTINGS_OBSERVER, Objects.toString(mSettingsObserver));
+        proto.flush();
     }
 }

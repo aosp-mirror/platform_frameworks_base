@@ -178,10 +178,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
     private volatile boolean mHasImeService;
 
+    /** Whether {@link #mActivities} is not empty. */
+    private volatile boolean mHasActivities;
     /** All activities running in the process (exclude destroying). */
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
     /** The activities will be removed but still belong to this process. */
     private ArrayList<ActivityRecord> mInactiveActivities;
+    /** Whether {@link #mRecentTasks} is not empty. */
+    private volatile boolean mHasRecentTasks;
     // any tasks this process had run root activities in
     private final ArrayList<Task> mRecentTasks = new ArrayList<>();
     // The most recent top-most activity that was resumed in the process for pre-Q app.
@@ -225,7 +229,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final OomScoreReferenceState mOomRefState;
 
     public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
-            String name, int uid, int userId, Object owner, WindowProcessListener listener) {
+            String name, int uid, int userId, Object owner,
+            @NonNull WindowProcessListener listener) {
         mInfo = info;
         mName = name;
         mUid = uid;
@@ -386,7 +391,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void postPendingUiCleanMsg(boolean pendingUiClean) {
-        if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::setPendingUiClean, mListener, pendingUiClean);
@@ -646,6 +650,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         mActivities.add(r);
+        mHasActivities = true;
         if (mInactiveActivities != null) {
             mInactiveActivities.remove(r);
         }
@@ -674,20 +679,20 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mInactiveActivities.remove(r);
         }
         mActivities.remove(r);
+        mHasActivities = !mActivities.isEmpty();
         updateActivityConfigurationListener();
     }
 
     void clearActivities() {
         mInactiveActivities = null;
         mActivities.clear();
+        mHasActivities = false;
         updateActivityConfigurationListener();
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasActivities() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return !mActivities.isEmpty();
-        }
+        return mHasActivities;
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
@@ -697,9 +702,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.LRU_UPDATE)
     public boolean hasActivitiesOrRecentTasks() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return !mActivities.isEmpty() || !mRecentTasks.isEmpty();
-        }
+        return mHasActivities || mHasRecentTasks;
     }
 
     private boolean hasActivityInVisibleTask() {
@@ -1147,7 +1150,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void clearProfilerIfNeeded() {
-        if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::clearProfilerIfNeeded, mListener));
@@ -1155,7 +1157,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
             boolean updateOomAdj, boolean addPendingTopUid) {
-        if (mListener == null) return;
         if (addPendingTopUid) {
             mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
         }
@@ -1169,14 +1170,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void updateServiceConnectionActivities() {
-        if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::updateServiceConnectionActivities, mListener));
     }
 
     void setPendingUiCleanAndForceProcessStateUpTo(int newState) {
-        if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::setPendingUiCleanAndForceProcessStateUpTo,
@@ -1185,7 +1184,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     boolean isRemoved() {
-        return mListener == null ? false : mListener.isRemoved();
+        return mListener.isRemoved();
     }
 
     private boolean shouldSetProfileProc() {
@@ -1210,7 +1209,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void onStartActivity(int topProcessState, ActivityInfo info) {
-        if (mListener == null) return;
         String packageName = null;
         if ((info.flags & ActivityInfo.FLAG_MULTIPROCESS) == 0
                 || !"android".equals(info.packageName)) {
@@ -1234,7 +1232,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void appDied(String reason) {
-        if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::appDied, mListener, reason);
@@ -1400,17 +1397,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        if (mListener.isCached()) {
-            // This process is in a cached state. We will delay delivering the config change to the
-            // process until the process is no longer cached.
-            mHasPendingConfigurationChange = true;
-            return;
-        }
-
-        dispatchConfigurationChange(config);
-    }
-
-    private void dispatchConfigurationChange(Configuration config) {
         if (mPauseConfigurationDispatchCount > 0) {
             mHasPendingConfigurationChange = true;
             return;
@@ -1475,22 +1461,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
     public long getCpuTime() {
-        return (mListener != null) ? mListener.getCpuTime() : 0;
+        return mListener.getCpuTime();
     }
 
     void addRecentTask(Task task) {
         mRecentTasks.add(task);
+        mHasRecentTasks = true;
     }
 
     void removeRecentTask(Task task) {
         mRecentTasks.remove(task);
+        mHasRecentTasks = !mRecentTasks.isEmpty();
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasRecentTasks() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return !mRecentTasks.isEmpty();
-        }
+        return mHasRecentTasks;
     }
 
     void clearRecentTasks() {
@@ -1498,6 +1484,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mRecentTasks.get(i).clearRootProcess();
         }
         mRecentTasks.clear();
+        mHasRecentTasks = false;
     }
 
     public void appEarlyNotResponding(String annotation, Runnable killAppCallback) {
@@ -1556,22 +1543,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     /**
-     * Called to notify WindowProcessController of a change in the process's cached state.
-     *
-     * @param isCached whether or not the process is cached.
-     */
-    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-    public void onProcCachedStateChanged(boolean isCached) {
-        if (!isCached) {
-            synchronized (mAtm.mGlobalLockWithoutBoost) {
-                if (mHasPendingConfigurationChange) {
-                    dispatchConfigurationChange(getConfiguration());
-                }
-            }
-        }
-    }
-
-    /**
      * Called to notify {@link WindowProcessController} of a started service.
      *
      * @param serviceInfo information describing the started service.
@@ -1602,23 +1573,28 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void onTopProcChanged() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            mAtm.mVrController.onTopProcChangedLocked(this);
+        if (mAtm.mVrController.isInterestingToSchedGroup()) {
+            mAtm.mH.post(() -> {
+                synchronized (mAtm.mGlobalLock) {
+                    mAtm.mVrController.onTopProcChangedLocked(this);
+                }
+            });
         }
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isHomeProcess() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return this == mAtm.mHomeProcess;
-        }
+        return this == mAtm.mHomeProcess;
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isPreviousProcess() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return this == mAtm.mPreviousProcess;
-        }
+        return this == mAtm.mPreviousProcess;
+    }
+
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
+    public boolean isHeavyWeightProcess() {
+        return this == mAtm.mHeavyWeightProcess;
     }
 
     void setRunningRecentsAnimation(boolean running) {
@@ -1687,8 +1663,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        if (mListener != null) {
-            mListener.dumpDebug(proto, fieldId);
-        }
+        mListener.dumpDebug(proto, fieldId);
     }
 }

@@ -1574,7 +1574,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullWifiActivityInfoLocked(int atomTag, List<StatsEvent> pulledData) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
             mWifiManager.getWifiActivityEnergyInfoAsync(
@@ -1622,7 +1622,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullModemActivityInfoLocked(int atomTag, List<StatsEvent> pulledData) {
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
             mTelephony.requestModemActivityInfo(modemReceiver);
@@ -2723,7 +2723,7 @@ public class StatsPullAtomService extends SystemService {
 
     // Add a RoleHolder atom for each package that holds a role.
     int pullRoleHolderLocked(int atomTag, List<StatsEvent> pulledData) {
-        long callingToken = Binder.clearCallingIdentity();
+        final long callingToken = Binder.clearCallingIdentity();
         try {
             PackageManager pm = mContext.getPackageManager();
             RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);

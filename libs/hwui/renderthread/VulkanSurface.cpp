@@ -16,6 +16,7 @@
 
 #include "VulkanSurface.h"
 
+#include <GrDirectContext.h>
 #include <SkSurface.h>
 #include <algorithm>
 
@@ -117,7 +118,7 @@ static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
 
 VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
                                      SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
-                                     GrContext* grContext, const VulkanManager& vkManager,
+                                     GrDirectContext* grContext, const VulkanManager& vkManager,
                                      uint32_t extraBuffers) {
     // Connect and set native window to default configurations.
     if (!ConnectAndSetWindowDefaults(window)) {
@@ -310,7 +311,7 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
 }
 
 VulkanSurface::VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo,
-                             GrContext* grContext)
+                             GrDirectContext* grContext)
         : mNativeWindow(window), mWindowInfo(windowInfo), mGrContext(grContext) {}
 
 VulkanSurface::~VulkanSurface() {

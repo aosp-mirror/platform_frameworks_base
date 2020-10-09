@@ -2232,8 +2232,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Send installed broadcasts if the package is not a static shared lib.
             if (res.pkg.getStaticSharedLibName() == null) {
-                mProcessLoggingHandler.invalidateProcessLoggingBaseApkHash(
-                        res.pkg.getBaseApkPath());
+                mProcessLoggingHandler.invalidateBaseApkHash(res.pkg.getBaseApkPath());
 
                 // Send added for users that see the package for the first time
                 // sendPackageAddedForNewUsers also deals with system apps
@@ -2494,13 +2493,6 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0, size = applicationInfo.splitNames.length; i < size; ++i) {
                 filesToChecksum.add(Pair.create(applicationInfo.splitNames[i],
                         new File(applicationInfo.splitSourceDirs[i])));
-            }
-        }
-
-        for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
-            final File file = filesToChecksum.get(i).second;
-            if (!file.exists()) {
-                throw new IllegalStateException("File not found: " + file.getPath());
             }
         }
 
@@ -5702,7 +5694,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
 
-                    long identity = Binder.clearCallingIdentity();
+                    final long identity = Binder.clearCallingIdentity();
                     try {
                         PackageInfo packageInfo = getPackageInfoVersioned(declaringPackage, flags
                                 | PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
@@ -7635,7 +7627,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isUserEnabled(int userId) {
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             UserInfo userInfo = mUserManager.getUserInfo(userId);
             return userInfo != null && userInfo.isEnabled();
@@ -8046,7 +8038,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter,
             int sourceUserId, int targetUserId) {
         ResolveInfo forwardingResolveInfo = new ResolveInfo();
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         boolean targetIsProfile;
         try {
             targetIsProfile = mUserManager.getUserInfo(targetUserId).isManagedProfile();
@@ -10181,7 +10173,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mPackageUsage.maybeWriteAsync(mSettings.mPackages);
             mCompilerStats.maybeWriteAsync();
         }
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mInstallLock) {
                 return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
@@ -13176,7 +13168,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             boolean sendAdded = false;
             boolean sendRemoved = false;
@@ -13343,7 +13335,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 true /* requireFullPermission */, false /* checkShell */,
                 "getApplicationHidden for user " + userId);
         PackageSetting ps;
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             // writer
             synchronized (mLock) {
@@ -13398,7 +13390,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             boolean installed = false;
             final boolean instantApp =
@@ -14489,7 +14481,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // was never set.
                 EventLog.writeEvent(0x534e4554, "150857253", callingUid, "");
 
-                long binderToken = Binder.clearCallingIdentity();
+                final long binderToken = Binder.clearCallingIdentity();
                 try {
                     if (mInjector.getCompatibility().isChangeEnabledByUid(
                             THROW_EXCEPTION_ON_REQUIRE_INSTALL_PACKAGES_TO_ADD_INSTALLER_PACKAGE,
@@ -14778,20 +14770,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         UserHandle getUser() {
-            return mUser;
-        }
-
-        /**
-         * Gets the user handle for the user that the rollback agent should
-         * use to look up information about this installation when enabling
-         * rollback.
-         */
-        UserHandle getRollbackUser() {
-            // The session for packages installed for "all" users is
-            // associated with the "system" user.
-            if (mUser == UserHandle.ALL) {
-                return UserHandle.SYSTEM;
-            }
             return mUser;
         }
 
@@ -21171,7 +21149,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
                 PackageInfo packageInfo = getPackageInfo(packageName, 0, UserHandle.USER_SYSTEM);
@@ -21532,7 +21510,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
             if (sendNow) {
                 int packageUid = UserHandle.getUid(userId, pkgSetting.appId);
@@ -25820,25 +25798,16 @@ public class PackageManagerService extends IPackageManager.Stub
      * @hide
      */
     @Override
-    public void logAppProcessStartIfNeeded(String processName, int uid, String seinfo,
-            String apkFile, int pid) {
+    public void logAppProcessStartIfNeeded(String packageName, String processName, int uid,
+            String seinfo, String apkFile, int pid) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
         if (!SecurityLog.isLoggingEnabled()) {
             return;
         }
-        Bundle data = new Bundle();
-        data.putLong("startTimestamp", System.currentTimeMillis());
-        data.putString("processName", processName);
-        data.putInt("uid", uid);
-        data.putString("seinfo", seinfo);
-        data.putString("apkFile", apkFile);
-        data.putInt("pid", pid);
-        Message msg = mProcessLoggingHandler.obtainMessage(
-                ProcessLoggingHandler.LOG_APP_PROCESS_START_MSG);
-        msg.setData(data);
-        mProcessLoggingHandler.sendMessage(msg);
+        mProcessLoggingHandler.logAppProcessStart(mContext, this, apkFile, packageName, processName,
+                uid, seinfo, pid);
     }
 
     public CompilerStats.PackageStats getCompilerPackageStats(String pkgName) {

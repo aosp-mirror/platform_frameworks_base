@@ -4387,7 +4387,7 @@ public final class Settings {
      */
     private static List<UserInfo> getUsers(UserManagerService userManager, boolean excludeDying,
             boolean excludePreCreated) {
-        long id = Binder.clearCallingIdentity();
+        final long id = Binder.clearCallingIdentity();
         try {
             return userManager.getUsers(/* excludePartial= */ true, excludeDying,
                     excludePreCreated);

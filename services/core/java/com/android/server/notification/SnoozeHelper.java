@@ -496,7 +496,7 @@ public class SnoozeHelper {
 
     private void scheduleRepostAtTime(String pkg, String key, int userId, long time) {
         Runnable runnable = () -> {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 final PendingIntent pi = createPendingIntent(pkg, key, userId);
                 mAm.cancel(pi);

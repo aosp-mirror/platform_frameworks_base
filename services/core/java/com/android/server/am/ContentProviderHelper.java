@@ -682,7 +682,7 @@ public class ContentProviderHelper {
      */
     void removeContentProvider(IBinder connection, boolean stable) {
         mService.enforceNotIsolatedCaller("removeContentProvider");
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mService) {
                 ContentProviderConnection conn;
@@ -711,7 +711,7 @@ public class ContentProviderHelper {
         mService.enforceCallingPermission(
                 android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
                 "Do not have permission in call removeContentProviderExternal()");
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             removeContentProviderExternalUnchecked(name, token, userId);
         } finally {

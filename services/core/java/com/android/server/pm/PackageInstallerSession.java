@@ -1602,13 +1602,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         validateApkInstallLocked();
                     }
                 }
-            }
-
-            if (params.isStaged) {
-                mStagingManager.checkNonOverlappingWithStagedSessions(this);
-            }
-
-            synchronized (mLock) {
                 if (mDestroyed) {
                     throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                             "Session destroyed");
@@ -2311,7 +2304,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return (params.installFlags & PackageManager.INSTALL_APEX) != 0;
     }
 
-    private boolean sessionContains(Predicate<PackageInstallerSession> filter) {
+    boolean sessionContains(Predicate<PackageInstallerSession> filter) {
         if (!isMultiPackage()) {
             return filter.test(this);
         }

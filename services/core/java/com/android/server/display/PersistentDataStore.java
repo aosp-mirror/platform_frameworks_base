@@ -216,7 +216,7 @@ final class PersistentDataStore {
     }
 
     public boolean forgetWifiDisplay(String deviceAddress) {
-		loadIfNeeded();
+        loadIfNeeded();
         int index = findRememberedWifiDisplay(deviceAddress);
         if (index >= 0) {
             mRememberedWifiDisplays.remove(index);
@@ -259,17 +259,17 @@ final class PersistentDataStore {
         return false;
     }
 
-	public Point getStableDisplaySize() {
-		loadIfNeeded();
-		return mStableDeviceValues.getDisplaySize();
-	}
+    public Point getStableDisplaySize() {
+        loadIfNeeded();
+        return mStableDeviceValues.getDisplaySize();
+    }
 
-	public void setStableDisplaySize(Point size) {
-		loadIfNeeded();
-		if (mStableDeviceValues.setDisplaySize(size)) {
-			setDirty();
-		}
-	}
+    public void setStableDisplaySize(Point size) {
+        loadIfNeeded();
+        if (mStableDeviceValues.setDisplaySize(size)) {
+            setDirty();
+        }
+    }
 
     public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userSerial,
             @Nullable String packageName) {

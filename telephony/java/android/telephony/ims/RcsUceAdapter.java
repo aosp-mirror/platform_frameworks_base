@@ -206,7 +206,7 @@ public class RcsUceAdapter {
             public void onPublishStateChanged(int publishState) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onChanged(publishState));
                 } finally {
@@ -322,7 +322,7 @@ public class RcsUceAdapter {
         IRcsUceControllerCallback internalCallback = new IRcsUceControllerCallback.Stub() {
             @Override
             public void onCapabilitiesReceived(List<RcsContactUceCapability> contactCapabilities) {
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() ->
                             c.onCapabilitiesReceived(contactCapabilities));
@@ -332,7 +332,7 @@ public class RcsUceAdapter {
             }
             @Override
             public void onError(int errorCode) {
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> c.onError(errorCode));
                 } finally {
