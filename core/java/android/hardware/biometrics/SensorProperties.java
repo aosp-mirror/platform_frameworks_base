@@ -17,6 +17,7 @@
 package android.hardware.biometrics;
 
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,19 +26,18 @@ import java.lang.annotation.RetentionPolicy;
  * The base class containing all modality-agnostic information.
  * @hide
  */
+@TestApi
 public class SensorProperties {
     /**
      * A sensor that meets the requirements for Class 1 biometrics as defined in the CDD. This does
      * not correspond to a public BiometricManager.Authenticators constant. Sensors of this strength
      * are not available to applications via the public API surface.
-     * @hide
      */
     public static final int STRENGTH_CONVENIENCE = 0;
 
     /**
      * A sensor that meets the requirements for Class 2 biometrics as defined in the CDD.
      * Corresponds to BiometricManager.Authenticators.BIOMETRIC_WEAK.
-     * @hide
      */
     public static final int STRENGTH_WEAK = 1;
 
@@ -46,7 +46,6 @@ public class SensorProperties {
      * Corresponds to BiometricManager.Authenticators.BIOMETRIC_STRONG.
      *
      * Notably, this is the only strength that allows generation of HardwareAuthToken(s).
-     * @hide
      */
     public static final int STRENGTH_STRONG = 2;
 
@@ -70,7 +69,6 @@ public class SensorProperties {
 
     /**
      * @return The sensor's unique identifier.
-     * @hide
      */
     public int getSensorId() {
         return mSensorId;
@@ -78,7 +76,6 @@ public class SensorProperties {
 
     /**
      * @return The sensor's strength.
-     * @hide
      */
     @Strength
     public int getSensorStrength() {
