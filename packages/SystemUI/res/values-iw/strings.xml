@@ -941,7 +941,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"הודעות כלליות"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"אחסון"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"טיפים"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"אפליקציות אינסטנט"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"אפליקציות ללא התקנה"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> פועלת"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"האפליקציה נפתחת בלי התקנה."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"האפליקציה נפתחת בלי התקנה. אפשר להקיש כדי לקבל מידע נוסף."</string>
@@ -1022,17 +1022,19 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"הגדרות"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>
-    <!-- no translation found for accessibility_control_zoom_in (1189272315480097417) -->
+    <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"התקרבות"</string>
+    <string name="accessibility_control_zoom_out" msgid="69578832020304084">"התרחקות"</string>
+    <string name="accessibility_control_move_up" msgid="6622825494014720136">"הזזה למעלה"</string>
+    <string name="accessibility_control_move_down" msgid="5390922476900974512">"הזזה למטה"</string>
+    <string name="accessibility_control_move_left" msgid="8156206978511401995">"הזזה שמאלה"</string>
+    <string name="accessibility_control_move_right" msgid="8926821093629582888">"הזזה ימינה"</string>
+    <!-- no translation found for magnification_mode_switch_description (2698364322069934733) -->
     <skip />
-    <!-- no translation found for accessibility_control_zoom_out (69578832020304084) -->
+    <!-- no translation found for magnification_mode_switch_state_full_screen (2882507327576770574) -->
     <skip />
-    <!-- no translation found for accessibility_control_move_up (6622825494014720136) -->
+    <!-- no translation found for magnification_mode_switch_state_window (8597100249594076965) -->
     <skip />
-    <!-- no translation found for accessibility_control_move_down (5390922476900974512) -->
-    <skip />
-    <!-- no translation found for accessibility_control_move_left (8156206978511401995) -->
-    <skip />
-    <!-- no translation found for accessibility_control_move_right (8926821093629582888) -->
+    <!-- no translation found for magnification_mode_switch_click_label (2786203505805898199) -->
     <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"פקדי מכשירים"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"יש להוסיף פקדים למכשירים המחוברים"</string>
@@ -1099,8 +1101,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"לא ניתן היה להתחבר. יש לנסות שוב."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"התאמה של מכשיר חדש"</string>
-    <!-- no translation found for build_number_clip_data_label (3623176728412560914) -->
-    <skip />
-    <!-- no translation found for build_number_copy_toast (877720921605503046) -->
-    <skip />
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"‏מספר Build"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"‏מספר ה-Build הועתק ללוח."</string>
 </resources>
