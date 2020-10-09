@@ -89,6 +89,11 @@ public:
                     progressListener,
             bool* _aidl_return) final;
     binder::Status unregisterLoadingProgressListener(int32_t storageId, bool* _aidl_return) final;
+    binder::Status registerStorageHealthListener(
+            int32_t storageId,
+            const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
+            const ::android::sp<IStorageHealthListener>& healthListener, bool* _aidl_return) final;
+    binder::Status unregisterStorageHealthListener(int32_t storageId) final;
 
 private:
     android::incremental::IncrementalService mImpl;

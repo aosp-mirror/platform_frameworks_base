@@ -143,7 +143,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -1700,28 +1699,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Slog.e(TAG, "Install of session " + sessionId + " failed: " + detailedMessage);
         destroyInternal();
         dispatchSessionFinished(error, detailedMessage, null);
-    }
-
-    private void onStorageHealthStatusChanged(int status) {
-        final String packageName = getPackageName();
-        if (TextUtils.isEmpty(packageName)) {
-            // The package has not been installed.
-            return;
-        }
-        mHandler.post(PooledLambda.obtainRunnable(
-                PackageManagerService::onStorageHealthStatusChanged,
-                mPm, packageName, status, userId).recycleOnUse());
-    }
-
-    private void onStreamHealthStatusChanged(int status) {
-        final String packageName = getPackageName();
-        if (TextUtils.isEmpty(packageName)) {
-            // The package has not been installed.
-            return;
-        }
-        mHandler.post(PooledLambda.obtainRunnable(
-                PackageManagerService::onStreamStatusChanged,
-                mPm, packageName, status, userId).recycleOnUse());
     }
 
     /**
@@ -3315,19 +3292,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return;
                 }
 
-                final boolean isDestroyedOrDataLoaderFinished;
                 synchronized (mLock) {
-                    isDestroyedOrDataLoaderFinished = mDestroyed || mDataLoaderFinished;
-                }
-                if (isDestroyedOrDataLoaderFinished) {
-                    switch (status) {
-                        case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            // treat as unhealthy storage
-                            onStorageHealthStatusChanged(
-                                    IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
-                            return;
+                    if (mDestroyed || mDataLoaderFinished) {
+                        // No need to worry about post installation
+                        return;
                     }
-                    return;
                 }
 
                 try {
@@ -3423,13 +3392,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             @Override
             public void reportStreamHealth(int dataLoaderId, int streamStatus) {
-                synchronized (mLock) {
-                    if (!mDestroyed && !mDataLoaderFinished) {
-                        // ignore streaming status if package isn't installed
-                        return;
-                    }
-                }
-                onStreamHealthStatusChanged(streamStatus);
+                // Currently the stream status is not used during package installation. It is
+                // technically possible for the data loader to report stream status via this
+                // callback, but if something is wrong with the streaming, it is more likely that
+                // prepareDataLoaderLocked will return false and the installation will be aborted.
             }
         };
 
@@ -3438,20 +3404,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
             healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
             healthCheckParams.unhealthyMonitoringMs = INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
-
             final boolean systemDataLoader =
                     params.getComponentName().getPackageName() == SYSTEM_DATA_LOADER_PACKAGE;
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
-                    final boolean isDestroyedOrDataLoaderFinished;
                     synchronized (mLock) {
-                        isDestroyedOrDataLoaderFinished = mDestroyed || mDataLoaderFinished;
-                    }
-                    if (isDestroyedOrDataLoaderFinished) {
-                        // App's installed.
-                        onStorageHealthStatusChanged(status);
-                        return;
+                        if (mDestroyed || mDataLoaderFinished) {
+                            // No need to worry about post installation
+                            return;
+                        }
                     }
 
                     switch (status) {

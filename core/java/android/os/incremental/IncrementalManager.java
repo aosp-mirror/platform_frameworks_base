@@ -283,6 +283,7 @@ public final class IncrementalManager {
                 return;
             }
             mLoadingProgressCallbacks.cleanUpCallbacks(storage);
+            unregisterHealthListener(codePath);
             mService.deleteStorage(storage.getId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -297,7 +298,7 @@ public final class IncrementalManager {
      * @param callback To report loading progress to.
      * @return True if the package name and associated storage id are valid. False otherwise.
      */
-    public boolean registerCallback(@NonNull String codePath,
+    public boolean registerLoadingProgressCallback(@NonNull String codePath,
             @NonNull IPackageLoadingProgressCallback callback) {
         final IncrementalStorage storage = openStorage(codePath);
         if (storage == null) {
@@ -314,7 +315,7 @@ public final class IncrementalManager {
      * @param codePath Path of the installed package
      * @return True if the package name and associated storage id are valid. False otherwise.
      */
-    public boolean unregisterCallback(@NonNull String codePath,
+    public boolean unregisterLoadingProgressCallback(@NonNull String codePath,
             @NonNull IPackageLoadingProgressCallback callback) {
         final IncrementalStorage storage = openStorage(codePath);
         if (storage == null) {
@@ -412,6 +413,38 @@ public final class IncrementalManager {
             }
             callbacksForStorage.finishBroadcast();
         }
+    }
+
+    /**
+     * Specify the health check params and listener for listening to Incremental Storage health
+     * status changes. Notice that this will overwrite the previously registered listener.
+     * @param codePath Path of the installed package. This path is on an Incremental Storage.
+     * @param healthCheckParams The params for health state change timeouts.
+     * @param listener To report health status change.
+     * @return True if listener was successfully registered.
+     */
+    public boolean registerHealthListener(@NonNull String codePath,
+            @NonNull StorageHealthCheckParams healthCheckParams,
+            @NonNull IStorageHealthListener.Stub listener) {
+        final IncrementalStorage storage = openStorage(codePath);
+        if (storage == null) {
+            // storage does not exist, package not installed
+            return false;
+        }
+        return storage.registerStorageHealthListener(healthCheckParams, listener);
+    }
+
+    /**
+     * Stop listening to health status changes on an Incremental Storage.
+     * @param codePath Path of the installed package. This path is on an Incremental Storage.
+     */
+    public void unregisterHealthListener(@NonNull String codePath) {
+        final IncrementalStorage storage = openStorage(codePath);
+        if (storage == null) {
+            // storage does not exist, package not installed
+            return;
+        }
+        storage.unregisterStorageHealthListener();
     }
 
     /* Native methods */
