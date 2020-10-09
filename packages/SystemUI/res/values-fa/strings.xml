@@ -433,7 +433,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"دستگاه"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به بالا بکشید"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به‌بالا بکشید"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"برای جابه‌جایی سریع میان برنامه‌ها، به چپ بکشید"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تغییر وضعیت نمای کلی"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"شارژ کامل شد"</string>
@@ -452,8 +452,8 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"اعلان‌های کمتر فوری در زیر"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"دوباره ضربه بزنید تا باز شود"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به بالا بکشید"</string>
-    <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به بالا بکشید"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
+    <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تعلق دارد"</string>
     <string name="phone_hint" msgid="6682125338461375925">"انگشتتان را از نماد تلفن تند بکشید"</string>
