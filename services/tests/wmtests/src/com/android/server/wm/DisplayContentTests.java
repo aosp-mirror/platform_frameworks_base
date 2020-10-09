@@ -1584,6 +1584,28 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(publicDc.forceDesktopMode());
     }
 
+    @Test
+    public void testDisplaySettingsReappliedWhenDisplayChanged() {
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        final DisplayContent dc = createNewDisplay(displayInfo);
+
+        // Generate width/height/density values different from the default of the display.
+        final int forcedWidth = dc.mBaseDisplayWidth + 1;
+        final int forcedHeight = dc.mBaseDisplayHeight + 1;;
+        final int forcedDensity = dc.mBaseDisplayDensity + 1;;
+        // Update the forced size and density in settings and the unique id to simualate a display
+        // remap.
+        dc.mWmService.mDisplayWindowSettings.setForcedSize(dc, forcedWidth, forcedHeight);
+        dc.mWmService.mDisplayWindowSettings.setForcedDensity(dc, forcedDensity, 0 /* userId */);
+        dc.mCurrentUniqueDisplayId = mDisplayInfo.uniqueId + "-test";
+        // Trigger display changed.
+        dc.onDisplayChanged();
+        // Ensure overridden size and denisty match the most up-to-date values in settings for the
+        // display.
+        verifySizes(dc, forcedWidth, forcedHeight, forcedDensity);
+    }
+
     private boolean isOptionsPanelAtRight(int displayId) {
         return (mWm.getPreferredOptionsPanelGravity(displayId) & Gravity.RIGHT) == Gravity.RIGHT;
     }
