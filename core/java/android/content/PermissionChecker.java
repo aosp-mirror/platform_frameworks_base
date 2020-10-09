@@ -116,6 +116,10 @@ public final class PermissionChecker {
      * will evaluate the permission access based on the current fg/bg state of the app and
      * leave a record that the data was accessed.
      *
+     * <p>For more details how to determine the {@code packageName}, {@code attributionTag}, and
+     * {@code message}, please check the description in
+     * {@link AppOpsManager#noteOp(String, int, String, String, String)}
+     *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @param pid The process id for which to check. Use {@link #PID_UNKNOWN} if the PID
@@ -262,11 +266,15 @@ public final class PermissionChecker {
      * will evaluate the permission access based on the current fg/bg state of the app and
      * leave a record that the data was accessed.
      *
+     * <p>For more details how to determine the {@code callingPackageName},
+     * {@code callingAttributionTag}, and {@code message}, please check the description in
+     * {@link AppOpsManager#noteOp(String, int, String, String, String)}
+     *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
-     * @param packageName The package name making the IPC. If null the
+     * @param callingPackageName The package name making the IPC. If null the
      *     the first package for the calling UID will be used.
-     * @param attributionTag attribution tag
+     * @param callingAttributionTag attribution tag
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param message A message describing the reason the permission was checked
@@ -275,13 +283,13 @@ public final class PermissionChecker {
      */
     @PermissionResult
     public static int checkCallingPermissionForDataDelivery(@NonNull Context context,
-            @NonNull String permission, @Nullable String packageName,
-            @Nullable String attributionTag, @Nullable String message) {
+            @NonNull String permission, @Nullable String callingPackageName,
+            @Nullable String callingAttributionTag, @Nullable String message) {
         if (Binder.getCallingPid() == Process.myPid()) {
             return PERMISSION_HARD_DENIED;
         }
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName, attributionTag, message);
+                Binder.getCallingUid(), callingPackageName, callingAttributionTag, message);
     }
 
     /**
@@ -338,6 +346,10 @@ public final class PermissionChecker {
      * deliver the location data to a registered listener you should use this method which
      * will evaluate the permission access based on the current fg/bg state of the app and
      * leave a record that the data was accessed.
+     *
+     * <p>For more details how to determine the {@code callingPackageName},
+     * {@code callingAttributionTag}, and {@code message}, please check the description in
+     * {@link AppOpsManager#noteOp(String, int, String, String, String)}
      *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
