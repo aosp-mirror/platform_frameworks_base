@@ -4708,9 +4708,12 @@ public class UserManagerService extends IUserManager.Stub {
                 final UserInfo user = users.get(i);
                 final boolean running = am.isUserRunning(user.id, 0);
                 final boolean current = user.id == currentUser;
+                final boolean hasParent = user.profileGroupId != user.id
+                        && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
                 if (verbose) {
-                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s\n", i, user.id, user.name,
+                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s\n", i, user.id, user.name,
                             UserInfo.flagsToString(user.flags),
+                            hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
                             user.preCreated ? " (pre-created)" : "",
@@ -4791,6 +4794,11 @@ public class UserManagerService extends IUserManager.Stub {
                     pw.print("  "); pw.print(userInfo);
                     pw.print(" serialNo="); pw.print(userInfo.serialNumber);
                     pw.print(" isPrimary="); pw.print(userInfo.isPrimary());
+                    if (userInfo.profileGroupId != userInfo.id
+                            &&  userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                        pw.print(" parentId="); pw.print(userInfo.profileGroupId);
+                    }
+
                     if (mRemovingUserIds.get(userId)) {
                         pw.print(" <removing> ");
                     }
