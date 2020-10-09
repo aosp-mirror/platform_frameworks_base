@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را تغییر دهد."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ضبط صدا"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"این برنامه وقتی درحال استفاده است، می‌تواند بااستفاده از میکروفون صدا ضبط کند."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ضبط صدا در پس‌زمینه"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"این برنامه می‌تواند در هرزمانی با استفاده از میکروفون صدا ضبط کند."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ارسال فرمان به سیم کارت"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"به برنامه اجازه ارسال دستورات به سیم کارت را می‌دهد. این بسیار خطرناک است."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"تشخیص فعالیت فیزیکی"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"این برنامه نمی‌تواند فعالیت فیزیکی‌تان را تشخیص دهد."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"عکسبرداری و فیلمبرداری"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"این برنامه وقتی درحال استفاده است، می‌تواند بااستفاده از دوربین عکس و فیلم بگیرد."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"گرفتن عکس و فیلم در پس‌زمینه"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"به برنامه یا سرویسی اجازه دهید برای عکس‌برداری و فیلم‌برداری به دوربین‌های سیستم دسترسی داشته باشد"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏این برنامه سیستم یا دارای امتیاز، می‌تواند با استفاده از دوربین سیستم در هرزمانی عکس‌برداری و فیلم‌برداری کند. برنامه به اجازه android.permission.CAMERA هم نیاز دارد."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"مجاز کردن برنامه یا سرویس برای دریافت پاسخ تماس درباره دستگاه‌های دوربینی که باز یا بسته می‌شوند."</string>
@@ -1664,11 +1658,11 @@
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ویژگی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ویژگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به بالا بکشید):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ویزگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به بالا بکشید):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ویژگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ویزگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"برای جابه‌جایی بین ویژگی‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه دارید."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"برای جابه‌جایی بین ویژگی‌ها، با دو انگشت صفحه را تند به بالا بکشید و نگه دارید."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"برای جابه‌جایی بین ویژگی‌ها، با سه انگشت صفحه را تند به بالا بکشید و نگه دارید."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"برای جابه‌جایی بین ویژگی‌ها، با دو انگشت صفحه را تند به‌بالا بکشید و نگه دارید."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"برای جابه‌جایی بین ویژگی‌ها، با سه انگشت صفحه را تند به‌بالا بکشید و نگه دارید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"درشت‌نمایی"</string>
     <string name="user_switched" msgid="7249833311585228097">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>

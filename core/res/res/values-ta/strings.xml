@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"எனது ஆடியோ அமைப்புகளை மாற்றுதல்"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ஒலியளவு மற்றும் வெளியீட்டிற்கு ஸ்பீக்கர்கள் பயன்படுத்தப்படுவது போன்ற ஒட்டுமொத்த ஆடியோ அமைப்புகளைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ஆடியோவைப் பதிவுசெய்தல்"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"இந்த ஆப்ஸ் உபயோகத்தில் இருக்கும்போதே இதனால் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்ய முடியும்."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"பின்புலத்தில் ஆடியோ ரெக்கார்டு செய்தல்"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"இந்த ஆப்ஸால் எப்போது வேண்டுமானாலும் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்ய முடியும்."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"கட்டளைகளை சிம்மிற்கு அனுப்புதல்"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"சிம் க்குக் கட்டளைகளை அனுப்ப ஆப்ஸை அனுமதிக்கிறது. இது மிகவும் ஆபத்தானதாகும்."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"உடல் செயல்பாட்டைக் கண்டறிதல்"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"உங்கள் உடல் செயல்பாட்டை இந்த ஆப்ஸால் கண்டறிய முடியும்."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"படங்கள் மற்றும் வீடியோக்களை எடுத்தல்"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"இந்த ஆப்ஸ் உபயோகத்தில் இருக்கும்போதே இதனால் கேமராவைப் பயன்படுத்தி படங்கள் எடுக்கவும் வீடியோக்களை ரெக்கார்டு செய்யவும் முடியும்."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"பின்புலத்தில் படங்களையும் வீடியோக்களையும் எடுத்தல்"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"இந்த ஆப்ஸால் எப்போது வேண்டுமானாலும் கேமராவைப் பயன்படுத்தி படங்கள் எடுக்கவும் வீடியோக்களை ரெக்கார்டு செய்யவும் முடியும்."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"படங்களையும் வீடியோக்களையும் எடுப்பதற்கு சிஸ்டம் கேமராக்களை அணுக ஆப்ஸையோ சேவையையோ அனுமதி"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"இந்த முன்னுரிமை பெற்ற அல்லது சிஸ்டம் ஆப்ஸால் சிஸ்டம் கேமராவைப் பயன்படுத்தி எப்போது வேண்டுமானாலும் படங்களை எடுக்கவோ வீடியோக்களை ரெக்கார்டு செய்யவோ முடியும். android.permission.CAMERA அனுமதியும் ஆப்ஸிற்குத் தேவை"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"கேமரா சாதனங்கள் திறக்கப்படும்போதோ மூடப்படும்போதோ அது குறித்த கால்பேக்குகளைப் பெற ஒரு ஆப்ஸையோ சேவையையோ அனுமதிக்கவும்."</string>

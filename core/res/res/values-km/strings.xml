@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ប្ដូរ​ការ​កំណត់​អូឌីយូ​របស់​អ្នក"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​សំឡេង​សកល ដូច​ជា​កម្រិត​សំឡេង និង​អូប៉ាល័រ​ដែល​បាន​ប្រើ​សម្រាប់​លទ្ធផល។"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ថត​សំឡេង"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"កម្មវិធី​នេះ​អាច​ថតសំឡេងដោយប្រើមីក្រូហ្វូន នៅពេលកំពុងប្រើប្រាស់កម្មវិធី។"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ថតសំឡេងនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"កម្មវិធី​នេះ​អាច​ថត​សំឡេង​ដោយ​ប្រើ​មីក្រូហ្វូន​បាន​គ្រប់​ពេល។"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ផ្ញើពាក្យបញ្ជាទៅស៊ីមកាត"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ឲ្យ​កម្មវិធី​ផ្ញើ​ពាក្យ​បញ្ជា​ទៅ​ស៊ីម​កាត។ វា​គ្រោះ​ថ្នាក់​ណាស់។"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ស្គាល់​សកម្មភាព​រាងកាយ"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"កម្មវិធីនេះ​អាចស្គាល់សកម្មភាព​រាងកាយ​របស់អ្នក។"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ថត​រូប និងវីដេអូ"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​វីដេអូ​ដោយ​ប្រើ​កាមេរ៉ា នៅពេលកំពុងប្រើប្រាស់កម្មវិធី។"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"ថតរូបភាព និងវីដេអូនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​វីដេអូ​ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ចូលប្រើកាមេរ៉ា​ប្រព័ន្ធ ដើម្បីថតរូប និង​ថតវីដេអូ"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"កម្មវិធីប្រព័ន្ធ ឬកម្មវិធីដែលមានសិទ្ធិអនុញ្ញាត​នេះអាចថត​រូប និង​ថតវីដេអូ ដោយប្រើ​កាមេរ៉ា​ប្រព័ន្ធបាន​គ្រប់ពេល។ តម្រូវឱ្យមាន​ការអនុញ្ញាត android.permission.CAMERA ដើម្បីឱ្យ​កម្មវិធីអាចធ្វើ​សកម្មភាព​បានផងដែរ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>

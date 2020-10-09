@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"cambiar tu configuración de audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y el altavoz de salida."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"grabar audio"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Esta app puede grabar audio con el micrófono mientras está en uso."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"grabar audio en segundo plano"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Esta app puede grabar audio con el micrófono en cualquier momento."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"enviar comandos a la tarjeta SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Permite que la aplicación envíe comandos a la tarjeta SIM. Usar este permiso es peligroso."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"reconocer actividad física"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Esta app puede reconocer tu actividad física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tomar fotografías y grabar videos"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Esta app puede tomar fotos y grabar videos con la cámara mientras está en uso."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"capturar fotos y videos en segundo plano"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Esta app puede tomar fotos y grabar videos con la cámara en cualquier momento."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permitir que una aplicación o un servicio accedan a las cámaras del sistema para tomar fotos y grabar videos"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esta app del sistema o con privilegios puede tomar fotografías y grabar videos con una cámara del sistema en cualquier momento. Para ello, requiere tener el permiso android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite que una aplicación o un servicio reciba devoluciones de llamada cuando se abren o cierran dispositivos de cámara."</string>

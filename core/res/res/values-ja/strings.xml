@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"録音"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"このアプリは、ユーザーがアプリを使用している場合にマイクを使用して音声を録音できます。"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"バックグラウンドでの音声の録音"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"このアプリは、いつでもマイクを使用して音声を録音できます。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"身体活動の認識"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"このアプリで身体活動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"このアプリは、ユーザーがアプリを使用している場合にカメラを使用して写真や動画を撮影できます。"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"バックグラウンドでの写真と動画の撮影"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"権限を付与されたこのアプリまたはシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>

@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"የድምፅ ቅንብሮችን ለውጥ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"መተግበሪያው አንደ የድምጽ መጠን እና ለውጽአት የትኛውን የድምጽ ማጉያ ጥቅም ላይ እንደዋለ የመሳሰሉ ሁለንተናዊ የድምጽ ቅንብሮችን እንዲያስተካክል ይፈቅድለታል።"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ኦዲዮ ይቅዱ"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"ይህ መተግበሪያ መተግበሪያው ስራ ላይ ሳለ ማይክሮፎኑን በመጠቀም ኦዲዮን መቅዳት ይችላል።"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"በበስተጀርባ ኦዲዮን ይቅዱ"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ይህ መተግበሪያ በማናቸውም ጊዜ ማይክራፎኑን በመጠቀም ኦዲዮን መቅዳት ይችላል።"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ወደ ሲሙ ትዕዛዞችን መላክ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"መተግበሪያው ትዕዛዞችን ወደ ሲሙ እንዲልክ ያስችለዋል። ይሄ በጣማ አደገኛ ነው።"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"አካላዊ እንቅስቃሴን ለይቶ ማወቅ"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ይህ መተግበሪያ አካላዊ እንቅስቃሴዎን ለይቶ ሊያውቅ ይችላል።"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ፎቶዎች እና ቪዲዮዎች ያንሱ"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"ይህ መተግበሪያ መተግበሪያው ስራ ላይ ሳለ ካሜራውን በመጠቀም ሥዕሎችን ማንሳት እና ቪዲዮዎችን መቅዳት ይችላል።"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"በበስተጀርባ ስዕሎችን እና ቪዲዮዎችን ያንሱ"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"ይህ መተግበሪያ በማናቸውም ጊዜ ካሜራውን በመጠቀም ፎቶ ሊያነሳ እና ቪዲዮዎችን ሊቀርጽ ይችላል።"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ሥዕሎችን ለማንሣት እና ቪዲዮዎችን ለመቅረጽ እንዲችሉ ወደ ሥርዓት ካሜራዎች ለመተግበሪያ ወይም ለአገልግሎት መዳረሻ ይፍቀዱ"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ይህ ልዩ ፈቃድ ያለው የሥርዓት መተግበሪያ በማንኛውም ጊዜ የሥርዓት ካሜራን በመጠቀም ሥዕሎችን ማንሣት እና ቪዲዮ መቅረጽ ይችላል። የandroid.permission.CAMERA ፈቃዱ በመተግበሪያውም ጭምር እንዲያዝ ያስፈልገዋል።"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"አንድ መተግበሪያ ወይም አገልግሎት እየተከፈቱ ወይም እየተዘጉ ስላሉ የካሜራ መሣሪያዎች መልሶ ጥሪዎችን እንዲቀበል ይፍቀዱ።"</string>

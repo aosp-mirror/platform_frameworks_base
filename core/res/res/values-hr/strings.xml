@@ -435,23 +435,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"snimanje zvuka"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Aplikacija može snimati audiozapise pomoću mikrofona dok se upotrebljava."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"snimati audiozapise u pozadini"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Aplikacija može snimati audiozapise pomoću mikrofona u svakom trenutku."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"slati naredbe SIM-u"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Omogućuje aplikaciji slanje naredbi SIM-u. To je vrlo opasno."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"prepoznati tjelesnu aktivnost"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ova aplikacija može prepoznati vašu tjelesnu aktivnost."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"snimi fotografije i videozapise"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Aplikacija može snimati fotografije i videozapise pomoću kamere dok se upotrebljava."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"snimati fotografije i videozapise u pozadini"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Aplikacija može snimati fotografije i videozapise pomoću kamere u svakom trenutku."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Dopustite aplikaciji ili usluzi da pristupa kamerama sustava radi snimanja fotografija i videozapisa"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ova povlaštena aplikacija ili aplikacija sustava u svakom trenutku može snimati fotografije i videozapise kamerom sustava. Aplikacija mora imati i dopuštenje android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Dopustite aplikaciji ili usluzi da prima povratne pozive o otvaranju ili zatvaranju fotoaparata."</string>

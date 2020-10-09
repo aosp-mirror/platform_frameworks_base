@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ta opp lyd"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Denne appen kan ta opp lyd med mikrofonen mens den er i bruk."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ta opp lyd i bakgrunnen"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Denne appen kan når som helst ta opp lyd med mikrofonen."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"sende kommandoer til SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Lar appen sende kommandoer til SIM-kortet. Dette er veldig farlig."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"gjenkjenn fysisk aktivitet"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Denne appen kan gjenkjenne den fysiske aktiviteten din."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ta bilder og videoer"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Denne appen kan ta bilder og spille inn videoer med kameraet mens den er i bruk."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"ta bilder og spille inn videoer i bakgrunnen"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Denne appen kan når som helst ta bilder og spille inn videoer med kameraet."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Gi en app eller tjeneste tilgang til systemkameraene for å ta bilder og spille inn videoer"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Denne privilegerte appen eller systemappen kan når som helst ta bilder og spille inn videoer med et systemkamera. Dette krever at appen også har tillatelsen android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillat at en app eller tjeneste mottar tilbakekallinger om kameraenheter som åpnes eller lukkes."</string>
@@ -1104,7 +1098,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Merk alt"</string>
     <string name="cut" msgid="2561199725874745819">"Klipp ut"</string>
-    <string name="copy" msgid="5472512047143665218">"Kopier"</string>
+    <string name="copy" msgid="5472512047143665218">"Kopiér"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Kunne ikke kopiere til utklippstavlen"</string>
     <string name="paste" msgid="461843306215520225">"Lim inn"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Lim inn som ren tekst"</string>

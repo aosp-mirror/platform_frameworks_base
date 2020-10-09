@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"更改您的音频设置"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"允许该应用修改全局音频设置，例如音量和用于输出的扬声器。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"录音"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"当您使用此应用时，它可以使用麦克风录音。"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"在后台录音"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"此应用可以随时使用麦克风录音。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"向 SIM 卡发送命令"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"允许应用向SIM卡发送命令（此权限具有很高的危险性）。"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"识别身体活动"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"此应用可以识别您的身体活动。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"拍摄照片和视频"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"当您使用此应用时，它可以使用相机拍摄照片和录制视频。"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"在后台拍摄照片和视频"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"此应用可以随时使用相机拍摄照片和录制视频。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"要拍照或录制视频，请允许应用或服务访问系统相机"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"这个具有特权的系统应用随时可以使用系统相机拍照及录制视频。另外，应用还需要获取 android.permission.CAMERA 权限"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允许应用或服务接收与打开或关闭摄像头设备有关的回调。"</string>
