@@ -738,7 +738,7 @@ public class StagingManager {
      * </ul>
      * @throws PackageManagerException if session fails the check
      */
-    void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
+    private void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
             throws PackageManagerException {
         if (session.isMultiPackage()) {
             // We cannot say a parent session overlaps until we process its children
@@ -747,7 +747,7 @@ public class StagingManager {
 
         String packageName = session.getPackageName();
         if (packageName == null) {
-            throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
+            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Cannot stage session " + session.sessionId + " with package name null");
         }
 
@@ -792,7 +792,7 @@ public class StagingManager {
                                 + "blocking rollback session: " + session.sessionId);
                     } else {
                         throw new PackageManagerException(
-                                PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                                 "Package: " + session.getPackageName() + " in session: "
                                         + session.sessionId + " has been staged already by session:"
                                         + " " + stagedSession.sessionId, null);
@@ -804,7 +804,7 @@ public class StagingManager {
                 // from two different root sessions.
                 if (!supportsCheckpoint) {
                     throw new PackageManagerException(
-                            PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "Cannot stage multiple sessions without checkpoint support", null);
                 }
             }
@@ -1147,6 +1147,19 @@ public class StagingManager {
          * See {@link PreRebootVerificationHandler} to see all nodes of pre reboot verification
          */
         private void handlePreRebootVerification_Start(@NonNull PackageInstallerSession session) {
+            try {
+                if (session.isMultiPackage()) {
+                    for (PackageInstallerSession s : session.getChildSessions()) {
+                        checkNonOverlappingWithStagedSessions(s);
+                    }
+                } else {
+                    checkNonOverlappingWithStagedSessions(session);
+                }
+            } catch (PackageManagerException e) {
+                onPreRebootVerificationFailure(session, e.error, e.getMessage());
+                return;
+            }
+
             int rollbackId = -1;
             if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
                 // If rollback is enabled for this session, we call through to the RollbackManager
