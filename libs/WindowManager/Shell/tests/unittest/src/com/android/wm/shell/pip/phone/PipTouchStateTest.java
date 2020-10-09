@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip.phone;
+package com.android.wm.shell.pip.phone;
 
 import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static android.view.MotionEvent.ACTION_DOWN;
