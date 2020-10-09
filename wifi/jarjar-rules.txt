@@ -70,7 +70,6 @@ rule android.net.util.NetworkConstants* com.android.wifi.x.@0
 rule android.net.util.InterfaceParams* com.android.wifi.x.@0
 rule android.net.util.SharedLog* com.android.wifi.x.@0
 rule android.net.util.NetUtils* com.android.wifi.x.@0
-rule android.net.util.IpUtils* com.android.wifi.x.@0
 
 rule androidx.annotation.** com.android.wifi.x.@0
 
