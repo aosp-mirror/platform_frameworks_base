@@ -201,6 +201,7 @@ public class Vpn {
     private final Context mContext;
     @VisibleForTesting final Dependencies mDeps;
     private final NetworkInfo mNetworkInfo;
+    private int mLegacyState = LegacyVpnInfo.STATE_DISCONNECTED;
     @VisibleForTesting protected String mPackage;
     private int mOwnerUID;
     private boolean mIsPackageTargetingAtLeastQ;
@@ -440,6 +441,7 @@ public class Vpn {
     @VisibleForTesting
     protected void updateState(DetailedState detailedState, String reason) {
         if (LOGD) Log.d(TAG, "setting state=" + detailedState + ", reason=" + reason);
+        mLegacyState = LegacyVpnInfo.stateFromNetworkInfo(detailedState);
         mNetworkInfo.setDetailedState(detailedState, reason, null);
         if (mNetworkAgent != null) {
             mNetworkAgent.sendNetworkInfo(mNetworkInfo);
@@ -2265,7 +2267,7 @@ public class Vpn {
 
         final LegacyVpnInfo info = new LegacyVpnInfo();
         info.key = mConfig.user;
-        info.state = LegacyVpnInfo.stateFromNetworkInfo(mNetworkInfo);
+        info.state = mLegacyState;
         if (mNetworkInfo.isConnected()) {
             info.intent = mStatusIntent;
         }
