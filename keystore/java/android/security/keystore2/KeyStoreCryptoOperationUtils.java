@@ -16,9 +16,18 @@
 
 package android.security.keystore2;
 
+import android.app.ActivityThread;
+import android.hardware.biometrics.BiometricManager;
+import android.security.GateKeeper;
 import android.security.KeyStore;
+import android.security.KeyStoreException;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.KeyExpiredException;
+import android.security.keystore.KeyNotYetValidException;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.ResponseCode;
 
 import libcore.util.EmptyArray;
 
@@ -26,6 +35,8 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Assorted utility methods for implementing crypto operations on top of KeyStore.
@@ -38,33 +49,80 @@ abstract class KeyStoreCryptoOperationUtils {
 
     private KeyStoreCryptoOperationUtils() {}
 
-    /**
-     * Returns the {@link InvalidKeyException} to be thrown by the {@code init} method of
-     * the crypto operation in response to {@code KeyStore.begin} operation or {@code null} if
-     * the {@code init} method should succeed.
-     */
-    static InvalidKeyException getInvalidKeyExceptionForInit(
-            KeyStore keyStore, AndroidKeyStoreKey key, int beginOpResultCode) {
-        if (beginOpResultCode == KeyStore.NO_ERROR) {
-            return null;
+
+    public static boolean canUserAuthorizationSucceed(AndroidKeyStoreKey key) {
+        List<Long> keySids = new ArrayList<Long>();
+        for (Authorization p : key.getAuthorizations()) {
+            switch(p.keyParameter.tag) {
+                case KeymasterDefs.KM_TAG_USER_SECURE_ID:
+                    keySids.add(p.keyParameter.longInteger);
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (keySids.isEmpty()) {
+            // Key is not bound to any SIDs -- no amount of authentication will help here.
+            return false;
+        }
+        long rootSid = GateKeeper.getSecureUserId();
+        if ((rootSid != 0) && (keySids.contains(rootSid))) {
+            // One of the key's SIDs is the current root SID -- user can be authenticated
+            // against that SID.
+            return true;
         }
 
-        // An error occurred. However, some errors should not lead to init throwing an exception.
-        // See below.
-        InvalidKeyException e =
-                keyStore.getInvalidKeyException(key.getAlias(), key.getUid(), beginOpResultCode);
-        switch (beginOpResultCode) {
-            case KeyStore.OP_AUTH_NEEDED:
-                // Operation needs to be authorized by authenticating the user. Don't throw an
-                // exception is such authentication is possible for this key
-                // (UserNotAuthenticatedException). An example of when it's not possible is where
-                // the key is permanently invalidated (KeyPermanentlyInvalidatedException).
-                if (e instanceof UserNotAuthenticatedException) {
-                    return null;
-                }
+        long[] biometricSids = ActivityThread
+                .currentApplication()
+                .getSystemService(BiometricManager.class)
+                .getAuthenticatorIds();
+
+        // The key must contain every biometric SID. This is because the current API surface
+        // treats all biometrics (capable of keystore integration) equally. e.g. if the
+        // device has multiple keystore-capable sensors, and one of the sensor's SIDs
+        // changed, 1) there is no way for a developer to specify authentication with a
+        // specific sensor (the one that hasn't changed), and 2) currently the only
+        // signal to developers is the UserNotAuthenticatedException, which doesn't
+        // indicate a specific sensor.
+        boolean canUnlockViaBiometrics = true;
+        for (long sid : biometricSids) {
+            if (!keySids.contains(sid)) {
+                canUnlockViaBiometrics = false;
                 break;
+            }
         }
-        return e;
+
+        if (canUnlockViaBiometrics) {
+            // All of the biometric SIDs are contained in the key's SIDs.
+            return true;
+        }
+
+        // None of the key's SIDs can ever be authenticated
+        return false;
+    }
+
+    /**
+     * Returns an {@link InvalidKeyException} corresponding to the provided
+     * {@link KeyStoreException}.
+     */
+    public static InvalidKeyException getInvalidKeyException(
+            AndroidKeyStoreKey key, KeyStoreException e) {
+        switch (e.getErrorCode()) {
+            case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
+                return new KeyExpiredException();
+            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
+                return new KeyNotYetValidException();
+            case ResponseCode.KEY_NOT_FOUND:
+                // TODO is this the right exception in this case?
+            case ResponseCode.KEY_PERMANENTLY_INVALIDATED:
+                return new KeyPermanentlyInvalidatedException();
+            case ResponseCode.LOCKED:
+            case ResponseCode.UNINITIALIZED:
+                // TODO b/173111727 remove response codes LOCKED and UNINITIALIZED
+                return new UserNotAuthenticatedException();
+            default:
+                return new InvalidKeyException("Keystore operation failed", e);
+        }
     }
 
     /**
@@ -73,13 +131,13 @@ abstract class KeyStoreCryptoOperationUtils {
      * should succeed.
      */
     public static GeneralSecurityException getExceptionForCipherInit(
-            KeyStore keyStore, AndroidKeyStoreKey key, int beginOpResultCode) {
-        if (beginOpResultCode == KeyStore.NO_ERROR) {
+            AndroidKeyStoreKey key, KeyStoreException e) {
+        if (e.getErrorCode() == KeyStore.NO_ERROR) {
             return null;
         }
 
         // Cipher-specific cases
-        switch (beginOpResultCode) {
+        switch (e.getErrorCode()) {
             case KeymasterDefs.KM_ERROR_INVALID_NONCE:
                 return new InvalidAlgorithmParameterException("Invalid IV");
             case KeymasterDefs.KM_ERROR_CALLER_NONCE_PROHIBITED:
@@ -87,7 +145,7 @@ abstract class KeyStoreCryptoOperationUtils {
         }
 
         // General cases
-        return getInvalidKeyExceptionForInit(keyStore, key, beginOpResultCode);
+        return getInvalidKeyException(key, e);
     }
 
     /**
