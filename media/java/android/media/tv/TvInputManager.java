@@ -901,12 +901,13 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the information about current TV channels has been updated.
+         * This is called when the information about current tuned information has been updated.
          *
-         * @param tvChannelInfos a list of {@link TvChannelInfo} objects of new current channels.
+         * @param tunedInfos a list of {@link TunedInfo} objects of new tuned information.
          * @hide
          */
-        public void onCurrentTvChannelInfosUpdated(@NonNull List<TvChannelInfo> tvChannelInfos) {
+        public void onCurrentTunedInfosUpdated(
+                @NonNull List<TunedInfo> tunedInfos) {
         }
     }
 
@@ -968,12 +969,11 @@ public final class TvInputManager {
             });
         }
 
-        public void postCurrentTvChannelInfosUpdated(
-                final List<TvChannelInfo> currentTvChannelInfos) {
+        public void onCurrentTunedInfosUpdated(final List<TunedInfo> currentTunedInfos) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onCurrentTvChannelInfosUpdated(currentTvChannelInfos);
+                    mCallback.onCurrentTunedInfosUpdated(currentTunedInfos);
                 }
             });
         }
@@ -1283,10 +1283,10 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onCurrentTvChannelInfosUpdated(List<TvChannelInfo> currentTvChannelInfos) {
+            public void onCurrentTunedInfosUpdated(List<TunedInfo> currentTunedInfos) {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
-                        record.postCurrentTvChannelInfosUpdated(currentTvChannelInfos);
+                        record.onCurrentTunedInfosUpdated(currentTunedInfos);
                     }
                 }
             }
@@ -1981,18 +1981,18 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns the list of TV channel information for {@link TvInputService.Session} that are
+     * Returns the list of session information for {@link TvInputService.Session} that are
      * currently in use.
      * <p> Permission com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS is required to get
-     * the channel URIs. If the permission is not granted, {@link TvChannelInfo#getChannelUri()}
-     * returns {@code null}.
+     * the channel URIs. If the permission is not granted,
+     * {@link TunedInfo#getChannelUri()} returns {@code null}.
      * @hide
      */
     @RequiresPermission("com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS")
     @NonNull
-    public List<TvChannelInfo> getCurrentTvChannelInfos() {
+    public List<TunedInfo> getCurrentTunedInfos() {
         try {
-            return mService.getCurrentTvChannelInfos(mUserId);
+            return mService.getCurrentTunedInfos(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
