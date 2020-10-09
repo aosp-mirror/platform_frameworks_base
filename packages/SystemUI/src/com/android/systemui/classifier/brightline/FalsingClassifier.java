@@ -96,7 +96,7 @@ abstract class FalsingClassifier {
     /**
      * Called when a ProximityEvent occurs (change in near/far).
      */
-    void onProximityEvent(ProximitySensor.ProximityEvent proximityEvent) {};
+    void onProximityEvent(ProximitySensor.ThresholdSensorEvent proximityEvent) {};
 
     /**
      * The phone screen has turned on and we need to begin falsing detection.

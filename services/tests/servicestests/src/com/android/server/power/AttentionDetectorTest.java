@@ -21,6 +21,7 @@ import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
 import static com.android.server.power.AttentionDetector.DEFAULT_POST_DIM_CHECK_DURATION_MILLIS;
 import static com.android.server.power.AttentionDetector.DEFAULT_PRE_DIM_CHECK_DURATION_MILLIS;
+import static com.android.server.power.AttentionDetector.KEY_MAX_EXTENSION_MILLIS;
 import static com.android.server.power.AttentionDetector.KEY_POST_DIM_CHECK_DURATION_MILLIS;
 import static com.android.server.power.AttentionDetector.KEY_PRE_DIM_CHECK_DURATION_MILLIS;
 
@@ -87,6 +88,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
         when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(false);
         mAttentionDetector = new TestableAttentionDetector();
         mRealAttentionDetector = new AttentionDetector(mOnUserAttention, new Object());
+        mRealAttentionDetector.mDefaultMaximumExtensionMillis = 900_000L;
         mAttentionDetector.onWakefulnessChangeStarted(PowerManagerInternal.WAKEFULNESS_AWAKE);
         mAttentionDetector.setAttentionServiceSupported(true);
         mNextDimming = SystemClock.uptimeMillis() + 3000L;
@@ -98,6 +100,10 @@ public class AttentionDetectorTest extends AndroidTestCase {
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.ADAPTIVE_SLEEP, 1, UserHandle.USER_CURRENT);
         mAttentionDetector.updateEnabledFromSettings(getContext());
+
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS,
+                Long.toString(10_000L), false);
     }
 
     @After
@@ -111,6 +117,9 @@ public class AttentionDetectorTest extends AndroidTestCase {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS,
                 Long.toString(DEFAULT_POST_DIM_CHECK_DURATION_MILLIS), false);
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS,
+                Long.toString(mRealAttentionDetector.mDefaultMaximumExtensionMillis), false);
     }
 
     @Test
@@ -393,6 +402,42 @@ public class AttentionDetectorTest extends AndroidTestCase {
                 DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
     }
 
+    @Test
+    public void testGetMaxExtensionMillis_handlesGoodFlagValue() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS, "123", false);
+        assertThat(mRealAttentionDetector.getMaxExtensionMillis()).isEqualTo(123);
+    }
+
+    @Test
+    public void testGetMaxExtensionMillis_rejectsNegativeValue() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS, "-50", false);
+        assertThat(mRealAttentionDetector.getMaxExtensionMillis()).isEqualTo(
+                mRealAttentionDetector.mDefaultMaximumExtensionMillis);
+    }
+
+    @Test
+    public void testGetMaxExtensionMillis_rejectsTooBigValue() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS, "9900000", false);
+        assertThat(mRealAttentionDetector.getMaxExtensionMillis()).isEqualTo(
+                mRealAttentionDetector.mDefaultMaximumExtensionMillis);
+    }
+
+    @Test
+    public void testGetMaxExtensionMillis_handlesBadFlagValue() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS, "20000k", false);
+        assertThat(mRealAttentionDetector.getMaxExtensionMillis()).isEqualTo(
+                mRealAttentionDetector.mDefaultMaximumExtensionMillis);
+
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_MAX_EXTENSION_MILLIS, "0.25", false);
+        assertThat(mRealAttentionDetector.getMaxExtensionMillis()).isEqualTo(
+                mRealAttentionDetector.mDefaultMaximumExtensionMillis);
+    }
+
     private long registerAttention() {
         mPreDimCheckDuration = 4000L;
         mAttentionDetector.onUserActivity(SystemClock.uptimeMillis(),
@@ -409,7 +454,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
             mWindowManager = mWindowManagerInternal;
             mPackageManager = AttentionDetectorTest.this.mPackageManager;
             mContentResolver = getContext().getContentResolver();
-            mMaximumExtensionMillis = 10000L;
         }
 
         void setAttentionServiceSupported(boolean supported) {
