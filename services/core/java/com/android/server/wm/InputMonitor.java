@@ -265,6 +265,7 @@ final class InputMonitor {
                 consumer.mWindowHandle.layoutParamsFlags |= FLAG_NOT_TOUCH_MODAL;
                 break;
             case INPUT_CONSUMER_RECENTS_ANIMATION:
+                consumer.mWindowHandle.focusable = true;
                 break;
             default:
                 throw new IllegalArgumentException("Illegal input consumer : " + name
@@ -545,7 +546,7 @@ final class InputMonitor {
 
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
-                        mRecentsAnimationInputConsumer.mWindowHandle, focusable)) {
+                        mRecentsAnimationInputConsumer.mWindowHandle)) {
                     mRecentsAnimationInputConsumer.show(mInputTransaction, w);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
