@@ -531,7 +531,28 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
             return false;
         }
     }
-    // TODO: determine update status for count, gauge, value, duration metrics.
+
+    for (int i = 0; i < config.gauge_metric_size(); i++, metricIndex++) {
+        const GaugeMetric& metric = config.gauge_metric(i);
+        set<int64_t> conditionDependencies;
+        if (metric.has_condition()) {
+            conditionDependencies.insert(metric.condition());
+        }
+        set<int64_t> matcherDependencies;
+        matcherDependencies.insert(metric.what());
+        if (metric.has_trigger_event()) {
+            matcherDependencies.insert(metric.trigger_event());
+        }
+        if (!determineMetricUpdateStatus(
+                    config, metric, metric.id(), METRIC_TYPE_GAUGE, matcherDependencies,
+                    conditionDependencies, ::google::protobuf::RepeatedField<int64_t>(),
+                    metric.links(), oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+                    replacedMatchers, replacedConditions, replacedStates,
+                    metricsToUpdate[metricIndex])) {
+            return false;
+        }
+    }
+    // TODO: determine update status for value, duration metrics.
     return true;
 }
 
