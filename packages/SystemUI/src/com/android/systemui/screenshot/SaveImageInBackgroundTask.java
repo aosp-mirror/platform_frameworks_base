@@ -217,13 +217,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mParams.mActionsReadyListener.onActionsReady(mImageData);
             mParams.finisher.accept(mImageData.uri);
             mParams.image = null;
-            mParams.errorMsgResId = 0;
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is
             // not mounted
             Slog.e(TAG, "unable to save screenshot", e);
             mParams.clearImage();
-            mParams.errorMsgResId = R.string.screenshot_failed_to_save_text;
             mImageData.reset();
             mParams.mActionsReadyListener.onActionsReady(mImageData);
             mParams.finisher.accept(null);
