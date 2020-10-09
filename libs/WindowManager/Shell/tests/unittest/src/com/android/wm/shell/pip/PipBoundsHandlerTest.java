@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip;
+package com.android.wm.shell.pip;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
