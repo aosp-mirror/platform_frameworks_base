@@ -100,6 +100,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.server.IpSecService;
@@ -589,7 +590,7 @@ public class VpnTest {
     }
 
     @Test
-    public void testNotificationShownForAlwaysOnApp() {
+    public void testNotificationShownForAlwaysOnApp() throws Exception {
         final UserHandle userHandle = UserHandle.of(primaryUser.id);
         final Vpn vpn = createVpn(primaryUser.id);
         setMockedUsers(primaryUser);
@@ -619,7 +620,6 @@ public class VpnTest {
 
     @Test
     public void testCapabilities() {
-        final Vpn vpn = createVpn(primaryUser.id);
         setMockedUsers(primaryUser);
 
         final Network mobile = new Network(1);
@@ -1037,7 +1037,7 @@ public class VpnTest {
         when(exception.getErrorType())
                 .thenReturn(IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED);
 
-        final Vpn vpn = startLegacyVpn(mVpnProfile);
+        final Vpn vpn = startLegacyVpn(createVpn(primaryUser.id), (mVpnProfile));
         final NetworkCallback cb = triggerOnAvailableAndGetCallback();
 
         // Wait for createIkeSession() to be called before proceeding in order to ensure consistent
@@ -1048,20 +1048,20 @@ public class VpnTest {
         ikeCb.onClosedExceptionally(exception);
 
         verify(mConnectivityManager, timeout(TEST_TIMEOUT_MS)).unregisterNetworkCallback(eq(cb));
-        assertEquals(DetailedState.FAILED, vpn.getNetworkInfo().getDetailedState());
+        assertEquals(LegacyVpnInfo.STATE_FAILED, vpn.getLegacyVpnInfo().state);
     }
 
     @Test
     public void testStartPlatformVpnIllegalArgumentExceptionInSetup() throws Exception {
         when(mIkev2SessionCreator.createIkeSession(any(), any(), any(), any(), any(), any()))
                 .thenThrow(new IllegalArgumentException());
-        final Vpn vpn = startLegacyVpn(mVpnProfile);
+        final Vpn vpn = startLegacyVpn(createVpn(primaryUser.id), mVpnProfile);
         final NetworkCallback cb = triggerOnAvailableAndGetCallback();
 
         // Wait for createIkeSession() to be called before proceeding in order to ensure consistent
         // state
         verify(mConnectivityManager, timeout(TEST_TIMEOUT_MS)).unregisterNetworkCallback(eq(cb));
-        assertEquals(DetailedState.FAILED, vpn.getNetworkInfo().getDetailedState());
+        assertEquals(LegacyVpnInfo.STATE_FAILED, vpn.getLegacyVpnInfo().state);
     }
 
     private void setAndVerifyAlwaysOnPackage(Vpn vpn, int uid, boolean lockdownEnabled) {
@@ -1100,8 +1100,7 @@ public class VpnTest {
         // a subsequent CL.
     }
 
-    public Vpn startLegacyVpn(final VpnProfile vpnProfile) throws Exception {
-        final Vpn vpn = createVpn(primaryUser.id);
+    private Vpn startLegacyVpn(final Vpn vpn, final VpnProfile vpnProfile) throws Exception {
         setMockedUsers(primaryUser);
 
         // Dummy egress interface
@@ -1118,7 +1117,7 @@ public class VpnTest {
 
     @Test
     public void testStartPlatformVpn() throws Exception {
-        startLegacyVpn(mVpnProfile);
+        startLegacyVpn(createVpn(primaryUser.id), mVpnProfile);
         // TODO: Test the Ikev2VpnRunner started up properly. Relies on utility methods added in
         // a subsequent patch.
     }
@@ -1153,7 +1152,7 @@ public class VpnTest {
                     legacyRunnerReady.open();
                     return new Network(102);
                 });
-        final Vpn vpn = startLegacyVpn(profile);
+        final Vpn vpn = startLegacyVpn(createVpn(primaryUser.id), profile);
         final TestDeps deps = (TestDeps) vpn.mDeps;
         try {
             // udppsk and 1701 are the values for TYPE_L2TP_IPSEC_PSK
