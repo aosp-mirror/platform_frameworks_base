@@ -385,13 +385,16 @@ class DisplayWindowSettings {
         dc.getDisplayRotation().restoreSettings(entry.mUserRotationMode,
                 entry.mUserRotation, entry.mFixedToUserRotation);
 
-        if (entry.mForcedDensity != 0) {
-            dc.mBaseDisplayDensity = entry.mForcedDensity;
-        }
-        if (entry.mForcedWidth != 0 && entry.mForcedHeight != 0) {
-            dc.updateBaseDisplayMetrics(entry.mForcedWidth, entry.mForcedHeight,
-                    dc.mBaseDisplayDensity);
-        }
+        final boolean hasDensityOverride = entry.mForcedDensity != 0;
+        final boolean hasSizeOverride = entry.mForcedWidth != 0 && entry.mForcedHeight != 0;
+        dc.mIsDensityForced = hasDensityOverride;
+        dc.mIsSizeForced = hasSizeOverride;
+
+        final int width = hasSizeOverride ? entry.mForcedWidth : dc.mBaseDisplayWidth;
+        final int height = hasSizeOverride ? entry.mForcedHeight : dc.mBaseDisplayHeight;
+        final int density = hasDensityOverride ? entry.mForcedDensity : dc.mBaseDisplayDensity;
+        dc.updateBaseDisplayMetrics(width, height, density);
+
         dc.mDisplayScalingDisabled = entry.mForcedScalingMode == FORCE_SCALING_MODE_DISABLED;
     }
 
