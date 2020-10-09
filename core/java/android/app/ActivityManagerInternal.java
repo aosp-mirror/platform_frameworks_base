@@ -103,6 +103,11 @@ public abstract class ActivityManagerInternal {
             IBinder whitelistToken, long duration);
 
     /**
+     * Returns the flags set for a {@link PendingIntent}.
+     */
+    public abstract int getPendingIntentFlags(IIntentSender target);
+
+    /**
      * Allows a {@link PendingIntent} to start activities from background.
      */
     public abstract void setPendingIntentAllowBgActivityStarts(
