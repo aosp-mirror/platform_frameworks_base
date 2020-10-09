@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.IPullAtomCallback;
 import android.os.IStatsManagerService;
 import android.os.IStatsd;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -412,8 +413,13 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     @Override
     public byte[] getData(long key, String packageName) throws IllegalStateException {
         enforceDumpAndUsageStatsPermission(packageName);
+        PowerManager powerManager = (PowerManager)
+                mContext.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                /*tag=*/ StatsManagerService.class.getCanonicalName());
         int callingUid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
+        wl.acquire();
         try {
             IStatsd statsd = waitForStatsd();
             if (statsd != null) {
@@ -423,6 +429,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             Log.e(TAG, "Failed to getData with statsd");
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
+            wl.release();
             Binder.restoreCallingIdentity(token);
         }
         throw new IllegalStateException("Failed to connect to statsd to getData");
