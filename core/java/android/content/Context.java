@@ -4502,6 +4502,14 @@ public abstract class Context {
     public static final String SOUND_TRIGGER_MIDDLEWARE_SERVICE = "soundtrigger_middleware";
 
     /**
+     * Used to access {@link MusicRecognitionManagerService}.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
+
+    /**
      * Official published name of the (internal) permission service.
      *
      * @see #getSystemService(String)
