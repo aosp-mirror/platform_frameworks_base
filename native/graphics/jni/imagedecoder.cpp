@@ -346,3 +346,10 @@ int AImageDecoder_decodeImage(AImageDecoder* decoder,
 void AImageDecoder_delete(AImageDecoder* decoder) {
     delete toDecoder(decoder);
 }
+
+bool AImageDecoder_isAnimated(AImageDecoder* decoder) {
+    if (!decoder) return false;
+
+    ImageDecoder* imageDecoder = toDecoder(decoder);
+    return imageDecoder->mCodec->codec()->getFrameCount() > 1;
+}
