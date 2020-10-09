@@ -16,29 +16,235 @@
 
 package com.android.systemui.qs;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
+import android.content.ComponentName;
+import android.content.res.Configuration;
+import android.metrics.LogMaker;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.util.ViewController;
 
-abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T> {
-    private final QSTileHost mHost;
-    private final DumpManager mDumpManager;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
-    protected QSPanelControllerBase(T view, QSTileHost host, DumpManager dumpManager) {
+/**
+ * Controller for QSPanel views.
+ *
+ * @param <T> Type of QSPanel.
+ */
+public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
+        implements Dumpable{
+    protected final QSTileHost mHost;
+    private final MediaHost mMediaHost;
+    private final MetricsLogger mMetricsLogger;
+    private final UiEventLogger mUiEventLogger;
+    private final DumpManager mDumpManager;
+    protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
+
+    private int mLastOrientation;
+
+    private final QSHost.Callback mQSHostCallback = this::setTiles;
+
+    private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
+            new QSPanel.OnConfigurationChangedListener() {
+                @Override
+                public void onConfigurationChange(Configuration newConfig) {
+                    if (newConfig.orientation != mLastOrientation) {
+                        mLastOrientation = newConfig.orientation;
+                        switchTileLayout(false);
+                    }
+                }
+            };
+    private String mCachedSpecs = "";
+
+    protected QSPanelControllerBase(T view, QSTileHost host,
+            MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
         super(view);
         mHost = host;
+        mMediaHost = mView.getMediaHost();
+        mMetricsLogger = metricsLogger;
+        mUiEventLogger = uiEventLogger;
         mDumpManager = dumpManager;
-        mView.setHost(mHost);
     }
 
     @Override
     protected void onViewAttached() {
-        mView.setTiles(mHost.getTiles());
-        mDumpManager.registerDumpable(mView.getDumpableTag(), mView);
+        mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mHost.addCallback(mQSHostCallback);
+        mMediaHost.addVisibilityChangeListener(aBoolean -> {
+            switchTileLayout(false);
+            return null;
+        });
+        setTiles();
+        switchTileLayout(true);
+        mDumpManager.registerDumpable(mView.getDumpableTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
-        mHost.removeCallback(mView);
+        mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mHost.removeCallback(mQSHostCallback);
+
+        for (TileRecord record : mRecords) {
+            record.tile.removeCallbacks();
+        }
+        mRecords.clear();
         mDumpManager.unregisterDumpable(mView.getDumpableTag());
+    }
+
+    /** */
+    public void setTiles() {
+        setTiles(mHost.getTiles(), false);
+    }
+
+    /** */
+    public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
+        if (!collapsedView) {
+            mView.updateRevealedTiles(tiles);
+        }
+        for (QSPanelControllerBase.TileRecord record : mRecords) {
+            mView.removeTile(record);
+            record.tile.removeCallback(record.callback);
+        }
+        mRecords.clear();
+        mCachedSpecs = "";
+        for (QSTile tile : tiles) {
+            addTile(tile, collapsedView);
+        }
+    }
+
+    /** */
+    public void refreshAllTiles() {
+        for (QSPanelControllerBase.TileRecord r : mRecords) {
+            r.tile.refreshState();
+        }
+    }
+
+    private void addTile(final QSTile tile, boolean collapsedView) {
+        final TileRecord r = new TileRecord();
+        r.tile = tile;
+        r.tileView = mHost.createTileView(tile, collapsedView);
+        mView.addTile(r);
+        mRecords.add(r);
+        mCachedSpecs = getTilesSpecs();
+
+    }
+
+    /** */
+    public void clickTile(ComponentName tile) {
+        final String spec = CustomTile.toSpec(tile);
+        for (TileRecord record : mRecords) {
+            if (record.tile.getTileSpec().equals(spec)) {
+                record.tile.click();
+                break;
+            }
+        }
+    }
+    protected QSTile getTile(String subPanel) {
+        for (int i = 0; i < mRecords.size(); i++) {
+            if (subPanel.equals(mRecords.get(i).tile.getTileSpec())) {
+                return mRecords.get(i).tile;
+            }
+        }
+        return mHost.createTile(subPanel);
+    }
+
+
+    QSTileView getTileView(QSTile tile) {
+        for (QSPanelControllerBase.TileRecord r : mRecords) {
+            if (r.tile == tile) {
+                return r.tileView;
+            }
+        }
+        return null;
+    }
+
+    private String getTilesSpecs() {
+        return mRecords.stream()
+                .map(tileRecord ->  tileRecord.tile.getTileSpec())
+                .collect(Collectors.joining(","));
+    }
+
+
+    /** */
+    public void setExpanded(boolean expanded) {
+        mView.setExpanded(expanded);
+        mMetricsLogger.visibility(MetricsEvent.QS_PANEL, expanded);
+        if (!expanded) {
+            mUiEventLogger.log(mView.closePanelEvent());
+            closeDetail();
+        } else {
+            mUiEventLogger.log(mView.openPanelEvent());
+            logTiles();
+        }
+    }
+
+    /** */
+    public void closeDetail() {
+        mView.closeDetail();
+    }
+
+    /** */
+    public void openDetails(String subPanel) {
+        QSTile tile = getTile(subPanel);
+        // If there's no tile with that name (as defined in QSFactoryImpl or other QSFactory),
+        // QSFactory will not be able to create a tile and getTile will return null
+        if (tile != null) {
+            mView.showDetailAdapter(
+                    true, tile.getDetailAdapter(), new int[]{mView.getWidth() / 2, 0});
+        }
+    }
+
+
+    void setListening(boolean listening) {
+        mView.setListening(listening, mCachedSpecs);
+    }
+
+    boolean switchTileLayout(boolean force) {
+        if (mView.switchTileLayout(force, mRecords)) {
+            setTiles();
+            return true;
+        }
+        return false;
+    }
+
+    private void logTiles() {
+        for (int i = 0; i < mRecords.size(); i++) {
+            QSTile tile = mRecords.get(i).tile;
+            mMetricsLogger.write(tile.populate(new LogMaker(tile.getMetricsCategory())
+                    .setType(MetricsEvent.TYPE_OPEN)));
+        }
+    }
+
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(getClass().getSimpleName() + ":");
+        pw.println("  Tile records:");
+        for (QSPanelControllerBase.TileRecord record : mRecords) {
+            if (record.tile instanceof Dumpable) {
+                pw.print("    "); ((Dumpable) record.tile).dump(fd, pw, args);
+                pw.print("    "); pw.println(record.tileView.toString());
+            }
+        }
+    }
+
+    /** */
+    public static final class TileRecord extends QSPanel.Record {
+        public QSTile tile;
+        public com.android.systemui.plugins.qs.QSTileView tileView;
+        public boolean scanState;
+        public QSTile.Callback callback;
     }
 }

@@ -74,9 +74,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private final ScreenLifecycle mScreenLifecycle;
     private final TileQueryHelper mTileQueryHelper;
     private final View mTransparentView;
+    private final QSTileHost mHost;
 
     private boolean isShown;
-    private QSTileHost mHost;
     private RecyclerView mRecyclerView;
     private TileAdapter mTileAdapter;
     private Toolbar mToolbar;
@@ -95,6 +95,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             KeyguardStateController keyguardStateController,
             ScreenLifecycle screenLifecycle,
             TileQueryHelper tileQueryHelper,
+            QSTileHost qsTileHost,
             UiEventLogger uiEventLogger) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
 
@@ -139,6 +140,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mLightBarController = lightBarController;
         mKeyguardStateController = keyguardStateController;
         mScreenLifecycle = screenLifecycle;
+        mHost = qsTileHost;
+        mTileAdapter.setHost(mHost);
         updateNavBackDrop(getResources().getConfiguration());
     }
 
@@ -168,11 +171,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private void updateNavColors() {
         mLightBarController.setQsCustomizing(mIsShowingNavBackdrop && isShown);
-    }
-
-    public void setHost(QSTileHost host) {
-        mHost = host;
-        mTileAdapter.setHost(host);
     }
 
     public void setContainer(NotificationsQuickSettingsContainer notificationsQsContainer) {

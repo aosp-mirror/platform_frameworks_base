@@ -29,16 +29,12 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.logging.QSLogger;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,11 +58,10 @@ public class QuickQSPanel extends QSPanel {
     public QuickQSPanel(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            DumpManager dumpManager,
             QSLogger qsLogger,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger) {
-        super(context, attrs, dumpManager, qsLogger, mediaHost, uiEventLogger);
+        super(context, attrs, qsLogger, mediaHost, uiEventLogger);
         sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
         applyBottomMargin((View) mRegularTileLayout);
     }
@@ -84,7 +79,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected TileLayout createRegularTileLayout() {
+    public TileLayout createRegularTileLayout() {
         return new QuickQSPanel.HeaderTileLayout(mContext, mUiEventLogger);
     }
 
@@ -118,11 +113,6 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-    }
-
-    @Override
     protected String getDumpableTag() {
         return TAG;
     }
@@ -137,7 +127,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected void drawTile(TileRecord r, State state) {
+    protected void drawTile(QSPanelControllerBase.TileRecord r, State state) {
         if (state instanceof SignalState) {
             SignalState copy = new SignalState();
             state.copyTo(copy);
@@ -151,9 +141,6 @@ public class QuickQSPanel extends QSPanel {
 
     public void setMaxTiles(int maxTiles) {
         mMaxTiles = maxTiles;
-        if (mHost != null) {
-            setTiles(mHost.getTiles());
-        }
     }
 
     @Override
@@ -162,18 +149,6 @@ public class QuickQSPanel extends QSPanel {
             // No Brightness or Tooltip for you!
             super.onTuningChanged(key, "0");
         }
-    }
-
-    @Override
-    public void setTiles(Collection<QSTile> tiles) {
-        ArrayList<QSTile> quickTiles = new ArrayList<>();
-        for (QSTile tile : tiles) {
-            quickTiles.add(tile);
-            if (quickTiles.size() == mMaxTiles) {
-                break;
-            }
-        }
-        super.setTiles(quickTiles, true);
     }
 
     public int getNumQuickTiles() {
@@ -273,7 +248,7 @@ public class QuickQSPanel extends QSPanel {
         }
 
         @Override
-        protected void addTileView(TileRecord tile) {
+        protected void addTileView(QSPanelControllerBase.TileRecord tile) {
             addView(tile.tileView, getChildCount(), generateTileLayoutParams());
         }
 
@@ -336,7 +311,7 @@ public class QuickQSPanel extends QSPanel {
         private void setAccessibilityOrder() {
             if (mRecords != null && mRecords.size() > 0) {
                 View previousView = this;
-                for (TileRecord record : mRecords) {
+                for (QSPanelControllerBase.TileRecord record : mRecords) {
                     if (record.tileView.getVisibility() == GONE) continue;
                     previousView = record.tileView.updateAccessibilityOrder(previousView);
                 }
@@ -348,7 +323,7 @@ public class QuickQSPanel extends QSPanel {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             // Measure each QS tile.
-            for (TileRecord record : mRecords) {
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
                 if (record.tileView.getVisibility() == GONE) continue;
                 record.tileView.measure(exactly(mCellWidth), exactly(mCellHeight));
             }
