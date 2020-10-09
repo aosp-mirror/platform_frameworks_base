@@ -707,7 +707,7 @@ public class BtHelper {
                         mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
                     } else {
                         Log.w(TAG, "requestScoState: connect to "
-                                + getAnonymizedAddress(mBluetoothHeadsetDevice)
+                                + mBluetoothHeadsetDevice
                                 + " failed, mScoAudioMode=" + mScoAudioMode);
                         broadcastScoConnectionState(
                                 AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
