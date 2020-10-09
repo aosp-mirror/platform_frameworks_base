@@ -1358,6 +1358,12 @@ class ActivityStarter {
             }
             return false;
         }
+        // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
+        if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
+            Slog.w(TAG, "Background activity start for " + callingPackage
+                    + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
+            return false;
+        }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
         // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
@@ -1393,12 +1399,6 @@ class ActivityStarter {
                     }
                 }
             }
-        }
-        // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
-        if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
-            Slog.w(TAG, "Background activity start for " + callingPackage
-                    + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
-            return false;
         }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
