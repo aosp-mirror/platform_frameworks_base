@@ -378,8 +378,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull Injector injector) {
         mInjector = injector;
         // The package info cache is the cache for package and permission information.
+        // Disable the package info and package permission caches locally but leave the
+        // checkPermission cache active.
         mInjector.invalidatePackageInfoCache();
-        mInjector.disablePermissionCache();
         mInjector.disablePackageNamePermissionCache();
 
         mContext = context;
