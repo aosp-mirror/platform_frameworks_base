@@ -54,7 +54,7 @@ import android.media.tv.ITvInputService;
 import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSession;
 import android.media.tv.ITvInputSessionCallback;
-import android.media.tv.TvChannelInfo;
+import android.media.tv.TunedInfo;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvContentRatingSystemInfo;
 import android.media.tv.TvContract;
@@ -90,7 +90,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -114,7 +113,7 @@ public final class TvInputManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
     private static final String DVB_DIRECTORY = "/dev/dvb";
-    private static final int APP_TAG_SELF = TvChannelInfo.APP_TAG_SELF;
+    private static final int APP_TAG_SELF = TunedInfo.APP_TAG_SELF;
     private static final String PERMISSION_ACCESS_WATCHED_PROGRAMS =
             "com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS";
 
@@ -860,9 +859,9 @@ public final class TvInputManagerService extends SystemService {
             try {
                 ITvInputManagerCallback callback = userState.mCallbacks.getBroadcastItem(i);
                 Pair<Integer, Integer> pidUid = userState.callbackPidUidMap.get(callback);
-                List<TvChannelInfo> infos = getCurrentTvChannelInfosInternalLocked(
+                List<TunedInfo> infos = getCurrentTunedInfosInternalLocked(
                         userState, pidUid.first, pidUid.second);
-                callback.onCurrentTvChannelInfosUpdated(infos);
+                callback.onCurrentTunedInfosUpdated(infos);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report updated current channel infos to callback", e);
             }
@@ -2097,14 +2096,14 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public List<TvChannelInfo> getCurrentTvChannelInfos(@UserIdInt int userId) {
+        public List<TunedInfo> getCurrentTunedInfos(@UserIdInt int userId) {
             int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
                     "getTvCurrentChannelInfos");
             synchronized (mLock) {
                 UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                return getCurrentTvChannelInfosInternalLocked(userState, callingPid, callingUid);
+                return getCurrentTunedInfosInternalLocked(userState, callingPid, callingUid);
             }
         }
 
@@ -2278,9 +2277,9 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private List<TvChannelInfo> getCurrentTvChannelInfosInternalLocked(
+    private List<TunedInfo> getCurrentTunedInfosInternalLocked(
             UserState userState, int callingPid, int callingUid) {
-        List<TvChannelInfo> channelInfos = new ArrayList<>();
+        List<TunedInfo> channelInfos = new ArrayList<>();
         boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission(callingPid, callingUid);
         for (SessionState state : userState.sessionStateMap.values()) {
             if (state.isCurrent) {
@@ -2288,7 +2287,7 @@ public final class TvInputManagerService extends SystemService {
                 int appType;
                 if (state.callingUid == callingUid) {
                     appTag = APP_TAG_SELF;
-                    appType = TvChannelInfo.APP_TYPE_SELF;
+                    appType = TunedInfo.APP_TYPE_SELF;
                 } else {
                     appTag = userState.mAppTagMap.get(state.callingUid);
                     if (appTag == null) {
@@ -2296,10 +2295,10 @@ public final class TvInputManagerService extends SystemService {
                         userState.mAppTagMap.put(state.callingUid, appTag);
                     }
                     appType = isSystemApp(state.componentName.getPackageName())
-                            ? TvChannelInfo.APP_TYPE_SYSTEM
-                            : TvChannelInfo.APP_TYPE_NON_SYSTEM;
+                            ? TunedInfo.APP_TYPE_SYSTEM
+                            : TunedInfo.APP_TYPE_NON_SYSTEM;
                 }
-                channelInfos.add(new TvChannelInfo(
+                channelInfos.add(new TunedInfo(
                         state.inputId,
                         watchedProgramsAccess ? state.currentChannel : null,
                         state.isRecordingSession,
