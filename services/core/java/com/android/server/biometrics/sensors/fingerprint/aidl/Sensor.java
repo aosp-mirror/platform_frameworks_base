@@ -54,6 +54,7 @@ class Sensor {
     @NonNull private final Handler mHandler;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricScheduler mScheduler;
+    @NonNull private final LockoutCache mLockoutCache;
 
     @Nullable private Session mCurrentSession; // TODO: Death recipient
     @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
@@ -82,6 +83,7 @@ class Sensor {
         mHandler = handler;
         mSensorProperties = sensorProperties;
         mScheduler = new BiometricScheduler(tag, gestureAvailabilityDispatcher);
+        mLockoutCache = new LockoutCache();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
 
@@ -217,7 +219,18 @@ class Sensor {
 
             @Override
             public void onLockoutCleared() {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof FingerprintResetLockoutClient)) {
+                        Slog.e(mTag, "onLockoutCleared for non-resetLockout client: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final FingerprintResetLockoutClient resetLockoutClient =
+                            (FingerprintResetLockoutClient) client;
+                    resetLockoutClient.onLockoutCleared();
+                });
             }
 
             @Override
@@ -252,5 +265,9 @@ class Sensor {
 
     @NonNull BiometricScheduler getScheduler() {
         return mScheduler;
+    }
+
+    @NonNull LockoutCache getLockoutCache() {
+        return mLockoutCache;
     }
 }

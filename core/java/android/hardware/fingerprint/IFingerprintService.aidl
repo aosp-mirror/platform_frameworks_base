@@ -91,7 +91,7 @@ interface IFingerprintService {
     void generateChallenge(IBinder token, int sensorId, IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    void revokeChallenge(IBinder token, String opPackageName);
+    void revokeChallenge(IBinder token, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled fingerprint
     boolean hasEnrolledFingerprints(int userId, String opPackageName);
