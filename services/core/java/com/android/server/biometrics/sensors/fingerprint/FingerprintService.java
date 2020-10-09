@@ -32,6 +32,8 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.fingerprint.IFingerprint;
+import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -40,9 +42,12 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
@@ -53,11 +58,13 @@ import android.view.Surface;
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
 
@@ -506,7 +513,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
-        public void onFingerDown(int sensorId, int x, int y, float minor, float major) {
+        public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -514,11 +521,11 @@ public class FingerprintService extends SystemService {
                 Slog.w(TAG, "No matching provider for onFingerDown, sensorId: " + sensorId);
                 return;
             }
-            provider.onFingerDown(sensorId, x, y, minor, major);
+            provider.onPointerDown(sensorId, x, y, minor, major);
         }
 
         @Override
-        public void onFingerUp(int sensorId) {
+        public void onPointerUp(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -526,7 +533,7 @@ public class FingerprintService extends SystemService {
                 Slog.w(TAG, "No matching provider for onFingerUp, sensorId: " + sensorId);
                 return;
             }
-            provider.onFingerUp(sensorId);
+            provider.onPointerUp(sensorId);
         }
 
         @Override
@@ -546,6 +553,39 @@ public class FingerprintService extends SystemService {
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
+
+        initializeAidlHals();
+    }
+
+    private void initializeAidlHals() {
+        final String[] instances = ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR);
+        if (instances == null || instances.length == 0) {
+            return;
+        }
+
+        // If for some reason the HAL is not started before the system service, do not block
+        // the rest of system server. Put this on a background thread.
+        final ServiceThread thread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
+                true /* allowIo */);
+        thread.start();
+        final Handler handler = new Handler(thread.getLooper());
+
+        handler.post(() -> {
+            for (String instance : instances) {
+                final String fqName = IFingerprint.DESCRIPTOR + "/" + instance;
+                final IFingerprint fp = IFingerprint.Stub.asInterface(
+                        ServiceManager.waitForDeclaredService(fqName));
+                try {
+                    final SensorProps[] props = fp.getSensorProps();
+                    final FingerprintProvider provider =
+                            new FingerprintProvider(getContext(), props, fqName,
+                                    mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+                    mServiceProviders.add(provider);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception when initializing instance: " + fqName);
+                }
+            }
+        });
     }
 
     @Override
@@ -571,6 +611,7 @@ public class FingerprintService extends SystemService {
     private Pair<Integer, ServiceProvider> getSingleProvider() {
         final List<FingerprintSensorPropertiesInternal> properties = getSensorProperties();
         if (properties.size() != 1) {
+            Slog.e(TAG, "Multiple sensors found: " + properties.size());
             return null;
         }
 

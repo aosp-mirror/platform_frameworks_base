@@ -761,14 +761,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onFingerDown(int sensorId, int x, int y, float minor, float major) {
+    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
         if (mService == null) {
             Slog.w(TAG, "onFingerDown: no fingerprint service");
             return;
         }
 
         try {
-            mService.onFingerDown(sensorId, x, y, minor, major);
+            mService.onPointerDown(sensorId, x, y, minor, major);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -778,14 +778,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onFingerUp(int sensorId) {
+    public void onPointerUp(int sensorId) {
         if (mService == null) {
             Slog.w(TAG, "onFingerDown: no fingerprint service");
             return;
         }
 
         try {
-            mService.onFingerUp(sensorId);
+            mService.onPointerUp(sensorId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

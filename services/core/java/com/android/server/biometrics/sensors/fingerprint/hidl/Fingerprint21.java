@@ -68,6 +68,7 @@ import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.ServiceProvider;
+import com.android.server.biometrics.sensors.fingerprint.Udfps;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -635,6 +636,11 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
+    public void scheduleInternalCleanup(int userId, int sensorId) {
+        scheduleInternalCleanup(userId);
+    }
+
+    @Override
     public boolean isHardwareDetected(int sensorId) {
         final IBiometricsFingerprint daemon = getDaemon();
         return daemon != null;
@@ -664,25 +670,25 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void onFingerDown(int sensorId, int x, int y, float minor, float major) {
+    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
         final ClientMonitor<?> client = mScheduler.getCurrentClient();
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onFingerDown received during client: " + client);
             return;
         }
         final Udfps udfps = (Udfps) client;
-        udfps.onFingerDown(x, y, minor, major);
+        udfps.onPointerDown(x, y, minor, major);
     }
 
     @Override
-    public void onFingerUp(int sensorId) {
+    public void onPointerUp(int sensorId) {
         final ClientMonitor<?> client = mScheduler.getCurrentClient();
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onFingerDown received during client: " + client);
             return;
         }
         final Udfps udfps = (Udfps) client;
-        udfps.onFingerUp();
+        udfps.onPointerUp();
     }
 
     @Override
