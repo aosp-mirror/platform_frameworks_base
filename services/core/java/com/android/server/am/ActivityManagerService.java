@@ -12127,6 +12127,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.setHasClientActivities(false);
 
         mServices.killServicesLocked(app, allowRestart);
+        mPhantomProcessList.onAppDied(app.pid);
 
         boolean restart = false;
 
