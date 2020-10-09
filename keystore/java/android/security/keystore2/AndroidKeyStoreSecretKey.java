@@ -16,6 +16,11 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
+import android.system.keystore2.KeyDescriptor;
+import android.system.keystore2.KeyMetadata;
+
 import javax.crypto.SecretKey;
 
 /**
@@ -25,7 +30,9 @@ import javax.crypto.SecretKey;
  */
 public class AndroidKeyStoreSecretKey extends AndroidKeyStoreKey implements SecretKey {
 
-    public AndroidKeyStoreSecretKey(String alias, int uid, String algorithm) {
-        super(alias, uid, algorithm);
+    public AndroidKeyStoreSecretKey(@NonNull KeyDescriptor descriptor,
+            @NonNull KeyMetadata metadata, @NonNull String algorithm,
+            @NonNull KeyStoreSecurityLevel securityLevel) {
+        super(descriptor, metadata.key.nspace, metadata.authorizations, algorithm, securityLevel);
     }
 }

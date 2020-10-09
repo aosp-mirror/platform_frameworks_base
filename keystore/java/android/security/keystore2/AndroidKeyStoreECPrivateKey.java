@@ -16,7 +16,11 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.KeyDescriptor;
 
 import java.security.PrivateKey;
 import java.security.interfaces.ECKey;
@@ -30,8 +34,12 @@ import java.security.spec.ECParameterSpec;
 public class AndroidKeyStoreECPrivateKey extends AndroidKeyStorePrivateKey implements ECKey {
     private final ECParameterSpec mParams;
 
-    public AndroidKeyStoreECPrivateKey(String alias, int uid, ECParameterSpec params) {
-        super(alias, uid, KeyProperties.KEY_ALGORITHM_EC);
+    public AndroidKeyStoreECPrivateKey(@NonNull KeyDescriptor descriptor,
+            long keyId,
+            Authorization[] authorizations,
+            @NonNull KeyStoreSecurityLevel securityLevel,
+            @NonNull ECParameterSpec params) {
+        super(descriptor, keyId, authorizations, KeyProperties.KEY_ALGORITHM_EC, securityLevel);
         mParams = params;
     }
 

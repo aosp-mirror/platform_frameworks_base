@@ -16,7 +16,11 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.KeyDescriptor;
+import android.system.keystore2.KeyMetadata;
 
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
@@ -32,19 +36,30 @@ public class AndroidKeyStoreECPublicKey extends AndroidKeyStorePublicKey impleme
     private final ECParameterSpec mParams;
     private final ECPoint mW;
 
-    public AndroidKeyStoreECPublicKey(String alias, int uid, byte[] x509EncodedForm, ECParameterSpec params,
-            ECPoint w) {
-        super(alias, uid, KeyProperties.KEY_ALGORITHM_EC, x509EncodedForm);
+    public AndroidKeyStoreECPublicKey(@NonNull KeyDescriptor descriptor,
+            @NonNull KeyMetadata metadata,
+            @NonNull KeyStoreSecurityLevel securityLevel,
+            @NonNull ECParameterSpec params, @NonNull ECPoint w) {
+        super(descriptor, metadata, KeyProperties.KEY_ALGORITHM_EC, securityLevel);
         mParams = params;
         mW = w;
     }
 
-    public AndroidKeyStoreECPublicKey(String alias, int uid, ECPublicKey info) {
-        this(alias, uid, info.getEncoded(), info.getParams(), info.getW());
+    public AndroidKeyStoreECPublicKey(@NonNull KeyDescriptor descriptor,
+            @NonNull KeyMetadata metadata,
+            @NonNull KeyStoreSecurityLevel securityLevel, @NonNull ECPublicKey info) {
+        this(descriptor, metadata, securityLevel, info.getParams(), info.getW());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());
         }
+    }
+
+    @Override
+    public AndroidKeyStorePrivateKey getPrivateKey() {
+        return new AndroidKeyStoreECPrivateKey(
+                getUserKeyDescriptor(), getKeyIdDescriptor().nspace, getAuthorizations(),
+                getSecurityLevel(), mParams);
     }
 
     @Override

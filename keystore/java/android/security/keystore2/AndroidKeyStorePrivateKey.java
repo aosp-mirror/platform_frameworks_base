@@ -16,6 +16,11 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.KeyDescriptor;
+
 import java.security.PrivateKey;
 
 /**
@@ -25,7 +30,10 @@ import java.security.PrivateKey;
  */
 public class AndroidKeyStorePrivateKey extends AndroidKeyStoreKey implements PrivateKey {
 
-    public AndroidKeyStorePrivateKey(String alias, int uid, String algorithm) {
-        super(alias, uid, algorithm);
+    public AndroidKeyStorePrivateKey(@NonNull KeyDescriptor descriptor,
+            long keyId, @NonNull Authorization[] authorizations, @NonNull String algorithm,
+            @NonNull KeyStoreSecurityLevel securityLevel) {
+        super(descriptor, keyId, authorizations, algorithm, securityLevel);
     }
+
 }

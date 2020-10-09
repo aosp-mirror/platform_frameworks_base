@@ -16,7 +16,11 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.KeyDescriptor;
+import android.system.keystore2.KeyMetadata;
 
 import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
@@ -30,19 +34,29 @@ public class AndroidKeyStoreRSAPublicKey extends AndroidKeyStorePublicKey implem
     private final BigInteger mModulus;
     private final BigInteger mPublicExponent;
 
-    public AndroidKeyStoreRSAPublicKey(String alias, int uid, byte[] x509EncodedForm, BigInteger modulus,
-            BigInteger publicExponent) {
-        super(alias, uid, KeyProperties.KEY_ALGORITHM_RSA, x509EncodedForm);
+    public AndroidKeyStoreRSAPublicKey(@NonNull KeyDescriptor descriptor,
+            @NonNull KeyMetadata metadata,
+            @NonNull KeyStoreSecurityLevel securityLevel, @NonNull BigInteger modulus,
+            @NonNull BigInteger publicExponent) {
+        super(descriptor, metadata, KeyProperties.KEY_ALGORITHM_RSA, securityLevel);
         mModulus = modulus;
         mPublicExponent = publicExponent;
     }
 
-    public AndroidKeyStoreRSAPublicKey(String alias, int uid, RSAPublicKey info) {
-        this(alias, uid, info.getEncoded(), info.getModulus(), info.getPublicExponent());
+    public AndroidKeyStoreRSAPublicKey(@NonNull KeyDescriptor descriptor,
+            @NonNull KeyMetadata metadata,
+            @NonNull KeyStoreSecurityLevel securityLevel, @NonNull RSAPublicKey info) {
+        this(descriptor, metadata, securityLevel, info.getModulus(), info.getPublicExponent());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());
         }
+    }
+
+    @Override
+    public AndroidKeyStorePrivateKey getPrivateKey() {
+        return new AndroidKeyStoreRSAPrivateKey(getUserKeyDescriptor(), getKeyIdDescriptor().nspace,
+                getAuthorizations(), getSecurityLevel(), mModulus);
     }
 
     @Override

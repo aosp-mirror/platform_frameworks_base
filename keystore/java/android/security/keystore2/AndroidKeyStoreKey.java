@@ -16,6 +16,13 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
+import android.util.Log;
+
 import java.security.Key;
 
 /**
@@ -24,23 +31,55 @@ import java.security.Key;
  * @hide
  */
 public class AndroidKeyStoreKey implements Key {
-    private final String mAlias;
-    private final int mUid;
+    // This is the original KeyDescriptor by which the key was loaded from
+    // with alias and domain.
+    private final KeyDescriptor mDescriptor;
+    // The key id can be used make certain manipulations to the keystore database
+    // assuring that the manipulation is made to the exact key that was loaded
+    // from the database. Alias based manipulations can not assure this, because
+    // aliases can be rebound to other keys at any time.
+    private final long mKeyId;
+    private final Authorization[] mAuthorizations;
+    // TODO extract algorithm string from metadata.
     private final String mAlgorithm;
 
-    public AndroidKeyStoreKey(String alias, int uid, String algorithm) {
-        mAlias = alias;
-        mUid = uid;
+    // This is the security level interface, that this key is associated with.
+    // We do not include this member in comparisons.
+    private final KeyStoreSecurityLevel mSecurityLevel;
+
+    AndroidKeyStoreKey(@NonNull KeyDescriptor descriptor,
+            long keyId,
+            @NonNull Authorization[] authorizations,
+            @NonNull String algorithm,
+            @NonNull KeyStoreSecurityLevel securityLevel) {
+        mDescriptor = descriptor;
+        mKeyId = keyId;
+        mAuthorizations = authorizations;
         mAlgorithm = algorithm;
+        mSecurityLevel = securityLevel;
     }
 
-    String getAlias() {
-        return mAlias;
+    KeyDescriptor getUserKeyDescriptor() {
+        return mDescriptor;
     }
 
-    int getUid() {
-        return mUid;
+    KeyDescriptor getKeyIdDescriptor() {
+        KeyDescriptor descriptor = new KeyDescriptor();
+        descriptor.nspace = mKeyId;
+        descriptor.domain = Domain.KEY_ID;
+        descriptor.alias = null;
+        descriptor.blob = null;
+        return descriptor;
     }
+
+    Authorization[] getAuthorizations() {
+        return mAuthorizations;
+    }
+
+    KeyStoreSecurityLevel getSecurityLevel() {
+        return mSecurityLevel;
+    }
+
 
     @Override
     public String getAlgorithm() {
@@ -63,9 +102,12 @@ public class AndroidKeyStoreKey implements Key {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+
+        result = prime * result + ((mDescriptor == null) ? 0 : mDescriptor.hashCode());
+        result = prime * result + (int) (mKeyId >>> 32);
+        result = prime * result + (int) (mKeyId & 0xffffffff);
+        result = prime * result + ((mAuthorizations == null) ? 0 : mAuthorizations.hashCode());
         result = prime * result + ((mAlgorithm == null) ? 0 : mAlgorithm.hashCode());
-        result = prime * result + ((mAlias == null) ? 0 : mAlias.hashCode());
-        result = prime * result + mUid;
         return result;
     }
 
@@ -81,21 +123,17 @@ public class AndroidKeyStoreKey implements Key {
             return false;
         }
         AndroidKeyStoreKey other = (AndroidKeyStoreKey) obj;
-        if (mAlgorithm == null) {
-            if (other.mAlgorithm != null) {
-                return false;
-            }
-        } else if (!mAlgorithm.equals(other.mAlgorithm)) {
+        if (mKeyId != other.mKeyId) {
             return false;
         }
-        if (mAlias == null) {
-            if (other.mAlias != null) {
-                return false;
-            }
-        } else if (!mAlias.equals(other.mAlias)) {
-            return false;
-        }
-        if (mUid != other.mUid) {
+
+        // If the key ids are equal and the class matches all the other fields cannot differ
+        // unless we have a bug.
+        if (!mAlgorithm.equals(other.mAlgorithm)
+                || !mAuthorizations.equals(other.mAuthorizations)
+                || !mDescriptor.equals(other.mDescriptor)) {
+            Log.e("AndroidKeyStoreKey", "Bug: key ids are identical, but key metadata"
+                    + "differs.");
             return false;
         }
         return true;

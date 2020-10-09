@@ -16,7 +16,11 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
+import android.security.KeyStoreSecurityLevel;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.KeyDescriptor;
 
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -31,8 +35,12 @@ public class AndroidKeyStoreRSAPrivateKey extends AndroidKeyStorePrivateKey impl
 
     private final BigInteger mModulus;
 
-    public AndroidKeyStoreRSAPrivateKey(String alias, int uid, BigInteger modulus) {
-        super(alias, uid, KeyProperties.KEY_ALGORITHM_RSA);
+
+    public AndroidKeyStoreRSAPrivateKey(@NonNull KeyDescriptor descriptor,
+            long keyId,
+            @NonNull Authorization[] authorizations,
+            @NonNull KeyStoreSecurityLevel securityLevel, @NonNull BigInteger modulus) {
+        super(descriptor, keyId, authorizations, KeyProperties.KEY_ALGORITHM_RSA, securityLevel);
         mModulus = modulus;
     }
 
