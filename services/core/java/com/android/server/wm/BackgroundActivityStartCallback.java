@@ -24,8 +24,8 @@ import android.os.IBinder;
  */
 public interface BackgroundActivityStartCallback {
     /**
-     * The token that allowed the activity start that triggered {@link
-     * #onExclusiveTokenActivityStart()}.
+     * The token for which this callback is responsible for deciding whether the app can start
+     * background activities or not.
      *
      * Ideally this should just return a final variable, don't do anything costly here (don't hold
      * any locks).
@@ -33,7 +33,10 @@ public interface BackgroundActivityStartCallback {
     IBinder getToken();
 
     /**
-     * Called when the background activity start happens.
+     * Returns true if the background activity start due to originating token in {@link #getToken()}
+     * should be allowed or not.
+     *
+     * This will be called holding the WM lock, don't do anything costly here.
      */
-    void onExclusiveTokenActivityStart(String packageName);
+    boolean isActivityStartAllowed(int uid, String packageName);
 }

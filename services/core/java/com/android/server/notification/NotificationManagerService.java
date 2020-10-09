@@ -140,6 +140,7 @@ import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
+import android.app.compat.CompatChanges;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.usage.UsageEvents;
@@ -407,6 +408,15 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK = 128611929L;
+
+    /**
+     * Activity starts coming from broadcast receivers or services in response to notification and
+     * notification action clicks will be blocked for UX and performance reasons. Instead start the
+     * activity directly from the PendingIntent.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
 
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
@@ -10013,7 +10023,7 @@ public class NotificationManagerService extends SystemService {
      * TODO(b/161957908): Remove dogfooder toast.
      */
     private class NotificationTrampolineCallback implements BackgroundActivityStartCallback {
-        private Set<String> mPackagesShown = new ArraySet<>();
+        private final Set<String> mPackagesShown = new ArraySet<>();
 
         @Override
         public IBinder getToken() {
@@ -10021,20 +10031,25 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onExclusiveTokenActivityStart(String packageName) {
-            Slog.w(TAG, "Indirect notification activity start from " + packageName);
-            boolean isFirstOccurrence = mPackagesShown.add(packageName);
-            if (!isFirstOccurrence) {
-                return;
+        public boolean isActivityStartAllowed(int uid, String packageName) {
+            boolean block = CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
+            if (block || mPackagesShown.add(packageName)) {
+                mUiHandler.post(() ->
+                        Toast.makeText(getUiContext(),
+                                "Indirect activity start from "
+                                        + packageName + ". "
+                                        + "This will be blocked in S.\n"
+                                        + "See go/s-trampolines.",
+                                Toast.LENGTH_LONG).show());
             }
-
-            mUiHandler.post(() ->
-                    Toast.makeText(getUiContext(),
-                            "Indirect activity start from "
-                                    + packageName + ". "
-                                    + "This will be blocked in S.\n"
-                                    + "See go/s-trampolines.",
-                            Toast.LENGTH_LONG).show());
+            String message =
+                    "Indirect notification activity start (trampoline) from " + packageName;
+            if (block) {
+                Slog.e(TAG, message + " blocked");
+                return false;
+            }
+            Slog.w(TAG, message + ", this should be avoided for performance reasons");
+            return true;
         }
     }
 }

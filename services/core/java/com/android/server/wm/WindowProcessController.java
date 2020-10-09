@@ -223,7 +223,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private boolean mRunningRemoteAnimation;
 
     @Nullable
-    private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
+    private final BackgroundActivityStartCallback mBackgroundActivityStartCallback;
 
     /** The state for oom-adjustment calculation. */
     private final OomScoreReferenceState mOomRefState;
@@ -555,8 +555,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
         // allow if the flag was explicitly set
-        if (!mBackgroundActivityStartTokens.isEmpty()) {
-            onBackgroundStartAllowedByToken();
+        if (isBackgroundStartAllowedByToken()) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[WindowProcessController(" + mPid
                         + ")] Activity start allowed: process allowed by token");
@@ -566,18 +565,29 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
-    private void onBackgroundStartAllowedByToken() {
+    /**
+     * If there are no tokens, we don't allow *by token*. If there are tokens, we need to check if
+     * the callback handles all the tokens, if so we ask the callback if the activity should be
+     * started, otherwise we allow.
+     */
+    private boolean isBackgroundStartAllowedByToken() {
+        if (mBackgroundActivityStartTokens.isEmpty()) {
+            return false;
+        }
         if (mBackgroundActivityStartCallback == null) {
-            return;
+            // We have tokens but no callback to decide => allow
+            return true;
         }
         IBinder callbackToken = mBackgroundActivityStartCallback.getToken();
         for (IBinder token : mBackgroundActivityStartTokens.values()) {
             if (token != callbackToken) {
-                return;
+                // The callback doesn't handle all the tokens => allow
+                return true;
             }
         }
-        mAtm.mH.post(() ->
-                mBackgroundActivityStartCallback.onExclusiveTokenActivityStart(mInfo.packageName));
+        // The callback handles all the tokens => callback decides
+        return mBackgroundActivityStartCallback.isActivityStartAllowed(mInfo.uid,
+                mInfo.packageName);
     }
 
     private boolean isBoundByForegroundUid() {
