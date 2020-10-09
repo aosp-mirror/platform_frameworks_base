@@ -104,7 +104,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         public Bitmap image;
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
-        public int errorMsgResId;
 
         void clearImage() {
             image = null;
@@ -632,7 +631,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 if (imageData.uri == null) {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
                     mNotificationsController.notifyScreenshotError(
-                            R.string.screenshot_failed_to_capture_text);
+                            R.string.screenshot_failed_to_save_text);
                 } else {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
 
@@ -752,7 +751,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         if (imageData.uri == null) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
             mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
+                    R.string.screenshot_failed_to_save_text);
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
         }
