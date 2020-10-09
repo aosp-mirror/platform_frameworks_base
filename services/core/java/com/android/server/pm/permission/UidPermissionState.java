@@ -24,8 +24,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 
-import com.android.internal.annotations.GuardedBy;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,29 +33,23 @@ import java.util.Set;
  * Permission state for a UID.
  */
 public final class UidPermissionState {
-    @NonNull
-    private final Object mLock = new Object();
-
     private boolean mMissing;
 
-    @GuardedBy("mLock")
     @Nullable
     private ArrayMap<String, PermissionState> mPermissions;
 
     public UidPermissionState() {}
 
     public UidPermissionState(@NonNull UidPermissionState other) {
-        synchronized (mLock) {
-            mMissing = other.mMissing;
+        mMissing = other.mMissing;
 
-            if (other.mPermissions != null) {
-                mPermissions = new ArrayMap<>();
-                final int permissionsSize = other.mPermissions.size();
-                for (int i = 0; i < permissionsSize; i++) {
-                    final String name = other.mPermissions.keyAt(i);
-                    final PermissionState permissionState = other.mPermissions.valueAt(i);
-                    mPermissions.put(name, new PermissionState(permissionState));
-                }
+        if (other.mPermissions != null) {
+            mPermissions = new ArrayMap<>();
+            final int permissionsSize = other.mPermissions.size();
+            for (int i = 0; i < permissionsSize; i++) {
+                final String name = other.mPermissions.keyAt(i);
+                final PermissionState permissionState = other.mPermissions.valueAt(i);
+                mPermissions.put(name, new PermissionState(permissionState));
             }
         }
     }
@@ -66,11 +58,9 @@ public final class UidPermissionState {
      * Reset the internal state of this object.
      */
     public void reset() {
-        synchronized (mLock) {
-            mMissing = false;
-            mPermissions = null;
-            invalidateCache();
-        }
+        mMissing = false;
+        mPermissions = null;
+        invalidateCache();
     }
 
     /**
@@ -97,9 +87,7 @@ public final class UidPermissionState {
      */
     @Deprecated
     public boolean hasPermissionState(@NonNull String name) {
-        synchronized (mLock) {
-            return mPermissions != null && mPermissions.containsKey(name);
-        }
+        return mPermissions != null && mPermissions.containsKey(name);
     }
 
     /**
@@ -109,19 +97,17 @@ public final class UidPermissionState {
      */
     @Deprecated
     public boolean hasPermissionState(@NonNull ArraySet<String> names) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return false;
-            }
-            final int namesSize = names.size();
-            for (int i = 0; i < namesSize; i++) {
-                final String name = names.valueAt(i);
-                if (mPermissions.containsKey(name)) {
-                    return true;
-                }
-            }
+        if (mPermissions == null) {
             return false;
         }
+        final int namesSize = names.size();
+        for (int i = 0; i < namesSize; i++) {
+            final String name = names.valueAt(i);
+            if (mPermissions.containsKey(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -132,28 +118,24 @@ public final class UidPermissionState {
      */
     @Nullable
     public PermissionState getPermissionState(@NonNull String name) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return null;
-            }
-            return mPermissions.get(name);
+        if (mPermissions == null) {
+            return null;
         }
+        return mPermissions.get(name);
     }
 
     @NonNull
     private PermissionState getOrCreatePermissionState(@NonNull BasePermission permission) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                mPermissions = new ArrayMap<>();
-            }
-            final String name = permission.getName();
-            PermissionState permissionState = mPermissions.get(name);
-            if (permissionState == null) {
-                permissionState = new PermissionState(permission);
-                mPermissions.put(name, permissionState);
-            }
-            return permissionState;
+        if (mPermissions == null) {
+            mPermissions = new ArrayMap<>();
         }
+        final String name = permission.getName();
+        PermissionState permissionState = mPermissions.get(name);
+        if (permissionState == null) {
+            permissionState = new PermissionState(permission);
+            mPermissions.put(name, permissionState);
+        }
+        return permissionState;
     }
 
     /**
@@ -163,12 +145,10 @@ public final class UidPermissionState {
      */
     @NonNull
     public List<PermissionState> getPermissionStates() {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return Collections.emptyList();
-            }
-            return new ArrayList<>(mPermissions.values());
+        if (mPermissions == null) {
+            return Collections.emptyList();
         }
+        return new ArrayList<>(mPermissions.values());
     }
 
     /**
@@ -179,20 +159,18 @@ public final class UidPermissionState {
      * @param flags the permission flags
      */
     public void putPermissionState(@NonNull BasePermission permission, boolean granted, int flags) {
-        synchronized (mLock) {
-            final String name = permission.getName();
-            if (mPermissions == null) {
-                mPermissions = new ArrayMap<>();
-            } else {
-                mPermissions.remove(name);
-            }
-            final PermissionState permissionState = new PermissionState(permission);
-            if (granted) {
-                permissionState.grant();
-            }
-            permissionState.updateFlags(flags, flags);
-            mPermissions.put(name, permissionState);
+        final String name = permission.getName();
+        if (mPermissions == null) {
+            mPermissions = new ArrayMap<>();
+        } else {
+            mPermissions.remove(name);
         }
+        final PermissionState permissionState = new PermissionState(permission);
+        if (granted) {
+            permissionState.grant();
+        }
+        permissionState.updateFlags(flags, flags);
+        mPermissions.put(name, permissionState);
     }
 
     /**
@@ -202,16 +180,14 @@ public final class UidPermissionState {
      * @return whether the permission state changed
      */
     public boolean removePermissionState(@NonNull String name) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return false;
-            }
-            boolean changed = mPermissions.remove(name) != null;
-            if (changed && mPermissions.isEmpty()) {
-                mPermissions = null;
-            }
-            return changed;
+        if (mPermissions == null) {
+            return false;
         }
+        final boolean changed = mPermissions.remove(name) != null;
+        if (changed && mPermissions.isEmpty()) {
+            mPermissions = null;
+        }
+        return changed;
     }
 
     /**
@@ -232,22 +208,20 @@ public final class UidPermissionState {
      */
     @NonNull
     public Set<String> getGrantedPermissions() {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return Collections.emptySet();
-            }
-
-            Set<String> permissions = new ArraySet<>(mPermissions.size());
-            final int permissionsSize = mPermissions.size();
-            for (int i = 0; i < permissionsSize; i++) {
-                PermissionState permissionState = mPermissions.valueAt(i);
-
-                if (permissionState.isGranted()) {
-                    permissions.add(permissionState.getName());
-                }
-            }
-            return permissions;
+        if (mPermissions == null) {
+            return Collections.emptySet();
         }
+
+        final Set<String> permissions = new ArraySet<>(mPermissions.size());
+        final int permissionsSize = mPermissions.size();
+        for (int i = 0; i < permissionsSize; i++) {
+            final PermissionState permissionState = mPermissions.valueAt(i);
+
+            if (permissionState.isGranted()) {
+                permissions.add(permissionState.getName());
+            }
+        }
+        return permissions;
     }
 
     /**
@@ -257,7 +231,7 @@ public final class UidPermissionState {
      * @return whether the permission grant state changed
      */
     public boolean grantPermission(@NonNull BasePermission permission) {
-        PermissionState permissionState = getOrCreatePermissionState(permission);
+        final PermissionState permissionState = getOrCreatePermissionState(permission);
         return permissionState.grant();
     }
 
@@ -319,37 +293,33 @@ public final class UidPermissionState {
         if (flagMask == 0) {
             return false;
         }
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return false;
-            }
-            boolean anyChanged = false;
-            for (int i = mPermissions.size() - 1; i >= 0; i--) {
-                final PermissionState permissionState = mPermissions.valueAt(i);
-                final boolean changed = permissionState.updateFlags(flagMask, flagValues);
-                if (changed && permissionState.isDefault()) {
-                    mPermissions.removeAt(i);
-                }
-                anyChanged |= changed;
-            }
-            return anyChanged;
+        if (mPermissions == null) {
+            return false;
         }
+        boolean anyChanged = false;
+        for (int i = mPermissions.size() - 1; i >= 0; i--) {
+            final PermissionState permissionState = mPermissions.valueAt(i);
+            final boolean changed = permissionState.updateFlags(flagMask, flagValues);
+            if (changed && permissionState.isDefault()) {
+                mPermissions.removeAt(i);
+            }
+            anyChanged |= changed;
+        }
+        return anyChanged;
     }
 
     public boolean isPermissionReviewRequired() {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return false;
-            }
-            final int permissionsSize = mPermissions.size();
-            for (int i = 0; i < permissionsSize; i++) {
-                final PermissionState permission = mPermissions.valueAt(i);
-                if ((permission.getFlags() & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                    return true;
-                }
-            }
+        if (mPermissions == null) {
             return false;
         }
+        final int permissionsSize = mPermissions.size();
+        for (int i = 0; i < permissionsSize; i++) {
+            final PermissionState permission = mPermissions.valueAt(i);
+            if ((permission.getFlags() & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -360,24 +330,22 @@ public final class UidPermissionState {
      */
     @NonNull
     public int[] computeGids(@NonNull int[] globalGids, @UserIdInt int userId) {
-        synchronized (mLock) {
-            IntArray gids = IntArray.wrap(globalGids);
-            if (mPermissions == null) {
-                return gids.toArray();
-            }
-            final int permissionsSize = mPermissions.size();
-            for (int i = 0; i < permissionsSize; i++) {
-                PermissionState permissionState = mPermissions.valueAt(i);
-                if (!permissionState.isGranted()) {
-                    continue;
-                }
-                final int[] permissionGids = permissionState.computeGids(userId);
-                if (permissionGids.length != 0) {
-                    gids.addAll(permissionGids);
-                }
-            }
+        IntArray gids = IntArray.wrap(globalGids);
+        if (mPermissions == null) {
             return gids.toArray();
         }
+        final int permissionsSize = mPermissions.size();
+        for (int i = 0; i < permissionsSize; i++) {
+            PermissionState permissionState = mPermissions.valueAt(i);
+            if (!permissionState.isGranted()) {
+                continue;
+            }
+            final int[] permissionGids = permissionState.computeGids(userId);
+            if (permissionGids.length != 0) {
+                gids.addAll(permissionGids);
+            }
+        }
+        return gids.toArray();
     }
 
     static void invalidateCache() {

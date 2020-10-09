@@ -21,57 +21,38 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
-
 /**
  * Permission state for this device.
  */
 public final class DevicePermissionState {
-    @GuardedBy("mLock")
-    @NonNull
     private final SparseArray<UserPermissionState> mUserStates = new SparseArray<>();
-
-    @NonNull
-    private final Object mLock;
-
-    public DevicePermissionState(@NonNull Object lock) {
-        mLock = lock;
-    }
 
     @Nullable
     public UserPermissionState getUserState(@UserIdInt int userId) {
-        synchronized (mLock) {
-            return mUserStates.get(userId);
-        }
+        return mUserStates.get(userId);
     }
 
     @NonNull
     public UserPermissionState getOrCreateUserState(@UserIdInt int userId) {
-        synchronized (mLock) {
-            UserPermissionState userState = mUserStates.get(userId);
-            if (userState == null) {
-                userState = new UserPermissionState(mLock);
-                mUserStates.put(userId, userState);
-            }
-            return userState;
+        UserPermissionState userState = mUserStates.get(userId);
+        if (userState == null) {
+            userState = new UserPermissionState();
+            mUserStates.put(userId, userState);
         }
+        return userState;
     }
 
     public void removeUserState(@UserIdInt int userId) {
-        synchronized (mLock) {
-            mUserStates.delete(userId);
-        }
+        mUserStates.delete(userId);
     }
 
     public int[] getUserIds() {
-        synchronized (mLock) {
-            final int userStatesSize = mUserStates.size();
-            final int[] userIds = new int[userStatesSize];
-            for (int i = 0; i < userStatesSize; i++) {
-                final int userId = mUserStates.keyAt(i);
-                userIds[i] = userId;
-            }
-            return userIds;
+        final int userStatesSize = mUserStates.size();
+        final int[] userIds = new int[userStatesSize];
+        for (int i = 0; i < userStatesSize; i++) {
+            final int userId = mUserStates.keyAt(i);
+            userIds[i] = userId;
         }
+        return userIds;
     }
 }
