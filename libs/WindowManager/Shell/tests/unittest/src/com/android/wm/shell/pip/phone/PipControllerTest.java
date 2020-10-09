@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip.phone;
+package com.android.wm.shell.pip.phone;
 
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
