@@ -16,10 +16,11 @@
 
 package android.security.keystore2;
 
-import android.security.keymaster.KeymasterArguments;
+import android.annotation.NonNull;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.ArrayUtils;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.KeyParameter;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -30,6 +31,7 @@ import java.security.ProviderException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.crypto.CipherSpi;
 import javax.crypto.spec.IvParameterSpec;
@@ -67,15 +69,13 @@ public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
             super(KeymasterDefs.KM_MODE_ECB, keymasterPadding, false);
         }
 
-        public static class NoPadding extends
-                AndroidKeyStore3DESCipherSpi.ECB {
+        public static class NoPadding extends ECB {
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
         }
 
-        public static class PKCS7Padding extends
-                AndroidKeyStore3DESCipherSpi.ECB {
+        public static class PKCS7Padding extends ECB {
             public PKCS7Padding() {
                 super(KeymasterDefs.KM_PAD_PKCS7);
             }
@@ -87,15 +87,13 @@ public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
             super(KeymasterDefs.KM_MODE_CBC, keymasterPadding, true);
         }
 
-        public static class NoPadding extends
-                AndroidKeyStore3DESCipherSpi.CBC {
+        public static class NoPadding extends CBC {
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
         }
 
-        public static class PKCS7Padding extends
-                AndroidKeyStore3DESCipherSpi.CBC {
+        public static class PKCS7Padding extends CBC {
             public PKCS7Padding() {
                 super(KeymasterDefs.KM_PAD_PKCS7);
             }
@@ -254,7 +252,7 @@ public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
     }
 
     @Override
-    protected void addAlgorithmSpecificParametersToBegin(KeymasterArguments keymasterArgs) {
+    protected void addAlgorithmSpecificParametersToBegin(@NonNull List<KeyParameter> parameters) {
         if ((isEncrypting()) && (mIvRequired) && (mIvHasBeenUsed)) {
             // IV is being reused for encryption: this violates security best practices.
             throw new IllegalStateException(
@@ -262,23 +260,38 @@ public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
                             + " practices.");
         }
 
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_3DES);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
-        if ((mIvRequired) && (mIv != null)) {
-            keymasterArgs.addBytes(KeymasterDefs.KM_TAG_NONCE, mIv);
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_ALGORITHM,
+                KeymasterDefs.KM_ALGORITHM_3DES
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_BLOCK_MODE,
+                mKeymasterBlockMode
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_PADDING,
+                mKeymasterPadding
+        ));
+
+        if (mIvRequired && (mIv != null)) {
+            parameters.add(KeyStore2ParameterUtils.makeBytes(KeymasterDefs.KM_TAG_NONCE, mIv));
         }
     }
 
     @Override
     protected void loadAlgorithmSpecificParametersFromBeginResult(
-            KeymasterArguments keymasterArgs) {
+            KeyParameter[] parameters) {
         mIvHasBeenUsed = true;
 
         // NOTE: Keymaster doesn't always return an IV, even if it's used.
-        byte[] returnedIv = keymasterArgs.getBytes(KeymasterDefs.KM_TAG_NONCE, null);
-        if ((returnedIv != null) && (returnedIv.length == 0)) {
-            returnedIv = null;
+        byte[] returnedIv = null;
+        if (parameters != null) {
+            for (KeyParameter p : parameters) {
+                if (p.tag == KeymasterDefs.KM_TAG_NONCE) {
+                    returnedIv = p.blob;
+                    break;
+                }
+            }
         }
 
         if (mIvRequired) {

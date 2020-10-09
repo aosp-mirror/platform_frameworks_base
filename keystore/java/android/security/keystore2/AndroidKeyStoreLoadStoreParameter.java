@@ -19,12 +19,15 @@ package android.security.keystore2;
 import java.security.KeyStore;
 import java.security.KeyStore.ProtectionParameter;
 
+/**
+ * @hide
+ */
 class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStoreParameter {
 
-    private final int mUid;
+    private final int mNamespace;
 
-    AndroidKeyStoreLoadStoreParameter(int uid) {
-        mUid = uid;
+    AndroidKeyStoreLoadStoreParameter(int namespace) {
+        mNamespace = namespace;
     }
 
     @Override
@@ -32,7 +35,7 @@ class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStoreParameter {
         return null;
     }
 
-    int getUid() {
-        return mUid;
+    int getNamespace() {
+        return mNamespace;
     }
 }

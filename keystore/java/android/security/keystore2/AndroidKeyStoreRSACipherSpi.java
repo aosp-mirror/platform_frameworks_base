@@ -18,12 +18,11 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.security.KeyStore;
-import android.security.keymaster.KeyCharacteristics;
-import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeymasterUtils;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.KeyParameter;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -35,6 +34,7 @@ import java.security.ProviderException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.MGF1ParameterSpec;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherSpi;
@@ -294,15 +294,17 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
         @Override
         protected final void addAlgorithmSpecificParametersToBegin(
-                KeymasterArguments keymasterArgs) {
-            super.addAlgorithmSpecificParametersToBegin(keymasterArgs);
-            keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+                @NonNull List<KeyParameter> parameters) {
+            super.addAlgorithmSpecificParametersToBegin(parameters);
+            parameters.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest
+            ));
         }
 
         @Override
         protected final void loadAlgorithmSpecificParametersFromBeginResult(
-                @NonNull KeymasterArguments keymasterArgs) {
-            super.loadAlgorithmSpecificParametersFromBeginResult(keymasterArgs);
+                KeyParameter[] parameters) {
+            super.loadAlgorithmSpecificParametersFromBeginResult(parameters);
         }
 
         @Override
@@ -415,14 +417,13 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             }
         }
 
-        KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
-        int errorCode = getKeyStore().getKeyCharacteristics(
-                keystoreKey.getAlias(), null, null, keystoreKey.getUid(), keyCharacteristics);
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw getKeyStore().getInvalidKeyException(
-                    keystoreKey.getAlias(), keystoreKey.getUid(), errorCode);
+        long keySizeBits = -1;
+        for (Authorization a : keystoreKey.getAuthorizations()) {
+            if (a.keyParameter.tag == KeymasterDefs.KM_TAG_KEY_SIZE) {
+                keySizeBits = KeyStore2ParameterUtils.getUnsignedInt(a);
+            }
         }
-        long keySizeBits = keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
+
         if (keySizeBits == -1) {
             throw new InvalidKeyException("Size of key not known");
         } else if (keySizeBits > Integer.MAX_VALUE) {
@@ -459,25 +460,32 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
     @Override
     protected void addAlgorithmSpecificParametersToBegin(
-            @NonNull KeymasterArguments keymasterArgs) {
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+            @NonNull List<KeyParameter> parameters) {
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA
+        ));
         int keymasterPadding = getKeymasterPaddingOverride();
         if (keymasterPadding == -1) {
             keymasterPadding = mKeymasterPadding;
         }
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, keymasterPadding);
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_PADDING, keymasterPadding
+        ));
         int purposeOverride = getKeymasterPurposeOverride();
         if ((purposeOverride != -1)
                 && ((purposeOverride == KeymasterDefs.KM_PURPOSE_SIGN)
                 || (purposeOverride == KeymasterDefs.KM_PURPOSE_VERIFY))) {
-            // Keymaster sign/verify requires digest to be specified. For raw sign/verify it's NONE.
-            keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
+            // Keymaster sign/verify requires digest to be specified.
+            // For raw sign/verify it's NONE.
+            parameters.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE
+            ));
         }
     }
 
     @Override
     protected void loadAlgorithmSpecificParametersFromBeginResult(
-            @NonNull KeymasterArguments keymasterArgs) {
+            KeyParameter[] parameters) {
     }
 
     @Override

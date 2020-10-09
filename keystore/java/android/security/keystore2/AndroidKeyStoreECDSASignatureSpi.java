@@ -17,19 +17,19 @@
 package android.security.keystore2;
 
 import android.annotation.NonNull;
-import android.os.IBinder;
-import android.security.KeyStore;
 import android.security.KeyStoreException;
-import android.security.keymaster.KeyCharacteristics;
-import android.security.keymaster.KeymasterArguments;
+import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.Authorization;
+import android.system.keystore2.KeyParameter;
 
 import libcore.util.EmptyArray;
 
 import java.io.ByteArrayOutputStream;
 import java.security.InvalidKeyException;
 import java.security.SignatureSpi;
+import java.util.List;
 
 /**
  * Base class for {@link SignatureSpi} providing Android KeyStore backed ECDSA signatures.
@@ -44,10 +44,10 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         }
 
         @Override
-        protected KeyStoreCryptoOperationStreamer createMainDataStreamer(KeyStore keyStore,
-                IBinder operationToken) {
+        protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
+                KeyStoreOperation operation) {
             return new TruncateToFieldSizeMessageStreamer(
-                    super.createMainDataStreamer(keyStore, operationToken),
+                    super.createMainDataStreamer(operation),
                     getGroupSizeBits());
         }
 
@@ -81,8 +81,8 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
             }
 
             @Override
-            public byte[] doFinal(byte[] input, int inputOffset, int inputLength, byte[] signature,
-                    byte[] additionalEntropy) throws KeyStoreException {
+            public byte[] doFinal(byte[] input, int inputOffset, int inputLength, byte[] signature)
+                    throws KeyStoreException {
                 if (inputLength > 0) {
                     mConsumedInputSizeBytes += inputLength;
                     mInputBuffer.write(input, inputOffset, inputLength);
@@ -94,7 +94,7 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
                 return mDelegate.doFinal(bufferedInput,
                         0,
                         Math.min(bufferedInput.length, ((mGroupSizeBits + 7) / 8)),
-                        signature, additionalEntropy);
+                        signature);
             }
 
             @Override
@@ -154,13 +154,13 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
                     + ". Only" + KeyProperties.KEY_ALGORITHM_EC + " supported");
         }
 
-        KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
-        int errorCode = getKeyStore().getKeyCharacteristics(
-                key.getAlias(), null, null, key.getUid(), keyCharacteristics);
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw getKeyStore().getInvalidKeyException(key.getAlias(), key.getUid(), errorCode);
+        long keySizeBits = -1;
+        for (Authorization a : key.getAuthorizations()) {
+            if (a.keyParameter.tag == KeymasterDefs.KM_TAG_KEY_SIZE) {
+                keySizeBits = KeyStore2ParameterUtils.getUnsignedInt(a);
+            }
         }
-        long keySizeBits = keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, -1);
+
         if (keySizeBits == -1) {
             throw new InvalidKeyException("Size of key not known");
         } else if (keySizeBits > Integer.MAX_VALUE) {
@@ -184,9 +184,13 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
 
     @Override
     protected final void addAlgorithmSpecificParametersToBegin(
-            @NonNull KeymasterArguments keymasterArgs) {
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_EC);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+            @NonNull List<KeyParameter> parameters) {
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_EC
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest
+        ));
     }
 
     @Override

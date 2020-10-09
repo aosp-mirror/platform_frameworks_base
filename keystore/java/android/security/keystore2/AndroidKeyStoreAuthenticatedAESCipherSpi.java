@@ -18,15 +18,13 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.IBinder;
-import android.security.KeyStore;
 import android.security.KeyStoreException;
-import android.security.keymaster.KeymasterArguments;
+import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
-import android.security.keymaster.OperationResult;
 import android.security.keystore.ArrayUtils;
 import android.security.keystore.KeyProperties;
 import android.security.keystore2.KeyStoreCryptoOperationChunkedStreamer.Stream;
+import android.system.keystore2.KeyParameter;
 
 import libcore.util.EmptyArray;
 
@@ -41,6 +39,7 @@ import java.security.ProviderException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.crypto.CipherSpi;
 import javax.crypto.spec.GCMParameterSpec;
@@ -175,26 +174,25 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         @NonNull
         @Override
         protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
-                KeyStore keyStore, IBinder operationToken) {
-            KeyStoreCryptoOperationStreamer
-                    streamer = new KeyStoreCryptoOperationChunkedStreamer(
+                KeyStoreOperation operation) {
+            KeyStoreCryptoOperationStreamer streamer = new KeyStoreCryptoOperationChunkedStreamer(
                     new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
-                            keyStore, operationToken), 0);
+                            operation), 0);
             if (isEncrypting()) {
                 return streamer;
             } else {
                 // When decrypting, to avoid leaking unauthenticated plaintext, do not return any
                 // plaintext before ciphertext is authenticated by KeyStore.finish.
-                return new AndroidKeyStoreAuthenticatedAESCipherSpi.BufferAllOutputUntilDoFinalStreamer(streamer);
+                return new BufferAllOutputUntilDoFinalStreamer(streamer);
             }
         }
 
         @NonNull
         @Override
         protected final KeyStoreCryptoOperationStreamer createAdditionalAuthenticationDataStreamer(
-                KeyStore keyStore, IBinder operationToken) {
+                KeyStoreOperation operation) {
             return new KeyStoreCryptoOperationChunkedStreamer(
-                    new AndroidKeyStoreAuthenticatedAESCipherSpi.AdditionalAuthenticationDataStream(keyStore, operationToken), 0);
+                    new AdditionalAuthenticationDataStream(operation), 0);
         }
 
         @Override
@@ -214,17 +212,19 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
 
         @Override
         protected final void addAlgorithmSpecificParametersToBegin(
-                @NonNull KeymasterArguments keymasterArgs) {
-            super.addAlgorithmSpecificParametersToBegin(keymasterArgs);
-            keymasterArgs.addUnsignedInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mTagLengthBits);
+                @NonNull List<KeyParameter> parameters) {
+            super.addAlgorithmSpecificParametersToBegin(parameters);
+            parameters.add(KeyStore2ParameterUtils.makeInt(
+                    KeymasterDefs.KM_TAG_MAC_LENGTH,
+                    mTagLengthBits
+            ));
         }
 
         protected final int getTagLengthBits() {
             return mTagLengthBits;
         }
 
-        public static final class NoPadding extends
-                AndroidKeyStoreAuthenticatedAESCipherSpi.GCM {
+        public static final class NoPadding extends GCM {
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
@@ -290,31 +290,45 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
 
     @Override
     protected void addAlgorithmSpecificParametersToBegin(
-            @NonNull KeymasterArguments keymasterArgs) {
+            @NonNull List<KeyParameter> parameters) {
         if ((isEncrypting()) && (mIvHasBeenUsed)) {
             // IV is being reused for encryption: this violates security best practices.
             throw new IllegalStateException(
                     "IV has already been used. Reusing IV in encryption mode violates security best"
                     + " practices.");
         }
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_ALGORITHM,
+                KeymasterDefs.KM_ALGORITHM_AES
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_BLOCK_MODE,
+                mKeymasterBlockMode
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_PADDING,
+                mKeymasterPadding
+        ));
 
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
         if (mIv != null) {
-            keymasterArgs.addBytes(KeymasterDefs.KM_TAG_NONCE, mIv);
+            parameters.add(KeyStore2ParameterUtils.makeBytes(KeymasterDefs.KM_TAG_NONCE, mIv));
         }
     }
 
     @Override
     protected final void loadAlgorithmSpecificParametersFromBeginResult(
-            @NonNull KeymasterArguments keymasterArgs) {
+            KeyParameter[] parameters) {
         mIvHasBeenUsed = true;
 
         // NOTE: Keymaster doesn't always return an IV, even if it's used.
-        byte[] returnedIv = keymasterArgs.getBytes(KeymasterDefs.KM_TAG_NONCE, null);
-        if ((returnedIv != null) && (returnedIv.length == 0)) {
-            returnedIv = null;
+        byte[] returnedIv = null;
+        if (parameters != null) {
+            for (KeyParameter p : parameters) {
+                if (p.tag == KeymasterDefs.KM_TAG_NONCE) {
+                    returnedIv = p.blob;
+                    break;
+                }
+            }
         }
 
         if (mIv == null) {
@@ -353,8 +367,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         private ByteArrayOutputStream mBufferedOutput = new ByteArrayOutputStream();
         private long mProducedOutputSizeBytes;
 
-        private BufferAllOutputUntilDoFinalStreamer(
-                KeyStoreCryptoOperationStreamer delegate) {
+        private BufferAllOutputUntilDoFinalStreamer(KeyStoreCryptoOperationStreamer delegate) {
             mDelegate = delegate;
         }
 
@@ -374,9 +387,8 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
 
         @Override
         public byte[] doFinal(byte[] input, int inputOffset, int inputLength,
-                byte[] signature, byte[] additionalEntropy) throws KeyStoreException {
-            byte[] output = mDelegate.doFinal(input, inputOffset, inputLength, signature,
-                    additionalEntropy);
+                byte[] signature) throws KeyStoreException {
+            byte[] output = mDelegate.doFinal(input, inputOffset, inputLength, signature);
             if (output != null) {
                 try {
                     mBufferedOutput.write(output);
@@ -407,48 +419,21 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
      */
     private static class AdditionalAuthenticationDataStream implements Stream {
 
-        private final KeyStore mKeyStore;
-        private final IBinder mOperationToken;
+        private final KeyStoreOperation mOperation;
 
-        private AdditionalAuthenticationDataStream(KeyStore keyStore, IBinder operationToken) {
-            mKeyStore = keyStore;
-            mOperationToken = operationToken;
+        private AdditionalAuthenticationDataStream(KeyStoreOperation operation) {
+            mOperation = operation;
         }
 
         @Override
-        public OperationResult update(byte[] input) {
-            KeymasterArguments keymasterArgs = new KeymasterArguments();
-            keymasterArgs.addBytes(KeymasterDefs.KM_TAG_ASSOCIATED_DATA, input);
-
-            // KeyStore does not reflect AAD in inputConsumed, but users of Stream rely on this
-            // field. We fix this discrepancy here. KeyStore.update contract is that all of AAD
-            // has been consumed if the method succeeds.
-            OperationResult result = mKeyStore.update(mOperationToken, keymasterArgs, null);
-            if (result.resultCode == KeyStore.NO_ERROR) {
-                result = new OperationResult(
-                        result.resultCode,
-                        result.token,
-                        result.operationHandle,
-                        input.length, // inputConsumed
-                        result.output,
-                        result.outParams);
-            }
-            return result;
+        public byte[] update(byte[] input) throws KeyStoreException {
+            mOperation.updateAad(input);
+            return null;
         }
 
         @Override
-        public OperationResult finish(byte[] input, byte[] signature, byte[] additionalEntropy) {
-            if ((additionalEntropy != null) && (additionalEntropy.length > 0)) {
-                throw new ProviderException("AAD stream does not support additional entropy");
-            }
-            return new OperationResult(
-                    KeyStore.NO_ERROR,
-                    mOperationToken,
-                    0, // operation handle -- nobody cares about this being returned from finish
-                    0, // inputConsumed
-                    EmptyArray.BYTE, // output
-                    new KeymasterArguments() // additional params returned by finish
-                    );
+        public byte[] finish(byte[] input, byte[] signature) {
+            return null;
         }
     }
 }

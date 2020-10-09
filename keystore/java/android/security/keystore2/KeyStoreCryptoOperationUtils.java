@@ -21,6 +21,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.KeyStoreException;
+import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyExpiredException;
 import android.security.keystore.KeyNotYetValidException;
@@ -28,6 +29,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.system.keystore2.Authorization;
 import android.system.keystore2.ResponseCode;
+import android.util.Log;
 
 import libcore.util.EmptyArray;
 
@@ -173,5 +175,37 @@ abstract class KeyStoreCryptoOperationUtils {
             sRng = new SecureRandom();
         }
         return sRng;
+    }
+
+    static void abortOperation(KeyStoreOperation operation) {
+        if (operation != null) {
+            try {
+                operation.abort();
+            } catch (KeyStoreException e) {
+                // We log this error, but we can afford to ignore it. Dropping the reference
+                // to the KeyStoreOperation is enough to clean up all related resources even
+                // in the Keystore daemon. We log it anyway, because it may indicate some
+                // underlying problem that is worth debugging.
+                Log.w(
+                        "KeyStoreCryptoOperationUtils",
+                        "Encountered error trying to abort a keystore operation.",
+                        e
+                );
+            }
+        }
+    }
+
+    static long getOrMakeOperationChallenge(KeyStoreOperation operation, AndroidKeyStoreKey key)
+            throws KeyPermanentlyInvalidatedException {
+        if (operation.getChallenge() != null) {
+            if (!KeyStoreCryptoOperationUtils.canUserAuthorizationSucceed(key)) {
+                throw new KeyPermanentlyInvalidatedException();
+            }
+            return operation.getChallenge();
+        } else {
+            // Keystore won't give us an operation challenge if the operation doesn't
+            // need user authorization. So we make our own.
+            return Math.randomLongInternal();
+        }
     }
 }

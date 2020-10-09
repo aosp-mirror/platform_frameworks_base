@@ -16,22 +16,30 @@
 
 package android.security.keystore2;
 
-import android.security.Credentials;
+import android.annotation.NonNull;
+import android.hardware.biometrics.BiometricManager;
 import android.security.GateKeeper;
-import android.security.KeyStore;
+import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
-import android.security.keymaster.KeyCharacteristics;
-import android.security.keymaster.KeymasterArguments;
+import android.security.KeyStoreSecurityLevel;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.KeymasterUtils;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
+import android.system.keystore2.AuthenticatorSpec;
+import android.system.keystore2.Domain;
+import android.system.keystore2.IKeystoreSecurityLevel;
+import android.system.keystore2.KeyDescriptor;
+import android.system.keystore2.KeyEntryResponse;
+import android.system.keystore2.KeyMetadata;
+import android.system.keystore2.KeyParameter;
+import android.system.keystore2.ResponseCode;
+import android.system.keystore2.SecurityLevel;
 import android.util.Log;
-
-import libcore.util.EmptyArray;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -48,7 +56,6 @@ import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.ProviderException;
-import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -63,6 +70,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
@@ -87,52 +95,88 @@ import javax.crypto.SecretKey;
  * @hide
  */
 public class AndroidKeyStoreSpi extends KeyStoreSpi {
+    public static final String TAG = "AndroidKeyStoreSpi";
     public static final String NAME = "AndroidKeyStore";
 
-    private KeyStore mKeyStore;
-    private int mUid = KeyStore.UID_SELF;
+    private KeyStore2 mKeyStore;
+    private int mNamespace = KeyProperties.NAMESPACE_APPLICATION;
 
     @Override
     public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException,
             UnrecoverableKeyException {
-        String userKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
-        AndroidKeyStoreKey key;
-        if (!mKeyStore.contains(userKeyAlias, mUid)) {
-            // try legacy prefix for backward compatibility
-            userKeyAlias = Credentials.USER_SECRET_KEY + alias;
-            if (!mKeyStore.contains(userKeyAlias, mUid)) return null;
-        }
         try {
-            key = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(mKeyStore,
-                                                                             userKeyAlias,
-                                                                             mUid);
+            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(mKeyStore,
+                                                                              alias,
+                                                                              mNamespace);
         } catch (KeyPermanentlyInvalidatedException e) {
             throw new UnrecoverableKeyException(e.getMessage());
+        } catch (UnrecoverableKeyException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof android.security.KeyStoreException) {
+                if (((android.security.KeyStoreException) cause).getErrorCode()
+                        == ResponseCode.KEY_NOT_FOUND) {
+                    return null;
+                }
+            }
+            throw e;
         }
-        return key;
     }
 
-    @Override
-    public Certificate[] engineGetCertificateChain(String alias) {
+    /**
+     * Make a key descriptor from the given alias and the mNamespace member.
+     * If mNamespace is -1 it sets the domain field to {@link Domain#APP} and {@link Domain#SELINUX}
+     * otherwise. The blob field is always set to null and the alias field to {@code alias}
+     * @param alias The alias of the new key descriptor.
+     * @return A new key descriptor.
+     */
+    private KeyDescriptor makeKeyDescriptor(@NonNull String alias) {
+        KeyDescriptor descriptor = new KeyDescriptor();
+        descriptor.domain = getTargetDomain();
+        descriptor.nspace = mNamespace; // ignored if Domain.App;
+        descriptor.alias = alias;
+        descriptor.blob = null;
+        return descriptor;
+    }
+
+    private @Domain int getTargetDomain() {
+        return mNamespace == KeyProperties.NAMESPACE_APPLICATION
+                ? Domain.APP
+                : Domain.SELINUX;
+    }
+    private KeyEntryResponse getKeyMetadata(String alias) {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
 
-        final X509Certificate leaf = (X509Certificate) engineGetCertificate(alias);
+        KeyDescriptor descriptor = makeKeyDescriptor(alias);
+
+        try {
+            return mKeyStore.getKeyEntry(descriptor);
+        } catch (android.security.KeyStoreException e) {
+            if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
+                Log.w(TAG, "Could not get key metadata from Keystore.", e);
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public Certificate[] engineGetCertificateChain(String alias) {
+        KeyEntryResponse response = getKeyMetadata(alias);
+
+        if (response == null || response.metadata.certificate == null) {
+            return null;
+        }
+
+        final X509Certificate leaf = (X509Certificate) toCertificate(response.metadata.certificate);
         if (leaf == null) {
             return null;
         }
 
         final Certificate[] caList;
 
-        // Suppress the key not found warning for this call. It seems that this error is exclusively
-        // being thrown when there is a self signed certificate chain, so when the keystore service
-        // attempts to query for the CA details, it obviously fails to find them and returns a
-        // key not found exception. This is WAI, and throwing a stack trace here can be very
-        // misleading since the trace is not clear.
-        final byte[] caBytes = mKeyStore.get(Credentials.CA_CERTIFICATE + alias,
-                                             mUid,
-                                             true /* suppressKeyNotFoundWarning */);
+        final byte[] caBytes = response.metadata.certificateChain;
+
         if (caBytes != null) {
             final Collection<X509Certificate> caChain = toCertificates(caBytes);
 
@@ -154,78 +198,24 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     @Override
     public Certificate engineGetCertificate(String alias) {
-        if (alias == null) {
-            throw new NullPointerException("alias == null");
+        KeyEntryResponse response = getKeyMetadata(alias);
+
+        if (response == null) {
+            return null;
         }
 
-        byte[] encodedCert = mKeyStore.get(Credentials.USER_CERTIFICATE + alias, mUid);
+        byte[] encodedCert = response.metadata.certificate;
         if (encodedCert != null) {
-            return getCertificateForPrivateKeyEntry(alias, encodedCert);
+            return toCertificate(encodedCert);
         }
 
-        encodedCert = mKeyStore.get(Credentials.CA_CERTIFICATE + alias, mUid);
+        encodedCert = response.metadata.certificateChain;
         if (encodedCert != null) {
-            return getCertificateForTrustedCertificateEntry(encodedCert);
+            return toCertificate(encodedCert);
         }
 
         // This entry/alias does not contain a certificate.
         return null;
-    }
-
-    private Certificate getCertificateForTrustedCertificateEntry(byte[] encodedCert) {
-        // For this certificate there shouldn't be a private key in this KeyStore entry. Thus,
-        // there's no need to wrap this certificate as opposed to the certificate associated with
-        // a private key entry.
-        return toCertificate(encodedCert);
-    }
-
-    private Certificate getCertificateForPrivateKeyEntry(String alias, byte[] encodedCert) {
-        // All crypto algorithms offered by Android Keystore for its private keys must also
-        // be offered for the corresponding public keys stored in the Android Keystore. The
-        // complication is that the underlying keystore service operates only on full key pairs,
-        // rather than just public keys or private keys. As a result, Android Keystore-backed
-        // crypto can only be offered for public keys for which keystore contains the
-        // corresponding private key. This is not the case for certificate-only entries (e.g.,
-        // trusted certificates).
-        //
-        // getCertificate().getPublicKey() is the only way to obtain the public key
-        // corresponding to the private key stored in the KeyStore. Thus, we need to make sure
-        // that the returned public key points to the underlying key pair / private key
-        // when available.
-
-        X509Certificate cert = toCertificate(encodedCert);
-        if (cert == null) {
-            // Failed to parse the certificate.
-            return null;
-        }
-
-        String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
-        if (mKeyStore.contains(privateKeyAlias, mUid)) {
-            // As expected, keystore contains the private key corresponding to this public key. Wrap
-            // the certificate so that its getPublicKey method returns an Android Keystore
-            // PublicKey. This key will delegate crypto operations involving this public key to
-            // Android Keystore when higher-priority providers do not offer these crypto
-            // operations for this key.
-            return wrapIntoKeyStoreCertificate(privateKeyAlias, mUid, cert);
-        } else {
-            // This KeyStore entry/alias is supposed to contain the private key corresponding to
-            // the public key in this certificate, but it does not for some reason. It's probably a
-            // bug. Let other providers handle crypto operations involving the public key returned
-            // by this certificate's getPublicKey.
-            return cert;
-        }
-    }
-
-    /**
-     * Wraps the provided cerificate into {@link KeyStoreX509Certificate} so that the public key
-     * returned by the certificate contains information about the alias of the private key in
-     * keystore. This is needed so that Android Keystore crypto operations using public keys can
-     * find out which key alias to use. These operations cannot work without an alias.
-     */
-    private static KeyStoreX509Certificate wrapIntoKeyStoreCertificate(
-            String privateKeyAlias, int uid, X509Certificate certificate) {
-        return (certificate != null)
-                ? new KeyStoreX509Certificate(privateKeyAlias, uid, certificate) : null;
     }
 
     private static X509Certificate toCertificate(byte[] bytes) {
@@ -251,37 +241,21 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
     }
 
-    private Date getModificationDate(String alias) {
-        final long epochMillis = mKeyStore.getmtime(alias, mUid);
-        if (epochMillis == -1L) {
+    @Override
+    public Date engineGetCreationDate(String alias) {
+        KeyEntryResponse response = getKeyMetadata(alias);
+
+        if (response == null) {
             return null;
         }
 
-        return new Date(epochMillis);
-    }
 
-    @Override
-    public Date engineGetCreationDate(String alias) {
-        if (alias == null) {
-            throw new NullPointerException("alias == null");
-        }
-
-        Date d = getModificationDate(Credentials.USER_PRIVATE_KEY + alias);
-        if (d != null) {
-            return d;
-        }
-
-        d = getModificationDate(Credentials.USER_SECRET_KEY + alias);
-        if (d != null) {
-            return d;
-        }
-
-        d = getModificationDate(Credentials.USER_CERTIFICATE + alias);
-        if (d != null) {
-            return d;
-        }
-
-        return getModificationDate(Credentials.CA_CERTIFICATE + alias);
+        // TODO add modification time to key metadata.
+        return null;
+        // if (response.metadata.modificationTime == -1) {
+        //     return null;
+        // }
+        // return new Date(response.metadata.modificationTime);
     }
 
     @Override
@@ -354,7 +328,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     }
 
     private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain,
-            ProtectionParameter param) throws KeyStoreException {
+            java.security.KeyStore.ProtectionParameter param) throws KeyStoreException {
+        @SecurityLevel int securitylevel = SecurityLevel.TRUSTED_ENVIRONMENT;
         int flags = 0;
         KeyProtection spec;
         if (param == null) {
@@ -362,17 +337,20 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         } else if (param instanceof KeyStoreParameter) {
             spec = getLegacyKeyProtectionParameter(key);
             KeyStoreParameter legacySpec = (KeyStoreParameter) param;
-            if (legacySpec.isEncryptionRequired()) {
-                flags = KeyStore.FLAG_ENCRYPTED;
-            }
         } else if (param instanceof KeyProtection) {
             spec = (KeyProtection) param;
             if (spec.isCriticalToDeviceEncryption()) {
-                flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
+                // This key is should not be bound to the LSKF even if it is auth bound.
+                // This indicates that this key is used in the derivation for of the
+                // master key, that is used for the LSKF binding of other auth bound
+                // keys. This breaks up a circular dependency while retaining logical
+                // authentication binding of the key.
+                flags |= IKeystoreSecurityLevel
+                        .KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING;
             }
 
             if (spec.isStrongBoxBacked()) {
-                flags |= KeyStore.FLAG_STRONGBOX;
+                securitylevel = SecurityLevel.STRONGBOX;
             }
         } else {
             throw new KeyStoreException(
@@ -447,147 +425,169 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             chainBytes = null;
         }
 
-        final String pkeyAlias;
+        @Domain int targetDomain = getTargetDomain();
+
+        // If the given key is an AndroidKeyStorePrivateKey, we attempt to update
+        // its subcomponents with the given certificate and certificate chain.
         if (key instanceof AndroidKeyStorePrivateKey) {
-            pkeyAlias = ((AndroidKeyStoreKey) key).getAlias();
-        } else {
-            pkeyAlias = null;
+            AndroidKeyStoreKey ksKey = (AndroidKeyStoreKey) key;
+            KeyDescriptor descriptor = ksKey.getUserKeyDescriptor();
+
+            // This throws if the request cannot replace the entry.
+            assertCanReplace(alias, targetDomain, mNamespace, descriptor);
+
+            try {
+                mKeyStore.updateSubcomponents(
+                        ((AndroidKeyStorePrivateKey) key).getKeyIdDescriptor(),
+                        userCertBytes, chainBytes);
+            } catch (android.security.KeyStoreException e) {
+                throw new KeyStoreException("Failed to store certificate and certificate chain", e);
+            }
+            return;
         }
 
-        byte[] pkcs8EncodedPrivateKeyBytes;
-        KeymasterArguments importArgs;
-        final boolean shouldReplacePrivateKey;
-        if (pkeyAlias != null && pkeyAlias.startsWith(Credentials.USER_PRIVATE_KEY)) {
-            final String keySubalias = pkeyAlias.substring(Credentials.USER_PRIVATE_KEY.length());
-            if (!alias.equals(keySubalias)) {
-                throw new KeyStoreException("Can only replace keys with same alias: " + alias
-                        + " != " + keySubalias);
-            }
-            shouldReplacePrivateKey = false;
-            importArgs = null;
-            pkcs8EncodedPrivateKeyBytes = null;
-        } else {
-            shouldReplacePrivateKey = true;
-            // Make sure the PrivateKey format is the one we support.
-            final String keyFormat = key.getFormat();
-            if ((keyFormat == null) || (!"PKCS#8".equals(keyFormat))) {
-                throw new KeyStoreException(
-                        "Unsupported private key export format: " + keyFormat
-                        + ". Only private keys which export their key material in PKCS#8 format are"
-                        + " supported.");
-            }
+        // Make sure the PrivateKey format is the one we support.
+        final String keyFormat = key.getFormat();
+        if ((keyFormat == null) || (!"PKCS#8".equals(keyFormat))) {
+            throw new KeyStoreException(
+                    "Unsupported private key export format: " + keyFormat
+                    + ". Only private keys which export their key material in PKCS#8 format are"
+                    + " supported.");
+        }
 
-            // Make sure we can actually encode the key.
-            pkcs8EncodedPrivateKeyBytes = key.getEncoded();
-            if (pkcs8EncodedPrivateKeyBytes == null) {
-                throw new KeyStoreException("Private key did not export any key material");
-            }
+        // Make sure we can actually encode the key.
+        byte[] pkcs8EncodedPrivateKeyBytes = key.getEncoded();
+        if (pkcs8EncodedPrivateKeyBytes == null) {
+            throw new KeyStoreException("Private key did not export any key material");
+        }
 
-            importArgs = new KeymasterArguments();
-            try {
-                importArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM,
-                        KeyProperties.KeyAlgorithm.toKeymasterAsymmetricKeyAlgorithm(
-                                key.getAlgorithm()));
-                @KeyProperties.PurposeEnum int purposes = spec.getPurposes();
-                importArgs.addEnums(KeymasterDefs.KM_TAG_PURPOSE,
-                        KeyProperties.Purpose.allToKeymaster(purposes));
-                if (spec.isDigestsSpecified()) {
-                    importArgs.addEnums(KeymasterDefs.KM_TAG_DIGEST,
-                            KeyProperties.Digest.allToKeymaster(spec.getDigests()));
+        final List<KeyParameter> importArgs = new ArrayList<>();
+
+        try {
+            importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_ALGORITHM,
+                    KeyProperties.KeyAlgorithm.toKeymasterAsymmetricKeyAlgorithm(
+                            key.getAlgorithm()))
+            );
+            KeyStore2ParameterUtils.forEachSetFlag(spec.getPurposes(), (purpose) -> {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_PURPOSE,
+                        KeyProperties.Purpose.toKeymaster(purpose)
+                ));
+            });
+            if (spec.isDigestsSpecified()) {
+                for (String digest : spec.getDigests()) {
+                    importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                            KeymasterDefs.KM_TAG_DIGEST,
+                            KeyProperties.Digest.toKeymaster(digest)
+                    ));
                 }
-
-                importArgs.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE,
-                        KeyProperties.BlockMode.allToKeymaster(spec.getBlockModes()));
-                int[] keymasterEncryptionPaddings =
-                        KeyProperties.EncryptionPadding.allToKeymaster(
-                                spec.getEncryptionPaddings());
-                if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
-                        && (spec.isRandomizedEncryptionRequired())) {
-                    for (int keymasterPadding : keymasterEncryptionPaddings) {
-                        if (!KeymasterUtils
-                                .isKeymasterPaddingSchemeIndCpaCompatibleWithAsymmetricCrypto(
-                                        keymasterPadding)) {
-                            throw new KeyStoreException(
-                                    "Randomized encryption (IND-CPA) required but is violated by"
-                                    + " encryption padding mode: "
-                                    + KeyProperties.EncryptionPadding.fromKeymaster(
-                                            keymasterPadding)
-                                    + ". See KeyProtection documentation.");
-                        }
+            }
+            for (String blockMode : spec.getBlockModes()) {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_BLOCK_MODE,
+                        KeyProperties.BlockMode.toKeymaster(blockMode)
+                ));
+            }
+            int[] keymasterEncryptionPaddings =
+                    KeyProperties.EncryptionPadding.allToKeymaster(
+                            spec.getEncryptionPaddings());
+            if (((spec.getPurposes() & KeyProperties.PURPOSE_DECRYPT) != 0)
+                    && (spec.isRandomizedEncryptionRequired())) {
+                for (int keymasterPadding : keymasterEncryptionPaddings) {
+                    if (!KeymasterUtils
+                            .isKeymasterPaddingSchemeIndCpaCompatibleWithAsymmetricCrypto(
+                                    keymasterPadding)) {
+                        throw new KeyStoreException(
+                                "Randomized encryption (IND-CPA) required but is violated by"
+                                        + " encryption padding mode: "
+                                        + KeyProperties.EncryptionPadding.fromKeymaster(
+                                        keymasterPadding)
+                                        + ". See KeyProtection documentation.");
                     }
                 }
-                importArgs.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterEncryptionPaddings);
-                importArgs.addEnums(KeymasterDefs.KM_TAG_PADDING,
-                        KeyProperties.SignaturePadding.allToKeymaster(spec.getSignaturePaddings()));
-                KeymasterUtils.addUserAuthArgs(importArgs, spec);
-                importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
-                        spec.getKeyValidityStart());
-                importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                        spec.getKeyValidityForOriginationEnd());
-                importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                        spec.getKeyValidityForConsumptionEnd());
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                throw new KeyStoreException(e);
             }
+            for (int padding : keymasterEncryptionPaddings) {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_PADDING,
+                        padding
+                ));
+            }
+            for (String padding : spec.getSignaturePaddings()) {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_PADDING,
+                        KeyProperties.SignaturePadding.toKeymaster(padding)
+                ));
+            }
+            KeyStore2ParameterUtils.addUserAuthArgs(importArgs, spec);
+            if (spec.getKeyValidityStart() != null) {
+                importArgs.add(KeyStore2ParameterUtils.makeDate(
+                        KeymasterDefs.KM_TAG_ACTIVE_DATETIME, spec.getKeyValidityStart()
+                ));
+            }
+            if (spec.getKeyValidityForOriginationEnd() != null) {
+                importArgs.add(KeyStore2ParameterUtils.makeDate(
+                        KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                        spec.getKeyValidityForOriginationEnd()
+                ));
+            }
+            if (spec.getKeyValidityForConsumptionEnd() != null) {
+                importArgs.add(KeyStore2ParameterUtils.makeDate(
+                        KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                        spec.getKeyValidityForConsumptionEnd()
+                ));
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new KeyStoreException(e);
         }
 
-
-        boolean success = false;
         try {
-            // Store the private key, if necessary
-            if (shouldReplacePrivateKey) {
-                // Delete the stored private key and any related entries before importing the
-                // provided key
-                Credentials.deleteAllTypesForAlias(mKeyStore, alias, mUid);
-                KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
-                int errorCode = mKeyStore.importKey(
-                        Credentials.USER_PRIVATE_KEY + alias,
-                        importArgs,
-                        KeymasterDefs.KM_KEY_FORMAT_PKCS8,
-                        pkcs8EncodedPrivateKeyBytes,
-                        mUid,
-                        flags,
-                        resultingKeyCharacteristics);
-                if (errorCode != KeyStore.NO_ERROR) {
-                    throw new KeyStoreException("Failed to store private key",
-                            KeyStore.getKeyStoreException(errorCode));
-                }
-            } else {
-                // Keep the stored private key around -- delete all other entry types
-                Credentials.deleteCertificateTypesForAlias(mKeyStore, alias, mUid);
-                Credentials.deleteLegacyKeyForAlias(mKeyStore, alias, mUid);
+            KeyStoreSecurityLevel securityLevelInterface = mKeyStore.getSecurityLevel(
+                    securitylevel);
+
+            KeyDescriptor descriptor = makeKeyDescriptor(alias);
+
+            KeyMetadata metadata = securityLevelInterface.importKey(descriptor, null,
+                    importArgs, flags, pkcs8EncodedPrivateKeyBytes);
+
+            try {
+                mKeyStore.updateSubcomponents(metadata.key, userCertBytes, chainBytes);
+            } catch (android.security.KeyStoreException e) {
+                mKeyStore.deleteKey(metadata.key);
+                throw new KeyStoreException("Failed to store certificate and certificate chain", e);
             }
 
-            // Store the leaf certificate
-            int errorCode = mKeyStore.insert(Credentials.USER_CERTIFICATE + alias, userCertBytes,
-                    mUid, flags);
-            if (errorCode != KeyStore.NO_ERROR) {
-                throw new KeyStoreException("Failed to store certificate #0",
-                        KeyStore.getKeyStoreException(errorCode));
-            }
-
-            // Store the certificate chain
-            errorCode = mKeyStore.insert(Credentials.CA_CERTIFICATE + alias, chainBytes,
-                    mUid, flags);
-            if (errorCode != KeyStore.NO_ERROR) {
-                throw new KeyStoreException("Failed to store certificate chain",
-                        KeyStore.getKeyStoreException(errorCode));
-            }
-            success = true;
-        } finally {
-            if (!success) {
-                if (shouldReplacePrivateKey) {
-                    Credentials.deleteAllTypesForAlias(mKeyStore, alias, mUid);
-                } else {
-                    Credentials.deleteCertificateTypesForAlias(mKeyStore, alias, mUid);
-                    Credentials.deleteLegacyKeyForAlias(mKeyStore, alias, mUid);
-                }
-            }
+        } catch (android.security.KeyStoreException e) {
+            throw new KeyStoreException("Failed to store private key", e);
         }
     }
 
-    private void setSecretKeyEntry(String entryAlias, SecretKey key,
-            ProtectionParameter param)
+    private static void assertCanReplace(String alias, @Domain int targetDomain,
+            int targetNamespace, KeyDescriptor descriptor)
+            throws KeyStoreException {
+        // If
+        //  * the alias does not match, or
+        //  * the domain does not match, or
+        //  * the domain is Domain.SELINUX and the namespaces don not match,
+        // then the designated key location is not equivalent to the location of the
+        // given key parameter and cannot be updated.
+        //
+        // Note: mNamespace == KeyProperties.NAMESPACE_APPLICATION implies that the target domain
+        // is Domain.APP and Domain.SELINUX is the target domain otherwise.
+        if (alias != descriptor.alias
+                || descriptor.domain != targetDomain
+                || (descriptor.domain == Domain.SELINUX && descriptor.nspace != targetNamespace)) {
+            throw new KeyStoreException("Can only replace keys with same alias: " + alias
+                    + " != " + descriptor.alias + " in the same target domain: " + targetDomain
+                    + " != " + descriptor.domain
+                    + (targetDomain == Domain.SELINUX ? " in the same target namespace: "
+                    + targetNamespace + " != " + descriptor.nspace : "")
+            );
+        }
+    }
+
+    private void setSecretKeyEntry(String alias, SecretKey key,
+            java.security.KeyStore.ProtectionParameter param)
             throws KeyStoreException {
         if ((param != null) && (!(param instanceof KeyProtection))) {
             throw new KeyStoreException(
@@ -596,28 +596,19 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
         KeyProtection params = (KeyProtection) param;
 
+        @SecurityLevel int securityLevel = params.isStrongBoxBacked() ? SecurityLevel.STRONGBOX :
+                SecurityLevel.TRUSTED_ENVIRONMENT;
+        @Domain int targetDomain = (getTargetDomain());
+
         if (key instanceof AndroidKeyStoreSecretKey) {
-            // KeyStore-backed secret key. It cannot be duplicated into another entry and cannot
-            // overwrite its own entry.
-            String keyAliasInKeystore = ((AndroidKeyStoreSecretKey) key).getAlias();
-            if (keyAliasInKeystore == null) {
-                throw new KeyStoreException("KeyStore-backed secret key does not have an alias");
-            }
-            String keyAliasPrefix = Credentials.USER_PRIVATE_KEY;
-            if (!keyAliasInKeystore.startsWith(keyAliasPrefix)) {
-                // try legacy prefix
-                keyAliasPrefix = Credentials.USER_SECRET_KEY;
-                if (!keyAliasInKeystore.startsWith(keyAliasPrefix)) {
-                    throw new KeyStoreException("KeyStore-backed secret key has invalid alias: "
-                            + keyAliasInKeystore);
-                }
-            }
-            String keyEntryAlias =
-                    keyAliasInKeystore.substring(keyAliasPrefix.length());
-            if (!entryAlias.equals(keyEntryAlias)) {
-                throw new KeyStoreException("Can only replace KeyStore-backed keys with same"
-                        + " alias: " + entryAlias + " != " + keyEntryAlias);
-            }
+            String keyAliasInKeystore =
+                    ((AndroidKeyStoreSecretKey) key).getUserKeyDescriptor().alias;
+
+            KeyDescriptor descriptor = ((AndroidKeyStoreSecretKey) key).getUserKeyDescriptor();
+
+            // This throws if the request cannot replace the existing key.
+            assertCanReplace(alias, targetDomain, mNamespace, descriptor);
+
             // This is the entry where this key is already stored. No need to do anything.
             if (params != null) {
                 throw new KeyStoreException("Modifying KeyStore-backed key using protection"
@@ -646,13 +637,18 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     + " RAW format export");
         }
 
-        KeymasterArguments args = new KeymasterArguments();
+        final List<KeyParameter> importArgs = new ArrayList<>();
+
         try {
             int keymasterAlgorithm =
-                    KeyProperties.KeyAlgorithm.toKeymasterSecretKeyAlgorithm(key.getAlgorithm());
-            args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, keymasterAlgorithm);
+                    KeyProperties.KeyAlgorithm.toKeymasterSecretKeyAlgorithm(
+                            key.getAlgorithm());
 
-            int[] keymasterDigests;
+            importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_ALGORITHM,
+                    keymasterAlgorithm
+            ));
+
             if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
                 // JCA HMAC key algorithm implies a digest (e.g., HmacSHA256 key algorithm
                 // implies SHA-256 digest). Because keymaster HMAC key is authorized only for one
@@ -666,7 +662,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                             "HMAC key algorithm digest unknown for key algorithm "
                                     + key.getAlgorithm());
                 }
-                keymasterDigests = new int[] {keymasterImpliedDigest};
+
                 if (params.isDigestsSpecified()) {
                     // Digest(s) explicitly specified in params -- check that the list consists of
                     // exactly one digest, the one implied by key algorithm.
@@ -676,172 +672,235 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                             || (keymasterDigestsFromParams[0] != keymasterImpliedDigest)) {
                         throw new KeyStoreException(
                                 "Unsupported digests specification: "
-                                + Arrays.asList(params.getDigests()) + ". Only "
-                                + KeyProperties.Digest.fromKeymaster(keymasterImpliedDigest)
-                                + " supported for HMAC key algorithm " + key.getAlgorithm());
+                                        + Arrays.asList(params.getDigests()) + ". Only "
+                                        + KeyProperties.Digest.fromKeymaster(keymasterImpliedDigest)
+                                        + " supported for HMAC key algorithm "
+                                        + key.getAlgorithm());
                     }
                 }
+                int outputBits = KeymasterUtils.getDigestOutputSizeBits(keymasterImpliedDigest);
+                if (outputBits == -1) {
+                    throw new ProviderException(
+                            "HMAC key authorized for unsupported digest: "
+                                    + KeyProperties.Digest.fromKeymaster(keymasterImpliedDigest));
+                }
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_DIGEST, keymasterImpliedDigest
+                ));
+                importArgs.add(KeyStore2ParameterUtils.makeInt(
+                        KeymasterDefs.KM_TAG_MIN_MAC_LENGTH, outputBits
+                ));
             } else {
-                // Key algorithm does not imply a digest.
                 if (params.isDigestsSpecified()) {
-                    keymasterDigests = KeyProperties.Digest.allToKeymaster(params.getDigests());
-                } else {
-                    keymasterDigests = EmptyArray.INT;
-                }
-            }
-            args.addEnums(KeymasterDefs.KM_TAG_DIGEST, keymasterDigests);
-
-            @KeyProperties.PurposeEnum int purposes = params.getPurposes();
-            int[] keymasterBlockModes =
-                    KeyProperties.BlockMode.allToKeymaster(params.getBlockModes());
-            if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
-                    && (params.isRandomizedEncryptionRequired())) {
-                for (int keymasterBlockMode : keymasterBlockModes) {
-                    if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatibleWithSymmetricCrypto(
-                            keymasterBlockMode)) {
-                        throw new KeyStoreException(
-                                "Randomized encryption (IND-CPA) required but may be violated by"
-                                + " block mode: "
-                                + KeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
-                                + ". See KeyProtection documentation.");
+                    for (String digest : params.getDigests()) {
+                        importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                                KeymasterDefs.KM_TAG_DIGEST,
+                                KeyProperties.Digest.toKeymaster(digest)
+                        ));
                     }
                 }
             }
-            args.addEnums(KeymasterDefs.KM_TAG_PURPOSE,
-                    KeyProperties.Purpose.allToKeymaster(purposes));
-            args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
+
+            KeyStore2ParameterUtils.forEachSetFlag(params.getPurposes(), (purpose) -> {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_PURPOSE,
+                        KeyProperties.Purpose.toKeymaster(purpose)
+                ));
+            });
+
+            boolean indCpa = false;
+            if ((params.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0) {
+                if (((KeyProtection) param).isRandomizedEncryptionRequired()) {
+                    indCpa = true;
+                } else {
+                    importArgs.add(KeyStore2ParameterUtils.makeBool(
+                            KeymasterDefs.KM_TAG_CALLER_NONCE
+                    ));
+                }
+            }
+
+            for (String blockMode : params.getBlockModes()) {
+                int keymasterBlockMode = KeyProperties.BlockMode.toKeymaster(blockMode);
+                if (indCpa
+                        && !KeymasterUtils.isKeymasterBlockModeIndCpaCompatibleWithSymmetricCrypto(
+                                keymasterBlockMode)) {
+                    throw new KeyStoreException(
+                            "Randomized encryption (IND-CPA) required but may be violated by"
+                                    + " block mode: " + blockMode
+                                    + ". See KeyProtection documentation.");
+
+                }
+                if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_AES
+                        && keymasterBlockMode == KeymasterDefs.KM_MODE_GCM) {
+                    importArgs.add(KeyStore2ParameterUtils.makeInt(
+                            KeymasterDefs.KM_TAG_MIN_MAC_LENGTH,
+                            AndroidKeyStoreAuthenticatedAESCipherSpi.GCM
+                                    .MIN_SUPPORTED_TAG_LENGTH_BITS
+                    ));
+                }
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_BLOCK_MODE,
+                        keymasterBlockMode
+                ));
+            }
+
             if (params.getSignaturePaddings().length > 0) {
                 throw new KeyStoreException("Signature paddings not supported for symmetric keys");
             }
-            int[] keymasterPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
-                    params.getEncryptionPaddings());
-            args.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
-            KeymasterUtils.addUserAuthArgs(args, params);
-            KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
-                    args,
-                    keymasterAlgorithm,
-                    keymasterBlockModes,
-                    keymasterDigests);
-            args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
-                    params.getKeyValidityStart());
-            args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                    params.getKeyValidityForOriginationEnd());
-            args.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                    params.getKeyValidityForConsumptionEnd());
 
-            if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
-                    && (!params.isRandomizedEncryptionRequired())) {
-                // Permit caller-provided IV when encrypting with this key
-                args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
+            for (String padding : params.getEncryptionPaddings()) {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_PADDING,
+                        KeyProperties.EncryptionPadding.toKeymaster(padding)
+                ));
+            }
+
+            KeyStore2ParameterUtils.addUserAuthArgs(importArgs, params);
+
+            if (params.getKeyValidityStart() != null) {
+                importArgs.add(KeyStore2ParameterUtils.makeDate(
+                        KeymasterDefs.KM_TAG_ACTIVE_DATETIME, params.getKeyValidityStart()
+                ));
+            }
+            if (params.getKeyValidityForOriginationEnd() != null) {
+                importArgs.add(KeyStore2ParameterUtils.makeDate(
+                        KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                        params.getKeyValidityForOriginationEnd()
+                ));
+            }
+            if (params.getKeyValidityForConsumptionEnd() != null) {
+                importArgs.add(KeyStore2ParameterUtils.makeDate(
+                        KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                        params.getKeyValidityForConsumptionEnd()
+                ));
             }
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new KeyStoreException(e);
         }
+
         int flags = 0;
         if (params.isCriticalToDeviceEncryption()) {
-            flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
-        }
-        if (params.isStrongBoxBacked()) {
-            flags |= KeyStore.FLAG_STRONGBOX;
+            flags |= IKeystoreSecurityLevel.KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING;
         }
 
-        Credentials.deleteAllTypesForAlias(mKeyStore, entryAlias, mUid);
-        String keyAliasInKeystore = Credentials.USER_PRIVATE_KEY + entryAlias;
-        int errorCode = mKeyStore.importKey(
-                keyAliasInKeystore,
-                args,
-                KeymasterDefs.KM_KEY_FORMAT_RAW,
-                keyMaterial,
-                mUid,
-                flags,
-                new KeyCharacteristics());
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw new KeyStoreException("Failed to import secret key. Keystore error code: "
-                + errorCode);
+        try {
+            KeyStoreSecurityLevel securityLevelInterface = mKeyStore.getSecurityLevel(
+                    securityLevel);
+
+            KeyDescriptor descriptor = makeKeyDescriptor(alias);
+
+            securityLevelInterface.importKey(descriptor, null /* TODO attestationKey */,
+                    importArgs, flags, keyMaterial);
+        } catch (android.security.KeyStoreException e) {
+            throw new KeyStoreException("Failed to import secret key.", e);
         }
     }
 
     private void setWrappedKeyEntry(String alias, WrappedKeyEntry entry,
-            ProtectionParameter param) throws KeyStoreException {
+            java.security.KeyStore.ProtectionParameter param) throws KeyStoreException {
         if (param != null) {
             throw new KeyStoreException("Protection parameters are specified inside wrapped keys");
         }
 
         byte[] maskingKey = new byte[32];
 
-
-        KeymasterArguments args = new KeymasterArguments();
         String[] parts = entry.getTransformation().split("/");
+
+        List<KeyParameter> args = new ArrayList<>();
 
         String algorithm = parts[0];
         if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(algorithm)) {
-            args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        } else if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)) {
-            args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+            args.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_ALGORITHM,
+                    KeymasterDefs.KM_ALGORITHM_RSA
+            ));
+        } else {
+            throw new KeyStoreException("Algorithm \"" + algorithm + "\" not supported for "
+                    + "wrapping. Only RSA wrapping keys are supported.");
         }
 
         if (parts.length > 1) {
             String mode = parts[1];
-            if (KeyProperties.BLOCK_MODE_ECB.equalsIgnoreCase(mode)) {
-                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
-            } else if (KeyProperties.BLOCK_MODE_CBC.equalsIgnoreCase(mode)) {
-                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CBC);
-            } else if (KeyProperties.BLOCK_MODE_CTR.equalsIgnoreCase(mode)) {
-                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
-            } else if (KeyProperties.BLOCK_MODE_GCM.equalsIgnoreCase(mode)) {
-                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
-            }
+            args.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_BLOCK_MODE,
+                    KeyProperties.BlockMode.toKeymaster(mode)
+            ));
         }
 
         if (parts.length > 2) {
-            String padding = parts[2];
-            if (KeyProperties.ENCRYPTION_PADDING_NONE.equalsIgnoreCase(padding)) {
-                // Noop
-            } else if (KeyProperties.ENCRYPTION_PADDING_PKCS7.equalsIgnoreCase(padding)) {
-                args.addEnums(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_PKCS7);
-            } else if (KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1.equalsIgnoreCase(padding)) {
-                args.addEnums(KeymasterDefs.KM_TAG_PADDING,
-                    KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT);
-            } else if (KeyProperties.ENCRYPTION_PADDING_RSA_OAEP.equalsIgnoreCase(padding)) {
-                args.addEnums(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_RSA_OAEP);
+            @KeyProperties.EncryptionPaddingEnum int padding =
+                    KeyProperties.EncryptionPadding.toKeymaster(parts[2]);
+            if (padding != KeymasterDefs.KM_PAD_NONE) {
+                args.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_PADDING,
+                        padding
+                ));
             }
         }
 
         KeyGenParameterSpec spec = (KeyGenParameterSpec) entry.getAlgorithmParameterSpec();
         if (spec.isDigestsSpecified()) {
-            String digest = spec.getDigests()[0];
-            if (KeyProperties.DIGEST_NONE.equalsIgnoreCase(digest)) {
-                // Noop
-            } else if (KeyProperties.DIGEST_MD5.equalsIgnoreCase(digest)) {
-                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_MD5);
-            } else if (KeyProperties.DIGEST_SHA1.equalsIgnoreCase(digest)) {
-                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA1);
-            } else if (KeyProperties.DIGEST_SHA224.equalsIgnoreCase(digest)) {
-                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_224);
-            } else if (KeyProperties.DIGEST_SHA256.equalsIgnoreCase(digest)) {
-                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_256);
-            } else if (KeyProperties.DIGEST_SHA384.equalsIgnoreCase(digest)) {
-                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_384);
-            } else if (KeyProperties.DIGEST_SHA512.equalsIgnoreCase(digest)) {
-                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_512);
+            @KeyProperties.DigestEnum int digest =
+                    KeyProperties.Digest.toKeymaster(spec.getDigests()[0]);
+            if (digest != KeymasterDefs.KM_DIGEST_NONE) {
+                args.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_DIGEST,
+                        digest
+                ));
             }
         }
 
-        int errorCode = mKeyStore.importWrappedKey(
-            Credentials.USER_PRIVATE_KEY + alias,
-            entry.getWrappedKeyBytes(),
-            Credentials.USER_PRIVATE_KEY + entry.getWrappingKeyAlias(),
-            maskingKey,
-            args,
-            GateKeeper.getSecureUserId(),
-            0, // FIXME fingerprint id?
-            mUid,
-            new KeyCharacteristics());
-        if (errorCode == KeymasterDefs.KM_ERROR_UNIMPLEMENTED) {
-          throw new SecureKeyImportUnavailableException("Could not import wrapped key");
-        } else if (errorCode != KeyStore.NO_ERROR) {
-            throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
-                + errorCode);
+        KeyDescriptor wrappingkey = makeKeyDescriptor(entry.getWrappingKeyAlias());
+
+        KeyEntryResponse response = null;
+        try {
+            response = mKeyStore.getKeyEntry(wrappingkey);
+        } catch (android.security.KeyStoreException e) {
+            throw new KeyStoreException("Failed to load wrapping key.", e);
+        }
+
+        KeyDescriptor wrappedKey = makeKeyDescriptor(alias);
+
+        KeyStoreSecurityLevel securityLevel = new KeyStoreSecurityLevel(response.iSecurityLevel);
+
+        final BiometricManager bm = android.app.AppGlobals.getInitialApplication()
+                .getSystemService(BiometricManager.class);
+
+        long[] biometricSids = bm.getAuthenticatorIds();
+
+        List<AuthenticatorSpec> authenticatorSpecs = new ArrayList<>();
+
+        AuthenticatorSpec authenticatorSpec = new AuthenticatorSpec();
+        // TODO Replace with HardwareAuthenticatorType.PASSWORD when KeyMint AIDL spec has landed.
+        authenticatorSpec.authenticatorType = 1; // HardwareAuthenticatorType.PASSWORD
+        authenticatorSpec.authenticatorId = GateKeeper.getSecureUserId();
+        authenticatorSpecs.add(authenticatorSpec);
+
+        for (long sid : biometricSids) {
+            AuthenticatorSpec authSpec = new AuthenticatorSpec();
+            // TODO Replace with HardwareAuthenticatorType.FINGERPRINT when KeyMint AIDL spec has
+            //      landed.
+            authSpec.authenticatorType = 2; // HardwareAuthenticatorType.FINGERPRINT
+            authSpec.authenticatorId = sid;
+            authenticatorSpecs.add(authSpec);
+        }
+
+        try {
+            securityLevel.importWrappedKey(
+                    wrappedKey, wrappingkey,
+                    entry.getWrappedKeyBytes(),
+                    null /* masking key is set to 32 bytes if null is given here */,
+                    args,
+                    authenticatorSpecs.toArray(new AuthenticatorSpec[0]));
+        } catch (android.security.KeyStoreException e) {
+            switch (e.getErrorCode()) {
+                case KeymasterDefs.KM_ERROR_UNIMPLEMENTED: {
+                    throw new SecureKeyImportUnavailableException("Could not import wrapped key");
+                }
+                default:
+                    throw new KeyStoreException("Failed to import wrapped key. Keystore error "
+                            + "code: " + e.getErrorCode(), e);
+            }
         }
     }
 
@@ -851,6 +910,23 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         throw new KeyStoreException("Operation not supported because key encoding is unknown");
     }
 
+    /**
+     * This function sets a trusted certificate entry. It fails if the given
+     * alias is already taken by an actual key entry. However, if the entry is a
+     * trusted certificate it will get silently replaced.
+     * @param alias the alias name
+     * @param cert the certificate
+     *
+     * @throws KeyStoreException if the alias is already taken by a secret or private
+     *         key entry.
+     * @throws KeyStoreException with a nested {@link CertificateEncodingException}
+     *         if the {@code cert.getEncoded()} throws.
+     * @throws KeyStoreException with a nested {@link android.security.KeyStoreException} if
+     *         something went wrong while inserting the certificate into keystore.
+     * @throws NullPointerException if cert or alias is null.
+     *
+     * @hide
+     */
     @Override
     public void engineSetCertificateEntry(String alias, Certificate cert) throws KeyStoreException {
         if (isKeyEntry(alias)) {
@@ -869,36 +945,43 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new KeyStoreException(e);
         }
 
-        if (!mKeyStore.put(Credentials.CA_CERTIFICATE + alias, encoded, mUid, KeyStore.FLAG_NONE)) {
-            throw new KeyStoreException("Couldn't insert certificate; is KeyStore initialized?");
+        try {
+            mKeyStore.updateSubcomponents(makeKeyDescriptor(alias),
+                    null /* publicCert - unused when used as pure certificate store. */,
+                    encoded);
+        } catch (android.security.KeyStoreException e) {
+            throw new KeyStoreException("Couldn't insert certificate.", e);
         }
     }
 
     @Override
     public void engineDeleteEntry(String alias) throws KeyStoreException {
-        if (!Credentials.deleteAllTypesForAlias(mKeyStore, alias, mUid)) {
-            throw new KeyStoreException("Failed to delete entry: " + alias);
+        KeyDescriptor descriptor = makeKeyDescriptor(alias);
+        try {
+            mKeyStore.deleteKey(descriptor);
+        } catch (android.security.KeyStoreException e) {
+            if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
+                throw new KeyStoreException("Failed to delete entry: " + alias, e);
+            }
         }
     }
 
     private Set<String> getUniqueAliases() {
-        final String[] rawAliases = mKeyStore.list("", mUid);
-        if (rawAliases == null) {
-            return new HashSet<String>();
-        }
 
-        final Set<String> aliases = new HashSet<String>(rawAliases.length);
-        for (String alias : rawAliases) {
-            final int idx = alias.indexOf('_');
-            if ((idx == -1) || (alias.length() <= idx)) {
-                Log.e(NAME, "invalid alias: " + alias);
-                continue;
+        try {
+            final KeyDescriptor[] keys = mKeyStore.list(
+                    getTargetDomain(),
+                    mNamespace
+            );
+            final Set<String> aliases = new HashSet<>(keys.length);
+            for (KeyDescriptor d : keys) {
+                aliases.add(d.alias);
             }
-
-            aliases.add(new String(alias.substring(idx + 1)));
+            return aliases;
+        } catch (android.security.KeyStoreException e) {
+            Log.e(TAG, "Failed to list keystore entries.", e);
+            return null;
         }
-
-        return aliases;
     }
 
     @Override
@@ -912,10 +995,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new NullPointerException("alias == null");
         }
 
-        return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias, mUid)
-                || mKeyStore.contains(Credentials.USER_SECRET_KEY + alias, mUid)
-                || mKeyStore.contains(Credentials.USER_CERTIFICATE + alias, mUid)
-                || mKeyStore.contains(Credentials.CA_CERTIFICATE + alias, mUid);
+        return getKeyMetadata(alias) != null;
     }
 
     @Override
@@ -929,22 +1009,30 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     }
 
     private boolean isKeyEntry(String alias) {
-        return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias, mUid) ||
-                mKeyStore.contains(Credentials.USER_SECRET_KEY + alias, mUid);
-    }
-
-
-    private boolean isCertificateEntry(String alias) {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
 
-        return mKeyStore.contains(Credentials.CA_CERTIFICATE + alias, mUid);
+        KeyEntryResponse response = getKeyMetadata(alias);
+        // If response is null, there is no such entry.
+        // If response.iSecurityLevel is null, there is no private or secret key material stored.
+        return response != null && response.iSecurityLevel != null;
     }
+
 
     @Override
     public boolean engineIsCertificateEntry(String alias) {
-        return !isKeyEntry(alias) && isCertificateEntry(alias);
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+        KeyEntryResponse response = getKeyMetadata(alias);
+        // If response == null there is no such entry.
+        // If there is no certificateChain, then this is not a certificate entry.
+        // If there is a private key entry, this is the certificate chain for that
+        // key entry and not a CA certificate entry.
+        return response != null
+                && response.metadata.certificateChain != null
+                && response.iSecurityLevel == null;
     }
 
     @Override
@@ -953,66 +1041,55 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             return null;
         }
         if (!"X.509".equalsIgnoreCase(cert.getType())) {
-            // Only X.509 certificates supported
+            Log.e(TAG, "In engineGetCertificateAlias: only X.509 certificates are supported.");
             return null;
         }
         byte[] targetCertBytes;
         try {
             targetCertBytes = cert.getEncoded();
         } catch (CertificateEncodingException e) {
+            Log.e(TAG, "While trying to get the alias for a certificate.", e);
             return null;
         }
         if (targetCertBytes == null) {
             return null;
         }
 
-        final Set<String> nonCaEntries = new HashSet<String>();
+        KeyDescriptor[] keyDescriptors = null;
+        try {
+            keyDescriptors = mKeyStore.list(
+                    getTargetDomain(),
+                    mNamespace
+            );
+        } catch (android.security.KeyStoreException e) {
+            Log.w(TAG, "Failed to get list of keystore entries.", e);
+        }
 
-        /*
-         * First scan the PrivateKeyEntry types. The KeyStoreSpi documentation
-         * says to only compare the first certificate in the chain which is
-         * equivalent to the USER_CERTIFICATE prefix for the Android keystore
-         * convention.
-         */
-        final String[] certAliases = mKeyStore.list(Credentials.USER_CERTIFICATE, mUid);
-        if (certAliases != null) {
-            for (String alias : certAliases) {
-                final byte[] certBytes = mKeyStore.get(Credentials.USER_CERTIFICATE + alias, mUid);
-                if (certBytes == null) {
-                    continue;
+        String caAlias = null;
+        for (KeyDescriptor d : keyDescriptors) {
+            KeyEntryResponse response = getKeyMetadata(d.alias);
+            if (response == null) {
+                continue;
+            }
+            /*
+             * The KeyStoreSpi documentation says to only compare the first certificate in the
+             * chain which is equivalent to the {@code response.metadata.certificate} field.
+             * So we look for a hit in this field first. For pure CA certificate entries,
+             * we check the {@code response.metadata.certificateChain} field. But we only
+             * return a CA alias if there was no hit in the certificate field of any other
+             * entry.
+             */
+            if (response.metadata.certificate != null) {
+                if (Arrays.equals(response.metadata.certificate, targetCertBytes)) {
+                    return d.alias;
                 }
-
-                nonCaEntries.add(alias);
-
-                if (Arrays.equals(certBytes, targetCertBytes)) {
-                    return alias;
+            } else if (response.metadata.certificateChain != null && caAlias == null) {
+                if (Arrays.equals(response.metadata.certificateChain, targetCertBytes)) {
+                    caAlias =  d.alias;
                 }
             }
         }
-
-        /*
-         * Look at all the TrustedCertificateEntry types. Skip all the
-         * PrivateKeyEntry we looked at above.
-         */
-        final String[] caAliases = mKeyStore.list(Credentials.CA_CERTIFICATE, mUid);
-        if (certAliases != null) {
-            for (String alias : caAliases) {
-                if (nonCaEntries.contains(alias)) {
-                    continue;
-                }
-
-                final byte[] certBytes = mKeyStore.get(Credentials.CA_CERTIFICATE + alias, mUid);
-                if (certBytes == null) {
-                    continue;
-                }
-
-                if (Arrays.equals(certBytes, targetCertBytes)) {
-                    return alias;
-                }
-            }
-        }
-
-        return null;
+        return caAlias;
     }
 
     @Override
@@ -1033,24 +1110,24 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         // Unfortunate name collision.
-        mKeyStore = KeyStore.getInstance();
-        mUid = KeyStore.UID_SELF;
+        mKeyStore = KeyStore2.getInstance();
+        mNamespace = KeyProperties.NAMESPACE_APPLICATION;
     }
 
     @Override
     public void engineLoad(LoadStoreParameter param) throws IOException,
             NoSuchAlgorithmException, CertificateException {
-        int uid = KeyStore.UID_SELF;
+        int namespace = KeyProperties.NAMESPACE_APPLICATION;
         if (param != null) {
             if (param instanceof AndroidKeyStoreLoadStoreParameter) {
-                uid = ((AndroidKeyStoreLoadStoreParameter) param).getUid();
+                namespace = ((AndroidKeyStoreLoadStoreParameter) param).getNamespace();
             } else {
                 throw new IllegalArgumentException(
                         "Unsupported param type: " + param.getClass());
             }
         }
-        mKeyStore = KeyStore.getInstance();
-        mUid = uid;
+        mKeyStore = KeyStore2.getInstance();
+        mNamespace = namespace;
     }
 
     @Override
@@ -1060,11 +1137,14 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new KeyStoreException("entry == null");
         }
 
-        Credentials.deleteAllTypesForAlias(mKeyStore, alias, mUid);
-
         if (entry instanceof java.security.KeyStore.TrustedCertificateEntry) {
             java.security.KeyStore.TrustedCertificateEntry trE =
                     (java.security.KeyStore.TrustedCertificateEntry) entry;
+            // engineSetCertificateEntry does not overwrite if the existing entry
+            // is a key entry, but the semantic of engineSetEntry is such that it
+            // overwrites any existing entry. Thus we delete any possible existing
+            // entry by this alias.
+            engineDeleteEntry(alias);
             engineSetCertificateEntry(alias, trE.getTrustedCertificate());
             return;
         }
@@ -1080,34 +1160,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             setWrappedKeyEntry(alias, wke, param);
         } else {
             throw new KeyStoreException(
-                    "Entry must be a PrivateKeyEntry, SecretKeyEntry or TrustedCertificateEntry"
-                    + "; was " + entry);
-        }
-    }
-
-    /**
-     * {@link X509Certificate} which returns {@link AndroidKeyStorePublicKey} from
-     * {@link #getPublicKey()}. This is so that crypto operations on these public keys contain
-     * can find out which keystore private key entry to use. This is needed so that Android Keystore
-     * crypto operations using public keys can find out which key alias to use. These operations
-     * require an alias.
-     */
-    static class KeyStoreX509Certificate extends DelegatingX509Certificate {
-        private final String mPrivateKeyAlias;
-        private final int mPrivateKeyUid;
-        KeyStoreX509Certificate(String privateKeyAlias, int privateKeyUid,
-                X509Certificate delegate) {
-            super(delegate);
-            mPrivateKeyAlias = privateKeyAlias;
-            mPrivateKeyUid = privateKeyUid;
-        }
-
-        @Override
-        public PublicKey getPublicKey() {
-            PublicKey original = super.getPublicKey();
-            return AndroidKeyStoreProvider.getAndroidKeyStorePublicKey(
-                    mPrivateKeyAlias, mPrivateKeyUid,
-                    original.getAlgorithm(), original.getEncoded());
+                    "Entry must be a PrivateKeyEntry, SecretKeyEntry, WrappedKeyEntry "
+                            + "or TrustedCertificateEntry; was " + entry);
         }
     }
 }

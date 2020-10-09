@@ -17,20 +17,20 @@
 package android.security.keystore2;
 
 import android.annotation.NonNull;
-import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.KeyParameter;
 
 import java.security.InvalidKeyException;
 import java.security.SignatureSpi;
+import java.util.List;
 
 /**
  * Base class for {@link SignatureSpi} providing Android KeyStore backed RSA signatures.
  *
  * @hide
  */
-abstract class AndroidKeyStoreRSASignatureSpi extends
-        AndroidKeyStoreSignatureSpiBase {
+abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSpiBase {
 
     abstract static class PKCS1Padding extends AndroidKeyStoreRSASignatureSpi {
         PKCS1Padding(int keymasterDigest) {
@@ -158,9 +158,15 @@ abstract class AndroidKeyStoreRSASignatureSpi extends
 
     @Override
     protected final void addAlgorithmSpecificParametersToBegin(
-            @NonNull KeymasterArguments keymasterArgs) {
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
-        keymasterArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
+            @NonNull List<KeyParameter> parameters) {
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding
+        ));
     }
 }

@@ -18,15 +18,12 @@ package android.security.keystore2;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
-import android.os.IBinder;
-import android.security.KeyStore;
 import android.security.KeyStoreException;
-import android.security.keymaster.KeymasterArguments;
+import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
-import android.security.keymaster.OperationResult;
 import android.security.keystore.ArrayUtils;
-import android.security.keystore.KeyStoreConnectException;
 import android.security.keystore.KeyStoreCryptoOperation;
+import android.system.keystore2.KeyParameter;
 
 import libcore.util.EmptyArray;
 
@@ -39,6 +36,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class for {@link SignatureSpi} implementations of Android KeyStore backed ciphers.
@@ -47,7 +46,7 @@ import java.security.SignatureSpi;
  */
 abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
         implements KeyStoreCryptoOperation {
-    private final KeyStore mKeyStore;
+    private static final String TAG = "AndroidKeyStoreSignatureSpiBase";
 
     // Fields below are populated by SignatureSpi.engineInitSign/engineInitVerify and KeyStore.begin
     // and should be preserved after SignatureSpi.engineSign/engineVerify finishes.
@@ -55,12 +54,18 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
     private AndroidKeyStoreKey mKey;
 
     /**
-     * Token referencing this operation inside keystore service. It is initialized by
-     * {@code engineInitSign}/{@code engineInitVerify} and is invalidated when
-     * {@code engineSign}/{@code engineVerify} succeeds and on some error conditions in between.
+     * Object representing this operation inside keystore service. It is initialized
+     * by {@code engineInit} and is invalidated when {@code engineDoFinal} succeeds and on some
+     * error conditions in between.
      */
-    private IBinder mOperationToken;
-    private long mOperationHandle;
+    private KeyStoreOperation mOperation;
+    /**
+     * The operation challenge is required when an operation needs user authorization.
+     * The challenge is subjected to an authenticator, e.g., Gatekeeper or a biometric
+     * authenticator, and included in the authentication token minted by this authenticator.
+     * It may be null, if the operation does not require authorization.
+     */
+    private long mOperationChallenge;
     private KeyStoreCryptoOperationStreamer mMessageStreamer;
 
     /**
@@ -72,7 +77,13 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
     private Exception mCachedException;
 
     AndroidKeyStoreSignatureSpiBase() {
-        mKeyStore = KeyStore.getInstance();
+        mOperation = null;
+        mOperationChallenge = 0;
+        mSigning = false;
+        mKey = null;
+        appRandom = null;
+        mMessageStreamer = null;
+        mCachedException = null;
     }
 
     @Override
@@ -145,6 +156,11 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
         mKey = key;
     }
 
+    private void abortOperation() {
+        KeyStoreCryptoOperationUtils.abortOperation(mOperation);
+        mOperation = null;
+    }
+
     /**
      * Resets this cipher to its pristine pre-init state. This must be equivalent to obtaining a new
      * cipher instance.
@@ -154,16 +170,11 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
      */
     @CallSuper
     protected void resetAll() {
-        IBinder operationToken = mOperationToken;
-        if (operationToken != null) {
-            mOperationToken = null;
-            mKeyStore.abort(operationToken);
-        }
+        abortOperation();
+        mOperationChallenge = 0;
         mSigning = false;
         mKey = null;
         appRandom = null;
-        mOperationToken = null;
-        mOperationHandle = 0;
         mMessageStreamer = null;
         mCachedException = null;
     }
@@ -178,12 +189,8 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
      */
     @CallSuper
     protected void resetWhilePreservingInitState() {
-        IBinder operationToken = mOperationToken;
-        if (operationToken != null) {
-            mOperationToken = null;
-            mKeyStore.abort(operationToken);
-        }
-        mOperationHandle = 0;
+        abortOperation();
+        mOperationChallenge = 0;
         mMessageStreamer = null;
         mCachedException = null;
     }
@@ -199,40 +206,29 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
             throw new IllegalStateException("Not initialized");
         }
 
-        KeymasterArguments keymasterInputArgs = new KeymasterArguments();
-        addAlgorithmSpecificParametersToBegin(keymasterInputArgs);
+        List<KeyParameter> parameters = new ArrayList<>();
+        addAlgorithmSpecificParametersToBegin(parameters);
 
-        OperationResult opResult = mKeyStore.begin(
-                mKey.getAlias(),
-                mSigning ? KeymasterDefs.KM_PURPOSE_SIGN : KeymasterDefs.KM_PURPOSE_VERIFY,
-                true, // permit aborting this operation if keystore runs out of resources
-                keymasterInputArgs,
-                null, // no additional entropy for begin -- only finish might need some
-                mKey.getUid());
-        if (opResult == null) {
-            throw new KeyStoreConnectException();
+        int purpose = mSigning ? KeymasterDefs.KM_PURPOSE_SIGN : KeymasterDefs.KM_PURPOSE_VERIFY;
+
+        parameters.add(KeyStore2ParameterUtils.makeEnum(KeymasterDefs.KM_TAG_PURPOSE, purpose));
+
+        try {
+            mOperation = mKey.getSecurityLevel().createOperation(
+                    mKey.getKeyIdDescriptor(),
+                    parameters);
+        } catch (KeyStoreException keyStoreException) {
+            throw KeyStoreCryptoOperationUtils.getInvalidKeyException(
+                    mKey, keyStoreException);
         }
 
-        // Store operation token and handle regardless of the error code returned by KeyStore to
-        // ensure that the operation gets aborted immediately if the code below throws an exception.
-        mOperationToken = opResult.token;
-        mOperationHandle = opResult.operationHandle;
+        // Now we check if we got an operation challenge. This indicates that user authorization
+        // is required. And if we got a challenge we check if the authorization can possibly
+        // succeed.
+        mOperationChallenge = KeyStoreCryptoOperationUtils.getOrMakeOperationChallenge(
+                mOperation, mKey);
 
-        // If necessary, throw an exception due to KeyStore operation having failed.
-        InvalidKeyException e = KeyStoreCryptoOperationUtils.getInvalidKeyExceptionForInit(
-                mKeyStore, mKey, opResult.resultCode);
-        if (e != null) {
-            throw e;
-        }
-
-        if (mOperationToken == null) {
-            throw new ProviderException("Keystore returned null operation token");
-        }
-        if (mOperationHandle == 0) {
-            throw new ProviderException("Keystore returned invalid operation handle");
-        }
-
-        mMessageStreamer = createMainDataStreamer(mKeyStore, opResult.token);
+        mMessageStreamer = createMainDataStreamer(mOperation);
     }
 
     /**
@@ -242,15 +238,15 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
      */
     @NonNull
     protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
-            KeyStore keyStore, IBinder operationToken) {
+            @NonNull KeyStoreOperation operation) {
         return new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
-                        keyStore, operationToken));
+                        operation));
     }
 
     @Override
     public final long getOperationHandle() {
-        return mOperationHandle;
+        return mOperationChallenge;
     }
 
     @Override
@@ -330,8 +326,7 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
                             appRandom, getAdditionalEntropyAmountForSign());
             signature = mMessageStreamer.doFinal(
                     EmptyArray.BYTE, 0, 0,
-                    null, // no signature provided -- it'll be generated by this invocation
-                    additionalEntropy);
+                    null); // no signature provided -- it'll be generated by this invocation
         } catch (InvalidKeyException | KeyStoreException e) {
             throw new SignatureException(e);
         }
@@ -356,9 +351,7 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
         try {
             byte[] output = mMessageStreamer.doFinal(
                     EmptyArray.BYTE, 0, 0,
-                    signature,
-                    null // no additional entropy needed -- verification is deterministic
-                    );
+                    signature);
             if (output.length != 0) {
                 throw new ProviderException(
                         "Signature verification unexpected produced output: " + output.length
@@ -398,10 +391,6 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
         throw new InvalidParameterException();
     }
 
-    protected final KeyStore getKeyStore() {
-        return mKeyStore;
-    }
-
     /**
      * Returns {@code true} if this signature is initialized for signing, {@code false} if this
      * signature is initialized for verification.
@@ -426,9 +415,9 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
     /**
      * Invoked to add algorithm-specific parameters for the KeyStore's {@code begin} operation.
      *
-     * @param keymasterArgs keystore/keymaster arguments to be populated with algorithm-specific
+     * @param parameters keystore/keymaster arguments to be populated with algorithm-specific
      *        parameters.
      */
     protected abstract void addAlgorithmSpecificParametersToBegin(
-            @NonNull KeymasterArguments keymasterArgs);
+            @NonNull List<KeyParameter> parameters);
 }
