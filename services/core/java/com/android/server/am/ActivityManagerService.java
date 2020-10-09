@@ -15753,6 +15753,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean startProfile(@UserIdInt int userId) {
+        return mUserController.startProfile(userId);
+    }
+
+    @Override
+    public boolean stopProfile(@UserIdInt int userId) {
+        return mUserController.stopProfile(userId);
+    }
+
+    @Override
     public UserInfo getCurrentUser() {
         return mUserController.getCurrentUser();
     }

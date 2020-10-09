@@ -616,6 +616,9 @@
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNAVAILABLE" />
     <protected-broadcast android:name="com.android.server.pm.DISABLE_QUIET_MODE_AFTER_UNLOCK" />
 
+    <protected-broadcast android:name="android.intent.action.PROFILE_ACCESSIBLE" />
+    <protected-broadcast android:name="android.intent.action.PROFILE_INACCESSIBLE" />
+
     <protected-broadcast android:name="com.android.server.retaildemo.ACTION_RESET_DEMO" />
 
     <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
