@@ -99,7 +99,7 @@ public class ImsRcsManager {
             public void onCapabilitiesStatusChanged(int config) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onAvailabilityChanged(
                             new RcsFeature.RcsImsCapabilities(config)));

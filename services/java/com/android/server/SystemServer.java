@@ -107,6 +107,7 @@ import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
+import com.android.server.devicestate.DeviceStateManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
@@ -1252,6 +1253,10 @@ public final class SystemServer {
 
             t.traceBegin("AppIntegrityService");
             mSystemServiceManager.startService(AppIntegrityManagerService.class);
+            t.traceEnd();
+
+            t.traceBegin("DeviceStateManagerService");
+            mSystemServiceManager.startService(DeviceStateManagerService.class);
             t.traceEnd();
 
         } catch (Throwable e) {

@@ -22,11 +22,14 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK;
 
 import static com.android.systemui.accessibility.MagnificationModeSwitch.getIconResId;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -45,10 +48,12 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -142,13 +147,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         resetMockImageViewAndAnimator();
         listener.onTouch(mSpyImageView, MotionEvent.obtain(
                 0, ViewConfiguration.getTapTimeout(), ACTION_UP, 100, 100, 0));
-        verify(mViewPropertyAnimator).cancel();
-        verify(mSpyImageView).setImageResource(
-                getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
-        verify(mWindowManager).removeView(mSpyImageView);
-        final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
-        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, actualMode);
+        verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     @Test
@@ -222,6 +221,34 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertShowButtonAnimation();
     }
 
+    @Test
+    public void initializeA11yNode_showWindowModeButton_expectedValues() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        final AccessibilityNodeInfo nodeInfo = new AccessibilityNodeInfo();
+
+        mSpyImageView.onInitializeAccessibilityNodeInfo(nodeInfo);
+
+        assertEquals(mContext.getString(R.string.magnification_mode_switch_description),
+                nodeInfo.getContentDescription());
+        assertEquals(mContext.getString(R.string.magnification_mode_switch_state_window),
+                nodeInfo.getStateDescription());
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityNodeInfo.AccessibilityAction(
+                        ACTION_CLICK.getId(), mContext.getResources().getString(
+                        R.string.magnification_mode_switch_click_label))));
+    }
+
+    @Test
+    public void performA11yActions_showWindowModeButton_verifyTapAction() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        resetMockImageViewAndAnimator();
+
+        mSpyImageView.performAccessibilityAction(
+                ACTION_CLICK.getId(), null);
+
+        verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
     private void assertModeUnchanged(int expectedMode) {
         final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
@@ -253,5 +280,20 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         Mockito.reset(mViewPropertyAnimator);
         Mockito.reset(mSpyImageView);
         initMockImageViewAndAnimator();
+    }
+
+    /**
+     * Verifies the tap behaviour including the image of the button and the magnification mode.
+     *
+     * @param expectedMode the expected mode after tapping
+     */
+    private void verifyTapAction(int expectedMode) {
+        verify(mViewPropertyAnimator).cancel();
+        verify(mSpyImageView).setImageResource(
+                getIconResId(expectedMode));
+        verify(mWindowManager).removeView(mSpyImageView);
+        final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
+        assertEquals(expectedMode, actualMode);
     }
 }

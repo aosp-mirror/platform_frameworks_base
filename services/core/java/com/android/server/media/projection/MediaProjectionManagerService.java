@@ -261,7 +261,7 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public boolean hasProjectionPermission(int uid, String packageName) {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             boolean hasPermission = false;
             try {
                 hasPermission |= checkPermission(packageName,
@@ -288,7 +288,7 @@ public final class MediaProjectionManagerService extends SystemService
             }
 
             final UserHandle callingUser = Binder.getCallingUserHandle();
-            long callingToken = Binder.clearCallingIdentity();
+            final long callingToken = Binder.clearCallingIdentity();
 
             MediaProjection projection;
             try {

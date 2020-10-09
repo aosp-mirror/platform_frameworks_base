@@ -56,6 +56,13 @@ interface IAppOpsService {
             String proxiedAttributionTag, int proxyUid, String proxyPackageName,
             String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage);
+    int startProxyOperation(IBinder clientId, int code, int proxiedUid, String proxiedPackageName,
+            @nullable String proxiedAttributionTag, int proxyUid, String proxyPackageName,
+            @nullable String proxyAttributionTag, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
+    void finishProxyOperation(IBinder clientId, int code, int proxiedUid, String proxiedPackageName,
+            @nullable String proxiedAttributionTag, int proxyUid, String proxyPackageName,
+            @nullable String proxyAttributionTag);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);

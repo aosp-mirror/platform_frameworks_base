@@ -16,9 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.view.Surface.ROTATION_180;
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
+import static com.android.server.wm.DisplayFramesProto.CURRENT;
+import static com.android.server.wm.DisplayFramesProto.DOCK;
 import static com.android.server.wm.DisplayFramesProto.STABLE_BOUNDS;
 
 import android.annotation.NonNull;
@@ -155,6 +154,8 @@ public class DisplayFrames {
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         mStable.dumpDebug(proto, STABLE_BOUNDS);
+        mDock.dumpDebug(proto, DOCK);
+        mCurrent.dumpDebug(proto, CURRENT);
         proto.end(token);
     }
 

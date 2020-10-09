@@ -1125,7 +1125,7 @@ public class TrustManagerService extends SystemService {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
 
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
                     userId = resolveProfileParent(userId);
@@ -1141,7 +1141,7 @@ public class TrustManagerService extends SystemService {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
 
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
                     userId = resolveProfileParent(userId);
@@ -1328,7 +1328,7 @@ public class TrustManagerService extends SystemService {
     }
 
     private int resolveProfileParent(int userId) {
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             UserInfo parent = mUserManager.getProfileParent(userId);
             if (parent != null) {

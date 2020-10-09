@@ -193,7 +193,17 @@ public abstract class AbstractInputMethodService extends Service
      * needed for a new client of the input method.
      */
     public abstract AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
-    
+
+    /**
+     * Dumps the internal state of IME to a protocol buffer output stream initialized using the
+     * given {@link FileDescriptor}.
+     *
+     * @param fd The file descriptor to which proto dump should be written.
+     * @param args The arguments passed to the dump method.
+     * @hide
+     */
+    abstract void dumpProtoInternal(FileDescriptor fd, String[] args);
+
     /**
      * Implement this to handle {@link android.os.Binder#dump Binder.dump()}
      * calls on your input method.

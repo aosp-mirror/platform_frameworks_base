@@ -2773,7 +2773,7 @@ public class SyncManager {
         }
 
         private void onReady() {
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mOnReadyCallback.onReady();
             } finally {

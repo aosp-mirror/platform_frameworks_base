@@ -2073,9 +2073,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateAccessibilityEnabledSettingLocked(AccessibilityUserState userState) {
-        final long identity = Binder.clearCallingIdentity();
         final boolean isA11yEnabled = mUiAutomationManager.isUiAutomationRunningLocked()
                 || userState.isHandlingAccessibilityEventsLocked();
+        final long identity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_ENABLED,
@@ -2384,8 +2384,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 int numServices = services.size();
                 for (int i = 0; i < numServices; i++) {
                     if (services.get(i).isCapturingFingerprintGestures()) {
-                        final long identity = Binder.clearCallingIdentity();
                         IFingerprintService service = null;
+                        final long identity = Binder.clearCallingIdentity();
                         try {
                             service = IFingerprintService.Stub.asInterface(
                                     ServiceManager.getService(Context.FINGERPRINT_SERVICE));

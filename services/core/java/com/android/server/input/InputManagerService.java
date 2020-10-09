@@ -55,6 +55,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.InputEventInjectionResult;
+import android.os.InputEventInjectionSync;
 import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
@@ -267,12 +269,6 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
     private static native void nativeNotifyPortAssociationsChanged(long ptr);
     private static native void nativeSetMotionClassifierEnabled(long ptr, boolean enabled);
-
-    // Input event injection constants defined in InputDispatcher.h.
-    private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
-    private static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
-    private static final int INPUT_EVENT_INJECTION_FAILED = 2;
-    private static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
 
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -691,9 +687,9 @@ public class InputManagerService extends IInputManager.Stub
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
-        if (mode != InputManager.INJECT_INPUT_EVENT_MODE_ASYNC
-                && mode != InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
-                && mode != InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT) {
+        if (mode != InputEventInjectionSync.NONE
+                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
+                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
             throw new IllegalArgumentException("mode is invalid");
         }
 
@@ -708,16 +704,16 @@ public class InputManagerService extends IInputManager.Stub
             Binder.restoreCallingIdentity(ident);
         }
         switch (result) {
-            case INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+            case InputEventInjectionResult.PERMISSION_DENIED:
                 Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
                 throw new SecurityException(
                         "Injecting to another application requires INJECT_EVENTS permission");
-            case INPUT_EVENT_INJECTION_SUCCEEDED:
+            case InputEventInjectionResult.SUCCEEDED:
                 return true;
-            case INPUT_EVENT_INJECTION_TIMED_OUT:
+            case InputEventInjectionResult.TIMED_OUT:
                 Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
                 return false;
-            case INPUT_EVENT_INJECTION_FAILED:
+            case InputEventInjectionResult.FAILED:
             default:
                 Slog.w(TAG, "Input event injection from pid " + pid + " failed.");
                 return false;

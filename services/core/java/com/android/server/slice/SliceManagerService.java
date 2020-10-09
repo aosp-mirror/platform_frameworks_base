@@ -281,7 +281,7 @@ public class SliceManagerService extends ISliceManager.Stub {
             String providerPkg = getProviderPkg(grantUri, providerUser);
             mPermissions.grantSliceAccess(pkg, userId, providerPkg, providerUser, grantUri);
         }
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mContext.getContentResolver().notifyChange(uri, null);
         } finally {
@@ -402,7 +402,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private String getProviderPkg(Uri uri, int user) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             String providerName = getUriWithoutUserId(uri).getAuthority();
             ProviderInfo provider = mContext.getPackageManager().resolveContentProviderAsUser(
@@ -438,7 +438,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private boolean hasFullSliceAccess(String pkg, int userId) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             boolean ret = isDefaultHomeApp(pkg, userId) || isAssistant(pkg, userId)
                     || isGrantedFullAccess(pkg, userId);

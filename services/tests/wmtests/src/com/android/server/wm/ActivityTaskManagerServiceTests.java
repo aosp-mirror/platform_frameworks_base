@@ -233,7 +233,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
                 .build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.setState(Task.ActivityState.RESUMED, "test");
         mSupervisor.endDeferResume();
+
+        assertEquals(activity.app, mAtm.mInternal.getTopApp());
+
         // Assume the activity is finishing and hidden because it was crashed.
         activity.finishing = true;
         activity.mVisibleRequested = false;
@@ -246,6 +250,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.mInternal.handleAppDied(activity.app, false /* restarting */,
                 null /* finishInstrumentationCallback */);
         assertEquals(Task.ActivityState.RESUMED, homeActivity.getState());
+        assertEquals(homeActivity.app, mAtm.mInternal.getTopApp());
     }
 }
 

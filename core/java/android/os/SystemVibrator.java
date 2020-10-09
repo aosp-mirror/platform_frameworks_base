@@ -221,18 +221,14 @@ public class SystemVibrator extends Vibrator {
     }
 
     @Override
-    public void vibrate(int uid, String opPkg, VibrationEffect effect,
-            String reason, AudioAttributes attributes) {
+    public void vibrate(int uid, String opPkg, @NonNull VibrationEffect effect,
+            String reason, @NonNull VibrationAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
             return;
         }
         try {
-            if (attributes == null) {
-                attributes = new AudioAttributes.Builder().build();
-            }
-            VibrationAttributes atr = new VibrationAttributes.Builder(attributes, effect).build();
-            mService.vibrate(uid, opPkg, effect, atr, reason, mToken);
+            mService.vibrate(uid, opPkg, effect, attributes, reason, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }

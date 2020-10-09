@@ -688,7 +688,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         boolean overridePolicy = false;
 
         if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0) {
                     if (checkAdjustPolicyFlagPermission) {
@@ -1044,7 +1044,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         // check.
         if (packageName != null) {
             // Allow access to a package that has been granted the READ_DEVICE_IDENTIFIERS appop.
-            long token = mInjector.clearCallingIdentity();
+            final long token = mInjector.clearCallingIdentity();
             AppOpsManager appOpsManager = (AppOpsManager) mInjector.getSystemService(
                     Context.APP_OPS_SERVICE);
             try {
@@ -3186,7 +3186,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         + " to register permissions as one time.");
         Objects.requireNonNull(packageName);
 
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             getOneTimePermissionUserManager(userId).startPackageOneTimeSession(packageName,
                     timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
@@ -3202,7 +3202,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         + " to remove permissions as one time.");
         Objects.requireNonNull(packageName);
 
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             getOneTimePermissionUserManager(userId).stopPackageOneTimeSession(packageName);
         } finally {

@@ -1444,7 +1444,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void engineShown(IWallpaperEngine engine) {
             synchronized (mLock) {
                 if (mReply != null) {
-                    long ident = Binder.clearCallingIdentity();
+                    final long ident = Binder.clearCallingIdentity();
                     try {
                         mReply.sendResult(null);
                     } catch (RemoteException e) {
@@ -2009,7 +2009,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public boolean hasNamedWallpaper(String name) {
         synchronized (mLock) {
             List<UserInfo> users;
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE)).getUsers();
             } finally {

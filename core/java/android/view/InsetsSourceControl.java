@@ -128,7 +128,13 @@ public class InsetsSourceControl implements Parcelable {
         }
     };
 
-    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+    /**
+     * Export the state of {@link InsetsSourceControl} into a protocol buffer output stream.
+     *
+     * @param proto   Stream to write the state to
+     * @param fieldId FieldId of InsetsSource as defined in the parent message
+     */
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(TYPE, InsetsState.typeToString(mType));
 

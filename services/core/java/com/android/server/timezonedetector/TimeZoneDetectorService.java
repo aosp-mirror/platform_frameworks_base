@@ -148,7 +148,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         enforceManageTimeZoneDetectorPermission();
 
         int userId = mCallerIdentityInjector.getCallingUserId();
-        long token = mCallerIdentityInjector.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             ConfigurationInternal configurationInternal =
                     mTimeZoneDetectorStrategy.getConfigurationInternal(userId);
@@ -164,7 +164,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         Objects.requireNonNull(configuration);
 
         int callingUserId = mCallerIdentityInjector.getCallingUserId();
-        long token = mCallerIdentityInjector.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             return mTimeZoneDetectorStrategy.updateConfiguration(callingUserId, configuration);
         } finally {
@@ -278,7 +278,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         Objects.requireNonNull(timeZoneSuggestion);
 
         int userId = mCallerIdentityInjector.getCallingUserId();
-        long token = mCallerIdentityInjector.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             return mTimeZoneDetectorStrategy.suggestManualTimeZone(userId, timeZoneSuggestion);
         } finally {

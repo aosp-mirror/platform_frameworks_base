@@ -81,11 +81,21 @@ public class AttentionManagerService extends SystemService {
     /** Service will unbind if connection is not used for that amount of time. */
     private static final long CONNECTION_TTL_MILLIS = 60_000;
 
+    /**
+     * We cache the DeviceConfig values to avoid frequent ashmem-related checks; if the cached
+     * values are stale for more than this duration we will update the cache.
+     */
+    @VisibleForTesting static final long DEVICE_CONFIG_MAX_STALENESS_MILLIS = 4 * 60 * 60 * 1000L;
+
+    @VisibleForTesting long mLastReadDeviceConfigMillis = Long.MIN_VALUE;
+
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
     private static final String KEY_SERVICE_ENABLED = "service_enabled";
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
+
+    private boolean mIsServiceEnabledCached;
 
     /**
      * DeviceConfig flag name, describes how much time we consider a result fresh; if the check
@@ -97,6 +107,8 @@ public class AttentionManagerService extends SystemService {
     /** Default value in absence of {@link DeviceConfig} override. */
     @VisibleForTesting
     static final long DEFAULT_STALE_AFTER_MILLIS = 1_000;
+
+    private long mStaleAfterMillisCached;
 
     /** The size of the buffer that stores recent attention check results. */
     @VisibleForTesting
@@ -176,8 +188,8 @@ public class AttentionManagerService extends SystemService {
     }
 
     private boolean isServiceEnabled() {
-        return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, KEY_SERVICE_ENABLED,
-                DEFAULT_SERVICE_ENABLED);
+        ensureDeviceConfigCachedValuesFreshness();
+        return mIsServiceEnabledCached;
     }
 
     /**
@@ -186,16 +198,39 @@ public class AttentionManagerService extends SystemService {
      */
     @VisibleForTesting
     protected long getStaleAfterMillis() {
+        ensureDeviceConfigCachedValuesFreshness();
+        return mStaleAfterMillisCached;
+    }
+
+    @VisibleForTesting
+    protected void ensureDeviceConfigCachedValuesFreshness() {
+        final long now = SystemClock.elapsedRealtime();
+        final long whenBecomesStale =
+                mLastReadDeviceConfigMillis + DEVICE_CONFIG_MAX_STALENESS_MILLIS;
+        if (now < whenBecomesStale) {
+            if (DEBUG) {
+                Slog.d(LOG_TAG,
+                        "Cached values are still fresh. Refreshed at=" + mLastReadDeviceConfigMillis
+                                + ", now=" + now);
+            }
+            return;
+        }
+
+        mIsServiceEnabledCached = DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_SERVICE_ENABLED,
+                DEFAULT_SERVICE_ENABLED);
+
         final long millis = DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_STALE_AFTER_MILLIS,
                 DEFAULT_STALE_AFTER_MILLIS);
-
         if (millis < 0 || millis > 10_000) {
             Slog.w(LOG_TAG, "Bad flag value supplied for: " + KEY_STALE_AFTER_MILLIS);
-            return DEFAULT_STALE_AFTER_MILLIS;
+            mStaleAfterMillisCached = DEFAULT_STALE_AFTER_MILLIS;
+        } else {
+            mStaleAfterMillisCached = millis;
         }
 
-        return millis;
+        mLastReadDeviceConfigMillis = now;
     }
 
     /**

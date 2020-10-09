@@ -74,6 +74,9 @@
 
 using android::base::ParseUint;
 using android::base::StringPrintf;
+using android::os::BlockUntrustedTouchesMode;
+using android::os::InputEventInjectionResult;
+using android::os::InputEventInjectionSync;
 
 // Maximum allowable delay value in a vibration pattern before
 // which the delay will be truncated.
@@ -1473,17 +1476,20 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         jint syncMode, jint timeoutMillis, jint policyFlags) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
+    // static_cast is safe because the value was already checked at the Java layer
+    InputEventInjectionSync mode = static_cast<InputEventInjectionSync>(syncMode);
+
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
         KeyEvent keyEvent;
         status_t status = android_view_KeyEvent_toNative(env, inputEventObj, & keyEvent);
         if (status) {
             jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
-            return INPUT_EVENT_INJECTION_FAILED;
+            return static_cast<jint>(InputEventInjectionResult::FAILED);
         }
 
-        const int32_t result =
+        const InputEventInjectionResult result =
                 im->getInputManager()->getDispatcher()->injectInputEvent(&keyEvent, injectorPid,
-                                                                         injectorUid, syncMode,
+                                                                         injectorUid, mode,
                                                                          std::chrono::milliseconds(
                                                                                  timeoutMillis),
                                                                          uint32_t(policyFlags));
@@ -1492,19 +1498,19 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
         if (!motionEvent) {
             jniThrowRuntimeException(env, "Could not read contents of MotionEvent object.");
-            return INPUT_EVENT_INJECTION_FAILED;
+            return static_cast<jint>(InputEventInjectionResult::FAILED);
         }
 
-        const int32_t result =
-                (jint)im->getInputManager()
-                        ->getDispatcher()
-                        ->injectInputEvent(motionEvent, injectorPid, injectorUid, syncMode,
-                                           std::chrono::milliseconds(timeoutMillis),
-                                           uint32_t(policyFlags));
+        const InputEventInjectionResult result =
+                im->getInputManager()->getDispatcher()->injectInputEvent(motionEvent, injectorPid,
+                                                                         injectorUid, mode,
+                                                                         std::chrono::milliseconds(
+                                                                                 timeoutMillis),
+                                                                         uint32_t(policyFlags));
         return static_cast<jint>(result);
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
-        return INPUT_EVENT_INJECTION_FAILED;
+        return static_cast<jint>(InputEventInjectionResult::FAILED);
     }
 }
 

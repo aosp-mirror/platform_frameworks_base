@@ -311,6 +311,10 @@ droidstubs {
             api_file: "non-updatable-api/module-lib-current.txt",
             removed_api_file: "non-updatable-api/module-lib-removed.txt",
         },
+        last_released: {
+            api_file: ":android-non-updatable.api.module-lib.latest",
+            removed_api_file: ":android-non-updatable-removed.api.module-lib.latest",
+        },
         api_lint: {
             enabled: true,
             new_since: ":android-non-updatable.api.module-lib.latest",

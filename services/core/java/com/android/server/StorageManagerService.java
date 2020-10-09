@@ -1742,7 +1742,7 @@ class StorageManagerService extends IStorageManager.Stub
         UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         final int callingUserId = UserHandle.getCallingUserId();
         boolean isAdmin;
-        long token = Binder.clearCallingIdentity();
+        final long token = Binder.clearCallingIdentity();
         try {
             isAdmin = um.getUserInfo(callingUserId).isAdmin();
         } finally {

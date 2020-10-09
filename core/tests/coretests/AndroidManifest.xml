@@ -138,6 +138,9 @@
     <!-- accessibility test permissions -->
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />
 
+    <!-- vibrator test permissions -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- vr test permissions -->
     <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
 

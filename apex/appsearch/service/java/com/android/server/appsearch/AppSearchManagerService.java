@@ -19,24 +19,27 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchDocument;
 import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.IAppSearchManager;
+import android.app.appsearch.SearchSpec;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.UserHandle;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localbackend.AppSearchImpl;
+import com.android.server.appsearch.external.localbackend.converter.SchemaToProtoConverter;
+import com.android.server.appsearch.external.localbackend.converter.SearchSpecToProtoConverter;
 
 import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.SchemaProto;
-import com.google.android.icing.proto.ScoringSpecProto;
+import com.google.android.icing.proto.SchemaTypeConfigProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
-import com.google.android.icing.proto.StatusProto;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,19 +62,24 @@ public class AppSearchManagerService extends SystemService {
     private class Stub extends IAppSearchManager.Stub {
         @Override
         public void setSchema(
-                @NonNull byte[] schemaBytes,
+                @NonNull List<Bundle> schemaBundles,
                 boolean forceOverride,
                 @NonNull AndroidFuture<AppSearchResult> callback) {
-            Preconditions.checkNotNull(schemaBytes);
+            Preconditions.checkNotNull(schemaBundles);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
+                SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
+                for (int i = 0; i < schemaBundles.size(); i++) {
+                    AppSearchSchema schema = new AppSearchSchema(schemaBundles.get(i));
+                    SchemaTypeConfigProto schemaTypeProto = SchemaToProtoConverter.convert(schema);
+                    schemaProtoBuilder.addTypes(schemaTypeProto);
+                }
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
-                impl.setSchema(databaseName, schema, forceOverride);
+                impl.setSchema(databaseName, schemaProtoBuilder.build(), forceOverride);
                 callback.complete(AppSearchResult.newSuccessfulResult(/*value=*/ null));
             } catch (Throwable t) {
                 callback.complete(throwableToFailedResult(t));
@@ -88,7 +96,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -119,7 +127,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -151,36 +159,31 @@ public class AppSearchManagerService extends SystemService {
         // TODO(sidchhabra): Do this in a threadpool.
         @Override
         public void query(
-                @NonNull byte[] searchSpecBytes,
-                @NonNull byte[] resultSpecBytes,
-                @NonNull byte[] scoringSpecBytes,
+                @NonNull String queryExpression,
+                @NonNull Bundle searchSpecBundle,
                 @NonNull AndroidFuture<AppSearchResult> callback) {
-            Preconditions.checkNotNull(searchSpecBytes);
-            Preconditions.checkNotNull(resultSpecBytes);
-            Preconditions.checkNotNull(scoringSpecBytes);
+            Preconditions.checkNotNull(queryExpression);
+            Preconditions.checkNotNull(searchSpecBundle);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                SearchSpecProto searchSpecProto = SearchSpecProto.parseFrom(searchSpecBytes);
-                ResultSpecProto resultSpecProto = ResultSpecProto.parseFrom(resultSpecBytes);
-                ScoringSpecProto scoringSpecProto = ScoringSpecProto.parseFrom(scoringSpecBytes);
+                SearchSpec searchSpec = new SearchSpec(searchSpecBundle);
+                SearchSpecProto searchSpecProto =
+                        SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
+                searchSpecProto = searchSpecProto.toBuilder()
+                        .setQuery(queryExpression).build();
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
+                // TODO(adorokhine): handle pagination
                 SearchResultProto searchResultProto = impl.query(
-                        databaseName, searchSpecProto, resultSpecProto, scoringSpecProto);
-                // TODO(sidchhabra): Translate SearchResultProto errors into error codes. This might
-                //     better be done in AppSearchImpl by throwing an AppSearchException.
-                if (searchResultProto.getStatus().getCode() != StatusProto.Code.OK) {
-                    callback.complete(
-                            AppSearchResult.newFailedResult(
-                                    AppSearchResult.RESULT_INTERNAL_ERROR,
-                                    searchResultProto.getStatus().getMessage()));
-                } else {
-                    callback.complete(
-                            AppSearchResult.newSuccessfulResult(searchResultProto.toByteArray()));
-                }
+                        databaseName,
+                        searchSpecProto,
+                        SearchSpecToProtoConverter.toResultSpecProto(searchSpec),
+                        SearchSpecToProtoConverter.toScoringSpecProto(searchSpec));
+                callback.complete(
+                        AppSearchResult.newSuccessfulResult(searchResultProto.toByteArray()));
             } catch (Throwable t) {
                 callback.complete(throwableToFailedResult(t));
             } finally {
@@ -194,7 +197,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -224,7 +227,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
@@ -252,7 +255,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
-            long callingIdentity = Binder.clearCallingIdentity();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);

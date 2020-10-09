@@ -27,7 +27,7 @@
 #include <SkRect.h>
 #include <utils/RefBase.h>
 
-class GrContext;
+class GrDirectContext;
 
 struct ANativeWindow;
 

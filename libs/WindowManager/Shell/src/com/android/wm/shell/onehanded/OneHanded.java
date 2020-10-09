@@ -27,11 +27,6 @@ import java.io.PrintWriter;
  */
 public interface OneHanded {
     /**
-     * Return whether the device has one handed feature or not.
-     */
-    boolean hasOneHandedFeature();
-
-    /**
      * Return one handed settings enabled or not.
      */
     boolean isOneHandedEnabled();

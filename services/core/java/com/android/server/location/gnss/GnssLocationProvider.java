@@ -1120,7 +1120,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @Override
     public void onExtraCommand(int uid, int pid, String command, Bundle extras) {
 
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             if ("delete_aiding_data".equals(command)) {
                 deleteAidingData(extras);

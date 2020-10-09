@@ -1039,8 +1039,8 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             final int callingUserId = UserHandle.getCallingUserId();
-            final long caller = Binder.clearCallingIdentity();
             boolean deleted = false;
+            final long caller = Binder.clearCallingIdentity();
             try {
                 SoundTriggerSession session = mLoadedKeyphraseIds.get(keyphraseId);
                 if (session != null) {

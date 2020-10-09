@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -15,34 +14,20 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -63,10 +48,6 @@ public class SmartReplyView extends ViewGroup {
                     - (v1.getMeasuredWidth() - v1.getPaddingLeft() - v1.getPaddingRight()));
 
     private static final int SQUEEZE_FAILED = -1;
-
-    private final SmartReplyConstants mConstants;
-    private final KeyguardDismissUtil mKeyguardDismissUtil;
-    private final NotificationRemoteInputManager mRemoteInputManager;
 
     /**
      * The upper bound for the height of this view in pixels. Notifications are automatically
@@ -98,30 +79,25 @@ public class SmartReplyView extends ViewGroup {
      */
     private boolean mSmartRepliesGeneratedByAssistant = false;
 
-    @ColorInt
-    private int mCurrentBackgroundColor;
-    @ColorInt
-    private final int mDefaultBackgroundColor;
-    @ColorInt
-    private final int mDefaultStrokeColor;
-    @ColorInt
-    private final int mDefaultTextColor;
-    @ColorInt
-    private final int mDefaultTextColorDarkBg;
-    @ColorInt
-    private final int mRippleColorDarkBg;
-    @ColorInt
-    private final int mRippleColor;
+    @ColorInt private int mCurrentBackgroundColor;
+    @ColorInt private final int mDefaultBackgroundColor;
+    @ColorInt private final int mDefaultStrokeColor;
+    @ColorInt private final int mDefaultTextColor;
+    @ColorInt private final int mDefaultTextColorDarkBg;
+    @ColorInt private final int mRippleColorDarkBg;
+    @ColorInt private final int mRippleColor;
     private final int mStrokeWidth;
     private final double mMinStrokeContrast;
 
-    private ActivityStarter mActivityStarter;
+    @ColorInt private int mCurrentStrokeColor;
+    @ColorInt private int mCurrentTextColor;
+    @ColorInt private int mCurrentRippleColor;
+    private int mMaxSqueezeRemeasureAttempts;
+    private int mMaxNumActions;
+    private int mMinNumSystemGeneratedReplies;
 
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mConstants = Dependency.get(SmartReplyConstants.class);
-        mKeyguardDismissUtil = Dependency.get(KeyguardDismissUtil.class);
-        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
 
         mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
             R.dimen.smart_reply_button_max_height);
@@ -172,6 +148,18 @@ public class SmartReplyView extends ViewGroup {
     }
 
     /**
+     * Inflate an instance of this class.
+     */
+    public static SmartReplyView inflate(Context context, SmartReplyConstants constants) {
+        SmartReplyView view = (SmartReplyView) LayoutInflater.from(context).inflate(
+                R.layout.smart_reply_view, null /* root */);
+        view.setMaxNumActions(constants.getMaxNumActions());
+        view.setMaxSqueezeRemeasureAttempts(constants.getMaxSqueezeRemeasureAttempts());
+        view.setMinNumSystemGeneratedReplies(constants.getMinNumSystemGeneratedReplies());
+        return view;
+    }
+
+    /**
      * Returns an upper bound for the height of this view in pixels. This method is intended to be
      * invoked before onMeasure, so it doesn't do any analysis on the contents of the buttons.
      */
@@ -197,174 +185,25 @@ public class SmartReplyView extends ViewGroup {
         mCurrentBackgroundColor = mDefaultBackgroundColor;
     }
 
-    /**
-     * Add buttons to the {@link SmartReplyView} - these buttons must have been preinflated using
-     * one of the methods in this class.
-     */
+    /** Add buttons to the {@link SmartReplyView} */
     public void addPreInflatedButtons(List<Button> smartSuggestionButtons) {
         for (Button button : smartSuggestionButtons) {
             addView(button);
+            setButtonColors(button);
         }
         reallocateCandidateButtonQueueForSqueezing();
     }
 
-    /**
-     * Add smart replies to this view, using the provided {@link RemoteInput} and
-     * {@link PendingIntent} to respond when the user taps a smart reply. Only the replies that fit
-     * into the notification are shown.
-     */
-    public List<Button> inflateRepliesFromRemoteInput(
-            @NonNull SmartReplies smartReplies,
-            SmartReplyController smartReplyController, NotificationEntry entry,
-            boolean delayOnClickListener) {
-        List<Button> buttons = new ArrayList<>();
-
-        if (smartReplies.remoteInput != null && smartReplies.pendingIntent != null) {
-            if (smartReplies.choices != null) {
-                for (int i = 0; i < smartReplies.choices.size(); ++i) {
-                    buttons.add(inflateReplyButton(
-                            this, getContext(), i, smartReplies, smartReplyController, entry,
-                            delayOnClickListener));
-                }
-                this.mSmartRepliesGeneratedByAssistant = smartReplies.fromAssistant;
-            }
-        }
-        return buttons;
+    public void setMaxNumActions(int maxNumActions) {
+        mMaxNumActions = maxNumActions;
     }
 
-    /**
-     * Add smart actions to be shown next to smart replies. Only the actions that fit into the
-     * notification are shown.
-     */
-    public List<Button> inflateSmartActions(Context packageContext,
-            @NonNull SmartActions smartActions, SmartReplyController smartReplyController,
-            NotificationEntry entry, HeadsUpManager headsUpManager, boolean delayOnClickListener) {
-        Context themedPackageContext = new ContextThemeWrapper(packageContext, mContext.getTheme());
-        List<Button> buttons = new ArrayList<>();
-        int numSmartActions = smartActions.actions.size();
-        for (int n = 0; n < numSmartActions; n++) {
-            Notification.Action action = smartActions.actions.get(n);
-            if (action.actionIntent != null) {
-                buttons.add(inflateActionButton(
-                        this, getContext(), themedPackageContext, n, smartActions,
-                        smartReplyController,
-                        entry, headsUpManager, delayOnClickListener));
-            }
-        }
-        return buttons;
+    public void setMinNumSystemGeneratedReplies(int minNumSystemGeneratedReplies) {
+        mMinNumSystemGeneratedReplies = minNumSystemGeneratedReplies;
     }
 
-    /**
-     * Inflate an instance of this class.
-     */
-    public static SmartReplyView inflate(Context context) {
-        return (SmartReplyView) LayoutInflater.from(context).inflate(
-                R.layout.smart_reply_view, null /* root */);
-    }
-
-    @VisibleForTesting
-    static Button inflateReplyButton(SmartReplyView smartReplyView, Context context,
-            int replyIndex, SmartReplies smartReplies, SmartReplyController smartReplyController,
-            NotificationEntry entry, boolean useDelayedOnClickListener) {
-        Button b = (Button) LayoutInflater.from(context).inflate(
-                R.layout.smart_reply_button, smartReplyView, false);
-        CharSequence choice = smartReplies.choices.get(replyIndex);
-        b.setText(choice);
-
-        OnDismissAction action = () -> {
-            if (smartReplyView.mConstants.getEffectiveEditChoicesBeforeSending(
-                    smartReplies.remoteInput.getEditChoicesBeforeSending())) {
-                EditedSuggestionInfo editedSuggestionInfo =
-                        new EditedSuggestionInfo(choice, replyIndex);
-                smartReplyView.mRemoteInputManager.activateRemoteInput(b,
-                        new RemoteInput[] { smartReplies.remoteInput }, smartReplies.remoteInput,
-                        smartReplies.pendingIntent, editedSuggestionInfo);
-                return false;
-            }
-
-            smartReplyController.smartReplySent(entry, replyIndex, b.getText(),
-                    NotificationLogger.getNotificationLocation(entry).toMetricsEventEnum(),
-                    false /* modifiedBeforeSending */);
-            Bundle results = new Bundle();
-            results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
-            Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            RemoteInput.addResultsToIntent(new RemoteInput[] { smartReplies.remoteInput }, intent,
-                    results);
-            RemoteInput.setResultsSource(intent, RemoteInput.SOURCE_CHOICE);
-            entry.setHasSentReply();
-            try {
-                smartReplies.pendingIntent.send(context, 0, intent);
-            } catch (PendingIntent.CanceledException e) {
-                Log.w(TAG, "Unable to send smart reply", e);
-            }
-            // Note that as inflateReplyButton is called mSmartReplyContainer is null, but when the
-            // reply Button is added to the SmartReplyView mSmartReplyContainer will be set. So, it
-            // will not be possible for a user to trigger this on-click-listener without
-            // mSmartReplyContainer being set.
-            smartReplyView.mSmartReplyContainer.setVisibility(View.GONE);
-            return false; // do not defer
-        };
-
-        OnClickListener onClickListener = view ->
-            smartReplyView.mKeyguardDismissUtil.executeWhenUnlocked(action, !entry.isRowPinned());
-        if (useDelayedOnClickListener) {
-            onClickListener = new DelayedOnClickListener(onClickListener,
-                    smartReplyView.mConstants.getOnClickInitDelay());
-        }
-        b.setOnClickListener(onClickListener);
-
-        b.setAccessibilityDelegate(new AccessibilityDelegate() {
-            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
-                super.onInitializeAccessibilityNodeInfo(host, info);
-                String label = smartReplyView.getResources().getString(
-                        R.string.accessibility_send_smart_reply);
-                info.addAction(new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, label));
-            }
-        });
-
-        SmartReplyView.setButtonColors(b, smartReplyView.mCurrentBackgroundColor,
-                smartReplyView.mDefaultStrokeColor, smartReplyView.mDefaultTextColor,
-                smartReplyView.mRippleColor, smartReplyView.mStrokeWidth);
-        return b;
-    }
-
-    @VisibleForTesting
-    static Button inflateActionButton(SmartReplyView smartReplyView, Context context,
-            Context packageContext, int actionIndex, SmartActions smartActions,
-            SmartReplyController smartReplyController, NotificationEntry entry,
-            HeadsUpManager headsUpManager, boolean useDelayedOnClickListener) {
-        Notification.Action action = smartActions.actions.get(actionIndex);
-        Button button = (Button) LayoutInflater.from(context).inflate(
-                R.layout.smart_action_button, smartReplyView, false);
-        button.setText(action.title);
-
-        // We received the Icon from the application - so use the Context of the application to
-        // reference icon resources.
-        Drawable iconDrawable = action.getIcon().loadDrawable(packageContext);
-        // Add the action icon to the Smart Action button.
-        int newIconSize = context.getResources().getDimensionPixelSize(
-                R.dimen.smart_action_button_icon_size);
-        iconDrawable.setBounds(0, 0, newIconSize, newIconSize);
-        button.setCompoundDrawables(iconDrawable, null, null, null);
-
-        OnClickListener onClickListener = view ->
-                smartReplyView.getActivityStarter().startPendingIntentDismissingKeyguard(
-                        action.actionIntent,
-                        () -> {
-                            smartReplyController.smartActionClicked(
-                                    entry, actionIndex, action, smartActions.fromAssistant);
-                            headsUpManager.removeNotification(entry.getKey(), true);
-                        }, entry.getRow());
-        if (useDelayedOnClickListener) {
-            onClickListener = new DelayedOnClickListener(onClickListener,
-                    smartReplyView.mConstants.getOnClickInitDelay());
-        }
-        button.setOnClickListener(onClickListener);
-
-        // Mark this as an Action button
-        final LayoutParams lp = (LayoutParams) button.getLayoutParams();
-        lp.buttonType = SmartButtonType.ACTION;
-        return button;
+    public void setMaxSqueezeRemeasureAttempts(int maxSqueezeRemeasureAttempts) {
+        mMaxSqueezeRemeasureAttempts = maxSqueezeRemeasureAttempts;
     }
 
     @Override
@@ -416,13 +255,13 @@ public class SmartReplyView extends ViewGroup {
         // reply button is added.
         SmartSuggestionMeasures actionsMeasures = null;
 
-        final int maxNumActions = mConstants.getMaxNumActions();
+        final int maxNumActions = mMaxNumActions;
         int numShownActions = 0;
 
         for (View child : smartSuggestions) {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (maxNumActions != -1 // -1 means 'no limit'
-                    && lp.buttonType == SmartButtonType.ACTION
+                    && lp.mButtonType == SmartButtonType.ACTION
                     && numShownActions >= maxNumActions) {
                 // We've reached the maximum number of actions, don't add another one!
                 continue;
@@ -446,7 +285,7 @@ public class SmartReplyView extends ViewGroup {
 
             // Remember the current measurements in case the current button doesn't fit in.
             SmartSuggestionMeasures originalMeasures = accumulatedMeasures.clone();
-            if (actionsMeasures == null && lp.buttonType == SmartButtonType.REPLY) {
+            if (actionsMeasures == null && lp.mButtonType == SmartButtonType.REPLY) {
                 // We've added all actions (we go through actions first), now add their
                 // measurements.
                 actionsMeasures = accumulatedMeasures.clone();
@@ -510,7 +349,7 @@ public class SmartReplyView extends ViewGroup {
 
             lp.show = true;
             displayedChildCount++;
-            if (lp.buttonType == SmartButtonType.ACTION) {
+            if (lp.mButtonType == SmartButtonType.ACTION) {
                 numShownActions++;
             }
         }
@@ -551,6 +390,19 @@ public class SmartReplyView extends ViewGroup {
                 resolveSize(buttonHeight, heightMeasureSpec));
     }
 
+    // TODO: this should be replaced, and instead, setMinSystemGenerated... should be invoked
+    //  with MAX_VALUE if mSmartRepliesGeneratedByAssistant would be false (essentially, this is a
+    //  ViewModel decision, as opposed to a View decision)
+    void setSmartRepliesGeneratedByAssistant(boolean fromAssistant) {
+        mSmartRepliesGeneratedByAssistant = fromAssistant;
+    }
+
+    void hideSmartSuggestions() {
+        if (mSmartReplyContainer != null) {
+            mSmartReplyContainer.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Fields we keep track of inside onMeasure() to correctly measure the SmartReplyView depending
      * on which suggestions are added.
@@ -577,6 +429,7 @@ public class SmartReplyView extends ViewGroup {
      * Returns whether our notification contains at least N smart replies (or 0) where N is
      * determined by {@link SmartReplyConstants}.
      */
+    // TODO: we probably sholdn't make this deliberation in the View
     private boolean gotEnoughSmartReplies(List<View> smartReplies) {
         int numShownReplies = 0;
         for (View smartReplyButton : smartReplies) {
@@ -585,8 +438,7 @@ public class SmartReplyView extends ViewGroup {
                 numShownReplies++;
             }
         }
-        if (numShownReplies == 0
-                || numShownReplies >= mConstants.getMinNumSystemGeneratedReplies()) {
+        if (numShownReplies == 0 || numShownReplies >= mMinNumSystemGeneratedReplies) {
             // We have enough replies, yay!
             return true;
         }
@@ -602,7 +454,7 @@ public class SmartReplyView extends ViewGroup {
             if (child.getVisibility() != View.VISIBLE || !(child instanceof Button)) {
                 continue;
             }
-            if (lp.buttonType == buttonType) {
+            if (lp.mButtonType == buttonType) {
                 actions.add(child);
             }
         }
@@ -656,7 +508,7 @@ public class SmartReplyView extends ViewGroup {
             // See if there's a better line-break point (leading to a more narrow button) in
             // either left or right direction.
             final boolean moveLeft = initialLeftTextWidth > initialRightTextWidth;
-            final int maxSqueezeRemeasureAttempts = mConstants.getMaxSqueezeRemeasureAttempts();
+            final int maxSqueezeRemeasureAttempts = mMaxSqueezeRemeasureAttempts;
             for (int i = 0; i < maxSqueezeRemeasureAttempts; i++) {
                 final int newPosition =
                         moveLeft ? mBreakIterator.previous() : mBreakIterator.next();
@@ -833,41 +685,38 @@ public class SmartReplyView extends ViewGroup {
 
         final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
 
-        int textColor = ContrastColorUtil.ensureTextContrast(
+        mCurrentTextColor = ContrastColorUtil.ensureTextContrast(
                 dark ? mDefaultTextColorDarkBg : mDefaultTextColor,
                 backgroundColor | 0xff000000, dark);
-        int strokeColor = ContrastColorUtil.ensureContrast(
+        mCurrentStrokeColor = ContrastColorUtil.ensureContrast(
                 mDefaultStrokeColor, backgroundColor | 0xff000000, dark, mMinStrokeContrast);
-        int rippleColor = dark ? mRippleColorDarkBg : mRippleColor;
+        mCurrentRippleColor = dark ? mRippleColorDarkBg : mRippleColor;
 
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            final Button child = (Button) getChildAt(i);
-            setButtonColors(child, backgroundColor, strokeColor, textColor, rippleColor,
-                    mStrokeWidth);
+            setButtonColors((Button) getChildAt(i));
         }
     }
 
-    private static void setButtonColors(Button button, int backgroundColor, int strokeColor,
-            int textColor, int rippleColor, int strokeWidth) {
+    private void setButtonColors(Button button) {
         Drawable drawable = button.getBackground();
         if (drawable instanceof RippleDrawable) {
             // Mutate in case other notifications are using this drawable.
             drawable = drawable.mutate();
             RippleDrawable ripple = (RippleDrawable) drawable;
-            ripple.setColor(ColorStateList.valueOf(rippleColor));
+            ripple.setColor(ColorStateList.valueOf(mCurrentRippleColor));
             Drawable inset = ripple.getDrawable(0);
             if (inset instanceof InsetDrawable) {
                 Drawable background = ((InsetDrawable) inset).getDrawable();
                 if (background instanceof GradientDrawable) {
                     GradientDrawable gradientDrawable = (GradientDrawable) background;
-                    gradientDrawable.setColor(backgroundColor);
-                    gradientDrawable.setStroke(strokeWidth, strokeColor);
+                    gradientDrawable.setColor(mCurrentBackgroundColor);
+                    gradientDrawable.setStroke(mStrokeWidth, mCurrentStrokeColor);
                 }
             }
             button.setBackground(drawable);
         }
-        button.setTextColor(textColor);
+        button.setTextColor(mCurrentTextColor);
     }
 
     private void setCornerRadius(Button button, float radius) {
@@ -887,14 +736,7 @@ public class SmartReplyView extends ViewGroup {
         }
     }
 
-    private ActivityStarter getActivityStarter() {
-        if (mActivityStarter == null) {
-            mActivityStarter = Dependency.get(ActivityStarter.class);
-        }
-        return mActivityStarter;
-    }
-
-    private enum SmartButtonType {
+    enum SmartButtonType {
         REPLY,
         ACTION
     }
@@ -924,7 +766,7 @@ public class SmartReplyView extends ViewGroup {
 
         private boolean show = false;
         private int squeezeStatus = SQUEEZE_STATUS_NONE;
-        private SmartButtonType buttonType = SmartButtonType.REPLY;
+        SmartButtonType mButtonType = SmartButtonType.REPLY;
 
         private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
@@ -973,34 +815,6 @@ public class SmartReplyView extends ViewGroup {
         public SmartActions(List<Notification.Action> actions, boolean fromAssistant) {
             this.actions = actions;
             this.fromAssistant = fromAssistant;
-        }
-    }
-
-    /**
-     * An OnClickListener wrapper that blocks the underlying OnClickListener for a given amount of
-     * time.
-     */
-    private static class DelayedOnClickListener implements OnClickListener {
-        private final OnClickListener mActualListener;
-        private final long mInitDelayMs;
-        private final long mInitTimeMs;
-
-        DelayedOnClickListener(OnClickListener actualOnClickListener, long initDelayMs) {
-            mActualListener = actualOnClickListener;
-            mInitDelayMs = initDelayMs;
-            mInitTimeMs = SystemClock.elapsedRealtime();
-        }
-
-        public void onClick(View v) {
-            if (hasFinishedInitialization()) {
-                mActualListener.onClick(v);
-            } else {
-                Log.i(TAG, "Accidental Smart Suggestion click registered, delay: " + mInitDelayMs);
-            }
-        }
-
-        private boolean hasFinishedInitialization() {
-            return SystemClock.elapsedRealtime() >= mInitTimeMs + mInitDelayMs;
         }
     }
 }

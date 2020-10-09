@@ -855,7 +855,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         if (!com.android.internal.util.DumpUtils.checkDumpAndUsageStatsPermission(mAm.mContext,
                 TAG, pw)) return;
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             if (args.length > 0) {
                 if ("--proto".equals(args[0])) {

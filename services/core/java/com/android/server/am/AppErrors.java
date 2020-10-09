@@ -546,7 +546,7 @@ class AppErrors {
                 }
             }
             if (res == AppErrorDialog.FORCE_QUIT) {
-                long orig = Binder.clearCallingIdentity();
+                final long orig = Binder.clearCallingIdentity();
                 try {
                     // Kill it with fire!
                     mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
@@ -800,9 +800,7 @@ class AppErrors {
         // with a home activity running in the process to prevent a repeatedly crashing app
         // from blocking the user to manually clear the list.
         final WindowProcessController proc = app.getWindowProcessController();
-        final WindowProcessController homeProc = mService.mAtmInternal.getHomeProcess();
-        if (proc == homeProc && proc.hasActivities()
-                && (((ProcessRecord) homeProc.mOwner).info.flags & FLAG_SYSTEM) == 0) {
+        if (proc.isHomeProcess() && proc.hasActivities() && (app.info.flags & FLAG_SYSTEM) == 0) {
             proc.clearPackagePreferredForHomeActivities();
         }
 

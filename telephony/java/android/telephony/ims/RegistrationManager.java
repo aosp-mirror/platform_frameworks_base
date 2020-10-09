@@ -105,7 +105,7 @@ public interface RegistrationManager {
             public void onRegistered(int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() ->
                             mLocalCallback.onRegistered(getAccessType(imsRadioTech)));
@@ -118,7 +118,7 @@ public interface RegistrationManager {
             public void onRegistering(int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() ->
                             mLocalCallback.onRegistering(getAccessType(imsRadioTech)));
@@ -131,7 +131,7 @@ public interface RegistrationManager {
             public void onDeregistered(ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onUnregistered(info));
                 } finally {
@@ -143,7 +143,7 @@ public interface RegistrationManager {
             public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
                             getAccessType(imsRadioTech), info));
@@ -155,7 +155,7 @@ public interface RegistrationManager {
             public void onSubscriberAssociatedUriChanged(Uri[] uris) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onSubscriberAssociatedUriChanged(uris));
                 } finally {

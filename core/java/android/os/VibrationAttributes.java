@@ -140,13 +140,12 @@ public final class VibrationAttributes implements Parcelable {
 
     private final int mUsage;
     private final int mFlags;
+    private final int mOriginalAudioUsage;
 
-    private final AudioAttributes mAudioAttributes;
-
-    private VibrationAttributes(int usage, int flags, @NonNull AudioAttributes audio) {
+    private VibrationAttributes(int usage, int audioUsage, int flags) {
         mUsage = usage;
+        mOriginalAudioUsage = audioUsage;
         mFlags = flags & FLAG_ALL_SUPPORTED;
-        mAudioAttributes = audio;
     }
 
     /**
@@ -182,14 +181,31 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /**
-     * Return AudioAttributes equivalent to this VibrationAttributes.
-     * @deprecated Temporary support of AudioAttributes, will be removed when out of WIP
+     * Return {@link AudioAttributes} usage equivalent to {@link #getUsage()}.
+     * @return one of {@link AudioAttributes#SDK_USAGES} that represents {@link #getUsage()}
      * @hide
      */
-    @Deprecated
     @TestApi
-    public @NonNull AudioAttributes getAudioAttributes() {
-        return mAudioAttributes;
+    public int getAudioUsage() {
+        if (mOriginalAudioUsage != AudioAttributes.USAGE_UNKNOWN) {
+            // Return same audio usage set in the Builder.
+            return mOriginalAudioUsage;
+        }
+        // Return correct audio usage based on the vibration usage set in the Builder.
+        switch (mUsage) {
+            case USAGE_NOTIFICATION:
+                return AudioAttributes.USAGE_NOTIFICATION;
+            case USAGE_COMMUNICATION_REQUEST:
+                return AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST;
+            case USAGE_RINGTONE:
+                return AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
+            case USAGE_TOUCH:
+                return AudioAttributes.USAGE_ASSISTANCE_SONIFICATION;
+            case USAGE_ALARM:
+                return AudioAttributes.USAGE_ALARM;
+            default:
+                return AudioAttributes.USAGE_UNKNOWN;
+        }
     }
 
     @Override
@@ -200,15 +216,14 @@ public final class VibrationAttributes implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mUsage);
+        dest.writeInt(mOriginalAudioUsage);
         dest.writeInt(mFlags);
-        dest.writeParcelable(mAudioAttributes, flags);
     }
 
     private VibrationAttributes(Parcel src) {
         mUsage = src.readInt();
+        mOriginalAudioUsage = src.readInt();
         mFlags = src.readInt();
-        mAudioAttributes = (AudioAttributes) src.readParcelable(
-                AudioAttributes.class.getClassLoader());
     }
 
     public static final @NonNull Parcelable.Creator<VibrationAttributes>
@@ -230,18 +245,20 @@ public final class VibrationAttributes implements Parcelable {
             return false;
         }
         VibrationAttributes rhs = (VibrationAttributes) o;
-        return mUsage == rhs.mUsage && mFlags == rhs.mFlags;
+        return mUsage == rhs.mUsage && mOriginalAudioUsage == rhs.mOriginalAudioUsage
+                && mFlags == rhs.mFlags;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUsage, mFlags);
+        return Objects.hash(mUsage, mOriginalAudioUsage, mFlags);
     }
 
     @Override
     public String toString() {
         return "VibrationAttributes:"
                 + " Usage=" + usageToString()
+                + " Audio Usage= " + AudioAttributes.usageToString(mOriginalAudioUsage)
                 + " Flags=" + mFlags;
     }
 
@@ -280,9 +297,8 @@ public final class VibrationAttributes implements Parcelable {
      */
     public static final class Builder {
         private int mUsage = USAGE_UNKNOWN;
+        private int mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
         private int mFlags = 0x0;
-
-        private AudioAttributes mAudioAttributes = new AudioAttributes.Builder().build();
 
         /**
          * Constructs a new Builder with the defaults.
@@ -296,8 +312,8 @@ public final class VibrationAttributes implements Parcelable {
         public Builder(@Nullable VibrationAttributes vib) {
             if (vib != null) {
                 mUsage = vib.mUsage;
+                mOriginalAudioUsage = vib.mOriginalAudioUsage;
                 mFlags = vib.mFlags;
-                mAudioAttributes = vib.mAudioAttributes;
             }
         }
 
@@ -306,9 +322,7 @@ public final class VibrationAttributes implements Parcelable {
          * @hide
          */
         @TestApi
-        public Builder(@NonNull AudioAttributes audio,
-                @Nullable VibrationEffect effect) {
-            mAudioAttributes = audio;
+        public Builder(@NonNull AudioAttributes audio, @Nullable VibrationEffect effect) {
             setUsage(audio);
             setFlags(audio);
             applyHapticFeedbackHeuristics(effect);
@@ -342,6 +356,7 @@ public final class VibrationAttributes implements Parcelable {
         }
 
         private void setUsage(@NonNull AudioAttributes audio) {
+            mOriginalAudioUsage = audio.getUsage();
             switch (audio.getUsage()) {
                 case AudioAttributes.USAGE_NOTIFICATION:
                 case AudioAttributes.USAGE_NOTIFICATION_EVENT:
@@ -379,8 +394,7 @@ public final class VibrationAttributes implements Parcelable {
          * @return a new {@link VibrationAttributes} object
          */
         public @NonNull VibrationAttributes build() {
-            VibrationAttributes ans = new VibrationAttributes(mUsage, mFlags,
-                    mAudioAttributes);
+            VibrationAttributes ans = new VibrationAttributes(mUsage, mOriginalAudioUsage, mFlags);
             return ans;
         }
 
@@ -396,6 +410,7 @@ public final class VibrationAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public @NonNull Builder setUsage(int usage) {
+            mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
             mUsage = usage;
             return this;
         }

@@ -667,7 +667,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         // clear calling identity so bindService does not fail
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             client.addDeviceConnection(device, callback);
         } finally {
@@ -692,7 +692,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         // clear calling identity so bindService does not fail
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             client.addDeviceConnection(device, callback);
         } finally {

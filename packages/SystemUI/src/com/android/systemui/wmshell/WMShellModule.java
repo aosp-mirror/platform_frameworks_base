@@ -30,8 +30,6 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
@@ -128,12 +126,5 @@ public class WMShellModule {
         return new PipTaskOrganizer(context, pipBoundsHandler,
                 pipSurfaceTransactionHelper, splitScreenOptional, displayController,
                 pipUiEventLogger, shellTaskOrganizer);
-    }
-
-    @SysUISingleton
-    @Provides
-    static OneHanded provideOneHandedController(Context context,
-            DisplayController displayController) {
-        return OneHandedController.create(context, displayController);
     }
 }

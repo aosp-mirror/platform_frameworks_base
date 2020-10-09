@@ -1660,7 +1660,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (changed) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 sendUserInfoChangedBroadcast(userId);
             } finally {
@@ -3769,7 +3769,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (user == null) {
             return null;
         }
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user.id);
             // Change the setting before applying the DISALLOW_SHARE_LOCATION restriction, otherwise
@@ -3822,7 +3822,7 @@ public class UserManagerService extends IUserManager.Stub {
             return false;
         }
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
             synchronized (mPackagesLock) {
@@ -3883,7 +3883,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private boolean removeUserUnchecked(@UserIdInt int userId) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
             int currentUser = ActivityManager.getCurrentUser();
@@ -3991,7 +3991,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Let other services shutdown any activity and clean up their state before completely
         // wiping the user's system directory and removing from the user list
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             Intent removedIntent = new Intent(Intent.ACTION_USER_REMOVED);
             removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
@@ -4153,7 +4153,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private int getUidForPackage(String packageName) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mContext.getPackageManager().getApplicationInfo(packageName,
                     PackageManager.MATCH_ANY_USER).uid;
@@ -5067,7 +5067,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public void setUserIcon(@UserIdInt int userId, Bitmap bitmap) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mPackagesLock) {
                     UserData userData = getUserDataNoChecks(userId);

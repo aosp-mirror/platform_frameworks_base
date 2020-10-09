@@ -244,7 +244,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir.mkdirs();
 
         mApexManager = ApexManager.getInstance();
-        mStagingManager = new StagingManager(this, context, apexParserSupplier);
+        mStagingManager = new StagingManager(context, apexParserSupplier);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -980,7 +980,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } else if (canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
             } finally {

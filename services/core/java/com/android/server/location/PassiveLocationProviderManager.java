@@ -52,7 +52,7 @@ class PassiveLocationProviderManager extends LocationProviderManager {
             PassiveProvider passiveProvider = (PassiveProvider) mProvider.getProvider();
             Preconditions.checkState(passiveProvider != null);
 
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 passiveProvider.updateLocation(location);
             } finally {

@@ -555,7 +555,7 @@ class KeyguardController {
                     && !mService.mWindowManager.mPowerManager.isInteractive()
                     && (mRequestDismissKeyguard || occludedByActivity)) {
                 controller.mStackSupervisor.wakeUp("handleTurnScreenOn");
-                mTopOccludesActivity.setCurrentLaunchCanTurnScreenOn(false);
+                mTopTurnScreenOnActivity.setCurrentLaunchCanTurnScreenOn(false);
             }
 
             if (lastOccluded != mOccluded) {

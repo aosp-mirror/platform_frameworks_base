@@ -40,6 +40,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
@@ -47,6 +48,8 @@ import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipMediaController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
+
+import java.util.Optional;
 
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -164,6 +167,10 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract Bubbles optionalBubbles();
 
-    @BindsOptionalOf
-    abstract OneHanded optionalOneHanded();
+    @SysUISingleton
+    @Provides
+    static Optional<OneHanded> provideOneHandedController(Context context,
+            DisplayController displayController) {
+        return Optional.ofNullable(OneHandedController.create(context, displayController));
+    }
 }

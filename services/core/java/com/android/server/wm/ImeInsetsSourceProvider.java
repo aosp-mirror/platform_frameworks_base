@@ -17,7 +17,11 @@
 package com.android.server.wm;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.server.wm.ImeInsetsSourceProviderProto.IME_TARGET_FROM_IME;
+import static com.android.server.wm.ImeInsetsSourceProviderProto.INSETS_SOURCE_PROVIDER;
+import static com.android.server.wm.ImeInsetsSourceProviderProto.IS_IME_LAYOUT_DRAWN;
 
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.WindowInsets;
 
@@ -153,5 +157,16 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
             pw.print(mImeTargetFromIme);
             pw.println();
         }
+    }
+
+    @Override
+    void dumpDebug(ProtoOutputStream proto, long fieldId, @WindowTraceLogLevel int logLevel) {
+        final long token = proto.start(fieldId);
+        super.dumpDebug(proto, INSETS_SOURCE_PROVIDER, logLevel);
+        if (mImeTargetFromIme != null) {
+            mImeTargetFromIme.getWindow().dumpDebug(proto, IME_TARGET_FROM_IME, logLevel);
+        }
+        proto.write(IS_IME_LAYOUT_DRAWN, mIsImeLayoutDrawn);
+        proto.end(token);
     }
 }

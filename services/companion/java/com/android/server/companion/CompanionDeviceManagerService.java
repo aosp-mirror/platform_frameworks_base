@@ -408,7 +408,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                                     PackageItemInfo.SAFE_LABEL_FLAG_TRIM
                                             | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE)
                             .toString());
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,

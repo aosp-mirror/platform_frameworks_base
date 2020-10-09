@@ -142,7 +142,6 @@ public class WMShellTest extends SysuiTestCase {
 
     @Test
     public void initOneHanded_registersCallbacks() {
-        when(mOneHanded.hasOneHandedFeature()).thenReturn(true);
         mWMShell.initOneHanded(mOneHanded);
 
         verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
