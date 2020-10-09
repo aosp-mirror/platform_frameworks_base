@@ -61,9 +61,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** @hide */
 class TestNetworkService extends ITestNetworkManager.Stub {
-    @NonNull private static final String TAG = TestNetworkService.class.getSimpleName();
     @NonNull private static final String TEST_NETWORK_LOGTAG = "TestNetworkAgent";
-    @NonNull private static final String TEST_NETWORK_PROVIDER_NAME = TAG;
+    @NonNull private static final String TEST_NETWORK_PROVIDER_NAME = "TestNetworkProvider";
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;
@@ -168,17 +167,15 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         private TestNetworkAgent(
                 @NonNull Context context,
                 @NonNull Looper looper,
-                @NonNull NetworkAgentConfig config,
                 @NonNull NetworkCapabilities nc,
                 @NonNull LinkProperties lp,
+                @NonNull NetworkAgentConfig config,
                 int uid,
                 @NonNull IBinder binder,
                 @NonNull NetworkProvider np)
                 throws RemoteException {
             super(context, looper, TEST_NETWORK_LOGTAG, nc, lp, NETWORK_SCORE, config, np);
-
             mUid = uid;
-
             synchronized (mBinderLock) {
                 mBinder = binder; // Binder null-checks in create()
 
@@ -286,8 +283,8 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null, iface));
         }
 
-        final TestNetworkAgent agent = new TestNetworkAgent(context, looper,
-                new NetworkAgentConfig.Builder().build(), nc, lp, callingUid, binder,
+        final TestNetworkAgent agent = new TestNetworkAgent(context, looper, nc, lp,
+                new NetworkAgentConfig.Builder().build(), callingUid, binder,
                 mNetworkProvider);
         agent.register();
         agent.markConnected();
