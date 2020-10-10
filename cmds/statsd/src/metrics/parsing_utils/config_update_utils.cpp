@@ -516,6 +516,21 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
             return false;
         }
     }
+    for (int i = 0; i < config.duration_metric_size(); i++, metricIndex++) {
+        const DurationMetric& metric = config.duration_metric(i);
+        set<int64_t> conditionDependencies({metric.what()});
+        if (metric.has_condition()) {
+            conditionDependencies.insert(metric.condition());
+        }
+        if (!determineMetricUpdateStatus(
+                    config, metric, metric.id(), METRIC_TYPE_DURATION, /*matcherDependencies=*/{},
+                    conditionDependencies, metric.slice_by_state(), metric.links(),
+                    oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+                    replacedMatchers, replacedConditions, replacedStates,
+                    metricsToUpdate[metricIndex])) {
+            return false;
+        }
+    }
     for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
         const EventMetric& metric = config.event_metric(i);
         set<int64_t> conditionDependencies;
@@ -538,8 +553,7 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
         if (metric.has_condition()) {
             conditionDependencies.insert(metric.condition());
         }
-        set<int64_t> matcherDependencies;
-        matcherDependencies.insert(metric.what());
+        set<int64_t> matcherDependencies({metric.what()});
         if (metric.has_trigger_event()) {
             matcherDependencies.insert(metric.trigger_event());
         }
@@ -552,7 +566,7 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
             return false;
         }
     }
-    // TODO: determine update status for value, duration metrics.
+    // TODO: determine update status for value metrics.
     return true;
 }
 
