@@ -159,8 +159,6 @@ MissingNullability: android.telephony.ModemActivityInfo#toString():
     
 MissingNullability: android.telephony.ModemActivityInfo#writeToParcel(android.os.Parcel, int) parameter #0:
     
-MissingNullability: android.telephony.ModemActivityInfo.TransmitPower#toString():
-    
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
     
 MissingNullability: android.telephony.SmsCbCmasInfo#toString():
