@@ -173,7 +173,13 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         @Override
         public void onActivityHidden(ComponentName componentName) {
-            mHandler.post(() -> mPipBoundsHandler.onResetReentryBounds(componentName));
+            mHandler.post(() -> {
+                if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
+                    // The activity was removed, we don't want to restore to the reentry state
+                    // saved for this component anymore.
+                    mPipBoundsState.setLastPipComponentName(null);
+                }
+            });
         }
 
         @Override
@@ -384,7 +390,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         if (isOutPipDirection(direction)) {
             // Exiting PIP, save the reentry bounds to restore to when re-entering.
             updateReentryBounds(pipBounds);
-            mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
+            final float snapFraction = mPipBoundsHandler.getSnapFraction(mReentryBounds);
+            mPipBoundsState.saveReentryState(mReentryBounds, snapFraction);
         }
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);

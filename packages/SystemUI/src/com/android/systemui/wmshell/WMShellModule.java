@@ -98,8 +98,9 @@ public class WMShellModule {
 
     @SysUISingleton
     @Provides
-    static PipBoundsHandler providePipBoundsHandler(Context context) {
-        return new PipBoundsHandler(context);
+    static PipBoundsHandler providesPipBoundsHandler(Context context,
+            PipBoundsState pipBoundsState) {
+        return new PipBoundsHandler(context, pipBoundsState);
     }
 
     @SysUISingleton
