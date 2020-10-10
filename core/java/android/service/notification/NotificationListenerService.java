@@ -64,6 +64,7 @@ import com.android.internal.os.SomeArgs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -1802,7 +1803,7 @@ public abstract class NotificationListenerService extends Service {
          * {@link NotificationAssistantService}
          */
         public @NonNull List<Notification.Action> getSmartActions() {
-            return mSmartActions;
+            return mSmartActions == null ? Collections.emptyList() : mSmartActions;
         }
 
         /**
@@ -1810,7 +1811,7 @@ public abstract class NotificationListenerService extends Service {
          * {@link NotificationAssistantService}
          */
         public @NonNull List<CharSequence> getSmartReplies() {
-            return mSmartReplies;
+            return mSmartReplies == null ? Collections.emptyList() : mSmartReplies;
         }
 
         /**
