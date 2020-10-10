@@ -16,19 +16,17 @@
 
 package android.security.keystore2;
 
-import android.os.IBinder;
-import android.security.KeyStore;
+import android.annotation.NonNull;
 import android.security.KeyStoreException;
+import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
-import android.security.keymaster.OperationResult;
 import android.security.keystore.ArrayUtils;
-import android.security.keystore.KeyStoreConnectException;
 
 import libcore.util.EmptyArray;
 
 /**
- * Helper for streaming a crypto operation's input and output via {@link KeyStore} service's
- * {@code update} and {@code finish} operations.
+ * Helper for streaming a crypto operation's input and output via {@link KeyStoreOperation}
+ * service's {@code update} and {@code finish} operations.
  *
  * <p>The helper abstracts away issues that need to be solved in most code that uses KeyStore's
  * update and finish operations. Firstly, KeyStore's update operation can consume only a limited
@@ -56,21 +54,34 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
      */
     interface Stream {
         /**
-         * Returns the result of the KeyStore {@code update} operation or null if keystore couldn't
-         * be reached.
+         * Returns the result of the KeyStoreOperation {@code update} if applicable.
+         * The return value may be null, e.g., when supplying AAD or to-be-signed data.
+         *
+         * @param input Data to update a KeyStoreOperation with.
+         *
+         * @throws KeyStoreException in case of error.
          */
-        OperationResult update(byte[] input);
+        byte[] update(@NonNull byte[] input) throws KeyStoreException;
 
         /**
-         * Returns the result of the KeyStore {@code finish} operation or null if keystore couldn't
-         * be reached.
+         * Returns the result of the KeyStore {@code finish} if applicable.
+         *
+         * @param input Optional data to update the operation with one last time.
+         *
+         * @param signature Optional HMAC signature when verifying an HMAC signature, must be
+         *                  null otherwise.
+         *
+         * @return Optional output data. Depending on the operation this may be a signature,
+         *                  some final bit of cipher, or plain text.
+         *
+         * @throws KeyStoreException in case of error.
          */
-        OperationResult finish(byte[] input, byte[] siganture, byte[] additionalEntropy);
+        byte[] finish(byte[] input, byte[] signature) throws KeyStoreException;
     }
 
     // Binder buffer is about 1MB, but it's shared between all active transactions of the process.
     // Thus, it's safer to use a much smaller upper bound.
-    private static final int DEFAULT_CHUNK_SIZE_MAX = 64 * 1024;
+    private static final int DEFAULT_CHUNK_SIZE_MAX = 32 * 1024;
     // The chunk buffer will be sent to update until its size under this threshold.
     // This threshold should be <= the max input allowed for finish.
     // Setting this threshold <= 1 will effectivley disable buffering between updates.
@@ -94,6 +105,9 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
 
     KeyStoreCryptoOperationChunkedStreamer(Stream operation, int chunkSizeThreshold,
             int chunkSizeMax) {
+        mChunkLength = 0;
+        mConsumedInputSizeBytes = 0;
+        mProducedOutputSizeBytes = 0;
         mKeyStoreStream = operation;
         mChunkSizeMax = chunkSizeMax;
         if (chunkSizeThreshold <= 0) {
@@ -113,78 +127,67 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
         }
         if (inputLength < 0 || inputOffset < 0 || (inputOffset + inputLength) > input.length) {
             throw new KeyStoreException(KeymasterDefs.KM_ERROR_UNKNOWN_ERROR,
-                "Input offset and length out of bounds of input array");
+                    "Input offset and length out of bounds of input array");
         }
 
         byte[] output = EmptyArray.BYTE;
 
-        while (inputLength > 0 || mChunkLength >= mChunkSizeThreshold) {
+        // Preamble: If there is leftover data, we fill it up with the new data provided
+        // and send it to Keystore.
+        if (mChunkLength > 0) {
+            // Fill current chunk and send it to Keystore
             int inputConsumed = ArrayUtils.copy(input, inputOffset, mChunk, mChunkLength,
                     inputLength);
             inputLength -= inputConsumed;
-            inputOffset += inputConsumed;
-            mChunkLength += inputConsumed;
-            mConsumedInputSizeBytes += inputConsumed;
-
-            if (mChunkLength > mChunkSizeMax) {
-                throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH,
-                    "Chunk size exceeded max chunk size. Max: " + mChunkSizeMax
-                    + " Actual: " + mChunkLength);
+            inputOffset += inputOffset;
+            byte[] o = mKeyStoreStream.update(mChunk);
+            if (o != null) {
+                output = ArrayUtils.concat(output, o);
             }
+            mConsumedInputSizeBytes += inputConsumed;
+            mChunkLength = 0;
+        }
 
-            if (mChunkLength >= mChunkSizeThreshold) {
-                OperationResult opResult = mKeyStoreStream.update(
-                        ArrayUtils.subarray(mChunk, 0, mChunkLength));
-
-                if (opResult == null) {
-                    throw new KeyStoreConnectException();
-                } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-                    throw KeyStore.getKeyStoreException(opResult.resultCode);
-                }
-                if (opResult.inputConsumed <= 0) {
-                    throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH,
-                        "Keystore consumed 0 of " + mChunkLength + " bytes provided.");
-                } else if (opResult.inputConsumed > mChunkLength) {
-                    throw new KeyStoreException(KeymasterDefs.KM_ERROR_UNKNOWN_ERROR,
-                        "Keystore consumed more input than provided. Provided: "
-                            + mChunkLength + ", consumed: " + opResult.inputConsumed);
-                }
-                mChunkLength -= opResult.inputConsumed;
-
-                if (mChunkLength > 0) {
-                    // Partialy consumed, shift chunk contents
-                    ArrayUtils.copy(mChunk, opResult.inputConsumed, mChunk, 0, mChunkLength);
-                }
-
-                if ((opResult.output != null) && (opResult.output.length > 0)) {
-                    // Output was produced
-                    mProducedOutputSizeBytes += opResult.output.length;
-                    output = ArrayUtils.concat(output, opResult.output);
-                }
+        // Main loop: Send large enough chunks to Keystore.
+        while (inputLength >= mChunkSizeThreshold) {
+            int nextChunkSize = inputLength < mChunkSizeMax ? inputLength : mChunkSizeMax;
+            byte[] o = mKeyStoreStream.update(ArrayUtils.subarray(input, inputOffset,
+                    nextChunkSize));
+            inputLength -= nextChunkSize;
+            inputOffset += nextChunkSize;
+            mConsumedInputSizeBytes += nextChunkSize;
+            if (o != null) {
+                output = ArrayUtils.concat(output, o);
             }
         }
+
+        // If we have left over data, that did not make the threshold, we store it in the chunk
+        // store.
+        if (inputLength > 0) {
+            mChunkLength = ArrayUtils.copy(input, inputOffset, mChunk, 0, inputLength);
+            mConsumedInputSizeBytes += inputLength;
+        }
+
+        mProducedOutputSizeBytes += output.length;
         return output;
     }
 
     public byte[] doFinal(byte[] input, int inputOffset, int inputLength,
-            byte[] signature, byte[] additionalEntropy) throws KeyStoreException {
+            byte[] signature) throws KeyStoreException {
         byte[] output = update(input, inputOffset, inputLength);
         byte[] finalChunk = ArrayUtils.subarray(mChunk, 0, mChunkLength);
-        OperationResult opResult = mKeyStoreStream.finish(finalChunk, signature, additionalEntropy);
+        byte[] o = mKeyStoreStream.finish(finalChunk, signature);
 
-        if (opResult == null) {
-            throw new KeyStoreConnectException();
-        } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeyStore.getKeyStoreException(opResult.resultCode);
+        if (o != null) {
+            // Output produced by update is already accounted for. We only add the bytes
+            // produced by finish.
+            mProducedOutputSizeBytes += o.length;
+            if (output != null) {
+                output = ArrayUtils.concat(output, o);
+            } else {
+                output = o;
+            }
         }
-        // If no error, assume all input consumed
-        mConsumedInputSizeBytes += finalChunk.length;
-
-        if ((opResult.output != null) && (opResult.output.length > 0)) {
-            mProducedOutputSizeBytes += opResult.output.length;
-            output = ArrayUtils.concat(output, opResult.output);
-        }
-
         return output;
     }
 
@@ -206,22 +209,21 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
      */
     public static class MainDataStream implements Stream {
 
-        private final KeyStore mKeyStore;
-        private final IBinder mOperationToken;
+        private final KeyStoreOperation mOperation;
 
-        public MainDataStream(KeyStore keyStore, IBinder operationToken) {
-            mKeyStore = keyStore;
-            mOperationToken = operationToken;
+        MainDataStream(KeyStoreOperation operation) {
+            mOperation = operation;
         }
 
         @Override
-        public OperationResult update(byte[] input) {
-            return mKeyStore.update(mOperationToken, null, input);
+        public byte[] update(byte[] input) throws KeyStoreException {
+            return mOperation.update(input);
         }
 
         @Override
-        public OperationResult finish(byte[] input, byte[] signature, byte[] additionalEntropy) {
-            return mKeyStore.finish(mOperationToken, null, input, signature, additionalEntropy);
+        public byte[] finish(byte[] input, byte[] signature)
+                throws KeyStoreException {
+            return mOperation.finish(input, signature);
         }
     }
 }
