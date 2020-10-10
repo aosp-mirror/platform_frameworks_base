@@ -33,7 +33,6 @@ import android.net.MacAddress;
 import android.net.TestNetworkInterface;
 import android.net.TestNetworkManager;
 import android.net.util.InterfaceParams;
-import android.net.util.IpUtils;
 import android.net.util.TetheringUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -46,6 +45,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.net.module.util.IpUtils;
 import com.android.testutils.TapPacketReader;
 
 import org.junit.After;

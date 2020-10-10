@@ -329,11 +329,11 @@ public final class NotificationEntry extends ListEntry {
         return mRanking.canBubble();
     }
 
-    public @NonNull List<Notification.Action> getSmartActions() {
+    public @Nullable List<Notification.Action> getSmartActions() {
         return mRanking.getSmartActions();
     }
 
-    public @NonNull List<CharSequence> getSmartReplies() {
+    public @Nullable List<CharSequence> getSmartReplies() {
         return mRanking.getSmartReplies();
     }
 

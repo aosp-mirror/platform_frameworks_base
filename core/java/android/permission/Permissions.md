@@ -203,7 +203,7 @@ decision is made the activity is called by via `Activity.onPermissionGranted`.
 
 During development and testing a runtime permission can be granted via the `pm` shell command or by
 using the `UiAutomator.grantRuntimePermission` API call. Please note that this does _not_ grant the
-[app-op](#runtime-permissions-and-app-ops) synchronously. Unless the app needs to test the actual
+[app-op](#runtime-permissions-and-app_ops) synchronously. Unless the app needs to test the actual
 permission grant flow it is recommended to grant the runtime permissions during install using
 `adb install -g /my/package.apk`.
 
@@ -262,7 +262,7 @@ crashing the app the special `PERMISSION_DENIED_APP_OP` mandates that the API sh
 silently fail.
 
 A secondary use case of the `AppOpsManager.noteOp` calls is to
-[track](../app/AppOps.md#Appops-for-tracking) which apps perform what runtime protected actions.
+[track](../app/AppOps.md#app_ops-for-tracking) which apps perform what runtime protected actions.
 
 #### Verifying an app has a runtime time permission
 
@@ -471,7 +471,7 @@ This is currently (Mar 2020) reworked and will behave like [location](#location)
 
 ##### Location
 
-As described [above](#runtime-permissions-and-app-ops) the app-op mode for granted permissions is
+As described [above](#runtime-permissions-and-app_ops) the app-op mode for granted permissions is
 `MODE_ALLOWED` to allow access or `MODE_IGNORED` to suppress access.
 
 The important case is the case where the permission is granted and the app-op is `MODE_IGNORED`. In

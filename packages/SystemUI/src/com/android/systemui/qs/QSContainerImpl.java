@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -282,7 +283,7 @@ public class QSContainerImpl extends FrameLayout {
             View view = getChildAt(i);
             if (view == mStatusBarBackground || view == mBackgroundGradient
                     || view == mQSCustomizer) {
-                // Some views are always full width
+                // Some views are always full width or have dependent padding
                 continue;
             }
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
@@ -291,6 +292,9 @@ public class QSContainerImpl extends FrameLayout {
             if (view == mQSPanelContainer) {
                 // QS panel lays out some of its content full width
                 mQSPanel.setContentMargins(mContentPaddingStart, mContentPaddingEnd);
+                Pair<Integer, Integer> margins = mQSPanel.getVisualSideMargins();
+                // Apply paddings based on QSPanel
+                mQSCustomizer.setContentPaddings(margins.first, margins.second);
             } else if (view == mHeader) {
                 // The header contains the QQS panel which needs to have special padding, to
                 // visually align them.

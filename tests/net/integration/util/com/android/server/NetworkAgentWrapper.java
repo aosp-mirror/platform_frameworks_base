@@ -213,7 +213,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
 
     public void connect() {
         assertNotEquals("MockNetworkAgents can only be connected once",
-                getNetworkInfo().getDetailedState(), NetworkInfo.DetailedState.CONNECTED);
+                mNetworkInfo.getDetailedState(), NetworkInfo.DetailedState.CONNECTED);
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
         mNetworkAgent.sendNetworkInfo(mNetworkInfo);
     }
@@ -266,10 +266,6 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
 
     public NetworkAgent getNetworkAgent() {
         return mNetworkAgent;
-    }
-
-    public NetworkInfo getNetworkInfo() {
-        return mNetworkInfo;
     }
 
     public NetworkCapabilities getNetworkCapabilities() {

@@ -47,7 +47,6 @@ import android.net.NetworkAgent;
 import android.net.NetworkUtils;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
-import android.net.util.IpUtils;
 import android.net.util.KeepaliveUtils;
 import android.os.Binder;
 import android.os.Handler;
@@ -63,6 +62,7 @@ import android.util.Pair;
 import com.android.internal.R;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.IpUtils;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;

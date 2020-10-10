@@ -12127,6 +12127,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.setHasClientActivities(false);
 
         mServices.killServicesLocked(app, allowRestart);
+        mPhantomProcessList.onAppDied(app.pid);
 
         boolean restart = false;
 
@@ -15786,6 +15787,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 long duration) {
             mPendingIntentController.setPendingIntentWhitelistDuration(target, whitelistToken,
                     duration);
+        }
+
+        @Override
+        public int getPendingIntentFlags(IIntentSender target) {
+            return mPendingIntentController.getPendingIntentFlags(target);
         }
 
         @Override

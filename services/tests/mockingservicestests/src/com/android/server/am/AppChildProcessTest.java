@@ -34,12 +34,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
-import com.android.server.am.ActivityManagerService.Injector;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
@@ -55,7 +55,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.quality.Strictness;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Presubmit
 public class AppChildProcessTest {
@@ -68,6 +72,7 @@ public class AppChildProcessTest {
 
     private Context mContext = getInstrumentation().getTargetContext();
     private TestInjector mInjector;
+    private PhantomTestInjector mPhantomInjector;
     private ActivityManagerService mAms;
     private ProcessList mProcessList;
     private PhantomProcessList mPhantomProcessList;
@@ -94,6 +99,7 @@ public class AppChildProcessTest {
         mProcessList = spy(pList);
 
         mInjector = new TestInjector(mContext);
+        mPhantomInjector = new PhantomTestInjector();
         mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
@@ -101,6 +107,7 @@ public class AppChildProcessTest {
         mAms.mPackageManagerInt = mPackageManagerInt;
         pList.mService = mAms;
         mPhantomProcessList = mAms.mPhantomProcessList;
+        mPhantomProcessList.mInjector = mPhantomInjector;
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
         doReturn(false).when(() -> Process.supportsPidFd());
         // Remove stale instance of PackageManagerInternal if there is any
@@ -136,47 +143,60 @@ public class AppChildProcessTest {
         final String child2ProcessName = "test1_child1_child2";
         final String nativeProcessName = "test_native";
 
-        makeParent(zygote64Pid, initPid);
-        makeParent(zygote32Pid, initPid);
+        makeProcess(rootUid, zygote64Pid, zygote64ProcessName);
+        makeParent(rootUid, zygote64Pid, initPid);
+        makeProcess(rootUid, zygote32Pid, zygote32ProcessName);
+        makeParent(rootUid, zygote32Pid, initPid);
 
         makeAppProcess(app1Pid, app1Uid, app1ProcessName, app1ProcessName);
-        makeParent(app1Pid, zygote64Pid);
         makeAppProcess(app2Pid, app2Uid, app2ProcessName, app2ProcessName);
-        makeParent(app2Pid, zygote64Pid);
+
+        mPhantomProcessList.lookForPhantomProcessesLocked();
 
         assertEquals(0, mPhantomProcessList.mPhantomProcesses.size());
 
         // Verify zygote itself isn't a phantom process
         assertEquals(null, mPhantomProcessList.getOrCreatePhantomProcessIfNeededLocked(
-                zygote64ProcessName, rootUid, zygote64Pid));
+                zygote64ProcessName, rootUid, zygote64Pid, false));
         assertEquals(null, mPhantomProcessList.getOrCreatePhantomProcessIfNeededLocked(
-                zygote32ProcessName, rootUid, zygote32Pid));
+                zygote32ProcessName, rootUid, zygote32Pid, false));
         // Verify none of the app isn't a phantom process
         assertEquals(null, mPhantomProcessList.getOrCreatePhantomProcessIfNeededLocked(
-                app1ProcessName, app1Uid, app1Pid));
+                app1ProcessName, app1Uid, app1Pid, false));
         assertEquals(null, mPhantomProcessList.getOrCreatePhantomProcessIfNeededLocked(
-                app2ProcessName, app2Uid, app2Pid));
+                app2ProcessName, app2Uid, app2Pid, false));
 
         // "Fork" an app child process
-        makeParent(child1Pid, app1Pid);
+        makeProcess(app1Uid, child1Pid, child1ProcessName);
+        makeParent(app1Uid, child1Pid, app1Pid);
+        mPhantomProcessList.lookForPhantomProcessesLocked();
+
         PhantomProcessRecord pr = mPhantomProcessList
-                .getOrCreatePhantomProcessIfNeededLocked(child1ProcessName, app1Uid, child1Pid);
+                .getOrCreatePhantomProcessIfNeededLocked(
+                        child1ProcessName, app1Uid, child1Pid, true);
         assertTrue(pr != null);
         assertEquals(1, mPhantomProcessList.mPhantomProcesses.size());
         assertEquals(pr, mPhantomProcessList.mPhantomProcesses.valueAt(0));
         verifyPhantomProcessRecord(pr, child1ProcessName, app1Uid, child1Pid);
 
         // Create another native process from init
-        makeParent(nativePid, initPid);
+        makeProcess(rootUid, nativePid, nativeProcessName);
+        makeParent(rootUid, nativePid, initPid);
+        mPhantomProcessList.lookForPhantomProcessesLocked();
+
         assertEquals(null, mPhantomProcessList.getOrCreatePhantomProcessIfNeededLocked(
-                nativeProcessName, rootUid, nativePid));
+                nativeProcessName, rootUid, nativePid, false));
         assertEquals(1, mPhantomProcessList.mPhantomProcesses.size());
         assertEquals(pr, mPhantomProcessList.mPhantomProcesses.valueAt(0));
 
         // "Fork" another app child process
-        makeParent(child2Pid, child1Pid);
+        makeProcess(app1Uid, child2Pid, child2ProcessName);
+        makeParent(app1Uid, child2Pid, app1Pid);
+        mPhantomProcessList.lookForPhantomProcessesLocked();
+
         PhantomProcessRecord pr2 = mPhantomProcessList
-                .getOrCreatePhantomProcessIfNeededLocked(child2ProcessName, app1Uid, child2Pid);
+                .getOrCreatePhantomProcessIfNeededLocked(
+                        child2ProcessName, app1Uid, child2Pid, false);
         assertTrue(pr2 != null);
         assertEquals(2, mPhantomProcessList.mPhantomProcesses.size());
         verifyPhantomProcessRecord(pr2, child2ProcessName, app1Uid, child2Pid);
@@ -197,19 +217,27 @@ public class AppChildProcessTest {
         assertEquals(pid, pr.mPid);
     }
 
+    private void makeProcess(int uid, int pid, String processName) {
+        doReturn(uid).when(() -> Process.getUidForPid(eq(pid)));
+        mPhantomInjector.mPidToName.put(pid, processName);
+    }
+
     private void makeAppProcess(int pid, int uid, String packageName, String processName) {
+        makeProcess(uid, pid, processName);
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
+        ai.uid = uid;
         ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
         app.pid = pid;
         mAms.mPidsSelfLocked.doAddInternal(app);
+        mPhantomInjector.addToProcess(uid, pid, pid);
     }
 
-    private void makeParent(int pid, int ppid) {
-        doReturn(ppid).when(() -> Process.getParentPid(eq(pid)));
+    private void makeParent(int uid, int pid, int ppid) {
+        mPhantomInjector.addToProcess(uid, ppid, pid);
     }
 
-    private class TestInjector extends Injector {
+    private class TestInjector extends ActivityManagerService.Injector {
         TestInjector(Context context) {
             super(context);
         }
@@ -227,6 +255,56 @@ public class AppChildProcessTest {
         @Override
         public ProcessList getProcessList(ActivityManagerService service) {
             return mProcessList;
+        }
+    }
+
+    private class PhantomTestInjector extends PhantomProcessList.Injector {
+        ArrayMap<String, InputStream> mPathToInput = new ArrayMap<>();
+        ArrayMap<String, StringBuffer> mPathToData = new ArrayMap<>();
+        ArrayMap<InputStream, StringBuffer> mInputToData = new ArrayMap<>();
+        ArrayMap<Integer, String> mPidToName = new ArrayMap<>();
+
+        @Override
+        InputStream openCgroupProcs(String path) throws FileNotFoundException, SecurityException {
+            InputStream input = mPathToInput.get(path);
+            if (input != null) {
+                return input;
+            }
+            input = new ByteArrayInputStream(new byte[8]); // buf size doesn't matter here
+            mPathToInput.put(path, input);
+            StringBuffer sb = mPathToData.get(path);
+            if (sb == null) {
+                sb = new StringBuffer();
+                mPathToData.put(path, sb);
+            }
+            mInputToData.put(input, sb);
+            return input;
+        }
+
+        @Override
+        int readCgroupProcs(InputStream input, byte[] buf, int offset, int len) throws IOException {
+            StringBuffer sb = mInputToData.get(input);
+            if (sb == null) {
+                return -1;
+            }
+            byte[] avail = sb.toString().getBytes();
+            System.arraycopy(avail, 0, buf, offset, Math.min(len, avail.length));
+            return Math.min(len, avail.length);
+        }
+
+        @Override
+        String getProcessName(final int pid) {
+            return mPidToName.get(pid);
+        }
+
+        void addToProcess(int uid, int pid, int newPid) {
+            final String path = PhantomProcessList.getCgroupFilePath(uid, pid);
+            StringBuffer sb = mPathToData.get(path);
+            if (sb == null) {
+                sb = new StringBuffer();
+                mPathToData.put(path, sb);
+            }
+            sb.append(newPid).append('\n');
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-package android.media.tv;
+package com.android.server.biometrics.sensors.fingerprint;
 
-parcelable TvChannelInfo;
+/**
+ * Interface for under-display fingerprint sensors.
+ * {@link com.android.server.biometrics.sensors.ClientMonitor} subclass that require knowledge of
+ * finger position (e.g. enroll, authenticate) should implement this.
+ */
+public interface Udfps {
+    void onPointerDown(int x, int y, float minor, float major);
+    void onPointerUp();
+}

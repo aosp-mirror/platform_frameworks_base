@@ -69,6 +69,7 @@ import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
@@ -104,7 +105,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         public Bitmap image;
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
-        public int errorMsgResId;
 
         void clearImage() {
             image = null;
@@ -184,6 +184,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private final WindowManager.LayoutParams mWindowLayoutParams;
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics;
+    private final AccessibilityManager mAccessibilityManager;
 
     private View mScreenshotLayout;
     private ScreenshotSelectorView mScreenshotSelectorView;
@@ -242,6 +243,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mUiEventLogger = uiEventLogger;
+        mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
         reloadAssets();
         Configuration config = mContext.getResources().getConfiguration();
@@ -573,6 +575,14 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, boolean showFlash) {
+        if (mAccessibilityManager.isEnabled()) {
+            AccessibilityEvent event =
+                    new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            event.setContentDescription(
+                    mContext.getResources().getString(R.string.screenshot_saving_title));
+            mAccessibilityManager.sendAccessibilityEvent(event);
+        }
+
         if (mScreenshotLayout.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
             if (mDismissAnimation == null || !mDismissAnimation.isRunning()) {
@@ -632,7 +642,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 if (imageData.uri == null) {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
                     mNotificationsController.notifyScreenshotError(
-                            R.string.screenshot_failed_to_capture_text);
+                            R.string.screenshot_failed_to_save_text);
                 } else {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
 
@@ -752,7 +762,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         if (imageData.uri == null) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
             mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
+                    R.string.screenshot_failed_to_save_text);
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
         }

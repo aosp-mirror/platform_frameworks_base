@@ -218,7 +218,7 @@
 
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
     <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
-    <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
+    <!-- Informs the user that a screenshot is being saved. [CHAR LIMIT=50] -->
     <string name="screenshot_saving_title">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
     <string name="screenshot_saved_title">Screenshot saved</string>

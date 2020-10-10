@@ -1477,7 +1477,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"खाता थप्नुहोस्"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"बढाउनुहोस्"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"घटाउनुहोस्"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> छोइराख्नुहोस्।"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> टच एण्ड होल्ड गर्नुहोस्।"</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"बढाउन माथि र घटाउन तल सार्नुहोस्।"</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"मिनेट बढाउनुहोस्"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"मिनेट घटाउनुहोस्"</string>
@@ -1660,9 +1660,9 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तपाईंले पहुँचको बटन ट्याप गर्दा प्रयोग गर्न चाहनुभएको सुविधा छनौट गर्नुहोस्:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"तपाईंले पहुँचको इसारामार्फत प्रयोग गर्न चाहनुभएको सुविधा छनौट गर्नुहोस् (दुईवटा औँलाले स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"तपाईंले पहुँचको इसारामार्फत प्रयोग गर्न चाहनुभएको सुविधा छनौट गर्नुहोस् (तीनवटा औँलाले स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एउटा सुविधाबाट अर्को सुविधामा जान पहुँच बटन छोइराख्नुहोस्।"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"एउटा सुविधाबाट अर्को सुविधामा जान दुईवटा औँलाले माथितिर स्वाइप गरी स्क्रिनमा छोइराख्नुहोस्।"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"एउटा सुविधाबाट अर्को सुविधामा जान तीनवटा औँलाले माथितिर स्वाइप गरी स्क्रिनमा छोइराख्नुहोस्।"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एउटा सुविधाबाट अर्को सुविधामा जान पहुँच बटन टच एण्ड होल्ड गर्नुहोस्।"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"एउटा सुविधाबाट अर्को सुविधामा जान दुईवटा औँलाले माथितिर स्वाइप गरी स्क्रिनमा टच एण्ड होल्ड गर्नुहोस्।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"एउटा सुविधाबाट अर्को सुविधामा जान तीनवटा औँलाले माथितिर स्वाइप गरी स्क्रिनमा टच एण्ड होल्ड गर्नुहोस्।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"म्याग्निफिकेसन"</string>
     <string name="user_switched" msgid="7249833311585228097">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> मा स्विच गर्दै..."</string>

@@ -63,7 +63,7 @@ import javax.inject.Inject;
  * Note that the current architecture is designed so that a single {@link UdfpsController}
  * controls/manages all UDFPS sensors. In other words, a single controller is registered with
  * {@link com.android.server.biometrics.sensors.fingerprint.FingerprintService}, and interfaces such
- * as {@link FingerprintManager#onFingerDown(int, int, int, float, float)} or
+ * as {@link FingerprintManager#onPointerDown(int, int, int, float, float)} or
  * {@link IUdfpsOverlayController#showUdfpsOverlay(int)}should all have
  * {@code sensorId} parameters.
  */
@@ -374,7 +374,7 @@ class UdfpsController implements DozeReceiver {
                 fw.write(mHbmEnableCommand);
                 fw.close();
             }
-            mFingerprintManager.onFingerDown(mUdfpsSensorId, x, y, minor, major);
+            mFingerprintManager.onPointerDown(mUdfpsSensorId, x, y, minor, major);
         } catch (IOException e) {
             mView.hideScrimAndDot();
             Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
@@ -382,7 +382,7 @@ class UdfpsController implements DozeReceiver {
     }
 
     private void onFingerUp() {
-        mFingerprintManager.onFingerUp(mUdfpsSensorId);
+        mFingerprintManager.onPointerUp(mUdfpsSensorId);
         // Hiding the scrim before disabling HBM results in less noticeable flicker.
         mView.hideScrimAndDot();
         if (mHbmSupported) {

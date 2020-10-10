@@ -108,6 +108,7 @@ public class OverlayViewGlobalStateController {
         if (mZOrderVisibleSortedMap.isEmpty()) {
             setWindowVisible(true);
         }
+
         if (!(viewController instanceof OverlayPanelViewController)) {
             inflateView(viewController);
         }
@@ -117,6 +118,7 @@ public class OverlayViewGlobalStateController {
         }
 
         updateInternalsWhenShowingView(viewController);
+        refreshUseStableInsets();
         refreshInsetTypesToFit();
         refreshWindowFocus();
         refreshNavigationBarVisibility();
@@ -190,6 +192,7 @@ public class OverlayViewGlobalStateController {
 
         mZOrderVisibleSortedMap.remove(mZOrderMap.get(viewController));
         refreshHighestZOrderWhenHidingView(viewController);
+        refreshUseStableInsets();
         refreshInsetTypesToFit();
         refreshWindowFocus();
         refreshNavigationBarVisibility();
@@ -245,6 +248,11 @@ public class OverlayViewGlobalStateController {
 
     private void refreshWindowFocus() {
         setWindowFocusable(mHighestZOrder == null ? false : mHighestZOrder.shouldFocusWindow());
+    }
+
+    private void refreshUseStableInsets() {
+        mSystemUIOverlayWindowController.setUsingStableInsets(
+                mHighestZOrder == null ? false : mHighestZOrder.shouldUseStableInsets());
     }
 
     private void refreshInsetTypesToFit() {

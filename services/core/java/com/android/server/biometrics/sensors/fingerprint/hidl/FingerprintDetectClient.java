@@ -32,6 +32,8 @@ import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.PerformanceTracker;
+import com.android.server.biometrics.sensors.fingerprint.Udfps;
+import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
 import java.util.ArrayList;
 
@@ -93,12 +95,12 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
-    public void onFingerDown(int x, int y, float minor, float major) {
+    public void onPointerDown(int x, int y, float minor, float major) {
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
     }
 
     @Override
-    public void onFingerUp() {
+    public void onPointerUp() {
         UdfpsHelper.onFingerUp(getFreshDaemon());
     }
 
