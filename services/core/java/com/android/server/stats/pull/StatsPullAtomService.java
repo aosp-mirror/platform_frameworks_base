@@ -1739,14 +1739,14 @@ public class StatsPullAtomService extends SystemService {
             }
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeLong(modemInfo.getTimestamp())
+                    .writeLong(modemInfo.getTimestampMillis())
                     .writeLong(modemInfo.getSleepTimeMillis())
                     .writeLong(modemInfo.getIdleTimeMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis())
-                    .writeLong(modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis())
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(0))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(1))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(2))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(3))
+                    .writeLong(modemInfo.getTransmitDurationMillisAtPowerLevel(4))
                     .writeLong(modemInfo.getReceiveTimeMillis())
                     .build();
             pulledData.add(e);
