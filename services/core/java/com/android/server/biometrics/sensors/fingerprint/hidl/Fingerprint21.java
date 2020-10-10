@@ -246,7 +246,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 Slog.d(TAG, "handleError"
-                        + ", client: " + (client != null ? client.getOwnerString() : null)
+                        + ", client: " + Utils.getClientName(client)
                         + ", error: " + error
                         + ", vendorCode: " + vendorCode);
                 if (!(client instanceof Interruptable)) {

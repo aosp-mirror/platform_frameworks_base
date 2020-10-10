@@ -204,32 +204,29 @@ interface SmartRepliesAndActionsInflater {
         }
         // Apps didn't provide any smart replies / actions, use those from NAS (if any).
         if (smartReplies == null && smartActions == null) {
-            smartReplies = entry.smartReplies
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.let { entryReplies -> freeformRemoteInputActionPair
-                            ?.takeIf {
-                                it.second.allowGeneratedReplies && it.second.actionIntent != null
-                            }?.let { freeformPair -> SmartReplies(
-                                    entryReplies,
-                                    freeformPair.first,
-                                    freeformPair.second.actionIntent,
-                                    true /* fromAssistant */)
-                            }
-                    }
-            smartActions = entry.smartActions
-                    ?.takeIf {
-                        it.isNotEmpty() && notification.allowSystemGeneratedContextualActions
-                    }?.let { entryActions ->
-                        val systemGeneratedActions: List<Notification.Action> = when {
-                            activityManagerWrapper.isLockTaskKioskModeActive ->
-                                // Filter actions if we're in kiosk-mode - we don't care about
-                                // screen pinning mode, since notifications aren't shown there
-                                // anyway.
-                                filterAllowlistedLockTaskApps(entryActions)
-                            else -> entryActions
-                        }
-                        SmartActions(systemGeneratedActions, true /* fromAssistant */)
-                    }
+            val entryReplies = entry.smartReplies
+            val entryActions = entry.smartActions
+            if (entryReplies.isNotEmpty()
+                    && freeformRemoteInputActionPair != null
+                    && freeformRemoteInputActionPair.second.allowGeneratedReplies
+                    && freeformRemoteInputActionPair.second.actionIntent != null) {
+                smartReplies = SmartReplies(
+                        entryReplies,
+                        freeformRemoteInputActionPair.first,
+                        freeformRemoteInputActionPair.second.actionIntent,
+                        true /* fromAssistant */)
+            }
+            if (entryActions.isNotEmpty()
+                    && notification.allowSystemGeneratedContextualActions) {
+                val systemGeneratedActions: List<Notification.Action> = when {
+                    activityManagerWrapper.isLockTaskKioskModeActive ->
+                        // Filter actions if we're in kiosk-mode - we don't care about screen
+                        // pinning mode, since notifications aren't shown there anyway.
+                        filterAllowlistedLockTaskApps(entryActions)
+                    else -> entryActions
+                }
+                smartActions = SmartActions(systemGeneratedActions, true /* fromAssistant */)
+            }
         }
         return SmartRepliesAndActions(smartReplies, smartActions)
     }

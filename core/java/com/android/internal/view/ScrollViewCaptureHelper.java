@@ -57,10 +57,6 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
 
     public ScrollResult onScrollRequested(@NonNull ViewGroup view, Rect scrollBounds,
             Rect requestRect) {
-        final View contentView = view.getChildAt(0); // returns null, does not throw IOOBE
-        if (contentView == null) {
-            return null;
-        }
         /*
                +---------+ <----+ Content [25,25 - 275,1025] (w=250,h=1000)
                |         |
@@ -88,9 +84,6 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
             \__ Requested Bounds[0,300 - 200,400] (200x100)
        */
 
-        ScrollResult result = new ScrollResult();
-        result.requestedArea = new Rect(requestRect);
-
         // 0) adjust the requestRect to account for scroll change since start
         //
         //  Scroll Bounds[50,50 - 250,250]  (w=200,h=200)
@@ -98,6 +91,17 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
 
         // (y-100) (scrollY - mStartScrollY)
         int scrollDelta = view.getScrollY() - mStartScrollY;
+
+        final ScrollResult result = new ScrollResult();
+        result.requestedArea = new Rect(requestRect);
+        result.scrollDelta = scrollDelta;
+        result.availableArea = new Rect();
+
+        final View contentView = view.getChildAt(0); // returns null, does not throw IOOBE
+        if (contentView == null) {
+            // No child view? Cannot continue.
+            return result;
+        }
 
         //  1) Translate request rect to make it relative to container view
         //
@@ -133,7 +137,7 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
         // TODO: crop capture area to avoid occlusions/minimize scroll changes
 
         Point offset = new Point();
-        final Rect available = new Rect(requestedContentBounds); // empty
+        final Rect available = new Rect(requestedContentBounds);
         if (!view.getChildVisibleRect(contentView, available, offset)) {
             available.setEmpty();
             result.availableArea = available;

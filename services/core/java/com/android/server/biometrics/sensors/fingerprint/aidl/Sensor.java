@@ -18,17 +18,31 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.hardware.biometrics.fingerprint.Error;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.ISessionCallback;
+import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.keymaster.HardwareAuthToken;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.sensors.AcquisitionClient;
+import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.Interruptable;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Maintains the state of a single sensor within an instance of the
@@ -36,6 +50,8 @@ import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDisp
  */
 class Sensor {
     @NonNull private final String mTag;
+    @NonNull private final Context mContext;
+    @NonNull private final Handler mHandler;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricScheduler mScheduler;
 
@@ -58,10 +74,12 @@ class Sensor {
         }
     }
 
-    Sensor(@NonNull String tag,
+    Sensor(@NonNull String tag, @NonNull Context context, @NonNull Handler handler,
             @NonNull FingerprintSensorPropertiesInternal sensorProperties,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         mTag = tag;
+        mContext = context;
+        mHandler = handler;
         mSensorProperties = sensorProperties;
         mScheduler = new BiometricScheduler(tag, gestureAvailabilityDispatcher);
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
@@ -89,27 +107,102 @@ class Sensor {
 
             @Override
             public void onAcquired(byte info, int vendorCode) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof AcquisitionClient)) {
+                        Slog.e(mTag, "onAcquired for non-acquisition client: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
+                    acquisitionClient.onAcquired(info, vendorCode);
+                });
             }
 
             @Override
             public void onError(byte error, int vendorCode) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    Slog.d(mTag, "onError"
+                            + ", client: " + Utils.getClientName(client)
+                            + ", error: " + error
+                            + ", vendorCode: " + vendorCode);
+                    if (!(client instanceof Interruptable)) {
+                        Slog.e(mTag, "onError for non-error consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final Interruptable interruptable = (Interruptable) client;
+                    interruptable.onError(error, vendorCode);
+
+                    if (error == Error.HW_UNAVAILABLE) {
+                        Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
+                        mCurrentSession = null;
+                    }
+                });
             }
 
             @Override
             public void onEnrollmentProgress(int enrollmentId, int remaining) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof FingerprintEnrollClient)) {
+                        Slog.e(mTag, "onEnrollmentProgress for non-enroll client: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final int currentUserId = client.getTargetUserId();
+                    final CharSequence name = FingerprintUtils.getInstance()
+                            .getUniqueName(mContext, currentUserId);
+                    final Fingerprint fingerprint = new Fingerprint(name, enrollmentId, sensorId);
+
+                    final FingerprintEnrollClient enrollClient = (FingerprintEnrollClient) client;
+                    enrollClient.onEnrollResult(fingerprint, remaining);
+                });
             }
 
             @Override
             public void onAuthenticationSucceeded(int enrollmentId, HardwareAuthToken hat) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof AuthenticationConsumer)) {
+                        Slog.e(mTag, "onAuthenticationSucceeded for non-authentication consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final AuthenticationConsumer authenticationConsumer =
+                            (AuthenticationConsumer) client;
+                    final Fingerprint fp = new Fingerprint("", enrollmentId, sensorId);
+                    final byte[] byteArray = HardwareAuthTokenUtils.toByteArray(hat);
+                    final ArrayList<Byte> byteList = new ArrayList<>();
+                    for (byte b : byteArray) {
+                        byteList.add(b);
+                    }
+
+                    authenticationConsumer.onAuthenticated(fp, true /* authenticated */, byteList);
+                });
             }
 
             @Override
             public void onAuthenticationFailed() {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof AuthenticationConsumer)) {
+                        Slog.e(mTag, "onAuthenticationFailed for non-authentication consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final AuthenticationConsumer authenticationConsumer =
+                            (AuthenticationConsumer) client;
+                    final Fingerprint fp = new Fingerprint("", 0 /* enrollmentId */, sensorId);
+                    authenticationConsumer
+                            .onAuthenticated(fp, false /* authenticated */, null /* hat */);
+                });
             }
 
             @Override

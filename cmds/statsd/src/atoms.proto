@@ -4466,6 +4466,7 @@ message BinaryPushStateChanged {
         // which requires reboot and not eligible for any reboot promotion strategy
         // (e.g. soft restart, notification restart).
         NO_REBOOT_PROMOTION_STRATEGY_ELIGIBLE = 30;
+        REBOOT_TRIGGER_FAILURE = 31;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.

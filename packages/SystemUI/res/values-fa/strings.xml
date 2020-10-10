@@ -431,7 +431,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"دستگاه"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به بالا بکشید"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به‌بالا بکشید"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"برای جابه‌جایی سریع میان برنامه‌ها، به چپ بکشید"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تغییر وضعیت نمای کلی"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"شارژ کامل شد"</string>
@@ -450,8 +450,8 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"اعلان‌های کمتر فوری در زیر"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"دوباره ضربه بزنید تا باز شود"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به بالا بکشید"</string>
-    <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به بالا بکشید"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
+    <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تعلق دارد"</string>
     <string name="phone_hint" msgid="6682125338461375925">"انگشتتان را از نماد تلفن تند بکشید"</string>
@@ -740,7 +740,7 @@
     <string name="feedback_promoted" msgid="8075757485407091976">"سیستمْ این اعلان را ارتقا داده است."</string>
     <string name="feedback_demoted" msgid="5848066008939031913">"سیستمْ این اعلان را تنزل داده است."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"این مورد درست بود؟"</string>
-    <string name="feedback_response" msgid="4671729244976641339">"از بازخورد شما سپاس‌گذاریم!"</string>
+    <string name="feedback_response" msgid="4671729244976641339">"از بازخوردتان سپاس‌گزاریم!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"تأیید"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> بسته شد"</string>
@@ -1012,17 +1012,19 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"تنظیمات"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"پنجره بزرگ‌نمایی"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"کنترل‌های پنجره بزرگ‌نمایی"</string>
-    <!-- no translation found for accessibility_control_zoom_in (1189272315480097417) -->
+    <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"بزرگ کردن"</string>
+    <string name="accessibility_control_zoom_out" msgid="69578832020304084">"کوچک کردن"</string>
+    <string name="accessibility_control_move_up" msgid="6622825494014720136">"انتقال به بالا"</string>
+    <string name="accessibility_control_move_down" msgid="5390922476900974512">"انتقال به پایین"</string>
+    <string name="accessibility_control_move_left" msgid="8156206978511401995">"انتقال به راست"</string>
+    <string name="accessibility_control_move_right" msgid="8926821093629582888">"انتقال به چپ"</string>
+    <!-- no translation found for magnification_mode_switch_description (2698364322069934733) -->
     <skip />
-    <!-- no translation found for accessibility_control_zoom_out (69578832020304084) -->
+    <!-- no translation found for magnification_mode_switch_state_full_screen (2882507327576770574) -->
     <skip />
-    <!-- no translation found for accessibility_control_move_up (6622825494014720136) -->
+    <!-- no translation found for magnification_mode_switch_state_window (8597100249594076965) -->
     <skip />
-    <!-- no translation found for accessibility_control_move_down (5390922476900974512) -->
-    <skip />
-    <!-- no translation found for accessibility_control_move_left (8156206978511401995) -->
-    <skip />
-    <!-- no translation found for accessibility_control_move_right (8926821093629582888) -->
+    <!-- no translation found for magnification_mode_switch_click_label (2786203505805898199) -->
     <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"کنترل‌های دستگاه"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"افزودن کنترل‌ها برای دستگاه‌های متصل"</string>
@@ -1087,8 +1089,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (اتصال قطع شد)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"متصل نشد. دوباره امتحان کنید."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"مرتبط کردن دستگاه جدید"</string>
-    <!-- no translation found for build_number_clip_data_label (3623176728412560914) -->
-    <skip />
-    <!-- no translation found for build_number_copy_toast (877720921605503046) -->
-    <skip />
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"شماره ساخت"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
 </resources>
