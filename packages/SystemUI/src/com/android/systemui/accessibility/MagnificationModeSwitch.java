@@ -46,9 +46,15 @@ import com.android.systemui.R;
  */
 class MagnificationModeSwitch {
 
-    private static final int DURATION_MS = 5000;
-    private static final int START_DELAY_MS = 3000;
-    private final Runnable mAnimationTask;
+    @VisibleForTesting
+    static final long FADING_ANIMATION_DURATION_MS = 300;
+    private static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 3000;
+    // The button visible duration starting from the last showButton() called.
+    private int mVisibleDuration = DEFAULT_FADE_OUT_ANIMATION_DELAY_MS;
+    private final Runnable mFadeInAnimationTask;
+    private final Runnable mFadeOutAnimationTask;
+    @VisibleForTesting
+    boolean mIsFadeOutAnimating = false;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -100,12 +106,19 @@ class MagnificationModeSwitch {
             }
         });
 
-        mAnimationTask = () -> {
+        mFadeInAnimationTask = () -> {
+            mImageView.animate()
+                    .alpha(1f)
+                    .setDuration(FADING_ANIMATION_DURATION_MS)
+                    .start();
+        };
+        mFadeOutAnimationTask = () -> {
             mImageView.animate()
                     .alpha(0f)
-                    .setDuration(DURATION_MS)
+                    .setDuration(FADING_ANIMATION_DURATION_MS)
                     .withEndAction(() -> removeButton())
                     .start();
+            mIsFadeOutAnimating = true;
         };
     }
 
@@ -128,7 +141,6 @@ class MagnificationModeSwitch {
         }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mImageView.setAlpha(1.0f);
                 mImageView.animate().cancel();
                 mLastDown.set(event.getRawX(), event.getRawY());
                 mLastDrag.set(event.getRawX(), event.getRawY());
@@ -169,9 +181,13 @@ class MagnificationModeSwitch {
         if (!mIsVisible) {
             return;
         }
-        mImageView.animate().cancel();
-        mWindowManager.removeView(mImageView);
         // Reset button status.
+        mImageView.removeCallbacks(mFadeInAnimationTask);
+        mImageView.removeCallbacks(mFadeOutAnimationTask);
+        mImageView.animate().cancel();
+        mIsFadeOutAnimating = false;
+        mImageView.setAlpha(0f);
+        mWindowManager.removeView(mImageView);
         mIsVisible = false;
         mParams.x = 0;
         mParams.y = 0;
@@ -185,14 +201,15 @@ class MagnificationModeSwitch {
         if (!mIsVisible) {
             mWindowManager.addView(mImageView, mParams);
             mIsVisible = true;
+            mImageView.postOnAnimation(mFadeInAnimationTask);
         }
-        mImageView.setAlpha(1.0f);
-        // TODO(b/143852371): use accessibility timeout as a delay.
-        // Dismiss the magnification switch button after the button is displayed for a period of
-        // time.
-        mImageView.animate().cancel();
-        mImageView.removeCallbacks(mAnimationTask);
-        mImageView.postDelayed(mAnimationTask, START_DELAY_MS);
+        if (mIsFadeOutAnimating) {
+            mImageView.animate().cancel();
+            mImageView.setAlpha(1f);
+        }
+        // Refresh the time slot of the fade-out task whenever this method is called.
+        mImageView.removeCallbacks(mFadeOutAnimationTask);
+        mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mVisibleDuration);
     }
 
     void onConfigurationChanged(int configDiff) {
@@ -222,6 +239,7 @@ class MagnificationModeSwitch {
         imageView.setClickable(true);
         imageView.setFocusable(true);
         imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        imageView.setAlpha(0f);
         return imageView;
     }
 
