@@ -985,7 +985,7 @@
     <string name="searchview_description_search" msgid="1045552007537359343">"Пребарај"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"Пребарај барање"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"Исчисти барање"</string>
-    <string name="searchview_description_submit" msgid="6771060386117334686">"Поднеси барање"</string>
+    <string name="searchview_description_submit" msgid="6771060386117334686">"Испрати барање"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Гласовно пребарување"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Овозможи „Истражувај со допир“?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> сака да овозможи „Истражувај со допир“. Кога е вклучено „Истражувај со допир“, може да се слушнат или да се видат описи на она што е под вашиот прст или да се прават движења за комуницирање со таблетот."</string>
@@ -1436,7 +1436,7 @@
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Не е избрана датотека"</string>
     <string name="reset" msgid="3865826612628171429">"Ресетирај"</string>
-    <string name="submit" msgid="862795280643405865">"Поднеси"</string>
+    <string name="submit" msgid="862795280643405865">"Испрати"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Апликацијата за возење работи"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Допрете за да излезете од апликацијата за возење."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Назад"</string>
