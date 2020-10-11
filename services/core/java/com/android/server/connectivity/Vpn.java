@@ -1960,8 +1960,9 @@ public class Vpn {
          */
         public PendingIntent pendingIntentGetActivityAsUser(
                 Intent intent, int flags, UserHandle user) {
-            return PendingIntent.getActivityAsUser(mContext, 0 /*request*/, intent, flags,
-                    null /*options*/, user);
+            return PendingIntent.getActivity(
+                    mContext.createContextAsUser(user, 0 /* flags */), 0 /* requestCode */,
+                    intent, flags);
         }
 
         /**
