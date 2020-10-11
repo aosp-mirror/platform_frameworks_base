@@ -40,7 +40,7 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     // classes when this provider is instantiated and installed early on during each app's
     // initialization process.
 
-    private static final String PACKAGE_NAME = "android.security.keystore";
+    private static final String PACKAGE_NAME = "android.security.keystore2";
     private static final String KEYSTORE_SECRET_KEY_CLASS_NAME =
             PACKAGE_NAME + ".AndroidKeyStoreSecretKey";
     private static final String KEYSTORE_PRIVATE_KEY_CLASS_NAME =
