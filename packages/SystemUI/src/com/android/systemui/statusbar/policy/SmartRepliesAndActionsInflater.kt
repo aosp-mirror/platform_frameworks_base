@@ -86,7 +86,7 @@ interface SmartRepliesAndActionsInflater {
         sysuiContext: Context,
         notifPackageContext: Context,
         entry: NotificationEntry,
-        existingRepliesAndAction: SmartRepliesAndActions
+        existingRepliesAndAction: SmartRepliesAndActions?
     ): InflatedSmartReplies
 }
 
@@ -103,7 +103,7 @@ interface SmartRepliesAndActionsInflater {
         sysuiContext: Context,
         notifPackageContext: Context,
         entry: NotificationEntry,
-        existingRepliesAndAction: SmartRepliesAndActions
+        existingRepliesAndAction: SmartRepliesAndActions?
     ): InflatedSmartReplies {
         val newRepliesAndActions = chooseSmartRepliesAndActions(entry)
         if (!shouldShowSmartReplyView(entry, newRepliesAndActions)) {
@@ -204,24 +204,26 @@ interface SmartRepliesAndActionsInflater {
         }
         // Apps didn't provide any smart replies / actions, use those from NAS (if any).
         if (smartReplies == null && smartActions == null) {
-            if (entry.smartReplies.isNotEmpty()
+            val entryReplies = entry.smartReplies
+            val entryActions = entry.smartActions
+            if (entryReplies.isNotEmpty()
                     && freeformRemoteInputActionPair != null
                     && freeformRemoteInputActionPair.second.allowGeneratedReplies
                     && freeformRemoteInputActionPair.second.actionIntent != null) {
                 smartReplies = SmartReplies(
-                        entry.smartReplies,
+                        entryReplies,
                         freeformRemoteInputActionPair.first,
                         freeformRemoteInputActionPair.second.actionIntent,
                         true /* fromAssistant */)
             }
-            if (entry.smartActions.isNotEmpty()
+            if (entryActions.isNotEmpty()
                     && notification.allowSystemGeneratedContextualActions) {
                 val systemGeneratedActions: List<Notification.Action> = when {
                     activityManagerWrapper.isLockTaskKioskModeActive ->
                         // Filter actions if we're in kiosk-mode - we don't care about screen
                         // pinning mode, since notifications aren't shown there anyway.
-                        filterAllowlistedLockTaskApps(entry.smartActions)
-                    else -> entry.smartActions
+                        filterAllowlistedLockTaskApps(entryActions)
+                    else -> entryActions
                 }
                 smartActions = SmartActions(systemGeneratedActions, true /* fromAssistant */)
             }

@@ -966,6 +966,32 @@ public final class Call {
         /**
          * Gets the verification status for the phone number of an incoming call as identified in
          * ATIS-1000082.
+         * <p>
+         * For incoming calls, the number verification status indicates whether the device was
+         * able to verify the authenticity of the calling number using the STIR process outlined
+         * in ATIS-1000082.  {@link Connection#VERIFICATION_STATUS_NOT_VERIFIED} indicates that
+         * the network was not able to use STIR to verify the caller's number (i.e. nothing is
+         * known regarding the authenticity of the number.
+         * {@link Connection#VERIFICATION_STATUS_PASSED} indicates that the network was able to
+         * use STIR to verify the caller's number.  This indicates that the network has a high
+         * degree of confidence that the incoming call actually originated from the indicated
+         * number.  {@link Connection#VERIFICATION_STATUS_FAILED} indicates that the network's
+         * STIR verification did not pass.  This indicates that the incoming call may not
+         * actually be from the indicated number.  This could occur if, for example, the caller
+         * is using an impersonated phone number.
+         * <p>
+         * A {@link CallScreeningService} can use this information to help determine if an
+         * incoming call is potentially an unwanted call.  A verification status of
+         * {@link Connection#VERIFICATION_STATUS_FAILED} indicates that an incoming call may not
+         * actually be from the number indicated on the call (i.e. impersonated number) and that it
+         * should potentially be blocked.  Likewise,
+         * {@link Connection#VERIFICATION_STATUS_PASSED} can be used as a positive signal to
+         * help clarify that the incoming call is originating from the indicated number and it
+         * is less likely to be an undesirable call.
+         * <p>
+         * An {@link InCallService} can use this information to provide a visual indicator to the
+         * user regarding the verification status of a call and to help identify calls from
+         * potentially impersonated numbers.
          * @return the verification status.
          */
         public @Connection.VerificationStatus int getCallerNumberVerificationStatus() {

@@ -31,11 +31,12 @@ import java.util.Objects;
 
 
 /**
- * This class is used to specify information of a TV channel.
+ * Contains information about a {@link TvInputService.Session} that is currently tuned to a channel
+ * or pass-through input.
  * @hide
  */
-public final class TvChannelInfo implements Parcelable {
-    static final String TAG = "TvChannelInfo";
+public final class TunedInfo implements Parcelable {
+    static final String TAG = "TunedInfo";
 
     /**
      * App tag for {@link #getAppTag()}: the corresponding application of the channel is the same as
@@ -67,21 +68,21 @@ public final class TvChannelInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface AppType {}
 
-    public static final @NonNull Parcelable.Creator<TvChannelInfo> CREATOR =
-            new Parcelable.Creator<TvChannelInfo>() {
+    public static final @NonNull Parcelable.Creator<TunedInfo> CREATOR =
+            new Parcelable.Creator<TunedInfo>() {
                 @Override
-                public TvChannelInfo createFromParcel(Parcel source) {
+                public TunedInfo createFromParcel(Parcel source) {
                     try {
-                        return new TvChannelInfo(source);
+                        return new TunedInfo(source);
                     } catch (Exception e) {
-                        Log.e(TAG, "Exception creating TvChannelInfo from parcel", e);
+                        Log.e(TAG, "Exception creating TunedInfo from parcel", e);
                         return null;
                     }
                 }
 
                 @Override
-                public TvChannelInfo[] newArray(int size) {
-                    return new TvChannelInfo[size];
+                public TunedInfo[] newArray(int size) {
+                    return new TunedInfo[size];
                 }
             };
 
@@ -94,7 +95,7 @@ public final class TvChannelInfo implements Parcelable {
     private final int mAppTag;
 
     /** @hide */
-    public TvChannelInfo(
+    public TunedInfo(
             String inputId, @Nullable Uri channelUri, boolean isRecordingSession,
             boolean isForeground, @AppType int appType, int appTag) {
         mInputId = inputId;
@@ -106,7 +107,7 @@ public final class TvChannelInfo implements Parcelable {
     }
 
 
-    private TvChannelInfo(Parcel source) {
+    private TunedInfo(Parcel source) {
         mInputId = source.readString();
         String uriString = source.readString();
         mChannelUri = uriString == null ? null : Uri.parse(uriString);
@@ -194,11 +195,11 @@ public final class TvChannelInfo implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof TvChannelInfo)) {
+        if (!(o instanceof TunedInfo)) {
             return false;
         }
 
-        TvChannelInfo other = (TvChannelInfo) o;
+        TunedInfo other = (TunedInfo) o;
 
         return TextUtils.equals(mInputId, other.getInputId())
                 && Objects.equals(mChannelUri, other.mChannelUri)

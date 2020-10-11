@@ -183,8 +183,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         SmartRepliesAndActions repliesAndActions =
                 mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
-                mEntry.getSmartReplies());
+        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(mEntry.getSmartReplies());
         assertThat(repliesAndActions.smartReplies.fromAssistant).isTrue();
         assertThat(repliesAndActions.smartActions).isNull();
     }

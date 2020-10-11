@@ -72,9 +72,9 @@ public class StackAnimationController extends
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
      */
-    public static final int DEFAULT_STIFFNESS = 12000;
+    public static final int SPRING_TO_TOUCH_STIFFNESS = 12000;
     public static final float IME_ANIMATION_STIFFNESS = SpringForce.STIFFNESS_LOW;
-    private static final int FLING_FOLLOW_STIFFNESS = 500;
+    private static final int CHAIN_STIFFNESS = 600;
     public static final float DEFAULT_BOUNCINESS = 0.9f;
 
     private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
@@ -629,7 +629,7 @@ public class StackAnimationController extends
     public void moveStackFromTouch(float x, float y) {
         // Begin the spring-to-touch catch up animation if needed.
         if (mSpringToTouchOnNextMotionEvent) {
-            springStack(x, y, DEFAULT_STIFFNESS);
+            springStack(x, y, SPRING_TO_TOUCH_STIFFNESS);
             mSpringToTouchOnNextMotionEvent = false;
             mFirstBubbleSpringingToTouch = true;
         } else if (mFirstBubbleSpringingToTouch) {
@@ -762,14 +762,12 @@ public class StackAnimationController extends
     @Override
     SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
         final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
-        final float stiffness = Settings.Secure.getFloat(contentResolver, "bubble_stiffness",
-                mIsMovingFromFlinging ? FLING_FOLLOW_STIFFNESS : DEFAULT_STIFFNESS /* default */);
         final float dampingRatio = Settings.Secure.getFloat(contentResolver, "bubble_damping",
                 DEFAULT_BOUNCINESS);
 
         return new SpringForce()
                 .setDampingRatio(dampingRatio)
-                .setStiffness(stiffness);
+                .setStiffness(CHAIN_STIFFNESS);
     }
 
     @Override

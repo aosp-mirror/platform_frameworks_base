@@ -222,7 +222,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         event.recycle();
         // THEN the event is passed to the FingerprintManager
-        verify(mFingerprintManager).onFingerDown(eq(mUdfpsController.mUdfpsSensorId), eq(0), eq(0),
+        verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mUdfpsSensorId), eq(0), eq(0),
                 eq(0f), eq(0f));
         // AND the scrim and dot is shown
         verify(mUdfpsView).showScrimAndDot();
@@ -236,7 +236,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0);
         // THEN the event is passed to the FingerprintManager
-        verify(mFingerprintManager).onFingerDown(eq(mUdfpsController.mUdfpsSensorId), eq(0), eq(0),
+        verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mUdfpsSensorId), eq(0), eq(0),
                 anyFloat(), anyFloat());
         // AND the scrim and dot is shown
         verify(mUdfpsView).showScrimAndDot();

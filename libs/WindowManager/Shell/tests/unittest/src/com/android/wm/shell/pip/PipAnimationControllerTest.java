@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip;
+package com.android.wm.shell.pip;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;

@@ -30,6 +30,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.systemui.bubbles.BubbleOverflowActivity.EXTRA_BUBBLE_CONTROLLER;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -51,6 +52,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.hardware.display.VirtualDisplay;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -576,6 +578,9 @@ public class BubbleExpandedView extends LinearLayout {
         mIsOverflow = overflow;
 
         Intent target = new Intent(mContext, BubbleOverflowActivity.class);
+        Bundle extras = new Bundle();
+        extras.putBinder(EXTRA_BUBBLE_CONTROLLER, ObjectWrapper.wrap(mBubbles));
+        target.putExtras(extras);
         mPendingIntent = PendingIntent.getActivity(mContext, /* requestCode */ 0,
                 target, PendingIntent.FLAG_UPDATE_CURRENT);
         mSettingsIcon.setVisibility(GONE);

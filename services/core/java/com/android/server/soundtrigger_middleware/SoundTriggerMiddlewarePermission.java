@@ -236,7 +236,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
 
         @Override
         public void unloadModel(int modelHandle) throws RemoteException {
-            enforcePermissions();
+            // Unloading a model does not require special permissions. Having a handle to the
+            // session is sufficient.
             mDelegate.unloadModel(modelHandle);
 
         }
@@ -250,7 +251,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
 
         @Override
         public void stopRecognition(int modelHandle) throws RemoteException {
-            enforcePermissions();
+            // Stopping a model does not require special permissions. Having a handle to the
+            // session is sufficient.
             mDelegate.stopRecognition(modelHandle);
         }
 
@@ -284,7 +286,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
 
         @Override
         public void detach() throws RemoteException {
-            enforcePermissions();
+            // Detaching does not require special permissions. Having a handle to the session is
+            // sufficient.
             mDelegate.detach();
         }
 

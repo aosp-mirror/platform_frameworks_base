@@ -23,8 +23,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_SPLIT_SCREEN;
+
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
@@ -56,17 +57,16 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
                     ShellTaskOrganizer shellTaskOrganizer) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
-        mTaskOrganizer.addListener(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_SPLIT_SCREEN);
     }
 
     void init() throws RemoteException {
         synchronized (this) {
             try {
                 mPrimary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                        WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                        WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
                 mSecondary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                        WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
             } catch (Exception e) {
                 // teardown to prevent callbacks
                 mTaskOrganizer.removeListener(this);

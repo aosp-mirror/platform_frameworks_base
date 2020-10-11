@@ -132,6 +132,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         layout.setSpanSizeLookup(mTileAdapter.getSizeLookup());
         mRecyclerView.setLayoutManager(layout);
         mRecyclerView.addItemDecoration(mTileAdapter.getItemDecoration());
+        mRecyclerView.addItemDecoration(mTileAdapter.getMarginItemDecoration());
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
@@ -219,6 +220,22 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mKeyguardStateController.addCallback(mKeyguardCallback);
             updateNavColors();
         }
+    }
+
+    /**
+     * Sets the padding for the RecyclerView. Also, updates the margin between the tiles in the
+     * {@link TileAdapter}.
+     */
+    public void setContentPaddings(int paddingStart, int paddingEnd) {
+        int halfMargin = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal) / 2;
+        mTileAdapter.changeHalfMargin(halfMargin);
+        mRecyclerView.setPaddingRelative(
+                paddingStart,
+                mRecyclerView.getPaddingTop(),
+                paddingEnd,
+                mRecyclerView.getPaddingBottom()
+        );
     }
 
     private void queryTiles() {

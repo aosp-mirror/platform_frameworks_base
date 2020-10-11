@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -282,7 +283,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (!PipUtils.hasSystemFeature(context)) {
             Log.w(TAG, "Device not support PIP feature");
         } else {
-            mTaskOrganizer.addListener(this, WINDOWING_MODE_PINNED);
+            mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_PIP);
             displayController.addDisplayWindowListener(this);
         }
     }

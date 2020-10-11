@@ -17,6 +17,7 @@ package android.hardware.fingerprint;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.ITestService;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -30,6 +31,10 @@ import java.util.List;
  * @hide
  */
 interface IFingerprintService {
+
+    // Retrieves a test service
+    ITestService getTestService(String opPackageName);
+
     // Retrieve static sensor properties for all fingerprint sensors
     List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
@@ -121,10 +126,10 @@ interface IFingerprintService {
     void initializeConfiguration(int sensorId, int strength);
 
     // Notifies about a finger touching the sensor area.
-    void onFingerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(int sensorId, int x, int y, float minor, float major);
 
     // Notifies about a finger leaving the sensor area.
-    void onFingerUp(int sensorId);
+    void onPointerUp(int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);

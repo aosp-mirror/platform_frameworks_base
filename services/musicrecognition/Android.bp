@@ -1,0 +1,13 @@
+filegroup {
+    name: "services.musicsearch-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library_static {
+    name: "services.musicsearch",
+    defaults: ["services_defaults"],
+    srcs: [":services.musicsearch-sources"],
+    libs: ["services.core", "app-compat-annotations"],
+}

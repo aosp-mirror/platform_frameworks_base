@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.hidl;
+package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.Nullable;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
@@ -29,7 +29,7 @@ public class UdfpsHelper {
 
     private static final String TAG = "UdfpsHelper";
 
-    static void onFingerDown(IBiometricsFingerprint daemon, int x, int y, float minor,
+    public static void onFingerDown(IBiometricsFingerprint daemon, int x, int y, float minor,
             float major) {
         android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
                 android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
@@ -46,7 +46,7 @@ public class UdfpsHelper {
         }
     }
 
-    static void onFingerUp(IBiometricsFingerprint daemon) {
+    public static void onFingerUp(IBiometricsFingerprint daemon) {
         android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
                 android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
                         daemon);
@@ -62,7 +62,7 @@ public class UdfpsHelper {
         }
     }
 
-    static void showUdfpsOverlay(int sensorId,
+    public static void showUdfpsOverlay(int sensorId,
             @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {
             return;
@@ -74,7 +74,7 @@ public class UdfpsHelper {
         }
     }
 
-    static void hideUdfpsOverlay(int sensorId,
+    public static void hideUdfpsOverlay(int sensorId,
             @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {
             return;

@@ -1815,22 +1815,6 @@ public class LocationManager {
     public void clearTestProviderStatus(@NonNull String provider) {}
 
     /**
-     * Get the last list of {@link LocationRequest}s sent to the provider.
-     *
-     * @hide
-     */
-    @TestApi
-    @NonNull
-    public List<LocationRequest> getTestProviderCurrentRequests(String providerName) {
-        Preconditions.checkArgument(providerName != null, "invalid null provider");
-        try {
-            return mService.getTestProviderCurrentRequests(providerName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Sets a proximity alert for the location given by the position (latitude, longitude) and the
      * given radius.
      *
