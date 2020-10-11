@@ -18,6 +18,8 @@ package com.android.systemui.bubbles;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
+import static com.android.systemui.Interpolators.ALPHA_IN;
+import static com.android.systemui.Interpolators.ALPHA_OUT;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -55,6 +57,11 @@ import com.android.systemui.recents.TriangleShape;
 public class BubbleFlyoutView extends FrameLayout {
     /** Max width of the flyout, in terms of percent of the screen width. */
     private static final float FLYOUT_MAX_WIDTH_PERCENT = .6f;
+
+    /** Translation Y of fade animation. */
+    private static final float FLYOUT_FADE_Y = 40f;
+
+    private static final long FLYOUT_FADE_DURATION = 200L;
 
     private final int mFlyoutPadding;
     private final int mFlyoutSpaceFromBubble;
@@ -103,6 +110,9 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** The bounds of the flyout background, kept up to date as it transitions to the 'new' dot. */
     private final RectF mBgRect = new RectF();
+
+    /** The y position of the flyout, relative to the top of the screen. */
+    private float mFlyoutY = 0f;
 
     /**
      * Percent progress in the transition from flyout to 'new' dot. These two values are the inverse
@@ -221,18 +231,33 @@ public class BubbleFlyoutView extends FrameLayout {
         mSenderText.setTextSize(TypedValue.COMPLEX_UNIT_PX, newFontSize);
     }
 
-    /** Configures the flyout, collapsed into to dot form. */
-    void setupFlyoutStartingAsDot(
-            Bubble.FlyoutMessage flyoutMessage,
-            PointF stackPos,
-            float parentWidth,
-            boolean arrowPointingLeft,
-            int dotColor,
-            @Nullable Runnable onLayoutComplete,
-            @Nullable Runnable onHide,
-            float[] dotCenter,
-            boolean hideDot) {
+    /*
+     * Fade animation for consecutive flyouts.
+     */
+    void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, float stackY) {
+        fade(false /* in */);
+        updateFlyoutMessage(flyoutMessage, parentWidth);
+        // Wait for TextViews to layout with updated height.
+        post(() -> {
+            mFlyoutY = stackY + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
+            fade(true /* in */);
+        });
+    }
 
+    private void fade(boolean in) {
+        setAlpha(in ? 0f : 1f);
+        setTranslationY(in ? mFlyoutY : mFlyoutY + FLYOUT_FADE_Y);
+        animate()
+                .alpha(in ? 1f : 0f)
+                .setDuration(FLYOUT_FADE_DURATION)
+                .setInterpolator(in ? ALPHA_IN : ALPHA_OUT);
+        animate()
+                .translationY(in ? mFlyoutY : mFlyoutY - FLYOUT_FADE_Y)
+                .setDuration(FLYOUT_FADE_DURATION)
+                .setInterpolator(in ? ALPHA_IN : ALPHA_OUT);
+    }
+
+    private void updateFlyoutMessage(Bubble.FlyoutMessage flyoutMessage, float parentWidth) {
         final Drawable senderAvatar = flyoutMessage.senderAvatar;
         if (senderAvatar != null && flyoutMessage.isGroupChat) {
             mSenderAvatar.setVisibility(VISIBLE);
@@ -256,6 +281,27 @@ public class BubbleFlyoutView extends FrameLayout {
             mSenderText.setVisibility(GONE);
         }
 
+        // Set the flyout TextView's max width in terms of percent, and then subtract out the
+        // padding so that the entire flyout view will be the desired width (rather than the
+        // TextView being the desired width + extra padding).
+        mMessageText.setMaxWidth(maxTextViewWidth);
+        mMessageText.setText(flyoutMessage.message);
+    }
+
+    /** Configures the flyout, collapsed into dot form. */
+    void setupFlyoutStartingAsDot(
+            Bubble.FlyoutMessage flyoutMessage,
+            PointF stackPos,
+            float parentWidth,
+            boolean arrowPointingLeft,
+            int dotColor,
+            @Nullable Runnable onLayoutComplete,
+            @Nullable Runnable onHide,
+            float[] dotCenter,
+            boolean hideDot)  {
+
+        updateFlyoutMessage(flyoutMessage, parentWidth);
+
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
@@ -263,24 +309,12 @@ public class BubbleFlyoutView extends FrameLayout {
 
         setCollapsePercent(1f);
 
-        // Set the flyout TextView's max width in terms of percent, and then subtract out the
-        // padding so that the entire flyout view will be the desired width (rather than the
-        // TextView being the desired width + extra padding).
-        mMessageText.setMaxWidth(maxTextViewWidth);
-        mMessageText.setText(flyoutMessage.message);
-
-        // Wait for the TextView to lay out so we know its line count.
+        // Wait for TextViews to layout with updated height.
         post(() -> {
-            float restingTranslationY;
-            // Multi line flyouts get top-aligned to the bubble.
-            if (mMessageText.getLineCount() > 1) {
-                restingTranslationY = stackPos.y + mBubbleIconTopPadding;
-            } else {
-                // Single line flyouts are vertically centered with respect to the bubble.
-                restingTranslationY =
-                        stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
-            }
-            setTranslationY(restingTranslationY);
+            // Flyout is vertically centered with respect to the bubble.
+            mFlyoutY =
+                    stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
+            setTranslationY(mFlyoutY);
 
             // Calculate the translation required to position the flyout next to the bubble stack,
             // with the desired padding.
@@ -300,7 +334,7 @@ public class BubbleFlyoutView extends FrameLayout {
             final float dotPositionY = stackPos.y + mDotCenter[1] - adjustmentForScaleAway;
 
             final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
-            final float distanceFromLayoutTopToDotCenterY = restingTranslationY - dotPositionY;
+            final float distanceFromLayoutTopToDotCenterY = mFlyoutY - dotPositionY;
 
             mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX;
             mTranslationYWhenDot = -distanceFromLayoutTopToDotCenterY;

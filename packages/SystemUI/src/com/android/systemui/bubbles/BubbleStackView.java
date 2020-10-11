@@ -2196,11 +2196,7 @@ public class BubbleStackView extends FrameLayout
         return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop;
     }
 
-    /**
-     * Animates in the flyout for the given bubble, if available, and then hides it after some time.
-     */
-    @VisibleForTesting
-    void animateInFlyoutForBubble(Bubble bubble) {
+    private boolean shouldShowFlyout(Bubble bubble) {
         Bubble.FlyoutMessage flyoutMessage = bubble.getFlyoutMessage();
         final BadgedImageView bubbleView = bubble.getIconView();
         if (flyoutMessage == null
@@ -2212,11 +2208,22 @@ public class BubbleStackView extends FrameLayout
                 || mIsGestureInProgress
                 || mBubbleToExpandAfterFlyoutCollapse != null
                 || bubbleView == null) {
-            if (bubbleView != null) {
+            if (bubbleView != null && mFlyout.getVisibility() != VISIBLE) {
                 bubbleView.removeDotSuppressionFlag(BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
             }
             // Skip the message if none exists, we're expanded or animating expansion, or we're
             // about to expand a bubble from the previous tapped flyout, or if bubble view is null.
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Animates in the flyout for the given bubble, if available, and then hides it after some time.
+     */
+    @VisibleForTesting
+    void animateInFlyoutForBubble(Bubble bubble) {
+        if (!shouldShowFlyout(bubble)) {
             return;
         }
 
@@ -2234,25 +2241,22 @@ public class BubbleStackView extends FrameLayout
             }
 
             // Stop suppressing the dot now that the flyout has morphed into the dot.
-            bubbleView.removeDotSuppressionFlag(
+            bubble.getIconView().removeDotSuppressionFlag(
                     BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
-
-            mFlyout.setVisibility(INVISIBLE);
 
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
         };
-        mFlyout.setVisibility(INVISIBLE);
 
         // Suppress the dot when we are animating the flyout.
-        bubbleView.addDotSuppressionFlag(
+        bubble.getIconView().addDotSuppressionFlag(
                 BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
 
         // Start flyout expansion. Post in case layout isn't complete and getWidth returns 0.
         post(() -> {
             // An auto-expanding bubble could have been posted during the time it takes to
             // layout.
-            if (isExpanded()) {
+            if (isExpanded() || bubble.getIconView() == null) {
                 return;
             }
             final Runnable expandFlyoutAfterDelay = () -> {
@@ -2269,18 +2273,21 @@ public class BubbleStackView extends FrameLayout
                 mFlyout.postDelayed(mAnimateInFlyout, 200);
             };
 
-            if (bubble.getIconView() == null) {
-                return;
-            }
 
-            mFlyout.setupFlyoutStartingAsDot(flyoutMessage,
-                    mStackAnimationController.getStackPosition(), getWidth(),
-                    mStackAnimationController.isStackOnLeftSide(),
-                    bubble.getIconView().getDotColor() /* dotColor */,
-                    expandFlyoutAfterDelay /* onLayoutComplete */,
-                    mAfterFlyoutHidden,
-                    bubble.getIconView().getDotCenter(),
-                    !bubble.showDot());
+            if (mFlyout.getVisibility() == View.VISIBLE) {
+                mFlyout.animateUpdate(bubble.getFlyoutMessage(), getWidth(),
+                        mStackAnimationController.getStackPosition().y);
+            } else {
+                mFlyout.setVisibility(INVISIBLE);
+                mFlyout.setupFlyoutStartingAsDot(bubble.getFlyoutMessage(),
+                        mStackAnimationController.getStackPosition(), getWidth(),
+                        mStackAnimationController.isStackOnLeftSide(),
+                        bubble.getIconView().getDotColor() /* dotColor */,
+                        expandFlyoutAfterDelay /* onLayoutComplete */,
+                        mAfterFlyoutHidden,
+                        bubble.getIconView().getDotCenter(),
+                        !bubble.showDot());
+            }
             mFlyout.bringToFront();
         });
         mFlyout.removeCallbacks(mHideFlyout);
