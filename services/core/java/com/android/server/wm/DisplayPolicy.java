@@ -1040,9 +1040,12 @@ public class DisplayPolicy {
         }
 
         if (attrs.providesInsetsTypes != null) {
-            mContext.enforcePermission(
-                    android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                    "DisplayPolicy");
+            // Recents component is allowed to add inset types.
+            if (!mService.mAtmInternal.isCallerRecents(callingUid)) {
+                mContext.enforcePermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                        "DisplayPolicy");
+            }
             enforceSingleInsetsTypeCorrespondingToWindowType(attrs.providesInsetsTypes);
 
             for (@InternalInsetsType int insetType : attrs.providesInsetsTypes) {
