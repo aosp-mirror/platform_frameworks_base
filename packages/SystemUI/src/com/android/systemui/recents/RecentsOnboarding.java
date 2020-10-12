@@ -67,6 +67,7 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -365,7 +366,7 @@ public class RecentsOnboarding {
             mOverviewProxyListenerRegistered = true;
         }
         if (!mTaskListenerRegistered) {
-            ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
+            TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskListener);
             mTaskListenerRegistered = true;
         }
     }
@@ -377,7 +378,7 @@ public class RecentsOnboarding {
             mOverviewProxyListenerRegistered = false;
         }
         if (mTaskListenerRegistered) {
-            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskListener);
+            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskListener);
             mTaskListenerRegistered = false;
         }
 
