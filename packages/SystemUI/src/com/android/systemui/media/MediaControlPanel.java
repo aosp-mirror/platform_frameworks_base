@@ -359,7 +359,15 @@ public class MediaControlPanel {
         final MediaController controller = getController();
         mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
 
+        // Guts label
+        boolean isDismissible = data.isClearable();
+        mViewHolder.getSettingsText().setText(isDismissible
+                ? R.string.controls_media_close_session
+                : R.string.controls_media_active_session);
+
         // Dismiss
+        mViewHolder.getDismissLabel().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
+        mViewHolder.getDismiss().setEnabled(isDismissible);
         mViewHolder.getDismiss().setOnClickListener(v -> {
             if (mKey != null) {
                 closeGuts();
