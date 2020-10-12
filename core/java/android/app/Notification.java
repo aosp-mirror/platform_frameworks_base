@@ -2240,7 +2240,8 @@ public class Notification implements Parcelable
                 .setTicker(tickerText)
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
-                .setContentIntent(PendingIntent.getActivity(context, 0, contentIntent, 0))
+                .setContentIntent(PendingIntent.getActivity(
+                        context, 0, contentIntent, PendingIntent.FLAG_MUTABLE))
                 .buildInto(this);
     }
 
