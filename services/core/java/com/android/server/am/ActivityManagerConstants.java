@@ -161,6 +161,13 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED =
             "default_fgs_starts_restriction_enabled";
 
+    /**
+     * Default value for mFlagFgsStartTempAllowListEnabled if not explicitly set in
+     * Settings.Global.
+     */
+    private static final String KEY_DEFAULT_FGS_STARTS_TEMP_ALLOWLIST_ENABLED =
+            "default_fgs_starts_temp_allowlist_enabled";
+
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
@@ -321,6 +328,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // at all.
     volatile boolean mFlagFgsStartRestrictionEnabled = false;
 
+    // When the foreground service background start restriction is enabled, if the app in
+    // DeviceIdleController's Temp AllowList is allowed to bypass the restriction.
+    volatile boolean mFlagFgsStartTempAllowListEnabled = false;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -471,6 +482,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED:
                                 updateFgsStartsRestriction();
+                                break;
+                            case KEY_DEFAULT_FGS_STARTS_TEMP_ALLOWLIST_ENABLED:
+                                updateFgsStartsTempAllowList();
                                 break;
                             case KEY_OOMADJ_UPDATE_POLICY:
                                 updateOomAdjUpdatePolicy();
@@ -721,6 +735,13 @@ final class ActivityManagerConstants extends ContentObserver {
         mFlagFgsStartRestrictionEnabled = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED,
+                /*defaultValue*/ false);
+    }
+
+    private void updateFgsStartsTempAllowList() {
+        mFlagFgsStartTempAllowListEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFAULT_FGS_STARTS_TEMP_ALLOWLIST_ENABLED,
                 /*defaultValue*/ false);
     }
 
