@@ -833,6 +833,7 @@ abstract public class ManagedServices {
 
     public void onUserSwitched(int user) {
         if (DEBUG) Slog.d(TAG, "onUserSwitched u=" + user);
+        unbindOtherUserServices(user);
         rebindServices(true, user);
     }
 
@@ -1219,6 +1220,27 @@ abstract public class ManagedServices {
         bindToServices(componentsToBind);
     }
 
+    /**
+     * Called when user switched to unbind all services from other users.
+     */
+    @VisibleForTesting
+    void unbindOtherUserServices(int currentUser) {
+        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
+
+        synchronized (mMutex) {
+            final Set<ManagedServiceInfo> removableBoundServices = getRemovableConnectedServices();
+            for (ManagedServiceInfo info : removableBoundServices) {
+                if (info.userid != currentUser) {
+                    Set<ComponentName> toUnbind =
+                            componentsToUnbind.get(info.userid, new ArraySet<>());
+                    toUnbind.add(info.component);
+                    componentsToUnbind.put(info.userid, toUnbind);
+                }
+            }
+        }
+        unbindFromServices(componentsToUnbind);
+    }
+
     protected void unbindFromServices(SparseArray<Set<ComponentName>> componentsToUnbind) {
         for (int i = 0; i < componentsToUnbind.size(); i++) {
             final int userId = componentsToUnbind.keyAt(i);
@@ -1264,7 +1286,8 @@ abstract public class ManagedServices {
     /**
      * Version of registerService that takes the name of a service component to bind to.
      */
-    private void registerService(final ComponentName name, final int userid) {
+    @VisibleForTesting
+    void registerService(final ComponentName name, final int userid) {
         synchronized (mMutex) {
             registerServiceLocked(name, userid);
         }
