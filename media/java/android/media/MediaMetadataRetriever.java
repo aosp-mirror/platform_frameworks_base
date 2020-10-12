@@ -16,10 +16,13 @@
 
 package android.media;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -1331,7 +1334,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see MediaFormat#COLOR_RANGE_FULL
      */
     public static final int METADATA_KEY_COLOR_RANGE    = 37;
-    // Add more here...
 
     /**
      * This key retrieves the sample rate in Hz, if available.
@@ -1344,4 +1346,13 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * This is a signed 32-bit integer formatted as a string in base 10.
      */
     public static final int METADATA_KEY_BITS_PER_SAMPLE = 39;
+
+    /**
+     * This key retrieves the video codec mimetype if available.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int METADATA_KEY_VIDEO_CODEC_MIME_TYPE = 40;
+
+    // Add more here...
 }
