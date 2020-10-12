@@ -49,7 +49,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
  * Base dialog for media output UI
  */
 public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
-        MediaOutputController.Callback {
+        MediaOutputController.Callback, Window.Callback {
 
     private static final String TAG = "MediaOutputDialog";
 
@@ -209,5 +209,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     @Override
     public void dismissDialog() {
         dismiss();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus && isShowing()) {
+            dismiss();
+        }
     }
 }
