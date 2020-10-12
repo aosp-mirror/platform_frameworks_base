@@ -389,9 +389,7 @@ public class RecentsAnimationController implements DeathRecipient {
         final int taskCount = visibleTasks.size();
         for (int i = 0; i < taskCount; i++) {
             final Task task = visibleTasks.get(i);
-            final WindowConfiguration config = task.getWindowConfiguration();
-            if (config.tasksAreFloating()
-                    || config.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            if (skipAnimation(task)) {
                 continue;
             }
             addAnimation(task, !recentTaskIds.get(task.mTaskId));
@@ -433,6 +431,19 @@ public class RecentsAnimationController implements DeathRecipient {
             mStatusBar.onRecentsAnimationStateChanged(true /* running */);
         }
     }
+
+
+    /**
+     * Whether a task should be filtered from the recents animation. This can be true for tasks
+     * being displayed outside of recents.
+     */
+    private boolean skipAnimation(Task task) {
+        final WindowConfiguration config = task.getWindowConfiguration();
+        return task.isAlwaysOnTop()
+                || config.tasksAreFloating()
+                || config.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+    }
+
 
     @VisibleForTesting
     AnimationAdapter addAnimation(Task task, boolean isRecentTaskInvisible) {
@@ -529,8 +540,9 @@ public class RecentsAnimationController implements DeathRecipient {
 
     void addTaskToTargets(Task task, OnAnimationFinishedCallback finishedCallback) {
         if (mRunner != null) {
-            // No need to send task appeared when the task target already exists.
-            if (isAnimatingTask(task)) {
+            // No need to send task appeared when the task target already exists, or when the
+            // task is being managed as a multi-window mode outside of recents (e.g. bubbles).
+            if (isAnimatingTask(task) || skipAnimation(task)) {
                 return;
             }
             final RemoteAnimationTarget target = createTaskRemoteAnimation(task, finishedCallback);
