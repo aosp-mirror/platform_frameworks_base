@@ -60,6 +60,11 @@ genrule {
     out: ["current.txt"],
     tools: ["metalava"],
     cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public/api",
+        dest: "android.txt",
+    },
 }
 
 genrule {
@@ -95,6 +100,11 @@ genrule {
     out: ["system-current.txt"],
     tools: ["metalava"],
     cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system/api",
+        dest: "android.txt",
+    },
 }
 
 genrule {
@@ -129,6 +139,11 @@ genrule {
     out: ["module-lib-current.txt"],
     tools: ["metalava"],
     cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib/api",
+        dest: "android.txt",
+    },
 }
 
 genrule {
