@@ -1768,7 +1768,9 @@ public final class DisplayManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                return mLogicalDisplayMapper.getDisplayIdsLocked(callingUid);
+                synchronized (mSyncRoot) {
+                    return mLogicalDisplayMapper.getDisplayIdsLocked(callingUid);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
