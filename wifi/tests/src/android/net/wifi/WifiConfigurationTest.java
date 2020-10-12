@@ -20,11 +20,13 @@ import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OPEN;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OSEN;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OWE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_PSK;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_SAE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_WAPI_CERT;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_WAPI_PSK;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_WEP;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -34,9 +36,13 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
+import android.net.wifi.WifiConfiguration.GroupCipher;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
+import android.net.wifi.WifiConfiguration.PairwiseCipher;
+import android.net.wifi.WifiConfiguration.Protocol;
 import android.os.Parcel;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
@@ -44,6 +50,8 @@ import com.android.net.module.util.MacAddressUtils;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiConfiguration}.
@@ -187,18 +195,24 @@ public class WifiConfigurationTest {
 
     @Test
     public void testIsOpenNetwork_NotOpen_HasAuthType() {
-        for (int keyMgmt = 0; keyMgmt < WifiConfiguration.KeyMgmt.strings.length; keyMgmt++) {
-            if (keyMgmt == WifiConfiguration.KeyMgmt.NONE
-                    || keyMgmt == WifiConfiguration.KeyMgmt.OWE) {
-                continue;
-            }
+        int[] securityTypes = new int [] {
+                SECURITY_TYPE_WEP,
+                SECURITY_TYPE_PSK,
+                SECURITY_TYPE_EAP,
+                SECURITY_TYPE_SAE,
+                SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT,
+                SECURITY_TYPE_WAPI_PSK,
+                SECURITY_TYPE_WAPI_CERT,
+                SECURITY_TYPE_EAP_WPA3_ENTERPRISE,
+                SECURITY_TYPE_OSEN,
+        };
+        for (int type: securityTypes) {
             WifiConfiguration config = new WifiConfiguration();
-            config.allowedKeyManagement.clear();
-            config.allowedKeyManagement.set(keyMgmt);
+            config.setSecurityParams(type);
             config.wepKeys = null;
 
-            assertFalse("Open network reported when key mgmt was set to "
-                            + WifiConfiguration.KeyMgmt.strings[keyMgmt], config.isOpenNetwork());
+            assertFalse("Open network reported when security type was set to "
+                            + type, config.isOpenNetwork());
         }
     }
 
@@ -208,6 +222,7 @@ public class WifiConfigurationTest {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
         config.wepKeys = null;
+        config.convertLegacyFieldsToSecurityParamsIfNeeded();
 
         assertFalse(config.isOpenNetwork());
     }
@@ -864,5 +879,244 @@ public class WifiConfigurationTest {
                     .append(carrierId).append('-').append(subId);
         }
         return sb.toString();
+    }
+
+    private void verifyAllowedKeyManagement(WifiConfiguration config, int[] akms) {
+        for (int akm: akms) {
+            assertTrue(config.getSecurityParamsList().stream()
+                    .anyMatch(params -> params.getAllowedKeyManagement().get(akm)));
+        }
+    }
+
+    private void verifyAllowedProtocols(WifiConfiguration config, int[] aps) {
+        for (int ap: aps) {
+            assertTrue(config.getSecurityParamsList().stream()
+                    .anyMatch(params -> params.getAllowedProtocols().get(ap)));
+        }
+    }
+
+    private void verifyAllowedPairwiseCiphers(WifiConfiguration config, int[] apcs) {
+        for (int apc: apcs) {
+            assertTrue(config.getSecurityParamsList().stream()
+                    .anyMatch(params -> params.getAllowedPairwiseCiphers().get(apc)));
+        }
+    }
+
+    private void verifyAllowedGroupCiphers(WifiConfiguration config, int[] agcs) {
+        for (int agc: agcs) {
+            assertTrue(config.getSecurityParamsList().stream()
+                    .anyMatch(params -> params.getAllowedGroupCiphers().get(agc)));
+        }
+    }
+
+    /** Verify that adding security types works as expected. */
+    @Test
+    public void testAddSecurityTypes() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+        config.addSecurityParams(SecurityParams.createWapiPskParams());
+        List<SecurityParams> paramsList = config.getSecurityParamsList();
+        assertEquals(3, paramsList.size());
+
+        verifyAllowedKeyManagement(config, new int[] {
+                KeyMgmt.WPA_PSK, KeyMgmt.SAE, KeyMgmt.WAPI_PSK});
+        verifyAllowedProtocols(config, new int[] {Protocol.WPA, Protocol.RSN, Protocol.WAPI});
+        verifyAllowedPairwiseCiphers(config, new int[] {
+                PairwiseCipher.CCMP, PairwiseCipher.TKIP,
+                PairwiseCipher.GCMP_128, PairwiseCipher.GCMP_256,
+                PairwiseCipher.SMS4});
+        verifyAllowedGroupCiphers(config, new int[] {
+                GroupCipher.CCMP, GroupCipher.TKIP,
+                GroupCipher.GCMP_128, GroupCipher.GCMP_256,
+                GroupCipher.SMS4});
+    }
+
+    /** Check that a personal security type can be added to a personal configuration. */
+    @Test
+    public void testAddPersonalTypeToPersonalConfiguration() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+    }
+
+    /** Check that an enterprise security type can be added to an enterprise configuration. */
+    @Test
+    public void testAddEnterpriseTypeToEnterpriseConfiguration() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
+    }
+
+    /** Verify that adding an enterprise type to a personal configuration. */
+    @Test (expected = IllegalArgumentException.class)
+    public void testAddEnterpriseTypeToPersonalConfig() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
+    }
+
+    /** Verify that adding a personal type to an enterprise configuration. */
+    @Test (expected = IllegalArgumentException.class)
+    public void testAddPersonalTypeToEnterpriseConfig() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+    }
+
+    /** Check that an open security cannot be added to a non-open configuration. */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddOpenTypeToNonOpenConfiguration() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_OPEN);
+    }
+
+    /** Check that a non-open security cannot be added to an open configuration. */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddNonOpenTypeToOpenConfiguration() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_OPEN);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+    }
+
+    /** Check that a OSEN security cannot be added as additional type. */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddOsenTypeToConfiguration() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_OSEN);
+    }
+
+    /** Verify that adding duplicate security types raises the exception. */
+    @Test (expected = IllegalArgumentException.class)
+    public void testAddDuplicateSecurityTypes() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+    }
+
+    /** Verify that adding duplicate security params raises the exception. */
+    @Test (expected = IllegalArgumentException.class)
+    public void testAddDuplicateSecurityParams() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(SecurityParams.createWpaWpa2PersonalParams());
+        config.addSecurityParams(SecurityParams.createWpaWpa2PersonalParams());
+    }
+
+    /** Verify that Suite-B type works as expected. */
+    @Test
+    public void testAddSuiteBSecurityType() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.addSecurityParams(SecurityParams.createWpa3EnterpriseParams());
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        config.addSecurityParams(SecurityParams.createWpa3Enterprise192BitParams());
+
+        assertFalse(config.isSuiteBCipherEcdheRsaEnabled());
+        config.enableSuiteBCiphers(false, true);
+        assertTrue(config.isSuiteBCipherEcdheRsaEnabled());
+    }
+
+    /** Verify that FILS bit can be set correctly. */
+    @Test
+    public void testFilsKeyMgmt() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+
+        config.enableFils(false, true);
+        assertFalse(config.isFilsSha256Enabled());
+        assertTrue(config.isFilsSha384Enabled());
+    }
+
+    /** Verify that SAE mode can be configured correctly. */
+    @Test
+    public void testSaeTypeMethods() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
+        config.addSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+
+        SecurityParams saeParams = config.getSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+        assertNotNull(saeParams);
+        assertFalse(saeParams.isSaeH2eOnlyMode());
+        assertFalse(saeParams.isSaePkOnlyMode());
+
+        config.enableSaeH2eOnlyMode(true);
+        config.enableSaePkOnlyMode(true);
+
+        saeParams = config.getSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+        assertNotNull(saeParams);
+        assertTrue(saeParams.isSaeH2eOnlyMode());
+        assertTrue(saeParams.isSaePkOnlyMode());
+    }
+
+    /** Verify the legacy configuration conversion */
+    @Test
+    public void testLegacyConfigurationConversion() {
+        Pair[] keyMgmtSecurityTypePairs = new Pair[] {
+                new Pair<>(KeyMgmt.WAPI_CERT, SECURITY_TYPE_WAPI_CERT),
+                new Pair<>(KeyMgmt.WAPI_PSK, SECURITY_TYPE_WAPI_PSK),
+                new Pair<>(KeyMgmt.SUITE_B_192, SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT),
+                new Pair<>(KeyMgmt.OWE, SECURITY_TYPE_OWE),
+                new Pair<>(KeyMgmt.SAE, SECURITY_TYPE_SAE),
+                new Pair<>(KeyMgmt.OSEN, SECURITY_TYPE_OSEN),
+                new Pair<>(KeyMgmt.WPA2_PSK, SECURITY_TYPE_PSK),
+                new Pair<>(KeyMgmt.WPA_EAP, SECURITY_TYPE_EAP),
+                new Pair<>(KeyMgmt.WPA_PSK, SECURITY_TYPE_PSK),
+                new Pair<>(KeyMgmt.NONE, SECURITY_TYPE_OPEN),
+        };
+
+        for (Pair pair: keyMgmtSecurityTypePairs) {
+            WifiConfiguration config = new WifiConfiguration();
+            config.allowedKeyManagement.set((int) pair.first);
+            config.convertLegacyFieldsToSecurityParamsIfNeeded();
+            assertNotNull(config.getSecurityParams((int) pair.second));
+        }
+
+        // If none of key management is set, it should be open.
+        WifiConfiguration emptyConfig = new WifiConfiguration();
+        emptyConfig.convertLegacyFieldsToSecurityParamsIfNeeded();
+        assertNotNull(emptyConfig.getSecurityParams(SECURITY_TYPE_OPEN));
+
+        // If EAP key management is set and requirePmf is true, it is WPA3 Enterprise.
+        WifiConfiguration wpa3EnterpriseConfig = new WifiConfiguration();
+        wpa3EnterpriseConfig.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        wpa3EnterpriseConfig.requirePmf = true;
+        wpa3EnterpriseConfig.convertLegacyFieldsToSecurityParamsIfNeeded();
+        assertNotNull(wpa3EnterpriseConfig.getSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE));
+
+        // If key management is NONE and wep key is set, it is WEP type.
+        WifiConfiguration wepConfig = new WifiConfiguration();
+        wepConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+        wepConfig.wepKeys = new String[] {"\"abcdef\""};
+        wepConfig.convertLegacyFieldsToSecurityParamsIfNeeded();
+        assertNotNull(wepConfig.getSecurityParams(SECURITY_TYPE_WEP));
+    }
+
+    /** Verify the set security params by SecurityParams objects. */
+    @Test
+    public void testSetBySecurityParamsObject() {
+        Pair[] securityParamsSecurityTypePairs = new Pair[] {
+                new Pair<>(SecurityParams.createWapiCertParams(), SECURITY_TYPE_WAPI_CERT),
+                new Pair<>(SecurityParams.createWapiPskParams(), SECURITY_TYPE_WAPI_PSK),
+                new Pair<>(SecurityParams.createWpa3Enterprise192BitParams(),
+                        SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT),
+                new Pair<>(SecurityParams.createEnhancedOpenParams(), SECURITY_TYPE_OWE),
+                new Pair<>(SecurityParams.createWpa3PersonalParams(), SECURITY_TYPE_SAE),
+                new Pair<>(SecurityParams.createOsenParams(), SECURITY_TYPE_OSEN),
+                new Pair<>(SecurityParams.createWpaWpa2EnterpriseParams(), SECURITY_TYPE_EAP),
+                new Pair<>(SecurityParams.createWpaWpa2PersonalParams(), SECURITY_TYPE_PSK),
+                new Pair<>(SecurityParams.createOpenParams(), SECURITY_TYPE_OPEN),
+        };
+        for (Pair pair: securityParamsSecurityTypePairs) {
+            WifiConfiguration config = new WifiConfiguration();
+            config.setSecurityParams((SecurityParams) pair.first);
+            assertNotNull(config.getSecurityParams((int) pair.second));
+        }
     }
 }
