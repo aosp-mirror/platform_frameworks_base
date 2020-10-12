@@ -64,6 +64,14 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logDozingSuppressed(isDozingSuppressed: Boolean) {
+        buffer.log(TAG, INFO, {
+            bool1 = isDozingSuppressed
+        }, {
+            "DozingSuppressed=$bool1"
+        })
+    }
+
     fun logFling(
         expand: Boolean,
         aboveThreshold: Boolean,
