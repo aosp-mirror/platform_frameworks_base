@@ -46,41 +46,25 @@ public class RollbackStoreTest {
     private static final String INSTALLER = "some.installer";
 
     private static final Correspondence<VersionedPackage, VersionedPackage> VER_PKG_CORR =
-            new Correspondence<VersionedPackage, VersionedPackage>() {
-                @Override
-                public boolean compare(VersionedPackage a, VersionedPackage b) {
-                    if (a == null || b == null) {
-                        return a == b;
-                    }
-                    return a.equals(b);
+            Correspondence.from((VersionedPackage a, VersionedPackage b) -> {
+                if (a == null || b == null) {
+                    return a == b;
                 }
-
-                @Override
-                public String toString() {
-                    return "is the same as";
-                }
-            };
+                return a.equals(b);
+            }, "is the same as");
 
     private static final Correspondence<PackageRollbackInfo.RestoreInfo,
             PackageRollbackInfo.RestoreInfo>
             RESTORE_INFO_CORR =
-            new Correspondence<PackageRollbackInfo.RestoreInfo, PackageRollbackInfo.RestoreInfo>() {
-                @Override
-                public boolean compare(PackageRollbackInfo.RestoreInfo a,
-                        PackageRollbackInfo.RestoreInfo b) {
-                    if (a == null || b == null) {
-                        return a == b;
-                    }
-                    return a.userId == b.userId
-                            && a.appId == b.appId
-                            && Objects.equals(a.seInfo, b.seInfo);
+            Correspondence.from((PackageRollbackInfo.RestoreInfo a,
+                    PackageRollbackInfo.RestoreInfo b) -> {
+                if (a == null || b == null) {
+                    return a == b;
                 }
-
-                @Override
-                public String toString() {
-                    return "is the same as";
-                }
-            };
+                return a.userId == b.userId
+                        && a.appId == b.appId
+                        && Objects.equals(a.seInfo, b.seInfo);
+            }, "is the same as");
 
     private static final String JSON_ROLLBACK_NO_EXT = "{'info':{'rollbackId':123,'packages':"
             + "[{'versionRolledBackFrom':{'packageName':'blah','longVersionCode':55},"
