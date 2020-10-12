@@ -2555,8 +2555,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             pw.print(prefix); pw.println("ContainerAnimator:");
             mSurfaceAnimator.dump(pw, prefix + "  ");
         }
-        if (mLastOrientationSource != null) {
+        if (mLastOrientationSource != null && this == mDisplayContent) {
             pw.println(prefix + "mLastOrientationSource=" + mLastOrientationSource);
+            pw.println(prefix + "deepestLastOrientationSource=" + getLastOrientationSource());
         }
     }
 
