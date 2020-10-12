@@ -1678,14 +1678,6 @@ public class Tethering {
             }
         }
 
-        private void addUpstreamPrefixes(final UpstreamNetworkState ns) {
-            mPrivateAddressCoordinator.updateUpstreamPrefix(ns.network, ns.linkProperties);
-        }
-
-        private void removeUpstreamPrefixes(final UpstreamNetworkState ns) {
-            mPrivateAddressCoordinator.removeUpstreamPrefix(ns.network);
-        }
-
         @VisibleForTesting
         void handleUpstreamNetworkMonitorCallback(int arg1, Object o) {
             if (arg1 == UpstreamNetworkMonitor.NOTIFY_LOCAL_PREFIXES) {
@@ -1696,10 +1688,10 @@ public class Tethering {
             final UpstreamNetworkState ns = (UpstreamNetworkState) o;
             switch (arg1) {
                 case UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES:
-                    addUpstreamPrefixes(ns);
+                    mPrivateAddressCoordinator.updateUpstreamPrefix(ns);
                     break;
                 case UpstreamNetworkMonitor.EVENT_ON_LOST:
-                    removeUpstreamPrefixes(ns);
+                    mPrivateAddressCoordinator.removeUpstreamPrefix(ns.network);
                     break;
             }
 
