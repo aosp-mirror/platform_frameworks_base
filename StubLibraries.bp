@@ -142,11 +142,6 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/public/api",
-        dest: "android.txt",
-    },
     jdiff_enabled: true,
 }
 
@@ -208,11 +203,6 @@ droidstubs {
             new_since: ":android.api.system.latest",
             baseline_file: "api/system-lint-baseline.txt",
         },
-    },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/system/api",
-        dest: "android.txt",
     },
     jdiff_enabled: true,
 }
@@ -293,11 +283,6 @@ droidstubs {
             new_since: ":android.api.module-lib.latest",
             baseline_file: "api/module-lib-lint-baseline.txt",
         },
-    },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/module-lib/api",
-        dest: "android.txt",
     },
 }
 
