@@ -2711,12 +2711,12 @@ final public class MediaCodec {
             }
         };
 
-        private final Pattern zeroPattern = new Pattern(0, 0);
+        private static final Pattern ZERO_PATTERN = new Pattern(0, 0);
 
         /**
          * The pattern applicable to the protected data in each subsample.
          */
-        private Pattern pattern;
+        private Pattern mPattern = ZERO_PATTERN;
 
         /**
          * Set the subsample count, clear/encrypted sizes, key, IV and mode fields of
@@ -2735,22 +2735,30 @@ final public class MediaCodec {
             key = newKey;
             iv = newIV;
             mode = newMode;
-            pattern = zeroPattern;
+            mPattern = ZERO_PATTERN;
+        }
+
+        /**
+         * Returns the {@link Pattern encryption pattern}.
+         */
+        public @NonNull Pattern getPattern() {
+            return new Pattern(mPattern.getEncryptBlocks(), mPattern.getSkipBlocks());
         }
 
         /**
          * Set the encryption pattern on a {@link MediaCodec.CryptoInfo} instance.
-         * See {@link MediaCodec.CryptoInfo.Pattern}.
+         * See {@link Pattern}.
          */
         public void setPattern(Pattern newPattern) {
             if (newPattern == null) {
-                newPattern = zeroPattern;
+                newPattern = ZERO_PATTERN;
             }
-            pattern = newPattern;
+            setPattern(newPattern.getEncryptBlocks(), newPattern.getSkipBlocks());
         }
 
+        // Accessed from android_media_MediaExtractor.cpp.
         private void setPattern(int blocksToEncrypt, int blocksToSkip) {
-            pattern = new Pattern(blocksToEncrypt, blocksToSkip);
+            mPattern = new Pattern(blocksToEncrypt, blocksToSkip);
         }
 
         @Override
@@ -2772,9 +2780,9 @@ final public class MediaCodec {
             builder.append(", encrypted ");
             builder.append(Arrays.toString(numBytesOfEncryptedData));
             builder.append(", pattern (encrypt: ");
-            builder.append(pattern.mEncryptBlocks);
+            builder.append(mPattern.mEncryptBlocks);
             builder.append(", skip: ");
-            builder.append(pattern.mSkipBlocks);
+            builder.append(mPattern.mSkipBlocks);
             builder.append(")");
             return builder.toString();
         }
