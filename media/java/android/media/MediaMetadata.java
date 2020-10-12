@@ -427,7 +427,7 @@ public final class MediaMetadata implements Parcelable {
 
     private MediaMetadata(Parcel in) {
         mBundle = in.readBundle();
-        mBitmapDimensionLimit = Math.max(in.readInt(), 0);
+        mBitmapDimensionLimit = Math.max(in.readInt(), 1);
     }
 
     /**
@@ -518,17 +518,18 @@ public final class MediaMetadata implements Parcelable {
 
     /**
      * Gets the width/height limit (in pixels) for the bitmaps when this metadata was created.
-     * This method returns a positive value or zero.
+     * This method always returns a positive value.
      * <p>
-     * If it returns a positive value, then all the bitmaps in this metadata has width/height
+     * If it returns {@link Integer#MAX_VALUE}, then no scaling down was applied to the bitmaps
+     * when this metadata was created.
+     * <p>
+     * If it returns another positive value, then all the bitmaps in this metadata has width/height
      * not greater than this limit. Bitmaps may have been scaled down according to the limit.
      * <p>
-     * If it returns zero, then no scaling down was applied to the bitmaps when this metadata
-     * was created.
      *
      * @see Builder#setBitmapDimensionLimit(int)
      */
-    public @IntRange(from = 0) int getBitmapDimensionLimit() {
+    public @IntRange(from = 1) int getBitmapDimensionLimit() {
         return mBitmapDimensionLimit;
     }
 
@@ -738,7 +739,7 @@ public final class MediaMetadata implements Parcelable {
      */
     public static final class Builder {
         private final Bundle mBundle;
-        private int mBitmapDimensionLimit;
+        private int mBitmapDimensionLimit = Integer.MAX_VALUE;
 
         /**
          * Create an empty Builder. Any field that should be included in the
@@ -925,14 +926,21 @@ public final class MediaMetadata implements Parcelable {
          * Bitmaps will be replaced with scaled down copies if their width (or height) is
          * larger than {@code bitmapDimensionLimit}.
          * <p>
-         * In order to unset the limit, pass zero as {@code bitmapDimensionLimit}.
+         * In order to unset the limit, pass {@link Integer#MAX_VALUE} as
+         * {@code bitmapDimensionLimit}.
          *
          * @param bitmapDimensionLimit The maximum width/height (in pixels) for bitmaps
-         *                             contained in the metadata. Pass {@code 0} to unset the limit.
+         *                             contained in the metadata. Non-positive values are ignored.
+         *                             Pass {@link Integer#MAX_VALUE} to unset the limit.
          */
         @NonNull
-        public Builder setBitmapDimensionLimit(int bitmapDimensionLimit) {
-            mBitmapDimensionLimit = Math.max(bitmapDimensionLimit, 0);
+        public Builder setBitmapDimensionLimit(@IntRange(from = 1) int bitmapDimensionLimit) {
+            if (bitmapDimensionLimit > 0) {
+                mBitmapDimensionLimit = bitmapDimensionLimit;
+            } else {
+                Log.w(TAG, "setBitmapDimensionLimit(): Ignoring non-positive bitmapDimensionLimit: "
+                        + bitmapDimensionLimit);
+            }
             return this;
         }
 
@@ -942,7 +950,7 @@ public final class MediaMetadata implements Parcelable {
          * @return The new MediaMetadata instance
          */
         public MediaMetadata build() {
-            if (mBitmapDimensionLimit > 0) {
+            if (mBitmapDimensionLimit != Integer.MAX_VALUE) {
                 for (String key : mBundle.keySet()) {
                     Object value = mBundle.get(key);
                     if (value instanceof Bitmap) {
