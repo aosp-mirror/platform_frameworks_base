@@ -10326,19 +10326,25 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION
     })
-    public ServiceState getServiceState() {
+    public @Nullable ServiceState getServiceState() {
         return getServiceStateForSubscriber(getSubId());
     }
 
     /**
      * Returns the service state information on specified subscription. Callers require
      * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     *
+     * May return {@code null} when the subscription is inactive or when there was an error
+     * communicating with the phone process.
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -10365,9 +10371,9 @@ public class TelephonyManager {
      * @param accountHandle The handle for the {@link PhoneAccount} for which to retrieve the
      * voicemail ringtone.
      * @return The URI for the ringtone to play when receiving a voicemail from a specific
-     * PhoneAccount.
+     * PhoneAccount. May be {@code null} if no ringtone is set.
      */
-    public Uri getVoicemailRingtoneUri(PhoneAccountHandle accountHandle) {
+    public @Nullable Uri getVoicemailRingtoneUri(PhoneAccountHandle accountHandle) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
