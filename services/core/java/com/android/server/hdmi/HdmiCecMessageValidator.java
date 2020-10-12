@@ -126,7 +126,11 @@ public class HdmiCecMessageValidator {
         addValidationInfo(
                 Constants.MESSAGE_CLEAR_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
         addValidationInfo(
+                Constants.MESSAGE_CLEAR_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
+        addValidationInfo(
                 Constants.MESSAGE_SET_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SET_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
 
         // Messages for the System Information.
         FixedLengthValidator oneByteValidator = new FixedLengthValidator(1);
@@ -455,6 +459,40 @@ public class HdmiCecMessageValidator {
         return isWithinRange(value, 0, 31);
     }
 
+    /**
+     * Check if the given value is a valid External Plug. A valid value is one which falls within
+     * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value External Plug
+     * @return true if the External Plug is valid
+     */
+    private boolean isValidExternalPlug(int value) {
+        return isWithinRange(value, 1, 255);
+    }
+
+    /**
+     * Check if the given value is a valid External Source. A valid value is one which falls within
+     * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value External Source Specifier
+     * @return true if the External Source is valid
+     */
+    private boolean isValidExternalSource(byte[] params, int offset) {
+        int externalSourceSpecifier = params[offset];
+        offset = offset + 1;
+        if (externalSourceSpecifier == 0x04) {
+            // External Plug
+            return isValidExternalPlug(params[offset]);
+        } else if (externalSourceSpecifier == 0x05) {
+            // External Physical Address
+            // Validate it contains 2 bytes Physical Address
+            if (params.length - offset >= 2) {
+                return isValidPhysicalAddress(params, offset);
+            }
+        }
+        return false;
+    }
+
     private class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
@@ -608,6 +646,29 @@ public class HdmiCecMessageValidator {
                             && isValidAnalogueFrequency(
                                     HdmiUtils.twoBytesToInt(params, 8)) // Analogue Frequency
                             && isValidBroadcastSystem(params[10])); // Broadcast System
+        }
+    }
+
+    /**
+     * Check if the given External Timer message parameters are valid. Valid parameters should
+     * adhere to message description of External Timer defined in CEC 1.4 Specification : Message
+     * Descriptions for Timer Programming Feature (CEC Table 12)
+     */
+    private class ExternalTimerValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 9) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(
+                    isValidDayOfMonth(params[0]) // Day of Month
+                            && isValidMonthOfYear(params[1]) // Month of Year
+                            && isValidHour(params[2]) // Start Time - Hour
+                            && isValidMinute(params[3]) // Start Time - Minute
+                            && isValidDurationHours(params[4]) // Duration - Duration Hours
+                            && isValidMinute(params[5]) // Duration - Minute
+                            && isValidRecordingSequence(params[6]) // Recording Sequence
+                            && isValidExternalSource(params, 7)); // External Source
         }
     }
 }
