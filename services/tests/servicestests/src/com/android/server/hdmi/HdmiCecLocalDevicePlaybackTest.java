@@ -814,7 +814,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
-        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+        assertThat(mNativeWrapper.getResultMessages()).containsAtLeast(pressed, released);
     }
 
     @Test
@@ -834,7 +834,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
-        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+        assertThat(mNativeWrapper.getResultMessages()).containsAtLeast(pressed, released);
     }
 
     @Test
@@ -853,7 +853,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
-        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+        assertThat(mNativeWrapper.getResultMessages()).containsAtLeast(pressed, released);
     }
 
     @Test
@@ -872,7 +872,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
-        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+        assertThat(mNativeWrapper.getResultMessages()).containsAtLeast(pressed, released);
     }
 
     @Test

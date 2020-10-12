@@ -76,7 +76,7 @@ public class MultiClientInputMethodManagerServiceTest {
 
         // Act and assert
         assertThat(MultiClientInputMethodManagerService.resolveMultiClientImeService(
-                asList(imeService))).isSameAs(imeService);
+                asList(imeService))).isSameInstanceAs(imeService);
     }
 
     private ResolveInfo buildResolveInfo(String permission, int flags) {

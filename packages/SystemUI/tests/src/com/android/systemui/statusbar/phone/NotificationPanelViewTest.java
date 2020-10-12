@@ -350,7 +350,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mAccessibiltyDelegate.onInitializeAccessibilityNodeInfo(mView, nodeInfo);
 
         List<AccessibilityNodeInfo.AccessibilityAction> actionList = nodeInfo.getActionList();
-        assertThat(actionList).containsAllIn(
+        assertThat(actionList).containsAtLeastElementsIn(
                 new AccessibilityNodeInfo.AccessibilityAction[] {
                         AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD,
                         AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP}

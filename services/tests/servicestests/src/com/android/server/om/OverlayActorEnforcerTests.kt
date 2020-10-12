@@ -72,7 +72,8 @@ class OverlayActorEnforcerTests {
         @JvmStatic
         fun checkAllCasesHandled() {
             // Assert that all states have been tested at least once.
-            assertThat(CASES.map { it.state }.distinct()).containsAllIn(ActorState.values())
+            assertThat(CASES.map { it.state }.distinct())
+                    .containsAtLeastElementsIn(ActorState.values())
         }
 
         @BeforeClass

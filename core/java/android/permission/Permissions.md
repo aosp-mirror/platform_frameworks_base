@@ -848,7 +848,7 @@ private val whitelistedPkgs = listOf("my.whitelisted.package")
 
 @Test
 fun onlySomeAppsAreAllowedToHavePermissionGranted() {
-    assertThat(whitelistedPkgs).containsAllIn(
+    assertThat(whitelistedPkgs).containsAtLeastElementsIn(
             context.packageManager.getInstalledPackages(MATCH_ALL)
                     .filter { pkg ->
                         context.checkPermission(android.Manifest.permission.MY_PRIVILEGED_PERMISSION, -1,
