@@ -45,6 +45,7 @@ public class KernelSingleProcessCpuThreadReader {
     private static final String TAG = "KernelSingleProcCpuThreadRdr";
 
     private static final boolean DEBUG = false;
+    private static final boolean NATIVE_ENABLED = true;
 
     /**
      * The name of the file to read CPU statistics from, must be found in {@code
@@ -64,7 +65,7 @@ public class KernelSingleProcessCpuThreadReader {
     private static final Path INITIAL_TIME_IN_STATE_PATH = Paths.get("self/time_in_state");
 
     /** See https://man7.org/linux/man-pages/man5/proc.5.html */
-    private static final int[] PROCESS_FULL_STATS_FORMAT = new int[]{
+    private static final int[] PROCESS_FULL_STATS_FORMAT = new int[] {
             PROC_SPACE_TERM,
             PROC_SPACE_TERM,
             PROC_SPACE_TERM,
@@ -162,6 +163,7 @@ public class KernelSingleProcessCpuThreadReader {
     /**
      * Get the total and per-thread CPU usage of the process with the PID specified in the
      * constructor.
+     *
      * @param selectedThreadIds a SORTED array of native Thread IDs whose CPU times should
      *                          be aggregated as a group.  This is expected to be a subset
      *                          of all thread IDs owned by the process.
@@ -171,6 +173,20 @@ public class KernelSingleProcessCpuThreadReader {
         if (DEBUG) {
             Slog.d(TAG, "Reading CPU thread usages with directory " + mProcPath + " process ID "
                     + mPid);
+        }
+
+        int cpuFrequencyCount = getCpuFrequencyCount();
+        ProcessCpuUsage processCpuUsage = new ProcessCpuUsage(cpuFrequencyCount);
+
+        if (NATIVE_ENABLED) {
+            boolean result = readProcessCpuUsage(mProcPath.toString(), mPid,
+                    selectedThreadIds, processCpuUsage.processCpuTimesMillis,
+                    processCpuUsage.threadCpuTimesMillis,
+                    processCpuUsage.selectedThreadCpuTimesMillis);
+            if (!result) {
+                return null;
+            }
+            return processCpuUsage;
         }
 
         if (!isSorted(selectedThreadIds)) {
@@ -189,8 +205,6 @@ public class KernelSingleProcessCpuThreadReader {
 
         long processCpuTimeMillis = (utime + stime) * mJiffyMillis;
 
-        int cpuFrequencyCount = getCpuFrequencyCount();
-        ProcessCpuUsage processCpuUsage = new ProcessCpuUsage(cpuFrequencyCount);
         try (DirectoryStream<Path> threadPaths = Files.newDirectoryStream(mThreadsDirectoryPath)) {
             for (Path threadDirectory : threadPaths) {
                 readThreadCpuUsage(processCpuUsage, selectedThreadIds, threadDirectory);
@@ -274,4 +288,8 @@ public class KernelSingleProcessCpuThreadReader {
         }
         return true;
     }
+
+    private native boolean readProcessCpuUsage(String procPath, int pid, int[] selectedThreadIds,
+            long[] processCpuTimesMillis, long[] threadCpuTimesMillis,
+            long[] selectedThreadCpuTimesMillis);
 }
