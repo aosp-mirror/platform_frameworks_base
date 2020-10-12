@@ -558,11 +558,18 @@ public final class ActiveServices {
                 }
                 if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                         && mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
-                    Slog.w(TAG, "startForegroundService() not allowed due to "
-                                    + "mAllowStartForeground false: service "
-                                    + r.shortInstanceName);
-                    showFgsBgRestrictedNotificationLocked(r);
-                    forcedStandby = true;
+                    if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
+                            && mAm.isOnDeviceIdleWhitelistLocked(r.appInfo.uid, false)) {
+                        // uid is on DeviceIdleController's allowlist.
+                        Slog.d(TAG, "startForegroundService() mAllowStartForeground false "
+                                + "but allowlist true: service " + r.shortInstanceName);
+                    } else {
+                        Slog.w(TAG, "startForegroundService() not allowed due to "
+                                + "mAllowStartForeground false: service "
+                                + r.shortInstanceName);
+                        showFgsBgRestrictedNotificationLocked(r);
+                        return null;
+                    }
                 }
             }
         }
@@ -1462,13 +1469,20 @@ public final class ActiveServices {
                         }
                         if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                                 && mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
-                            Slog.w(TAG,
-                                    "Service.startForeground() not allowed due to "
-                                            + "mAllowStartForeground false: service "
-                                            + r.shortInstanceName);
-                            showFgsBgRestrictedNotificationLocked(r);
-                            updateServiceForegroundLocked(r.app, true);
-                            ignoreForeground = true;
+                            if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
+                                    && mAm.isOnDeviceIdleWhitelistLocked(r.appInfo.uid, false)) {
+                                // uid is on DeviceIdleController's allowlist.
+                                Slog.d(TAG, "Service.startForeground() "
+                                        + "mAllowStartForeground false but allowlist true: service "
+                                        + r.shortInstanceName);
+                            } else {
+                                Slog.w(TAG, "Service.startForeground() not allowed due to "
+                                                + "mAllowStartForeground false: service "
+                                                + r.shortInstanceName);
+                                showFgsBgRestrictedNotificationLocked(r);
+                                updateServiceForegroundLocked(r.app, true);
+                                ignoreForeground = true;
+                            }
                         }
                     }
                 }
