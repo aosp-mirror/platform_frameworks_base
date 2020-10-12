@@ -128,4 +128,26 @@ public class ImeInsetsSourceConsumerTest {
                     eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(true) /* fromIme */);
         });
     }
+
+    @Test
+    public void testImeGetAndClearSkipAnimationOnce() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Request IME visible before control is available.
+            mImeConsumer.onWindowFocusGained();
+            mImeConsumer.applyImeVisibility(true /* setVisible */);
+
+            // set control and verify visibility is applied.
+            InsetsSourceControl control = Mockito.spy(
+                    new InsetsSourceControl(ITYPE_IME, mLeash, new Point()));
+            // Simulate IME source control set this flag when the target has starting window.
+            control.setSkipAnimationOnce(true);
+            mController.onControlsChanged(new InsetsSourceControl[] { control });
+            // Verify IME show animation should be triggered when control becomes available and
+            // the animation will be skipped by getAndClearSkipAnimationOnce invoked.
+            verify(control).getAndClearSkipAnimationOnce();
+            verify(mController).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
+                    eq(true) /* skipAnim */);
+        });
+    }
 }

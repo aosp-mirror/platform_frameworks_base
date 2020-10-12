@@ -207,7 +207,8 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
                     // is always false. Low-res snapshots are only created when loading from
                     // disk.
                     false /* isLowResolution */,
-                    mIsRealSnapshot, mWindowingMode, mSystemUiVisibility, mIsTranslucent);
+                    mIsRealSnapshot, mWindowingMode, mSystemUiVisibility, mIsTranslucent,
+                    false /* hasImeSurface */);
         }
     }
 }
