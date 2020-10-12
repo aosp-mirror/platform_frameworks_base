@@ -132,6 +132,10 @@
             android:label="@string/keyboard_layout_turkish"
             android:keyboardLayout="@raw/keyboard_layout_turkish" />
 
+    <keyboard-layout android:name="keyboard_layout_turkish_f"
+            android:label="@string/keyboard_layout_turkish_f"
+            android:keyboardLayout="@raw/keyboard_layout_turkish_f" />
+
     <keyboard-layout android:name="keyboard_layout_ukrainian"
             android:label="@string/keyboard_layout_ukrainian"
             android:keyboardLayout="@raw/keyboard_layout_ukrainian" />
