@@ -36,6 +36,7 @@ package android {
     field public static final String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
+    field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
     field public static final String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
@@ -10120,6 +10121,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void bootstrapAuthenticationRequest(int, @NonNull android.net.Uri, @NonNull android.telephony.gba.UaSecurityProtocolIdentifier, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.BootstrapAuthenticationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult changeIccLockPin(@NonNull String, @NonNull String);
     method public int checkCarrierPrivilegesForPackage(String);
@@ -10288,6 +10290,12 @@ package android.telephony {
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int GBA_FAILURE_REASON_FEATURE_NOT_READY = 2; // 0x2
+    field public static final int GBA_FAILURE_REASON_FEATURE_NOT_SUPPORTED = 1; // 0x1
+    field public static final int GBA_FAILURE_REASON_INCORRECT_NAF_ID = 4; // 0x4
+    field public static final int GBA_FAILURE_REASON_NETWORK_FAILURE = 3; // 0x3
+    field public static final int GBA_FAILURE_REASON_SECURITY_PROTOCOL_NOT_SUPPORTED = 5; // 0x5
+    field public static final int GBA_FAILURE_REASON_UNKNOWN = 0; // 0x0
     field public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1; // 0xffffffff
     field public static final int KEY_TYPE_EPDG = 1; // 0x1
     field public static final int KEY_TYPE_WLAN = 2; // 0x2
@@ -10339,6 +10347,12 @@ package android.telephony {
     field public static final int THERMAL_MITIGATION_RESULT_MODEM_NOT_AVAILABLE = 2; // 0x2
     field public static final int THERMAL_MITIGATION_RESULT_SUCCESS = 0; // 0x0
     field public static final int THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR = 4; // 0x4
+  }
+
+  public static class TelephonyManager.BootstrapAuthenticationCallback {
+    ctor public TelephonyManager.BootstrapAuthenticationCallback();
+    method public void onAuthenticationFailure(int);
+    method public void onKeysAvailable(@NonNull byte[], @NonNull String);
   }
 
   public static interface TelephonyManager.CallForwardingInfoCallback {
@@ -10721,6 +10735,141 @@ package android.telephony.euicc {
   }
 
   @IntDef(flag=true, prefix={"POLICY_RULE_FLAG_"}, value={android.telephony.euicc.EuiccRulesAuthTable.POLICY_RULE_FLAG_CONSENT_REQUIRED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccRulesAuthTable.PolicyRuleFlag {
+  }
+
+}
+
+package android.telephony.gba {
+
+  public class GbaService extends android.app.Service {
+    ctor public GbaService();
+    method public void onAuthenticationRequest(int, int, int, @NonNull android.net.Uri, @NonNull byte[], boolean);
+    method public final void reportAuthenticationFailure(int, int) throws java.lang.RuntimeException;
+    method public final void reportKeysAvailable(int, @NonNull byte[], @NonNull String) throws java.lang.RuntimeException;
+    field public static final String SERVICE_INTERFACE = "android.telephony.gba.GbaService";
+  }
+
+  public class TlsParams {
+    method public static boolean isTlsCipherSuiteSupported(int);
+    field public static final int GROUP_SECP256R1 = 23; // 0x17
+    field public static final int GROUP_SECP384R1 = 24; // 0x18
+    field public static final int GROUP_X25519 = 29; // 0x1d
+    field public static final int GROUP_X448 = 30; // 0x1e
+    field public static final int PROTOCOL_VERSION_TLS_1_2 = 771; // 0x303
+    field public static final int PROTOCOL_VERSION_TLS_1_3 = 772; // 0x304
+    field public static final int SIG_ECDSA_BRAINPOOLP256R1TLS13_SHA256 = 2074; // 0x81a
+    field public static final int SIG_ECDSA_BRAINPOOLP384R1TLS13_SHA384 = 2075; // 0x81b
+    field public static final int SIG_ECDSA_BRAINPOOLP512R1TLS13_SHA512 = 2076; // 0x81c
+    field public static final int SIG_ECDSA_SECP256R1_SHA256 = 1027; // 0x403
+    field public static final int SIG_ECDSA_SECP384R1_SHA384 = 1283; // 0x503
+    field public static final int SIG_ECDSA_SECP521R1_SHA512 = 1539; // 0x603
+    field public static final int SIG_ECDSA_SHA1 = 515; // 0x203
+    field public static final int SIG_RSA_PKCS1_SHA1 = 513; // 0x201
+    field public static final int SIG_RSA_PKCS1_SHA256 = 1025; // 0x401
+    field public static final int SIG_RSA_PKCS1_SHA256_LEGACY = 1056; // 0x420
+    field public static final int SIG_RSA_PKCS1_SHA384 = 1281; // 0x501
+    field public static final int SIG_RSA_PKCS1_SHA384_LEGACY = 1312; // 0x520
+    field public static final int SIG_RSA_PKCS1_SHA512 = 1537; // 0x601
+    field public static final int SIG_RSA_PKCS1_SHA512_LEGACY = 1568; // 0x620
+    field public static final int SIG_RSA_PSS_RSAE_SHA256 = 2052; // 0x804
+    field public static final int SIG_RSA_PSS_RSAE_SHA384 = 2053; // 0x805
+    field public static final int SIG_RSA_PSS_RSAE_SHA512 = 2054; // 0x806
+    field public static final int TLS_AES_128_CCM_SHA256 = 4868; // 0x1304
+    field public static final int TLS_AES_128_GCM_SHA256 = 4865; // 0x1301
+    field public static final int TLS_AES_256_GCM_SHA384 = 4866; // 0x1302
+    field public static final int TLS_CHACHA20_POLY1305_SHA256 = 4867; // 0x1303
+    field public static final int TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = 19; // 0x13
+    field public static final int TLS_DHE_DSS_WITH_AES_128_CBC_SHA = 50; // 0x32
+    field public static final int TLS_DHE_DSS_WITH_AES_128_CBC_SHA256 = 64; // 0x40
+    field public static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA = 56; // 0x38
+    field public static final int TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 = 106; // 0x6a
+    field public static final int TLS_DHE_PSK_WITH_AES_128_CCM = 49318; // 0xc0a6
+    field public static final int TLS_DHE_PSK_WITH_AES_128_GCM_SHA256 = 170; // 0xaa
+    field public static final int TLS_DHE_PSK_WITH_AES_256_CCM = 49319; // 0xc0a7
+    field public static final int TLS_DHE_PSK_WITH_AES_256_GCM_SHA384 = 171; // 0xab
+    field public static final int TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256 = 52397; // 0xccad
+    field public static final int TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = 22; // 0x16
+    field public static final int TLS_DHE_RSA_WITH_AES_128_CBC_SHA = 51; // 0x33
+    field public static final int TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 = 103; // 0x67
+    field public static final int TLS_DHE_RSA_WITH_AES_128_CCM = 49310; // 0xc09e
+    field public static final int TLS_DHE_RSA_WITH_AES_128_GCM_SHA256 = 158; // 0x9e
+    field public static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 57; // 0x39
+    field public static final int TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 = 107; // 0x6b
+    field public static final int TLS_DHE_RSA_WITH_AES_256_CCM = 49311; // 0xc09f
+    field public static final int TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 = 159; // 0x9f
+    field public static final int TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256 = 52394; // 0xccaa
+    field public static final int TLS_DH_ANON_WITH_3DES_EDE_CBC_SHA = 27; // 0x1b
+    field public static final int TLS_DH_ANON_WITH_AES_128_CBC_SHA = 52; // 0x34
+    field public static final int TLS_DH_ANON_WITH_AES_128_CBC_SHA256 = 108; // 0x6c
+    field public static final int TLS_DH_ANON_WITH_AES_256_CBC_SHA = 58; // 0x3a
+    field public static final int TLS_DH_ANON_WITH_AES_256_CBC_SHA256 = 109; // 0x6d
+    field public static final int TLS_DH_ANON_WITH_RC4_128_MD5 = 24; // 0x18
+    field public static final int TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA = 13; // 0xd
+    field public static final int TLS_DH_DSS_WITH_AES_128_CBC_SHA = 48; // 0x30
+    field public static final int TLS_DH_DSS_WITH_AES_128_CBC_SHA256 = 62; // 0x3e
+    field public static final int TLS_DH_DSS_WITH_AES_256_CBC_SHA = 54; // 0x36
+    field public static final int TLS_DH_DSS_WITH_AES_256_CBC_SHA256 = 104; // 0x68
+    field public static final int TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA = 16; // 0x10
+    field public static final int TLS_DH_RSA_WITH_AES_128_CBC_SHA = 49; // 0x31
+    field public static final int TLS_DH_RSA_WITH_AES_128_CBC_SHA256 = 63; // 0x3f
+    field public static final int TLS_DH_RSA_WITH_AES_256_CBC_SHA = 55; // 0x37
+    field public static final int TLS_DH_RSA_WITH_AES_256_CBC_SHA256 = 105; // 0x69
+    field public static final int TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 = 49195; // 0xc02b
+    field public static final int TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 = 49196; // 0xc02c
+    field public static final int TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 = 52393; // 0xcca9
+    field public static final int TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256 = 53253; // 0xd005
+    field public static final int TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256 = 53249; // 0xd001
+    field public static final int TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384 = 53250; // 0xd002
+    field public static final int TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256 = 52396; // 0xccac
+    field public static final int TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 = 49199; // 0xc02f
+    field public static final int TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 = 49200; // 0xc030
+    field public static final int TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 = 52392; // 0xcca8
+    field public static final int TLS_NULL_WITH_NULL_NULL = 0; // 0x0
+    field public static final int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 10; // 0xa
+    field public static final int TLS_RSA_WITH_AES_128_CBC_SHA = 47; // 0x2f
+    field public static final int TLS_RSA_WITH_AES_128_CBC_SHA256 = 60; // 0x3c
+    field public static final int TLS_RSA_WITH_AES_256_CBC_SHA = 53; // 0x35
+    field public static final int TLS_RSA_WITH_AES_256_CBC_SHA256 = 61; // 0x3d
+    field public static final int TLS_RSA_WITH_NULL_MD5 = 1; // 0x1
+    field public static final int TLS_RSA_WITH_NULL_SHA = 2; // 0x2
+    field public static final int TLS_RSA_WITH_NULL_SHA256 = 59; // 0x3b
+    field public static final int TLS_RSA_WITH_RC4_128_MD5 = 4; // 0x4
+    field public static final int TLS_RSA_WITH_RC4_128_SHA = 5; // 0x5
+  }
+
+  public final class UaSecurityProtocolIdentifier implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getOrg();
+    method public int getProtocol();
+    method public int getTlsCipherSuite();
+    method @NonNull public byte[] toByteArray();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.gba.UaSecurityProtocolIdentifier> CREATOR;
+    field public static final int ORG_3GPP = 1; // 0x1
+    field public static final int ORG_3GPP2 = 2; // 0x2
+    field public static final int ORG_GSMA = 4; // 0x4
+    field public static final int ORG_LOCAL = 255; // 0xff
+    field public static final int ORG_NONE = 0; // 0x0
+    field public static final int ORG_OMA = 3; // 0x3
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_GENERATION_TMPI = 256; // 0x100
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_GENERIC_PUSH_LAYER = 5; // 0x5
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_HTTP_BASED_MBMS = 3; // 0x3
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_HTTP_DIGEST_AUTHENTICATION = 2; // 0x2
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_IMS_MEDIA_PLANE = 6; // 0x6
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_MBMS = 1; // 0x1
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_SIP_BASED_MBMS = 4; // 0x4
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_SUBSCRIBER_CERTIFICATE = 0; // 0x0
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_TLS_BROWSER = 131072; // 0x20000
+    field public static final int UA_SECURITY_PROTOCOL_3GPP_TLS_DEFAULT = 65536; // 0x10000
+  }
+
+  public static final class UaSecurityProtocolIdentifier.Builder {
+    ctor public UaSecurityProtocolIdentifier.Builder();
+    ctor public UaSecurityProtocolIdentifier.Builder(@NonNull android.telephony.gba.UaSecurityProtocolIdentifier);
+    method @NonNull public android.telephony.gba.UaSecurityProtocolIdentifier build();
+    method @NonNull public android.telephony.gba.UaSecurityProtocolIdentifier.Builder setOrg(int);
+    method @NonNull public android.telephony.gba.UaSecurityProtocolIdentifier.Builder setProtocol(int);
+    method @NonNull public android.telephony.gba.UaSecurityProtocolIdentifier.Builder setTlsCipherSuite(int);
   }
 
 }
