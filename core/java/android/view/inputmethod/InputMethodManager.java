@@ -1006,6 +1006,24 @@ public final class InputMethodManager {
                 return;
             }
             closeConnection();
+
+            // Notify the app that the InputConnection was closed.
+            final View servedView = mServedView.get();
+            if (servedView != null) {
+                final Handler handler = servedView.getHandler();
+                // The handler is null if the view is already detached. When that's the case, for
+                // now, we simply don't dispatch this callback.
+                if (handler != null) {
+                    if (DEBUG) {
+                        Log.v(TAG, "Calling View.onInputConnectionClosed: view=" + servedView);
+                    }
+                    if (handler.getLooper().isCurrentThread()) {
+                        servedView.onInputConnectionClosedInternal();
+                    } else {
+                        handler.post(servedView::onInputConnectionClosedInternal);
+                    }
+                }
+            }
         }
 
         @Override
@@ -1940,6 +1958,8 @@ public final class InputMethodManager {
         InputConnection ic = view.onCreateInputConnection(tba);
         if (DEBUG) Log.v(TAG, "Starting input: tba=" + tba + " ic=" + ic);
 
+        final Handler icHandler;
+        InputBindResult res = null;
         synchronized (mH) {
             // Now that we are locked again, validate that our state hasn't
             // changed.
@@ -1976,7 +1996,6 @@ public final class InputMethodManager {
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
                 mCursorAnchorInfo = null;
-                final Handler icHandler;
                 missingMethodFlags = InputConnectionInspector.getMissingMethodFlags(ic);
                 if ((missingMethodFlags & InputConnectionInspector.MissingMethodFlags.GET_HANDLER)
                         != 0) {
@@ -1990,6 +2009,7 @@ public final class InputMethodManager {
             } else {
                 servedContext = null;
                 missingMethodFlags = 0;
+                icHandler = null;
             }
             mServedInputConnectionWrapper = servedContext;
 
@@ -1997,7 +2017,7 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
                         + ic + " tba=" + tba + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
-                final InputBindResult res = mService.startInputOrWindowGainedFocus(
+                res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
                         softInputMode, windowFlags, tba, servedContext, missingMethodFlags,
                         view.getContext().getApplicationInfo().targetSdkVersion);
@@ -2034,6 +2054,15 @@ public final class InputMethodManager {
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
+        }
+
+        // Notify the app that the InputConnection is initialized and ready for use.
+        if (ic != null && res != null && res.method != null) {
+            if (DEBUG) {
+                Log.v(TAG, "Calling View.onInputConnectionOpened: view= " + view
+                        + ", ic=" + ic + ", tba=" + tba + ", handler=" + icHandler);
+            }
+            view.onInputConnectionOpenedInternal(ic, tba, icHandler);
         }
 
         return true;
