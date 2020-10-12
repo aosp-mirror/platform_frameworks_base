@@ -70,6 +70,7 @@ stubs_defaults {
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb.gadget-V1.0-java",
