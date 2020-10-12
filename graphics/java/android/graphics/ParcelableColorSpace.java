@@ -73,6 +73,9 @@ public final class ParcelableColorSpace extends ColorSpace implements Parcelable
         }
     }
 
+    /**
+     * @return the backing ColorSpace that this ParcelableColorSpace is wrapping.
+     */
     public @NonNull ColorSpace getColorSpace() {
         return mColorSpace;
     }
