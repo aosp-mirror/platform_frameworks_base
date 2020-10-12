@@ -71,6 +71,7 @@ import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
@@ -387,7 +388,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mGestureNavigationSettingsObserver.unregister();
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             mPluginManager.removePluginListener(this);
-            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
             DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
 
             try {
@@ -403,7 +404,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             updateDisplaySize();
             mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
                     mContext.getMainThreadHandler());
-            ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+            TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                     runnable -> (mContext.getMainThreadHandler()).post(runnable),
                     mOnPropertiesChangedListener);

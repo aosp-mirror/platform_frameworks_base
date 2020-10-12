@@ -29,8 +29,8 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SizeCompatModeActivityController.RestartActivityButton;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class SizeCompatModeActivityControllerTest extends SysuiTestCase {
 
     private SizeCompatModeActivityController mController;
     private TaskStackChangeListener mTaskStackListener;
-    private @Mock ActivityManagerWrapper mMockAm;
+    private @Mock TaskStackChangeListeners mMockTaskListeners;
     private @Mock RestartActivityButton mMockButton;
     private @Mock IBinder mMockActivityToken;
 
@@ -59,7 +59,7 @@ public class SizeCompatModeActivityControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         doReturn(true).when(mMockButton).show();
 
-        mController = new SizeCompatModeActivityController(mContext, mMockAm,
+        mController = new SizeCompatModeActivityController(mContext, mMockTaskListeners,
                 new CommandQueue(mContext)) {
             @Override
             RestartActivityButton createRestartButton(Context context) {
@@ -69,7 +69,7 @@ public class SizeCompatModeActivityControllerTest extends SysuiTestCase {
 
         ArgumentCaptor<TaskStackChangeListener> listenerCaptor =
                 ArgumentCaptor.forClass(TaskStackChangeListener.class);
-        verify(mMockAm).registerTaskStackListener(listenerCaptor.capture());
+        verify(mMockTaskListeners).registerTaskStackListener(listenerCaptor.capture());
         mTaskStackListener = listenerCaptor.getValue();
     }
 
