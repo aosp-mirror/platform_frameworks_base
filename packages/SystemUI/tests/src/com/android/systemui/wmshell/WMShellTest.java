@@ -36,9 +36,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
@@ -68,7 +68,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock CommandQueue mCommandQueue;
     @Mock ConfigurationController mConfigurationController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock ActivityManagerWrapper mActivityManagerWrapper;
+    @Mock TaskStackChangeListeners mTaskStackChangeListeners;
     @Mock DisplayImeController mDisplayImeController;
     @Mock InputConsumerController mMockInputConsumerController;
     @Mock NavigationModeController mNavigationModeController;
@@ -88,7 +88,7 @@ public class WMShellTest extends SysuiTestCase {
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
 
         mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
-                mInputConsumerController, mKeyguardUpdateMonitor, mActivityManagerWrapper,
+                mInputConsumerController, mKeyguardUpdateMonitor, mTaskStackChangeListeners,
                 mDisplayImeController, mNavigationModeController, mScreenLifecycle, mSysUiState,
                 Optional.of(mPip), Optional.of(mSplitScreen), Optional.of(mOneHanded),
                 mTaskOrganizer, mProtoTracer);
@@ -116,7 +116,7 @@ public class WMShellTest extends SysuiTestCase {
         final TestableContext nonPipContext = getNonPipFeatureContext();
         final WMShell nonPipWMShell = new WMShell(nonPipContext, mCommandQueue,
                 mConfigurationController, mMockInputConsumerController, mKeyguardUpdateMonitor,
-                mActivityManagerWrapper, mDisplayImeController, mNavigationModeController,
+                mTaskStackChangeListeners, mDisplayImeController, mNavigationModeController,
                 mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
                 Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
         nonPipWMShell.initPip(mPip);
@@ -125,7 +125,7 @@ public class WMShellTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor, never()).registerCallback(any());
         verify(mConfigurationController, never()).addCallback(any());
         verify(mSysUiState, never()).addCallback(any());
-        verify(mActivityManagerWrapper, never()).registerTaskStackListener(any());
+        verify(mTaskStackChangeListeners, never()).registerTaskStackListener(any());
         verify(mMockInputConsumerController, never()).setInputListener(any());
         verify(mMockInputConsumerController, never()).setRegistrationListener(any());
         verify(mPip, never()).registerSessionListenerForCurrentUser();
@@ -136,7 +136,7 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initSplitScreen(mSplitScreen);
 
         verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-        verify(mActivityManagerWrapper).registerTaskStackListener(
+        verify(mTaskStackChangeListeners).registerTaskStackListener(
                 any(TaskStackChangeListener.class));
     }
 
@@ -149,7 +149,7 @@ public class WMShellTest extends SysuiTestCase {
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mNavigationModeController).addListener(
                 any(NavigationModeController.ModeChangedListener.class));
-        verify(mActivityManagerWrapper).registerTaskStackListener(
+        verify(mTaskStackChangeListeners).registerTaskStackListener(
                 any(TaskStackChangeListener.class));
 
         verify(mOneHanded).registerGestureCallback(any(
