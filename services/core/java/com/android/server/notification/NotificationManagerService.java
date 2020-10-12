@@ -6644,7 +6644,7 @@ public class NotificationManagerService extends SystemService {
 
                     // Log event to statsd
                     mNotificationRecordLogger.maybeLogNotificationPosted(r, old, position,
-                            buzzBeepBlinkLoggingCode, getGroupInstanceId(n.getGroupKey()));
+                            buzzBeepBlinkLoggingCode, getGroupInstanceId(r.getSbn().getGroupKey()));
                 } finally {
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
