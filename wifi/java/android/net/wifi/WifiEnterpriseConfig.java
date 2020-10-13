@@ -1335,6 +1335,16 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
+     * Initialize the value of the app installed device key and cert flag.
+     *
+     * @param isAppInstalledDeviceKeyAndCert true or false
+     * @hide
+     */
+    public void initIsAppInstalledDeviceKeyAndCert(boolean isAppInstalledDeviceKeyAndCert) {
+        mIsAppInstalledDeviceKeyAndCert = isAppInstalledDeviceKeyAndCert;
+    }
+
+    /**
      * Check if CA certificate was installed by an app, or manually (not by an app). If true,
      * CA certificate will be removed from key storage when this network is removed. If not,
      * then certificates and keys remain persistent until the user manually removes them.
@@ -1345,6 +1355,16 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public boolean isAppInstalledCaCert() {
         return mIsAppInstalledCaCert;
+    }
+
+    /**
+     * Initialize the value of the app installed root CA cert flag.
+     *
+     * @param isAppInstalledCaCert true or false
+     * @hide
+     */
+    public void initIsAppInstalledCaCert(boolean isAppInstalledCaCert) {
+        mIsAppInstalledCaCert = isAppInstalledCaCert;
     }
 
     /**
