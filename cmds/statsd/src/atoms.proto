@@ -5269,12 +5269,23 @@ message BlobOpened{
  * Event to track Jank for various system interactions.
  *
  * Logged from:
- *  frameworks/base/core/java/android/os/aot/FrameTracker.java
+ *  frameworks/base/core/java/com/android/internal/jank/FrameTracker.java
  */
 message UIInteractionFrameInfoReported {
     enum InteractionType {
         UNKNOWN = 0;
         NOTIFICATION_SHADE_SWIPE = 1;
+        SHADE_EXPAND_COLLAPSE_LOCK = 2;
+        SHADE_SCROLL_FLING = 3;
+        SHADE_ROW_EXPAND = 4;
+        SHADE_ROW_SWIPE = 5;
+        SHADE_QS_EXPAND_COLLAPSE = 6;
+        SHADE_QS_SCROLL_SWIPE = 7;
+        LAUNCHER_APP_LAUNCH_FROM_RECENTS = 8;
+        LAUNCHER_APP_LAUNCH_FROM_ICON = 9;
+        LAUNCHER_APP_CLOSE_TO_HOME = 10;
+        LAUNCHER_APP_CLOSE_TO_PIP = 11;
+        LAUNCHER_QUICK_SWITCH = 12;
     }
 
     optional InteractionType interaction_type = 1;
