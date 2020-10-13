@@ -100,7 +100,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Executor;
 
 /**
  * <p>
@@ -4753,43 +4752,31 @@ public class ActivityManager {
     }
 
     /**
-     * Register to be notified when the visibility of the home screen changes.
-     *
-     * @param executor The executor on which the listener should be called.
-     * @param listener The listener that is called when home visibility changes.
+     * Register with {@link HomeVisibilityObserver} with ActivityManager.
+     * TODO: b/144351078 expose as SystemApi
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
-    public void addHomeVisibilityListener(@NonNull Executor executor,
-            @NonNull HomeVisibilityListener listener) {
-        Preconditions.checkNotNull(listener);
-        Preconditions.checkNotNull(executor);
+    public void registerHomeVisibilityObserver(@NonNull HomeVisibilityObserver observer) {
+        Preconditions.checkNotNull(observer);
         try {
-            listener.init(mContext, executor, this);
-            getService().registerProcessObserver(listener.mObserver);
+            observer.init(mContext, this);
+            getService().registerProcessObserver(observer.mObserver);
             // Notify upon first registration.
-            executor.execute(() ->
-                    listener.onHomeVisibilityChanged(listener.mIsHomeActivityVisible));
+            observer.onHomeVisibilityChanged(observer.mIsHomeActivityVisible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Removes a listener that was previously added with {@link #addHomeVisibilityListener}.
-     *
-     * @param listener The listener that was previously added.
+     * Unregister with {@link HomeVisibilityObserver} with ActivityManager.
+     * TODO: b/144351078 expose as SystemApi
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
-    public void removeHomeVisibilityListener(@NonNull HomeVisibilityListener listener) {
-        Preconditions.checkNotNull(listener);
+    public void unregisterHomeVisibilityObserver(@NonNull HomeVisibilityObserver observer) {
+        Preconditions.checkNotNull(observer);
         try {
-            getService().unregisterProcessObserver(listener.mObserver);
+            getService().unregisterProcessObserver(observer.mObserver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
