@@ -41,6 +41,7 @@ import android.window.IDisplayAreaOrganizer;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
+import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -70,6 +71,13 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     private final DisplayAreaOrganizerController mOrganizerController;
     IDisplayAreaOrganizer mOrganizer;
     private final Configuration mTmpConfiguration = new Configuration();
+
+    /**
+     * Whether this {@link DisplayArea} should ignore fixed-orientation request. If {@code true}, it
+     * can never specify orientation, but shows the fixed-orientation apps below it in the
+     * letterbox; otherwise, it rotates based on the fixed-orientation request.
+     */
+    protected boolean mIgnoreOrientationRequest;
 
     DisplayArea(WindowManagerService wms, Type type, String name) {
         this(wms, type, name, FEATURE_UNDEFINED);
@@ -125,6 +133,52 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 && (position == POSITION_TOP || position == POSITION_BOTTOM)) {
             parent.positionChildAt(position, this /* child */, true /* includingParents */);
         }
+    }
+
+    @Override
+    int getOrientation(int candidate) {
+        mLastOrientationSource = null;
+        if (mIgnoreOrientationRequest) {
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
+        return super.getOrientation(candidate);
+    }
+
+    /**
+     * Sets whether this {@link DisplayArea} should ignore fixed-orientation request from apps and
+     * windows below it.
+     *
+     * @return Whether the display orientation changed after calling this method.
+     */
+    boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
+        if (mIgnoreOrientationRequest == ignoreOrientationRequest) {
+            return false;
+        }
+        mIgnoreOrientationRequest = ignoreOrientationRequest;
+
+        // Check whether we should notify Display to update orientation.
+        if (mDisplayContent == null) {
+            return false;
+        }
+
+        // The orientation request from this DA may now be respected.
+        if (!ignoreOrientationRequest) {
+            return mDisplayContent.updateOrientation();
+        }
+
+        final int lastOrientation = mDisplayContent.getLastOrientation();
+        final WindowContainer lastOrientationSource = mDisplayContent.getLastOrientationSource();
+        if (lastOrientation == SCREEN_ORIENTATION_UNSET
+                || lastOrientation == SCREEN_ORIENTATION_UNSPECIFIED) {
+            // Orientation won't be changed.
+            return false;
+        }
+        if (lastOrientationSource == null || lastOrientationSource.isDescendantOf(this)) {
+            // Try update if the orientation may be affected.
+            return mDisplayContent.updateOrientation();
+        }
+        return false;
     }
 
     /**
@@ -197,6 +251,14 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         proto.write(NAME, mName);
         proto.write(IS_TASK_DISPLAY_AREA, isTaskDisplayArea());
         proto.end(token);
+    }
+
+    @Override
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
+        if (mIgnoreOrientationRequest) {
+            pw.println(prefix + "mIgnoreOrientationRequest=true");
+        }
     }
 
     @Override
@@ -409,6 +471,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         @Override
         int getOrientation(int candidate) {
             mLastOrientationSource = null;
+            if (mIgnoreOrientationRequest) {
+                return SCREEN_ORIENTATION_UNSET;
+            }
+
             // Find a window requesting orientation.
             final WindowState win = getWindow(mGetOrientingWindow);
 

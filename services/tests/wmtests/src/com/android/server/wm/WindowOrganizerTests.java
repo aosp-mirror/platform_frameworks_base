@@ -366,7 +366,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetIgnoreOrientationRequest() {
+    public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack = taskDisplayArea.createStack(
@@ -378,7 +378,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         // TDA returns UNSET when ignoreOrientationRequest == true
-        // DC is UNSPECIFIED because it is using the previous (default) when TDA returns UNSET.
+        // DC is UNSPECIFIED when child returns UNSET
         assertThat(taskDisplayArea.getOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSET);
         assertThat(mDisplayContent.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSPECIFIED);
 
@@ -399,8 +399,40 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
 
         // TDA returns UNSET when ignoreOrientationRequest == true
-        // DC is LANDSCAPE because it is using the previous when TDA returns UNSET.
+        // DC is UNSPECIFIED when child returns UNSET
         assertThat(taskDisplayArea.getOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSET);
+        assertThat(mDisplayContent.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
+    @Test
+    public void testSetIgnoreOrientationRequest_displayContent() {
+        removeGlobalMinSizeRestriction();
+        final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final Task stack = taskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setStack(stack).build();
+        mDisplayContent.setFocusedApp(activity);
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        // DC uses the orientation request from app
+        assertThat(mDisplayContent.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
+
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        t.setIgnoreOrientationRequest(
+                mDisplayContent.mRemoteToken.toWindowContainerToken(),
+                true /* ignoreOrientationRequest */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+
+        // DC returns UNSPECIFIED when ignoreOrientationRequest == true
+        assertThat(mDisplayContent.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSPECIFIED);
+
+        t.setIgnoreOrientationRequest(
+                mDisplayContent.mRemoteToken.toWindowContainerToken(),
+                false /* ignoreOrientationRequest */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+
+        // DC uses the orientation request from app after mIgnoreOrientationRequest is set to false
         assertThat(mDisplayContent.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
     }
 
