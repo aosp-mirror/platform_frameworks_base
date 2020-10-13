@@ -69,21 +69,27 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
-    @SuppressWarnings("unused")  // Becomes active at instantiation time.
-    private PhysicalDisplayEventReceiver mPhysicalDisplayEventReceiver;
+    private final Injector mInjector;
 
 
     // Called with SyncRoot lock held.
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
+        this(syncRoot, context, handler, listener, new Injector());
+    }
+
+    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
+            Context context, Handler handler, Listener listener, Injector injector) {
         super(syncRoot, context, handler, listener, TAG);
+        mInjector = injector;
     }
 
     @Override
     public void registerLocked() {
         super.registerLocked();
 
-        mPhysicalDisplayEventReceiver = new PhysicalDisplayEventReceiver(getHandler().getLooper());
+        mInjector.setDisplayEventListenerLocked(getHandler().getLooper(),
+                new LocalDisplayEventListener());
 
         for (long physicalDisplayId : SurfaceControl.getPhysicalDisplayIds()) {
             tryConnectDisplayLocked(physicalDisplayId);
@@ -1052,12 +1058,33 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
-    private final class PhysicalDisplayEventReceiver extends DisplayEventReceiver {
-        PhysicalDisplayEventReceiver(Looper looper) {
-            super(looper, VSYNC_SOURCE_APP, CONFIG_CHANGED_EVENT_DISPATCH);
+    public static class Injector {
+        private ProxyDisplayEventReceiver mReceiver;
+        public void setDisplayEventListenerLocked(Looper looper, DisplayEventListener listener) {
+            mReceiver = new ProxyDisplayEventReceiver(looper, listener);
         }
+    }
 
-        @Override
+    public interface DisplayEventListener {
+        void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected);
+        void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId);
+    }
+
+    public static final class ProxyDisplayEventReceiver extends DisplayEventReceiver {
+        private final DisplayEventListener mListener;
+        ProxyDisplayEventReceiver(Looper looper, DisplayEventListener listener) {
+            super(looper, VSYNC_SOURCE_APP, CONFIG_CHANGED_EVENT_DISPATCH);
+            mListener = listener;
+        }
+        public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
+            mListener.onHotplug(timestampNanos, physicalDisplayId, connected);
+        }
+        public void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
+            mListener.onConfigChanged(timestampNanos, physicalDisplayId, configId);
+        }
+    }
+
+    private final class LocalDisplayEventListener implements DisplayEventListener {
         public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
             synchronized (getSyncRoot()) {
                 if (connected) {
@@ -1067,8 +1094,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             }
         }
-
-        @Override
         public void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
             if (DEBUG) {
                 Slog.d(TAG, "onConfigChanged("
