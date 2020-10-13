@@ -7911,7 +7911,7 @@ public class AppOpsManager {
      *
      * @param op The op to note
      * @param proxiedUid The uid to note the op for {@code null}
-     * @param proxiedUid The package name the uid belongs to
+     * @param proxiedPackageName The package name the uid belongs to
      * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
      * attribution tag} or {@code null} for default attribution
      * @param message A message describing the reason the op was noted
@@ -7939,17 +7939,7 @@ public class AppOpsManager {
      *Like {@link #startProxyOp(String, int, String, String, String)} but instead
      * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
-     * @param op The op to note
-     * @param proxiedUid The uid to note the op for {@code null}
-     * @param proxiedUid The package name the uid belongs to
-     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
-     * attribution tag} or {@code null} for default attribution
-     * @param message A message describing the reason the op was noted*
-     * <p>This API requires package with the {@code proxiedPackageName} to belong to
-     * {@code proxiedUid}.
-     *
-     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
-     * if it is not allowed and should be silently ignored (without causing the app to crash).
+     * @see #startProxyOp(String, int, String, String, String)
      */
     public int startProxyOpNoThrow(@NonNull String op, int proxiedUid,
             @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag,
