@@ -1350,9 +1350,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
             mHandler.sendMessage(getMsg);
         }
+        BluetoothModeChangeHelper bluetoothModeChangeHelper =
+                new BluetoothModeChangeHelper(mContext);
+
         if (mBluetoothAirplaneModeListener != null) {
-            mBluetoothAirplaneModeListener.start(
-                    new BluetoothAirplaneModeListener.AirplaneModeHelper(mContext));
+            mBluetoothAirplaneModeListener.start(bluetoothModeChangeHelper);
         }
     }
 
