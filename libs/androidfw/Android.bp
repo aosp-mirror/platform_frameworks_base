@@ -193,3 +193,21 @@ cc_benchmark {
     shared_libs: common_test_libs,
     data: ["tests/data/**/*.apk"],
 }
+
+cc_library {
+    name: "libandroidfw_fuzzer_lib",
+    defaults: ["libandroidfw_defaults"],
+    host_supported: true,
+    srcs: [
+        "CursorWindow.cpp",
+    ],
+    export_include_dirs: ["include"],
+    target: {
+        android: {
+            shared_libs: common_test_libs + ["libbinder", "liblog"],
+        },
+        host: {
+            static_libs: common_test_libs + ["libbinder", "liblog"],
+        },
+    },
+}

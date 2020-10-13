@@ -1,0 +1,31 @@
+cc_fuzz {
+    name: "cursorwindow_fuzzer",
+    srcs: [
+        "cursorwindow_fuzzer.cpp",
+    ],
+    host_supported: true,
+    corpus: ["corpus/*"],
+    static_libs: ["libgmock"],
+    target: {
+        android: {
+            shared_libs: [
+                "libandroidfw_fuzzer_lib",
+                "libbase",
+                "libbinder",
+                "libcutils",
+                "liblog",
+                "libutils",
+            ],
+        },
+        host: {
+            static_libs: [
+                "libandroidfw_fuzzer_lib",
+                "libbase",
+                "libbinder",
+                "libcutils",
+                "liblog",
+                "libutils",
+            ],
+        },
+    },
+}

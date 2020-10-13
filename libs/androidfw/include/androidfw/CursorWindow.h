@@ -150,7 +150,8 @@ private:
      * Pointer to the first FieldSlot, used to optimize the extremely
      * hot code path of getFieldSlot().
      */
-    void* mSlotsData = nullptr;
+    void* mSlotsStart = nullptr;
+    void* mSlotsEnd = nullptr;
     uint32_t mSize = 0;
     /**
      * When a window starts as lightweight inline allocation, this value

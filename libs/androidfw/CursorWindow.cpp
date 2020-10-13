@@ -251,7 +251,8 @@ status_t CursorWindow::clear() {
 }
 
 void CursorWindow::updateSlotsData() {
-    mSlotsData = static_cast<uint8_t*>(mData) + mSize - kSlotSizeBytes;
+    mSlotsStart = static_cast<uint8_t*>(mData) + mSize - kSlotSizeBytes;
+    mSlotsEnd = static_cast<uint8_t*>(mData) + mSlotsOffset;
 }
 
 void* CursorWindow::offsetToPtr(uint32_t offset, uint32_t bufferSize = 0) {
@@ -300,6 +301,7 @@ status_t CursorWindow::allocRow() {
     }
     memset(offsetToPtr(newOffset), 0, size);
     mSlotsOffset = newOffset;
+    updateSlotsData();
     mNumRows++;
     return OK;
 }
@@ -314,6 +316,7 @@ status_t CursorWindow::freeLastRow() {
         return NO_MEMORY;
     }
     mSlotsOffset = newOffset;
+    updateSlotsData();
     mNumRows--;
     return OK;
 }
@@ -337,18 +340,18 @@ status_t CursorWindow::alloc(size_t size, uint32_t* outOffset) {
 }
 
 CursorWindow::FieldSlot* CursorWindow::getFieldSlot(uint32_t row, uint32_t column) {
-    if (row >= mNumRows || column >= mNumColumns) {
-        LOG(ERROR) << "Failed to read row " << row << ", column " << column
-                << " from a window with " << mNumRows << " rows, " << mNumColumns << " columns";
-        return nullptr;
-    }
-
     // This is carefully tuned to use as few cycles as
     // possible, since this is an extremely hot code path;
     // see CursorWindow_bench.cpp for more details
-    void *result = static_cast<uint8_t*>(mSlotsData)
+    void *result = static_cast<uint8_t*>(mSlotsStart)
             - (((row * mNumColumns) + column) << kSlotShift);
-    return static_cast<FieldSlot*>(result);
+    if (result < mSlotsEnd || column >= mNumColumns) {
+        LOG(ERROR) << "Failed to read row " << row << ", column " << column
+                << " from a window with " << mNumRows << " rows, " << mNumColumns << " columns";
+        return nullptr;
+    } else {
+        return static_cast<FieldSlot*>(result);
+    }
 }
 
 status_t CursorWindow::putBlob(uint32_t row, uint32_t column, const void* value, size_t size) {
