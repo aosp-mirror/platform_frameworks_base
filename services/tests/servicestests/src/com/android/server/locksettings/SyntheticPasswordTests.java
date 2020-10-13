@@ -519,10 +519,24 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         LockscreenCredential password = newPassword("password");
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         assertTrue(mService.setLockCredential(password, password, PRIMARY_USER_ID));
+        assertNoOrphanedFilesLeft(PRIMARY_USER_ID);
+    }
 
+    @Test
+    public void testAddingEscrowToken_NoOrphanedFilesLeft() throws Exception {
+        final byte[] token = "some-high-entropy-secure-token".getBytes();
+        for (int i = 0; i < 16; i++) {
+            long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
+            assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+            mLocalService.removeEscrowToken(handle, PRIMARY_USER_ID);
+        }
+        assertNoOrphanedFilesLeft(PRIMARY_USER_ID);
+    }
+
+    private void assertNoOrphanedFilesLeft(int userId) {
         String handleString = String.format("%016x",
-                mService.getSyntheticPasswordHandleLocked(PRIMARY_USER_ID));
-        File directory = mStorage.getSyntheticPasswordDirectoryForUser(PRIMARY_USER_ID);
+                mService.getSyntheticPasswordHandleLocked(userId));
+        File directory = mStorage.getSyntheticPasswordDirectoryForUser(userId);
         for (File file : directory.listFiles()) {
             String[] parts = file.getName().split("\\.");
             if (!parts[0].equals(handleString) && !parts[0].equals("0000000000000000")) {
