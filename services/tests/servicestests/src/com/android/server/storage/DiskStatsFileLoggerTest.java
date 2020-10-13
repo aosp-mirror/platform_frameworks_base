@@ -132,7 +132,7 @@ public class DiskStatsFileLoggerTest extends AndroidTestCase {
                     appSizes.getLong(i), cacheSizes.getLong(i));
             apps.add(app);
         }
-        assertThat(apps).containsAllOf(new AppSizeGrouping("com.test.app", 1100, 20),
+        assertThat(apps).containsAtLeast(new AppSizeGrouping("com.test.app", 1100, 20),
                 new AppSizeGrouping("com.test.app2", 11, 2));
     }
 

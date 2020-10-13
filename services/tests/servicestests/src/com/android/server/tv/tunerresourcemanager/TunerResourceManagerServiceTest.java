@@ -81,9 +81,7 @@ public class TunerResourceManagerServiceTest {
 
     // A correspondence to compare a FrontendResource and a TunerFrontendInfo.
     private static final Correspondence<FrontendResource, TunerFrontendInfo> FR_TFI_COMPARE =
-            new Correspondence<FrontendResource, TunerFrontendInfo>() {
-            @Override
-            public boolean compare(FrontendResource actual, TunerFrontendInfo expected) {
+            Correspondence.from((FrontendResource actual, TunerFrontendInfo expected) -> {
                 if (actual == null || expected == null) {
                     return (actual == null) && (expected == null);
                 }
@@ -91,13 +89,7 @@ public class TunerResourceManagerServiceTest {
                 return actual.getId() == expected.getId()
                         && actual.getType() == expected.getFrontendType()
                         && actual.getExclusiveGroupId() == expected.getExclusiveGroupId();
-            }
-
-            @Override
-            public String toString() {
-                return "is correctly configured from ";
-            }
-        };
+            },  "is correctly configured from ");
 
     @Before
     public void setUp() throws Exception {
