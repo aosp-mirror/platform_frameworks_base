@@ -134,46 +134,52 @@ public interface OnReceiveContentCallback<T extends View> {
     final class Payload {
 
         /**
-         * Specifies the UI through which content is being inserted.
+         * Specifies the UI through which content is being inserted. Future versions of Android may
+         * support additional values.
          *
          * @hide
          */
-        @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_CLIPBOARD, SOURCE_INPUT_METHOD,
+        @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_APP, SOURCE_CLIPBOARD, SOURCE_INPUT_METHOD,
                 SOURCE_DRAG_AND_DROP, SOURCE_AUTOFILL, SOURCE_PROCESS_TEXT})
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
 
         /**
+         * Specifies that the operation was triggered by the app that contains the target view.
+         */
+        public static final int SOURCE_APP = 0;
+
+        /**
          * Specifies that the operation was triggered by a paste from the clipboard (e.g. "Paste" or
          * "Paste as plain text" action in the insertion/selection menu).
          */
-        public static final int SOURCE_CLIPBOARD = 0;
+        public static final int SOURCE_CLIPBOARD = 1;
 
         /**
          * Specifies that the operation was triggered from the soft keyboard (also known as input
          * method editor or IME). See https://developer.android.com/guide/topics/text/image-keyboard
          * for more info.
          */
-        public static final int SOURCE_INPUT_METHOD = 1;
+        public static final int SOURCE_INPUT_METHOD = 2;
 
         /**
          * Specifies that the operation was triggered by the drag/drop framework. See
          * https://developer.android.com/guide/topics/ui/drag-drop for more info.
          */
-        public static final int SOURCE_DRAG_AND_DROP = 2;
+        public static final int SOURCE_DRAG_AND_DROP = 3;
 
         /**
          * Specifies that the operation was triggered by the autofill framework. See
          * https://developer.android.com/guide/topics/text/autofill for more info.
          */
-        public static final int SOURCE_AUTOFILL = 3;
+        public static final int SOURCE_AUTOFILL = 4;
 
         /**
          * Specifies that the operation was triggered by a result from a
          * {@link android.content.Intent#ACTION_PROCESS_TEXT PROCESS_TEXT} action in the selection
          * menu.
          */
-        public static final int SOURCE_PROCESS_TEXT = 4;
+        public static final int SOURCE_PROCESS_TEXT = 5;
 
         /**
          * Returns the symbolic name of the given source.
@@ -182,6 +188,7 @@ public interface OnReceiveContentCallback<T extends View> {
          */
         static String sourceToString(@Source int source) {
             switch (source) {
+                case SOURCE_APP: return "SOURCE_APP";
                 case SOURCE_CLIPBOARD: return "SOURCE_CLIPBOARD";
                 case SOURCE_INPUT_METHOD: return "SOURCE_INPUT_METHOD";
                 case SOURCE_DRAG_AND_DROP: return "SOURCE_DRAG_AND_DROP";
@@ -252,7 +259,8 @@ public interface OnReceiveContentCallback<T extends View> {
         }
 
         /**
-         * The source of the operation. See {@code SOURCE_} constants.
+         * The source of the operation. See {@code SOURCE_} constants. Future versions of Android
+         * may pass additional values.
          */
         public @Source int getSource() {
             return mSource;
