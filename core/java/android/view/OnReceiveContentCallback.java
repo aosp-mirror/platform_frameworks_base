@@ -217,37 +217,11 @@ public interface OnReceiveContentCallback<T extends View> {
             return String.valueOf(flags);
         }
 
-        /**
-         * The data to be inserted.
-         */
         @NonNull private final ClipData mClip;
-
-        /**
-         * The source of the operation. See {@code SOURCE_} constants.
-         */
         private final @Source int mSource;
-
-        /**
-         * Optional flags that control the insertion behavior. See {@code FLAG_} constants.
-         */
         private final @Flags int mFlags;
-
-        /**
-         * Optional http/https URI for the content that may be provided by the IME. This is only
-         * populated if the source is {@link #SOURCE_INPUT_METHOD} and if a non-empty
-         * {@link android.view.inputmethod.InputContentInfo#getLinkUri linkUri} was passed by the
-         * IME.
-         */
-        @Nullable
-        private final Uri mLinkUri;
-
-        /**
-         * Optional additional metadata. If the source is {@link #SOURCE_INPUT_METHOD}, this will
-         * include the {@link android.view.inputmethod.InputConnection#commitContent opts} passed by
-         * the IME.
-         */
-        @Nullable
-        private final Bundle mExtras;
+        @Nullable private final Uri mLinkUri;
+        @Nullable private final Bundle mExtras;
 
         private Payload(Builder b) {
             this.mClip = Objects.requireNonNull(b.mClip);
