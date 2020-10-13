@@ -13330,9 +13330,7 @@ public class TelephonyManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws SecurityException if the caller doesn't have the permission.
      *
-     * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NonNull List<String> getEquivalentHomePlmns() {
         try {
