@@ -66,8 +66,8 @@ import org.mockito.Mockito;
  * {@link android.widget.cts.TextViewOnReceiveContentCallbackTest}. This class tests some internal
  * implementation details, e.g. fallback to the keyboard image API.
  */
-@RunWith(AndroidJUnit4.class)
 @MediumTest
+@RunWith(AndroidJUnit4.class)
 public class TextViewOnReceiveContentCallbackTest {
     private static final Uri SAMPLE_CONTENT_URI = Uri.parse("content://com.example/path");
 
@@ -101,7 +101,7 @@ public class TextViewOnReceiveContentCallbackTest {
 
         // Assert that the callback returns the MIME types declared in the EditorInfo in addition to
         // the default.
-        assertThat(mDefaultCallback.getSupportedMimeTypes(mEditText)).containsExactly(
+        assertThat(mDefaultCallback.getMimeTypes(mEditText)).containsExactly(
                 "text/*", "image/gif", "image/png");
     }
 
@@ -118,7 +118,7 @@ public class TextViewOnReceiveContentCallbackTest {
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
         // Assert that the callback returns the default MIME types.
-        assertThat(mDefaultCallback.getSupportedMimeTypes(mEditText)).containsExactly("text/*");
+        assertThat(mDefaultCallback.getMimeTypes(mEditText)).containsExactly("text/*");
     }
 
     @Test
