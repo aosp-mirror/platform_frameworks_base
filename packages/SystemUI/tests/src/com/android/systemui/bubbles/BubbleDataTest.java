@@ -95,6 +95,8 @@ public class BubbleDataTest extends SysuiTestCase {
     private PendingIntent mExpandIntent;
     @Mock
     private PendingIntent mDeleteIntent;
+    @Mock
+    private BubbleLogger mBubbleLogger;
 
     @Captor
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
@@ -134,7 +136,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener);
         mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener);
 
-        mBubbleData = new BubbleData(getContext());
+        mBubbleData = new BubbleData(getContext(), mBubbleLogger);
 
         // Used by BubbleData to set lastAccessedTime
         when(mTimeSource.currentTimeMillis()).thenReturn(1000L);

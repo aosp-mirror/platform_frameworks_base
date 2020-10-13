@@ -32,10 +32,9 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.shared.system.SysUiStatsLog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -53,10 +52,9 @@ import java.util.function.Predicate;
 /**
  * Keeps track of active bubbles.
  */
-@SysUISingleton
 public class BubbleData {
 
-    private BubbleLoggerImpl mLogger = new BubbleLoggerImpl();
+    private BubbleLogger mLogger;
 
     private int mCurrentUserId;
 
@@ -155,8 +153,9 @@ public class BubbleData {
      */
     private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
 
-    public BubbleData(Context context) {
+    public BubbleData(Context context, BubbleLogger bubbleLogger) {
         mContext = context;
+        mLogger = bubbleLogger;
         mBubbles = new ArrayList<>();
         mOverflowBubbles = new ArrayList<>();
         mPendingBubbles = new HashMap<>();
@@ -618,12 +617,12 @@ public class BubbleData {
      * @param normalX Normalized x position of the stack
      * @param normalY Normalized y position of the stack
      */
-     void logBubbleEvent(@Nullable BubbleViewProvider provider, int action, String packageName,
+    void logBubbleEvent(@Nullable BubbleViewProvider provider, int action, String packageName,
             int bubbleCount, int bubbleIndex, float normalX, float normalY) {
         if (provider == null) {
             mLogger.logStackUiChanged(packageName, action, bubbleCount, normalX, normalY);
         } else if (provider.getKey().equals(BubbleOverflow.KEY)) {
-            if (action == SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED) {
+            if (action == FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED) {
                 mLogger.logShowOverflow(packageName, mCurrentUserId);
             }
         } else {
