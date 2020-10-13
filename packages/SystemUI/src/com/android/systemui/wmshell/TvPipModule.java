@@ -24,6 +24,7 @@ import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -105,9 +106,10 @@ public abstract class TvPipModule {
             PipBoundsHandler pipBoundsHandler,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
-            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
+            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
+            SystemWindows systemWindows) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsHandler,
-                pipSurfaceTransactionHelper, splitScreenOptional, displayController,
-                pipUiEventLogger, shellTaskOrganizer);
+                null /* menuActivityController */, pipSurfaceTransactionHelper, splitScreenOptional,
+                displayController, pipUiEventLogger, shellTaskOrganizer, systemWindows);
     }
 }

@@ -104,9 +104,9 @@ public class WMShellModule {
 
     @WMSingleton
     @Provides
-    static PipMenuActivityController providePipMenuActivityController(Context context,
-            PipMediaController pipMediaController, PipTaskOrganizer pipTaskOrganizer) {
-        return new PipMenuActivityController(context, pipMediaController, pipTaskOrganizer);
+    static PipMenuActivityController providesPipMenuActivityController(Context context,
+            PipMediaController pipMediaController, SystemWindows systemWindows) {
+        return new PipMenuActivityController(context, pipMediaController, systemWindows);
     }
 
     @WMSingleton
@@ -126,11 +126,13 @@ public class WMShellModule {
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             PipBoundsState pipBoundsState,
             PipBoundsHandler pipBoundsHandler,
+            PipMenuActivityController menuActivityController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
-            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
+            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
+            SystemWindows systemWindows) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsHandler,
-                pipSurfaceTransactionHelper, splitScreenOptional, displayController,
-                pipUiEventLogger, shellTaskOrganizer);
+                menuActivityController, pipSurfaceTransactionHelper, splitScreenOptional,
+                displayController, pipUiEventLogger, shellTaskOrganizer, systemWindows);
     }
 }

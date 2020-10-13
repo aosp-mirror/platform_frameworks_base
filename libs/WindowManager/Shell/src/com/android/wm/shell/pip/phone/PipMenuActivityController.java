@@ -18,25 +18,37 @@ package com.android.wm.shell.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
+import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
+import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
-import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -51,6 +63,7 @@ import java.util.List;
 public class PipMenuActivityController {
 
     private static final String TAG = "PipMenuActController";
+    private static final String MENU_WINDOW_TITLE = "PipMenuView";
     private static final boolean DEBUG = false;
 
     public static final int MENU_STATE_NONE = 0;
@@ -85,13 +98,18 @@ public class PipMenuActivityController {
         void onPipShowMenu();
     }
 
-    private Context mContext;
-    private PipTaskOrganizer mPipTaskOrganizer;
-    private PipMediaController mMediaController;
+    private final Matrix mMoveTransform = new Matrix();
+    private final Rect mTmpSourceBounds = new Rect();
+    private final RectF mTmpSourceRectF = new RectF();
+    private final RectF mTmpDestinationRectF = new RectF();
+    private final Context mContext;
+    private final PipMediaController mMediaController;
 
-    private ArrayList<Listener> mListeners = new ArrayList<>();
+    private final ArrayList<Listener> mListeners = new ArrayList<>();
+    private final SystemWindows mSystemWindows;
     private ParceledListSlice<RemoteAction> mAppActions;
     private ParceledListSlice<RemoteAction> mMediaActions;
+    private SyncRtSurfaceTransactionApplier mApplier;
     private int mMenuState;
 
     private PipMenuView mPipMenuView;
@@ -106,10 +124,10 @@ public class PipMenuActivityController {
     };
 
     public PipMenuActivityController(Context context,
-            PipMediaController mediaController, PipTaskOrganizer pipTaskOrganizer) {
+            PipMediaController mediaController, SystemWindows systemWindows) {
         mContext = context;
         mMediaController = mediaController;
-        mPipTaskOrganizer = pipTaskOrganizer;
+        mSystemWindows = systemWindows;
     }
 
     public boolean isMenuVisible() {
@@ -122,9 +140,7 @@ public class PipMenuActivityController {
 
     public void onActivityUnpinned() {
         hideMenu();
-        mPipTaskOrganizer.detachPipMenuViewHost();
-        mPipMenuView = null;
-        mPipMenuInputToken = null;
+        detachPipMenuView();
     }
 
     public void onPinnedStackAnimationEnded() {
@@ -136,15 +152,39 @@ public class PipMenuActivityController {
     private void attachPipMenuView() {
         if (mPipMenuView == null) {
             mPipMenuView = new PipMenuView(mContext, this);
-
         }
 
-        // If we haven't gotten the input toekn, that means we haven't had a success attempt
-        // yet at attaching the PipMenuView
-        if (mPipMenuInputToken == null) {
-            mPipMenuInputToken = mPipTaskOrganizer.attachPipMenuViewHost(mPipMenuView,
-                    getPipMenuLayoutParams(0, 0));
+        mSystemWindows.addView(mPipMenuView, getPipMenuLayoutParams(0, 0), 0, SHELL_ROOT_LAYER_PIP);
+    }
+
+    private void detachPipMenuView() {
+        if (mPipMenuView == null) {
+            return;
         }
+
+        mApplier = null;
+        mSystemWindows.removeView(mPipMenuView);
+        mPipMenuView = null;
+        mPipMenuInputToken = null;
+    }
+
+    /**
+     * Updates the layout parameters of the menu.
+     * @param destinationBounds New Menu bounds.
+     */
+    public void updateMenuBounds(Rect destinationBounds) {
+        mSystemWindows.updateViewLayout(mPipMenuView,
+                getPipMenuLayoutParams(destinationBounds.width(), destinationBounds.height()));
+    }
+
+    /**
+     * Tries to grab a surface control from {@link PipMenuView}. If this isn't available for some
+     * reason (ie. the window isn't ready yet, thus {@link android.view.ViewRootImpl} is
+     * {@code null}), it will get the leash that the WindowlessWM has assigned to it.
+     */
+    public SurfaceControl getSurfaceControl() {
+        SurfaceControl sf = mPipMenuView.getWindowSurfaceControl();
+        return sf != null ? sf : mSystemWindows.getViewSurface(mPipMenuView);
     }
 
     /**
@@ -190,13 +230,92 @@ public class PipMenuActivityController {
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
 
-        if (!mPipTaskOrganizer.isPipMenuViewHostAttached()) {
-            Log.d(TAG, "PipMenu has not been attached yet. Attaching now at showMenuInternal().");
-            attachPipMenuView();
-        }
+        maybeCreateSyncApplier();
 
         mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
                 showResizeHandle);
+    }
+
+    /**
+     * Move the PiP menu, which does a translation and possibly a scale transformation.
+     */
+    public void movePipMenu(@Nullable SurfaceControl pipLeash,
+            @Nullable SurfaceControl.Transaction t,
+            Rect destinationBounds) {
+        if (destinationBounds.isEmpty()) {
+            return;
+        }
+
+        if (!maybeCreateSyncApplier()) {
+            return;
+        }
+
+        // If there is no pip leash supplied, that means the PiP leash is already finalized
+        // resizing and the PiP menu is also resized. We then want to do a scale from the current
+        // new menu bounds.
+        if (pipLeash != null && t != null) {
+            mPipMenuView.getBoundsOnScreen(mTmpSourceBounds);
+        } else {
+            mTmpSourceBounds.set(0, 0, destinationBounds.width(), destinationBounds.height());
+        }
+
+        mTmpSourceRectF.set(mTmpSourceBounds);
+        mTmpDestinationRectF.set(destinationBounds);
+        mMoveTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
+        SurfaceControl surfaceControl = getSurfaceControl();
+        SurfaceParams params = new SurfaceParams.Builder(surfaceControl)
+                .withMatrix(mMoveTransform)
+                .build();
+        if (pipLeash != null && t != null) {
+            SurfaceParams pipParams = new SurfaceParams.Builder(pipLeash)
+                    .withMergeTransaction(t)
+                    .build();
+            mApplier.scheduleApply(params, pipParams);
+        } else {
+            mApplier.scheduleApply(params);
+        }
+    }
+
+    /**
+     * Does an immediate window crop of the PiP menu.
+     */
+    public void resizePipMenu(@Nullable SurfaceControl pipLeash,
+            @Nullable SurfaceControl.Transaction t,
+            Rect destinationBounds) {
+        if (destinationBounds.isEmpty()) {
+            return;
+        }
+
+        if (!maybeCreateSyncApplier()) {
+            return;
+        }
+
+        SurfaceControl surfaceControl = getSurfaceControl();
+        SurfaceParams params = new SurfaceParams.Builder(surfaceControl)
+                .withWindowCrop(destinationBounds)
+                .build();
+        if (pipLeash != null && t != null) {
+            SurfaceParams pipParams = new SurfaceParams.Builder(pipLeash)
+                    .withMergeTransaction(t)
+                    .build();
+            mApplier.scheduleApply(params, pipParams);
+        } else {
+            mApplier.scheduleApply(params);
+        }
+    }
+
+    private boolean maybeCreateSyncApplier() {
+        if (mPipMenuView == null) {
+            Log.v(TAG, "Not going to move PiP since the menu is not created.");
+            return false;
+        }
+
+        if (mApplier == null) {
+            mApplier = new SyncRtSurfaceTransactionApplier(mPipMenuView);
+            mPipMenuInputToken = mPipMenuView.getViewRootImpl().getInputToken();
+        }
+
+        return mApplier != null;
     }
 
     /**
@@ -296,8 +415,13 @@ public class PipMenuActivityController {
      * @param height the PIP stack height.
      */
     public static WindowManager.LayoutParams getPipMenuLayoutParams(int width, int height) {
-        return new WindowManager.LayoutParams(width, height,
-                WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSLUCENT);
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
+                TYPE_APPLICATION_OVERLAY,
+                FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY | FLAG_NOT_TOUCHABLE,
+                PixelFormat.TRANSLUCENT);
+
+        lp.setTitle(MENU_WINDOW_TITLE);
+        return lp;
     }
 
     /**

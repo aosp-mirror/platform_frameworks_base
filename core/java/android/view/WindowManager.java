@@ -133,6 +133,22 @@ public interface WindowManager extends ViewManager {
     /** @hide */
     String INPUT_CONSUMER_RECENTS_ANIMATION = "recents_animation_input_consumer";
 
+    /** @hide */
+    int SHELL_ROOT_LAYER_DIVIDER = 0;
+    /** @hide */
+    int SHELL_ROOT_LAYER_PIP = 1;
+
+    /**
+     * Declares the layer the shell root will belong to. This is for z-ordering.
+     * @hide
+     */
+    @IntDef(prefix = { "SHELL_ROOT_LAYER_" }, value = {
+            SHELL_ROOT_LAYER_DIVIDER,
+            SHELL_ROOT_LAYER_PIP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ShellRootLayer {}
+
     /**
      * Not set up for a transition.
      * @hide

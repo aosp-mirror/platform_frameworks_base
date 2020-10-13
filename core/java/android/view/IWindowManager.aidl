@@ -153,11 +153,10 @@ interface IWindowManager
      * WindowlessWindowManager).
      *
      * @param client an IWindow used for window-level communication (ime, finish draw, etc.).
-     * @param windowType used by WM to determine the z-order. This is the same as the window type
-     *                   used in {@link WindowManager.LayoutParams}.
+     * @param shellRootLayer The container's layer. See WindowManager#ShellRootLayer.
      * @return a SurfaceControl to add things to.
      */
-    SurfaceControl addShellRoot(int displayId, IWindow client, int windowType);
+    SurfaceControl addShellRoot(int displayId, IWindow client, int shellRootLayer);
 
     /**
      * Sets the window token sent to accessibility for a particular shell root. The
@@ -165,7 +164,7 @@ interface IWindowManager
      *
      * @param target The IWindow that accessibility service interfaces with.
      */
-    void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target);
+    void setShellRootAccessibilityWindow(int displayId, int shellRootLayer, IWindow target);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
