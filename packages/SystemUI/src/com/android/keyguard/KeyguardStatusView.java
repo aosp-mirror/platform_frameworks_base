@@ -79,6 +79,11 @@ public class KeyguardStatusView extends GridLayout implements
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
+        public void onLockScreenModeChanged(int mode) {
+            updateLockScreenMode(mode);
+        }
+
+        @Override
         public void onTimeChanged() {
             refreshTime();
         }
@@ -253,6 +258,10 @@ public class KeyguardStatusView extends GridLayout implements
 
     private void refreshTime() {
         mClockView.refresh();
+    }
+
+    private void updateLockScreenMode(int mode) {
+        mClockView.updateLockScreenMode(mode);
     }
 
     private void updateTimeZone(TimeZone timeZone) {
