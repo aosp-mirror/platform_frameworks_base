@@ -19,6 +19,7 @@ package android.app.usage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,6 +33,7 @@ import java.util.Objects;
  * allows apps to understand how much cache to use.
  * {@hide}
  */
+@TestApi
 @SystemApi
 public final class CacheQuotaHint implements Parcelable {
     public static final long QUOTA_NOT_SET = -1;
@@ -44,14 +46,14 @@ public final class CacheQuotaHint implements Parcelable {
      * Create a new request.
      * @param builder A builder for this object.
      */
-    public CacheQuotaHint(Builder builder) {
+    public CacheQuotaHint(@NonNull Builder builder) {
         this.mUuid = builder.mUuid;
         this.mUid = builder.mUid;
         this.mUsageStats = builder.mUsageStats;
         this.mQuota = builder.mQuota;
     }
 
-    public String getVolumeUuid() {
+    @Nullable public String getVolumeUuid() {
         return mUuid;
     }
 
@@ -63,12 +65,12 @@ public final class CacheQuotaHint implements Parcelable {
         return mQuota;
     }
 
-    public UsageStats getUsageStats() {
+    @Nullable public UsageStats getUsageStats() {
         return mUsageStats;
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mUuid);
         dest.writeInt(mUid);
         dest.writeLong(mQuota);
@@ -106,7 +108,7 @@ public final class CacheQuotaHint implements Parcelable {
         public Builder() {
         }
 
-        public Builder(CacheQuotaHint hint) {
+        public Builder(@NonNull CacheQuotaHint hint) {
             setVolumeUuid(hint.getVolumeUuid());
             setUid(hint.getUid());
             setUsageStats(hint.getUsageStats());
