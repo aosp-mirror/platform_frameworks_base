@@ -34,6 +34,7 @@ import android.testing.TestableLooper;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTestCase;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
@@ -67,10 +68,12 @@ public class PipControllerTest extends PipTestCase {
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
     @Mock private PipTouchHandler mMockPipTouchHandler;
     @Mock private WindowManagerShellWrapper mMockWindowManagerShellWrapper;
+    private PipBoundsState mPipBoundsState;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        mPipBoundsState = new PipBoundsState();
 
         mSpiedContext = spy(mContext);
 
@@ -78,9 +81,9 @@ public class PipControllerTest extends PipTestCase {
         when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
 
         mPipController = new PipController(mSpiedContext, mMockdDisplayController,
-                mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipMediaController,
-                mMockPipMenuActivityController, mMockPipTaskOrganizer, mMockPipTouchHandler,
-                mMockWindowManagerShellWrapper);
+                mMockPipAppOpsListener, mMockPipBoundsHandler, mPipBoundsState,
+                mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
+                mMockPipTouchHandler, mMockWindowManagerShellWrapper);
     }
 
     @Test
