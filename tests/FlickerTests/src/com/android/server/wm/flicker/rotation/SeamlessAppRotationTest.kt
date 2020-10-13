@@ -16,29 +16,36 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.content.ComponentName
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.os.Bundle
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.RotationTestBase
-import com.android.server.wm.flicker.dsl.flicker
+import com.android.server.wm.flicker.Flicker
+import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.stopPackage
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -47,150 +54,142 @@ import org.junit.runners.Parameterized
  * Cycle through supported app rotations using seamless rotations.
  * To run this test: `atest FlickerTests:SeamlessAppRotationTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 147659548)
 class SeamlessAppRotationTest(
-    testId: String,
-    private val intent: Intent,
-    beginRotationName: String,
-    endRotationName: String,
-    beginRotation: Int,
-    endRotation: Int
-) : RotationTestBase(beginRotationName, endRotationName, beginRotation, endRotation) {
-    @Test
-    fun test() {
-        var intentId = ""
-        if (intent.extras?.getBoolean(ActivityOptions.EXTRA_STARVE_UI_THREAD) == true) {
-            intentId = "BUSY_UI_THREAD"
-        }
-
-        flicker(instrumentation) {
-            withTag {
-                "changeAppRotation_" + intentId + "_" +
-                        Surface.rotationToString(beginRotation) + "_" +
-                        Surface.rotationToString(endRotation)
-            }
-            repeat { 1 }
-            setup {
-                eachRun {
-                    device.wakeUpAndGoToHomeScreen()
-                    instrumentation.targetContext.startActivity(intent)
-                    device.wait(Until.hasObject(By.pkg(intent.component?.packageName)
-                            .depth(0)), APP_LAUNCH_TIMEOUT)
-                    this.setRotation(beginRotation)
-                }
-            }
-            teardown {
-                eachRun {
-                    stopPackage(
-                            instrumentation.targetContext,
-                            intent.component?.packageName
-                                    ?: error("Unable to determine package name for intent"))
-                    this.setRotation(Surface.ROTATION_0)
-                }
-            }
-            transitions {
-                this.setRotation(endRotation)
-            }
-            assertions {
-                windowManagerTrace {
-                    navBarWindowIsAlwaysVisible(bugId = 140855415)
-                    statusBarWindowIsAlwaysVisible(bugId = 140855415)
-                }
-
-                layersTrace {
-                    navBarLayerIsAlwaysVisible(bugId = 140855415)
-                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
-                    noUncoveredRegions(beginRotation, endRotation, allStates = true)
-                    navBarLayerRotatesAndScales(beginRotation, endRotation)
-                    statusBarLayerRotatesScales(beginRotation, endRotation, enabled = false)
-                }
-
-                layersTrace {
-                    all("appLayerRotates"/*, bugId = 147659548*/) {
-                        val startingPos = WindowUtils.getDisplayBounds(beginRotation)
-                        val endingPos = WindowUtils.getDisplayBounds(endRotation)
-
-                        if (startingPos == endingPos) {
-                            this.hasVisibleRegion(
-                                    intent.component?.packageName ?: "",
-                                    startingPos)
-                        } else {
-                            this.hasVisibleRegion(intent.component?.packageName ?: "", startingPos)
-                                    .then()
-                                    .hasVisibleRegion(intent.component?.packageName
-                                            ?: "", endingPos)
-                        }
-                    }
-
-                    all("noUncoveredRegions"/*, bugId = 147659548*/) {
-                        val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
-                        val endingBounds = WindowUtils.getDisplayBounds(endRotation)
-                        if (startingBounds == endingBounds) {
-                            this.coversAtLeastRegion(startingBounds)
-                        } else {
-                            this.coversAtLeastRegion(startingBounds)
-                                    .then()
-                                    .coversAtLeastRegion(endingBounds)
-                        }
-                    }
-                }
-
-                eventLog {
-                    focusDoesNotChange(bugId = 151179149)
-                }
-            }
-        }
-    }
-
+    testName: String,
+    flickerSpec: Flicker
+) : FlickerTestRunner(testName, flickerSpec) {
     companion object {
         private const val APP_LAUNCH_TIMEOUT: Long = 10000
 
-        // launch test activity that supports seamless rotation with a busy UI thread to miss frames
-        // when the app is asked to redraw
+        private val Bundle.intent: Intent?
+            get() = this.getParcelable(Intent::class.java.simpleName)
+
+        private val Bundle.intentPackageName: String
+            get() = this.intent?.component?.packageName ?: ""
+
+        private val Bundle.intentId get() = if (this.intent?.getBooleanExtra(
+                ActivityOptions.EXTRA_STARVE_UI_THREAD, false) == true) {
+            "BUSY_UI_THREAD"
+        } else {
+            ""
+        }
+
+        private fun Bundle.createConfig(starveUiThread: Boolean): Bundle {
+            val config = this.deepCopy()
+            val intent = Intent()
+            intent.addCategory(Intent.CATEGORY_LAUNCHER)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.component = ComponentName("com.android.server.wm.flicker.testapp",
+                "com.android.server.wm.flicker.testapp.SeamlessRotationActivity")
+
+            intent.putExtra(ActivityOptions.EXTRA_STARVE_UI_THREAD, starveUiThread)
+
+            config.putParcelable(Intent::class.java.simpleName, intent)
+            return config
+        }
+
+        @JvmStatic
+        private fun FlickerTestRunnerFactory.getConfigurations(): List<Bundle> {
+            return this.getConfigRotationTests().flatMap {
+                val defaultRun = it.createConfig(starveUiThread = false)
+                val busyUiRun = it.createConfig(starveUiThread = true)
+                listOf(defaultRun, busyUiRun)
+            }
+        }
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
-            val supportedRotations = intArrayOf(Surface.ROTATION_0, Surface.ROTATION_90)
-            val params = mutableListOf<Array<Any>>()
-            val testIntents = mutableListOf<Intent>()
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val factory = FlickerTestRunnerFactory(instrumentation)
+            val configurations = factory.getConfigurations()
+            return factory.buildRotationTest(configurations) { configuration ->
+                withTestName {
+                    buildTestTag("seamlessRotation_" + configuration.intentId,
+                        app = null, configuration = configuration)
+                }
+                repeat { configuration.repetitions }
+                setup {
+                    test {
+                        device.wakeUpAndGoToHomeScreen()
+                        instrumentation.targetContext.startActivity(configuration.intent)
+                        val searchQuery = By.pkg(configuration.intent?.component?.packageName)
+                            .depth(0)
+                        device.wait(Until.hasObject(searchQuery), APP_LAUNCH_TIMEOUT)
+                    }
+                    eachRun {
+                        this.setRotation(configuration.startRotation)
+                    }
+                }
+                teardown {
+                    test {
+                        this.setRotation(Surface.ROTATION_0)
+                        stopPackage(
+                            instrumentation.targetContext,
+                            configuration.intent?.component?.packageName
+                                ?: error("Unable to determine package name for intent"))
+                    }
+                }
+                transitions {
+                    this.setRotation(configuration.endRotation)
+                }
+                assertions {
+                    windowManagerTrace {
+                        navBarWindowIsAlwaysVisible(bugId = 140855415)
+                        statusBarWindowIsAlwaysVisible(bugId = 140855415)
+                    }
 
-            // launch test activity that supports seamless rotation
-            var intent = Intent(Intent.ACTION_MAIN)
-            intent.component = ActivityOptions.SEAMLESS_ACTIVITY_COMPONENT_NAME
-            intent.flags = FLAG_ACTIVITY_NEW_TASK
-            testIntents.add(intent)
+                    layersTrace {
+                        navBarLayerIsAlwaysVisible(bugId = 140855415)
+                        statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                        noUncoveredRegions(configuration.startRotation,
+                            configuration.endRotation, allStates = false
+                            /*, bugId = 147659548*/)
+                        navBarLayerRotatesAndScales(configuration.startRotation,
+                            configuration.endRotation)
+                        statusBarLayerRotatesScales(configuration.startRotation,
+                            configuration.endRotation, enabled = false)
+                    }
 
-            // launch test activity that supports seamless rotation with a busy UI thread to miss frames
-            // when the app is asked to redraw
-            intent = Intent(intent)
-            intent.putExtra(ActivityOptions.EXTRA_STARVE_UI_THREAD, true)
-            intent.flags = FLAG_ACTIVITY_NEW_TASK
-            testIntents.add(intent)
-            for (testIntent in testIntents) {
-                for (begin in supportedRotations) {
-                    for (end in supportedRotations) {
-                        if (begin != end) {
-                            var testId: String = Surface.rotationToString(begin) +
-                                    "_" + Surface.rotationToString(end)
-                            if (testIntent.extras?.getBoolean(
-                                            ActivityOptions.EXTRA_STARVE_UI_THREAD) == true) {
-                                testId += "_" + "BUSY_UI_THREAD"
+                    layersTrace {
+                        val startingBounds = WindowUtils
+                            .getDisplayBounds(configuration.startRotation)
+                        val endingBounds = WindowUtils
+                            .getDisplayBounds(configuration.endRotation)
+
+                        all("appLayerRotates"/*, bugId = 147659548*/) {
+                            if (startingBounds == endingBounds) {
+                                this.hasVisibleRegion(
+                                    configuration.intentPackageName, startingBounds)
+                            } else {
+                                this.hasVisibleRegion(configuration.intentPackageName,
+                                    startingBounds)
+                                    .then()
+                                    .hasVisibleRegion(configuration.intentPackageName,
+                                        endingBounds)
                             }
-                            params.add(arrayOf(
-                                    testId,
-                                    testIntent,
-                                    Surface.rotationToString(begin),
-                                    Surface.rotationToString(end),
-                                    begin,
-                                    end))
                         }
+
+                        all("noUncoveredRegions"/*, bugId = 147659548*/) {
+                            if (startingBounds == endingBounds) {
+                                this.coversAtLeastRegion(startingBounds)
+                            } else {
+                                this.coversAtLeastRegion(startingBounds)
+                                    .then()
+                                    .coversAtLeastRegion(endingBounds)
+                            }
+                        }
+                    }
+
+                    eventLog {
+                        focusDoesNotChange(bugId = 151179149)
                     }
                 }
             }
-            return params
         }
     }
 }

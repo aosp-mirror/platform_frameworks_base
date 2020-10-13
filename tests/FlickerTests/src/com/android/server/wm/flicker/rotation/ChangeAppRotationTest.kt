@@ -16,24 +16,30 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import android.view.Surface
-import com.android.server.wm.flicker.NonRotationTestBase.Companion.SCREENSHOT_LAYER
-import com.android.server.wm.flicker.RotationTestBase
-import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.flicker.dsl.flicker
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.Flicker
+import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
+import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -42,84 +48,95 @@ import org.junit.runners.Parameterized
  * Cycle through supported app rotations.
  * To run this test: `atest FlickerTest:ChangeAppRotationTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ChangeAppRotationTest(
-    beginRotationName: String,
-    endRotationName: String,
-    beginRotation: Int,
-    endRotation: Int
-) : RotationTestBase(beginRotationName, endRotationName, beginRotation, endRotation) {
-    @Test
-    fun test() {
-        val testApp = StandardAppHelper(instrumentation,
+    testName: String,
+    flickerSpec: Flicker
+) : FlickerTestRunner(testName, flickerSpec) {
+    companion object {
+        private const val SCREENSHOT_LAYER = "RotationLayer"
+
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<Array<Any>> {
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
-
-        flicker(instrumentation) {
-            withTag {
-                buildTestTag("changeAppRotation", testApp, beginRotation, endRotation)
-            }
-            repeat { 1 }
-            setup {
-                test {
-                    device.wakeUpAndGoToHomeScreen()
-                    testApp.open()
-                }
-                eachRun {
-                    this.setRotation(beginRotation)
-                }
-            }
-            teardown {
-                eachRun {
-                    this.setRotation(Surface.ROTATION_0)
-                }
-                test {
-                    testApp.exit()
-                }
-            }
-            transitions {
-                this.setRotation(endRotation)
-            }
-            assertions {
-                windowManagerTrace {
-                    navBarWindowIsAlwaysVisible()
-                    statusBarWindowIsAlwaysVisible()
-                }
-
-                layersTrace {
-                    navBarLayerIsAlwaysVisible(bugId = 140855415)
-                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
-                    noUncoveredRegions(beginRotation, endRotation, allStates = false)
-                    navBarLayerRotatesAndScales(beginRotation, endRotation)
-                    statusBarLayerRotatesScales(beginRotation, endRotation)
-                }
-
-                layersTrace {
-                    val startingPos = WindowUtils.getDisplayBounds(beginRotation)
-                    val endingPos = WindowUtils.getDisplayBounds(endRotation)
-
-                    start("appLayerRotates_StartingPos") {
-                        this.hasVisibleRegion(testApp.getPackage(), startingPos)
+            return FlickerTestRunnerFactory(instrumentation)
+                .buildRotationTest { configuration ->
+                    withTestName {
+                        buildTestTag(
+                            "changeAppRotation", testApp, configuration)
                     }
-
-                    end("appLayerRotates_EndingPos") {
-                        this.hasVisibleRegion(testApp.getPackage(), endingPos)
+                    repeat { configuration.repetitions }
+                    setup {
+                        test {
+                            device.wakeUpAndGoToHomeScreen()
+                            testApp.open()
+                        }
+                        eachRun {
+                            this.setRotation(configuration.startRotation)
+                        }
                     }
+                    teardown {
+                        eachRun {
+                            this.setRotation(Surface.ROTATION_0)
+                        }
+                        test {
+                            testApp.exit()
+                        }
+                    }
+                    transitions {
+                        this.setRotation(configuration.endRotation)
+                    }
+                    assertions {
+                        windowManagerTrace {
+                            navBarWindowIsAlwaysVisible()
+                            statusBarWindowIsAlwaysVisible()
+                        }
 
-                    all("screenshotLayerBecomesInvisible") {
-                        this.showsLayer(testApp.getPackage())
-                                .then()
-                                .showsLayer(SCREENSHOT_LAYER)
-                                .then()
+                        layersTrace {
+                            navBarLayerIsAlwaysVisible(bugId = 140855415)
+                            statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                            noUncoveredRegions(configuration.startRotation,
+                                configuration.endRotation, allStates = false)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                configuration.endRotation)
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                configuration.endRotation)
+                        }
+
+                        layersTrace {
+                            val startingPos = WindowUtils.getDisplayBounds(
+                                configuration.startRotation)
+                            val endingPos = WindowUtils.getDisplayBounds(
+                                configuration.endRotation)
+
+                            start("appLayerRotates_StartingPos") {
+                                this.hasVisibleRegion(testApp.getPackage(), startingPos)
+                            }
+
+                            end("appLayerRotates_EndingPos") {
+                                this.hasVisibleRegion(testApp.getPackage(), endingPos)
+                            }
+
+                            all("screenshotLayerBecomesInvisible") {
+                                this.showsLayer(testApp.getPackage())
+                                        .then()
+                                        .showsLayer(SCREENSHOT_LAYER)
+                                        .then()
                                 showsLayer(testApp.getPackage())
+                            }
+                        }
+
+                        eventLog {
+                            focusDoesNotChange(bugId = 151179149)
+                        }
                     }
                 }
-
-                eventLog {
-                    focusDoesNotChange(bugId = 151179149)
-                }
-            }
         }
     }
 }
