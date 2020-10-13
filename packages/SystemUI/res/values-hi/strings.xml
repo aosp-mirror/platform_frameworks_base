@@ -1020,14 +1020,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"नीचे ले जाएं"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"बाईं ओर ले जाएं"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"दाईं ओर ले जाएं"</string>
-    <!-- no translation found for magnification_mode_switch_description (2698364322069934733) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_full_screen (2882507327576770574) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_window (8597100249594076965) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_click_label (2786203505805898199) -->
-    <skip />
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ज़ूम करने की सुविधा वाला स्विच"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"पूरी स्क्रीन को ज़ूम करें"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
+    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस कंट्रोल सेट अप करें"</string>
