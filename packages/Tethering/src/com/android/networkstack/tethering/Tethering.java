@@ -326,7 +326,7 @@ public class Tethering {
         // It is OK for the configuration to be passed to the PrivateAddressCoordinator at
         // construction time because the only part of the configuration it uses is
         // shouldEnableWifiP2pDedicatedIp(), and currently do not support changing that.
-        mPrivateAddressCoordinator = new PrivateAddressCoordinator(mContext, mConfig);
+        mPrivateAddressCoordinator = mDeps.getPrivateAddressCoordinator(mContext, mConfig);
 
         // Must be initialized after tethering configuration is loaded because BpfCoordinator
         // constructor needs to use the configuration.
