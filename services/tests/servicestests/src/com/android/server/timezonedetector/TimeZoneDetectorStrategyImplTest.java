@@ -91,6 +91,7 @@ public class TimeZoneDetectorStrategyImplTest {
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(false)
                     .setAutoDetectionSupported(true)
+                    .setGeoDetectionSupported(true)
                     .setAutoDetectionEnabled(false)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(false)
@@ -100,6 +101,7 @@ public class TimeZoneDetectorStrategyImplTest {
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(false)
                     .setAutoDetectionSupported(true)
+                    .setGeoDetectionSupported(true)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(true)
@@ -109,32 +111,36 @@ public class TimeZoneDetectorStrategyImplTest {
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionSupported(false)
+                    .setGeoDetectionSupported(false)
                     .setAutoDetectionEnabled(false)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(false)
+                    .build();
+
+    private static final ConfigurationInternal CONFIG_INT_AUTO_SUPPORTED_GEO_NOT_SUPPORTED =
+            new ConfigurationInternal.Builder(USER_ID)
+                    .setUserConfigAllowed(true)
+                    .setAutoDetectionSupported(true)
+                    .setGeoDetectionSupported(false)
+                    .setAutoDetectionEnabled(true)
+                    .setLocationEnabled(true)
+                    .setGeoDetectionEnabled(true)
                     .build();
 
     private static final ConfigurationInternal CONFIG_INT_AUTO_DISABLED_GEO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionSupported(true)
+                    .setGeoDetectionSupported(true)
                     .setAutoDetectionEnabled(false)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(false)
                     .build();
 
-    private static final ConfigurationInternal CONFIG_INT_AUTO_DISABLED_GEO_ENABLED =
-            new ConfigurationInternal.Builder(USER_ID)
-                    .setUserConfigAllowed(true)
-                    .setAutoDetectionSupported(true)
-                    .setAutoDetectionEnabled(false)
-                    .setLocationEnabled(true)
-                    .setGeoDetectionEnabled(true)
-                    .build();
-
     private static final ConfigurationInternal CONFIG_INT_AUTO_ENABLED_GEO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setAutoDetectionSupported(true)
+                    .setGeoDetectionSupported(true)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)
@@ -144,6 +150,7 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final ConfigurationInternal CONFIG_INT_AUTO_ENABLED_GEO_ENABLED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setAutoDetectionSupported(true)
+                    .setGeoDetectionSupported(true)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)
@@ -223,14 +230,14 @@ public class TimeZoneDetectorStrategyImplTest {
         // The settings should not have been changed: user shouldn't have the capabilities.
         script.verifyConfigurationNotChanged();
 
-        // Update the configuration with auto detection enabled.
+        // Try to update the configuration with auto detection enabled.
         script.simulateUpdateConfiguration(
                 USER_ID, CONFIG_AUTO_ENABLED,  false /* expectedResult */);
 
         // The settings should not have been changed: user shouldn't have the capabilities.
         script.verifyConfigurationNotChanged();
 
-        // Try to  update the configuration to enable geolocation time zone detection.
+        // Try to update the configuration to enable geolocation time zone detection.
         script.simulateUpdateConfiguration(
                 USER_ID, CONFIG_GEO_DETECTION_ENABLED,  false /* expectedResult */);
 
@@ -249,11 +256,43 @@ public class TimeZoneDetectorStrategyImplTest {
         // The settings should not have been changed: user shouldn't have the capabilities.
         script.verifyConfigurationNotChanged();
 
-        // Update the configuration with auto detection enabled.
+        // Try to update the configuration with auto detection enabled.
         script.simulateUpdateConfiguration(
                 USER_ID, CONFIG_AUTO_ENABLED, false /* expectedResult */);
 
         // The settings should not have been changed: user shouldn't have the capabilities.
+        script.verifyConfigurationNotChanged();
+    }
+
+    @Test
+    public void testUpdateConfiguration_autoDetectSupportedGeoNotSupported() {
+        Script script = new Script().initializeConfig(CONFIG_INT_AUTO_SUPPORTED_GEO_NOT_SUPPORTED);
+
+        // Update the configuration with auto detection disabled.
+        script.simulateUpdateConfiguration(
+                USER_ID, CONFIG_AUTO_DISABLED, true /* expectedResult */);
+
+        // The settings should have been changed and the StrategyListener onChange() called.
+        ConfigurationInternal expectedConfig =
+                new ConfigurationInternal.Builder(CONFIG_INT_AUTO_SUPPORTED_GEO_NOT_SUPPORTED)
+                        .setAutoDetectionEnabled(false)
+                        .build();
+        script.verifyConfigurationChangedAndReset(expectedConfig);
+
+        // Try to update the configuration with geo detection disabled.
+        script.simulateUpdateConfiguration(
+                USER_ID, CONFIG_GEO_DETECTION_DISABLED, false /* expectedResult */);
+
+        // The settings should not have been changed: user shouldn't have the capability to modify
+        // the setting when the feature is disabled.
+        script.verifyConfigurationNotChanged();
+
+        // Try to update the configuration with geo detection enabled.
+        script.simulateUpdateConfiguration(
+                USER_ID, CONFIG_GEO_DETECTION_ENABLED, false /* expectedResult */);
+
+        // The settings should not have been changed: user shouldn't have the capability to modify
+        // the setting when the feature is disabled.
         script.verifyConfigurationNotChanged();
     }
 
