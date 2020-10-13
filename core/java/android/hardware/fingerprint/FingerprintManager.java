@@ -636,13 +636,24 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Finishes enrollment and cancels the current auth token.
+     * Revokes the current challenge.
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void revokeChallenge() {
+        // On HALs with only single in-flight challenge such as IBiometricsFingerprint@2.1,
+        // this parameter is ignored.
+        revokeChallenge(0L);
+    }
+
+    /**
+     * Revokes the specified challenge.
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void revokeChallenge(long challenge) {
         if (mService != null) try {
-            mService.revokeChallenge(mToken, mContext.getOpPackageName());
+            mService.revokeChallenge(mToken, mContext.getOpPackageName(), challenge);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

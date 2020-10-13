@@ -34,7 +34,7 @@ public class FingerprintGenerateChallengeClient extends GenerateChallengeClient<
     private static final String TAG = "FingerprintGenerateChallengeClient";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
-    private IGenerateChallengeCallback mGenerateChallengeCallback =
+    private final IGenerateChallengeCallback mGenerateChallengeCallback =
             new IGenerateChallengeCallback.Stub() {
         @Override
         public void onChallengeGenerated(int sensorId, int userId, long challenge) {

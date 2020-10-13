@@ -187,7 +187,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void revokeChallenge(IBinder token, String opPackageName) {
+        public void revokeChallenge(IBinder token, String opPackageName, long challenge) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -196,7 +196,8 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            provider.second.scheduleRevokeChallenge(provider.first, token, opPackageName);
+            provider.second.scheduleRevokeChallenge(provider.first, token, opPackageName,
+                    challenge);
         }
 
         @Override // Binder call

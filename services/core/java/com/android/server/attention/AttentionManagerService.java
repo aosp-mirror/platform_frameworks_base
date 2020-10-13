@@ -26,6 +26,7 @@ import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNO
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.content.BroadcastReceiver;
@@ -68,6 +69,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * An attention service implementation that runs in System Server process.
@@ -81,21 +83,15 @@ public class AttentionManagerService extends SystemService {
     /** Service will unbind if connection is not used for that amount of time. */
     private static final long CONNECTION_TTL_MILLIS = 60_000;
 
-    /**
-     * We cache the DeviceConfig values to avoid frequent ashmem-related checks; if the cached
-     * values are stale for more than this duration we will update the cache.
-     */
-    @VisibleForTesting static final long DEVICE_CONFIG_MAX_STALENESS_MILLIS = 4 * 60 * 60 * 1000L;
-
-    @VisibleForTesting long mLastReadDeviceConfigMillis = Long.MIN_VALUE;
-
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
-    private static final String KEY_SERVICE_ENABLED = "service_enabled";
+    @VisibleForTesting
+    static final String KEY_SERVICE_ENABLED = "service_enabled";
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
-    private boolean mIsServiceEnabledCached;
+    @VisibleForTesting
+    boolean mIsServiceEnabled;
 
     /**
      * DeviceConfig flag name, describes how much time we consider a result fresh; if the check
@@ -108,7 +104,8 @@ public class AttentionManagerService extends SystemService {
     @VisibleForTesting
     static final long DEFAULT_STALE_AFTER_MILLIS = 1_000;
 
-    private long mStaleAfterMillisCached;
+    @VisibleForTesting
+    long mStaleAfterMillis;
 
     /** The size of the buffer that stores recent attention check results. */
     @VisibleForTesting
@@ -156,6 +153,11 @@ public class AttentionManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mContext.registerReceiver(new ScreenStateReceiver(),
                     new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
+            readValuesFromDeviceConfig();
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                    ActivityThread.currentApplication().getMainExecutor(),
+                    (properties) -> onDeviceConfigChange(properties.getKeyset()));
         }
     }
 
@@ -179,17 +181,9 @@ public class AttentionManagerService extends SystemService {
         return mComponentName != null;
     }
 
-    /**
-     * Returns {@code true} if attention service is supported on this device.
-     */
-    @VisibleForTesting
-    protected boolean isAttentionServiceSupported() {
-        return isServiceEnabled();
-    }
-
-    private boolean isServiceEnabled() {
-        ensureDeviceConfigCachedValuesFreshness();
-        return mIsServiceEnabledCached;
+    private boolean getIsServiceEnabled() {
+        return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, KEY_SERVICE_ENABLED,
+                DEFAULT_SERVICE_ENABLED);
     }
 
     /**
@@ -198,39 +192,38 @@ public class AttentionManagerService extends SystemService {
      */
     @VisibleForTesting
     protected long getStaleAfterMillis() {
-        ensureDeviceConfigCachedValuesFreshness();
-        return mStaleAfterMillisCached;
-    }
-
-    @VisibleForTesting
-    protected void ensureDeviceConfigCachedValuesFreshness() {
-        final long now = SystemClock.elapsedRealtime();
-        final long whenBecomesStale =
-                mLastReadDeviceConfigMillis + DEVICE_CONFIG_MAX_STALENESS_MILLIS;
-        if (now < whenBecomesStale) {
-            if (DEBUG) {
-                Slog.d(LOG_TAG,
-                        "Cached values are still fresh. Refreshed at=" + mLastReadDeviceConfigMillis
-                                + ", now=" + now);
-            }
-            return;
-        }
-
-        mIsServiceEnabledCached = DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                KEY_SERVICE_ENABLED,
-                DEFAULT_SERVICE_ENABLED);
-
         final long millis = DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_STALE_AFTER_MILLIS,
                 DEFAULT_STALE_AFTER_MILLIS);
+
         if (millis < 0 || millis > 10_000) {
             Slog.w(LOG_TAG, "Bad flag value supplied for: " + KEY_STALE_AFTER_MILLIS);
-            mStaleAfterMillisCached = DEFAULT_STALE_AFTER_MILLIS;
-        } else {
-            mStaleAfterMillisCached = millis;
+            return DEFAULT_STALE_AFTER_MILLIS;
         }
 
-        mLastReadDeviceConfigMillis = now;
+        return millis;
+    }
+
+    private void onDeviceConfigChange(@NonNull Set<String> keys) {
+        for (String key : keys) {
+            switch (key) {
+                case KEY_SERVICE_ENABLED:
+                case KEY_STALE_AFTER_MILLIS:
+                    readValuesFromDeviceConfig();
+                    return;
+                default:
+                    Slog.i(LOG_TAG, "Ignoring change on " + key);
+            }
+        }
+    }
+
+    private void readValuesFromDeviceConfig() {
+        mIsServiceEnabled = getIsServiceEnabled();
+        mStaleAfterMillis = getStaleAfterMillis();
+
+        Slog.i(LOG_TAG, "readValuesFromDeviceConfig():"
+                + "\nmIsServiceEnabled=" + mIsServiceEnabled
+                + "\nmStaleAfterMillis=" + mStaleAfterMillis);
     }
 
     /**
@@ -246,7 +239,7 @@ public class AttentionManagerService extends SystemService {
     boolean checkAttention(long timeout, AttentionCallbackInternal callbackInternal) {
         Objects.requireNonNull(callbackInternal);
 
-        if (!isAttentionServiceSupported()) {
+        if (!mIsServiceEnabled) {
             Slog.w(LOG_TAG, "Trying to call checkAttention() on an unsupported device.");
             return false;
         }
@@ -272,7 +265,7 @@ public class AttentionManagerService extends SystemService {
             // throttle frequent requests
             final AttentionCheckCache cache = mAttentionCheckCacheBuffer == null ? null
                     : mAttentionCheckCacheBuffer.getLast();
-            if (cache != null && now < cache.mLastComputed + getStaleAfterMillis()) {
+            if (cache != null && now < cache.mLastComputed + mStaleAfterMillis) {
                 callbackInternal.onSuccess(cache.mResult, cache.mTimestamp);
                 return true;
             }
@@ -379,7 +372,8 @@ public class AttentionManagerService extends SystemService {
 
     private void dumpInternal(IndentingPrintWriter ipw) {
         ipw.println("Attention Manager Service (dumpsys attention) state:\n");
-        ipw.println("isServiceEnabled=" + isServiceEnabled());
+        ipw.println("isServiceEnabled=" + mIsServiceEnabled);
+        ipw.println("mStaleAfterMillis=" + mStaleAfterMillis);
         ipw.println("AttentionServicePackageName=" + getServiceConfigPackage(mContext));
         ipw.println("Resolved component:");
         if (mComponentName != null) {
@@ -403,7 +397,7 @@ public class AttentionManagerService extends SystemService {
     private final class LocalService extends AttentionManagerInternal {
         @Override
         public boolean isAttentionServiceSupported() {
-            return AttentionManagerService.this.isAttentionServiceSupported();
+            return AttentionManagerService.this.mIsServiceEnabled;
         }
 
         @Override

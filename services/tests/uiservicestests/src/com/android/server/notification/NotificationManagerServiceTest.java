@@ -43,6 +43,9 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_MUTABLE;
+import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -110,6 +113,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -248,6 +252,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     Resources mResources;
     @Mock
     RankingHandler mRankingHandler;
+    @Mock
+    ActivityManagerInternal mAmi;
+
+    @Mock
+    IIntentSender pi1;
 
     private static final int MAX_POST_DELAY = 1000;
 
@@ -392,7 +401,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         DeviceIdleInternal deviceIdleInternal = mock(DeviceIdleInternal.class);
         when(deviceIdleInternal.getNotificationAllowlistDuration()).thenReturn(3000L);
-        ActivityManagerInternal activityManagerInternal = mock(ActivityManagerInternal.class);
 
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
@@ -403,7 +411,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.addService(DeviceIdleInternal.class, deviceIdleInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
-        LocalServices.addService(ActivityManagerInternal.class, activityManagerInternal);
+        LocalServices.addService(ActivityManagerInternal.class, mAmi);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -477,7 +485,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mGroupHelper, mAm, mAtm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mock(TelephonyManager.class));
+                mock(TelephonyManager.class), mAmi);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
@@ -674,7 +682,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
         Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
                 .setContentTitle("foo")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
         if (extender != null) {
             nb.extend(extender);
         }
@@ -810,6 +819,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         PendingIntent pendingIntent = mock(PendingIntent.class);
         Intent intent = mock(Intent.class);
         when(pendingIntent.getIntent()).thenReturn(intent);
+        when(pendingIntent.getTarget()).thenReturn(pi1);
 
         ActivityInfo info = new ActivityInfo();
         info.resizeMode = RESIZE_MODE_RESIZEABLE;
@@ -7133,5 +7143,160 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         inOrder.verify(parent).recordDismissalSentiment(anyInt());
         inOrder.verify(child).recordDismissalSentiment(anyInt());
+    }
+
+    @Test
+    public void testImmutableBubbleIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(pi1))
+                .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
+        NotificationRecord r = generateMessageBubbleNotifRecord(true,
+                mTestNotificationChannel, 7, "testImmutableBubbleIntent", null, false);
+        try {
+            mBinderService.enqueueNotificationWithTag(PKG, PKG, r.getSbn().getTag(),
+                    r.getSbn().getId(), r.getNotification(), r.getSbn().getUserId());
+
+            waitForIdle();
+            fail("Allowed a bubble with an immutable intent to be posted");
+        } catch (IllegalArgumentException e) {
+            // good
+        }
+    }
+
+    @Test
+    public void testMutableBubbleIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(pi1))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        NotificationRecord r = generateMessageBubbleNotifRecord(true,
+                mTestNotificationChannel, 7, "testMutableBubbleIntent", null, false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, r.getSbn().getTag(),
+                r.getSbn().getId(), r.getNotification(), r.getSbn().getUserId());
+
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(r.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testImmutableDirectReplyActionIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
+        NotificationRecord r = generateMessageBubbleNotifRecord(false,
+                mTestNotificationChannel, 7, "testImmutableDirectReplyActionIntent", null, false);
+        try {
+            mBinderService.enqueueNotificationWithTag(PKG, PKG, r.getSbn().getTag(),
+                    r.getSbn().getId(), r.getNotification(), r.getSbn().getUserId());
+
+            waitForIdle();
+            fail("Allowed a direct reply with an immutable intent to be posted");
+        } catch (IllegalArgumentException e) {
+            // good
+        }
+    }
+
+    @Test
+    public void testMutableDirectReplyActionIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        NotificationRecord r = generateMessageBubbleNotifRecord(false,
+                mTestNotificationChannel, 7, "testMutableDirectReplyActionIntent", null, false);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, r.getSbn().getTag(),
+                r.getSbn().getId(), r.getNotification(), r.getSbn().getUserId());
+
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(r.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testImmutableDirectReplyContextualActionIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        ArrayList<Notification.Action> extraAction = new ArrayList<>();
+        RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
+        PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
+        Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
+                inputIntent).addRemoteInput(remoteInput)
+                .build();
+        extraAction.add(replyAction);
+        Bundle signals = new Bundle();
+        signals.putParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, extraAction);
+        Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals, "",
+                r.getUser());
+        r.addAdjustment(adjustment);
+        r.applyAdjustments();
+
+        try {
+            mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
+                    r.getSbn().getTag(), r,false);
+            fail("Allowed a contextual direct reply with an immutable intent to be posted");
+        } catch (IllegalArgumentException e) {
+            // good
+        }
+    }
+
+    @Test
+    public void testMutableDirectReplyContextualActionIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        ArrayList<Notification.Action> extraAction = new ArrayList<>();
+        RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
+        PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
+        Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
+                inputIntent).addRemoteInput(remoteInput)
+                .build();
+        extraAction.add(replyAction);
+        Bundle signals = new Bundle();
+        signals.putParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, extraAction);
+        Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals, "",
+                r.getUser());
+        r.addAdjustment(adjustment);
+        r.applyAdjustments();
+
+        mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
+                r.getSbn().getTag(), r,false);
+    }
+
+    @Test
+    public void testImmutableActionIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, r.getSbn().getTag(),
+                r.getSbn().getId(), r.getNotification(), r.getSbn().getUserId());
+
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(r.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testImmutableContextualActionIntent() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        ArrayList<Notification.Action> extraAction = new ArrayList<>();
+        extraAction.add(new Notification.Action(0, "hello", null));
+        Bundle signals = new Bundle();
+        signals.putParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, extraAction);
+        Adjustment adjustment = new Adjustment(r.getSbn().getPackageName(), r.getKey(), signals, "",
+                r.getUser());
+        r.addAdjustment(adjustment);
+        r.applyAdjustments();
+
+        mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
+                    r.getSbn().getTag(), r,false);
     }
 }

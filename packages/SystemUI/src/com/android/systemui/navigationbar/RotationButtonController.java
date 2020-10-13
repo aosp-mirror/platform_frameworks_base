@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.RotationLockController;
 
@@ -156,7 +157,7 @@ public class RotationButtonController {
             throw e.rethrowFromSystemServer();
         }
 
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
     }
 
     void unregisterListeners() {
@@ -171,7 +172,7 @@ public class RotationButtonController {
             throw e.rethrowFromSystemServer();
         }
 
-        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }
 
     void addRotationCallback(Consumer<Integer> watcher) {

@@ -413,6 +413,7 @@ public class DozeMachine {
         pw.print(" state="); pw.println(mState);
         pw.print(" wakeLockHeldForCurrentState="); pw.println(mWakeLockHeldForCurrentState);
         pw.print(" wakeLock="); pw.println(mWakeLock);
+        pw.print(" isDozeSuppressed="); pw.println(mDozeHost.isDozeSuppressed());
         pw.println("Parts:");
         for (Part p : mParts) {
             p.dump(pw);

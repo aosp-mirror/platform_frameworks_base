@@ -87,8 +87,8 @@ import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
@@ -480,7 +480,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
         statusBarStateController.addCallback(mStatusBarStateListener);
 
         mTaskStackListener = new BubbleTaskStackListener();
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
 
         try {
             windowManagerShellWrapper.addPinnedStackListener(new BubblesImeListener());

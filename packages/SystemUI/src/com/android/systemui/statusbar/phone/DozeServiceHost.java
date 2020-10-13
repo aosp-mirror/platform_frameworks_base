@@ -456,6 +456,7 @@ public final class DozeServiceHost implements DozeHost {
             return;
         }
         mSuppressed = suppressed;
+        mDozeLog.traceDozingSuppressed(mSuppressed);
         for (Callback callback : mCallbacks) {
             callback.onDozeSuppressedChanged(suppressed);
         }

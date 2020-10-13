@@ -123,6 +123,14 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Appends dozing event to the logs
+     * @param suppressed true if dozing is suppressed
+     */
+    public void traceDozingSuppressed(boolean suppressed) {
+        mLogger.logDozingSuppressed(suppressed);
+    }
+
+    /**
      * Appends fling event to the logs
      */
     public void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,

@@ -47,6 +47,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -344,6 +345,7 @@ public class Dependency {
     @Inject Lazy<DisplayImeController> mDisplayImeController;
     @Inject Lazy<RecordingController> mRecordingController;
     @Inject Lazy<ProtoTracer> mProtoTracer;
+    @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
 
     @Inject
     public Dependency() {
@@ -540,6 +542,8 @@ public class Dependency {
         mProviders.put(AutoHideController.class, mAutoHideController::get);
 
         mProviders.put(RecordingController.class, mRecordingController::get);
+
+        mProviders.put(MediaOutputDialogFactory.class, mMediaOutputDialogFactory::get);
 
         Dependency.setInstance(this);
     }

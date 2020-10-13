@@ -24,6 +24,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -58,6 +59,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull private final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
     @NonNull private final ClientMonitor.LazyDaemon<IFingerprint> mLazyDaemon;
     @NonNull private final Handler mHandler;
+    @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
 
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
 
@@ -69,6 +71,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mSensors = new SparseArray<>();
         mLazyDaemon = this::getHalInstance;
         mHandler = new Handler(Looper.getMainLooper());
+        mLockoutResetDispatcher = lockoutResetDispatcher;
 
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
@@ -157,7 +160,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull
     @Override
     public List<FingerprintSensorPropertiesInternal> getSensorProperties() {
-        List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
+        final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
         for (int i = 0; i < mSensors.size(); i++) {
             props.add(mSensors.valueAt(i).getSensorProperties());
         }
@@ -166,7 +169,27 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken) {
+        mHandler.post(() -> {
+            final IFingerprint daemon = getHalInstance();
+            if (daemon == null) {
+                Slog.e(getTag(), "Null daemon during resetLockout, sensorId: " + sensorId);
+                return;
+            }
 
+            try {
+                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
+                    scheduleCreateSessionWithoutHandler(daemon, sensorId, userId);
+                }
+
+                final FingerprintResetLockoutClient client = new FingerprintResetLockoutClient(
+                        mContext, mSensors.get(sensorId).getLazySession(), userId,
+                        mContext.getOpPackageName(), sensorId, hardwareAuthToken,
+                        mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher);
+                scheduleForSensor(sensorId, client);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Remote exception when scheduling resetLockout", e);
+            }
+        });
     }
 
     @Override
@@ -176,14 +199,19 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintGenerateChallengeClient client =
                     new FingerprintGenerateChallengeClient(mContext, mLazyDaemon, token,
                             new ClientMonitorCallbackConverter(receiver), opPackageName, sensorId);
-            mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+            scheduleForSensor(sensorId, client);
         });
     }
 
     @Override
     public void scheduleRevokeChallenge(int sensorId, @NonNull IBinder token,
-            @NonNull String opPackageName) {
-
+            @NonNull String opPackageName, long challenge) {
+        mHandler.post(() -> {
+            final FingerprintRevokeChallengeClient client =
+                    new FingerprintRevokeChallengeClient(mContext, mLazyDaemon, token,
+                            opPackageName, sensorId, challenge);
+            scheduleForSensor(sensorId, client);
+        });
     }
 
     @Override
@@ -194,6 +222,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
                 Slog.e(getTag(), "Null daemon during enroll, sensorId: " + sensorId);
+
+                try {
+                    receiver.onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */);
+                } catch (RemoteException e) {
+                    Slog.e(getTag(), "Unable to send HW_UNAVAILABLE", e);
+                }
                 return;
             }
 

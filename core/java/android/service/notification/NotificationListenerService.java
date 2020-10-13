@@ -1865,8 +1865,9 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns whether this notification is a conversation notification.
-         * @hide
+         * Returns whether this notification is a conversation notification, and would appear
+         * in the conversation section of the notification shade, on devices that separate that
+         * type of notification.
          */
         public boolean isConversation() {
             return mIsConversation;
@@ -1881,7 +1882,10 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * @hide
+         * Returns the shortcut information associated with this notification, if it is a
+         * {@link #isConversation() conversation notification}.
+         * <p>This might be null even if the notification is a conversation notification, if
+         * the posting app hasn't opted into the full conversation feature set yet.</p>
          */
         public @Nullable ShortcutInfo getShortcutInfo() {
             return mShortcutInfo;

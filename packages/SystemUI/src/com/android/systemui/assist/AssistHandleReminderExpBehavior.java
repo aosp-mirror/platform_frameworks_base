@@ -47,6 +47,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 
 import java.io.PrintWriter;
@@ -171,6 +172,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private final DeviceConfigHelper mDeviceConfigHelper;
     private final Lazy<StatusBarStateController> mStatusBarStateController;
     private final Lazy<ActivityManagerWrapper> mActivityManagerWrapper;
+    private final Lazy<TaskStackChangeListeners> mTaskStackChangeListeners;
     private final Lazy<OverviewProxyService> mOverviewProxyService;
     private final Lazy<SysUiState> mSysUiFlagContainer;
     private final Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
@@ -207,6 +209,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             DeviceConfigHelper deviceConfigHelper,
             Lazy<StatusBarStateController> statusBarStateController,
             Lazy<ActivityManagerWrapper> activityManagerWrapper,
+            Lazy<TaskStackChangeListeners> taskStackChangeListeners,
             Lazy<OverviewProxyService> overviewProxyService,
             Lazy<SysUiState> sysUiFlagContainer,
             Lazy<WakefulnessLifecycle> wakefulnessLifecycle,
@@ -218,6 +221,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mDeviceConfigHelper = deviceConfigHelper;
         mStatusBarStateController = statusBarStateController;
         mActivityManagerWrapper = activityManagerWrapper;
+        mTaskStackChangeListeners = taskStackChangeListeners;
         mOverviewProxyService = overviewProxyService;
         mSysUiFlagContainer = sysUiFlagContainer;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -245,7 +249,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         ActivityManager.RunningTaskInfo runningTaskInfo =
                 mActivityManagerWrapper.get().getRunningTask();
         mRunningTaskId = runningTaskInfo == null ? 0 : runningTaskInfo.taskId;
-        mActivityManagerWrapper.get().registerTaskStackListener(mTaskStackChangeListener);
+        mTaskStackChangeListeners.get().registerTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.get().addCallback(mOverviewProxyListener);
         mSysUiFlagContainer.get().addCallback(mSysUiStateCallback);
         mIsAwake = mWakefulnessLifecycle.get().getWakefulness()
@@ -300,7 +304,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             mContext = null;
         }
         mStatusBarStateController.get().removeCallback(mStatusBarStateListener);
-        mActivityManagerWrapper.get().unregisterTaskStackListener(mTaskStackChangeListener);
+        mTaskStackChangeListeners.get().unregisterTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.get().removeCallback(mOverviewProxyListener);
         mSysUiFlagContainer.get().removeCallback(mSysUiStateCallback);
         mWakefulnessLifecycle.get().removeObserver(mWakefulnessLifecycleObserver);

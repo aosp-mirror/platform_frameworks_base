@@ -35,6 +35,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -82,7 +83,6 @@ public final class PhoneStateMonitor {
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
-        ActivityManagerWrapper activityManagerWrapper = ActivityManagerWrapper.getInstance();
         mDefaultHome = getCurrentDefaultHome();
         bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());
         IntentFilter intentFilter = new IntentFilter();
@@ -95,12 +95,13 @@ public final class PhoneStateMonitor {
                 mDefaultHome = getCurrentDefaultHome();
             }
         }, intentFilter);
-        mLauncherShowing = isLauncherShowing(activityManagerWrapper.getRunningTask());
-        activityManagerWrapper.registerTaskStackListener(new TaskStackChangeListener() {
-            @Override
-            public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
-                mLauncherShowing = isLauncherShowing(taskInfo);
-            }
+        mLauncherShowing = isLauncherShowing(ActivityManagerWrapper.getInstance().getRunningTask());
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(
+                new TaskStackChangeListener() {
+                    @Override
+                    public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+                        mLauncherShowing = isLauncherShowing(taskInfo);
+                    }
         });
     }
 

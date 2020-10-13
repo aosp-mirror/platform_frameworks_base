@@ -15165,6 +15165,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Called by the {@link android.view.inputmethod.InputMethodManager} to notify the application
+     * that the system has successfully initialized an {@link InputConnection} and it is ready for
+     * use.
+     *
+     * <p>The default implementation does nothing, since a view doesn't support input methods by
+     * default (see {@link #onCreateInputConnection}).
+     *
+     * @param inputConnection The {@link InputConnection} from {@link #onCreateInputConnection},
+     * after it's been fully initialized by the system.
+     * @param editorInfo The {@link EditorInfo} that was used to create the {@link InputConnection}.
+     * @param handler The dedicated {@link Handler} on which IPC method calls from input methods
+     * will be dispatched. This is the handler returned by {@link InputConnection#getHandler()}. If
+     * that method returns null, this parameter will be null also.
+     *
+     * @hide
+     */
+    public void onInputConnectionOpenedInternal(@NonNull InputConnection inputConnection,
+            @NonNull EditorInfo editorInfo, @Nullable Handler handler) {}
+
+    /**
+     * Called by the {@link android.view.inputmethod.InputMethodManager} to notify the application
+     * that the {@link InputConnection} has been closed.
+     *
+     * <p>The default implementation does nothing, since a view doesn't support input methods by
+     * default (see {@link #onCreateInputConnection}).
+     *
+     * <p><strong>Note:</strong> This callback is not invoked if the view is already detached when
+     * the {@link InputConnection} is closed or the connection is not valid and managed by
+     * {@link com.android.server.inputmethod.InputMethodManagerService}.
+     * TODO(b/170645312): Before un-hiding this API, handle the detached view scenario.
+     *
+     * @hide
+     */
+    public void onInputConnectionClosedInternal() {}
+
+    /**
      * Called by the {@link android.view.inputmethod.InputMethodManager}
      * when a view who is not the current
      * input connection target is trying to make a call on the manager.  The

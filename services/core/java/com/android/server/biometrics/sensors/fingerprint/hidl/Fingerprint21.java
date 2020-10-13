@@ -518,7 +518,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void scheduleRevokeChallenge(int sensorId, @NonNull IBinder token,
-            @NonNull String opPackageName) {
+            @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
             final FingerprintRevokeChallengeClient client = new FingerprintRevokeChallengeClient(
                     mContext, mLazyDaemon, token, opPackageName, mSensorProperties.sensorId);
