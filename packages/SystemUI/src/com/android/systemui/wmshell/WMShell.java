@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEvents;
@@ -105,6 +106,9 @@ public final class WMShell extends SystemUI
     private final NavigationModeController mNavigationModeController;
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
+    // TODO: This is only here because we need to dump state. Remove and replace with a dumper
+    //  interface.
+    private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
@@ -126,6 +130,7 @@ public final class WMShell extends SystemUI
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
+            ShellTaskOrganizer shellTaskOrganizer,
             ProtoTracer protoTracer) {
         super(context);
         mCommandQueue = commandQueue;
@@ -139,6 +144,7 @@ public final class WMShell extends SystemUI
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
+        mShellTaskOrganizer = shellTaskOrganizer;
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
     }
@@ -404,6 +410,9 @@ public final class WMShell extends SystemUI
             return;
         }
         // Dump WMShell stuff here if no commands were handled
+        mShellTaskOrganizer.dump(pw, "");
+        pw.println();
+        pw.println();
         mPipOptional.ifPresent(pip -> pip.dump(pw));
         mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw));
         mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));

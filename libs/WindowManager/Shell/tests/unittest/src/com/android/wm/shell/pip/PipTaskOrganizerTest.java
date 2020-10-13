@@ -64,7 +64,7 @@ public class PipTaskOrganizerTest extends PipTestCase {
 
     @Test
     public void instantiatePipTaskOrganizer_addsTaskListener() {
-        verify(mMockShellTaskOrganizer).addListener(any(), anyInt());
+        verify(mMockShellTaskOrganizer).addListenerForType(any(), anyInt());
     }
 
     @Test
