@@ -17,6 +17,8 @@
 package android.uwb;
 
 import android.annotation.FloatRange;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * A data point for the distance measurement
@@ -26,7 +28,7 @@ import android.annotation.FloatRange;
  *
  * @hide
  */
-public final class DistanceMeasurement {
+public final class DistanceMeasurement implements Parcelable {
     private final double mMeters;
     private final double mErrorMeters;
     private final double mConfidenceLevel;
@@ -68,6 +70,35 @@ public final class DistanceMeasurement {
     public double getConfidenceLevel() {
         return mConfidenceLevel;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(mMeters);
+        dest.writeDouble(mErrorMeters);
+        dest.writeDouble(mConfidenceLevel);
+    }
+
+    public static final @android.annotation.NonNull Creator<DistanceMeasurement> CREATOR =
+            new Creator<DistanceMeasurement>() {
+                @Override
+                public DistanceMeasurement createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+                    builder.setMeters(in.readDouble());
+                    builder.setErrorMeters(in.readDouble());
+                    builder.setConfidenceLevel(in.readDouble());
+                    return builder.build();
+                }
+
+                @Override
+                public DistanceMeasurement[] newArray(int size) {
+                    return new DistanceMeasurement[size];
+                }
+    };
 
     /**
      * Builder to get a {@link DistanceMeasurement} object.

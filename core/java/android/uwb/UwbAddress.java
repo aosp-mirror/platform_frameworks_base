@@ -18,6 +18,8 @@ package android.uwb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.Arrays;
 
@@ -26,7 +28,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public final class UwbAddress {
+public final class UwbAddress implements Parcelable {
     public static final int SHORT_ADDRESS_BYTE_LENGTH = 2;
     public static final int EXTENDED_ADDRESS_BYTE_LENGTH = 8;
 
@@ -98,4 +100,30 @@ public final class UwbAddress {
     public int hashCode() {
         return Arrays.hashCode(mAddressBytes);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mAddressBytes.length);
+        dest.writeByteArray(mAddressBytes);
+    }
+
+    public static final @android.annotation.NonNull Creator<UwbAddress> CREATOR =
+            new Creator<UwbAddress>() {
+                @Override
+                public UwbAddress createFromParcel(Parcel in) {
+                    byte[] address = new byte[in.readInt()];
+                    in.readByteArray(address);
+                    return UwbAddress.fromBytes(address);
+                }
+
+                @Override
+                public UwbAddress[] newArray(int size) {
+                    return new UwbAddress[size];
+                }
+    };
 }
