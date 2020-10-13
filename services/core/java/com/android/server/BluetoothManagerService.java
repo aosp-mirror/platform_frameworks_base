@@ -63,7 +63,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -177,6 +176,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private BluetoothAirplaneModeListener mBluetoothAirplaneModeListener;
 
+    private BluetoothDeviceConfigListener mBluetoothDeviceConfigListener;
+
     // used inside handler thread
     private boolean mQuietEnable = false;
     private boolean mEnable;
@@ -281,29 +282,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
             };
 
-    private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigChangedListener =
-            new DeviceConfig.OnPropertiesChangedListener() {
-                @Override
-                public void onPropertiesChanged(DeviceConfig.Properties properties) {
-                    if (!properties.getNamespace().equals(DeviceConfig.NAMESPACE_BLUETOOTH)) {
-                        return;
-                    }
-                    boolean foundInit = false;
-                    for (String name : properties.getKeyset()) {
-                        if (name.startsWith("INIT_")) {
-                            foundInit = true;
-                            break;
-                        }
-                    }
-                    if (!foundInit) {
-                        return;
-                    }
-                    mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
-                    mHandler.sendEmptyMessageDelayed(
-                            MESSAGE_INIT_FLAGS_CHANGED,
-                            DELAY_BEFORE_RESTART_DUE_TO_INIT_FLAGS_CHANGED_MS);
-                }
-            };
+    @VisibleForTesting
+    public void onInitFlagsChanged() {
+        mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
+        mHandler.sendEmptyMessageDelayed(
+                MESSAGE_INIT_FLAGS_CHANGED,
+                DELAY_BEFORE_RESTART_DUE_TO_INIT_FLAGS_CHANGED_MS);
+    }
 
     public boolean onFactoryReset() {
         // Wait for stable state if bluetooth is temporary state.
@@ -535,10 +520,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Slog.w(TAG, "Unable to resolve SystemUI's UID.");
         }
         mSystemUiUid = systemUiUid;
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_BLUETOOTH,
-                (Runnable r) -> r.run(),
-                mDeviceConfigChangedListener);
+        mBluetoothDeviceConfigListener = new BluetoothDeviceConfigListener(this);
     }
 
     /**
