@@ -139,7 +139,6 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    jdiff_enabled: true,
 }
 
 droidstubs {
@@ -201,7 +200,6 @@ droidstubs {
             baseline_file: "api/system-lint-baseline.txt",
         },
     },
-    jdiff_enabled: true,
 }
 
 droidstubs {
