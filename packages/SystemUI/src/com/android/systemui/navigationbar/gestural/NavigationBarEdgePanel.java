@@ -16,6 +16,8 @@
 
 package com.android.systemui.navigationbar.gestural;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -334,6 +336,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         setVisibility(GONE);
 
+        boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
@@ -345,8 +348,14 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                     public Rect getSampledRegion(View sampledView) {
                         return mSamplingRect;
                     }
+
+                    @Override
+                    public boolean isSamplingEnabled() {
+                        return isPrimaryDisplay;
+                    }
                 });
         mRegionSamplingHelper.setWindowVisible(true);
+        mShowProtection = !isPrimaryDisplay;
     }
 
     @Override
@@ -364,11 +373,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private void setIsDark(boolean isDark, boolean animate) {
         mIsDark = isDark;
         updateIsDark(animate);
-    }
-
-    private void setShowProtection(boolean showProtection) {
-        mShowProtection = showProtection;
-        invalidate();
     }
 
     @Override
