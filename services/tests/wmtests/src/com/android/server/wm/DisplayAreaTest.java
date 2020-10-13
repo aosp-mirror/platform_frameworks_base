@@ -23,6 +23,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayArea.Type.ANY;
@@ -37,14 +39,18 @@ import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.WindowManager;
 
 import com.google.android.collect.Lists;
 
@@ -405,6 +411,33 @@ public class DisplayAreaTest {
                 childBounds1, windowToken.getMaxBounds());
     }
 
+    @Test
+    public void testGetOrientation() {
+        final DisplayArea.Tokens area = new DisplayArea.Tokens(mWms, ABOVE_TASKS, "test");
+        final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
+        spyOn(token);
+        doReturn(mock(DisplayContent.class)).when(token).getDisplayContent();
+        doNothing().when(token).setParent(any());
+        final WindowState win = createWindowState(token);
+        spyOn(win);
+        doNothing().when(win).setParent(any());
+        win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        token.addChild(win, 0);
+        area.addChild(token);
+
+        doReturn(true).when(win).isVisible();
+
+        assertEquals("Visible window can request orientation",
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
+                area.getOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR));
+
+        doReturn(false).when(win).isVisible();
+
+        assertEquals("Invisible window cannot request orientation",
+                ActivityInfo.SCREEN_ORIENTATION_NOSENSOR,
+                area.getOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR));
+    }
+
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
         private TestDisplayArea(WindowManagerService wms, Rect bounds) {
             super(wms, ANY, "half display area");
@@ -415,6 +448,13 @@ public class DisplayAreaTest {
         SurfaceControl.Builder makeChildSurface(WindowContainer child) {
             return new MockSurfaceControlBuilder();
         }
+    }
+
+    private WindowState createWindowState(WindowToken token) {
+        return new WindowState(mWms, mock(Session.class), new TestIWindow(), token,
+                null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
+                View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
+                false /* ownerCanAddInternalSystemWindow */);
     }
 
     private WindowToken createWindowToken(int type) {
