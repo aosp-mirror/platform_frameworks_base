@@ -58,6 +58,9 @@ public class ExpandedAnimationController
     /** Duration of the expand/collapse target path animation. */
     public static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
 
+    /** Damping ratio for expand/collapse spring. */
+    private static final float DAMPING_RATIO_MEDIUM_LOW_BOUNCY = 0.65f;
+
     /** Stiffness for the expand/collapse path-following animation. */
     private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
 
@@ -510,7 +513,7 @@ public class ExpandedAnimationController
     @Override
     SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
         return new SpringForce()
-                .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
+                .setDampingRatio(DAMPING_RATIO_MEDIUM_LOW_BOUNCY)
                 .setStiffness(SpringForce.STIFFNESS_LOW);
     }
 
