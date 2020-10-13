@@ -120,10 +120,9 @@ static void flushProtoToBuffer(ProtoOutputStream& proto, vector<uint8_t>* outDat
     }
 }
 
-void StatsLogProcessor::onAnomalyAlarmFired(
+void StatsLogProcessor::processFiredAnomalyAlarmsLocked(
         const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
-    std::lock_guard<std::mutex> lock(mMetricsMutex);
     for (const auto& itr : mMetricsManagers) {
         itr.second->onAnomalyAlarmFired(timestampNs, alarmSet);
     }
@@ -429,6 +428,20 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
 
     if (mMetricsManagers.empty()) {
         return;
+    }
+
+    bool fireAlarm = false;
+    {
+        std::lock_guard<std::mutex> anomalyLock(mAnomalyAlarmMutex);
+        if (mNextAnomalyAlarmTime != 0 &&
+            MillisToNano(mNextAnomalyAlarmTime) <= elapsedRealtimeNs) {
+            mNextAnomalyAlarmTime = 0;
+            VLOG("informing anomaly alarm at time %lld", (long long)elapsedRealtimeNs);
+            fireAlarm = true;
+        }
+    }
+    if (fireAlarm) {
+        informAnomalyAlarmFiredLocked(NanoToMillis(elapsedRealtimeNs));
     }
 
     int64_t curTimeSec = getElapsedRealtimeSec();
@@ -1090,6 +1103,28 @@ void StatsLogProcessor::onStatsdInitCompleted(const int64_t& elapsedTimeNs) {
 void StatsLogProcessor::noteOnDiskData(const ConfigKey& key) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     mOnDiskDataConfigs.insert(key);
+}
+
+void StatsLogProcessor::setAnomalyAlarm(const int64_t elapsedTimeMillis) {
+    std::lock_guard<std::mutex> lock(mAnomalyAlarmMutex);
+    mNextAnomalyAlarmTime = elapsedTimeMillis;
+}
+
+void StatsLogProcessor::cancelAnomalyAlarm() {
+    std::lock_guard<std::mutex> lock(mAnomalyAlarmMutex);
+    mNextAnomalyAlarmTime = 0;
+}
+
+void StatsLogProcessor::informAnomalyAlarmFiredLocked(const int64_t elapsedTimeMillis) {
+    VLOG("StatsService::informAlarmForSubscriberTriggeringFired was called");
+    std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
+            mAnomalyAlarmMonitor->popSoonerThan(static_cast<uint32_t>(elapsedTimeMillis / 1000));
+    if (alarmSet.size() > 0) {
+        VLOG("Found periodic alarm fired.");
+        processFiredAnomalyAlarmsLocked(MillisToNano(elapsedTimeMillis), alarmSet);
+    } else {
+        ALOGW("Cannot find an periodic alarm that fired. Perhaps it was recently cancelled.");
+    }
 }
 
 }  // namespace statsd
