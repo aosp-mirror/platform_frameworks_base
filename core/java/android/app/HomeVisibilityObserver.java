@@ -16,56 +16,49 @@
 
 package android.app;
 
-import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Context;
-import android.os.Binder;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /**
- * A listener that will be invoked when the visibility of the home screen changes.
- * Register this callback via {@link ActivityManager#addHomeVisibilityListener}
+ * An observer / callback to create and register by
+ * {@link ActivityManager#registerHomeVisibilityObserver} so that it's triggered when
+ * visibility of home page changes.
+ * TODO: b/144351078 expose as SystemApi
  * @hide
  */
-// This is a single-method listener that needs a bunch of supporting code, so it can't be an
-// interface
-@SuppressLint("ListenerInterface")
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-@TestApi
-public abstract class HomeVisibilityListener {
+public abstract class HomeVisibilityObserver {
     private Context mContext;
     private ActivityManager mActivityManager;
-    private Executor mExecutor;
     /** @hide */
-    android.app.IProcessObserver.Stub mObserver;
+    IProcessObserver.Stub mObserver;
     /** @hide */
     boolean mIsHomeActivityVisible;
 
     /** @hide */
-    void init(Context context, Executor executor, ActivityManager activityManager) {
+    void init(Context context, ActivityManager activityManager) {
         mContext = context;
         mActivityManager = activityManager;
         mIsHomeActivityVisible = isHomeActivityVisible();
-        mExecutor = executor;
     }
 
     /**
-     * Called when the visibility of the home screen changes.
-     *
-     * @param isHomeActivityVisible Whether the home screen activity is now visible.
+     * The API that needs implemented and will be triggered when activity on home page changes.
      */
     public abstract void onHomeVisibilityChanged(boolean isHomeActivityVisible);
 
-    public HomeVisibilityListener() {
-        mObserver = new android.app.IProcessObserver.Stub() {
+    public HomeVisibilityObserver() {
+        mObserver = new IProcessObserver.Stub() {
             @Override
             public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
-                refreshHomeVisibility();
+                boolean isHomeActivityVisible = isHomeActivityVisible();
+                if (mIsHomeActivityVisible != isHomeActivityVisible) {
+                    mIsHomeActivityVisible = isHomeActivityVisible;
+                    onHomeVisibilityChanged(mIsHomeActivityVisible);
+                }
             }
 
             @Override
@@ -74,17 +67,6 @@ public abstract class HomeVisibilityListener {
 
             @Override
             public void onProcessDied(int pid, int uid) {
-                refreshHomeVisibility();
-            }
-
-            private void refreshHomeVisibility() {
-                boolean isHomeActivityVisible = isHomeActivityVisible();
-                if (mIsHomeActivityVisible != isHomeActivityVisible) {
-                    mIsHomeActivityVisible = isHomeActivityVisible;
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() ->
-                                    onHomeVisibilityChanged(mIsHomeActivityVisible)));
-                }
             }
         };
     }
@@ -101,9 +83,12 @@ public abstract class HomeVisibilityListener {
         }
 
         // We can assume that the screen is idle if the home application is in the foreground.
-        String defaultHomePackage = mContext.getPackageManager()
-                .getHomeActivities(new ArrayList<>()).getPackageName();
-        if (Objects.equals(top, defaultHomePackage)) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+        intent.addCategory(Intent.CATEGORY_HOME);
+
+        ResolveInfo info = mContext.getPackageManager().resolveActivity(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        if (info != null && top.equals(info.activityInfo.packageName)) {
             return true;
         }
 
