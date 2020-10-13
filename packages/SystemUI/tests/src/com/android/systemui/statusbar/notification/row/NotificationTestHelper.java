@@ -48,6 +48,7 @@ import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.bubbles.BubblesTestActivity;
 import com.android.systemui.media.MediaFeatureFlag;
+import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -115,6 +116,7 @@ public class NotificationTestHelper {
         mTestLooper = testLooper;
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
+        dependency.injectMockDependency(MediaOutputDialogFactory.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mGroupMembershipManager = new NotificationGroupManagerLegacy(
                 mStatusBarStateController,

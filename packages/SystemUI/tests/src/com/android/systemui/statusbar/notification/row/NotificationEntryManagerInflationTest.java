@@ -45,6 +45,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.MediaFeatureFlag;
+import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -152,6 +153,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(SmartReplyController.class);
+        mDependency.injectMockDependency(MediaOutputDialogFactory.class);
 
         mHandler = Handler.createAsync(TestableLooper.get(this).getLooper());
 
