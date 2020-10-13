@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "TimeLord.h"
+#include <limits>
 
 namespace android {
 namespace uirenderer {
@@ -22,12 +23,15 @@ namespace renderthread {
 TimeLord::TimeLord() : mFrameIntervalNanos(milliseconds_to_nanoseconds(16)),
                        mFrameTimeNanos(0),
                        mFrameIntendedTimeNanos(0),
-                       mFrameVsyncId(-1) {}
+                       mFrameVsyncId(-1),
+                       mFrameDeadline(std::numeric_limits<int64_t>::max()){}
 
-bool TimeLord::vsyncReceived(nsecs_t vsync, nsecs_t intendedVsync, int64_t vsyncId) {
+bool TimeLord::vsyncReceived(nsecs_t vsync, nsecs_t intendedVsync, int64_t vsyncId,
+                             int64_t frameDeadline) {
     if (intendedVsync > mFrameIntendedTimeNanos) {
         mFrameIntendedTimeNanos = intendedVsync;
         mFrameVsyncId = vsyncId;
+        mFrameDeadline = frameDeadline;
     }
 
     if (vsync > mFrameTimeNanos) {

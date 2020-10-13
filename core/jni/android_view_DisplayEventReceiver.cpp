@@ -60,7 +60,7 @@ private:
     sp<MessageQueue> mMessageQueue;
 
     void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count,
-                       int64_t sharedTimelineFrameCount) override;
+                       VsyncEventData vsyncEventData) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
     void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
                                int32_t configId, nsecs_t vsyncPeriod) override;
@@ -91,14 +91,15 @@ void NativeDisplayEventReceiver::dispose() {
 }
 
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId,
-                                               uint32_t count, int64_t frameTimelineVsyncId) {
+                                               uint32_t count, VsyncEventData vsyncEventData) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
     ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchVsync,
-                            timestamp, displayId.value, count, frameTimelineVsyncId);
+                            timestamp, displayId.value, count, vsyncEventData.id,
+                            vsyncEventData.deadlineTimestamp);
         ALOGV("receiver %p ~ Returned from vsync handler.", this);
     }
 
@@ -198,7 +199,8 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
     gDisplayEventReceiverClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
     gDisplayEventReceiverClassInfo.dispatchVsync =
-            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchVsync", "(JJIJ)V");
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchVsync",
+                             "(JJIJJ)V");
     gDisplayEventReceiverClassInfo.dispatchHotplug = GetMethodIDOrDie(env,
             gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
     gDisplayEventReceiverClassInfo.dispatchConfigChanged = GetMethodIDOrDie(env,
