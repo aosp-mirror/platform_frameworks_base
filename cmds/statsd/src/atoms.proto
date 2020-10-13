@@ -266,7 +266,7 @@ message Atom {
                 147 [(module) = "framework", (module) = "statsd"];
         BiometricSystemHealthIssueDetected biometric_system_health_issue_detected =
                 148 [(module) = "framework"];
-        BubbleUIChanged bubble_ui_changed = 149 [(module) = "sysui"];
+        BubbleUIChanged bubble_ui_changed = 149 [(module) = "framework"];
         ScheduledJobConstraintChanged scheduled_job_constraint_changed =
                 150 [(module) = "framework"];
         BluetoothActiveDeviceChanged bluetooth_active_device_changed =
