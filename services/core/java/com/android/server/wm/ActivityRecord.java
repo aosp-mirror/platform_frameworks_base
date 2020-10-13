@@ -3222,6 +3222,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mTaskSnapshotController.onAppRemoved(this);
         mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
+        mStackSupervisor.mStoppingActivities.remove(this);
         waitingToShow = false;
 
         // TODO(b/169035022): move to a more-appropriate place.
