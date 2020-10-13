@@ -115,6 +115,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     // Delay for retrying enable and disable in msec
     private static final int ENABLE_DISABLE_DELAY_MS = 300;
     private static final int DELAY_BEFORE_RESTART_DUE_TO_INIT_FLAGS_CHANGED_MS = 300;
+    private static final int DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS = 86400;
 
     private static final int MESSAGE_ENABLE = 1;
     private static final int MESSAGE_DISABLE = 2;
@@ -173,6 +174,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private boolean mUnbinding;
     private int mWaitForEnableRetry;
     private int mWaitForDisableRetry;
+
+    private BluetoothModeChangeHelper mBluetoothModeChangeHelper;
 
     private BluetoothAirplaneModeListener mBluetoothAirplaneModeListener;
 
@@ -520,7 +523,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Slog.w(TAG, "Unable to resolve SystemUI's UID.");
         }
         mSystemUiUid = systemUiUid;
-        mBluetoothDeviceConfigListener = new BluetoothDeviceConfigListener(this);
     }
 
     /**
@@ -1350,12 +1352,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
             mHandler.sendMessage(getMsg);
         }
-        BluetoothModeChangeHelper bluetoothModeChangeHelper =
-                new BluetoothModeChangeHelper(mContext);
 
+        mBluetoothModeChangeHelper = new BluetoothModeChangeHelper(mContext);
         if (mBluetoothAirplaneModeListener != null) {
-            mBluetoothAirplaneModeListener.start(bluetoothModeChangeHelper);
+            mBluetoothAirplaneModeListener.start(mBluetoothModeChangeHelper);
         }
+        mBluetoothDeviceConfigListener = new BluetoothDeviceConfigListener(this);
     }
 
     /**
@@ -2198,6 +2200,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         Slog.d(TAG, "MESSAGE_INIT_FLAGS_CHANGED");
                     }
                     mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
+                    if (mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                        mHandler.sendEmptyMessageDelayed(
+                                MESSAGE_INIT_FLAGS_CHANGED,
+                                DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS);
+                        break;
+                    }
                     if (mBluetooth != null && isEnabled()) {
                         restartForReason(
                                 BluetoothProtoEnums.ENABLE_DISABLE_REASON_INIT_FLAGS_CHANGED);
