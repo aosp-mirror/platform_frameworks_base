@@ -249,8 +249,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             updateDimensions();
             if (isWindowVisible()) {
-                mWm.removeView(mMirrorView);
-                createMirrorWindow();
+                deleteWindowMagnification();
+                enableWindowMagnification(Float.NaN, Float.NaN, Float.NaN);
             }
         } else if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
             onRotate();
