@@ -365,6 +365,7 @@ public class TimeZoneDetectorServiceTest {
         final boolean geoDetectionEnabled = autoDetectionEnabled;
         return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setAutoDetectionSupported(true)
+                .setGeoDetectionSupported(true)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionEnabled(autoDetectionEnabled)
                 .setLocationEnabled(geoDetectionEnabled)
