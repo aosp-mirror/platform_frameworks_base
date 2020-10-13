@@ -969,6 +969,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         private int findMatchingModeIdLocked(int configId) {
+            if (configId < 0 || configId >= mDisplayConfigs.length) {
+                Slog.e(TAG, "Invalid display config index " + configId);
+                return NO_DISPLAY_MODE_ID;
+            }
             SurfaceControl.DisplayConfig config = mDisplayConfigs[configId];
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 DisplayModeRecord record = mSupportedModes.valueAt(i);
