@@ -46,7 +46,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -82,13 +81,11 @@ public class ActivityManagerWrapper {
 
     private final PackageManager mPackageManager;
     private final BackgroundExecutor mBackgroundExecutor;
-    private final TaskStackChangeListeners mTaskStackChangeListeners;
 
     private ActivityManagerWrapper() {
         final Context context = AppGlobals.getInitialApplication();
         mPackageManager = context.getPackageManager();
         mBackgroundExecutor = BackgroundExecutor.get();
-        mTaskStackChangeListeners = new TaskStackChangeListeners(Looper.getMainLooper());
     }
 
     public static ActivityManagerWrapper getInstance() {
@@ -360,23 +357,17 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * Registers a task stack listener with the system.
-     * This should be called on the main thread.
+     * @deprecated use {@link TaskStackChangeListeners#registerTaskStackListener}
      */
     public void registerTaskStackListener(TaskStackChangeListener listener) {
-        synchronized (mTaskStackChangeListeners) {
-            mTaskStackChangeListeners.addListener(ActivityManager.getService(), listener);
-        }
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(listener);
     }
 
     /**
-     * Unregisters a task stack listener with the system.
-     * This should be called on the main thread.
+     * @deprecated use {@link TaskStackChangeListeners#unregisterTaskStackListener}
      */
     public void unregisterTaskStackListener(TaskStackChangeListener listener) {
-        synchronized (mTaskStackChangeListeners) {
-            mTaskStackChangeListeners.removeListener(listener);
-        }
+        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(listener);
     }
 
     /**

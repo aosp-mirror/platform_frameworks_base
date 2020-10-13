@@ -105,6 +105,9 @@
     <!-- Turkish keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_turkish">Turkish</string>
 
+    <!-- Turkish keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_turkish_f">Turkish F</string>
+
     <!-- Ukrainian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_ukrainian">Ukrainian</string>
 

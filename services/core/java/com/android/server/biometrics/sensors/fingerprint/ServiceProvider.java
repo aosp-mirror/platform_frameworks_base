@@ -68,7 +68,7 @@ public interface ServiceProvider {
             @NonNull IFingerprintServiceReceiver receiver, String opPackageName);
 
     void scheduleRevokeChallenge(int sensorId, @NonNull IBinder token,
-            @NonNull String opPackageName);
+            @NonNull String opPackageName, long challenge);
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,

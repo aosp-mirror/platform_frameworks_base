@@ -100,8 +100,8 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.Assert;
@@ -1796,7 +1796,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         mIsAutomotive = isAutomotive();
 
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
         int user = ActivityManager.getCurrentUser();
@@ -2965,7 +2965,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             Log.d(TAG, "RemoteException onDestroy. cannot unregister userSwitchObserver");
         }
 
-        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
 
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastAllReceiver);

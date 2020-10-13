@@ -339,13 +339,18 @@ namespace PaintGlue {
     }
 
     static void doTextBounds(JNIEnv* env, const jchar* text, int count, jobject bounds,
-            const Paint& paint, const Typeface* typeface, jint bidiFlagsInt) {
+            const Paint& paint, const Typeface* typeface, jint bidiFlags) {
         SkRect  r;
         SkIRect ir;
 
+        minikin::Layout layout = MinikinUtils::doLayout(&paint,
+                static_cast<minikin::Bidi>(bidiFlags), typeface,
+                text, count,  // text buffer
+                0, count,  // draw range
+                0, count,  // context range
+                nullptr);
         minikin::MinikinRect rect;
-        minikin::Bidi bidiFlags = static_cast<minikin::Bidi>(bidiFlagsInt);
-        MinikinUtils::getBounds(&paint, bidiFlags, typeface, text, count, &rect);
+        layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
         r.fTop = rect.mTop;
         r.fRight = rect.mRight;

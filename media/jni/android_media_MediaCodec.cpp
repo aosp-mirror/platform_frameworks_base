@@ -2662,7 +2662,7 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     gFields.cryptoInfoModeID = env->GetFieldID(clazz.get(), "mode", "I");
     CHECK(gFields.cryptoInfoModeID != NULL);
 
-    gFields.cryptoInfoPatternID = env->GetFieldID(clazz.get(), "pattern",
+    gFields.cryptoInfoPatternID = env->GetFieldID(clazz.get(), "mPattern",
         "Landroid/media/MediaCodec$CryptoInfo$Pattern;");
     CHECK(gFields.cryptoInfoPatternID != NULL);
 

@@ -55,9 +55,9 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -104,7 +104,7 @@ public final class WMShell extends SystemUI
     private final DisplayImeController mDisplayImeController;
     private final InputConsumerController mInputConsumerController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final ActivityManagerWrapper mActivityManagerWrapper;
+    private final TaskStackChangeListeners mTaskStackChangeListeners;
     private final NavigationModeController mNavigationModeController;
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
@@ -125,7 +125,7 @@ public final class WMShell extends SystemUI
             ConfigurationController configurationController,
             InputConsumerController inputConsumerController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            ActivityManagerWrapper activityManagerWrapper,
+            TaskStackChangeListeners taskStackChangeListeners,
             DisplayImeController displayImeController,
             NavigationModeController navigationModeController,
             ScreenLifecycle screenLifecycle,
@@ -140,7 +140,7 @@ public final class WMShell extends SystemUI
         mConfigurationController = configurationController;
         mInputConsumerController = inputConsumerController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mActivityManagerWrapper = activityManagerWrapper;
+        mTaskStackChangeListeners = taskStackChangeListeners;
         mDisplayImeController = displayImeController;
         mNavigationModeController = navigationModeController;
         mScreenLifecycle = screenLifecycle;
@@ -205,7 +205,7 @@ public final class WMShell extends SystemUI
         });
 
         // Handle for system task stack changes.
-        mActivityManagerWrapper.registerTaskStackListener(
+        mTaskStackChangeListeners.registerTaskStackListener(
                 new TaskStackChangeListener() {
                     @Override
                     public void onTaskStackChanged() {
@@ -276,7 +276,7 @@ public final class WMShell extends SystemUI
         };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
 
-        mActivityManagerWrapper.registerTaskStackListener(
+        mTaskStackChangeListeners.registerTaskStackListener(
                 new TaskStackChangeListener() {
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
@@ -388,7 +388,7 @@ public final class WMShell extends SystemUI
             }
         });
 
-        mActivityManagerWrapper.registerTaskStackListener(
+        mTaskStackChangeListeners.registerTaskStackListener(
                 new TaskStackChangeListener() {
                     @Override
                     public void onTaskCreated(int taskId, ComponentName componentName) {

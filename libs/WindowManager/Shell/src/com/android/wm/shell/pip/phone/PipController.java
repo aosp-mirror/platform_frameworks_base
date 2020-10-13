@@ -61,7 +61,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
     private final Rect mTmpNormalBounds = new Rect();
-    protected final Rect mReentryBounds = new Rect();
 
     private DisplayController mDisplayController;
     private PipAppOpsListener mAppOpsListener;
@@ -396,24 +395,13 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
             // Exiting PIP, save the reentry bounds to restore to when re-entering.
-            updateReentryBounds(pipBounds);
-            mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
+            mPipBoundsHandler.onSaveReentryBounds(activity, pipBounds);
         }
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.accept(true);
         }
-    }
-
-    /**
-     * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
-     */
-    public void updateReentryBounds(Rect bounds) {
-        final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
-        float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
-        mPipBoundsHandler.applySnapFraction(reentryBounds, snapFraction);
-        mReentryBounds.set(reentryBounds);
     }
 
     @Override

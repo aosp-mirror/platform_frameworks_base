@@ -421,6 +421,7 @@ public class NotificationManagerService extends SystemService {
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
     private ActivityManager mActivityManager;
+    private ActivityManagerInternal mAmi;
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
     AudioManager mAudioManager;
@@ -1897,7 +1898,7 @@ public class NotificationManagerService extends SystemService {
             DevicePolicyManagerInternal dpm, IUriGrantsManager ugm,
             UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, UserManager userManager,
             NotificationHistoryManager historyManager, StatsManager statsManager,
-            TelephonyManager telephonyManager) {
+            TelephonyManager telephonyManager, ActivityManagerInternal ami) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -1919,6 +1920,7 @@ public class NotificationManagerService extends SystemService {
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
         mActivityManager = activityManager;
+        mAmi = ami;
         mDeviceIdleManager = getContext().getSystemService(DeviceIdleManager.class);
         mDpm = dpm;
         mUm = userManager;
@@ -2197,7 +2199,8 @@ public class NotificationManagerService extends SystemService {
                 new NotificationHistoryManager(getContext(), handler),
                 mStatsManager = (StatsManager) getContext().getSystemService(
                         Context.STATS_MANAGER),
-                getContext().getSystemService(TelephonyManager.class));
+                getContext().getSystemService(TelephonyManager.class),
+                LocalServices.getService(ActivityManagerInternal.class));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -5239,8 +5242,8 @@ public class NotificationManagerService extends SystemService {
             if (!summaries.containsKey(pkg)) {
                 // Add summary
                 final ApplicationInfo appInfo =
-                       adjustedSbn.getNotification().extras.getParcelable(
-                               Notification.EXTRA_BUILDER_APPLICATION_INFO);
+                        adjustedSbn.getNotification().extras.getParcelable(
+                                Notification.EXTRA_BUILDER_APPLICATION_INFO);
                 final Bundle extras = new Bundle();
                 extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
                 final String channelId = notificationRecord.getChannel().getId();
@@ -5276,11 +5279,11 @@ public class NotificationManagerService extends SystemService {
                         notificationRecord.getIsAppImportanceLocked());
                 summaries.put(pkg, summarySbn.getKey());
             }
-        }
-        if (summaryRecord != null && checkDisqualifyingFeatures(userId, MY_UID,
-                summaryRecord.getSbn().getId(), summaryRecord.getSbn().getTag(), summaryRecord,
-                true)) {
-            mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord, isAppForeground));
+            if (summaryRecord != null && checkDisqualifyingFeatures(userId, MY_UID,
+                    summaryRecord.getSbn().getId(), summaryRecord.getSbn().getTag(), summaryRecord,
+                    true)) {
+                mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord, isAppForeground));
+            }
         }
     }
 
@@ -6019,13 +6022,17 @@ public class NotificationManagerService extends SystemService {
                 + " cannot post for pkg " + targetPkg + " in user " + userId);
     }
 
+    public boolean hasFlag(final int flags, final int flag) {
+        return (flags & flag) != 0;
+    }
     /**
      * Checks if a notification can be posted. checks rate limiter, snooze helper, and blocking.
      *
      * Has side effects.
      */
-    private boolean checkDisqualifyingFeatures(int userId, int uid, int id, String tag,
+    boolean checkDisqualifyingFeatures(int userId, int uid, int id, String tag,
             NotificationRecord r, boolean isAutogroup) {
+        Notification n = r.getNotification();
         final String pkg = r.getSbn().getPackageName();
         final boolean isSystemNotification =
                 isUidSystemOrPhone(uid) || ("android".equals(pkg));
@@ -6034,71 +6041,101 @@ public class NotificationManagerService extends SystemService {
         // Limit the number of notifications that any given package except the android
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
-            synchronized (mNotificationLock) {
-                final int callingUid = Binder.getCallingUid();
-                if (mNotificationsByKey.get(r.getSbn().getKey()) == null
-                        && isCallerInstantApp(callingUid, userId)) {
-                    // Ephemeral apps have some special constraints for notifications.
-                    // They are not allowed to create new notifications however they are allowed to
-                    // update notifications created by the system (e.g. a foreground service
-                    // notification).
-                    throw new SecurityException("Instant app " + pkg
-                            + " cannot create notifications");
-                }
+            final int callingUid = Binder.getCallingUid();
+            if (mNotificationsByKey.get(r.getSbn().getKey()) == null
+                    && isCallerInstantApp(callingUid, userId)) {
+                // Ephemeral apps have some special constraints for notifications.
+                // They are not allowed to create new notifications however they are allowed to
+                // update notifications created by the system (e.g. a foreground service
+                // notification).
+                throw new SecurityException("Instant app " + pkg
+                        + " cannot create notifications");
+            }
 
-                // rate limit updates that aren't completed progress notifications
-                if (mNotificationsByKey.get(r.getSbn().getKey()) != null
-                        && !r.getNotification().hasCompletedProgress()
-                        && !isAutogroup) {
+            // rate limit updates that aren't completed progress notifications
+            if (mNotificationsByKey.get(r.getSbn().getKey()) != null
+                    && !r.getNotification().hasCompletedProgress()
+                    && !isAutogroup) {
 
-                    final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
-                    if (appEnqueueRate > mMaxPackageEnqueueRate) {
-                        mUsageStats.registerOverRateQuota(pkg);
-                        final long now = SystemClock.elapsedRealtime();
-                        if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
-                            Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
-                                    + ". Shedding " + r.getSbn().getKey() + ". package=" + pkg);
-                            mLastOverRateLogTime = now;
-                        }
-                        return false;
+                final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
+                if (appEnqueueRate > mMaxPackageEnqueueRate) {
+                    mUsageStats.registerOverRateQuota(pkg);
+                    final long now = SystemClock.elapsedRealtime();
+                    if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
+                        Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
+                                + ". Shedding " + r.getSbn().getKey() + ". package=" + pkg);
+                        mLastOverRateLogTime = now;
                     }
+                    return false;
                 }
+            }
 
-                // limit the number of non-fgs outstanding notificationrecords an app can have
-                if (!r.getNotification().isForegroundService()) {
-                    int count = getNotificationCountLocked(pkg, userId, id, tag);
-                    if (count >= MAX_PACKAGE_NOTIFICATIONS) {
-                        mUsageStats.registerOverCountQuota(pkg);
-                        Slog.e(TAG, "Package has already posted or enqueued " + count
-                                + " notifications.  Not showing more.  package=" + pkg);
-                        return false;
-                    }
+            // limit the number of non-fgs outstanding notificationrecords an app can have
+            if (!n.isForegroundService()) {
+                int count = getNotificationCountLocked(pkg, userId, id, tag);
+                if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                    mUsageStats.registerOverCountQuota(pkg);
+                    Slog.e(TAG, "Package has already posted or enqueued " + count
+                            + " notifications.  Not showing more.  package=" + pkg);
+                    return false;
                 }
             }
         }
 
-        synchronized (mNotificationLock) {
-            // snoozed apps
-            if (mSnoozeHelper.isSnoozed(userId, pkg, r.getKey())) {
-                MetricsLogger.action(r.getLogMaker()
-                        .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
-                        .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED));
-                mNotificationRecordLogger.log(
-                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_NOT_POSTED_SNOOZED,
-                        r);
-                if (DBG) {
-                    Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
+        // bubble or inline reply that's immutable?
+        if (n.getBubbleMetadata() != null
+                && n.getBubbleMetadata().getIntent() != null
+                && hasFlag(mAmi.getPendingIntentFlags(
+                        n.getBubbleMetadata().getIntent().getTarget()),
+                        PendingIntent.FLAG_IMMUTABLE)) {
+            throw new IllegalArgumentException(r.getKey() + " Not posted."
+                    + " PendingIntents attached to bubbles must be mutable");
+        }
+
+        if (n.actions != null) {
+            for (Notification.Action action : n.actions) {
+                if ((action.getRemoteInputs() != null || action.getDataOnlyRemoteInputs() != null)
+                        && hasFlag(mAmi.getPendingIntentFlags(action.actionIntent.getTarget()),
+                        PendingIntent.FLAG_IMMUTABLE)) {
+                    throw new IllegalArgumentException(r.getKey() + " Not posted."
+                            + " PendingIntents attached to actions with remote"
+                            + " inputs must be mutable");
                 }
-                mSnoozeHelper.update(userId, r);
-                handleSavePolicyFile();
-                return false;
             }
+        }
+
+        if (r.getSystemGeneratedSmartActions() != null) {
+            for (Notification.Action action : r.getSystemGeneratedSmartActions()) {
+                if ((action.getRemoteInputs() != null || action.getDataOnlyRemoteInputs() != null)
+                        && hasFlag(mAmi.getPendingIntentFlags(action.actionIntent.getTarget()),
+                        PendingIntent.FLAG_IMMUTABLE)) {
+                    throw new IllegalArgumentException(r.getKey() + " Not posted."
+                            + " PendingIntents attached to contextual actions with remote inputs"
+                            + " must be mutable");
+                }
+            }
+        }
+
+        // snoozed apps
+        if (mSnoozeHelper.isSnoozed(userId, pkg, r.getKey())) {
+            MetricsLogger.action(r.getLogMaker()
+                    .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                    .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED));
+            mNotificationRecordLogger.log(
+                    NotificationRecordLogger.NotificationEvent.NOTIFICATION_NOT_POSTED_SNOOZED,
+                    r);
+            if (DBG) {
+                Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
+            }
+            mSnoozeHelper.update(userId, r);
+            handleSavePolicyFile();
+            return false;
+        }
 
 
-            // blocked apps
-            if (isBlocked(r, mUsageStats)) {
-                return false;
-            }
+        // blocked apps
+        if (isBlocked(r, mUsageStats)) {
+            return false;
         }
 
         return true;
