@@ -279,6 +279,7 @@ public class ScreenshotHelper {
             final Runnable mScreenshotTimeout = () -> {
                 synchronized (mScreenshotLock) {
                     if (mScreenshotConnection != null) {
+                        Log.e(TAG, "Timed out before getting screenshot capture response");
                         mContext.unbindService(mScreenshotConnection);
                         mScreenshotConnection = null;
                         mScreenshotService = null;
@@ -353,6 +354,7 @@ public class ScreenshotHelper {
                                 mScreenshotService = null;
                                 // only log an error if we're still within the timeout period
                                 if (handler.hasCallbacks(mScreenshotTimeout)) {
+                                    Log.e(TAG, "Screenshot service disconnected");
                                     handler.removeCallbacks(mScreenshotTimeout);
                                     notifyScreenshotError();
                                 }
