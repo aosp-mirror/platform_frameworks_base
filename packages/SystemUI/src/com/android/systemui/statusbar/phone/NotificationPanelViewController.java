@@ -221,6 +221,11 @@ public class NotificationPanelViewController extends PanelViewController {
             new KeyguardUpdateMonitorCallback() {
 
                 @Override
+                public void onLockScreenModeChanged(int mode) {
+                    mClockPositionAlgorithm.onLockScreenModeChanged(mode);
+                }
+
+                @Override
                 public void onBiometricAuthenticated(int userId,
                         BiometricSourceType biometricSourceType,
                         boolean isStrongBiometric) {
