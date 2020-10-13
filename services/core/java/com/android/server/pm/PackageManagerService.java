@@ -222,6 +222,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
@@ -479,7 +480,7 @@ import java.util.function.Supplier;
  * </pre>
  */
 public class PackageManagerService extends IPackageManager.Stub
-        implements PackageSender {
+        implements PackageSender, TestUtilityService {
     static final String TAG = "PackageManager";
     public static final boolean DEBUG_SETTINGS = false;
     static final boolean DEBUG_PREFERRED = false;
@@ -819,6 +820,7 @@ public class PackageManagerService extends IPackageManager.Stub
     boolean mPromoteSystemApps;
 
     private final PackageManagerInternal mPmInternal;
+    private final TestUtilityService mTestUtilityService;
 
 
     @GuardedBy("mLock")
@@ -1192,6 +1194,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public IPermissionManager permissionManagerService;
         public PendingPackageBroadcasts pendingPackageBroadcasts;
         public PackageManagerInternal pmInternal;
+        public TestUtilityService testUtilityService;
         public ProcessLoggingHandler processLoggingHandler;
         public ProtectedPackages protectedPackages;
         public @NonNull String requiredInstallerPackage;
@@ -2956,6 +2959,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mPendingBroadcasts = testParams.pendingPackageBroadcasts;
         mPermissionManagerService = testParams.permissionManagerService;
         mPmInternal = testParams.pmInternal;
+        mTestUtilityService = testParams.testUtilityService;
         mProcessLoggingHandler = testParams.processLoggingHandler;
         mProtectedPackages = testParams.protectedPackages;
         mSeparateProcesses = testParams.separateProcesses;
@@ -3026,6 +3030,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Expose private service for system components to use.
         mPmInternal = new PackageManagerInternalImpl();
+        LocalServices.addService(TestUtilityService.class, this);
+        mTestUtilityService = LocalServices.getService(TestUtilityService.class);
         LocalServices.addService(PackageManagerInternal.class, mPmInternal);
         mUserManager = injector.getUserManagerService();
         mComponentResolver = injector.getComponentResolver();
@@ -26336,9 +26342,39 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void holdLock(int durationMs) {
+    public IBinder getHoldLockToken() {
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException("getHoldLockToken requires a debuggable build");
+        }
+
         mContext.enforceCallingPermission(
-                Manifest.permission.INJECT_EVENTS, "holdLock requires shell identity");
+                Manifest.permission.INJECT_EVENTS,
+                "getHoldLockToken requires INJECT_EVENTS permission");
+
+        final Binder token = new Binder();
+        token.attachInterface(this, "holdLock:" + Binder.getCallingUid());
+        return token;
+    }
+
+    @Override
+    public void verifyHoldLockToken(IBinder token) {
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException("holdLock requires a debuggable build");
+        }
+
+        if (token == null) {
+            throw new SecurityException("null holdLockToken");
+        }
+
+        if (token.queryLocalInterface("holdLock:" + Binder.getCallingUid()) != this) {
+            throw new SecurityException("Invalid holdLock() token");
+        }
+    }
+
+    @Override
+    public void holdLock(IBinder token, int durationMs) {
+        mTestUtilityService.verifyHoldLockToken(token);
+
         synchronized (mLock) {
             SystemClock.sleep(durationMs);
         }

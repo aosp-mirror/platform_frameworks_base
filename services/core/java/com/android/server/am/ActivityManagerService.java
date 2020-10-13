@@ -208,6 +208,7 @@ import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
+import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -1311,6 +1312,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     PackageManagerInternal mPackageManagerInt;
     PermissionManagerServiceInternal mPermissionManagerInt;
+    private TestUtilityService mTestUtilityService;
 
     /**
      * Whether to force background check on all apps (for battery saver) or not.
@@ -5782,6 +5784,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     LocalServices.getService(PermissionManagerServiceInternal.class);
         }
         return mPermissionManagerInt;
+    }
+
+    private TestUtilityService getTestUtilityServiceLocked() {
+        if (mTestUtilityService == null) {
+            mTestUtilityService =
+                    LocalServices.getService(TestUtilityService.class);
+        }
+        return mTestUtilityService;
     }
 
     @Override
@@ -17334,11 +17344,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Holds the AM lock for the specified amount of milliseconds.
      * Intended for use by the tests that need to imitate lock contention.
-     * Requires permission identity of the shell UID.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
      */
     @Override
-    public void holdLock(int durationMs) {
-        enforceCallingPermission(Manifest.permission.INJECT_EVENTS, "holdLock");
+    public void holdLock(IBinder token, int durationMs) {
+        getTestUtilityServiceLocked().verifyHoldLockToken(token);
 
         synchronized (this) {
             SystemClock.sleep(durationMs);

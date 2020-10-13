@@ -4049,11 +4049,12 @@ public interface WindowManager extends ViewManager {
     /**
      * Holds the WM lock for the specified amount of milliseconds.
      * Intended for use by the tests that need to imitate lock contention.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
-    default void holdLock(int durationMs) {
+    default void holdLock(IBinder token, int durationMs) {
         throw new UnsupportedOperationException();
     }
 }
