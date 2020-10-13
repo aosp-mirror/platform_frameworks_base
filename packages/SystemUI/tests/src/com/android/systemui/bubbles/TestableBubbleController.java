@@ -19,6 +19,7 @@ package com.android.systemui.bubbles;
 import android.app.INotificationManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
+import android.os.Handler;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -35,9 +36,9 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
-
 
 /**
  * Testable BubbleController subclass that immediately synchronizes surfaces.
@@ -67,14 +68,17 @@ public class TestableBubbleController extends BubbleController {
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
-            BubbleLogger bubbleLogger) {
+            BubbleLogger bubbleLogger,
+            Handler mainHandler,
+            ShellTaskOrganizer shellTaskOrganizer) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 data, Runnable::run, configurationController, interruptionStateProvider,
                 zenModeController, lockscreenUserManager, groupManager, entryManager,
                 notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
                 dataRepository, sysUiState, notificationManager, statusBarService,
-                windowManager, windowManagerShellWrapper, launcherApps, bubbleLogger);
+                windowManager, windowManagerShellWrapper, launcherApps, bubbleLogger,
+                mainHandler, shellTaskOrganizer);
         setInflateSynchronously(true);
     }
 }

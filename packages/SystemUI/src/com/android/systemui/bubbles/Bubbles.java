@@ -17,8 +17,6 @@
 package com.android.systemui.bubbles;
 
 import android.annotation.NonNull;
-import android.content.Context;
-import android.view.Display;
 
 import androidx.annotation.MainThread;
 
@@ -57,12 +55,6 @@ public interface Bubbles {
      */
     ScrimView getScrimForBubble();
 
-    /**
-     * @return the display id of the expanded view, if the stack is expanded and not occluded by the
-     * status bar, otherwise returns {@link Display#INVALID_DISPLAY}.
-     */
-    int getExpandedDisplayId(Context context);
-
     /** @return Bubbles for updating overflow. */
     List<Bubble> getOverflowBubbles();
 
@@ -76,13 +68,6 @@ public interface Bubbles {
      * @param entry the notification for the bubble to be selected
      */
     void expandStackAndSelectBubble(NotificationEntry entry);
-
-
-    /**
-     * Directs a back gesture at the bubble stack. When opened, the current expanded bubble
-     * is forwarded a back key down/up pair.
-     */
-    void performBackPressIfNeeded();
 
     /** Promote the provided bubbles when overflow view. */
     void promoteBubbleFromOverflow(Bubble bubble);
@@ -142,4 +127,7 @@ public interface Bubbles {
 
     /** Set a listener to be notified of when overflow view update. */
     void setOverflowListener(BubbleData.Listener listener);
+
+    /** The task listener for events in bubble tasks. **/
+    MultiWindowTaskListener getTaskManager();
 }
