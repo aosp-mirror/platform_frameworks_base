@@ -132,6 +132,8 @@ using ::android::hardware::tv::tuner::V1_0::LnbTone;
 using ::android::hardware::tv::tuner::V1_0::LnbVoltage;
 using ::android::hardware::tv::tuner::V1_0::PlaybackSettings;
 using ::android::hardware::tv::tuner::V1_0::RecordSettings;
+using ::android::hardware::tv::tuner::V1_1::AudioStreamType;
+using ::android::hardware::tv::tuner::V1_1::AvStreamType;
 using ::android::hardware::tv::tuner::V1_1::Constant;
 using ::android::hardware::tv::tuner::V1_1::Constant64Bit;
 using ::android::hardware::tv::tuner::V1_1::FrontendAnalogAftFlag;
@@ -157,6 +159,7 @@ using ::android::hardware::tv::tuner::V1_1::FrontendSpectralInversion;
 using ::android::hardware::tv::tuner::V1_1::FrontendStatusExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendStatusTypeExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendTransmissionMode;
+using ::android::hardware::tv::tuner::V1_1::VideoStreamType;
 
 struct fields_t {
     jfieldID tunerContext;
@@ -3399,6 +3402,31 @@ static DemuxFilterAvSettings getFilterAvSettings(JNIEnv *env, const jobject& set
     return filterAvSettings;
 }
 
+static bool getAvStreamType(JNIEnv *env, jobject filterConfigObj, AvStreamType& type) {
+    jobject settingsObj =
+            env->GetObjectField(
+                    filterConfigObj,
+                    env->GetFieldID(
+                            env->FindClass("android/media/tv/tuner/filter/FilterConfiguration"),
+                            "mSettings",
+                            "Landroid/media/tv/tuner/filter/Settings;"));
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/AvSettings");
+    AvStreamType streamType;
+    AudioStreamType audioStreamType = static_cast<AudioStreamType>(
+            env->GetIntField(settingsObj, env->GetFieldID(clazz, "mAudioStreamType", "I")));
+    if (audioStreamType != AudioStreamType::UNDEFINED) {
+        type.audio(audioStreamType);
+        return true;
+    }
+    VideoStreamType videoStreamType = static_cast<VideoStreamType>(
+            env->GetIntField(settingsObj, env->GetFieldID(clazz, "mVideoStreamType", "I")));
+    if (videoStreamType != VideoStreamType::UNDEFINED) {
+        type.video(videoStreamType);
+        return true;
+    }
+    return false;
+}
+
 static DemuxFilterPesDataSettings getFilterPesDataSettings(JNIEnv *env, const jobject& settings) {
     jclass clazz = env->FindClass("android/media/tv/tuner/filter/PesSettings");
     uint16_t streamId = static_cast<uint16_t>(
@@ -3721,6 +3749,16 @@ static jint copyData(JNIEnv *env, std::unique_ptr<MQ>& mq, EventFlag* flag, jbyt
     return size;
 }
 
+static bool isAvFilterSettings(DemuxFilterSettings filterSettings) {
+    return (filterSettings.getDiscriminator() == DemuxFilterSettings::hidl_discriminator::ts
+            && filterSettings.ts().filterSettings.getDiscriminator()
+                    == DemuxTsFilterSettings::FilterSettings::hidl_discriminator::av)
+            ||
+            (filterSettings.getDiscriminator() == DemuxFilterSettings::hidl_discriminator::mmtp
+            && filterSettings.mmtp().filterSettings.getDiscriminator()
+                    == DemuxMmtpFilterSettings::FilterSettings::hidl_discriminator::av);
+}
+
 static jint android_media_tv_Tuner_configure_filter(
         JNIEnv *env, jobject filter, int type, int subtype, jobject settings) {
     ALOGD("configure filter type=%d, subtype=%d", type, subtype);
@@ -3739,6 +3777,20 @@ static jint android_media_tv_Tuner_configure_filter(
 
     if (static_cast<DemuxFilterMainType>(type) == DemuxFilterMainType::IP) {
         res = configureIpFilterContextId(env, iFilterSp, settings);
+        if (res != Result::SUCCESS) {
+            return (jint) res;
+        }
+    }
+
+    AvStreamType streamType;
+    if (isAvFilterSettings(filterSettings) && getAvStreamType(env, settings, streamType)) {
+        sp<::android::hardware::tv::tuner::V1_1::IFilter> iFilterSp_1_1;
+        iFilterSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(iFilterSp);
+        if (iFilterSp_1_1 != NULL) {
+            res = iFilterSp_1_1->configureAvStreamType(streamType);
+        } else {
+            ALOGW("configureAvStreamType is not supported with the current HAL implementation.");
+        }
         if (res != Result::SUCCESS) {
             return (jint) res;
         }
