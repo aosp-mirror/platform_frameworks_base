@@ -156,4 +156,12 @@ public abstract class TetheringDependencies {
     public boolean isTetheringDenied() {
         return TextUtils.equals(SystemProperties.get("ro.tether.denied"), "true");
     }
+
+    /**
+     * Get a reference to PrivateAddressCoordinator to be used by Tethering.
+     */
+    public PrivateAddressCoordinator getPrivateAddressCoordinator(Context ctx,
+            TetheringConfiguration cfg) {
+        return new PrivateAddressCoordinator(ctx, cfg);
+    }
 }
