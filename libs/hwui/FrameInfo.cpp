@@ -31,6 +31,7 @@ const std::string FrameInfoNames[] = {
         "AnimationStart",
         "PerformTraversalsStart",
         "DrawStart",
+        "FrameDeadline",
         "SyncQueued",
         "SyncStart",
         "IssueDrawCommandsStart",
@@ -45,7 +46,7 @@ static_assert((sizeof(FrameInfoNames) / sizeof(FrameInfoNames[0])) ==
                       static_cast<int>(FrameInfoIndex::NumIndexes),
               "size mismatch: FrameInfoNames doesn't match the enum!");
 
-static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 18,
+static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 19,
               "Must update value in FrameMetrics.java#FRAME_STATS_COUNT (and here)");
 
 void FrameInfo::importUiThreadInfo(int64_t* info) {
