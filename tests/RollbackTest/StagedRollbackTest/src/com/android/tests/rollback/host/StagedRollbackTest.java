@@ -18,6 +18,8 @@ package com.android.tests.rollback.host;
 
 import static com.android.tests.rollback.host.WatchdogEventLogger.watchdogEventOccurred;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -272,6 +274,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         List<String> after = getSnapshotDirectories("/data/misc_ce/0/rollback");
         // Only check directories newly created during the test
         after.removeAll(before);
+        // There should be only one /data/misc_ce/0/rollback/<rollbackId> created during test
+        assertThat(after).hasSize(1);
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
@@ -358,6 +362,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         List<String> after = getSnapshotDirectories("/data/misc/apexrollback");
         // Only check directories newly created during the test
         after.removeAll(before);
+        // There should be only one /data/misc/apexrollback/<rollbackId> created during test
+        assertThat(after).hasSize(1);
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
@@ -405,6 +411,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         List<String> after = getSnapshotDirectories("/data/misc_de/0/apexrollback");
         // Only check directories newly created during the test
         after.removeAll(before);
+        // There should be only one /data/misc_de/0/apexrollback/<rollbackId> created during test
+        assertThat(after).hasSize(1);
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
@@ -450,6 +458,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         List<String> after = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
         // Only check directories newly created during the test
         after.removeAll(before);
+        // There should be only one /data/misc_ce/0/apexrollback/<rollbackId> created during test
+        assertThat(after).hasSize(1);
         after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
@@ -509,6 +519,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         List<String> after = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
         // Only check directories newly created during the test
         after.removeAll(before);
+        // There should be only one /data/misc_ce/0/apexrollback/<rollbackId> created during test
+        assertThat(after).hasSize(1);
         // Expire all rollbacks and check CE snapshot directories are deleted
         runPhase("testCleanUp");
         for (String dir : after) {
