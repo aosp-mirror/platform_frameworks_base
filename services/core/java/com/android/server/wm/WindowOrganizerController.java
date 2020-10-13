@@ -207,7 +207,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
                                 entries.next();
                         final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
-                        if (!wc.isAttached()) {
+                        if (wc == null || !wc.isAttached()) {
                             Slog.e(TAG, "Attempt to operate on detached container: " + wc);
                             continue;
                         }
