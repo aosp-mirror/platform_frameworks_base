@@ -1469,7 +1469,7 @@ public class TrustManagerService extends SystemService {
             if (userId > 0) {
                 return userId;
             } else {
-                Slog.wtf(TAG, "EXTRA_USER_HANDLE missing or invalid, value=" + userId);
+                Log.w(TAG, "EXTRA_USER_HANDLE missing or invalid, value=" + userId);
                 return -100;
             }
         }
