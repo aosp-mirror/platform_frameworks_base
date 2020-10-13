@@ -343,6 +343,78 @@ public class HdmiCecMessageValidator {
         return true;
     }
 
+    /**
+     * Check if the given value is a valid day of month. A valid value is one which falls within the
+     * range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value day of month
+     * @return true if the day of month is valid
+     */
+    private boolean isValidDayOfMonth(int value) {
+        return isWithinRange(value, 1, 31);
+    }
+
+    /**
+     * Check if the given value is a valid month of year. A valid value is one which falls within
+     * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value month of year
+     * @return true if the month of year is valid
+     */
+    private boolean isValidMonthOfYear(int value) {
+        return isWithinRange(value, 1, 12);
+    }
+
+    /**
+     * Check if the given value is a valid hour. A valid value is one which falls within the range
+     * description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value hour
+     * @return true if the hour is valid
+     */
+    private boolean isValidHour(int value) {
+        return isWithinRange(value, 0, 23);
+    }
+
+    /**
+     * Check if the given value is a valid minute. A valid value is one which falls within the range
+     * description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value minute
+     * @return true if the minute is valid
+     */
+    private boolean isValidMinute(int value) {
+        return isWithinRange(value, 0, 59);
+    }
+
+    /**
+     * Check if the given value is a valid duration hours. A valid value is one which falls within
+     * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value duration hours
+     * @return true if the duration hours is valid
+     */
+    private boolean isValidDurationHours(int value) {
+        return isWithinRange(value, 0, 99);
+    }
+
+    /**
+     * Check if the given value is a valid recording sequence. A valid value is adheres to range
+     * description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value recording sequence
+     * @return true if the given recording sequence is valid
+     */
+    private boolean isValidRecordingSequence(int value) {
+        value = value & 0xFF;
+        // Validate bit 7 is set to zero
+        if ((value & 0x80) != 0x00) {
+            return false;
+        }
+        // Validate than not more than one bit is set
+        return (Integer.bitCount(value) <= 1);
+    }
+
     private class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
