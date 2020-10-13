@@ -199,10 +199,10 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     private boolean isGeoDetectionEnabled(@UserIdInt int userId) {
-        final boolean locationEnabled = isLocationEnabled(userId);
+        final boolean geoDetectionEnabledByDefault = false;
         return Settings.Secure.getIntForUser(mCr,
                 Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
-                locationEnabled ? 1 : 0 /* defaultValue */, userId) != 0;
+                (geoDetectionEnabledByDefault ? 1 : 0) /* defaultValue */, userId) != 0;
     }
 
     private void setGeoDetectionEnabled(@UserIdInt int userId, boolean enabled) {
