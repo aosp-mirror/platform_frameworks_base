@@ -777,12 +777,15 @@ public abstract class ApexManager {
         void registerApkInApex(AndroidPackage pkg) {
             synchronized (mLock) {
                 for (ActiveApexInfo aai : mActiveApexInfosCache) {
-                    if (pkg.getBaseApkPath().startsWith(aai.apexDirectory.getAbsolutePath())) {
+                    if (pkg.getBaseApkPath().startsWith(
+                            aai.apexDirectory.getAbsolutePath() + File.separator)) {
                         List<String> apks = mApksInApex.get(aai.apexModuleName);
                         if (apks == null) {
                             apks = Lists.newArrayList();
                             mApksInApex.put(aai.apexModuleName, apks);
                         }
+                        Slog.i(TAG, "Registering " + pkg.getPackageName() + " as apk-in-apex of "
+                                + aai.apexModuleName);
                         apks.add(pkg.getPackageName());
                     }
                 }
