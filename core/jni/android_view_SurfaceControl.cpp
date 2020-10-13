@@ -738,14 +738,15 @@ static void nativeSetShadowRadius(JNIEnv* env, jclass clazz, jlong transactionOb
 }
 
 static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
-                               jfloat frameRate, jint compatibility) {
+                               jfloat frameRate, jint compatibility, jboolean shouldBeSeamless) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
     const auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     // Our compatibility is a Surface.FRAME_RATE_COMPATIBILITY_* value, and
     // Transaction::setFrameRate() takes an ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_* value. The
     // values are identical though, so no need to convert anything.
-    transaction->setFrameRate(ctrl, frameRate, static_cast<int8_t>(compatibility));
+    transaction->setFrameRate(ctrl, frameRate, static_cast<int8_t>(compatibility),
+                              bool(shouldBeSeamless));
 }
 
 static jlong nativeAcquireFrameRateFlexibilityToken(JNIEnv* env, jclass clazz) {
@@ -1668,7 +1669,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetBlurRegions },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
-    {"nativeSetFrameRate", "(JJFI)V",
+    {"nativeSetFrameRate", "(JJFIZ)V",
             (void*)nativeSetFrameRate },
     {"nativeAcquireFrameRateFlexibilityToken", "()J",
             (void*)nativeAcquireFrameRateFlexibilityToken },
