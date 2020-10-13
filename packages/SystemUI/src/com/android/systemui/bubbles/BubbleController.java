@@ -80,6 +80,7 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
@@ -87,6 +88,7 @@ import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -168,7 +170,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
     private final ShadeController mShadeController;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
-    private BubbleLogger mLogger = new BubbleLoggerImpl();
+    private BubbleLogger mLogger;
 
     private BubbleData mBubbleData;
     private ScrimView mBubbleScrim;
@@ -365,20 +367,21 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
-            BubbleDataRepository dataRepository,
             SysUiState sysUiState,
             INotificationManager notificationManager,
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            LauncherApps launcherApps) {
+            LauncherApps launcherApps,
+            UiEventLogger uiEventLogger) {
+        BubbleLogger logger = new BubbleLogger(uiEventLogger);
         return new BubbleController(context, notificationShadeWindowController,
-                statusBarStateController, shadeController, new BubbleData(context), synchronizer,
-                configurationController, interruptionStateProvider, zenModeController,
+                statusBarStateController, shadeController, new BubbleData(context, logger),
+                synchronizer, configurationController, interruptionStateProvider, zenModeController,
                 notifUserManager, groupManager, entryManager, notifPipeline, featureFlags,
-                dumpManager, floatingContentCoordinator, dataRepository, sysUiState,
-                notificationManager, statusBarService, windowManager, windowManagerShellWrapper,
-                launcherApps);
+                dumpManager, floatingContentCoordinator,
+                new BubbleDataRepository(context, launcherApps), sysUiState, notificationManager,
+                statusBarService, windowManager, windowManagerShellWrapper, launcherApps, logger);
     }
 
     /**
@@ -407,7 +410,8 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            LauncherApps launcherApps) {
+            LauncherApps launcherApps,
+            BubbleLogger bubbleLogger) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -417,6 +421,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
         mINotificationManager = notificationManager;
+        mLogger = bubbleLogger;
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
             public void onZenChanged(int zen) {
@@ -575,6 +580,12 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    private void onBubbleExpandChanged(boolean shouldExpand) {
+        mSysUiState
+                .setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
+                .commitUpdate(mContext.getDisplayId());
     }
 
     private void setupNEM() {
@@ -791,8 +802,8 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
-                    mSysUiState, this::onAllBubblesAnimatedOut, this::onImeVisibilityChanged,
-                    this::hideCurrentInputMethod);
+                    this::onAllBubblesAnimatedOut, this::onImeVisibilityChanged,
+                    this::hideCurrentInputMethod, this::onBubbleExpandChanged);
             mStackView.setStackStartPosition(mPositionFromRemovedStack);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {

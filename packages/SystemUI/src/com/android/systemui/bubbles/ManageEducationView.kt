@@ -25,8 +25,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.Interpolators
-import com.android.systemui.Prefs
-import com.android.systemui.Prefs.Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION
 import com.android.systemui.R
 
 /**
@@ -38,8 +36,8 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
     private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleManageEducationView"
         else BubbleDebugConfig.TAG_BUBBLES
 
-    private val ANIMATE_DURATION : Long = 200
-    private val ANIMATE_DURATION_SHORT : Long = 40
+    private val ANIMATE_DURATION: Long = 200
+    private val ANIMATE_DURATION_SHORT: Long = 40
 
     private val manageView by lazy { findViewById<View>(R.id.manage_education_view) }
     private val manageButton by lazy { findViewById<Button>(R.id.manage) }
@@ -50,7 +48,7 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
     private var isHiding = false
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.bubbles_manage_button_education, this);
+        LayoutInflater.from(context).inflate(R.layout.bubbles_manage_button_education, this)
         visibility = View.GONE
         elevation = resources.getDimensionPixelSize(R.dimen.bubble_elevation).toFloat()
 
@@ -95,7 +93,7 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
      *
      * @param show whether the user education view should show or not.
      */
-    fun show(expandedView: BubbleExpandedView, rect : Rect) {
+    fun show(expandedView: BubbleExpandedView, rect: Rect) {
         if (visibility == VISIBLE) return
 
         alpha = 0f
@@ -136,10 +134,13 @@ class ManageEducationView constructor(context: Context) : LinearLayout(context) 
             .withEndAction {
                 isHiding = false
                 visibility = GONE
-            };
+            }
     }
 
     private fun setShouldShow(shouldShow: Boolean) {
-        Prefs.putBoolean(context, HAS_SEEN_BUBBLES_MANAGE_EDUCATION, !shouldShow)
+        context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+                .edit().putBoolean(PREF_MANAGED_EDUCATION, !shouldShow).apply()
     }
 }
+
+const val PREF_MANAGED_EDUCATION: String = "HasSeenBubblesManageOnboarding"

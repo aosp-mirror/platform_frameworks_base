@@ -24,21 +24,19 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.Interpolators
-import com.android.systemui.Prefs
-import com.android.systemui.Prefs.Key.HAS_SEEN_BUBBLES_EDUCATION
 import com.android.systemui.R
 
 /**
  * User education view to highlight the collapsed stack of bubbles.
  * Shown only the first time a user taps the stack.
  */
-class StackEducationView constructor(context: Context) : LinearLayout(context){
+class StackEducationView constructor(context: Context) : LinearLayout(context) {
 
     private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleStackEducationView"
         else BubbleDebugConfig.TAG_BUBBLES
 
-    private val ANIMATE_DURATION : Long = 200
-    private val ANIMATE_DURATION_SHORT : Long = 40
+    private val ANIMATE_DURATION: Long = 200
+    private val ANIMATE_DURATION_SHORT: Long = 40
 
     private val view by lazy { findViewById<View>(R.id.stack_education_layout) }
     private val titleTextView by lazy { findViewById<TextView>(R.id.stack_education_title) }
@@ -47,7 +45,7 @@ class StackEducationView constructor(context: Context) : LinearLayout(context){
     private var isHiding = false
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.bubble_stack_user_education, this);
+        LayoutInflater.from(context).inflate(R.layout.bubble_stack_user_education, this)
 
         visibility = View.GONE
         elevation = resources.getDimensionPixelSize(R.dimen.bubble_elevation).toFloat()
@@ -93,7 +91,7 @@ class StackEducationView constructor(context: Context) : LinearLayout(context){
      *
      * @return true if user education was shown, false otherwise.
      */
-    fun show(stackPosition: PointF) : Boolean{
+    fun show(stackPosition: PointF): Boolean {
         if (visibility == VISIBLE) return false
 
         setAlpha(0f)
@@ -129,6 +127,9 @@ class StackEducationView constructor(context: Context) : LinearLayout(context){
     }
 
     private fun setShouldShow(shouldShow: Boolean) {
-        Prefs.putBoolean(context, HAS_SEEN_BUBBLES_EDUCATION, !shouldShow)
+        context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+                .edit().putBoolean(PREF_MANAGED_EDUCATION, !shouldShow).apply()
     }
 }
+
+const val PREF_STACK_EDUCATION: String = "HasSeenBubblesOnboarding"
