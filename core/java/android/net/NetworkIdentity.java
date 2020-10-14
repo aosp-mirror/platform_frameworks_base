@@ -18,6 +18,7 @@ package android.net;
 
 import static android.net.ConnectivityManager.TYPE_WIFI;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -67,7 +68,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkIdentity) {
             final NetworkIdentity ident = (NetworkIdentity) obj;
             return mType == ident.mType && mSubType == ident.mSubType && mRoaming == ident.mRoaming
