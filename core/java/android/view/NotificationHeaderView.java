@@ -27,7 +27,6 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -344,14 +343,6 @@ public class NotificationHeaderView extends ViewGroup {
         }
     }
 
-    public View getWorkProfileIcon() {
-        return mProfileBadge;
-    }
-
-    public CachingIconView getIcon() {
-        return mIcon;
-    }
-
     /**
      * Sets the margin end for the text portion of the header, excluding right-aligned elements
      * @param headerTextMarginEnd margin size
@@ -488,10 +479,6 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
         return this;
-    }
-
-    public ImageView getExpandButton() {
-        return mExpandButton;
     }
 
     @Override
