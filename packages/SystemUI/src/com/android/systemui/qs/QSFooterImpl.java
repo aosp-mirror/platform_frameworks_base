@@ -51,7 +51,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
 import com.android.settingslib.drawable.UserIconDrawable;
@@ -64,20 +63,17 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-public class QSFooterImpl extends FrameLayout implements QSFooter,
-        OnClickListener, OnUserInfoChangedListener {
+/** */
+public class QSFooterImpl extends FrameLayout implements OnClickListener {
 
     private static final String TAG = "QSFooterImpl";
 
     private final ActivityStarter mActivityStarter;
-    private final UserInfoController mUserInfoController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final UserTracker mUserTracker;
     private SettingsButton mSettingsButton;
@@ -119,11 +115,10 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     @Inject
     public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ActivityStarter activityStarter, UserInfoController userInfoController,
+            ActivityStarter activityStarter,
             DeviceProvisionedController deviceProvisionedController, UserTracker userTracker) {
         super(context, attrs);
         mActivityStarter = activityStarter;
-        mUserInfoController = userInfoController;
         mDeviceProvisionedController = deviceProvisionedController;
         mUserTracker = userTracker;
     }
@@ -132,7 +127,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     public QSFooterImpl(Context context, AttributeSet attrs) {
         this(context, attrs,
                 Dependency.get(ActivityStarter.class),
-                Dependency.get(UserInfoController.class),
                 Dependency.get(DeviceProvisionedController.class),
                 Dependency.get(UserTracker.class));
     }
@@ -249,24 +243,20 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 .build();
     }
 
-    @Override
     public void setKeyguardShowing(boolean keyguardShowing) {
         setExpansion(mExpansionAmount);
     }
 
-    @Override
     public void setExpandClickListener(OnClickListener onClickListener) {
         mExpandClickListener = onClickListener;
     }
 
-    @Override
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
         updateEverything();
     }
 
-    @Override
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
         if (mSettingsCogAnimator != null) mSettingsCogAnimator.setPosition(headerExpansionFraction);
@@ -287,18 +277,15 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
-        setListening(false);
         mContext.getContentResolver().unregisterContentObserver(mDeveloperSettingsObserver);
         super.onDetachedFromWindow();
     }
 
-    @Override
     public void setListening(boolean listening) {
         if (listening == mListening) {
             return;
         }
         mListening = listening;
-        updateListeners();
     }
 
     @Override
@@ -318,7 +305,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
-    @Override
     public void disable(int state1, int state2, boolean animate) {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
@@ -358,15 +344,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         return mExpanded && mMultiUserSwitch.isMultiUserEnabled();
     }
 
-    private void updateListeners() {
-        if (mListening) {
-            mUserInfoController.addCallback(this);
-        } else {
-            mUserInfoController.removeCallback(this);
-        }
-    }
-
-    @Override
     public void setQSPanel(final QSPanel qsPanel) {
         mQsPanel = qsPanel;
         if (mQsPanel != null) {
@@ -375,7 +352,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         }
     }
 
-    @Override
     public void setQQSPanel(@Nullable QuickQSPanel panel) {
         mQuickQsPanel = panel;
     }
@@ -424,12 +400,9 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 true /* dismissShade */);
     }
 
-    @Override
-    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
-        if (picture != null &&
-                UserManager.get(mContext).isGuestUser(KeyguardUpdateMonitor.getCurrentUser()) &&
-                !(picture instanceof UserIconDrawable)) {
-            picture = picture.getConstantState().newDrawable(mContext.getResources()).mutate();
+    void onUserInfoChanged(Drawable picture, boolean isGuestUser) {
+        if (picture != null && isGuestUser && !(picture instanceof UserIconDrawable)) {
+            picture = picture.getConstantState().newDrawable(getResources()).mutate();
             picture.setColorFilter(
                     Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorForeground),
                     Mode.SRC_IN);

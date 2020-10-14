@@ -16,11 +16,15 @@
 
 package com.android.systemui.qs;
 
+import android.graphics.drawable.Drawable;
+import android.os.UserManager;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -30,10 +34,39 @@ import javax.inject.Inject;
  */
 @QSScope
 public class QSFooterImplController extends ViewController<QSFooterImpl> implements QSFooter {
+
+    private final UserManager mUserManager;
+    private final UserInfoController mUserInfoController;
+
+    private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
+            new UserInfoController.OnUserInfoChangedListener() {
+        @Override
+        public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+            boolean isGuestUser = mUserManager.isGuestUser(KeyguardUpdateMonitor.getCurrentUser());
+            mView.onUserInfoChanged(picture, isGuestUser);
+        }
+    };
+
+    private boolean mListening;
+
     @Inject
-    QSFooterImplController(QSFooterImpl view) {
+    QSFooterImplController(QSFooterImpl view, UserManager userManager,
+            UserInfoController userInfoController) {
         super(view);
+        mUserManager = userManager;
+        mUserInfoController = userInfoController;
     }
+
+
+    @Override
+    protected void onViewAttached() {
+    }
+
+    @Override
+    protected void onViewDetached() {
+        setListening(false);
+    }
+
 
     @Override
     public void setQSPanel(@Nullable QSPanel panel) {
@@ -62,7 +95,16 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
 
     @Override
     public void setListening(boolean listening) {
-        mView.setListening(listening);
+        if (mListening == listening) {
+            return;
+        }
+
+        mListening = listening;
+        if (mListening) {
+            mUserInfoController.addCallback(mOnUserInfoChangedListener);
+        } else {
+            mUserInfoController.removeCallback(mOnUserInfoChangedListener);
+        }
     }
 
     @Override
@@ -74,15 +116,6 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
     public void setExpandClickListener(View.OnClickListener onClickListener) {
         mView.setExpandClickListener(onClickListener);
     }
-
-    @Override
-    protected void onViewAttached() {
-    }
-
-    @Override
-    protected void onViewDetached() {
-    }
-
     @Override
     public void setQQSPanel(@Nullable QuickQSPanel panel) {
         mView.setQQSPanel(panel);
@@ -100,12 +133,17 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
      */
     @QSScope
     public static class Factory {
+        private final UserManager mUserManager;
+        private final UserInfoController mUserInfoController;
+
         @Inject
-        Factory() {
+        Factory(UserManager userManager, UserInfoController userInfoController) {
+            mUserManager = userManager;
+            mUserInfoController = userInfoController;
         }
 
         QSFooterImplController create(QSFooterImpl view) {
-            return new QSFooterImplController(view);
+            return new QSFooterImplController(view, mUserManager, mUserInfoController);
         }
     }
 }
