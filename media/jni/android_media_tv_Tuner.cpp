@@ -3149,6 +3149,29 @@ static DemuxFilterSettings getFilterConfiguration(
     return filterSettings;
 }
 
+static Result configureIpFilterContextId(
+        JNIEnv *env, sp<IFilter> iFilterSp, jobject ipFilterConfigObj) {
+    jclass clazz = env->FindClass(
+            "android/media/tv/tuner/filter/IpFilterConfiguration");
+    uint32_t cid = env->GetIntField(ipFilterConfigObj, env->GetFieldID(
+            clazz, "mIpFilterContextId", "I"));
+    Result res = Result::SUCCESS;
+    if (cid != static_cast<uint32_t>(Constant::INVALID_IP_FILTER_CONTEXT_ID)) {
+        sp<::android::hardware::tv::tuner::V1_1::IFilter> iFilterSp_1_1;
+        iFilterSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(iFilterSp);
+
+        if (iFilterSp_1_1 != NULL) {
+            res = iFilterSp_1_1->configureIpCid(cid);
+            if (res != Result::SUCCESS) {
+                return res;
+            }
+        } else {
+            ALOGW("configureIpCid is not supported with the current HAL implementation.");
+        }
+    }
+    return res;
+}
+
 static jint copyData(JNIEnv *env, std::unique_ptr<MQ>& mq, EventFlag* flag, jbyteArray buffer,
         jlong offset, jlong size) {
     ALOGD("copyData, size=%ld, offset=%ld", (long) size, (long) offset);
@@ -3190,6 +3213,13 @@ static jint android_media_tv_Tuner_configure_filter(
 
     if (res != Result::SUCCESS) {
         return (jint) res;
+    }
+
+    if (static_cast<DemuxFilterMainType>(type) == DemuxFilterMainType::IP) {
+        res = configureIpFilterContextId(env, iFilterSp, settings);
+        if (res != Result::SUCCESS) {
+            return (jint) res;
+        }
     }
 
     MQDescriptorSync<uint8_t> filterMQDesc;
