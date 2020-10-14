@@ -7,6 +7,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "-1683614271": {
+      "message": "Existing task: id=%d component=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
     "-1534364071": {
       "message": "onTransitionReady %s: %s",
       "level": "VERBOSE",
@@ -60,6 +66,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/FullscreenTaskListener.java"
+    },
+    "580605218": {
+      "message": "Registering organizer",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
     "980952660": {
       "message": "Task root back pressed taskId=%d",

@@ -32,6 +32,7 @@ import android.app.ActivityManager.TaskDescription;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,6 +40,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
+import android.window.TaskAppearedInfo;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -76,8 +78,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             WINDOWING_MODE_FREEFORM
     };
 
-    private final WindowManagerGlobalLock mGlobalLock;
-
     private class DeathRecipient implements IBinder.DeathRecipient {
         ITaskOrganizer mTaskOrganizer;
 
@@ -103,22 +103,28 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      * transaction before they are presented to the task org.
      */
     private class TaskOrganizerCallbacks {
-        final WindowManagerService mService;
         final ITaskOrganizer mTaskOrganizer;
         final Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
-        private final SurfaceControl.Transaction mTransaction;
-
-        TaskOrganizerCallbacks(WindowManagerService wm, ITaskOrganizer taskOrg,
+        TaskOrganizerCallbacks(ITaskOrganizer taskOrg,
                 Consumer<Runnable> deferTaskOrgCallbacksConsumer) {
-            mService = wm;
             mDeferTaskOrgCallbacksConsumer = deferTaskOrgCallbacksConsumer;
             mTaskOrganizer = taskOrg;
-            mTransaction = wm.mTransactionFactory.get();
         }
 
         IBinder getBinder() {
             return mTaskOrganizer.asBinder();
+        }
+
+        SurfaceControl prepareLeash(Task task, boolean visible, String reason) {
+            SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl(), reason);
+            if (!task.mCreatedByOrganizer && !visible) {
+                // To prevent flashes, we hide the task prior to sending the leash to the
+                // task org if the task has previously hidden (ie. when entering PIP)
+                mTransaction.hide(outSurfaceControl);
+                mTransaction.apply();
+            }
+            return outSurfaceControl;
         }
 
         void onTaskAppeared(Task task) {
@@ -127,15 +133,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
-                    SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl(),
-                            "TaskOrganizerController.onTaskAppeared");
-                    if (!task.mCreatedByOrganizer && !visible) {
-                        // To prevent flashes, we hide the task prior to sending the leash to the
-                        // task org if the task has previously hidden (ie. when entering PIP)
-                        mTransaction.hide(outSurfaceControl);
-                        mTransaction.apply();
-                    }
-                    mTaskOrganizer.onTaskAppeared(taskInfo, outSurfaceControl);
+                    mTaskOrganizer.onTaskAppeared(taskInfo, prepareLeash(task, visible,
+                            "TaskOrganizerController.onTaskAppeared"));
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onTaskAppeared callback", e);
                 }
@@ -208,8 +207,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     mDeferTaskOrgCallbacksConsumer != null
                             ? mDeferTaskOrgCallbacksConsumer
                             : mService.mWindowManager.mAnimator::addAfterPrepareSurfacesRunnable;
-            mOrganizer = new TaskOrganizerCallbacks(mService.mWindowManager, organizer,
-                    deferTaskOrgCallbacksConsumer);
+            mOrganizer = new TaskOrganizerCallbacks(organizer, deferTaskOrgCallbacksConsumer);
             mDeathRecipient = new DeathRecipient(organizer);
             try {
                 organizer.asBinder().linkToDeath(mDeathRecipient, 0);
@@ -217,6 +215,18 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
+        }
+
+        /**
+         * Register this task with this state, but doesn't trigger the task appeared callback to
+         * the organizer.
+         */
+        SurfaceControl addTaskWithoutCallback(Task t, String reason) {
+            t.mTaskAppearedSent = true;
+            if (!mOrganizedTasks.contains(t)) {
+                mOrganizedTasks.add(t);
+            }
+            return mOrganizer.prepareLeash(t, t.isVisible(), reason);
         }
 
         void addTask(Task t) {
@@ -265,6 +275,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
+    private final ActivityTaskManagerService mService;
+    private final WindowManagerGlobalLock mGlobalLock;
+
     // List of task organizers by priority
     private final LinkedList<ITaskOrganizer> mTaskOrganizers = new LinkedList<>();
     private final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap<>();
@@ -273,8 +286,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     // Set of organized tasks (by taskId) that dispatch back pressed to their organizers
     private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet();
 
-    private final ActivityTaskManagerService mService;
-
+    private SurfaceControl.Transaction mTransaction;
     private RunningTaskInfo mTmpTaskInfo;
     private Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
@@ -299,7 +311,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      * Register a TaskOrganizer to manage tasks as they enter the a supported windowing mode.
      */
     @Override
-    public void registerTaskOrganizer(ITaskOrganizer organizer) {
+    public ParceledListSlice<TaskAppearedInfo> registerTaskOrganizer(ITaskOrganizer organizer) {
         enforceStackPermission("registerTaskOrganizer()");
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -307,17 +319,36 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register task organizer=%s uid=%d",
                         organizer.asBinder(), uid);
+
+                // Defer initializing the transaction since the transaction factory can be set up
+                // by the tests after construction of the controller
+                if (mTransaction == null) {
+                    mTransaction = mService.mWindowManager.mTransactionFactory.get();
+                }
+
                 if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
                     mTaskOrganizers.add(organizer);
                     mTaskOrganizerStates.put(organizer.asBinder(),
                             new TaskOrganizerState(organizer, uid));
                 }
+
+                final ArrayList<TaskAppearedInfo> taskInfos = new ArrayList<>();
+                final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 mService.mRootWindowContainer.forAllTasks((task) -> {
                     if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, task.getWindowingMode())) {
                         return;
                     }
-                    task.updateTaskOrganizerState(true /* forceUpdate */);
+
+                    boolean returnTask = !task.mCreatedByOrganizer;
+                    task.updateTaskOrganizerState(true /* forceUpdate */,
+                            returnTask /* skipTaskAppeared */);
+                    if (returnTask) {
+                        SurfaceControl outSurfaceControl = state.addTaskWithoutCallback(task,
+                                "TaskOrganizerController.registerTaskOrganizer");
+                        taskInfos.add(new TaskAppearedInfo(task.getTaskInfo(), outSurfaceControl));
+                    }
                 });
+                return new ParceledListSlice<>(taskInfos);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

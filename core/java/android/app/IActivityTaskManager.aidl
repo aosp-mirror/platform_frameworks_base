@@ -165,7 +165,8 @@ interface IActivityTaskManager {
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
     /** Finish all activities that were started for result from the specified activity. */
     void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
-    ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
+    ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
+            int userId);
     boolean willActivityBeVisible(in IBinder token);
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
     int getRequestedOrientation(in IBinder token);
