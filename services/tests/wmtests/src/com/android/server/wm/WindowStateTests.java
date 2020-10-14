@@ -46,6 +46,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.WindowContainer.SYNC_STATE_WAITING_FOR_DRAW;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -608,7 +609,8 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Check that the window is in resizing if using blast sync.
         win.reportResized();
-        win.prepareForSync(mock(BLASTSyncEngine.TransactionReadyListener.class), 1);
+        win.prepareSync();
+        assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).contains(win);
 

@@ -7877,4 +7877,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pictureInPictureArgs.copyOnlySet(p);
         getTask().getRootTask().onPictureInPictureParamsChanged();
     }
+
+    @Override
+    boolean isSyncFinished() {
+        if (!super.isSyncFinished()) return false;
+        if (!isVisibleRequested()) return true;
+        // If visibleRequested, wait for at-least one visible child.
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).isVisibleRequested()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

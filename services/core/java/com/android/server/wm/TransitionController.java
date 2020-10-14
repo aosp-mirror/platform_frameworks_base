@@ -51,7 +51,6 @@ class TransitionController {
         Arrays.sort(SUPPORTED_LEGACY_TRANSIT_TYPES);
     }
 
-    final BLASTSyncEngine mSyncEngine = new BLASTSyncEngine();
     private ITransitionPlayer mTransitionPlayer;
     private final IBinder.DeathRecipient mTransitionPlayerDeath = () -> mTransitionPlayer = null;
     final ActivityTaskManagerService mAtm;

@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Server side implementation for the interface for organizing windows
@@ -84,7 +83,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private final ActivityTaskManagerService mService;
     private final WindowManagerGlobalLock mGlobalLock;
 
-    private final BLASTSyncEngine mBLASTSyncEngine = new BLASTSyncEngine();
     private final HashMap<Integer, IWindowContainerTransactionCallback>
             mTransactionCallbacksByPendingSyncId = new HashMap();
 
@@ -505,7 +503,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     @VisibleForTesting
     int startSyncWithOrganizer(IWindowContainerTransactionCallback callback) {
-        int id = mBLASTSyncEngine.startSyncSet(this);
+        int id = mService.mWindowManager.mSyncEngine.startSyncSet(this);
         mTransactionCallbacksByPendingSyncId.put(id, callback);
         return id;
     }
@@ -513,31 +511,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @VisibleForTesting
     void setSyncReady(int id) {
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Set sync ready, syncId=%d", id);
-        mBLASTSyncEngine.setReady(id);
+        mService.mWindowManager.mSyncEngine.setReady(id);
     }
 
     @VisibleForTesting
     void addToSyncSet(int syncId, WindowContainer wc) {
-        mBLASTSyncEngine.addToSyncSet(syncId, wc);
+        mService.mWindowManager.mSyncEngine.addToSyncSet(syncId, wc);
     }
 
     @Override
-    public void onTransactionReady(int syncId, Set<WindowContainer> windowContainersReady) {
+    public void onTransactionReady(int syncId, SurfaceControl.Transaction t) {
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Transaction ready, syncId=%d", syncId);
         final IWindowContainerTransactionCallback callback =
                 mTransactionCallbacksByPendingSyncId.get(syncId);
 
-        SurfaceControl.Transaction mergedTransaction = new SurfaceControl.Transaction();
-        for (WindowContainer container : windowContainersReady) {
-            container.mergeBlastSyncTransaction(mergedTransaction);
-        }
-
         try {
-            callback.onTransactionReady(syncId, mergedTransaction);
+            callback.onTransactionReady(syncId, t);
         } catch (RemoteException e) {
             // If there's an exception when trying to send the mergedTransaction to the client, we
             // should immediately apply it here so the transactions aren't lost.
-            mergedTransaction.apply();
+            t.apply();
         }
 
         mTransactionCallbacksByPendingSyncId.remove(syncId);
