@@ -26,9 +26,9 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
  * Extension for {@link AccessibilityTarget} with {@link AccessibilityFragmentType#INVISIBLE_TOGGLE}
  * type.
  */
-class InvisibleToggleWhiteListingFeatureTarget extends AccessibilityTarget {
+class InvisibleToggleAllowListingFeatureTarget extends AccessibilityTarget {
 
-    InvisibleToggleWhiteListingFeatureTarget(Context context, @ShortcutType int shortcutType,
+    InvisibleToggleAllowListingFeatureTarget(Context context, @ShortcutType int shortcutType,
             boolean isShortcutSwitched, String id, CharSequence label, Drawable icon, String key) {
         super(context, shortcutType, AccessibilityFragmentType.INVISIBLE_TOGGLE,
                 isShortcutSwitched, id, label, icon, key);
