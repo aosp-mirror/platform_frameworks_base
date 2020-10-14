@@ -45,6 +45,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -286,6 +287,31 @@ public class ApexManagerTest {
         assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isTrue();
         mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath());
         assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isFalse();
+    }
+
+    /**
+     * registerApkInApex method checks if the prefix of base apk path contains the apex package
+     * name. When an apex package name is a prefix of another apex package name, e.g,
+     * com.android.media and com.android.mediaprovider, then we need to ensure apk inside apex
+     * mediaprovider does not get registered under apex media.
+     */
+    @Test
+    public void testRegisterApkInApexDoesNotRegisterSimilarPrefix() throws RemoteException {
+        when(mApexService.getActivePackages()).thenReturn(createApexInfo(true, true));
+        final ApexManager.ActiveApexInfo activeApex = mApexManager.getActiveApexInfos().get(0);
+        assertThat(activeApex.apexModuleName).isEqualTo(TEST_APEX_PKG);
+
+        AndroidPackage fakeApkInApex = mock(AndroidPackage.class);
+        when(fakeApkInApex.getBaseApkPath()).thenReturn("/apex/" + TEST_APEX_PKG + "randomSuffix");
+        when(fakeApkInApex.getPackageName()).thenReturn("randomPackageName");
+
+        when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        assertThat(mApexManager.getApksInApex(activeApex.apexModuleName)).isEmpty();
+        mApexManager.registerApkInApex(fakeApkInApex);
+        assertThat(mApexManager.getApksInApex(activeApex.apexModuleName)).isEmpty();
     }
 
     private ApexInfo[] createApexInfo(boolean isActive, boolean isFactory) {
