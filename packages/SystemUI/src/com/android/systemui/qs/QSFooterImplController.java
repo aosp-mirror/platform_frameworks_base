@@ -16,15 +16,29 @@
 
 package com.android.systemui.qs;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.SettingsButton;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -37,6 +51,13 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
 
     private final UserManager mUserManager;
     private final UserInfoController mUserInfoController;
+    private final ActivityStarter mActivityStarter;
+    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final UserTracker mUserTracker;
+    private final TunerService mTunerService;
+    private final MetricsLogger mMetricsLogger;
+    private final SettingsButton mSettingsButton;
+    private final TextView mBuildText;
 
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             new UserInfoController.OnUserInfoChangedListener() {
@@ -47,19 +68,88 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
         }
     };
 
+    private final View.OnClickListener mSettingsOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // Don't do anything until view are unhidden
+            if (!mExpanded) {
+                return;
+            }
+
+            if (v == mSettingsButton) {
+                if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+                    // If user isn't setup just unlock the device and dump them back at SUW.
+                    mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                    });
+                    return;
+                }
+                mMetricsLogger.action(
+                        mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
+                                : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
+                if (mSettingsButton.isTunerClick()) {
+                    mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                        if (isTunerEnabled()) {
+                            mTunerService.showResetRequest(
+                                    mUserTracker.getUserHandle(),
+                                    () -> {
+                                        // Relaunch settings so that the tuner disappears.
+                                        startSettingsActivity();
+                                    });
+                        } else {
+                            Toast.makeText(getContext(), R.string.tuner_toast,
+                                    Toast.LENGTH_LONG).show();
+                            mTunerService.setTunerEnabled(mUserTracker.getUserHandle(), true);
+                        }
+                        startSettingsActivity();
+
+                    });
+                } else {
+                    startSettingsActivity();
+                }
+            }
+        }
+    };
+
     private boolean mListening;
+    private boolean mExpanded;
 
     @Inject
     QSFooterImplController(QSFooterImpl view, UserManager userManager,
-            UserInfoController userInfoController) {
+            UserInfoController userInfoController, ActivityStarter activityStarter,
+            DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
+            TunerService tunerService, MetricsLogger metricsLogger) {
         super(view);
         mUserManager = userManager;
         mUserInfoController = userInfoController;
+        mActivityStarter = activityStarter;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mUserTracker = userTracker;
+        mTunerService = tunerService;
+        mMetricsLogger = metricsLogger;
+
+        mSettingsButton = mView.findViewById(R.id.settings_button);
+        mBuildText = mView.findViewById(R.id.build);
     }
 
 
     @Override
     protected void onViewAttached() {
+        mSettingsButton.setOnClickListener(mSettingsOnClickListener);
+        mBuildText.setOnLongClickListener(view -> {
+            CharSequence buildText = mBuildText.getText();
+            if (!TextUtils.isEmpty(buildText)) {
+                ClipboardManager service =
+                        mUserTracker.getUserContext().getSystemService(ClipboardManager.class);
+                String label = getResources().getString(R.string.build_number_clip_data_label);
+                service.setPrimaryClip(ClipData.newPlainText(label, buildText));
+                Toast.makeText(getContext(), R.string.build_number_copy_toast, Toast.LENGTH_SHORT)
+                        .show();
+                return true;
+            }
+            return false;
+        });
+
+        mView.updateEverything(isTunerEnabled());
     }
 
     @Override
@@ -80,8 +170,10 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
 
     @Override
     public void setExpanded(boolean expanded) {
-        mView.setExpanded(expanded);
+        mExpanded = expanded;
+        mView.setExpanded(expanded, isTunerEnabled());
     }
+
 
     @Override
     public int getHeight() {
@@ -109,13 +201,15 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
 
     @Override
     public void setKeyguardShowing(boolean keyguardShowing) {
-        mView.setKeyguardShowing(keyguardShowing);
+        mView.setKeyguardShowing();
     }
 
+    /** */
     @Override
     public void setExpandClickListener(View.OnClickListener onClickListener) {
         mView.setExpandClickListener(onClickListener);
     }
+
     @Override
     public void setQQSPanel(@Nullable QuickQSPanel panel) {
         mView.setQQSPanel(panel);
@@ -123,7 +217,17 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
 
     @Override
     public void disable(int state1, int state2, boolean animate) {
-        mView.disable(state1, state2, animate);
+        mView.disable(state2, isTunerEnabled());
+    }
+
+
+    private void startSettingsActivity() {
+        mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
+                true /* dismissShade */);
+    }
+
+    private boolean isTunerEnabled() {
+        return mTunerService.isTunerEnabled(mUserTracker.getUserHandle());
     }
 
     /**
@@ -135,15 +239,32 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
     public static class Factory {
         private final UserManager mUserManager;
         private final UserInfoController mUserInfoController;
+        private final ActivityStarter mActivityStarter;
+        private final DeviceProvisionedController mDeviceProvisionedController;
+        private final UserTracker mUserTracker;
+        private final TunerService mTunerService;
+        private final MetricsLogger mMetricsLogger;
 
         @Inject
-        Factory(UserManager userManager, UserInfoController userInfoController) {
+        Factory(UserManager userManager, UserInfoController userInfoController,
+                ActivityStarter activityStarter,
+                DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
+                TunerService tunerService, MetricsLogger metricsLogger) {
             mUserManager = userManager;
             mUserInfoController = userInfoController;
+            mActivityStarter = activityStarter;
+            mDeviceProvisionedController = deviceProvisionedController;
+            mUserTracker = userTracker;
+            mTunerService = tunerService;
+            mMetricsLogger = metricsLogger;
         }
 
         QSFooterImplController create(QSFooterImpl view) {
-            return new QSFooterImplController(view, mUserManager, mUserInfoController);
+            QSFooterImplController controller = new QSFooterImplController(view, mUserManager,
+                    mUserInfoController, mActivityStarter, mDeviceProvisionedController,
+                    mUserTracker, mTunerService, mMetricsLogger);
+            controller.init();
+            return controller;
         }
     }
 }

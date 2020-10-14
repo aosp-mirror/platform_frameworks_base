@@ -16,6 +16,8 @@
 
 package com.android.systemui.util;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 
@@ -73,6 +75,14 @@ public abstract class ViewController<T extends View> {
             }
             mView.addOnAttachStateChangeListener(mOnAttachStateListener);
         }
+    }
+
+    protected Context getContext() {
+        return mView.getContext();
+    }
+
+    protected Resources getResources() {
+        return mView.getResources();
     }
 
     /**

@@ -20,10 +20,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PorterDuff.Mode;
@@ -36,21 +33,16 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
 import com.android.settingslib.drawable.UserIconDrawable;
@@ -59,23 +51,15 @@ import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.tuner.TunerService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 /** */
-public class QSFooterImpl extends FrameLayout implements OnClickListener {
-
-    private static final String TAG = "QSFooterImpl";
-
+public class QSFooterImpl extends FrameLayout {
     private final ActivityStarter mActivityStarter;
-    private final DeviceProvisionedController mDeviceProvisionedController;
-    private final UserTracker mUserTracker;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
@@ -115,20 +99,14 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
 
     @Inject
     public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ActivityStarter activityStarter,
-            DeviceProvisionedController deviceProvisionedController, UserTracker userTracker) {
+            ActivityStarter activityStarter) {
         super(context, attrs);
         mActivityStarter = activityStarter;
-        mDeviceProvisionedController = deviceProvisionedController;
-        mUserTracker = userTracker;
     }
 
     @VisibleForTesting
     public QSFooterImpl(Context context, AttributeSet attrs) {
-        this(context, attrs,
-                Dependency.get(ActivityStarter.class),
-                Dependency.get(DeviceProvisionedController.class),
-                Dependency.get(UserTracker.class));
+        this(context, attrs, Dependency.get(ActivityStarter.class));
     }
 
     @Override
@@ -143,7 +121,6 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
 
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
-        mSettingsButton.setOnClickListener(this);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -151,19 +128,6 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
         mActionsContainer = findViewById(R.id.qs_footer_actions_container);
         mEditContainer = findViewById(R.id.qs_footer_actions_edit_container);
         mBuildText = findViewById(R.id.build);
-        mBuildText.setOnLongClickListener(view -> {
-            CharSequence buildText = mBuildText.getText();
-            if (!TextUtils.isEmpty(buildText)) {
-                ClipboardManager service =
-                        mUserTracker.getUserContext().getSystemService(ClipboardManager.class);
-                String label = mContext.getString(R.string.build_number_clip_data_label);
-                service.setPrimaryClip(ClipData.newPlainText(label, buildText));
-                Toast.makeText(mContext, R.string.build_number_copy_toast, Toast.LENGTH_SHORT)
-                        .show();
-                return true;
-            }
-            return false;
-        });
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
@@ -174,7 +138,6 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
         addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight,
                 oldBottom) -> updateAnimator(right - left));
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-        updateEverything();
         setBuildText();
     }
 
@@ -243,7 +206,8 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
                 .build();
     }
 
-    public void setKeyguardShowing(boolean keyguardShowing) {
+    /** */
+    public void setKeyguardShowing() {
         setExpansion(mExpansionAmount);
     }
 
@@ -251,10 +215,10 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
         mExpandClickListener = onClickListener;
     }
 
-    public void setExpanded(boolean expanded) {
+    void setExpanded(boolean expanded, boolean isTunerEnabled) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        updateEverything();
+        updateEverything(isTunerEnabled);
     }
 
     public void setExpansion(float headerExpansionFraction) {
@@ -305,16 +269,16 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
         info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
-    public void disable(int state1, int state2, boolean animate) {
+    void disable(int state2, boolean isTunerEnabled) {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        updateEverything();
+        updateEverything(isTunerEnabled);
     }
 
-    public void updateEverything() {
+    void updateEverything(boolean isTunerEnabled) {
         post(() -> {
-            updateVisibilities();
+            updateVisibilities(isTunerEnabled);
             updateClickabilities();
             setClickable(false);
         });
@@ -327,11 +291,10 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
         mBuildText.setLongClickable(mBuildText.getVisibility() == View.VISIBLE);
     }
 
-    private void updateVisibilities() {
+    private void updateVisibilities(boolean isTunerEnabled) {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                TunerService.isTunerEnabled(mContext, mUserTracker.getUserHandle()) ? View.VISIBLE
-                        : View.INVISIBLE);
+                isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
         mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
@@ -356,49 +319,6 @@ public class QSFooterImpl extends FrameLayout implements OnClickListener {
         mQuickQsPanel = panel;
     }
 
-    @Override
-    public void onClick(View v) {
-        // Don't do anything until view are unhidden
-        if (!mExpanded) {
-            return;
-        }
-
-        if (v == mSettingsButton) {
-            if (!mDeviceProvisionedController.isCurrentUserSetup()) {
-                // If user isn't setup just unlock the device and dump them back at SUW.
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                });
-                return;
-            }
-            MetricsLogger.action(mContext,
-                    mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
-                            : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
-            if (mSettingsButton.isTunerClick()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    if (TunerService.isTunerEnabled(mContext, mUserTracker.getUserHandle())) {
-                        TunerService.showResetRequest(mContext, mUserTracker.getUserHandle(),
-                                () -> {
-                                    // Relaunch settings so that the tuner disappears.
-                                    startSettingsActivity();
-                                });
-                    } else {
-                        Toast.makeText(getContext(), R.string.tuner_toast,
-                                Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, mUserTracker.getUserHandle(), true);
-                    }
-                    startSettingsActivity();
-
-                });
-            } else {
-                startSettingsActivity();
-            }
-        }
-    }
-
-    private void startSettingsActivity() {
-        mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
-                true /* dismissShade */);
-    }
 
     void onUserInfoChanged(Drawable picture, boolean isGuestUser) {
         if (picture != null && isGuestUser && !(picture instanceof UserIconDrawable)) {
