@@ -118,7 +118,6 @@ stubs_defaults {
 droidstubs {
     name: "api-stubs-docs",
     defaults: ["metalava-full-api-stubs-default"],
-    removed_dex_api_filename: "removed-dex.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
@@ -179,7 +178,6 @@ module_libs = " " +
 droidstubs {
     name: "system-api-stubs-docs",
     defaults: ["metalava-full-api-stubs-default"],
-    removed_dex_api_filename: "system-removed-dex.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
