@@ -90,6 +90,9 @@ public final class SoftApConfiguration implements Parcelable {
      * Device is allowed to choose the optimal band (2Ghz, 5Ghz, 6Ghz) based on device capability,
      * operating country code and current radio conditions.
      * @hide
+     *
+     * @deprecated The bands are a bit mask - use any combination of {@code BAND_},
+     * for instance {@code BAND_2GHZ | BAND_5GHZ | BAND_6GHZ}.
      */
     @SystemApi
     public static final int BAND_ANY = BAND_2GHZ | BAND_5GHZ | BAND_6GHZ;
