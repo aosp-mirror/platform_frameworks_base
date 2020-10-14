@@ -72,6 +72,8 @@ public class QSFooterImplControllerTest extends LeakCheckedTest {
     @Mock
     private UserTracker mUserTracker;
     @Mock
+    private QSPanelController mQSPanelController;
+    @Mock
     private ClipboardManager mClipboardManager;
     private FakeTunerService mFakeTunerService;
     private MetricsLogger mMetricsLogger = new FakeMetricsLogger();
@@ -80,6 +82,8 @@ public class QSFooterImplControllerTest extends LeakCheckedTest {
     private SettingsButton mSettingsButton;
     @Mock
     private TextView mBuildText;
+    @Mock
+    private View mEdit;
 
     private QSFooterImplController mController;
 
@@ -100,10 +104,11 @@ public class QSFooterImplControllerTest extends LeakCheckedTest {
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mView.findViewById(R.id.settings_button)).thenReturn(mSettingsButton);
         when(mView.findViewById(R.id.build)).thenReturn(mBuildText);
+        when(mView.findViewById(android.R.id.edit)).thenReturn(mEdit);
 
         mController = new QSFooterImplController(mView, mUserManager, mUserInfoController,
-                mActivityStarter, mDeviceProvisionedController, mUserTracker, mFakeTunerService,
-                mMetricsLogger);
+                mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
+                mFakeTunerService, mMetricsLogger);
 
         mController.init();
     }

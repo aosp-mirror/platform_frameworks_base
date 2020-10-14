@@ -54,10 +54,12 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
     private final ActivityStarter mActivityStarter;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final UserTracker mUserTracker;
+    private final QSPanelController mQsPanelController;
     private final TunerService mTunerService;
     private final MetricsLogger mMetricsLogger;
     private final SettingsButton mSettingsButton;
     private final TextView mBuildText;
+    private final View mEdit;
 
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             new UserInfoController.OnUserInfoChangedListener() {
@@ -117,18 +119,21 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
     QSFooterImplController(QSFooterImpl view, UserManager userManager,
             UserInfoController userInfoController, ActivityStarter activityStarter,
             DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
-            TunerService tunerService, MetricsLogger metricsLogger) {
+            QSPanelController qsPanelController, TunerService tunerService,
+            MetricsLogger metricsLogger) {
         super(view);
         mUserManager = userManager;
         mUserInfoController = userInfoController;
         mActivityStarter = activityStarter;
         mDeviceProvisionedController = deviceProvisionedController;
         mUserTracker = userTracker;
+        mQsPanelController = qsPanelController;
         mTunerService = tunerService;
         mMetricsLogger = metricsLogger;
 
         mSettingsButton = mView.findViewById(R.id.settings_button);
         mBuildText = mView.findViewById(R.id.build);
+        mEdit = mView.findViewById(android.R.id.edit);
     }
 
 
@@ -148,6 +153,10 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
             }
             return false;
         });
+
+        mEdit.setOnClickListener(view ->
+                mActivityStarter.postQSRunnableDismissingKeyguard(() ->
+                        mQsPanelController.showEdit(view)));
 
         mView.updateEverything(isTunerEnabled());
     }
@@ -242,6 +251,7 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
         private final ActivityStarter mActivityStarter;
         private final DeviceProvisionedController mDeviceProvisionedController;
         private final UserTracker mUserTracker;
+        private final QSPanelController mQsPanelController;
         private final TunerService mTunerService;
         private final MetricsLogger mMetricsLogger;
 
@@ -249,12 +259,14 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
         Factory(UserManager userManager, UserInfoController userInfoController,
                 ActivityStarter activityStarter,
                 DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
-                TunerService tunerService, MetricsLogger metricsLogger) {
+                QSPanelController qsPanelController, TunerService tunerService,
+                MetricsLogger metricsLogger) {
             mUserManager = userManager;
             mUserInfoController = userInfoController;
             mActivityStarter = activityStarter;
             mDeviceProvisionedController = deviceProvisionedController;
             mUserTracker = userTracker;
+            mQsPanelController = qsPanelController;
             mTunerService = tunerService;
             mMetricsLogger = metricsLogger;
         }
@@ -262,7 +274,7 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
         QSFooterImplController create(QSFooterImpl view) {
             QSFooterImplController controller = new QSFooterImplController(view, mUserManager,
                     mUserInfoController, mActivityStarter, mDeviceProvisionedController,
-                    mUserTracker, mTunerService, mMetricsLogger);
+                    mUserTracker, mQsPanelController, mTunerService, mMetricsLogger);
             controller.init();
             return controller;
         }

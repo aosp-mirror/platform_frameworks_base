@@ -18,8 +18,6 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -46,20 +44,14 @@ import androidx.annotation.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
 import com.android.settingslib.drawable.UserIconDrawable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.dimen;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 /** */
 public class QSFooterImpl extends FrameLayout {
-    private final ActivityStarter mActivityStarter;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
@@ -67,7 +59,6 @@ public class QSFooterImpl extends FrameLayout {
     private boolean mShouldShowBuildText;
 
     private boolean mQsDisabled;
-    private QSPanel mQsPanel;
     private QuickQSPanel mQuickQsPanel;
 
     private boolean mExpanded;
@@ -97,25 +88,14 @@ public class QSFooterImpl extends FrameLayout {
         }
     };
 
-    @Inject
-    public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ActivityStarter activityStarter) {
-        super(context, attrs);
-        mActivityStarter = activityStarter;
-    }
-
-    @VisibleForTesting
     public QSFooterImpl(Context context, AttributeSet attrs) {
-        this(context, attrs, Dependency.get(ActivityStarter.class));
+        super(context, attrs);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mEdit = findViewById(android.R.id.edit);
-        mEdit.setOnClickListener(view ->
-                mActivityStarter.postQSRunnableDismissingKeyguard(() ->
-                        mQsPanel.showEdit(view)));
 
         mPageIndicator = findViewById(R.id.footer_page_indicator);
 
@@ -308,10 +288,9 @@ public class QSFooterImpl extends FrameLayout {
     }
 
     public void setQSPanel(final QSPanel qsPanel) {
-        mQsPanel = qsPanel;
-        if (mQsPanel != null) {
+        if (qsPanel != null) {
             mMultiUserSwitch.setQsPanel(qsPanel);
-            mQsPanel.setFooterPageIndicator(mPageIndicator);
+            qsPanel.setFooterPageIndicator(mPageIndicator);
         }
     }
 
