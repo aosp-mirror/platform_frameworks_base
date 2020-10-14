@@ -309,9 +309,9 @@ C2DataIdInfo::C2DataIdInfo(uint32_t index, uint64_t value) : C2Param(kParamSize,
 
 /////////////// MediaEvent ///////////////////////
 
-MediaEvent::MediaEvent(sp<IFilter> iFilter, hidl_handle avHandle,
-        uint64_t dataId, uint64_t dataLength, jobject obj) : mIFilter(iFilter),
-        mDataId(dataId), mDataLength(dataLength), mBuffer(nullptr),
+MediaEvent::MediaEvent(sp<Filter> filter, hidl_handle avHandle,
+        uint64_t dataId, uint64_t dataSize, jobject obj) : mFilter(filter),
+        mDataId(dataId), mDataSize(dataSize), mBuffer(nullptr),
         mDataIdRefCnt(0), mAvHandleRefCnt(0), mIonHandle(nullptr) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     mMediaEventObj = env->NewWeakGlobalRef(obj);
@@ -335,7 +335,8 @@ MediaEvent::~MediaEvent() {
 
 void MediaEvent::finalize() {
     if (mAvHandleRefCnt == 0) {
-        mIFilter->releaseAvHandle(hidl_handle(mAvHandle), mDataIdRefCnt == 0 ? mDataId : 0);
+        mFilter->mFilterSp->releaseAvHandle(
+                hidl_handle(mAvHandle), mDataIdRefCnt == 0 ? mDataId : 0);
         native_handle_close(mAvHandle);
     }
 }
@@ -348,7 +349,47 @@ jobject MediaEvent::getLinearBlock() {
     if (mLinearBlockObj != NULL) {
         return mLinearBlockObj;
     }
-    mIonHandle = new C2HandleIon(dup(mAvHandle->data[0]), mDataLength);
+
+    int fd;
+    int numInts = 0;
+    int memIndex;
+    int dataSize;
+    if (mAvHandle->numFds == 0) {
+        if (mFilter->mAvSharedHandle == NULL) {
+            ALOGE("Shared AV memory handle is not initialized.");
+            return NULL;
+        }
+        if (mFilter->mAvSharedHandle->numFds == 0) {
+            ALOGE("Shared AV memory handle is empty.");
+            return NULL;
+        }
+        fd = mFilter->mAvSharedHandle->data[0];
+        dataSize = mFilter->mAvSharedMemSize;
+        numInts = mFilter->mAvSharedHandle->numInts;
+        if (numInts > 0) {
+            // If the first int in the shared native handle has value, use it as the index
+            memIndex = mFilter->mAvSharedHandle->data[mFilter->mAvSharedHandle->numFds];
+        }
+    } else {
+        fd = mAvHandle->data[0];
+        dataSize = mDataSize;
+        numInts = mAvHandle->numInts;
+        if (numInts > 0) {
+            // Otherwise if the first int in the av native handle returned from the filter
+            // event has value, use it as the index
+            memIndex = mAvHandle->data[mAvHandle->numFds];
+        } else {
+            if (mFilter->mAvSharedHandle != NULL) {
+                numInts = mFilter->mAvSharedHandle->numInts;
+                if (numInts > 0) {
+                    // If the first int in the shared native handle has value, use it as the index
+                    memIndex = mFilter->mAvSharedHandle->data[mFilter->mAvSharedHandle->numFds];
+                }
+            }
+        }
+    }
+
+    mIonHandle = new C2HandleIon(dup(fd), dataSize);
     std::shared_ptr<C2LinearBlock> block = _C2BlockFactory::CreateLinearBlock(mIonHandle);
     if (block != nullptr) {
         // CreateLinearBlock delete mIonHandle after it create block successfully.
@@ -357,13 +398,11 @@ jobject MediaEvent::getLinearBlock() {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
         context->mBlock = block;
-        std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, mDataLength);
+        std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, dataSize);
         context->mBuffer = pC2Buffer;
         mC2Buffer = pC2Buffer;
-        if (mAvHandle->numInts > 0) {
-            // use first int in the native_handle as the index
-            int index = mAvHandle->data[mAvHandle->numFds];
-            std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(index, mDataId);
+        if (numInts > 0) {
+            std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(memIndex, mDataId);
             std::shared_ptr<C2Info> info(std::static_pointer_cast<C2Info>(c2param));
             pC2Buffer->setInfo(info);
         }
@@ -470,7 +509,7 @@ jobjectArray FilterCallback::getMediaEvent(
 
         if (mediaEvent.avMemory.getNativeHandle() != NULL || mediaEvent.avDataId != 0) {
             sp<MediaEvent> mediaEventSp =
-                           new MediaEvent(mIFilter, mediaEvent.avMemory,
+                           new MediaEvent(mFilter, mediaEvent.avMemory,
                                mediaEvent.avDataId, dataLength + offset, obj);
             mediaEventSp->mAvHandleRefCnt++;
             env->SetLongField(obj, eventContext, (jlong) mediaEventSp.get());
@@ -690,7 +729,7 @@ Return<void> FilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEve
         }
     }
     env->CallVoidMethod(
-            mFilter,
+            mFilter->mFilterObj,
             gFields.onFilterEventID,
             array);
     return Void();
@@ -709,7 +748,7 @@ Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus status) {
     ALOGD("FilterCallback::onFilterStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(
-            mFilter,
+            mFilter->mFilterObj,
             gFields.onFilterStatusID,
             (jint)status);
     return Void();
@@ -717,17 +756,11 @@ Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus status) {
 
 void FilterCallback::setFilter(const sp<Filter> filter) {
     ALOGD("FilterCallback::setFilter");
-    mFilter = filter->mFilterObj;
-    mIFilter = filter->mFilterSp;
+    // JNI Object
+    mFilter = filter;
 }
 
-FilterCallback::~FilterCallback() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (mFilter != NULL) {
-        env->DeleteWeakGlobalRef(mFilter);
-        mFilter = NULL;
-    }
-}
+FilterCallback::~FilterCallback() {}
 
 /////////////// Filter ///////////////////////
 
@@ -1609,8 +1642,32 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
     sp<Filter> filterSp = new Filter(iFilterSp, filterObj);
     filterSp->incStrong(filterObj);
     env->SetLongField(filterObj, gFields.filterContext, (jlong)filterSp.get());
-
+    filterSp->mIsMediaFilter = false;
+    filterSp->mAvSharedHandle = NULL;
     callback->setFilter(filterSp);
+
+    if (type.mainType == DemuxFilterMainType::MMTP) {
+        if (type.subType.mmtpFilterType() == DemuxMmtpFilterType::AUDIO ||
+                type.subType.mmtpFilterType() == DemuxMmtpFilterType::VIDEO) {
+            filterSp->mIsMediaFilter = true;
+        }
+    }
+
+    if (type.mainType == DemuxFilterMainType::TS) {
+        if (type.subType.tsFilterType() == DemuxTsFilterType::AUDIO ||
+                type.subType.tsFilterType() == DemuxTsFilterType::VIDEO) {
+            filterSp->mIsMediaFilter = true;
+        }
+    }
+
+    if (iFilterSp_1_1 != NULL && filterSp->mIsMediaFilter) {
+        iFilterSp_1_1->getAvSharedHandle([&](Result r, hidl_handle avMemory, uint64_t avMemSize) {
+            if (r == Result::SUCCESS) {
+                filterSp->mAvSharedHandle = native_handle_clone(avMemory.getNativeHandle());
+                filterSp->mAvSharedMemSize = avMemSize;
+            }
+        });
+    }
 
     return filterObj;
 }
