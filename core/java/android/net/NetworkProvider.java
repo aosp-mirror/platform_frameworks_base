@@ -30,7 +30,7 @@ import android.util.Log;
 
 /**
  * Base class for network providers such as telephony or Wi-Fi. NetworkProviders connect the device
- * to networks and makes them available to to the core network stack by creating
+ * to networks and makes them available to the core network stack by creating
  * {@link NetworkAgent}s. The networks can then provide connectivity to apps and can be interacted
  * with via networking APIs such as {@link ConnectivityManager}.
  *
