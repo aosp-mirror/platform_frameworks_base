@@ -4773,9 +4773,11 @@ class Task extends WindowContainer<WindowContainer> {
             // If the task is not yet visible when it is added to the task organizer, then we should
             // hide it to allow the task organizer to show it when it is properly reparented. We
             // skip this for tasks created by the organizer because they can synchronously update
-            // the leash before new children are added to the task.
+            // the leash before new children are added to the task.  Also skip this if the task
+            // has already been sent to the organizer which can happen before the first draw if
+            // an existing task is reported to the organizer when it first registers.
             if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
-                    && !mCreatedByOrganizer
+                    && !mCreatedByOrganizer && !mTaskAppearedSent
                     && mTaskOrganizer != null && !prevHasBeenVisible) {
                 getSyncTransaction().hide(getSurfaceControl());
                 commitPendingTransaction();
@@ -4827,6 +4829,11 @@ class Task extends WindowContainer<WindowContainer> {
 
     @VisibleForTesting
     boolean setTaskOrganizer(ITaskOrganizer organizer) {
+        return setTaskOrganizer(organizer, false /* skipTaskAppeared */);
+    }
+
+    @VisibleForTesting
+    boolean setTaskOrganizer(ITaskOrganizer organizer, boolean skipTaskAppeared) {
         if (mTaskOrganizer == organizer) {
             return false;
         }
@@ -4839,7 +4846,9 @@ class Task extends WindowContainer<WindowContainer> {
         sendTaskVanished(prevOrganizer);
 
         if (mTaskOrganizer != null) {
-            sendTaskAppeared();
+            if (!skipTaskAppeared) {
+                sendTaskAppeared();
+            }
         } else {
             // No longer managed by any organizer.
             mTaskAppearedSent = false;
@@ -4852,6 +4861,10 @@ class Task extends WindowContainer<WindowContainer> {
         return true;
     }
 
+    boolean updateTaskOrganizerState(boolean forceUpdate) {
+        return updateTaskOrganizerState(forceUpdate, false /* skipTaskAppeared */);
+    }
+
     /**
      * Called when the task state changes (ie. from windowing mode change) an the task organizer
      * state should also be updated.
@@ -4859,9 +4872,10 @@ class Task extends WindowContainer<WindowContainer> {
      * @param forceUpdate Updates the task organizer to the one currently specified in the task
      *                    org controller for the task's windowing mode, ignoring the cached
      *                    windowing mode checks.
+     * @param skipTaskAppeared Skips calling taskAppeared for the new organizer if it has changed
      * @return {@code true} if task organizer changed.
      */
-    boolean updateTaskOrganizerState(boolean forceUpdate) {
+    boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
         if (getSurfaceControl() == null) {
             // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
             // is created.
@@ -4877,7 +4891,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (!forceUpdate && mTaskOrganizer == organizer) {
             return false;
         }
-        return setTaskOrganizer(organizer);
+        return setTaskOrganizer(organizer, skipTaskAppeared);
     }
 
     @Override
