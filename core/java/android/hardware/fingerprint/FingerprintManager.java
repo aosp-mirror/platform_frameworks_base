@@ -39,6 +39,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricTestSession;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.SensorProperties;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
@@ -97,6 +98,24 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private Fingerprint mRemovalFingerprint;
     private Handler mHandler;
 
+
+    /**
+     * Retrieves a list of properties for all fingerprint sensors on the device.
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public List<SensorProperties> getSensorProperties() {
+        final List<SensorProperties> properties = new ArrayList<>();
+        final List<FingerprintSensorPropertiesInternal> internalProperties
+                = getSensorPropertiesInternal();
+        for (FingerprintSensorPropertiesInternal internalProp : internalProperties) {
+            properties.add(FingerprintSensorProperties.from(internalProp));
+        }
+        return properties;
+    }
+
     /**
      * Retrieves a test session for FingerprintManager.
      * @hide
@@ -104,10 +123,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @TestApi
     @NonNull
     @RequiresPermission(TEST_BIOMETRIC)
-    public BiometricTestSession getTestSession() {
+    public BiometricTestSession createTestSession(int sensorId) {
         try {
             return new BiometricTestSession(mContext,
-                    mService.getTestService(mContext.getOpPackageName()));
+                    mService.createTestSession(sensorId, mContext.getOpPackageName()));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -875,21 +894,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
         }
         return false;
-    }
-
-    /**
-     * Retrieves a list of properties for all fingerprint sensors on the device.
-     * @hide
-     */
-    @NonNull
-    public List<FingerprintSensorProperties> getSensorProperties() {
-        final List<FingerprintSensorProperties> properties = new ArrayList<>();
-        final List<FingerprintSensorPropertiesInternal> internalProperties
-                = getSensorPropertiesInternal();
-        for (FingerprintSensorPropertiesInternal internalProp : internalProperties) {
-            properties.add(FingerprintSensorProperties.from(internalProp));
-        }
-        return properties;
     }
 
     /**
