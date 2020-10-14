@@ -380,24 +380,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return effects;
     }
 
-    private int applyTaskDisplayAreaChanges(TaskDisplayArea taskDisplayArea,
-            WindowContainerTransaction.Change c) {
-        int effects = applyDisplayAreaChanges(taskDisplayArea, c);
-        if ((c.getChangeMask()
-                & WindowContainerTransaction.Change.CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
-            if (taskDisplayArea.setIgnoreOrientationRequest(c.getIgnoreOrientationRequest())) {
-                effects |= TRANSACT_EFFECTS_LIFECYCLE;
-            }
-        }
-
-        return effects;
-    }
-
-    private int applyDisplayAreaChanges(WindowContainer container,
+    private int applyDisplayAreaChanges(DisplayArea displayArea,
             WindowContainerTransaction.Change c) {
         final int[] effects = new int[1];
 
-        container.forAllTasks(task -> {
+        if ((c.getChangeMask()
+                & WindowContainerTransaction.Change.CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
+            if (displayArea.setIgnoreOrientationRequest(c.getIgnoreOrientationRequest())) {
+                effects[0] |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
+        }
+
+        displayArea.forAllTasks(task -> {
             Task tr = (Task) task;
             if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
                 if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
@@ -475,10 +469,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         int effects = applyChanges(wc, c);
 
-        if (wc instanceof TaskDisplayArea) {
-            effects |= applyTaskDisplayAreaChanges((TaskDisplayArea) wc, c);
-        } else if (wc instanceof DisplayArea) {
-            effects |= applyDisplayAreaChanges(wc, c);
+        if (wc instanceof DisplayArea) {
+            effects |= applyDisplayAreaChanges(wc.asDisplayArea(), c);
         } else if (wc instanceof Task) {
             effects |= applyTaskChanges(wc.asTask(), c);
         }

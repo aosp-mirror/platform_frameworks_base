@@ -1002,14 +1002,18 @@ public class TaskRecordTests extends WindowTestsBase {
     public void testNotSpecifyOrientationByFloatingTask() {
         final Task task = getTestTask();
         final ActivityRecord activity = task.getTopMostActivity();
+        final WindowContainer<?> parentContainer = task.getParent();
         final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, parentContainer.getOrientation());
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, taskDisplayArea.getOrientation());
 
         task.setWindowingMode(WINDOWING_MODE_PINNED);
 
-        assertEquals(SCREEN_ORIENTATION_UNSET, taskDisplayArea.getOrientation());
+        // TDA returns the last orientation when child returns UNSET
+        assertEquals(SCREEN_ORIENTATION_UNSET, parentContainer.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, taskDisplayArea.getOrientation());
     }
 
     @Test

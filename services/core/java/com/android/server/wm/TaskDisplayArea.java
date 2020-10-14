@@ -29,10 +29,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
@@ -148,13 +150,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      * on it to be finished before removing this object.
      */
     private boolean mRemoved;
-
-    /**
-     * Whether the task display area should ignore fixed-orientation request. If {@code true}, it
-     * can never specify orientation, but show the fixed-orientation apps in the letterbox;
-     * otherwise, it rotates based on the fixed-orientation request when it has the focus.
-     */
-    private boolean mIgnoreOrientationRequest;
 
     /**
      * The id of a leaf task that most recently being moved to front.
@@ -654,28 +649,9 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
     }
 
-    /**
-     * Sets whether the task display area should ignore fixed-orientation request from apps.
-     *
-     * @return Whether the display orientation changed
-     */
-    boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        if (mIgnoreOrientationRequest == ignoreOrientationRequest) {
-            return false;
-        }
-
-        mIgnoreOrientationRequest = ignoreOrientationRequest;
-        if (isLastFocused()) {
-            // Update orientation if this TDA is the last focused, otherwise it shouldn't affect
-            // the display.
-            return mDisplayContent.updateOrientation();
-        }
-
-        return false;
-    }
-
     @Override
     int getOrientation(int candidate) {
+        mLastOrientationSource = null;
         // Only allow to specify orientation if this TDA is not set to ignore orientation request,
         // and it has the focus.
         if (mIgnoreOrientationRequest || !isLastFocused()) {
@@ -708,7 +684,21 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             return SCREEN_ORIENTATION_UNSPECIFIED;
         }
 
-        return super.getOrientation(candidate);
+        final int orientation = super.getOrientation(candidate);
+        if (orientation != SCREEN_ORIENTATION_UNSET
+                && orientation != SCREEN_ORIENTATION_BEHIND) {
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "App is requesting an orientation, return %d for display id=%d",
+                    orientation, mDisplayContent.mDisplayId);
+            return orientation;
+        }
+
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "No app is requesting an orientation, return %d for display id=%d",
+                mDisplayContent.getLastOrientation(), mDisplayContent.mDisplayId);
+        // The next app has not been requested to be visible, so we keep the current orientation
+        // to prevent freezing/unfreezing the display too early.
+        return mDisplayContent.getLastOrientation();
     }
 
     @Override
