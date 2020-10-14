@@ -861,13 +861,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    void forceWindowsScaleableInTransaction(boolean force) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.forceWindowsScaleableInTransaction(force);
-        }
-    }
-
     /**
      * @return {@code true} when an application can override an app transition animation on this
      * container.

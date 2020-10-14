@@ -2172,16 +2172,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    @Override
-    void forceWindowsScaleableInTransaction(boolean force) {
-        if (mWinAnimator != null && mWinAnimator.hasSurface()) {
-            mWinAnimator.mSurfaceController.forceScaleableInTransaction(force);
-        }
-
-        super.forceWindowsScaleableInTransaction(force);
-    }
-
-    @Override
+  @Override
     void removeImmediately() {
         super.removeImmediately();
 

@@ -1360,15 +1360,6 @@ static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->detachChildren(ctrl);
 }
 
-static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jint scalingMode) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setOverrideScalingMode(ctrl, scalingMode);
-}
-
 static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
     if (token == NULL) return NULL;
@@ -1694,8 +1685,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeReparent },
     {"nativeSeverChildren", "(JJ)V",
             (void*)nativeSeverChildren } ,
-    {"nativeSetOverrideScalingMode", "(JJI)V",
-            (void*)nativeSetOverrideScalingMode },
     {"nativeCaptureDisplay",
             "(Landroid/view/SurfaceControl$DisplayCaptureArgs;Landroid/view/SurfaceControl$ScreenCaptureListener;)I",
             (void*)nativeCaptureDisplay },
