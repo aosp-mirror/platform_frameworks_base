@@ -107,13 +107,18 @@ public abstract class PermissionManagerInternal {
             @NonNull ArrayList<String> allPackageNames,
             @NonNull PermissionCallback permissionCallback);
 
+    public abstract void revokeRuntimePermissionsIfPermissionDefinitionChanged(
+            @NonNull List<String> permissionsToRevoke,
+            @NonNull ArrayList<String> allPackageNames,
+            @NonNull PermissionCallback permissionCallback);
+
     /**
      * Add all permissions in the given package.
      * <p>
      * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
      * the permission settings.
      */
-    public abstract void addAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
+    public abstract List<String> addAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract void addAllPermissionGroups(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract boolean addDynamicPermission(@NonNull PermissionInfo info, boolean async,
