@@ -2827,11 +2827,13 @@ public class TelephonyManager {
     };
 
     /**
-     * Return a collection of all network types
-     * @return network types
+     * Returns an array of all valid network types.
+     *
+     * @return An integer array containing all valid network types in no particular order.
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static @NonNull @NetworkType int[] getAllNetworkTypes() {
         return NETWORK_TYPES;
     }
