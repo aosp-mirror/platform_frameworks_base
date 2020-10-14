@@ -852,15 +852,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Returns true if this container may be scaled without resizing, and windows within may need
-     * to be configured as such.
-     * @hide
-     */
-    public boolean windowsAreScaleable() {
-        return mWindowingMode == WINDOWING_MODE_PINNED;
-    }
-
-    /**
      * Returns true if windows in this container should be given move animations by default.
      * @hide
      */

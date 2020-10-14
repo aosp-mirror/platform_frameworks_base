@@ -163,12 +163,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction setOverrideScalingMode(SurfaceControl sc,
-            int overrideScalingMode) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setColor(SurfaceControl sc, float[] color) {
         return this;
     }
