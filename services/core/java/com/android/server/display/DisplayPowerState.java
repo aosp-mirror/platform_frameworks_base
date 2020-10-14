@@ -58,6 +58,7 @@ final class DisplayPowerState {
     private final DisplayBlanker mBlanker;
     private final ColorFade mColorFade;
     private final PhotonicModulator mPhotonicModulator;
+    private final int mDisplayId;
 
     private int mScreenState;
     private float mScreenBrightness;
@@ -71,13 +72,14 @@ final class DisplayPowerState {
 
     private Runnable mCleanListener;
 
-    public DisplayPowerState(DisplayBlanker blanker, ColorFade colorFade) {
+    public DisplayPowerState(DisplayBlanker blanker, ColorFade colorFade, int displayId) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mBlanker = blanker;
         mColorFade = colorFade;
         mPhotonicModulator = new PhotonicModulator();
         mPhotonicModulator.start();
+        mDisplayId = displayId;
 
         // At boot time, we know that the screen is on and the electron beam
         // animation is not playing.  We don't know the screen's brightness though,
@@ -434,10 +436,10 @@ final class DisplayPowerState {
 
                 // Apply pending change.
                 if (DEBUG) {
-                    Slog.d(TAG, "Updating screen state: state="
+                    Slog.d(TAG, "Updating screen state: id=" + mDisplayId +  ", state="
                             + Display.stateToString(state) + ", backlight=" + brightnessState);
                 }
-                mBlanker.requestDisplayState(state, brightnessState);
+                mBlanker.requestDisplayState(mDisplayId, state, brightnessState);
             }
         }
     }
