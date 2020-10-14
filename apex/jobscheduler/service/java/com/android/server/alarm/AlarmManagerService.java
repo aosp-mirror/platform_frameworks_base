@@ -26,6 +26,9 @@ import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
+import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -727,9 +730,9 @@ public class AlarmManagerService extends SystemService {
             }
 
             // within each class, sort by nominal delivery time
-            if (lhs.whenElapsed < rhs.whenElapsed) {
+            if (lhs.getWhenElapsed() < rhs.getWhenElapsed()) {
                 return -1;
-            } else if (lhs.whenElapsed > rhs.whenElapsed) {
+            } else if (lhs.getWhenElapsed() > rhs.getWhenElapsed()) {
                 return 1;
             }
 
@@ -798,9 +801,12 @@ public class AlarmManagerService extends SystemService {
         this(context, new Injector(context));
     }
 
+    private static boolean isRtc(int type) {
+        return (type == RTC || type == RTC_WAKEUP);
+    }
+
     private long convertToElapsed(long when, int type) {
-        final boolean isRtc = (type == RTC || type == RTC_WAKEUP);
-        if (isRtc) {
+        if (isRtc(type)) {
             when -= mInjector.getCurrentTimeMillis() - mInjector.getElapsedRealtime();
         }
         return when;
@@ -823,13 +829,29 @@ public class AlarmManagerService extends SystemService {
     }
 
     // The RTC clock has moved arbitrarily, so we need to recalculate all the RTC alarm deliveries.
-    void reevaluateRtcAlarms(final long nowElapsed) {
+    void reevaluateRtcAlarms() {
         synchronized (mLock) {
-            final ArrayList<Alarm> rtcAlarms = mAlarmStore.remove(a -> (a.type == RTC
-                    || a.type == RTC_WAKEUP));
-            for (final Alarm a : rtcAlarms) {
-                restoreAlarmLocked(a, nowElapsed);
-                setImplLocked(a);
+            boolean changed = mAlarmStore.updateAlarmDeliveries(a -> {
+                if (!isRtc(a.type)) {
+                    return false;
+                }
+                return restoreRequestedTime(a);
+            });
+
+            if (mNextWakeFromIdle != null && isRtc(mNextWakeFromIdle.type)) {
+                // The next wake from idle got updated due to the rtc time change, implying we need
+                // to update the time we have to come out of idle too.
+                changed |= mAlarmStore.updateAlarmDeliveries(a -> {
+                    if (a != mPendingIdleUntil) {
+                        return false;
+                    }
+                    return adjustIdleUntilTime(a);
+                });
+            }
+
+            if (changed) {
+                rescheduleKernelAlarmsLocked();
+                // Only time shifted, so the next alarm clock will not change
             }
         }
     }
@@ -844,7 +866,7 @@ public class AlarmManagerService extends SystemService {
     boolean reorderAlarmsBasedOnStandbyBuckets(ArraySet<Pair<String, Integer>> targetPackages) {
         final long start = mStatLogger.getTime();
 
-        final boolean changed = mAlarmStore.recalculateAlarmDeliveries(a -> {
+        final boolean changed = mAlarmStore.updateAlarmDeliveries(a -> {
             final Pair<String, Integer> packageUser =
                     Pair.create(a.sourcePackage, UserHandle.getUserId(a.creatorUid));
             if (targetPackages != null && !targetPackages.contains(packageUser)) {
@@ -857,23 +879,8 @@ public class AlarmManagerService extends SystemService {
         return changed;
     }
 
-    private void restoreAlarmLocked(Alarm a, long nowElapsed) {
-        a.when = a.origWhen;
-        long whenElapsed = convertToElapsed(a.when, a.type);
-        final long maxElapsed;
-        if (a.windowLength == AlarmManager.WINDOW_EXACT) {
-            // Exact
-            maxElapsed = whenElapsed;
-        } else {
-            // Not exact.  Preserve any explicit window, otherwise recalculate
-            // the window based on the alarm's new futurity.  Note that this
-            // reflects a policy of preferring timely to deferred delivery.
-            maxElapsed = (a.windowLength > 0)
-                    ? clampPositive(whenElapsed + a.windowLength)
-                    : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
-        }
-        a.expectedWhenElapsed = a.whenElapsed = whenElapsed;
-        a.expectedMaxWhenElapsed = a.maxWhenElapsed = maxElapsed;
+    private boolean restoreRequestedTime(Alarm a) {
+        return a.setPolicyElapsed(REQUESTER_POLICY_INDEX, convertToElapsed(a.origWhen, a.type));
     }
 
     static long clampPositive(long val) {
@@ -973,14 +980,17 @@ public class AlarmManagerService extends SystemService {
             // Recurring alarms may have passed several alarm intervals while the
             // alarm was kept pending. Send the appropriate trigger count.
             if (alarm.repeatInterval > 0) {
-                alarm.count += (nowELAPSED - alarm.expectedWhenElapsed) / alarm.repeatInterval;
+                alarm.count += (nowELAPSED - alarm.getPolicyElapsed(REQUESTER_POLICY_INDEX))
+                        / alarm.repeatInterval;
                 // Also schedule its next recurrence
                 final long delta = alarm.count * alarm.repeatInterval;
-                final long nextElapsed = alarm.expectedWhenElapsed + delta;
-                setImplLocked(alarm.type, alarm.when + delta, nextElapsed, alarm.windowLength,
-                        maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
-                        alarm.repeatInterval, alarm.operation, null, null, alarm.flags,
-                        alarm.workSource, alarm.alarmClock, alarm.uid, alarm.packageName);
+                final long nextElapsed = alarm.getPolicyElapsed(REQUESTER_POLICY_INDEX) + delta;
+                final long nextMaxElapsed = maxTriggerTime(nowELAPSED, nextElapsed,
+                        alarm.repeatInterval);
+                setImplLocked(alarm.type, alarm.origWhen + delta, nextElapsed,
+                        nextMaxElapsed - nextElapsed, alarm.repeatInterval, alarm.operation, null,
+                        null, alarm.flags, alarm.workSource, alarm.alarmClock, alarm.uid,
+                        alarm.packageName);
                 // Kernel alarms will be rescheduled as needed in setImplLocked
             }
         }
@@ -1026,18 +1036,10 @@ public class AlarmManagerService extends SystemService {
         if (mPendingWhileIdleAlarms.size() > 0) {
             ArrayList<Alarm> alarms = mPendingWhileIdleAlarms;
             mPendingWhileIdleAlarms = new ArrayList<>();
-            final long nowElapsed = mInjector.getElapsedRealtime();
             for (int i = alarms.size() - 1; i >= 0; i--) {
-                Alarm a = alarms.get(i);
-                restoreAlarmLocked(a, nowElapsed);
-                setImplLocked(a);
+                setImplLocked(alarms.get(i));
             }
         }
-
-        // Reschedule everything.
-        rescheduleKernelAlarmsLocked();
-        updateNextAlarmClockLocked();
-
     }
 
     static final class InFlight {
@@ -1449,6 +1451,11 @@ public class AlarmManagerService extends SystemService {
             }
         }
 
+        if ((flags & AlarmManager.FLAG_IDLE_UNTIL) != 0) {
+            // Do not support windows for idle-until alarms.
+            windowLength = AlarmManager.WINDOW_EXACT;
+        }
+
         // Sanity check the window length.  This will catch people mistakenly
         // trying to pass an end-of-window timestamp rather than a duration.
         if (windowLength > AlarmManager.INTERVAL_HALF_DAY) {
@@ -1515,17 +1522,17 @@ public class AlarmManagerService extends SystemService {
                 Slog.w(TAG, errorMsg);
                 throw new IllegalStateException(errorMsg);
             }
-            setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
-                    interval, operation, directReceiver, listenerTag, flags, workSource,
-                    alarmClock, callingUid, callingPackage);
+            setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, interval, operation,
+                    directReceiver, listenerTag, flags, workSource, alarmClock, callingUid,
+                    callingPackage);
         }
     }
 
     private void setImplLocked(int type, long when, long whenElapsed, long windowLength,
-            long maxWhen, long interval, PendingIntent operation, IAlarmListener directReceiver,
+            long interval, PendingIntent operation, IAlarmListener directReceiver,
             String listenerTag, int flags, WorkSource workSource,
             AlarmManager.AlarmClockInfo alarmClock, int callingUid, String callingPackage) {
-        Alarm a = new Alarm(type, when, whenElapsed, windowLength, maxWhen, interval,
+        final Alarm a = new Alarm(type, when, whenElapsed, windowLength, interval,
                 operation, directReceiver, listenerTag, workSource, flags, alarmClock,
                 callingUid, callingPackage);
         if (mActivityManagerInternal.isAppStartModeDisabled(callingUid, callingPackage)) {
@@ -1560,72 +1567,55 @@ public class AlarmManagerService extends SystemService {
     }
 
     /**
-     * Adjusts the idle-until alarm delivery time based on the upcoming wake-from-idle alarm.
+     * An alarm with {@link AlarmManager#FLAG_IDLE_UNTIL} is a special alarm that will put the
+     * system into idle until it goes off. We need to pull it earlier if there are existing alarms
+     * that have requested to bring us out of idle at an earlier time.
      *
      * @param alarm The alarm to adjust
      * @return true if the alarm delivery time was updated.
      */
     private boolean adjustIdleUntilTime(Alarm alarm) {
-        if ((alarm.flags & AlarmManager.FLAG_IDLE_UNTIL) != 0) {
+        if ((alarm.flags & AlarmManager.FLAG_IDLE_UNTIL) == 0) {
             return false;
         }
-        // This is a special alarm that will put the system into idle until it goes off.
-        // The caller has given the time they want this to happen at, however we need
-        // to pull that earlier if there are existing alarms that have requested to
-        // bring us out of idle at an earlier time.
-        if (mNextWakeFromIdle != null && alarm.whenElapsed > mNextWakeFromIdle.whenElapsed) {
-            alarm.when = alarm.whenElapsed = alarm.maxWhenElapsed = mNextWakeFromIdle.whenElapsed;
+        restoreRequestedTime(alarm);
+        long triggerBeforeFuzz = alarm.getPolicyElapsed(REQUESTER_POLICY_INDEX);
+        if (mNextWakeFromIdle != null && triggerBeforeFuzz > mNextWakeFromIdle.getWhenElapsed()) {
+            triggerBeforeFuzz = mNextWakeFromIdle.getWhenElapsed();
         }
         // Add fuzz to make the alarm go off some time before the actual desired time.
-        final long nowElapsed = mInjector.getElapsedRealtime();
-        final int fuzz = fuzzForDuration(alarm.whenElapsed - nowElapsed);
+        final int fuzz = fuzzForDuration(alarm.getWhenElapsed() - mInjector.getElapsedRealtime());
+        final int delta;
         if (fuzz > 0) {
             if (mRandom == null) {
                 mRandom = new Random();
             }
-            final int delta = mRandom.nextInt(fuzz);
-            alarm.whenElapsed -= delta;
-            if (false) {
-                Slog.d(TAG, "Alarm when: " + alarm.whenElapsed);
-                Slog.d(TAG, "Delta until alarm: " + (alarm.whenElapsed - nowElapsed));
-                Slog.d(TAG, "Applied fuzz: " + fuzz);
-                Slog.d(TAG, "Final delta: " + delta);
-                Slog.d(TAG, "Final when: " + alarm.whenElapsed);
-            }
-            alarm.when = alarm.maxWhenElapsed = alarm.whenElapsed;
+            delta = mRandom.nextInt(fuzz);
+        } else {
+            delta = 0;
         }
+        alarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, triggerBeforeFuzz - delta);
         return true;
     }
 
     /**
-     * Adjusts the alarm delivery time based on the current app standby bucket.
+     * Adjusts the alarm's policy time for app_standby.
      *
-     * @param alarm The alarm to adjust
-     * @return true if the alarm delivery time was updated.
+     * @param alarm The alarm to update.
+     * @return {@code true} if the actual delivery time of the given alarm was updated due to
+     *         adjustments made in this call.
      */
     private boolean adjustDeliveryTimeBasedOnBucketLocked(Alarm alarm) {
-        if (isExemptFromAppStandby(alarm)) {
-            return false;
+        final long nowElapsed = mInjector.getElapsedRealtime();
+        if (isExemptFromAppStandby(alarm) || mAppStandbyParole) {
+            return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, nowElapsed);
         }
-        if (mAppStandbyParole) {
-            if (alarm.whenElapsed > alarm.expectedWhenElapsed) {
-                // We did defer this alarm earlier, restore original requirements
-                alarm.whenElapsed = alarm.expectedWhenElapsed;
-                alarm.maxWhenElapsed = alarm.expectedMaxWhenElapsed;
-                return true;
-            }
-            return false;
-        }
-        final long oldWhenElapsed = alarm.whenElapsed;
-        final long oldMaxWhenElapsed = alarm.maxWhenElapsed;
 
         final String sourcePackage = alarm.sourcePackage;
         final int sourceUserId = UserHandle.getUserId(alarm.creatorUid);
         final int standbyBucket = mUsageStatsManagerInternal.getAppStandbyBucket(
-                sourcePackage, sourceUserId, mInjector.getElapsedRealtime());
+                sourcePackage, sourceUserId, nowElapsed);
 
-        // Quota deferring implementation:
-        boolean deferred = false;
         final int wakeupsInWindow = mAppWakeupHistory.getTotalWakeupsInWindow(sourcePackage,
                 sourceUserId);
         if (standbyBucket == UsageStatsManager.STANDBY_BUCKET_RESTRICTED) {
@@ -1635,14 +1625,9 @@ public class AlarmManagerService extends SystemService {
             if (wakeupsInWindow > 0) {
                 final long lastWakeupTime = mAppWakeupHistory.getNthLastWakeupForPackage(
                         sourcePackage, sourceUserId, mConstants.APP_STANDBY_RESTRICTED_QUOTA);
-                if (mInjector.getElapsedRealtime() - lastWakeupTime
-                        < mConstants.APP_STANDBY_RESTRICTED_WINDOW) {
-                    final long minElapsed =
-                            lastWakeupTime + mConstants.APP_STANDBY_RESTRICTED_WINDOW;
-                    if (alarm.expectedWhenElapsed < minElapsed) {
-                        alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
-                        deferred = true;
-                    }
+                if ((nowElapsed - lastWakeupTime) < mConstants.APP_STANDBY_RESTRICTED_WINDOW) {
+                    return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX,
+                            lastWakeupTime + mConstants.APP_STANDBY_RESTRICTED_WINDOW);
                 }
             }
         } else {
@@ -1651,7 +1636,7 @@ public class AlarmManagerService extends SystemService {
                 final long minElapsed;
                 if (quotaForBucket <= 0) {
                     // Just keep deferring for a day till the quota changes
-                    minElapsed = mInjector.getElapsedRealtime() + MILLIS_IN_DAY;
+                    minElapsed = nowElapsed + MILLIS_IN_DAY;
                 } else {
                     // Suppose the quota for window was q, and the qth last delivery time for this
                     // package was t(q) then the next delivery must be after t(q) + <window_size>
@@ -1659,19 +1644,11 @@ public class AlarmManagerService extends SystemService {
                             sourcePackage, sourceUserId, quotaForBucket);
                     minElapsed = t + mConstants.APP_STANDBY_WINDOW;
                 }
-                if (alarm.expectedWhenElapsed < minElapsed) {
-                    alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
-                    deferred = true;
-                }
+                return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, minElapsed);
             }
         }
-        if (!deferred) {
-            // Restore original requirements in case they were changed earlier.
-            alarm.whenElapsed = alarm.expectedWhenElapsed;
-            alarm.maxWhenElapsed = alarm.expectedMaxWhenElapsed;
-        }
-
-        return (oldWhenElapsed != alarm.whenElapsed || oldMaxWhenElapsed != alarm.maxWhenElapsed);
+        // wakeupsInWindow are less than the permitted quota, hence no deferring is needed.
+        return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, nowElapsed);
     }
 
     private static boolean isAllowedWhileIdle(Alarm a) {
@@ -1691,7 +1668,7 @@ public class AlarmManagerService extends SystemService {
                 ent.tag = a.operation.getTag("");
                 ent.op = "SET";
                 ent.elapsedRealtime = mInjector.getElapsedRealtime();
-                ent.argRealtime = a.whenElapsed;
+                ent.argRealtime = a.getWhenElapsed();
                 mAllowWhileIdleDispatches.add(ent);
                 if (mPendingIdleUntil == null) {
                     IdleDispatchEntry ent2 = new IdleDispatchEntry();
@@ -1704,6 +1681,7 @@ public class AlarmManagerService extends SystemService {
             if ((mPendingIdleUntil != a) && (mPendingIdleUntil != null)) {
                 Slog.wtfStack(TAG, "setImplLocked: idle until changed from " + mPendingIdleUntil
                         + " to " + a);
+                mAlarmStore.remove(mPendingIdleUntil::equals);
             }
             mPendingIdleUntil = a;
             final ArrayList<Alarm> notAllowedWhileIdleAlarms = mAlarmStore.remove(
@@ -1718,18 +1696,16 @@ public class AlarmManagerService extends SystemService {
             }
         }
         if ((a.flags & AlarmManager.FLAG_WAKE_FROM_IDLE) != 0) {
-            if (mNextWakeFromIdle == null || mNextWakeFromIdle.whenElapsed > a.whenElapsed) {
+            if (mNextWakeFromIdle == null || mNextWakeFromIdle.getWhenElapsed()
+                    > a.getWhenElapsed()) {
                 mNextWakeFromIdle = a;
                 // If this wake from idle is earlier than whatever was previously scheduled,
-                // and we are currently idling, then we need to rebatch alarms in case the idle
-                // until time needs to be updated.
+                // and we are currently idling, then the idle-until time needs to be updated.
                 if (mPendingIdleUntil != null) {
-                    final long nowElapsed = mInjector.getElapsedRealtime();
-                    mAlarmStore.recalculateAlarmDeliveries(alarm -> {
+                    mAlarmStore.updateAlarmDeliveries(alarm -> {
                         if (alarm != mPendingIdleUntil) {
                             return false;
                         }
-                        restoreAlarmLocked(alarm, nowElapsed);
                         return adjustIdleUntilTime(alarm);
                     });
                 }
@@ -2563,7 +2539,7 @@ public class AlarmManagerService extends SystemService {
 
     long getNextWakeFromIdleTimeImpl() {
         synchronized (mLock) {
-            return mNextWakeFromIdle != null ? mNextWakeFromIdle.whenElapsed : Long.MAX_VALUE;
+            return mNextWakeFromIdle != null ? mNextWakeFromIdle.getWhenElapsed() : Long.MAX_VALUE;
         }
     }
 
@@ -2784,12 +2760,11 @@ public class AlarmManagerService extends SystemService {
                 restorePending = true;
             }
             if (mNextWakeFromIdle != null && mNextWakeFromIdle.matches(operation, directReceiver)) {
-                mNextWakeFromIdle = null;
-                mAlarmStore.recalculateAlarmDeliveries(alarm -> {
+                mNextWakeFromIdle = mAlarmStore.getNextWakeFromIdleAlarm();
+                mAlarmStore.updateAlarmDeliveries(alarm -> {
                     if (alarm != mPendingIdleUntil) {
                         return false;
                     }
-                    restoreAlarmLocked(alarm, mInjector.getElapsedRealtime());
                     return adjustIdleUntilTime(alarm);
                 });
             }
@@ -2834,15 +2809,14 @@ public class AlarmManagerService extends SystemService {
                 mPendingBackgroundAlarms.removeAt(i);
             }
         }
-        // If we're currently keying off of this app's alarms for doze transitions,
-        // make sure to reset to other triggers.
+        // If we're currently using this app's alarms to come out of doze,
+        // make sure to reset to any remaining WAKE_FROM_IDLE alarms.
         if (mNextWakeFromIdle != null && mNextWakeFromIdle.uid == uid) {
-            mNextWakeFromIdle = null;
-            mAlarmStore.recalculateAlarmDeliveries(alarm -> {
+            mNextWakeFromIdle = mAlarmStore.getNextWakeFromIdleAlarm();
+            mAlarmStore.updateAlarmDeliveries(alarm -> {
                 if (alarm != mPendingIdleUntil) {
                     return false;
                 }
-                restoreAlarmLocked(alarm, mInjector.getElapsedRealtime());
                 return adjustIdleUntilTime(alarm);
             });
         }
@@ -2906,15 +2880,14 @@ public class AlarmManagerService extends SystemService {
                 mPendingBackgroundAlarms.removeAt(i);
             }
         }
-        // If we're currently keying off of this app's alarms for doze transitions,
-        // make sure to reset to other triggers.
+        // If we're currently using this app's alarms to come out of doze,
+        // make sure to reset to any remaining WAKE_FROM_IDLE alarms.
         if (removedNextWakeFromIdle.value) {
-            mNextWakeFromIdle = null;
-            mAlarmStore.recalculateAlarmDeliveries(alarm -> {
+            mNextWakeFromIdle = mAlarmStore.getNextWakeFromIdleAlarm();
+            mAlarmStore.updateAlarmDeliveries(alarm -> {
                 if (alarm != mPendingIdleUntil) {
                     return false;
                 }
-                restoreAlarmLocked(alarm, mInjector.getElapsedRealtime());
                 return adjustIdleUntilTime(alarm);
             });
         }
@@ -3071,20 +3044,6 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    private static final String labelForType(int type) {
-        switch (type) {
-            case RTC:
-                return "RTC";
-            case RTC_WAKEUP:
-                return "RTC_WAKEUP";
-            case ELAPSED_REALTIME:
-                return "ELAPSED";
-            case ELAPSED_REALTIME_WAKEUP:
-                return "ELAPSED_WAKEUP";
-        }
-        return "--unknown--";
-    }
-
     private static final void dumpAlarmList(PrintWriter pw, ArrayList<Alarm> list,
             String prefix, long nowELAPSED, SimpleDateFormat sdf) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, prefix, prefix);
@@ -3095,7 +3054,7 @@ public class AlarmManagerService extends SystemService {
             long nowELAPSED, SimpleDateFormat sdf) {
         for (int i = list.size() - 1; i >= 0; i--) {
             final Alarm a = list.get(i);
-            final String label = labelForType(a.type);
+            final String label = Alarm.typeToString(a.type);
             ipw.print(label);
             ipw.print(" #");
             ipw.print(i);
@@ -3125,6 +3084,9 @@ public class AlarmManagerService extends SystemService {
         }
         final String sourcePackage = alarm.sourcePackage;
         final int sourceUid = alarm.creatorUid;
+        if (UserHandle.isCore(sourceUid)) {
+            return false;
+        }
         return (mAppStateTracker != null) &&
                 mAppStateTracker.areAlarmsRestricted(sourceUid, sourcePackage,
                         exemptOnBatterySaver);
@@ -3169,11 +3131,7 @@ public class AlarmManagerService extends SystemService {
                     // Whoops, it hasn't been long enough since the last ALLOW_WHILE_IDLE
                     // alarm went off for this app.  Reschedule the alarm to be in the
                     // correct time period.
-                    alarm.expectedWhenElapsed = alarm.whenElapsed = minTime;
-                    if (alarm.maxWhenElapsed < minTime) {
-                        alarm.maxWhenElapsed = minTime;
-                    }
-                    alarm.expectedMaxWhenElapsed = alarm.maxWhenElapsed;
+                    alarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, minTime);
                     if (RECORD_DEVICE_IDLE_ALARMS) {
                         IdleDispatchEntry ent = new IdleDispatchEntry();
                         ent.uid = alarm.uid;
@@ -3213,12 +3171,11 @@ public class AlarmManagerService extends SystemService {
                 restorePendingWhileIdleAlarmsLocked();
             }
             if (mNextWakeFromIdle == alarm) {
-                mNextWakeFromIdle = null;
-                mAlarmStore.recalculateAlarmDeliveries(a -> {
+                mNextWakeFromIdle = mAlarmStore.getNextWakeFromIdleAlarm();
+                mAlarmStore.updateAlarmDeliveries(a -> {
                     if (a != mPendingIdleUntil) {
                         return false;
                     }
-                    restoreAlarmLocked(a, nowELAPSED);
                     return adjustIdleUntilTime(a);
                 });
             }
@@ -3228,14 +3185,17 @@ public class AlarmManagerService extends SystemService {
             if (alarm.repeatInterval > 0) {
                 // this adjustment will be zero if we're late by
                 // less than one full repeat interval
-                alarm.count += (nowELAPSED - alarm.expectedWhenElapsed) / alarm.repeatInterval;
+                alarm.count += (nowELAPSED - alarm.getPolicyElapsed(REQUESTER_POLICY_INDEX))
+                        / alarm.repeatInterval;
                 // Also schedule its next recurrence
                 final long delta = alarm.count * alarm.repeatInterval;
-                final long nextElapsed = alarm.expectedWhenElapsed + delta;
-                setImplLocked(alarm.type, alarm.when + delta, nextElapsed, alarm.windowLength,
-                        maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
-                        alarm.repeatInterval, alarm.operation, null, null, alarm.flags,
-                        alarm.workSource, alarm.alarmClock, alarm.uid, alarm.packageName);
+                final long nextElapsed = alarm.getPolicyElapsed(REQUESTER_POLICY_INDEX) + delta;
+                final long nextMaxElapsed = maxTriggerTime(nowELAPSED, nextElapsed,
+                        alarm.repeatInterval);
+                setImplLocked(alarm.type, alarm.origWhen + delta, nextElapsed,
+                        nextMaxElapsed - nextElapsed, alarm.repeatInterval, alarm.operation, null,
+                        null, alarm.flags, alarm.workSource, alarm.alarmClock, alarm.uid,
+                        alarm.packageName);
             }
 
             if (alarm.wakeup) {
@@ -3277,7 +3237,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    static int fuzzForDuration(long duration) {
+    int fuzzForDuration(long duration) {
         if (duration < 15 * 60 * 1000) {
             // If the duration until the time is less than 15 minutes, the maximum fuzz
             // is the duration.
@@ -3480,7 +3440,7 @@ public class AlarmManagerService extends SystemService {
                         FrameworkStatsLog.write(FrameworkStatsLog.WALL_CLOCK_TIME_SHIFTED, nowRTC);
                         removeImpl(null, mTimeTickTrigger);
                         removeImpl(mDateChangeSender, null);
-                        reevaluateRtcAlarms(nowELAPSED);
+                        reevaluateRtcAlarms();
                         mClockReceiver.scheduleTimeTickEvent();
                         mClockReceiver.scheduleDateChangedEvent();
                         synchronized (mLock) {

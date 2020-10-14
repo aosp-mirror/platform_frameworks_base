@@ -66,8 +66,8 @@ public class BatchingAlarmStore implements AlarmStore {
     };
 
     private static final Comparator<Alarm> sIncreasingTimeOrder = (a1, a2) -> {
-        long when1 = a1.whenElapsed;
-        long when2 = a2.whenElapsed;
+        long when1 = a1.getWhenElapsed();
+        long when2 = a2.getWhenElapsed();
         if (when1 > when2) {
             return 1;
         }
@@ -99,9 +99,26 @@ public class BatchingAlarmStore implements AlarmStore {
         }
         if (!removed.isEmpty()) {
             mSize -= removed.size();
+            // Not needed if only whole batches were removed, but keeping existing behavior.
             rebatchAllAlarms();
         }
         return removed;
+    }
+
+    @Override
+    public Alarm getNextWakeFromIdleAlarm() {
+        for (final Batch batch : mAlarmBatches) {
+            if ((batch.mFlags & AlarmManager.FLAG_WAKE_FROM_IDLE) == 0) {
+                continue;
+            }
+            for (int i = 0; i < batch.size(); i++) {
+                final Alarm a = batch.get(i);
+                if ((a.flags & AlarmManager.FLAG_WAKE_FROM_IDLE) != 0) {
+                    return a;
+                }
+            }
+        }
+        return null;
     }
 
     private void rebatchAllAlarms() {
@@ -157,7 +174,7 @@ public class BatchingAlarmStore implements AlarmStore {
     }
 
     @Override
-    public boolean recalculateAlarmDeliveries(AlarmDeliveryCalculator deliveryCalculator) {
+    public boolean updateAlarmDeliveries(AlarmDeliveryCalculator deliveryCalculator) {
         boolean changed = false;
         for (final Batch b : mAlarmBatches) {
             for (int i = 0; i < b.size(); i++) {
@@ -204,7 +221,7 @@ public class BatchingAlarmStore implements AlarmStore {
 
     private void insertAndBatchAlarm(Alarm alarm) {
         final int whichBatch = ((alarm.flags & AlarmManager.FLAG_STANDALONE) != 0) ? -1
-                : attemptCoalesce(alarm.whenElapsed, alarm.maxWhenElapsed);
+                : attemptCoalesce(alarm.getWhenElapsed(), alarm.getMaxWhenElapsed());
 
         if (whichBatch < 0) {
             addBatch(mAlarmBatches, new Batch(alarm));
@@ -247,8 +264,8 @@ public class BatchingAlarmStore implements AlarmStore {
         final ArrayList<Alarm> mAlarms = new ArrayList<>();
 
         Batch(Alarm seed) {
-            mStart = seed.whenElapsed;
-            mEnd = clampPositive(seed.maxWhenElapsed);
+            mStart = seed.getWhenElapsed();
+            mEnd = clampPositive(seed.getMaxWhenElapsed());
             mFlags = seed.flags;
             mAlarms.add(seed);
         }
@@ -276,12 +293,12 @@ public class BatchingAlarmStore implements AlarmStore {
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "Adding " + alarm + " to " + this);
             }
-            if (alarm.whenElapsed > mStart) {
-                mStart = alarm.whenElapsed;
+            if (alarm.getWhenElapsed() > mStart) {
+                mStart = alarm.getWhenElapsed();
                 newStart = true;
             }
-            if (alarm.maxWhenElapsed < mEnd) {
-                mEnd = alarm.maxWhenElapsed;
+            if (alarm.getMaxWhenElapsed() < mEnd) {
+                mEnd = alarm.getMaxWhenElapsed();
             }
             mFlags |= alarm.flags;
 
@@ -309,11 +326,11 @@ public class BatchingAlarmStore implements AlarmStore {
                         Slog.wtf(TAG, "Removed TIME_TICK alarm");
                     }
                 } else {
-                    if (alarm.whenElapsed > newStart) {
-                        newStart = alarm.whenElapsed;
+                    if (alarm.getWhenElapsed() > newStart) {
+                        newStart = alarm.getWhenElapsed();
                     }
-                    if (alarm.maxWhenElapsed < newEnd) {
-                        newEnd = alarm.maxWhenElapsed;
+                    if (alarm.getMaxWhenElapsed() < newEnd) {
+                        newEnd = alarm.getMaxWhenElapsed();
                     }
                     newFlags |= alarm.flags;
                     i++;
