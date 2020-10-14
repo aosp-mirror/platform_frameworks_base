@@ -128,7 +128,7 @@ class StackEducationView constructor(context: Context) : LinearLayout(context) {
 
     private fun setShouldShow(shouldShow: Boolean) {
         context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-                .edit().putBoolean(PREF_MANAGED_EDUCATION, !shouldShow).apply()
+                .edit().putBoolean(PREF_STACK_EDUCATION, !shouldShow).apply()
     }
 }
 
