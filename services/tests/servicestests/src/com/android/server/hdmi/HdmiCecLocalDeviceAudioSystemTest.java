@@ -29,6 +29,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.Context;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IPowerManager;
@@ -833,5 +834,43 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 Constants.INVALID_PHYSICAL_ADDRESS);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
         assertThat(mHdmiCecLocalDeviceAudioSystem.isActiveSource()).isFalse();
+    }
+
+    @Test
+    @Ignore("b/151150320")
+    public void oneTouchPlay() {
+        mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn_fromPlayback = HdmiCecMessageBuilder.buildTextViewOn(
+                mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress(), ADDR_TV);
+        HdmiCecMessage activeSource_fromPlayback = HdmiCecMessageBuilder.buildActiveSource(
+                mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress(),
+                SELF_PHYSICAL_ADDRESS);
+        HdmiCecMessage systemAudioModeRequest_fromPlayback =
+                HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                        mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM, SELF_PHYSICAL_ADDRESS, true);
+        HdmiCecMessage textViewOn_fromAudioSystem = HdmiCecMessageBuilder.buildTextViewOn(
+                mHdmiCecLocalDeviceAudioSystem.getDeviceInfo().getLogicalAddress(), ADDR_TV);
+        HdmiCecMessage activeSource_fromAudioSystem = HdmiCecMessageBuilder.buildActiveSource(
+                mHdmiCecLocalDeviceAudioSystem.getDeviceInfo().getLogicalAddress(),
+                SELF_PHYSICAL_ADDRESS);
+        HdmiCecMessage systemAudioModeRequest_fromAudioSystem =
+                HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                        mHdmiCecLocalDeviceAudioSystem.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM, SELF_PHYSICAL_ADDRESS, true);
+        assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn_fromPlayback);
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource_fromPlayback);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(
+                systemAudioModeRequest_fromPlayback);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(textViewOn_fromAudioSystem);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSource_fromAudioSystem);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(
+                systemAudioModeRequest_fromAudioSystem);
     }
 }
