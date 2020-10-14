@@ -37,6 +37,7 @@ import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
+import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
@@ -209,12 +210,32 @@ class Sensor {
 
             @Override
             public void onLockoutTimed(long durationMillis) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof LockoutConsumer)) {
+                        Slog.e(mTag, "onLockoutTimed for non-lockout consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
+                    lockoutConsumer.onLockoutTimed(durationMillis);
+                });
             }
 
             @Override
             public void onLockoutPermanent() {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof LockoutConsumer)) {
+                        Slog.e(mTag, "onLockoutPermanent for non-lockout consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
+                    lockoutConsumer.onLockoutPermanent();
+                });
             }
 
             @Override
