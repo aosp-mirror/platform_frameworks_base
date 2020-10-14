@@ -2756,4 +2756,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: S
     SCREEN_TIMEOUT = 1852;
+
+    // OPEN: Settings > Accessibility > Reduce Bright Colors
+    // CATEGORY: SETTINGS
+    // OS: S
+    REDUCE_BRIGHT_COLORS_SETTINGS = 1853;
 }

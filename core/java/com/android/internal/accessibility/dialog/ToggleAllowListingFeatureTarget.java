@@ -32,9 +32,9 @@ import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
  * Extension for {@link AccessibilityTarget} with {@link AccessibilityFragmentType#TOGGLE}
  * type.
  */
-class ToggleWhiteListingFeatureTarget extends AccessibilityTarget {
+class ToggleAllowListingFeatureTarget extends AccessibilityTarget {
 
-    ToggleWhiteListingFeatureTarget(Context context, @ShortcutType int shortcutType,
+    ToggleAllowListingFeatureTarget(Context context, @ShortcutType int shortcutType,
             boolean isShortcutSwitched, String id, CharSequence label, Drawable icon, String key) {
         super(context, shortcutType, AccessibilityFragmentType.TOGGLE,
                 isShortcutSwitched, id, label, icon, key);

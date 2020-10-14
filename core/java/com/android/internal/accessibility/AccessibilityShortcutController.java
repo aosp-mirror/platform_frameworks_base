@@ -80,6 +80,8 @@ public class AccessibilityShortcutController {
             "com.android.server.accessibility.MagnificationController";
     public static final ComponentName MAGNIFICATION_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "Magnification");
+    public static final ComponentName REDUCE_BRIGHT_COLORS_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "ReduceBrightColors");
 
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -126,6 +128,11 @@ public class AccessibilityShortcutController {
                             Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
                             "1" /* Value to enable */, "0" /* Value to disable */,
                             R.string.color_correction_feature_name));
+            featuresMap.put(REDUCE_BRIGHT_COLORS_COMPONENT_NAME,
+                    new ToggleableFrameworkFeatureInfo(
+                            Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                            "1" /* Value to enable */, "0" /* Value to disable */,
+                            R.string.reduce_bright_colors_feature_name));
             sFrameworkShortcutFeaturesMap = Collections.unmodifiableMap(featuresMap);
         }
         return sFrameworkShortcutFeaturesMap;
