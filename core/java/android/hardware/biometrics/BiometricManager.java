@@ -35,6 +35,8 @@ import android.util.Slog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class that contains biometric utilities. For authentication, see {@link BiometricPrompt}.
@@ -199,13 +201,24 @@ public class BiometricManager {
     }
 
     /**
+     * @return A list of {@link SensorProperties}
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public List<SensorProperties> getSensorProperties() {
+        return new ArrayList<>(); // TODO(169459906)
+    }
+
+    /**
      * Retrieves a test session for BiometricManager/BiometricPrompt.
      * @hide
      */
     @TestApi
     @NonNull
     @RequiresPermission(TEST_BIOMETRIC)
-    public BiometricTestSession getTestSession() {
+    public BiometricTestSession createTestSession(int sensorId) {
         return null; // TODO(169459906)
     }
 

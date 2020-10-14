@@ -1234,20 +1234,19 @@ package android.graphics.drawable {
 package android.hardware.biometrics {
 
   public class BiometricManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession getTestSession();
+    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
   }
 
   public class BiometricTestSession implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void authenticateReject(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void authenticateSuccess(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void acceptAuthentication(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void cleanupInternalState(int);
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void close();
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enableTestHal(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enrollFinish(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enrollStart(int, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void internalCleanup(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void finishEnroll(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void rejectAuthentication(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void startEnroll(int);
   }
 
   public class SensorProperties {
@@ -1368,7 +1367,8 @@ package android.hardware.display {
 package android.hardware.fingerprint {
 
   @Deprecated public class FingerprintManager {
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession getTestSession();
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
   }
 
 }
