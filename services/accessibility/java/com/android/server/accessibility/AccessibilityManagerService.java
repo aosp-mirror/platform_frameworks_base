@@ -2624,6 +2624,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public PendingIntent getPendingIntentActivity(Context context, int requestCode, Intent intent,
             int flags) {
         return PendingIntent.getActivity(context, requestCode, intent, flags);
