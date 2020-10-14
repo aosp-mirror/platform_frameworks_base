@@ -74,6 +74,8 @@ public final class BasePermission {
     private static final String ATTR_PACKAGE = "package";
     private static final String TAG_ITEM = "item";
 
+    private boolean mPermissionDefinitionChanged;
+
     @NonNull
     private PermissionInfo mPermissionInfo;
 
@@ -122,6 +124,10 @@ public final class BasePermission {
         return mPermissionInfo.packageName;
     }
 
+    public boolean isPermissionDefinitionChanged() {
+        return mPermissionDefinitionChanged;
+    }
+
     public int getType() {
         return mType;
     }
@@ -146,6 +152,10 @@ public final class BasePermission {
             mPermissionInfo = newPermissionInfo;
         }
         mReconciled = permissionInfo != null;
+    }
+
+    public void setPermissionDefinitionChanged(boolean shouldOverride) {
+        mPermissionDefinitionChanged = shouldOverride;
     }
 
     public boolean hasGids() {
@@ -364,6 +374,7 @@ public final class BasePermission {
             @NonNull AndroidPackage pkg, Collection<BasePermission> permissionTrees,
             boolean chatty) {
         // Allow system apps to redefine non-system permissions
+        boolean ownerChanged = false;
         if (bp != null && !Objects.equals(bp.mPermissionInfo.packageName, p.packageName)) {
             final boolean currentOwnerIsSystem;
             if (!bp.mReconciled) {
@@ -389,6 +400,7 @@ public final class BasePermission {
                     String msg = "New decl " + pkg + " of permission  "
                             + p.name + " is system; overriding " + bp.mPermissionInfo.packageName;
                     PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                    ownerChanged = true;
                     bp = null;
                 }
             }
@@ -396,6 +408,7 @@ public final class BasePermission {
         if (bp == null) {
             bp = new BasePermission(p.name, p.packageName, TYPE_MANIFEST);
         }
+        boolean wasNormal = bp.isNormal();
         StringBuilder r = null;
         if (!bp.mReconciled) {
             if (bp.mPermissionInfo.packageName == null
@@ -434,6 +447,11 @@ public final class BasePermission {
             }
             r.append("DUP:");
             r.append(p.name);
+        }
+        if (bp.isRuntime() && (ownerChanged || wasNormal)) {
+            // If this is a runtime permission and the owner has changed, or this was a normal
+            // permission, then permission state should be cleaned up
+            bp.mPermissionDefinitionChanged = true;
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
             Log.d(TAG, "  Permissions: " + r);
