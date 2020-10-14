@@ -4282,6 +4282,19 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter) {
+        return getDefaultActivityOptions(animationAdapter).toBundle();
+    }
+
+    public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter,
+            boolean isKeyguardShowing, long eventTime) {
+        ActivityOptions options = getDefaultActivityOptions(animationAdapter);
+        options.setSourceInfo(isKeyguardShowing ? ActivityOptions.SourceInfo.TYPE_LOCKSCREEN
+                : ActivityOptions.SourceInfo.TYPE_NOTIFICATION, eventTime);
+        return options.toBundle();
+    }
+
+    public static ActivityOptions getDefaultActivityOptions(
+            @Nullable RemoteAnimationAdapter animationAdapter) {
         ActivityOptions options;
         if (animationAdapter != null) {
             options = ActivityOptions.makeRemoteAnimation(animationAdapter);
@@ -4291,7 +4304,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Anything launched from the notification shade should always go into the secondary
         // split-screen windowing mode.
         options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
-        return options.toBundle();
+        return options;
     }
 
     void visibilityChanged(boolean visible) {
