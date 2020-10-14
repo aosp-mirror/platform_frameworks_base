@@ -136,6 +136,11 @@ public class Tuner implements AutoCloseable  {
      */
     public static final long INVALID_FILTER_ID_64BIT =
             android.hardware.tv.tuner.V1_1.Constants.Constant64Bit.INVALID_FILTER_ID_64BIT;
+    /**
+     * Invalid frequency that is used as the default frontend frequency setting.
+     */
+    public static final int INVALID_FRONTEND_SETTING_FREQUENCY =
+            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FRONTEND_SETTING_FREQUENCY;
 
     /** @hide */
     @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
