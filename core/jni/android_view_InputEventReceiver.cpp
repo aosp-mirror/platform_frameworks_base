@@ -321,7 +321,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                                     jboolean(focusEvent->getHasFocus()),
                                     jboolean(focusEvent->getInTouchMode()));
                 finishInputEvent(seq, true /* handled */);
-                return OK;
+                continue;
             }
 
             default:
