@@ -50,11 +50,6 @@ class WindowSurfaceController {
 
     SurfaceControl mSurfaceControl;
 
-    /**
-     * WM only uses for deferred transactions.
-     */
-    SurfaceControl mBLASTSurfaceControl;
-
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
     private float mSurfaceX = 0;
@@ -112,21 +107,12 @@ class WindowSurfaceController {
 
         final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags &
                 WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
+
         if (useBLAST) {
-            b.setContainerLayer();
+            b.setBLASTLayer();
         }
 
         mSurfaceControl = b.build();
-
-        if (useBLAST) {
-            mBLASTSurfaceControl = win.makeSurface()
-                .setParent(mSurfaceControl)
-                .setName(name + "(BLAST)")
-                .setHidden(false)
-                .setBLASTLayer()
-                .setCallsite("WindowSurfaceController")
-                .build();
-        }
 
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -172,9 +158,6 @@ class WindowSurfaceController {
         } finally {
             setShown(false);
             mSurfaceControl = null;
-            if (mBLASTSurfaceControl != null) {
-                mBLASTSurfaceControl.release();
-            }
         }
     }
 
@@ -369,12 +352,6 @@ class WindowSurfaceController {
         outSurfaceControl.copyFrom(mSurfaceControl, "WindowSurfaceController.getSurfaceControl");
     }
 
-    void getBLASTSurfaceControl(SurfaceControl outSurfaceControl) {
-        if (mBLASTSurfaceControl != null) {
-            outSurfaceControl.copyFrom(mBLASTSurfaceControl, "WindowSurfaceController.getBLASTSurfaceControl");
-        }
-    }
-
     boolean getShown() {
         return mSurfaceShown;
     }
@@ -397,21 +374,6 @@ class WindowSurfaceController {
 
     int getHeight() {
         return mSurfaceH;
-    }
-
-    /**
-     * Returns the Surface which the client-framework ViewRootImpl will be using.
-     * This is either the WSA SurfaceControl or it's BLAST child surface.
-     * This has too main uses:
-     * 1. This is the Surface the client will add children to, we use this to make
-     *    sure we don't reparent the BLAST surface itself when calling reparentChildren
-     * 2. We use this as the barrier Surface for some deferTransaction operations.
-     */
-    SurfaceControl getClientViewRootSurface() {
-        if (mBLASTSurfaceControl != null) {
-            return mBLASTSurfaceControl;
-        }
-        return mSurfaceControl;
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

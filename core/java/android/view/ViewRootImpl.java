@@ -519,7 +519,6 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
     private final SurfaceControl mSurfaceControl = new SurfaceControl();
-    private SurfaceControl mBlastSurfaceControl = new SurfaceControl();
 
     private BLASTBufferQueue mBlastBufferQueue;
 
@@ -1808,7 +1807,7 @@ public final class ViewRootImpl implements ViewParent,
             mBoundsLayer = new SurfaceControl.Builder(mSurfaceSession)
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
-                    .setParent(getRenderSurfaceControl())
+                    .setParent(getSurfaceControl())
                     .setCallsite("ViewRootImpl.getBoundsLayer")
                     .build();
             setBoundsLayerCrop(mTransaction);
@@ -1818,22 +1817,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     Surface getOrCreateBLASTSurface(int width, int height) {
-        if (mSurfaceControl == null
-                || !mSurfaceControl.isValid()
-                || mBlastSurfaceControl == null
-                || !mBlastSurfaceControl.isValid()) {
+        if (!mSurfaceControl.isValid()) {
             return null;
         }
 
         Surface ret = null;
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(mTag,
-                mBlastSurfaceControl, width, height, mEnableTripleBuffering);
+                    mSurfaceControl, width, height, mEnableTripleBuffering);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
         } else {
-            mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
+            mBlastBufferQueue.update(mSurfaceControl, width, height);
         }
 
         return ret;
@@ -1855,7 +1851,7 @@ public final class ViewRootImpl implements ViewParent,
     private boolean updateBoundsLayer(SurfaceControl.Transaction t) {
         if (mBoundsLayer != null) {
             setBoundsLayerCrop(t);
-            t.deferTransactionUntil(mBoundsLayer, getRenderSurfaceControl(),
+            t.deferTransactionUntil(mBoundsLayer, getSurfaceControl(),
                 mSurface.getNextFrameNumber());
             return true;
         }
@@ -1864,7 +1860,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private void prepareSurfaces(boolean sizeChanged) {
         final SurfaceControl.Transaction t = mTransaction;
-        final SurfaceControl sc = getRenderSurfaceControl();
+        final SurfaceControl sc = getSurfaceControl();
         if (!sc.isValid()) return;
 
         boolean applyTransaction = updateBoundsLayer(t);
@@ -1885,7 +1881,6 @@ public final class ViewRootImpl implements ViewParent,
         mSurface.release();
         mSurfaceControl.release();
 
-        mBlastSurfaceControl.release();
         // We should probably add an explicit dispose.
         mBlastBufferQueue = null;
     }
@@ -7447,7 +7442,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f), viewVisibility,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
-                mTempControls, mSurfaceSize, mBlastSurfaceControl);
+                mTempControls, mSurfaceSize);
         mPendingDisplayCutout.set(mTmpFrames.displayCutout);
         mPendingBackDropFrame.set(mTmpFrames.backdropFrame);
         if (mSurfaceControl.isValid()) {
@@ -9866,17 +9861,6 @@ public final class ViewRootImpl implements ViewParent,
 
     Object getBlastTransactionLock() {
         return mRtBLASTSyncTransaction;
-    }
-
-    /**
-     * @hide
-     */
-    public SurfaceControl getRenderSurfaceControl() {
-        if (useBLAST()) {
-            return mBlastSurfaceControl;
-        } else {
-            return mSurfaceControl;
-        }
     }
 
     @Override

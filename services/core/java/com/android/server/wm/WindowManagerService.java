@@ -2104,8 +2104,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
             long frameNumber, ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
-            SurfaceControl outBLASTSurfaceControl) {
+            InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
         Arrays.fill(outActiveControls, null);
         int result = 0;
         boolean configChanged;
@@ -2280,8 +2279,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 result = win.relayoutVisibleWindow(result, attrChanges);
 
                 try {
-                    result = createSurfaceControl(outSurfaceControl, outBLASTSurfaceControl,
-                            result, win, winAnimator);
+                    result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
                 } catch (Exception e) {
                     displayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
 
@@ -2313,7 +2311,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     // surface, let the client use that, but don't create new surface at this point.
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
                     winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
-                    winAnimator.mSurfaceController.getBLASTSurfaceControl(outBLASTSurfaceControl);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 } else {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
@@ -2501,8 +2498,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return focusMayChange;
     }
 
-    private int createSurfaceControl(SurfaceControl outSurfaceControl,
-            SurfaceControl outBLASTSurfaceControl, int result,
+    private int createSurfaceControl(SurfaceControl outSurfaceControl, int result,
             WindowState win, WindowStateAnimator winAnimator) {
         if (!win.mHasSurface) {
             result |= RELAYOUT_RES_SURFACE_CHANGED;
@@ -2517,7 +2513,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (surfaceController != null) {
             surfaceController.getSurfaceControl(outSurfaceControl);
-            surfaceController.getBLASTSurfaceControl(outBLASTSurfaceControl);
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "OUT SURFACE %s: copied", outSurfaceControl);
 
         } else {
