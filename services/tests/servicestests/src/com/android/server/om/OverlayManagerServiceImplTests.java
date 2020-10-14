@@ -39,8 +39,8 @@ import java.util.Map;
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTestsBase {
 
-    private static final String OVERLAY = "com.dummy.overlay";
-    private static final String TARGET = "com.dummy.target";
+    private static final String OVERLAY = "com.test.overlay";
+    private static final String TARGET = "com.test.target";
     private static final int USER = 0;
 
     private static final String OVERLAY2 = OVERLAY + "2";
@@ -50,7 +50,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     private static final String OVERLAY3 = OVERLAY + "3";
     private static final int USER3 = USER2 + 1;
 
-    private static final String CONFIG_SIGNATURE_REFERENCE_PKG = "com.dummy.ref";
+    private static final String CONFIG_SIGNATURE_REFERENCE_PKG = "com.test.ref";
     private static final String CERT_CONFIG_OK = "config_certificate_ok";
     private static final String CERT_CONFIG_NOK = "config_certificate_nok";
 
@@ -149,7 +149,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installNewPackage(overlay(OVERLAY, TARGET), USER);
         assertState(STATE_MISSING_TARGET, OVERLAY, USER);
 
-        final DummyDeviceState.PackageBuilder target = target(TARGET);
+        final FakeDeviceState.PackageBuilder target = target(TARGET);
         installNewPackage(target, USER);
         assertState(STATE_DISABLED, OVERLAY, USER);
 
@@ -169,9 +169,9 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
 
     @Test
     public void testOnOverlayPackageUpgraded() {
-        final DummyListener listener = getListener();
-        final DummyDeviceState.PackageBuilder target = target(TARGET);
-        final DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET);
+        final FakeListener listener = getListener();
+        final FakeDeviceState.PackageBuilder target = target(TARGET);
+        final FakeDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET);
         installNewPackage(target, USER);
         installNewPackage(overlay, USER);
         listener.count = 0;
@@ -181,7 +181,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         // upgrade to a version where the overlay has changed its target
         // expect once for the old target package, once for the new target package
         listener.count = 0;
-        final DummyDeviceState.PackageBuilder overlay2 = overlay(OVERLAY, "some.other.target");
+        final FakeDeviceState.PackageBuilder overlay2 = overlay(OVERLAY, "some.other.target");
         upgradePackage(overlay2, USER);
         assertEquals(3, listener.count);
 
@@ -193,7 +193,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     @Test
     public void testListener() {
         final OverlayManagerServiceImpl impl = getImpl();
-        final DummyListener listener = getListener();
+        final FakeListener listener = getListener();
         installNewPackage(overlay(OVERLAY, TARGET), USER);
         assertEquals(1, listener.count);
         listener.count = 0;
@@ -219,12 +219,12 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_OK), USER);
 
-        final DummyIdmapDaemon idmapd = getIdmapd();
-        final DummyDeviceState state = getState();
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
         String overlayPath = state.select(OVERLAY, USER).apkPath;
         assertTrue(idmapd.idmapExists(overlayPath, USER));
 
-        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
         assertTrue((CONFIG_SIGNATURE & idmap.policies) == CONFIG_SIGNATURE);
     }
 
@@ -237,12 +237,12 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
 
-        final DummyIdmapDaemon idmapd = getIdmapd();
-        final DummyDeviceState state = getState();
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
         String overlayPath = state.select(OVERLAY, USER).apkPath;
         assertTrue(idmapd.idmapExists(overlayPath, USER));
 
-        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
         assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
     }
 
@@ -252,12 +252,12 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
 
-        final DummyIdmapDaemon idmapd = getIdmapd();
-        final DummyDeviceState state = getState();
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
         String overlayPath = state.select(OVERLAY, USER).apkPath;
         assertTrue(idmapd.idmapExists(overlayPath, USER));
 
-        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
         assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
     }
 
@@ -266,12 +266,12 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
 
-        final DummyIdmapDaemon idmapd = getIdmapd();
-        final DummyDeviceState state = getState();
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
         String overlayPath = state.select(OVERLAY, USER).apkPath;
         assertTrue(idmapd.idmapExists(overlayPath, USER));
 
-        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
         assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
     }
 
@@ -284,12 +284,12 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
 
-        final DummyIdmapDaemon idmapd = getIdmapd();
-        final DummyDeviceState state = getState();
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
         String overlayPath = state.select(OVERLAY, USER).apkPath;
         assertTrue(idmapd.idmapExists(overlayPath, USER));
 
-        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
         assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
     }
 }
