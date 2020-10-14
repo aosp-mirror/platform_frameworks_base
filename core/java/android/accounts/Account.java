@@ -50,7 +50,7 @@ public class Account implements Parcelable {
     @UnsupportedAppUsage
     private final @Nullable String accessId;
 
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) return true;
         if (!(o instanceof Account)) return false;
         final Account other = (Account)o;

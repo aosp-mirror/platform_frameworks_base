@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Environment;
@@ -149,7 +150,7 @@ public class VolumeRecord implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof VolumeRecord) {
             return Objects.equals(fsUuid, ((VolumeRecord) o).fsUuid);
         } else {

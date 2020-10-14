@@ -275,7 +275,7 @@ public class ProxyInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof ProxyInfo)) return false;
         ProxyInfo p = (ProxyInfo)o;
         // If PAC URL is present in either then they must be equal.

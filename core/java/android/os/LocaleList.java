@@ -93,7 +93,7 @@ public final class LocaleList implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (other == this)
             return true;
         if (!(other instanceof LocaleList))

@@ -295,7 +295,7 @@ public final class DisplayInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return o instanceof DisplayInfo && equals((DisplayInfo)o);
     }
 

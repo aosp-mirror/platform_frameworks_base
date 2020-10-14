@@ -22,6 +22,7 @@ import static com.android.internal.util.Preconditions.*;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -190,7 +191,7 @@ public final class SessionConfiguration implements Parcelable {
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         } else if (this == obj) {

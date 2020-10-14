@@ -19,6 +19,7 @@ package android.widget;
 import static android.widget.RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID;
 import static android.widget.RemoteViews.EXTRA_REMOTEADAPTER_ON_LIGHT_BACKGROUND;
 
+import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.app.IServiceConnection;
 import android.appwidget.AppWidgetHostView;
@@ -814,7 +815,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof RemoteViewsCacheKey)) {
                 return false;
             }

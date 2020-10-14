@@ -203,7 +203,7 @@ public final class SpellCheckerSubtype implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof SpellCheckerSubtype) {
             SpellCheckerSubtype subtype = (SpellCheckerSubtype) o;
             if (subtype.mSubtypeId != SUBTYPE_ID_NONE || mSubtypeId != SUBTYPE_ID_NONE) {

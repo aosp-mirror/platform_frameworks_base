@@ -282,7 +282,7 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof AutomaticZenRule)) return false;
         if (o == this) return true;
         final AutomaticZenRule other = (AutomaticZenRule) o;

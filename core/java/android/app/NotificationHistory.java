@@ -116,7 +116,7 @@ public final class NotificationHistory implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             HistoricalNotification that = (HistoricalNotification) o;

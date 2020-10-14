@@ -20,6 +20,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -107,7 +108,7 @@ public class NewIntentItem extends ActivityTransactionItem {
     };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

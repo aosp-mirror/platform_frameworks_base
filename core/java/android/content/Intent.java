@@ -10378,7 +10378,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj instanceof FilterComparison) {
                 Intent other = ((FilterComparison)obj).mIntent;
                 return mIntent.filterEquals(other);

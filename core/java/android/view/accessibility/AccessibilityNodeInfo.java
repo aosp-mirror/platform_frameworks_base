@@ -4369,7 +4369,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (this == object) {
             return true;
         }
@@ -5039,7 +5039,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             if (other == null) {
                 return false;
             }

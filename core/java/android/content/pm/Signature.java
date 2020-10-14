@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -248,7 +249,7 @@ public class Signature implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         try {
             if (obj != null) {
                 Signature other = (Signature)obj;

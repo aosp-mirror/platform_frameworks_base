@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -124,7 +125,7 @@ public final class DeviceProductInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeviceProductInfo that = (DeviceProductInfo) o;
@@ -227,7 +228,7 @@ public final class DeviceProductInfo implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ManufactureDate that = (ManufactureDate) o;

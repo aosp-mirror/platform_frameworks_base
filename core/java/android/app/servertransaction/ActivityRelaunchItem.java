@@ -19,6 +19,7 @@ package android.app.servertransaction;
 import static android.app.ActivityThread.DEBUG_ORDER;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
@@ -144,7 +145,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

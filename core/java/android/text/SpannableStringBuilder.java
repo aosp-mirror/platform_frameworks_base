@@ -1607,7 +1607,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
     // Same as SpannableStringInternal
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof Spanned &&
                 toString().equals(o.toString())) {
             final Spanned other = (Spanned) o;

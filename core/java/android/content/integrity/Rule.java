@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -115,7 +116,7 @@ public final class Rule implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
