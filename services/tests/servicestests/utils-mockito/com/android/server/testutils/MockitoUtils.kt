@@ -17,6 +17,7 @@
 package com.android.server.testutils
 
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
@@ -53,7 +54,7 @@ inline fun <reified T> mock(block: T.() -> Unit = {}) = Mockito.mock(T::class.ja
 
 fun <T> spy(value: T, block: T.() -> Unit = {}) = Mockito.spy(value).apply(block)
 
-fun <Type> Stubber.whenever(mock: Type) = Mockito.`when`(mock)
+fun <Type> Stubber.whenever(mock: Type) = this.`when`(mock)
 fun <Type : Any?> whenever(mock: Type) = Mockito.`when`(mock)
 
 @Suppress("UNCHECKED_CAST")
@@ -81,3 +82,5 @@ inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit = {}): 
 
 inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit = {}) =
         spyThrowOnUnmocked<T>(null, block)
+
+inline fun <reified T : Any> nullable() = ArgumentMatchers.nullable(T::class.java)

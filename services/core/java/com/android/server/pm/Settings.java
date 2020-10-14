@@ -475,6 +475,14 @@ public final class Settings {
         return mPackages.get(pkgName);
     }
 
+    ArrayMap<String, PackageSetting> getPackagesLocked() {
+        return mPackages;
+    }
+
+    KeySetManagerService getKeySetManagerService() {
+        return mKeySetManagerService;
+    }
+
     String getRenamedPackageLPr(String pkgName) {
         return mRenamedPackages.get(pkgName);
     }
@@ -5554,7 +5562,8 @@ public final class Settings {
         return mPreferredActivities.get(userId);
     }
 
-    CrossProfileIntentResolver getCrossProfileIntentResolvers(int userId) {
+    @Nullable
+    CrossProfileIntentResolver getCrossProfileIntentResolver(int userId) {
         return mCrossProfileIntentResolvers.get(userId);
     }
 
