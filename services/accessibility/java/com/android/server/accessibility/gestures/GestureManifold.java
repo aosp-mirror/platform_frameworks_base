@@ -19,6 +19,7 @@ package com.android.server.accessibility.gestures;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SINGLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_DOWN;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_LEFT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_RIGHT;
@@ -27,11 +28,13 @@ import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SINGLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SINGLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_DOWN;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_LEFT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_RIGHT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_TRIPLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_TRIPLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SINGLE_TAP;
@@ -140,6 +143,9 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 2, 1, GESTURE_2_FINGER_SINGLE_TAP, this));
         mMultiFingerGestures.add(
+                new MultiFingerMultiTapAndHold(
+                        mContext, 2, 1, GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD, this));
+        mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 2, 2, GESTURE_2_FINGER_DOUBLE_TAP, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTapAndHold(
@@ -153,7 +159,15 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 new MultiFingerMultiTap(mContext, 3, 2, GESTURE_3_FINGER_DOUBLE_TAP, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTapAndHold(
+                        mContext, 3, 1, GESTURE_3_FINGER_SINGLE_TAP_AND_HOLD, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTapAndHold(
                         mContext, 3, 2, GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTap(mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTapAndHold(
+                        mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP_AND_HOLD, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP, this));
         // Four-finger taps.
