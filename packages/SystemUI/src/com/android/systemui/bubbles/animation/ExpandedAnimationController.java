@@ -271,16 +271,14 @@ public class ExpandedAnimationController
                 // Then, draw a line across the screen to the bubble's resting position.
                 path.lineTo(getBubbleLeft(index), expandedY);
             } else {
-                final float sideMultiplier =
-                        mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x) ? -1 : 1;
-                final float stackedX = mCollapsePoint.x + (sideMultiplier * index * mStackOffsetPx);
+                final float stackedX = mCollapsePoint.x;
 
                 // If we're collapsing, draw a line from the bubble's current position to the side
                 // of the screen where the bubble will be stacked.
                 path.lineTo(stackedX, expandedY);
 
                 // Then, draw a line down to the stack position.
-                path.lineTo(stackedX, mCollapsePoint.y);
+                path.lineTo(stackedX, mCollapsePoint.y + index * mStackOffsetPx);
             }
 
             // The lead bubble should be the bubble with the longest distance to travel when we're

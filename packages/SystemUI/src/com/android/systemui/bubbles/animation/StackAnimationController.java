@@ -744,15 +744,13 @@ public class StackAnimationController extends
 
     @Override
     float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
-        if (property.equals(DynamicAnimation.TRANSLATION_X)) {
+        if (property.equals(DynamicAnimation.TRANSLATION_Y)) {
             // If we're in the dismiss target, have the bubbles pile on top of each other with no
             // offset.
             if (isStackStuckToTarget()) {
                 return 0f;
             } else {
-                // Offset to the left if we're on the left, or the right otherwise.
-                return mLayout.isFirstChildXLeftOfCenter(mStackPosition.x)
-                        ? -mStackOffset : mStackOffset;
+                return mStackOffset;
             }
         } else {
             return 0f;
