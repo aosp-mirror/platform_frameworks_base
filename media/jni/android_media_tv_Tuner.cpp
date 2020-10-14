@@ -22,7 +22,6 @@
 #include "android_runtime/AndroidRuntime.h"
 
 #include <android-base/logging.h>
-#include <android/hardware/tv/tuner/1.0/ITuner.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -34,7 +33,6 @@ using ::android::hardware::Void;
 using ::android::hardware::hidl_bitfield;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::AudioExtraMetaData;
-using ::android::hardware::tv::tuner::V1_0::Constant;
 using ::android::hardware::tv::tuner::V1_0::DataFormat;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterType;
@@ -129,12 +127,13 @@ using ::android::hardware::tv::tuner::V1_0::FrontendStatus;
 using ::android::hardware::tv::tuner::V1_0::FrontendStatusAtsc3PlpInfo;
 using ::android::hardware::tv::tuner::V1_0::FrontendStatusType;
 using ::android::hardware::tv::tuner::V1_0::FrontendType;
-using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::LnbPosition;
 using ::android::hardware::tv::tuner::V1_0::LnbTone;
 using ::android::hardware::tv::tuner::V1_0::LnbVoltage;
 using ::android::hardware::tv::tuner::V1_0::PlaybackSettings;
 using ::android::hardware::tv::tuner::V1_0::RecordSettings;
+using ::android::hardware::tv::tuner::V1_1::Constant;
+using ::android::hardware::tv::tuner::V1_1::Constant64Bit;
 
 struct fields_t {
     jfieldID tunerContext;
@@ -505,10 +504,11 @@ jobjectArray FilterCallback::getPesEvent(
 }
 
 jobjectArray FilterCallback::getTsRecordEvent(
-        jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events) {
+        jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events,
+                const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TsRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJ)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJ)V");
 
     for (int i = 0; i < events.size(); i++) {
         auto event = events[i];
@@ -537,28 +537,39 @@ jobjectArray FilterCallback::getTsRecordEvent(
 
         jlong byteNumber = static_cast<jlong>(tsRecordEvent.byteNumber);
 
+        jlong pts = (eventsExt.size() > i) ? static_cast<jlong>(eventsExt[i].tsRecord().pts)
+                : static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+
         jobject obj =
-                env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber);
+                env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber, pts);
         env->SetObjectArrayElement(arr, i, obj);
     }
     return arr;
 }
 
 jobjectArray FilterCallback::getMmtpRecordEvent(
-        jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events) {
+        jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events,
+                const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJ)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJ)V");
 
     for (int i = 0; i < events.size(); i++) {
         auto event = events[i];
+
         DemuxFilterMmtpRecordEvent mmtpRecordEvent = event.mmtpRecord();
 
         jint scHevcIndexMask = static_cast<jint>(mmtpRecordEvent.scHevcIndexMask);
         jlong byteNumber = static_cast<jlong>(mmtpRecordEvent.byteNumber);
+        jint mpuSequenceNumber = (eventsExt.size() > i)
+                ? static_cast<jint>(eventsExt[i].mmtpRecord().mpuSequenceNumber)
+                : static_cast<jint>(Constant::INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM);
+        jlong pts = (eventsExt.size() > i) ? static_cast<jlong>(eventsExt[i].mmtpRecord().pts)
+                : static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
 
         jobject obj =
-                env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber);
+                env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
+                        mpuSequenceNumber, pts);
         env->SetObjectArrayElement(arr, i, obj);
     }
     return arr;
@@ -627,12 +638,14 @@ jobjectArray FilterCallback::getTemiEvent(
     return arr;
 }
 
-Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& filterEvent) {
-    ALOGD("FilterCallback::onFilterEvent");
+Return<void> FilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
+        const DemuxFilterEventExt& filterEventExt) {
+    ALOGD("FilterCallback::onFilterEvent_1_1");
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
     std::vector<DemuxFilterEvent::Event> events = filterEvent.events;
+    std::vector<DemuxFilterEventExt::Event> eventsExt = filterEventExt.events;
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/FilterEvent");
     jobjectArray array = env->NewObjectArray(events.size(), eventClazz, NULL);
 
@@ -652,11 +665,11 @@ Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& filterEvent) 
                 break;
             }
             case DemuxFilterEvent::Event::hidl_discriminator::tsRecord: {
-                array = getTsRecordEvent(array, events);
+                array = getTsRecordEvent(array, events, eventsExt);
                 break;
             }
             case DemuxFilterEvent::Event::hidl_discriminator::mmtpRecord: {
-                array = getMmtpRecordEvent(array, events);
+                array = getMmtpRecordEvent(array, events, eventsExt);
                 break;
             }
             case DemuxFilterEvent::Event::hidl_discriminator::download: {
@@ -683,6 +696,14 @@ Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& filterEvent) 
     return Void();
 }
 
+Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& filterEvent) {
+    ALOGD("FilterCallback::onFilterEvent");
+    std::vector<DemuxFilterEventExt::Event> emptyEventsExt;
+    DemuxFilterEventExt emptyFilterEventExt {
+            .events = emptyEventsExt,
+    };
+    return onFilterEvent_1_1(filterEvent, emptyFilterEventExt);
+}
 
 Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus status) {
     ALOGD("FilterCallback::onFilterStatus");
@@ -919,6 +940,8 @@ Return<void> FrontendCallback::onScanMessage(FrontendScanMessageType type, const
 /////////////// Tuner ///////////////////////
 
 sp<ITuner> JTuner::mTuner;
+sp<::android::hardware::tv::tuner::V1_1::ITuner> JTuner::mTuner_1_1;
+int JTuner::mTunerVersion = 0;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz)
     : mClass(NULL) {
@@ -950,13 +973,28 @@ JTuner::~JTuner() {
 
 sp<ITuner> JTuner::getTunerService() {
     if (mTuner == nullptr) {
-        mTuner = ITuner::getService();
+        mTunerVersion = 0;
+        mTuner_1_1 = ::android::hardware::tv::tuner::V1_1::ITuner::getService();
 
-        if (mTuner == nullptr) {
-            ALOGW("Failed to get tuner service.");
-        }
-    }
-    return mTuner;
+        if (mTuner_1_1 == nullptr) {
+            ALOGW("Failed to get tuner 1.1 service.");
+            mTuner = ITuner::getService();
+            if (mTuner == nullptr) {
+                ALOGW("Failed to get tuner 1.0 service.");
+            } else {
+                mTunerVersion = 1 << 16;
+            }
+        } else {
+            mTuner = static_cast<sp<ITuner>>(mTuner_1_1);
+            mTunerVersion = ((1 << 16) | 1);
+         }
+     }
+     return mTuner;
+}
+
+jint JTuner::getTunerVersion() {
+    ALOGD("JTuner::getTunerVersion()");
+    return (jint) mTunerVersion;
 }
 
 jobject JTuner::getFrontendIds() {
@@ -1504,6 +1542,7 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
     }
 
     sp<IFilter> iFilterSp;
+    sp<::android::hardware::tv::tuner::V1_1::IFilter> iFilterSp_1_1;
     sp<FilterCallback> callback = new FilterCallback();
     Result res;
     mDemux->openFilter(type, bufferSize, callback,
@@ -1515,17 +1554,23 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
         ALOGD("Failed to open filter, type = %d", type.mainType);
         return NULL;
     }
-    int fId;
+    uint64_t fId;
     iFilterSp->getId([&](Result, uint32_t filterId) {
         fId = filterId;
     });
+    iFilterSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(iFilterSp);
+    if (iFilterSp_1_1 != NULL) {
+        iFilterSp_1_1->getId64Bit([&](Result, uint64_t filterId64Bit) {
+            fId = filterId64Bit;
+        });
+    }
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jobject filterObj =
             env->NewObject(
                     env->FindClass("android/media/tv/tuner/filter/Filter"),
                     gFields.filterInitID,
-                    (jint) fId);
+                    (jlong) fId);
 
     sp<Filter> filterSp = new Filter(iFilterSp, filterObj);
     filterSp->incStrong(filterObj);
@@ -2460,7 +2505,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     jclass filterClazz = env->FindClass("android/media/tv/tuner/filter/Filter");
     gFields.filterContext = env->GetFieldID(filterClazz, "mNativeContext", "J");
     gFields.filterInitID =
-            env->GetMethodID(filterClazz, "<init>", "(I)V");
+            env->GetMethodID(filterClazz, "<init>", "(J)V");
     gFields.onFilterStatusID =
             env->GetMethodID(filterClazz, "onFilterStatus", "(I)V");
     gFields.onFilterEventID =
@@ -2499,6 +2544,11 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
 static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = new JTuner(env, thiz);
     setTuner(env,thiz, tuner);
+}
+
+static jint android_media_tv_Tuner_native_get_tuner_version(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getTunerVersion();
 }
 
 static jobject android_media_tv_Tuner_get_frontend_ids(JNIEnv *env, jobject thiz) {
@@ -3069,6 +3119,36 @@ static jint android_media_tv_Tuner_get_filter_id(JNIEnv* env, jobject filter) {
         return (jint) Constant::INVALID_FILTER_ID;
     }
     return (jint) id;
+}
+
+static jlong android_media_tv_Tuner_get_filter_64bit_id(JNIEnv* env, jobject filter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
+        ALOGD("Failed to get filter ID: filter not found");
+        return static_cast<jlong>(
+                ::android::hardware::tv::tuner::V1_1::Constant64Bit::INVALID_FILTER_ID_64BIT);
+    }
+
+    sp<::android::hardware::tv::tuner::V1_1::IFilter> iFilterSp_1_1;
+    iFilterSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(iFilterSp);
+    Result res;
+    uint64_t id;
+
+    if (iFilterSp_1_1 != NULL) {
+        iFilterSp_1_1->getId64Bit(
+            [&](Result r, uint64_t filterId64Bit) {
+                res = r;
+                id = filterId64Bit;
+        });
+    } else {
+        ALOGW("getId64Bit is not supported with the current HAL implementation.");
+        return static_cast<jlong>(
+                ::android::hardware::tv::tuner::V1_1::Constant64Bit::INVALID_FILTER_ID_64BIT);
+    }
+
+    return (res == Result::SUCCESS) ?
+            static_cast<jlong>(id) : static_cast<jlong>(
+                    ::android::hardware::tv::tuner::V1_1::Constant64Bit::INVALID_FILTER_ID_64BIT);
 }
 
 static jint android_media_tv_Tuner_set_filter_data_source(
@@ -3684,6 +3764,7 @@ static void android_media_tv_Tuner_media_event_finalize(JNIEnv* env, jobject med
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
+    { "nativeGetTunerVersion", "()I", (void *)android_media_tv_Tuner_native_get_tuner_version },
     { "nativeGetFrontendIds", "()Ljava/util/List;",
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
@@ -3735,6 +3816,8 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeConfigureFilter", "(IILandroid/media/tv/tuner/filter/FilterConfiguration;)I",
             (void *)android_media_tv_Tuner_configure_filter },
     { "nativeGetId", "()I", (void *)android_media_tv_Tuner_get_filter_id },
+    { "nativeGetId64Bit", "()J",
+            (void *)android_media_tv_Tuner_get_filter_64bit_id },
     { "nativeSetDataSource", "(Landroid/media/tv/tuner/filter/Filter;)I",
             (void *)android_media_tv_Tuner_set_filter_data_source },
     { "nativeStartFilter", "()I", (void *)android_media_tv_Tuner_start_filter },

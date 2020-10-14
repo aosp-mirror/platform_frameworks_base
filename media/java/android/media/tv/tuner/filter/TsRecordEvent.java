@@ -32,13 +32,15 @@ public class TsRecordEvent extends FilterEvent {
     private final int mTsIndexMask;
     private final int mScIndexMask;
     private final long mDataLength;
+    private final long mPts;
 
     // This constructor is used by JNI code only
-    private TsRecordEvent(int pid, int tsIndexMask, int scIndexMask, long dataLength) {
+    private TsRecordEvent(int pid, int tsIndexMask, int scIndexMask, long dataLength, long pts) {
         mPid = pid;
         mTsIndexMask = tsIndexMask;
         mScIndexMask = scIndexMask;
         mDataLength = dataLength;
+        mPts = pts;
     }
 
     /**
@@ -71,5 +73,14 @@ public class TsRecordEvent extends FilterEvent {
     @BytesLong
     public long getDataLength() {
         return mDataLength;
+    }
+
+    /**
+     * Gets the Presentation Time Stamp(PTS) for the audio or video frame. It is based on 90KHz
+     * and has the same format as the PTS in ISO/IEC 13818-1. It is used only for the SC and
+     * the SC_HEVC.
+     */
+    public long getPts() {
+        return mPts;
     }
 }

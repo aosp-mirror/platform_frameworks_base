@@ -185,7 +185,7 @@ public class Filter implements AutoCloseable {
     private long mNativeContext;
     private FilterCallback mCallback;
     private Executor mExecutor;
-    private final int mId;
+    private final long mId;
     private int mMainType;
     private int mSubtype;
     private Filter mSource;
@@ -196,6 +196,7 @@ public class Filter implements AutoCloseable {
     private native int nativeConfigureFilter(
             int type, int subType, FilterConfiguration settings);
     private native int nativeGetId();
+    private native long nativeGetId64Bit();
     private native int nativeSetDataSource(Filter source);
     private native int nativeStartFilter();
     private native int nativeStopFilter();
@@ -204,7 +205,7 @@ public class Filter implements AutoCloseable {
     private native int nativeClose();
 
     // Called by JNI
-    private Filter(int id) {
+    private Filter(long id) {
         mId = id;
     }
 
@@ -265,6 +266,16 @@ public class Filter implements AutoCloseable {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             return nativeGetId();
+        }
+    }
+
+    /**
+     * Gets the 64-bit filter Id.
+     */
+    public long getId64Bit() {
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeGetId64Bit();
         }
     }
 
