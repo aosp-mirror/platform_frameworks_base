@@ -69,6 +69,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -152,6 +153,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -819,7 +821,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     updateScrimController();
                 };
 
-
+        mActivityIntentHelper = new ActivityIntentHelper(mContext);
         DateTimeView.setReceiverHandler(timeTickHandler);
     }
 
@@ -832,8 +834,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
         }
-
-        mActivityIntentHelper = new ActivityIntentHelper(mContext);
 
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addCallback(this,
@@ -3978,6 +3978,27 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mLaunchCameraWhenFinishedWaking = true;
             }
         }
+    }
+
+    @Override
+    public void onEmergencyActionLaunchGestureDetected() {
+        // TODO (b/169793384) Polish the panic gesture to be just like its older brother, camera.
+        Intent emergencyIntent = new Intent(EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
+        PackageManager pm = mContext.getPackageManager();
+        ResolveInfo resolveInfo = pm.resolveActivity(emergencyIntent, /*flags=*/0);
+        if (resolveInfo == null) {
+            Log.wtf(TAG, "Couldn't find an app to process the emergency intent.");
+            return;
+        }
+
+        if (mVibrator != null && mVibrator.hasVibrator()) {
+            mVibrator.vibrate(500L);
+        }
+
+        emergencyIntent.setComponent(new ComponentName(resolveInfo.activityInfo.packageName,
+                resolveInfo.activityInfo.name));
+        emergencyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(emergencyIntent, /*dismissShade=*/true);
     }
 
     boolean isCameraAllowedByAdmin() {
