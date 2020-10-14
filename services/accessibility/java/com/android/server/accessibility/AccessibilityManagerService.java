@@ -941,10 +941,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (resolvedUserId != mCurrentUserId) {
                 return null;
             }
-            if (mA11yWindowManager.findA11yWindowInfoByIdLocked(windowId) == null) {
+            final AccessibilityWindowInfo accessibilityWindowInfo = mA11yWindowManager
+                    .findA11yWindowInfoByIdLocked(windowId);
+            if (accessibilityWindowInfo == null) {
                 return null;
             }
-            return mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(userId, windowId);
+            // We use AccessibilityWindowInfo#getId instead of windowId. When the windowId comes
+            // from an embedded hierarchy, the system can't find correct window token because
+            // embedded hierarchy doesn't have windowInfo. Calling
+            // AccessibilityWindowManager#findA11yWindowInfoByIdLocked can look for its parent's
+            // windowInfo, so it is safer to use AccessibilityWindowInfo#getId
+            // to get window token to find real window.
+            return mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(userId,
+                    accessibilityWindowInfo.getId());
         }
     }
 
