@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -44,6 +45,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.io.PrintWriter;
@@ -61,10 +63,12 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
     private final Rect mTmpNormalBounds = new Rect();
+    protected final Rect mReentryBounds = new Rect();
 
     private DisplayController mDisplayController;
     private PipAppOpsListener mAppOpsListener;
     private PipBoundsHandler mPipBoundsHandler;
+    private @NonNull PipBoundsState mPipBoundsState;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
     private Consumer<Boolean> mPinnedStackAnimationRecentsCallback;
@@ -97,7 +101,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
             mTouchHandler.adjustBoundsForRotation(mTmpNormalBounds,
-                    mPipTaskOrganizer.getLastReportedBounds(), mTmpInsetBounds);
+                    mPipBoundsState.getBounds(), mTmpInsetBounds);
 
             // The bounds are being applied to a specific snap fraction, so reset any known offsets
             // for the previous orientation before updating the movement bounds.
@@ -196,6 +200,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsHandler pipBoundsHandler,
+            @NonNull PipBoundsState pipBoundsState,
             PipMediaController pipMediaController,
             PipMenuActivityController pipMenuActivityController,
             PipTaskOrganizer pipTaskOrganizer,
@@ -206,7 +211,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         if (PipUtils.hasSystemFeature(mContext)) {
             initController(context, displayController, pipAppOpsListener, pipBoundsHandler,
-                    pipMediaController, pipMenuActivityController, pipTaskOrganizer,
+                    pipBoundsState, pipMediaController, pipMenuActivityController, pipTaskOrganizer,
                     pipTouchHandler, windowManagerShellWrapper);
         } else {
             Log.w(TAG, "Device not support PIP feature");
@@ -217,6 +222,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsHandler pipBoundsHandler,
+            @NonNull PipBoundsState pipBoundsState,
             PipMediaController pipMediaController,
             PipMenuActivityController pipMenuActivityController,
             PipTaskOrganizer pipTaskOrganizer,
@@ -232,6 +238,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsHandler = pipBoundsHandler;
+        mPipBoundsState = pipBoundsState;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mMediaController = pipMediaController;
@@ -360,7 +367,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         final boolean changed = mPipBoundsHandler.setShelfHeight(visible, shelfHeight);
         if (changed) {
             mTouchHandler.onShelfVisibilityChanged(visible, shelfHeight);
-            updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
+            updateMovementBounds(mPipBoundsState.getBounds(),
                     false /* fromRotation */, false /* fromImeAdjustment */,
                     true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
         }
@@ -395,13 +402,24 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
             // Exiting PIP, save the reentry bounds to restore to when re-entering.
-            mPipBoundsHandler.onSaveReentryBounds(activity, pipBounds);
+            updateReentryBounds(pipBounds);
+            mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
         }
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.accept(true);
         }
+    }
+
+    /**
+     * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
+     */
+    public void updateReentryBounds(Rect bounds) {
+        final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
+        float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
+        mPipBoundsHandler.applySnapFraction(reentryBounds, snapFraction);
+        mReentryBounds.set(reentryBounds);
     }
 
     @Override
@@ -445,5 +463,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mTouchHandler.dump(pw, innerPrefix);
         mPipBoundsHandler.dump(pw, innerPrefix);
         mPipTaskOrganizer.dump(pw, innerPrefix);
+        mPipBoundsState.dump(pw, innerPrefix);
     }
 }

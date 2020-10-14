@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.util.MathUtils;
 
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
@@ -122,6 +123,8 @@ public class KeyguardClockPositionAlgorithm {
      */
     private int mUnlockedStackScrollerPadding;
 
+    private int mLockScreenMode;
+
     /**
      * Refreshes the dimension values.
      */
@@ -171,6 +174,13 @@ public class KeyguardClockPositionAlgorithm {
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
+    /**
+      * Update lock screen mode for testing different layouts
+      */
+    public void onLockScreenModeChanged(int mode) {
+        mLockScreenMode = mode;
+    }
+
     public float getMinStackScrollerPadding() {
         return mBypassEnabled ? mUnlockedStackScrollerPadding
                 : mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
@@ -185,6 +195,9 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getExpandedPreferredClockY() {
+        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
+            return mMinTopMargin;
+        }
         return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? getPreferredClockY()
                 : getExpandedClockPosition();
     }

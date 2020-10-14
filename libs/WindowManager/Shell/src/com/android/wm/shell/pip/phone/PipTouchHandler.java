@@ -22,6 +22,7 @@ import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STAT
 import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,6 +49,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
 
@@ -70,6 +72,7 @@ public class PipTouchHandler {
     private final boolean mEnableResize;
     private final Context mContext;
     private final PipBoundsHandler mPipBoundsHandler;
+    private final @NonNull PipBoundsState mPipBoundsState;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
 
@@ -161,6 +164,7 @@ public class PipTouchHandler {
     public PipTouchHandler(Context context,
             PipMenuActivityController menuController,
             PipBoundsHandler pipBoundsHandler,
+            @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger) {
@@ -168,11 +172,12 @@ public class PipTouchHandler {
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsHandler = pipBoundsHandler;
+        mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
-        mMotionHelper = new PipMotionHelper(mContext, pipTaskOrganizer, mMenuController,
-                mPipBoundsHandler.getSnapAlgorithm(), floatingContentCoordinator);
+        mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
+                mMenuController, mPipBoundsHandler.getSnapAlgorithm(), floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         pipTaskOrganizer, this::getMovementBounds,
@@ -189,8 +194,8 @@ public class PipTouchHandler {
         reloadResources();
 
         mFloatingContentCoordinator = floatingContentCoordinator;
-        mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
-                pipTaskOrganizer, mPipBoundsHandler.getSnapAlgorithm(),
+        mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
+                mMotionHelper, pipTaskOrganizer, mPipBoundsHandler.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds, mHandler);
 
         mPipUiEventLogger = pipUiEventLogger;

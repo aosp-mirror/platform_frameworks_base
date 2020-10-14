@@ -45,6 +45,9 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
+import android.view.DisplayAddress;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1737,7 +1740,9 @@ public class MediaRouter {
          */
         private static final int DEFAULT_PLAYBACK_VOLUME = DEFAULT_PLAYBACK_MAX_VOLUME;
 
-        RouteInfo(RouteCategory category) {
+        /** @hide */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public RouteInfo(RouteCategory category) {
             mCategory = category;
             mDeviceType = DEVICE_TYPE_UNKNOWN;
         }
@@ -2078,7 +2083,9 @@ public class MediaRouter {
             return mPresentationDisplay;
         }
 
-        boolean updatePresentationDisplay() {
+        /** @hide */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public boolean updatePresentationDisplay() {
             Display display = choosePresentationDisplay();
             if (mPresentationDisplay != display) {
                 mPresentationDisplay = display;
@@ -2088,38 +2095,78 @@ public class MediaRouter {
         }
 
         private Display choosePresentationDisplay() {
-            if ((mSupportedTypes & ROUTE_TYPE_LIVE_VIDEO) != 0) {
-                Display[] displays = sStatic.getAllPresentationDisplays();
+            if ((getSupportedTypes() & ROUTE_TYPE_LIVE_VIDEO) == 0) {
+                return null;
+            }
+            final Display[] displays = getAllPresentationDisplays();
+            if (displays == null || displays.length == 0) {
+                return null;
+            }
 
-                // Ensure that the specified display is valid for presentations.
-                // This check will normally disallow the default display unless it was
-                // configured as a presentation display for some reason.
-                if (mPresentationDisplayId >= 0) {
-                    for (Display display : displays) {
-                        if (display.getDisplayId() == mPresentationDisplayId) {
-                            return display;
-                        }
+            // Ensure that the specified display is valid for presentations.
+            // This check will normally disallow the default display unless it was
+            // configured as a presentation display for some reason.
+            if (mPresentationDisplayId >= 0) {
+                for (Display display : displays) {
+                    if (display.getDisplayId() == mPresentationDisplayId) {
+                        return display;
                     }
-                    return null;
                 }
+                return null;
+            }
 
-                // Find the indicated Wifi display by its address.
-                if (mDeviceAddress != null) {
-                    for (Display display : displays) {
-                        if (display.getType() == Display.TYPE_WIFI
-                                && mDeviceAddress.equals(display.getAddress())) {
-                            return display;
-                        }
+            // Find the indicated Wifi display by its address.
+            if (getDeviceAddress() != null) {
+                for (Display display : displays) {
+                    if (display.getType() == Display.TYPE_WIFI
+                            && displayAddressEquals(display)) {
+                        return display;
                     }
-                    return null;
-                }
-
-                // For the default route, choose the first presentation display from the list.
-                if (this == sStatic.mDefaultAudioVideo && displays.length > 0) {
-                    return displays[0];
                 }
             }
+
+            // Returns the first hard-wired display.
+            for (Display display : displays) {
+                if (display.getType() == Display.TYPE_EXTERNAL) {
+                    return display;
+                }
+            }
+
+            // Returns the first non-default built-in display.
+            for (Display display : displays) {
+                if (display.getType() == Display.TYPE_INTERNAL) {
+                    return display;
+                }
+            }
+
+            // For the default route, choose the first presentation display from the list.
+            if (this == getDefaultAudioVideo()) {
+                return displays[0];
+            }
             return null;
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public Display[] getAllPresentationDisplays() {
+            return sStatic.getAllPresentationDisplays();
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public RouteInfo getDefaultAudioVideo() {
+            return sStatic.mDefaultAudioVideo;
+        }
+
+        private boolean displayAddressEquals(Display display) {
+            final DisplayAddress displayAddress = display.getAddress();
+            // mDeviceAddress recorded mac address. If displayAddress is not a kind of Network,
+            // return false early.
+            if (!(displayAddress instanceof DisplayAddress.Network)) {
+                return false;
+            }
+            final DisplayAddress.Network networkAddress = (DisplayAddress.Network) displayAddress;
+            return getDeviceAddress().equals(networkAddress.toString());
         }
 
         /** @hide */

@@ -55,3 +55,17 @@ android_test {
         "platform-test-annotations",
     ],
 }
+
+java_library {
+    name: "wm-flicker-common-assertions",
+    platform_apis: true,
+    srcs: ["src/**/*Assertions.java", "src/**/*Assertions.kt"],
+    exclude_srcs: [
+        "**/helpers/*",
+    ],
+    static_libs: [
+        "flickerlib",
+        "truth-prebuilt",
+        "app-helpers-core"
+    ],
+}

@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 
@@ -188,6 +189,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private LauncherApps mLauncherApps;
     @Mock
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
+    @Mock
+    private BubbleLogger mBubbleLogger;
 
     private BubbleData mBubbleData;
 
@@ -251,7 +254,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         mock(Handler.class)
                 );
-        mBubbleData = new BubbleData(mContext);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger);
         when(mFeatureFlagsNewPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -275,7 +278,10 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mStatusBarService,
                 mWindowManager,
                 mWindowManagerShellWrapper,
-                mLauncherApps);
+                mLauncherApps,
+                mBubbleLogger,
+                mock(Handler.class),
+                mock(ShellTaskOrganizer.class));
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 

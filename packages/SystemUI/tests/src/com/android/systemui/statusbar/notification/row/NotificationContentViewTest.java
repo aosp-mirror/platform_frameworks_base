@@ -25,8 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AppOpsManager;
-import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -37,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +50,8 @@ public class NotificationContentViewTest extends SysuiTestCase {
     @Before
     @UiThreadTest
     public void setup() {
+        mDependency.injectMockDependency(MediaOutputDialogFactory.class);
+
         mView = new NotificationContentView(mContext, null);
         ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
         ExpandableNotificationRow mockRow = spy(row);

@@ -35,6 +35,7 @@ import android.testing.TestableLooper;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTestCase;
@@ -66,19 +67,21 @@ public class PipTaskOrganizerTest extends PipTestCase {
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
     @Mock private Optional<SplitScreen> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
+    private PipBoundsState mPipBoundsState;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        mPipBoundsState = new PipBoundsState();
 
         mSpiedContext = spy(mContext);
 
         when(mPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
         when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
 
-        mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mSpiedContext, mMockPipBoundsHandler,
-                mMockPipSurfaceTransactionHelper, mMockOptionalSplitScreen, mMockdDisplayController,
-                mMockPipUiEventLogger, mMockShellTaskOrganizer));
+        mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mSpiedContext, mPipBoundsState,
+                mMockPipBoundsHandler, mMockPipSurfaceTransactionHelper, mMockOptionalSplitScreen,
+                mMockdDisplayController, mMockPipUiEventLogger, mMockShellTaskOrganizer));
     }
 
     @Test

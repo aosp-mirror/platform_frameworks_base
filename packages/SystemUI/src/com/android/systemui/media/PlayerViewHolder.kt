@@ -23,7 +23,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
 

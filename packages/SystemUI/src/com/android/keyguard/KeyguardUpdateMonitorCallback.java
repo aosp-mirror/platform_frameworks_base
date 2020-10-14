@@ -317,4 +317,9 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
 
+    /**
+     * Called to switch lock screen layout/clock layouts
+     */
+    public void onLockScreenModeChanged(int mode) { }
+
 }

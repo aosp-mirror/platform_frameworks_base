@@ -17269,13 +17269,13 @@ public class PackageManagerService extends IPackageManager.Stub
         private final PackageSetting mPackageSetting;
         private final String mPackageName;
         private final String mPathString;
-        private final int mUserId;
+        private final int mUid;
         private final int[] mInstalledUserIds;
 
         IncrementalStatesCallback(PackageSetting packageSetting, int userId) {
             mPackageSetting = packageSetting;
             mPackageName = packageSetting.name;
-            mUserId = userId;
+            mUid = UserHandle.getUid(userId, packageSetting.appId);
             mPathString = packageSetting.getPathString();
             final int[] allUserIds = resolveUserIds(userId);
             final ArrayList<Integer> installedUserIds = new ArrayList<>();
@@ -17311,7 +17311,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         ps, mInstalledUserIds, mSettings.mPackages);
             }
             Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, mUserId);
+            extras.putInt(Intent.EXTRA_UID, mUid);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
             sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_LOADED, mPackageName,
                     extras, 0 /*flags*/,
@@ -17331,7 +17331,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         ps, mInstalledUserIds, mSettings.mPackages);
             }
             Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, mUserId);
+            extras.putInt(Intent.EXTRA_UID, mUid);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
             extras.putInt(Intent.EXTRA_REASON, reason);
             // send broadcast to users with this app installed
@@ -17353,7 +17353,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         ps, mInstalledUserIds, mSettings.mPackages);
             }
             Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, mUserId);
+            extras.putInt(Intent.EXTRA_UID, mUid);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
             // send broadcast to users with this app installed
             sendPackageBroadcast(Intent.ACTION_PACKAGE_STARTABLE, mPackageName,

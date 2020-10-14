@@ -11,7 +11,8 @@ android_test {
     static_libs: [
         "android-support-test",
         "mockito-target-minus-junit4",
-        "testng"
+        "testng",
+        "truth-prebuilt",
     ],
 
     platform_apis: true,

@@ -18,16 +18,11 @@ package com.android.systemui.bubbles.storage
 import android.content.Context
 import android.util.AtomicFile
 import android.util.Log
-import com.android.systemui.dagger.SysUISingleton
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import javax.inject.Inject
 
-@SysUISingleton
-class BubblePersistentRepository @Inject constructor(
-    context: Context
-) {
+class BubblePersistentRepository(context: Context) {
 
     private val bubbleFile: AtomicFile = AtomicFile(File(context.filesDir,
             "overflow_bubbles.xml"), "overflow-bubbles")

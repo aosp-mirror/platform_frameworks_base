@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.pip.phone;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -28,6 +29,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
@@ -50,6 +52,7 @@ public class PipAccessibilityInteractionConnection
 
     private Context mContext;
     private Handler mHandler;
+    private final @NonNull PipBoundsState mPipBoundsState;
     private PipMotionHelper mMotionHelper;
     private PipTaskOrganizer mTaskOrganizer;
     private PipSnapAlgorithm mSnapAlgorithm;
@@ -62,12 +65,14 @@ public class PipAccessibilityInteractionConnection
     private final Rect mExpandedMovementBounds = new Rect();
     private Rect mTmpBounds = new Rect();
 
-    public PipAccessibilityInteractionConnection(Context context, PipMotionHelper motionHelper,
+    public PipAccessibilityInteractionConnection(Context context,
+            @NonNull PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer taskOrganizer, PipSnapAlgorithm snapAlgorithm,
             AccessibilityCallbacks callbacks, Runnable updateMovementBoundCallback,
             Handler handler) {
         mContext = context;
         mHandler = handler;
+        mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
         mTaskOrganizer = taskOrganizer;
         mSnapAlgorithm = snapAlgorithm;
@@ -148,7 +153,7 @@ public class PipAccessibilityInteractionConnection
 
     private void setToExpandedBounds() {
         float savedSnapFraction = mSnapAlgorithm.getSnapFraction(
-                new Rect(mTaskOrganizer.getLastReportedBounds()), mNormalMovementBounds);
+                mPipBoundsState.getBounds(), mNormalMovementBounds);
         mSnapAlgorithm.applySnapFraction(mExpandedBounds, mExpandedMovementBounds,
                 savedSnapFraction);
         mTaskOrganizer.scheduleFinishResizePip(mExpandedBounds, (Rect bounds) -> {
@@ -159,7 +164,7 @@ public class PipAccessibilityInteractionConnection
 
     private void setToNormalBounds() {
         float savedSnapFraction = mSnapAlgorithm.getSnapFraction(
-                new Rect(mTaskOrganizer.getLastReportedBounds()), mExpandedMovementBounds);
+                mPipBoundsState.getBounds(), mExpandedMovementBounds);
         mSnapAlgorithm.applySnapFraction(mNormalBounds, mNormalMovementBounds, savedSnapFraction);
         mTaskOrganizer.scheduleFinishResizePip(mNormalBounds, (Rect bounds) -> {
             mMotionHelper.synchronizePinnedStackBounds();

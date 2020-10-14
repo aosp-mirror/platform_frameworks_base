@@ -17,6 +17,7 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.FrameInfo;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -145,6 +146,26 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = null;
     }
 
+    static final class VsyncEventData {
+        // The frame timeline vsync id, used to correlate a frame
+        // produced by HWUI with the timeline data stored in Surface Flinger.
+        public final long id;
+
+        // The frame deadline timestamp in {@link System#nanoTime()} timebase that it is
+        // allotted for the frame to be completed.
+        public final long frameDeadline;
+
+        VsyncEventData(long id, long frameDeadline) {
+            this.id = id;
+            this.frameDeadline = frameDeadline;
+        }
+
+        VsyncEventData() {
+            this.id = FrameInfo.INVALID_VSYNC_ID;
+            this.frameDeadline = Long.MAX_VALUE;
+        }
+    }
+
     /**
      * Called when a vertical sync pulse is received.
      * The recipient should render a frame and then call {@link #scheduleVsync}
@@ -154,11 +175,10 @@ public abstract class DisplayEventReceiver {
      * timebase.
      * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
      * @param frame The frame number.  Increases by one for each vertical sync interval.
-     * @param frameTimelineVsyncId The frame timeline vsync id, used to correlate a frame
-     * produced by HWUI with the timeline data stored in Surface Flinger.
+     * @param vsyncEventData The vsync event data.
      */
     public void onVsync(long timestampNanos, long physicalDisplayId, int frame,
-            long frameTimelineVsyncId) {
+            VsyncEventData vsyncEventData) {
     }
 
     /**
@@ -201,8 +221,9 @@ public abstract class DisplayEventReceiver {
     // Called from native code.
     @SuppressWarnings("unused")
     private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame,
-            long frameTimelineVsyncId) {
-        onVsync(timestampNanos, physicalDisplayId, frame, frameTimelineVsyncId);
+            long frameTimelineVsyncId, long frameDeadline) {
+        onVsync(timestampNanos, physicalDisplayId, frame,
+                new VsyncEventData(frameTimelineVsyncId, frameDeadline));
     }
 
     // Called from native code.

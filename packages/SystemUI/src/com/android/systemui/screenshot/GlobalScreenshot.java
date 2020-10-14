@@ -321,8 +321,17 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
             Consumer<Uri> finisher, Runnable onComplete) {
         // TODO: use task Id, userId, topComponent for smart handler
-
         mOnCompleteRunnable = onComplete;
+
+        if (screenshot == null) {
+            Log.e(TAG, "Got null bitmap from screenshot message");
+            mNotificationsController.notifyScreenshotError(
+                    R.string.screenshot_failed_to_capture_text);
+            finisher.accept(null);
+            mOnCompleteRunnable.run();
+            return;
+        }
+
         if (aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
             saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, false);
         } else {
@@ -569,7 +578,17 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         .build();
         final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                 SurfaceControl.captureDisplay(captureArgs);
-        final Bitmap screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        Bitmap screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+
+        if (screenshot == null) {
+            Log.e(TAG, "Screenshot bitmap was null");
+            mNotificationsController.notifyScreenshotError(
+                    R.string.screenshot_failed_to_capture_text);
+            finisher.accept(null);
+            mOnCompleteRunnable.run();
+            return;
+        }
+
         saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, true);
     }
 
@@ -592,14 +611,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         }
 
         mScreenBitmap = screenshot;
-
-        if (mScreenBitmap == null) {
-            mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
-            finisher.accept(null);
-            mOnCompleteRunnable.run();
-            return;
-        }
 
         if (!isUserSetupComplete()) {
             // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing

@@ -15,8 +15,8 @@
  */
 package com.android.systemui.bubbles;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.os.AsyncTask.Status.FINISHED;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
@@ -256,7 +256,8 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Cleanup expanded view for bubbles going into overflow.
+     * Call this to clean up the task for the bubble. Ensure this is always called when done with
+     * the bubble.
      */
     void cleanupExpandedView() {
         if (mExpandedView != null) {
@@ -270,8 +271,7 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Call when the views should be removed, ensure this is called to clean up ActivityView
-     * content.
+     * Call when all the views should be removed/cleaned up.
      */
     void cleanupViews() {
         cleanupExpandedView();
@@ -468,14 +468,6 @@ class Bubble implements BubbleViewProvider {
         return mIntentActive;
     }
 
-    /**
-     * @return the display id of the virtual display on which bubble contents is drawn.
-     */
-    @Override
-    public int getDisplayId() {
-        return mExpandedView != null ? mExpandedView.getVirtualDisplayId() : INVALID_DISPLAY;
-    }
-
     public InstanceId getInstanceId() {
         return mInstanceId;
     }
@@ -487,6 +479,14 @@ class Bubble implements BubbleViewProvider {
 
     public int getNotificationId() {
         return mNotificationId;
+    }
+
+    /**
+     * @return the task id of the task in which bubble contents is drawn.
+     */
+    @Override
+    public int getTaskId() {
+        return mExpandedView != null ? mExpandedView.getTaskId() : INVALID_TASK_ID;
     }
 
     /**

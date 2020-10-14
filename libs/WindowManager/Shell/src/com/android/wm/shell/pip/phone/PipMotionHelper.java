@@ -37,6 +37,7 @@ import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
@@ -66,6 +67,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private final Context mContext;
     private final PipTaskOrganizer mPipTaskOrganizer;
+    private final @NonNull PipBoundsState mPipBoundsState;
 
     private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
@@ -178,11 +180,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         public void onPipTransitionCanceled(ComponentName activity, int direction) {}
     };
 
-    public PipMotionHelper(Context context, PipTaskOrganizer pipTaskOrganizer,
-            PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
-            FloatingContentCoordinator floatingContentCoordinator) {
+    public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
+            PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController menuController,
+            PipSnapAlgorithm snapAlgorithm, FloatingContentCoordinator floatingContentCoordinator) {
         mContext = context;
         mPipTaskOrganizer = pipTaskOrganizer;
+        mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
@@ -220,7 +223,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     void synchronizePinnedStackBounds() {
         cancelAnimations();
-        mBounds.set(mPipTaskOrganizer.getLastReportedBounds());
+        mBounds.set(mPipBoundsState.getBounds());
         mTemporaryBounds.setEmpty();
 
         if (mPipTaskOrganizer.isInPip()) {
