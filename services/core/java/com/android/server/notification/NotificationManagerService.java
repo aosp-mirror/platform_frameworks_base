@@ -4769,7 +4769,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public List<ComponentName> getEnabledNotificationListeners(int userId) {
-            checkCallerIsSystem();
+            checkNotificationListenerAccess();
             return mListeners.getAllowedComponents(userId);
         }
 
@@ -4838,7 +4838,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
                 boolean granted) {
             Objects.requireNonNull(listener);
-            checkCallerIsSystemOrShell();
+            checkNotificationListenerAccess();
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (mAllowedManagedServicePackages.test(
@@ -5110,6 +5110,14 @@ public class NotificationManagerService extends SystemService {
             return 0;
         }
     };
+
+    protected void checkNotificationListenerAccess() {
+        if (!isCallerSystemOrPhone()) {
+            getContext().enforceCallingPermission(
+                    permission.MANAGE_NOTIFICATION_LISTENERS,
+                    "Caller must hold " + permission.MANAGE_NOTIFICATION_LISTENERS);
+        }
+    }
 
     @VisibleForTesting
     protected void setNotificationAssistantAccessGrantedForUserInternal(
