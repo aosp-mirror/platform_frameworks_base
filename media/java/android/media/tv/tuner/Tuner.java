@@ -223,6 +223,7 @@ public class Tuner implements AutoCloseable  {
     private final Context mContext;
     private final TunerResourceManager mTunerResourceManager;
     private final int mClientId;
+    private static int sTunerVersion = TunerVersionChecker.TUNER_VERSION_UNKNOWN;
 
     private Frontend mFrontend;
     private EventHandler mHandler;
@@ -274,6 +275,14 @@ public class Tuner implements AutoCloseable  {
     public Tuner(@NonNull Context context, @Nullable String tvInputSessionId,
             @TvInputService.PriorityHintUseCaseType int useCase) {
         nativeSetup();
+        sTunerVersion = nativeGetTunerVersion();
+        if (sTunerVersion == TunerVersionChecker.TUNER_VERSION_UNKNOWN) {
+            Log.e(TAG, "Unknown Tuner version!");
+        } else {
+            Log.d(TAG, "Current Tuner version is "
+                    + TunerVersionChecker.getMajorVersion(sTunerVersion) + "."
+                    + TunerVersionChecker.getMinorVersion(sTunerVersion) + ".");
+        }
         mContext = context;
         mTunerResourceManager = (TunerResourceManager)
                 context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
@@ -311,6 +320,11 @@ public class Tuner implements AutoCloseable  {
             infos[i] = tunerFrontendInfo;
         }
         mTunerResourceManager.setFrontendInfoList(infos);
+    }
+
+    /** @hide */
+    public static int getTunerVersion() {
+        return sTunerVersion;
     }
 
     /** @hide */
@@ -434,6 +448,11 @@ public class Tuner implements AutoCloseable  {
      * Native setup.
      */
     private native void nativeSetup();
+
+    /**
+     * Native method to get all frontend IDs.
+     */
+    private native int nativeGetTunerVersion();
 
     /**
      * Native method to get all frontend IDs.

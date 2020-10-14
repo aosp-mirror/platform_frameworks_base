@@ -5073,6 +5073,13 @@ package android.media.tv.tuner {
     method public void onResourceLost(@NonNull android.media.tv.tuner.Tuner);
   }
 
+  public final class TunerVersionChecker {
+    method public static int getTunerVersion();
+    field public static final int TUNER_VERSION_1_0 = 65536; // 0x10000
+    field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
+    field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
+  }
+
 }
 
 package android.media.tv.tuner.dvr {

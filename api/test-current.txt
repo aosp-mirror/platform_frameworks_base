@@ -2130,6 +2130,21 @@ package android.media.tv {
 
 }
 
+package android.media.tv.tuner {
+
+  public final class TunerVersionChecker {
+    method public static int getMajorVersion(int);
+    method public static int getMinorVersion(int);
+    method public static int getTunerVersion();
+    method public static boolean isHigherOrEqualVersionTo(int);
+    method public static boolean supportTunerVersion(int);
+    field public static final int TUNER_VERSION_1_0 = 65536; // 0x10000
+    field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
+    field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
+  }
+
+}
+
 package android.metrics {
 
   public class LogMaker {

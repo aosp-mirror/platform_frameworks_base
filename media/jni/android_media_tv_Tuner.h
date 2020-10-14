@@ -203,6 +203,7 @@ struct TimeFilter : public RefBase {
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
     sp<ITuner> getTunerService();
+    int getTunerVersion();
     jobject getAvSyncHwId(sp<Filter> filter);
     jobject getAvSyncTime(jint id);
     int connectCiCam(jint id);
@@ -239,6 +240,9 @@ private:
     jweak mObject;
     static sp<ITuner> mTuner;
     static sp<::android::hardware::tv::tuner::V1_1::ITuner> mTuner_1_1;
+    // An integer that carries the Tuner version. The high 16 bits are the major version number
+    // while the low 16 bits are the minor version. Default value is unknown version 0.
+    static int mTunerVersion;
     hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
     int mFeId;
