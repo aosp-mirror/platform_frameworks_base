@@ -71,9 +71,9 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
   if (!target_package.DefinesOverlayable()) {
     return (sDefaultPolicies & fulfilled_policies) != 0
                ? Result<Unit>({})
-               : Error(
-                     "overlay must be preinstalled or signed with the same signature as the "
-                     "target");
+               : Error("overlay must be preinstalled, signed with the same signature as the target,"
+                       " or signed with the same signature as the package referenced through"
+                       " <overlay-config-signature>.");
   }
 
   const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(target_resource);
