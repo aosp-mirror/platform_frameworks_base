@@ -313,7 +313,7 @@ static jlong nativeGetFromBlastBufferQueue(JNIEnv* env, jclass clazz, jlong nati
         return nativeObject;
     }
 
-    sp<Surface> surface(new Surface(bufferProducer, true));
+    sp<Surface> surface = queue->getSurface();
     if (surface != NULL) {
         surface->incStrong(&sRefBaseOwner);
     }

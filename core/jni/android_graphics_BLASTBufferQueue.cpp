@@ -55,7 +55,7 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
 
 static jobject nativeGetSurface(JNIEnv* env, jclass clazz, jlong ptr) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    return android_view_Surface_createFromIGraphicBufferProducer(env, queue->getIGraphicBufferProducer());
+    return android_view_Surface_createFromSurface(env, queue->getSurface());
 }
 
 static void nativeSetNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong transactionPtr) {
