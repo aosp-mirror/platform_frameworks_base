@@ -57,10 +57,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class QSFooterImplControllerTest extends LeakCheckedTest {
+public class QSFooterViewControllerTest extends LeakCheckedTest {
 
     @Mock
-    private QSFooterImpl mView;
+    private QSFooterView mView;
     @Mock
     private UserManager mUserManager;
     @Mock
@@ -85,7 +85,7 @@ public class QSFooterImplControllerTest extends LeakCheckedTest {
     @Mock
     private View mEdit;
 
-    private QSFooterImplController mController;
+    private QSFooterViewController mController;
 
     @Before
     public void setup() throws Exception {
@@ -106,7 +106,7 @@ public class QSFooterImplControllerTest extends LeakCheckedTest {
         when(mView.findViewById(R.id.build)).thenReturn(mBuildText);
         when(mView.findViewById(android.R.id.edit)).thenReturn(mEdit);
 
-        mController = new QSFooterImplController(mView, mUserManager, mUserInfoController,
+        mController = new QSFooterViewController(mView, mUserManager, mUserInfoController,
                 mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
                 mFakeTunerService, mMetricsLogger);
 

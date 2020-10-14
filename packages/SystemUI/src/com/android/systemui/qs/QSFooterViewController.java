@@ -44,10 +44,10 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 
 /**
- * Controller for {@link QSFooterImpl}.
+ * Controller for {@link QSFooterView}.
  */
 @QSScope
-public class QSFooterImplController extends ViewController<QSFooterImpl> implements QSFooter {
+public class QSFooterViewController extends ViewController<QSFooterView> implements QSFooter {
 
     private final UserManager mUserManager;
     private final UserInfoController mUserInfoController;
@@ -116,7 +116,7 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
     private boolean mExpanded;
 
     @Inject
-    QSFooterImplController(QSFooterImpl view, UserManager userManager,
+    QSFooterViewController(QSFooterView view, UserManager userManager,
             UserInfoController userInfoController, ActivityStarter activityStarter,
             DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
             QSPanelController qsPanelController, TunerService tunerService,
@@ -237,46 +237,5 @@ public class QSFooterImplController extends ViewController<QSFooterImpl> impleme
 
     private boolean isTunerEnabled() {
         return mTunerService.isTunerEnabled(mUserTracker.getUserHandle());
-    }
-
-    /**
-     * Factory for {@link QSFooterImplController}.
-     *
-     * TODO(b/168904199): Delete this once QSFooterImpl is no longer marked as injectable.
-     */
-    @QSScope
-    public static class Factory {
-        private final UserManager mUserManager;
-        private final UserInfoController mUserInfoController;
-        private final ActivityStarter mActivityStarter;
-        private final DeviceProvisionedController mDeviceProvisionedController;
-        private final UserTracker mUserTracker;
-        private final QSPanelController mQsPanelController;
-        private final TunerService mTunerService;
-        private final MetricsLogger mMetricsLogger;
-
-        @Inject
-        Factory(UserManager userManager, UserInfoController userInfoController,
-                ActivityStarter activityStarter,
-                DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
-                QSPanelController qsPanelController, TunerService tunerService,
-                MetricsLogger metricsLogger) {
-            mUserManager = userManager;
-            mUserInfoController = userInfoController;
-            mActivityStarter = activityStarter;
-            mDeviceProvisionedController = deviceProvisionedController;
-            mUserTracker = userTracker;
-            mQsPanelController = qsPanelController;
-            mTunerService = tunerService;
-            mMetricsLogger = metricsLogger;
-        }
-
-        QSFooterImplController create(QSFooterImpl view) {
-            QSFooterImplController controller = new QSFooterImplController(view, mUserManager,
-                    mUserInfoController, mActivityStarter, mDeviceProvisionedController,
-                    mUserTracker, mQsPanelController, mTunerService, mMetricsLogger);
-            controller.init();
-            return controller;
-        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.qs;
@@ -51,7 +51,7 @@ import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 
 /** */
-public class QSFooterImpl extends FrameLayout {
+public class QSFooterView extends FrameLayout {
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
@@ -88,7 +88,7 @@ public class QSFooterImpl extends FrameLayout {
         }
     };
 
-    public QSFooterImpl(Context context, AttributeSet attrs) {
+    public QSFooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -201,6 +201,7 @@ public class QSFooterImpl extends FrameLayout {
         updateEverything(isTunerEnabled);
     }
 
+    /** */
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
         if (mSettingsCogAnimator != null) mSettingsCogAnimator.setPosition(headerExpansionFraction);
@@ -225,6 +226,7 @@ public class QSFooterImpl extends FrameLayout {
         super.onDetachedFromWindow();
     }
 
+    /** */
     public void setListening(boolean listening) {
         if (listening == mListening) {
             return;
@@ -287,6 +289,7 @@ public class QSFooterImpl extends FrameLayout {
         return mExpanded && mMultiUserSwitch.isMultiUserEnabled();
     }
 
+    /** */
     public void setQSPanel(final QSPanel qsPanel) {
         if (qsPanel != null) {
             mMultiUserSwitch.setQsPanel(qsPanel);
