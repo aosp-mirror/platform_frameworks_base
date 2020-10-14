@@ -1630,13 +1630,14 @@ public class StatsPullAtomService extends SystemService {
             if (modemInfo == null) {
                 return StatsManager.PULL_SKIP;
             }
-            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, modemInfo.getTimestamp(),
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                    modemInfo.getTimestampMillis(),
                     modemInfo.getSleepTimeMillis(), modemInfo.getIdleTimeMillis(),
-                    modemInfo.getTransmitPowerInfo().get(0).getTimeInMillis(),
-                    modemInfo.getTransmitPowerInfo().get(1).getTimeInMillis(),
-                    modemInfo.getTransmitPowerInfo().get(2).getTimeInMillis(),
-                    modemInfo.getTransmitPowerInfo().get(3).getTimeInMillis(),
-                    modemInfo.getTransmitPowerInfo().get(4).getTimeInMillis(),
+                    modemInfo.getTransmitDurationMillisAtPowerLevel(0),
+                    modemInfo.getTransmitDurationMillisAtPowerLevel(1),
+                    modemInfo.getTransmitDurationMillisAtPowerLevel(2),
+                    modemInfo.getTransmitDurationMillisAtPowerLevel(3),
+                    modemInfo.getTransmitDurationMillisAtPowerLevel(4),
                     modemInfo.getReceiveTimeMillis(),
                     -1 /*`energy_used` field name deprecated, use -1 to indicate as unused.*/));
         } finally {
