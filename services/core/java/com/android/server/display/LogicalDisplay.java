@@ -20,8 +20,11 @@ import android.annotation.NonNull;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
+import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -123,10 +126,27 @@ final class LogicalDisplay {
      */
     private boolean mIsEnabled = true;
 
+    /**
+     * The UID mappings for refresh rate override
+     */
+    private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides;
+
+    /**
+     * Holds a set of UIDs that their frame rate override changed and needs to be notified
+     */
+    private ArraySet<Integer> mPendingFrameRateOverrideUids;
+
+    /**
+     * Temporary frame rate override list, used when needed.
+     */
+    private final SparseArray<Float> mTempFrameRateOverride;
+
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
+        mPendingFrameRateOverrideUids = new ArraySet<>();
+        mTempFrameRateOverride = new SparseArray<>();
     }
 
     /**
@@ -176,6 +196,27 @@ final class LogicalDisplay {
             mInfo.set(info);
         }
         return mInfo.get();
+    }
+
+    /**
+     * Returns the frame rate overrides list
+     */
+    public DisplayEventReceiver.FrameRateOverride[] getFrameRateOverrides() {
+        return mFrameRateOverrides;
+    }
+
+    /**
+     * Returns the list of uids that needs to be updated about their frame rate override
+     */
+    public ArraySet<Integer> getPendingFrameRateOverrideUids() {
+        return mPendingFrameRateOverrideUids;
+    }
+
+    /**
+     * Clears the list of uids that needs to be updated about their frame rate override
+     */
+    public void clearPendingFrameRateOverrideUids() {
+        mPendingFrameRateOverrideUids = new ArraySet<>();
     }
 
     /**
@@ -324,9 +365,37 @@ final class LogicalDisplay {
                     (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
             mBaseDisplayInfo.displayCutout = maskCutout ? null : deviceInfo.displayCutout;
             mBaseDisplayInfo.displayId = mDisplayId;
+            updateFrameRateOverrides(deviceInfo);
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
+        }
+    }
+
+    private void updateFrameRateOverrides(DisplayDeviceInfo deviceInfo) {
+        mTempFrameRateOverride.clear();
+        if (mFrameRateOverrides != null) {
+            for (DisplayEventReceiver.FrameRateOverride frameRateOverride
+                    : mFrameRateOverrides) {
+                mTempFrameRateOverride.put(frameRateOverride.uid,
+                        frameRateOverride.frameRateHz);
+            }
+        }
+        mFrameRateOverrides = deviceInfo.frameRateOverrides;
+        if (mFrameRateOverrides != null) {
+            for (DisplayEventReceiver.FrameRateOverride frameRateOverride
+                    : mFrameRateOverrides) {
+                float refreshRate = mTempFrameRateOverride.get(frameRateOverride.uid, 0f);
+                if (refreshRate == 0 || frameRateOverride.frameRateHz != refreshRate) {
+                    mTempFrameRateOverride.put(frameRateOverride.uid,
+                            frameRateOverride.frameRateHz);
+                } else {
+                    mTempFrameRateOverride.delete(frameRateOverride.uid);
+                }
+            }
+        }
+        for (int i = 0; i < mTempFrameRateOverride.size(); i++) {
+            mPendingFrameRateOverrideUids.add(mTempFrameRateOverride.keyAt(i));
         }
     }
 
@@ -638,5 +707,7 @@ final class LogicalDisplay {
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
         pw.println("mOverrideDisplayInfo=" + mOverrideDisplayInfo);
         pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
+        pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
+        pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
     }
 }

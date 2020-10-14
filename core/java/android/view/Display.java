@@ -456,6 +456,9 @@ public final class Display {
     // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
     public static final int REMOVE_MODE_DESTROY_CONTENT = 1;
 
+    /** @hide */
+    public static final int DISPLAY_MODE_ID_FOR_FRAME_RATE_OVERRIDE = 0xFF;
+
     /**
      * Internal method to create a display.
      * The display created with this method will have a static {@link DisplayAdjustments} applied.
@@ -886,7 +889,7 @@ public final class Display {
     public float getRefreshRate() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.getMode().getRefreshRate();
+            return mDisplayInfo.getRefreshRate();
         }
     }
 
@@ -1507,6 +1510,16 @@ public final class Display {
             return mWidth == width &&
                     mHeight == height &&
                     Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate);
+        }
+
+        /**
+         * Returns {@code true} if this mode equals to the other mode in all parameters except
+         * the refresh rate.
+         *
+         * @hide
+         */
+        public boolean equalsExceptRefreshRate(@Nullable Display.Mode other) {
+            return mWidth == other.mWidth && mHeight == other.mHeight;
         }
 
         @Override
