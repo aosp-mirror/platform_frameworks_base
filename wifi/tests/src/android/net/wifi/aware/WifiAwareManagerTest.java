@@ -16,6 +16,7 @@
 
 package android.net.wifi.aware;
 
+import static android.net.wifi.aware.WifiAwareManager.WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE;
 import static android.net.wifi.aware.WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -372,7 +373,8 @@ public class WifiAwareManagerTest {
         // (5) discovery session is no longer visible
         sessionProxyCallback.getValue().onMatchExpired(peerHandle.peerId);
         mMockLooper.dispatchAll();
-        inOrder.verify(mockSessionCallback).onServiceLost(peerIdCaptor.capture());
+        inOrder.verify(mockSessionCallback).onServiceLost(peerIdCaptor.capture(),
+                eq(WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE));
         assertEquals(peerHandle.peerId, peerIdCaptor.getValue().peerId);
 
         // (6) terminate
@@ -520,7 +522,8 @@ public class WifiAwareManagerTest {
         // (5) discovery session is no longer visible
         sessionProxyCallback.getValue().onMatchExpired(peerHandle.peerId);
         mMockLooper.dispatchAll();
-        inOrder.verify(mockSessionCallback).onServiceLost(peerIdCaptor.capture());
+        inOrder.verify(mockSessionCallback).onServiceLost(peerIdCaptor.capture(),
+                eq(WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE));
         assertEquals(peerHandle.peerId, peerIdCaptor.getValue().peerId);
 
         // (6) terminate
