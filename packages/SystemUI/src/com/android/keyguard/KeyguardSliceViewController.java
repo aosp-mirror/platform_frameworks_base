@@ -59,7 +59,6 @@ public class KeyguardSliceViewController implements Dumpable {
     private static final String TAG = "KeyguardSliceViewCtrl";
 
     private final KeyguardSliceView mView;
-    private final KeyguardStatusView mKeyguardStatusView;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
@@ -135,11 +134,10 @@ public class KeyguardSliceViewController implements Dumpable {
 
     @Inject
     public KeyguardSliceViewController(KeyguardSliceView keyguardSliceView,
-            KeyguardStatusView keyguardStatusView, ActivityStarter activityStarter,
+            ActivityStarter activityStarter,
             ConfigurationController configurationController, TunerService tunerService,
             DumpManager dumpManager) {
         mView = keyguardSliceView;
-        mKeyguardStatusView = keyguardStatusView;
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
         mTunerService = tunerService;
@@ -153,8 +151,6 @@ public class KeyguardSliceViewController implements Dumpable {
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
         mView.setOnClickListener(mOnClickListener);
-        // TODO: remove the line below.
-        mKeyguardStatusView.setKeyguardSliceViewController(this);
     }
 
     /**
@@ -233,7 +229,5 @@ public class KeyguardSliceViewController implements Dumpable {
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
         pw.println("  mClickActions: " + mClickActions);
-
-        mKeyguardStatusView.dump(fd, pw, args);
     }
 }
