@@ -60,7 +60,7 @@ public class SyncRtSurfaceTransactionApplier {
         if (mTargetViewRootImpl == null) {
             return;
         }
-        mTargetSc = mTargetViewRootImpl.getRenderSurfaceControl();
+        mTargetSc = mTargetViewRootImpl.getSurfaceControl();
         mTargetViewRootImpl.registerRtFrameCallback(frame -> {
             if (mTargetSc == null || !mTargetSc.isValid()) {
                 return;

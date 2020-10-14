@@ -122,7 +122,6 @@ class TaskSnapshotSurface implements StartingSurface {
 
     //tmp vars for unused relayout params
     private static final Point sTmpSurfaceSize = new Point();
-    private static final SurfaceControl sTmpSurfaceControl = new SurfaceControl();
 
     private final Window mWindow;
     private final Surface mSurface;
@@ -260,7 +259,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
-                    mTempControls, sTmpSurfaceSize, sTmpSurfaceControl);
+                    mTempControls, sTmpSurfaceSize);
         } catch (RemoteException e) {
             // Local call.
         }

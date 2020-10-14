@@ -276,12 +276,11 @@ public class SystemWindows {
                 long frameNumber, ClientWindowFrames outFrames,
                 MergedConfiguration mergedConfiguration,
                 SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-                InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
-                SurfaceControl outBLASTSurfaceControl) {
+                InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
             int res = super.relayout(window, attrs, requestedWidth, requestedHeight,
                     viewVisibility, flags, frameNumber, outFrames,
                     mergedConfiguration, outSurfaceControl, outInsetsState,
-                    outActiveControls, outSurfaceSize, outBLASTSurfaceControl);
+                    outActiveControls, outSurfaceSize);
             if (res != 0) {
                 return res;
             }
