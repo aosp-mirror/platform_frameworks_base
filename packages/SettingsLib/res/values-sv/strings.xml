@@ -545,19 +545,14 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Innan du skapar en begränsad profil måste du konfigurera ett skärmlås för att skydda dina appar och personliga data."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurera lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Byt till <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for creating_new_user_dialog_message (7232880257538970375) -->
-    <skip />
-    <!-- no translation found for user_nickname (262624187455825083) -->
-    <skip />
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Skapar ny användare …"</string>
+    <string name="user_nickname" msgid="262624187455825083">"Smeknamn"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Lägg till gäst"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ta bort gäst"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gäst"</string>
-    <!-- no translation found for user_image_take_photo (467512954561638530) -->
-    <skip />
-    <!-- no translation found for user_image_choose_photo (1363820919146782908) -->
-    <skip />
-    <!-- no translation found for user_image_photo_selector (433658323306627093) -->
-    <skip />
+    <string name="user_image_take_photo" msgid="467512954561638530">"Ta ett foto"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"Välj en bild"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"Välj foto"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Enhetens standardinställning"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Inaktiverat"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiverat"</string>

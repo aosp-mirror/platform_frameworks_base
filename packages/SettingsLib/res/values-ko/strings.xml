@@ -545,19 +545,14 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"제한된 프로필을 만들기 전에 화면 잠금을 설정하여 앱과 개인 데이터를 보호해야 합니다."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"잠금 설정"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>(으)로 전환"</string>
-    <!-- no translation found for creating_new_user_dialog_message (7232880257538970375) -->
-    <skip />
-    <!-- no translation found for user_nickname (262624187455825083) -->
-    <skip />
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"새로운 사용자를 만드는 중…"</string>
+    <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
-    <!-- no translation found for user_image_take_photo (467512954561638530) -->
-    <skip />
-    <!-- no translation found for user_image_choose_photo (1363820919146782908) -->
-    <skip />
-    <!-- no translation found for user_image_photo_selector (433658323306627093) -->
-    <skip />
+    <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"기기 기본값"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
