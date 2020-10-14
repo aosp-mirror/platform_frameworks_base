@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -48,11 +49,12 @@ public class FingerprintEnrollClient extends EnrollClient<ISession> implements U
     public FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
-            int statsModality, int sensorId,
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner,
+            @NonNull FingerprintUtils utils, int sensorId,
             @Nullable IUdfpsOverlayController udfpsOvelayController, int maxTemplatesPerUser) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                0 /* timeoutSec */, statsModality, sensorId, true /* shouldVibrate */);
+                0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
+                true /* shouldVibrate */);
         mUdfpsOverlayController = udfpsOvelayController;
         mMaxTemplatesPerUser = maxTemplatesPerUser;
     }
@@ -83,7 +85,7 @@ public class FingerprintEnrollClient extends EnrollClient<ISession> implements U
     protected void startHalOperation() {
         UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         try {
-            getFreshDaemon().enroll(mSequentialId,
+            mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);

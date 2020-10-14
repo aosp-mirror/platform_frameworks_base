@@ -24,9 +24,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ public class FingerprintRemovalClient extends RemovalClient<ISession> {
     public FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            @NonNull String owner, @NonNull FingerprintUtils utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);

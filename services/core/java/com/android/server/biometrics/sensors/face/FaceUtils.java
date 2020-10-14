@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Utility class for dealing with faces and face settings.
  */
-public class FaceUtils implements BiometricUtils {
+public class FaceUtils implements BiometricUtils<Face> {
 
     private static final Object sInstanceLock = new Object();
     private static FaceUtils sInstance;
@@ -56,9 +56,8 @@ public class FaceUtils implements BiometricUtils {
     }
 
     @Override
-    public void addBiometricForUser(Context ctx, int userId,
-            BiometricAuthenticator.Identifier identifier) {
-        getStateForUser(ctx, userId).addBiometric(identifier);
+    public void addBiometricForUser(Context ctx, int userId, Face face) {
+        getStateForUser(ctx, userId).addBiometric(face);
     }
 
     @Override

@@ -285,8 +285,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                        opPackageName, FingerprintUtils.getInstance(),
-                        BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
+                        opPackageName, FingerprintUtils.getInstance(), sensorId,
                         mUdfpsOverlayController, maxTemplatesPerUser);
                 scheduleForSensor(sensorId, client, new ClientMonitor.Callback() {
                     @Override
