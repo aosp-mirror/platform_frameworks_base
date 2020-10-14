@@ -1034,6 +1034,7 @@ jobject JTuner::openFrontendById(int id) {
         return NULL;
     }
     mFe = fe;
+    mFe_1_1 = ::android::hardware::tv::tuner::V1_1::IFrontend::castFrom(mFe);
     mFeId = id;
     if (mDemux != NULL) {
         mDemux->setFrontendDataSource(mFeId);
@@ -1493,6 +1494,27 @@ int JTuner::connectCiCam(jint id) {
     return (int) r;
 }
 
+int JTuner::linkCiCam(int id) {
+    if (mFe_1_1 == NULL) {
+        ALOGE("frontend 1.1 is not initialized");
+        return (int)Constant::INVALID_LTS_ID;
+    }
+
+    Result res;
+    uint32_t ltsId;
+    mFe_1_1->linkCiCam(static_cast<uint32_t>(id),
+            [&](Result r, uint32_t id) {
+                res = r;
+                ltsId = id;
+            });
+
+    if (res != Result::SUCCESS) {
+        return (int)Constant::INVALID_LTS_ID;
+    }
+
+    return (int) ltsId;
+}
+
 int JTuner::disconnectCiCam() {
     if (mDemux == NULL) {
         Result r = openDemux();
@@ -1501,6 +1523,18 @@ int JTuner::disconnectCiCam() {
         }
     }
     Result r = mDemux->disconnectCiCam();
+    return (int) r;
+}
+
+
+int JTuner::unlinkCiCam(int id) {
+    if (mFe_1_1 == NULL) {
+        ALOGE("frontend 1.1 is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+
+    Result r = mFe_1_1->unlinkCiCam(static_cast<uint32_t>(id));
+
     return (int) r;
 }
 
@@ -1947,6 +1981,10 @@ jint JTuner::closeFrontend() {
     if (mFe != NULL) {
         r = mFe->close();
     }
+    if (r == Result::SUCCESS) {
+        mFe = NULL;
+        mFe_1_1 = NULL;
+    }
     return (jint) r;
 }
 
@@ -1954,6 +1992,9 @@ jint JTuner::closeDemux() {
     Result r = Result::SUCCESS;
     if (mDemux != NULL) {
         r = mDemux->close();
+    }
+    if (r == Result::SUCCESS) {
+        mDemux = NULL;
     }
     return (jint) r;
 }
@@ -2629,9 +2670,19 @@ static int android_media_tv_Tuner_connect_cicam(JNIEnv *env, jobject thiz, jint 
     return tuner->connectCiCam(id);
 }
 
+static int android_media_tv_Tuner_link_cicam(JNIEnv *env, jobject thiz, jint id) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->linkCiCam(id);
+}
+
 static int android_media_tv_Tuner_disconnect_cicam(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->disconnectCiCam();
+}
+
+static int android_media_tv_Tuner_unlink_cicam(JNIEnv *env, jobject thiz, jint id) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->unlinkCiCam(id);
 }
 
 static jobject android_media_tv_Tuner_get_frontend_info(JNIEnv *env, jobject thiz, jint id) {
@@ -3786,6 +3837,10 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeGetAvSyncTime", "(I)Ljava/lang/Long;",
             (void *)android_media_tv_Tuner_get_av_sync_time },
     { "nativeConnectCiCam", "(I)I", (void *)android_media_tv_Tuner_connect_cicam },
+    { "nativeLinkCiCam", "(I)I",
+            (void *)android_media_tv_Tuner_link_cicam },
+    { "nativeUnlinkCiCam", "(I)I",
+            (void *)android_media_tv_Tuner_unlink_cicam },
     { "nativeDisconnectCiCam", "()I", (void *)android_media_tv_Tuner_disconnect_cicam },
     { "nativeGetFrontendInfo", "(I)Landroid/media/tv/tuner/frontend/FrontendInfo;",
             (void *)android_media_tv_Tuner_get_frontend_info },
