@@ -17,7 +17,11 @@
 #ifndef _ANDROID_MEDIA_TV_TUNER_H_
 #define _ANDROID_MEDIA_TV_TUNER_H_
 
-#include <android/hardware/tv/tuner/1.0/ITuner.h>
+#include <android/hardware/tv/tuner/1.1/IFilter.h>
+#include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
+#include <android/hardware/tv/tuner/1.1/ITuner.h>
+#include <android/hardware/tv/tuner/1.1/types.h>
+
 #include <C2BlockInternal.h>
 #include <C2HandleIonInternal.h>
 #include <C2ParamDef.h>
@@ -38,6 +42,7 @@ using ::android::hardware::hidl_handle;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::kSynchronizedReadWrite;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
+using ::android::hardware::tv::tuner::V1_1::DemuxFilterEventExt;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxPid;
@@ -54,7 +59,7 @@ using ::android::hardware::tv::tuner::V1_0::IDescrambler;
 using ::android::hardware::tv::tuner::V1_0::IDvr;
 using ::android::hardware::tv::tuner::V1_0::IDvrCallback;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
-using ::android::hardware::tv::tuner::V1_0::IFilterCallback;
+using ::android::hardware::tv::tuner::V1_1::IFilterCallback;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::IFrontendCallback;
 using ::android::hardware::tv::tuner::V1_0::ILnb;
@@ -147,6 +152,8 @@ struct Filter : public RefBase {
 
 struct FilterCallback : public IFilterCallback {
     ~FilterCallback();
+    virtual Return<void> onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
+            const DemuxFilterEventExt& filterEventExt);
     virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
 
@@ -161,9 +168,11 @@ private:
     jobjectArray getPesEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getTsRecordEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>&events,
+                    const std::vector<DemuxFilterEventExt::Event>& eventsExt);
     jobjectArray getMmtpRecordEvent(
-            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>&events,
+                    const std::vector<DemuxFilterEventExt::Event>& eventsExt);
     jobjectArray getDownloadEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getIpPayloadEvent(
@@ -229,6 +238,7 @@ private:
     jclass mClass;
     jweak mObject;
     static sp<ITuner> mTuner;
+    static sp<::android::hardware::tv::tuner::V1_1::ITuner> mTuner_1_1;
     hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
     int mFeId;
