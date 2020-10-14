@@ -831,7 +831,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public void finishedGoingToSleep(int why);
 
     /**
-     * Called when the device is about to turn on the screen to show content.
+     * Called when the display is about to turn on to show content.
      * When waking up, this method will be called once after the call to wakingUp().
      * When dozing, the method will be called sometime after the call to goingToSleep() and
      * may be called repeatedly in the case where the screen is pulsing on and off.
@@ -839,13 +839,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Must call back on the listener to tell it when the higher-level system
      * is ready for the screen to go on (i.e. the lock screen is shown).
      */
-    public void screenTurningOn(ScreenOnListener screenOnListener);
+    public void screenTurningOn(int displayId, ScreenOnListener screenOnListener);
 
     /**
-     * Called when the device has actually turned on the screen, i.e. the display power state has
-     * been set to ON and the screen is unblocked.
+     * Called when the display has actually turned on, i.e. the display power state has been set to
+     * ON and the screen is unblocked.
      */
-    public void screenTurnedOn();
+    public void screenTurnedOn(int displayId);
 
     /**
      * Called when the display would like to be turned off. This gives policy a chance to do some
@@ -854,12 +854,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param screenOffListener Must be called to tell that the display power state can actually be
      *                          changed now after policy has done its work.
      */
-    public void screenTurningOff(ScreenOffListener screenOffListener);
+    public void screenTurningOff(int displayId, ScreenOffListener screenOffListener);
 
     /**
-     * Called when the device has turned the screen off.
+     * Called when the display has turned off.
      */
-    public void screenTurnedOff();
+    public void screenTurnedOff(int displayId);
 
     public interface ScreenOnListener {
         void onScreenOn();

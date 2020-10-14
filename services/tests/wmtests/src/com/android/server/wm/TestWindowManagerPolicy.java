@@ -197,19 +197,19 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void screenTurningOn(ScreenOnListener screenOnListener) {
+    public void screenTurningOn(int displayId, ScreenOnListener screenOnListener) {
     }
 
     @Override
-    public void screenTurnedOn() {
+    public void screenTurnedOn(int displayId) {
     }
 
     @Override
-    public void screenTurningOff(ScreenOffListener screenOffListener) {
+    public void screenTurningOff(int displayId, ScreenOffListener screenOffListener) {
     }
 
     @Override
-    public void screenTurnedOff() {
+    public void screenTurnedOff(int displayId) {
     }
 
     @Override
