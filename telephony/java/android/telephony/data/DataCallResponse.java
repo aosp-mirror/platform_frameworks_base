@@ -411,6 +411,25 @@ public final class DataCallResponse implements Parcelable {
             };
 
     /**
+     * Convert handover failure mode to string.
+     *
+     * @param handoverFailureMode Handover failure mode
+     * @return Handover failure mode in string
+     *
+     * @hide
+     */
+    public static String failureModeToString(@HandoverFailureMode int handoverFailureMode) {
+        switch (handoverFailureMode) {
+            case HANDOVER_FAILURE_MODE_UNKNOWN: return "unknown";
+            case HANDOVER_FAILURE_MODE_LEGACY: return "legacy";
+            case HANDOVER_FAILURE_MODE_DO_FALLBACK: return "fallback";
+            case HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER: return "retry handover";
+            case HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL: return "retry setup new one";
+            default: return Integer.toString(handoverFailureMode);
+        }
+    }
+
+    /**
      * Provides a convenient way to set the fields of a {@link DataCallResponse} when creating a new
      * instance.
      *
