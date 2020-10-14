@@ -48,6 +48,15 @@ public interface AlarmStore {
     ArrayList<Alarm> remove(Predicate<Alarm> whichAlarms);
 
     /**
+     * Gets the earliest alarm with the flag {@link android.app.AlarmManager#FLAG_WAKE_FROM_IDLE}
+     * based on {@link Alarm#getWhenElapsed()}.
+     *
+     * @return An alarm object matching the description above or {@code null} if no such alarm was
+     *         found.
+     */
+    Alarm getNextWakeFromIdleAlarm();
+
+    /**
      * Returns the total number of alarms in this store.
      */
     int size();
@@ -71,7 +80,7 @@ public interface AlarmStore {
     /**
      * Removes all alarms that are pending delivery at the given time.
      *
-     * @param nowElapsed    The time at which delivery eligibility is evaluated.
+     * @param nowElapsed The time at which delivery eligibility is evaluated.
      * @return The list of alarms pending at the given time.
      */
     ArrayList<Alarm> removePendingAlarms(long nowElapsed);
@@ -82,7 +91,7 @@ public interface AlarmStore {
      *
      * @return {@code true} if any of the alarm deliveries changed due to this call.
      */
-    boolean recalculateAlarmDeliveries(AlarmDeliveryCalculator deliveryCalculator);
+    boolean updateAlarmDeliveries(AlarmDeliveryCalculator deliveryCalculator);
 
     /**
      * Returns all the alarms in the form of a list.
@@ -97,6 +106,7 @@ public interface AlarmStore {
      * Primary useful for debugging. Can be called from the
      * {@link android.os.Binder#dump(FileDescriptor PrintWriter, String[]) dump} method of the
      * caller.
+     *
      * @param ipw        The {@link IndentingPrintWriter} to write to.
      * @param nowElapsed the time when the dump is requested in the
      *                   {@link SystemClock#elapsedRealtime()
@@ -112,7 +122,7 @@ public interface AlarmStore {
 
     /**
      * A functional interface used to update the alarm. Used to describe the update in
-     * {@link #recalculateAlarmDeliveries(AlarmDeliveryCalculator)}
+     * {@link #updateAlarmDeliveries(AlarmDeliveryCalculator)}
      */
     @FunctionalInterface
     interface AlarmDeliveryCalculator {
@@ -125,3 +135,4 @@ public interface AlarmStore {
         boolean updateAlarmDelivery(Alarm a);
     }
 }
+
