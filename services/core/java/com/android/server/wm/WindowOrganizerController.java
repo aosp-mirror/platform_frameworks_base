@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
@@ -117,7 +116,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     @Override
     public IBinder startTransition(int type, @Nullable IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
-        enforceStackPermission("startTransition()");
+        enforceTaskPermission("startTransition()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -144,7 +143,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     public int finishTransition(@NonNull IBinder transitionToken,
             @Nullable WindowContainerTransaction t,
             @Nullable IWindowContainerTransactionCallback callback) {
-        enforceStackPermission("finishTransition()");
+        enforceTaskPermission("finishTransition()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -168,7 +167,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private int applyTransaction(@NonNull WindowContainerTransaction t,
             @Nullable IWindowContainerTransactionCallback callback,
             @Nullable Transition transition) {
-        enforceStackPermission("applySyncTransaction()");
+        enforceTaskPermission("applySyncTransaction()");
         int syncId = -1;
         if (t == null) {
             throw new IllegalArgumentException(
@@ -491,13 +490,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     @Override
     public ITaskOrganizerController getTaskOrganizerController() {
-        enforceStackPermission("getTaskOrganizerController()");
+        enforceTaskPermission("getTaskOrganizerController()");
         return mTaskOrganizerController;
     }
 
     @Override
     public IDisplayAreaOrganizerController getDisplayAreaOrganizerController() {
-        enforceStackPermission("getDisplayAreaOrganizerController()");
+        enforceTaskPermission("getDisplayAreaOrganizerController()");
         return mDisplayAreaOrganizerController;
     }
 
@@ -573,7 +572,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     @Override
     public void registerTransitionPlayer(ITransitionPlayer player) {
-        enforceStackPermission("registerTransitionPlayer()");
+        enforceTaskPermission("registerTransitionPlayer()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -584,7 +583,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    private void enforceStackPermission(String func) {
-        mService.mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, func);
+    private void enforceTaskPermission(String func) {
+        mService.enforceTaskPermission(func);
     }
 }

@@ -430,7 +430,7 @@ public class LockTaskController {
             // instead of the app calling startLockTaskMode. In this case
             // {@link Task.mLockTaskUid} will be 0, so we compare the callingUid to the
             // {@link Task.effectiveUid} instead. Also caller with
-            // {@link MANAGE_ACTIVITY_STACKS} can stop any lock task.
+            // {@link MANAGE_ACTIVITY_TASKS} can stop any lock task.
             if (callingUid != task.mLockTaskUid
                     && (task.mLockTaskUid != 0 || callingUid != task.effectiveUid)) {
                 throw new SecurityException("Invalid uid, expected " + task.mLockTaskUid

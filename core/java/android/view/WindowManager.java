@@ -2154,7 +2154,7 @@ public interface WindowManager extends ViewManager {
          * {@link DragEvent#ACTION_DROP}) will be relinquished to the window.
          * @hide
          */
-        @RequiresPermission(permission.MANAGE_ACTIVITY_STACKS)
+        @RequiresPermission(permission.MANAGE_ACTIVITY_TASKS)
         public static final int PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP = 0x80000000;
 
         /**
