@@ -438,6 +438,28 @@ public class DisplayAreaTest {
                 area.getOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR));
     }
 
+    @Test
+    public void testSetIgnoreOrientationRequest() {
+        final DisplayArea.Tokens area = new DisplayArea.Tokens(mWms, ABOVE_TASKS, "test");
+        final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
+        spyOn(token);
+        doReturn(mock(DisplayContent.class)).when(token).getDisplayContent();
+        doNothing().when(token).setParent(any());
+        final WindowState win = createWindowState(token);
+        spyOn(win);
+        doNothing().when(win).setParent(any());
+        win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        token.addChild(win, 0);
+        area.addChild(token);
+        doReturn(true).when(win).isVisible();
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, area.getOrientation());
+
+        area.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSET, area.getOrientation());
+    }
+
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
         private TestDisplayArea(WindowManagerService wms, Rect bounds) {
             super(wms, ANY, "half display area");

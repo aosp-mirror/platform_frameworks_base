@@ -28,8 +28,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -2347,6 +2347,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     int getOrientation() {
         mLastOrientationSource = null;
+        if (mIgnoreOrientationRequest) {
+            // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "Display id=%d is ignoring all orientation requests, return %d",
+                    mDisplayId, SCREEN_ORIENTATION_UNSPECIFIED);
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
 
         if (mWmService.mDisplayFrozen) {
             if (mWmService.mPolicy.isKeyguardLocked()) {
@@ -2363,19 +2370,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         final int orientation = super.getOrientation();
-        if (orientation != SCREEN_ORIENTATION_UNSET && orientation != SCREEN_ORIENTATION_BEHIND) {
+        if (orientation == SCREEN_ORIENTATION_UNSET) {
+            // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
             ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "App is requesting an orientation, return %d for display id=%d",
-                    orientation, mDisplayId);
-            return orientation;
+                    "No app or window is requesting an orientation, return %d for display id=%d",
+                    SCREEN_ORIENTATION_UNSPECIFIED, mDisplayId);
+            return SCREEN_ORIENTATION_UNSPECIFIED;
         }
 
-        ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "No app is requesting an orientation, return %d for display id=%d",
-                getLastOrientation(), mDisplayId);
-        // The next app has not been requested to be visible, so we keep the current orientation
-        // to prevent freezing/unfreezing the display too early.
-        return getLastOrientation();
+        return orientation;
     }
 
     void updateDisplayInfo() {
@@ -4243,6 +4246,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         int getOrientation(int candidate) {
+            if (mIgnoreOrientationRequest) {
+                return SCREEN_ORIENTATION_UNSET;
+            }
+
             // IME does not participate in orientation.
             return candidate;
         }
