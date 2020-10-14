@@ -17,10 +17,15 @@
 package android.telephony.ims.aidl;
 
 import android.net.Uri;
+import android.telephony.ims.DelegateRequest;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
 import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
-import android.telephony.ims.aidl.IImsRegistrationCallback;
+import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
+import android.telephony.ims.aidl.ISipDelegate;
+import android.telephony.ims.aidl.ISipDelegateMessageCallback;
+import android.telephony.ims.aidl.ISipDelegateConnectionStateCallback;
 
 import com.android.ims.ImsFeatureContainer;
 import com.android.ims.internal.IImsServiceFeatureCallback;
@@ -55,6 +60,10 @@ interface IImsRcsController {
 
     // SipDelegateManager
     boolean isSipDelegateSupported(int subId);
+    void createSipDelegate(int subId, in DelegateRequest request,
+            ISipDelegateConnectionStateCallback delegateState,
+            ISipDelegateMessageCallback delegateMessage);
+    void destroySipDelegate(int subId, ISipDelegate connection, int reason);
 
     // Internal commands that should not be made public
     void registerRcsFeatureCallback(int slotId, in IImsServiceFeatureCallback callback);

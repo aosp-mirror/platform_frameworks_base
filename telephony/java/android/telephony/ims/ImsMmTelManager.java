@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.BinderCacheManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -213,6 +214,7 @@ public class ImsMmTelManager implements RegistrationManager {
     }
 
     private final int mSubId;
+    private final BinderCacheManager<ITelephony> mBinderCache;
 
     /**
      * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
@@ -242,7 +244,8 @@ public class ImsMmTelManager implements RegistrationManager {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
 
-        return new ImsMmTelManager(subId);
+        return new ImsMmTelManager(subId, new BinderCacheManager<>(
+                ImsMmTelManager::getITelephonyInterface));
     }
 
     /**
@@ -250,8 +253,9 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @VisibleForTesting
-    public ImsMmTelManager(int subId) {
+    public ImsMmTelManager(int subId, BinderCacheManager<ITelephony> binderCache) {
         mSubId = subId;
+        mBinderCache = binderCache;
     }
 
     /**
@@ -1367,7 +1371,11 @@ public class ImsMmTelManager implements RegistrationManager {
         }
     }
 
-    private static ITelephony getITelephony() {
+    private ITelephony getITelephony() {
+        return mBinderCache.getBinder();
+    }
+
+    private static ITelephony getITelephonyInterface() {
         ITelephony binder = ITelephony.Stub.asInterface(
                 TelephonyFrameworkInitializer
                         .getTelephonyServiceManager()

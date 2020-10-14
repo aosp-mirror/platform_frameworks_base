@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.BinderCacheManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -152,14 +153,17 @@ public class ImsRcsManager {
 
     private final int mSubId;
     private final Context mContext;
+    private final BinderCacheManager<IImsRcsController> mBinderCache;
 
     /**
      * Use {@link ImsManager#getImsRcsManager(int)} to create an instance of this class.
      * @hide
      */
-    public ImsRcsManager(Context context, int subId) {
+    public ImsRcsManager(Context context, int subId,
+            BinderCacheManager<IImsRcsController> binderCache) {
         mSubId = subId;
         mContext = context;
+        mBinderCache = binderCache;
     }
 
     /**
