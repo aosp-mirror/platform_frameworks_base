@@ -258,7 +258,10 @@ public class ContextHubService extends IContextHubService.Stub {
      * @return the IContextHubWrapper interface
      */
     private IContextHubWrapper getContextHubWrapper() {
-        IContextHubWrapper wrapper = IContextHubWrapper.maybeConnectTo1_1();
+        IContextHubWrapper wrapper = IContextHubWrapper.maybeConnectTo1_2();
+        if (wrapper == null) {
+            wrapper = IContextHubWrapper.maybeConnectTo1_1();
+        }
         if (wrapper == null) {
             wrapper = IContextHubWrapper.maybeConnectTo1_0();
         }

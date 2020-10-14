@@ -68,6 +68,25 @@ public abstract class IContextHubWrapper {
     }
 
     /**
+     * Attempts to connect to the Contexthub HAL 1.2 service, if it exists.
+     *
+     * @return A valid IContextHubWrapper if the connection was successful, null otherwise.
+     */
+    @Nullable
+    public static IContextHubWrapper maybeConnectTo1_2() {
+        android.hardware.contexthub.V1_2.IContexthub proxy = null;
+        try {
+            proxy = android.hardware.contexthub.V1_2.IContexthub.getService(true /* retry */);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while attaching to Context Hub HAL proxy", e);
+        } catch (NoSuchElementException e) {
+            Log.i(TAG, "Context Hub HAL service not found");
+        }
+
+        return (proxy == null) ? null : new ContextHubWrapperV1_2(proxy);
+    }
+
+    /**
      * @return A valid instance of Contexthub HAL 1.0.
      */
     public abstract android.hardware.contexthub.V1_0.IContexthub getHub();
@@ -84,6 +103,19 @@ public abstract class IContextHubWrapper {
      */
     public abstract void onLocationSettingChanged(boolean enabled);
 
+    /**
+     * @return True if this version of the Contexthub HAL supports WiFi availability setting
+     * notifications.
+     */
+    public abstract boolean supportsWifiSettingNotifications();
+
+    /**
+     * Notifies the Contexthub implementation of a user WiFi availability setting change.
+     *
+     * @param enabled true if the WiFi availability setting has been enabled.
+     */
+    public abstract void onWifiSettingChanged(boolean enabled);
+
     private static class ContextHubWrapperV1_0 extends IContextHubWrapper {
         private android.hardware.contexthub.V1_0.IContexthub mHub;
 
@@ -99,7 +131,13 @@ public abstract class IContextHubWrapper {
             return false;
         }
 
+        public boolean supportsWifiSettingNotifications() {
+            return false;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {}
+
+        public void onWifiSettingChanged(boolean enabled) {}
     }
 
     private static class ContextHubWrapperV1_1 extends IContextHubWrapper {
@@ -117,11 +155,55 @@ public abstract class IContextHubWrapper {
             return true;
         }
 
+        public boolean supportsWifiSettingNotifications() {
+            return false;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             try {
                 mHub.onSettingChanged(Setting.LOCATION,
                         enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
             } catch  (RemoteException e) {
+                Log.e(TAG, "Failed to send setting change to Contexthub", e);
+            }
+        }
+
+        public void onWifiSettingChanged(boolean enabled) {}
+    }
+
+    private static class ContextHubWrapperV1_2 extends IContextHubWrapper {
+        private android.hardware.contexthub.V1_2.IContexthub mHub;
+
+        ContextHubWrapperV1_2(android.hardware.contexthub.V1_2.IContexthub hub) {
+            mHub = hub;
+        }
+
+        public android.hardware.contexthub.V1_0.IContexthub getHub() {
+            return mHub;
+        }
+
+        public boolean supportsLocationSettingNotifications() {
+            return true;
+        }
+
+        public boolean supportsWifiSettingNotifications() {
+            return true;
+        }
+
+        public void onLocationSettingChanged(boolean enabled) {
+            sendSettingChanged(Setting.LOCATION,
+                    enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+        }
+
+        public void onWifiSettingChanged(boolean enabled) {
+            sendSettingChanged(android.hardware.contexthub.V1_2.Setting.WIFI_AVAILABLE,
+                    enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+        }
+
+        private void sendSettingChanged(byte setting, byte newValue) {
+            try {
+                mHub.onSettingChanged_1_2(setting, newValue);
+            } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send setting change to Contexthub", e);
             }
         }
