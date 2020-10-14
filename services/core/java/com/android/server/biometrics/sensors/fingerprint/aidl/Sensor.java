@@ -100,6 +100,7 @@ class Sensor {
         return mSensorProperties;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean hasSessionForUser(int userId) {
         return mCurrentSession != null && mCurrentSession.mUserId == userId;
     }

@@ -43,7 +43,7 @@ import java.util.ArrayList;
  * Fingerprint-specific authentication client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-public class FingerprintAuthenticationClient extends AuthenticationClient<ISession> implements
+class FingerprintAuthenticationClient extends AuthenticationClient<ISession> implements
         Udfps, LockoutConsumer {
     private static final String TAG = "FingerprintAuthenticationClient";
 
@@ -51,7 +51,7 @@ public class FingerprintAuthenticationClient extends AuthenticationClient<ISessi
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    public FingerprintAuthenticationClient(@NonNull Context context,
+    FingerprintAuthenticationClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,

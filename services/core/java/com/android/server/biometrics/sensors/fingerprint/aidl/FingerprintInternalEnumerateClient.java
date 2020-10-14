@@ -17,7 +17,6 @@
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.ISession;
@@ -27,34 +26,31 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
-import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
-import java.util.Map;
+import java.util.List;
 
 /**
- * Fingerprint-specific removal client supporting the
- * {@link android.hardware.biometrics.fingerprint.IFingerprint} interface.
+ * Fingerprint-specific internal client supporting the
+ * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
-    private static final String TAG = "FingerprintRemovalClient";
+class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISession> {
+    private static final String TAG = "FingerprintInternalEnumerateClient";
 
-    FingerprintRemovalClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
-            @Nullable ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
-            @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
-                authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
+    protected FingerprintInternalEnumerateClient(@NonNull Context context,
+            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
+            @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
+        super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            final int[] ids = new int[] {mBiometricId};
-            getFreshDaemon().removeEnrollments(mSequentialId, ids);
+            getFreshDaemon().enumerateEnrollments(mSequentialId);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting remove", e);
+            Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);
         }
     }

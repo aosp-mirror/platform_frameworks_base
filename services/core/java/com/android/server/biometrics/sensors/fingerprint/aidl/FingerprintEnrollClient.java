@@ -38,7 +38,7 @@ import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
-public class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
+class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     private static final String TAG = "FingerprintEnrollClient";
 
@@ -46,7 +46,7 @@ public class FingerprintEnrollClient extends EnrollClient<ISession> implements U
     @Nullable private ICancellationSignal mCancellationSignal;
     private final int mMaxTemplatesPerUser;
 
-    public FingerprintEnrollClient(@NonNull Context context,
+    FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
