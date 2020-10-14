@@ -285,7 +285,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                        opPackageName, FingerprintUtils.getInstance(), sensorId,
+                        opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                         mUdfpsOverlayController, maxTemplatesPerUser);
                 scheduleForSensor(sensorId, client, new ClientMonitor.Callback() {
                     @Override
@@ -380,7 +380,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), fingerId, userId,
-                        opPackageName, FingerprintUtils.getInstance(), sensorId,
+                        opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {

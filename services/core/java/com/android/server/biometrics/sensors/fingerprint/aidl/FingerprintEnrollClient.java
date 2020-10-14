@@ -61,7 +61,7 @@ public class FingerprintEnrollClient extends EnrollClient<ISession> implements U
 
     @Override
     protected boolean hasReachedEnrollmentLimit() {
-        return FingerprintUtils.getInstance()
+        return FingerprintUtils.getInstance(getSensorId())
                 .getBiometricsForUser(getContext(), getTargetUserId()).size()
                 >= mMaxTemplatesPerUser;
     }
