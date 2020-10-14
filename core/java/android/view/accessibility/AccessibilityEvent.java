@@ -199,7 +199,7 @@ import java.util.List;
  * <b>Window state changed</b> - represents the event of a change to a section of
  * the user interface that is visually distinct. Should be sent from either the
  * root view of a window or from a view that is marked as a pane
- * {@link android.view.View#setAccessibilityPaneTitle(CharSequence)}. Not that changes
+ * {@link android.view.View#setAccessibilityPaneTitle(CharSequence)}. Note that changes
  * to true windows are represented by {@link #TYPE_WINDOWS_CHANGED}.</br>
  * <em>Type:</em> {@link #TYPE_WINDOW_STATE_CHANGED}</br>
  * <em>Properties:</em></br>
