@@ -1386,6 +1386,7 @@ public final class SystemServiceRegistry {
                 case Context.CONTENT_CAPTURE_MANAGER_SERVICE:
                 case Context.APP_PREDICTION_SERVICE:
                 case Context.INCREMENTAL_SERVICE:
+                case Context.ETHERNET_SERVICE:
                     return null;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);
