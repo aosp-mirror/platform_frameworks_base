@@ -86,6 +86,13 @@ public interface StatusBarManagerInternal {
     void toggleSplitScreen();
     void appTransitionFinished(int displayId);
 
+    /**
+     * Notifies the status bar that a Emergency Action launch gesture has been detected.
+     *
+     * TODO (b/169175022) Update method name and docs when feature name is locked.
+     */
+    void onEmergencyActionLaunchGestureDetected();
+
     void toggleRecentApps();
 
     void setCurrentUser(int newUserId);
