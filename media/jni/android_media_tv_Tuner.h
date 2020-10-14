@@ -19,6 +19,7 @@
 
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
+#include <android/hardware/tv/tuner/1.1/IFrontend.h>
 #include <android/hardware/tv/tuner/1.1/ITuner.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
@@ -207,7 +208,9 @@ struct JTuner : public RefBase {
     jobject getAvSyncHwId(sp<Filter> filter);
     jobject getAvSyncTime(jint id);
     int connectCiCam(jint id);
+    int linkCiCam(jint id);
     int disconnectCiCam();
+    int unlinkCiCam(jint id);
     jobject getFrontendIds();
     jobject openFrontendById(int id);
     jint closeFrontendById(int id);
@@ -245,6 +248,7 @@ private:
     static int mTunerVersion;
     hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
+    sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFe_1_1;
     int mFeId;
     hidl_vec<LnbId> mLnbIds;
     sp<ILnb> mLnb;

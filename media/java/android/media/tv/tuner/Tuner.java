@@ -122,6 +122,16 @@ public class Tuner implements AutoCloseable  {
             android.hardware.tv.tuner.V1_1.Constants.Constant
                     .INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM;
     /**
+     * Invalid local transport stream id.
+     *
+     * <p>Returned by {@link #linkFrontendToCiCam(int)} when the requested failed
+     * or the hal implementation does not support the operation.
+     *
+     * @see #linkFrontendToCiCam(int)
+     */
+    public static final int INVALID_LTS_ID =
+            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_LTS_ID;
+    /**
      * Invalid 64-bit filter ID.
      */
     public static final long INVALID_FILTER_ID_64BIT =
@@ -475,7 +485,9 @@ public class Tuner implements AutoCloseable  {
     private native Integer nativeGetAvSyncHwId(Filter filter);
     private native Long nativeGetAvSyncTime(int avSyncId);
     private native int nativeConnectCiCam(int ciCamId);
+    private native int nativeLinkCiCam(int ciCamId);
     private native int nativeDisconnectCiCam();
+    private native int nativeUnlinkCiCam(int ciCamId);
     private native FrontendInfo nativeGetFrontendInfo(int id);
     private native Filter nativeOpenFilter(int type, int subType, long bufferSize);
     private native TimeFilter nativeOpenTimeFilter();
@@ -798,6 +810,33 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
+     * Link Conditional Access Modules (CAM) Frontend to support Common Interface (CI) by-pass mode.
+     *
+     * <p>It is used by the client to link CI-CAM to a Frontend. CI by-pass mode requires that
+     * the CICAM also receives the TS concurrently from the frontend when the Demux is receiving
+     * the TS directly from the frontend.
+     *
+     * <p>Use {@link #unlinkFrontendToCicam(int)} to disconnect.
+     *
+     * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+     * no-op and return {@link INVALID_LTS_ID}. Use {@link TunerVersionChecker.getTunerVersion()} to
+     * check the version.
+     *
+     * @param ciCamId specify CI-CAM Id to link.
+     * @return Local transport stream id when connection is successfully established. Failed
+     *         operation returns {@link INVALID_LTS_ID}.
+     */
+    public int linkFrontendToCiCam(int ciCamId) {
+        if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
+                "linkFrontendToCiCam")) {
+            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+                return nativeLinkCiCam(ciCamId);
+            }
+        }
+        return INVALID_LTS_ID;
+    }
+
+    /**
      * Disconnects Conditional Access Modules (CAM)
      *
      * <p>The demux will use the output from the frontend as the input after this call.
@@ -808,6 +847,28 @@ public class Tuner implements AutoCloseable  {
     public int disconnectCiCam() {
         if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
             return nativeDisconnectCiCam();
+        }
+        return RESULT_UNAVAILABLE;
+    }
+
+    /**
+     * Unlink Conditional Access Modules (CAM) Frontend.
+     *
+     * <p>It is used by the client to unlink CI-CAM to a Frontend.
+     *
+     * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+     * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     *
+     * @param ciCamId specify CI-CAM Id to unlink.
+     * @return result status of the operation.
+     */
+    @Result
+    public int unlinkFrontendToCiCam(int ciCamId) {
+        if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
+                "unlinkFrontendToCiCam")) {
+            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+                return nativeUnlinkCiCam(ciCamId);
+            }
         }
         return RESULT_UNAVAILABLE;
     }
