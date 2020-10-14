@@ -13,6 +13,7 @@ LIBJNIGRAPHICS {
     AImageDecoder_setTargetSize; # introduced=30
     AImageDecoder_computeSampledSize; # introduced=30
     AImageDecoder_setCrop; # introduced=30
+    AImageDecoder_isAnimated; # introduced=31
     AImageDecoderHeaderInfo_getWidth; # introduced=30
     AImageDecoderHeaderInfo_getHeight; # introduced=30
     AImageDecoderHeaderInfo_getMimeType; # introduced=30

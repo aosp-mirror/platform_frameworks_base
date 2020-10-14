@@ -80,7 +80,7 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
         val background2 = processor.processArtwork(context, artwork)!!
         // THEN the two bitmaps are the same
         // Note: This is currently broken and trying to use caching causes issues
-        assertThat(background1).isNotSameAs(background2)
+        assertThat(background1).isNotSameInstanceAs(background2)
     }
 
     @Test

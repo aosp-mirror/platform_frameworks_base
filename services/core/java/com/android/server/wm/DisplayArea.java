@@ -370,6 +370,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 Comparator.comparingInt(WindowToken::getWindowLayerFromType);
 
         private final Predicate<WindowState> mGetOrientingWindow = w -> {
+            if (!w.isVisible() || !w.mLegacyPolicyVisibilityAfterAnim) {
+                return false;
+            }
             final WindowManagerPolicy policy = mWmService.mPolicy;
             if (policy.isKeyguardHostWindow(w.mAttrs)) {
                 if (mWmService.mKeyguardGoingAway) {
@@ -405,6 +408,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
         @Override
         int getOrientation(int candidate) {
+            mLastOrientationSource = null;
             // Find a window requesting orientation.
             final WindowState win = getWindow(mGetOrientingWindow);
 

@@ -47,6 +47,7 @@ public class ConfigurationInternalTest {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(true)
+                .setGeoDetectionSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)
@@ -108,6 +109,7 @@ public class ConfigurationInternalTest {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(false)
                 .setAutoDetectionSupported(true)
+                .setGeoDetectionSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)
@@ -169,6 +171,7 @@ public class ConfigurationInternalTest {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(false)
+                .setGeoDetectionSupported(false)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)
@@ -210,6 +213,69 @@ public class ConfigurationInternalTest {
 
             TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
             assertEquals(CAPABILITY_NOT_SUPPORTED,
+                    capabilities.getConfigureAutoDetectionEnabledCapability());
+            assertEquals(CAPABILITY_NOT_SUPPORTED,
+                    capabilities.getConfigureGeoDetectionEnabledCapability());
+            assertEquals(CAPABILITY_POSSESSED, capabilities.getSuggestManualTimeZoneCapability());
+
+            TimeZoneConfiguration configuration = capabilitiesAndConfig.getConfiguration();
+            assertFalse(configuration.isAutoDetectionEnabled());
+            assertTrue(configuration.isGeoDetectionEnabled());
+        }
+    }
+
+    /**
+     * Tests when {@link ConfigurationInternal#isAutoDetectionSupported()} is true, but
+     * {@link ConfigurationInternal#isGeoDetectionSupported()} is false.
+     */
+    @Test
+    public void test_geoDetectNotSupported() {
+        ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+                .setUserConfigAllowed(true)
+                .setAutoDetectionSupported(true)
+                .setGeoDetectionSupported(false)
+                .setAutoDetectionEnabled(true)
+                .setLocationEnabled(true)
+                .setGeoDetectionEnabled(true)
+                .build();
+        {
+            ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
+                    .setAutoDetectionEnabled(true)
+                    .build();
+            assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
+            assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
+            assertTrue(autoOnConfig.getAutoDetectionEnabledBehavior());
+            assertFalse(autoOnConfig.getGeoDetectionEnabledBehavior());
+
+            TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
+                    autoOnConfig.createCapabilitiesAndConfig();
+
+            TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+            assertEquals(CAPABILITY_POSSESSED,
+                    capabilities.getConfigureAutoDetectionEnabledCapability());
+            assertEquals(CAPABILITY_NOT_SUPPORTED,
+                    capabilities.getConfigureGeoDetectionEnabledCapability());
+            assertEquals(CAPABILITY_NOT_APPLICABLE,
+                    capabilities.getSuggestManualTimeZoneCapability());
+
+            TimeZoneConfiguration configuration = capabilitiesAndConfig.getConfiguration();
+            assertTrue(configuration.isAutoDetectionEnabled());
+            assertTrue(configuration.isGeoDetectionEnabled());
+        }
+        {
+            ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
+                    .setAutoDetectionEnabled(false)
+                    .build();
+            assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
+            assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
+            assertFalse(autoOffConfig.getAutoDetectionEnabledBehavior());
+            assertFalse(autoOffConfig.getGeoDetectionEnabledBehavior());
+
+            TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
+                    autoOffConfig.createCapabilitiesAndConfig();
+
+            TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+            assertEquals(CAPABILITY_POSSESSED,
                     capabilities.getConfigureAutoDetectionEnabledCapability());
             assertEquals(CAPABILITY_NOT_SUPPORTED,
                     capabilities.getConfigureGeoDetectionEnabledCapability());

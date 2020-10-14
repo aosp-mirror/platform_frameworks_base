@@ -104,6 +104,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private boolean mSupportsDarkText;
     private int[] mColorPalette;
 
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
+
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -126,6 +128,35 @@ public class KeyguardClockSwitch extends RelativeLayout {
      */
     public boolean hasCustomClock() {
         return mClockPlugin != null;
+    }
+
+    /**
+      * Update lock screen mode for testing different layouts
+      */
+    public void updateLockScreenMode(int mode) {
+        mLockScreenMode = mode;
+        RelativeLayout.LayoutParams statusAreaLP = (RelativeLayout.LayoutParams)
+                mKeyguardStatusArea.getLayoutParams();
+        RelativeLayout.LayoutParams clockLP = (RelativeLayout.LayoutParams)
+                mSmallClockFrame.getLayoutParams();
+
+        if (mode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+            statusAreaLP.removeRule(RelativeLayout.BELOW);
+            statusAreaLP.addRule(RelativeLayout.LEFT_OF, R.id.clock_view);
+            statusAreaLP.addRule(RelativeLayout.ALIGN_PARENT_START);
+
+            clockLP.addRule(RelativeLayout.ALIGN_PARENT_END);
+            clockLP.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        } else {
+            statusAreaLP.removeRule(RelativeLayout.LEFT_OF);
+            statusAreaLP.removeRule(RelativeLayout.ALIGN_PARENT_START);
+            statusAreaLP.addRule(RelativeLayout.BELOW, R.id.clock_view);
+
+            clockLP.removeRule(RelativeLayout.ALIGN_PARENT_END);
+            clockLP.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+
+        requestLayout();
     }
 
     @Override
@@ -363,6 +394,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * these cases.
      */
     void setKeyguardShowingHeader(boolean hasHeader) {
+        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
+            hasHeader = false;
+        }
+
         if (mShowingHeader == hasHeader) {
             return;
         }

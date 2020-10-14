@@ -19,21 +19,26 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.dsl.flicker
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.Flicker
+import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.openQuickstep
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -45,61 +50,69 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeWindowToHomeTest(
-    rotationName: String,
-    rotation: Int
-) : NonRotationTestBase(rotationName, rotation) {
-    open val testApp = ImeAppHelper(instrumentation)
+class CloseImeWindowToHomeTest(
+    testName: String,
+    flickerSpec: Flicker
+) : FlickerTestRunner(testName, flickerSpec) {
 
-    @Test
-    open fun test() {
-        flicker(instrumentation) {
-            withTag { buildTestTag("imeToHome", testApp, rotation) }
-            repeat { 1 }
-            setup {
-                test {
-                    device.wakeUpAndGoToHomeScreen()
-                    this.setRotation(rotation)
-                    testApp.open()
-                }
-                eachRun {
-                    device.openQuickstep()
-                    device.reopenAppFromOverview()
-                    this.setRotation(rotation)
-                    testApp.openIME(device)
-                }
-            }
-            transitions {
-                device.pressHome()
-                device.waitForIdle()
-            }
-            teardown {
-                eachRun {
-                    device.pressHome()
-                }
-                test {
-                    testApp.exit()
-                    this.setRotation(Surface.ROTATION_0)
-                }
-            }
-            assertions {
-                windowManagerTrace {
-                    navBarWindowIsAlwaysVisible()
-                    statusBarWindowIsAlwaysVisible()
-                    imeWindowBecomesInvisible()
-                    imeAppWindowBecomesInvisible(testApp)
-                }
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): List<Array<Any>> {
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val testApp = ImeAppHelper(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation)
+                .buildTest { configuration ->
+                    withTestName { buildTestTag("imeToHome", testApp, configuration) }
+                    repeat { configuration.repetitions }
+                    setup {
+                        test {
+                            device.wakeUpAndGoToHomeScreen()
+                            this.setRotation(configuration.startRotation)
+                            testApp.open()
+                        }
+                        eachRun {
+                            device.openQuickstep()
+                            device.reopenAppFromOverview()
+                            this.setRotation(configuration.startRotation)
+                            testApp.openIME(device)
+                        }
+                    }
+                    transitions {
+                        device.pressHome()
+                        device.waitForIdle()
+                    }
+                    teardown {
+                        eachRun {
+                            device.pressHome()
+                        }
+                        test {
+                            testApp.exit()
+                            this.setRotation(Surface.ROTATION_0)
+                        }
+                    }
+                    assertions {
+                        windowManagerTrace {
+                            navBarWindowIsAlwaysVisible()
+                            statusBarWindowIsAlwaysVisible()
+                            imeWindowBecomesInvisible()
+                            imeAppWindowBecomesInvisible(testApp)
+                        }
 
-                layersTrace {
-                    navBarLayerIsAlwaysVisible(bugId = 140855415)
-                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
-                    noUncoveredRegions(rotation, Surface.ROTATION_0, allStates = false)
-                    navBarLayerRotatesAndScales(rotation, Surface.ROTATION_0, bugId = 140855415)
-                    statusBarLayerRotatesScales(rotation, Surface.ROTATION_0)
-                    imeLayerBecomesInvisible(bugId = 153739621)
-                    imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
+                        layersTrace {
+                            navBarLayerIsAlwaysVisible(bugId = 140855415)
+                            statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                            noUncoveredRegions(configuration.startRotation,
+                                Surface.ROTATION_0, allStates = false)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                Surface.ROTATION_0, bugId = 140855415)
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                Surface.ROTATION_0)
+                            imeLayerBecomesInvisible(bugId = 153739621)
+                            imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
+                        }
+                    }
                 }
-            }
         }
     }
 }

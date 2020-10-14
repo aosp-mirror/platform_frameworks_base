@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util
+package com.android.systemui.bubbles
 
 import android.graphics.PointF
 import android.os.Handler

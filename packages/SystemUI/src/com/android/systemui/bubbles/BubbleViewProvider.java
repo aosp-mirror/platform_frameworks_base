@@ -48,5 +48,5 @@ interface BubbleViewProvider {
 
     boolean showDot();
 
-    int getDisplayId();
+    int getTaskId();
 }

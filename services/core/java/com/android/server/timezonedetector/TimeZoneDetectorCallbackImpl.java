@@ -119,13 +119,13 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
 
     @Override
     public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
-        boolean geoDetectionEnabled = mGeoDetectionFeatureEnabled && isGeoDetectionEnabled(userId);
         return new ConfigurationInternal.Builder(userId)
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setAutoDetectionSupported(isAutoDetectionSupported())
+                .setGeoDetectionSupported(isGeoDetectionSupported())
                 .setAutoDetectionEnabled(isAutoDetectionEnabled())
                 .setLocationEnabled(isLocationEnabled(userId))
-                .setGeoDetectionEnabled(geoDetectionEnabled)
+                .setGeoDetectionEnabled(isGeoDetectionEnabled(userId))
                 .build();
     }
 
@@ -170,7 +170,11 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
             final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
             setAutoDetectionEnabled(autoDetectionEnabled);
 
-            if (mGeoDetectionFeatureEnabled) {
+            // Avoid writing the geo detection enabled setting for devices that do not support geo
+            // time zone detection: if we wrote it down then we'd set the value explicitly, which
+            // would prevent detecting "default" later. That might influence what happens on later
+            // releases that support geo detection on the same hardware.
+            if (isGeoDetectionSupported()) {
                 final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
                 setGeoDetectionEnabled(userId, geoTzDetectionEnabled);
             }
@@ -183,7 +187,11 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     private boolean isAutoDetectionSupported() {
-        return deviceHasTelephonyNetwork() || mGeoDetectionFeatureEnabled;
+        return deviceHasTelephonyNetwork() || isGeoDetectionSupported();
+    }
+
+    private boolean isGeoDetectionSupported() {
+        return mGeoDetectionFeatureEnabled;
     }
 
     private boolean isAutoDetectionEnabled() {
@@ -199,10 +207,10 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     private boolean isGeoDetectionEnabled(@UserIdInt int userId) {
-        final boolean locationEnabled = isLocationEnabled(userId);
+        final boolean geoDetectionEnabledByDefault = false;
         return Settings.Secure.getIntForUser(mCr,
                 Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
-                locationEnabled ? 1 : 0 /* defaultValue */, userId) != 0;
+                (geoDetectionEnabledByDefault ? 1 : 0) /* defaultValue */, userId) != 0;
     }
 
     private void setGeoDetectionEnabled(@UserIdInt int userId, boolean enabled) {

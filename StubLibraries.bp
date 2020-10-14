@@ -70,6 +70,7 @@ stubs_defaults {
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb.gadget-V1.0-java",
@@ -142,7 +143,6 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    jdiff_enabled: true,
 }
 
 droidstubs {
@@ -204,7 +204,6 @@ droidstubs {
             baseline_file: "api/system-lint-baseline.txt",
         },
     },
-    jdiff_enabled: true,
 }
 
 droidstubs {
@@ -236,7 +235,11 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
+    args: metalava_framework_docs_args
+        + " --show-annotation android.annotation.TestApi"
+        + " --show-for-stub-purposes-annotation android.annotation.SystemApi\\("
+        +     "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS"
+        + "\\)",
     check_api: {
         current: {
             api_file: "api/test-current.txt",
