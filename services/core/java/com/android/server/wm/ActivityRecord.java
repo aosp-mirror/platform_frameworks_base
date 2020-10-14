@@ -701,6 +701,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
 
+    // Tracking cookie for the launch of this activity and it's task.
+    IBinder mLaunchCookie;
+
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -1643,6 +1646,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mHandoverTaskDisplayArea = daToken != null
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
+            mLaunchCookie = options.getLaunchCookie();
         }
     }
 
@@ -3984,10 +3988,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mWmService.mH.obtainMessage(H.NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
             }
         }
-    }
-
-    ActivityOptions getOptionsForTargetActivityLocked() {
-        return pendingOptions != null ? pendingOptions.forTargetActivity() : null;
     }
 
     void clearOptionsLocked() {
