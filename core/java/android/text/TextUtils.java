@@ -2080,6 +2080,94 @@ public class TextUtils {
     }
 
     /**
+     * Simple alternative to {@link String#format} which purposefully supports
+     * only a small handful of substitutions to improve execution speed.
+     * Benchmarking reveals this optimized alternative performs 6.5x faster for
+     * a typical format string.
+     * <p>
+     * Below is a summary of the limited grammar supported by this method; if
+     * you need advanced features, please continue using {@link String#format}.
+     * <ul>
+     * <li>{@code %b} for {@code boolean}
+     * <li>{@code %c} for {@code char}
+     * <li>{@code %d} for {@code int} or {@code long}
+     * <li>{@code %f} for {@code float} or {@code double}
+     * <li>{@code %s} for {@code String}
+     * <li>{@code %x} for hex representation of {@code int} or {@code long}
+     * <li>{@code %%} for literal {@code %}
+     * </ul>
+     *
+     * @throws IllegalArgumentException if the format string or arguments don't
+     *             match the supported grammar described above.
+     * @hide
+     */
+    public static @NonNull String formatSimple(@NonNull String format, Object... args) {
+        final StringBuilder sb = new StringBuilder(format);
+        int j = 0;
+        for (int i = 0; i < sb.length(); ) {
+            if (sb.charAt(i) == '%') {
+                final String repl;
+                final char code = sb.charAt(i + 1);
+                switch (code) {
+                    case 'b': {
+                        if (j == args.length) {
+                            throw new IllegalArgumentException("Too few arguments");
+                        }
+                        final Object arg = args[j++];
+                        if (arg instanceof Boolean) {
+                            repl = Boolean.toString((boolean) arg);
+                        } else {
+                            repl = Boolean.toString(arg != null);
+                        }
+                        break;
+                    }
+                    case 'c':
+                    case 'd':
+                    case 'f':
+                    case 's': {
+                        if (j == args.length) {
+                            throw new IllegalArgumentException("Too few arguments");
+                        }
+                        final Object arg = args[j++];
+                        repl = String.valueOf(arg);
+                        break;
+                    }
+                    case 'x': {
+                        if (j == args.length) {
+                            throw new IllegalArgumentException("Too few arguments");
+                        }
+                        final Object arg = args[j++];
+                        if (arg instanceof Integer) {
+                            repl = Integer.toHexString((int) arg);
+                        } else if (arg instanceof Long) {
+                            repl = Long.toHexString((long) arg);
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Unsupported hex type " + arg.getClass());
+                        }
+                        break;
+                    }
+                    case '%': {
+                        repl = "%";
+                        break;
+                    }
+                    default: {
+                        throw new IllegalArgumentException("Unsupported format code " + code);
+                    }
+                }
+                sb.replace(i, i + 2, repl);
+                i += repl.length();
+            } else {
+                i++;
+            }
+        }
+        if (j != args.length) {
+            throw new IllegalArgumentException("Too many arguments");
+        }
+        return sb.toString();
+    }
+
+    /**
      * Returns whether or not the specified spanned text has a style span.
      * @hide
      */
