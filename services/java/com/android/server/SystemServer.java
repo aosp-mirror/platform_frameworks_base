@@ -1265,6 +1265,12 @@ public final class SystemServer implements Dumpable {
             inputManager = new InputManagerService(context);
             t.traceEnd();
 
+            if (!disableCameraService) {
+                t.traceBegin("StartCameraServiceProxy");
+                mSystemServiceManager.startService(CameraServiceProxy.class);
+                t.traceEnd();
+            }
+
             t.traceBegin("StartWindowManagerService");
             // WMS needs sensor service ready
             ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
@@ -2187,12 +2193,6 @@ public final class SystemServer implements Dumpable {
         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
             t.traceBegin("StartSliceManagerService");
             mSystemServiceManager.startService(SLICE_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
-        }
-
-        if (!disableCameraService) {
-            t.traceBegin("StartCameraServiceProxy");
-            mSystemServiceManager.startService(CameraServiceProxy.class);
             t.traceEnd();
         }
 
