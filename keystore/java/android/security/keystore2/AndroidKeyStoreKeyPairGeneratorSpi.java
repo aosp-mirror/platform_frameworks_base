@@ -16,58 +16,41 @@
 
 package android.security.keystore2;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
-import android.security.Credentials;
 import android.security.KeyPairGeneratorSpec;
-import android.security.KeyStore;
-import android.security.keymaster.KeyCharacteristics;
+import android.security.KeyStore2;
+import android.security.KeyStoreException;
+import android.security.KeyStoreSecurityLevel;
 import android.security.keymaster.KeymasterArguments;
-import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.ArrayUtils;
 import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.KeyProperties;
 import android.security.keystore.KeymasterUtils;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.StrongBoxUnavailableException;
-
-import com.android.org.bouncycastle.asn1.ASN1EncodableVector;
-import com.android.org.bouncycastle.asn1.ASN1InputStream;
-import com.android.org.bouncycastle.asn1.ASN1Integer;
-import com.android.org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import com.android.org.bouncycastle.asn1.DERBitString;
-import com.android.org.bouncycastle.asn1.DERNull;
-import com.android.org.bouncycastle.asn1.DERSequence;
-import com.android.org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import com.android.org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import com.android.org.bouncycastle.asn1.x509.Certificate;
-import com.android.org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import com.android.org.bouncycastle.asn1.x509.TBSCertificate;
-import com.android.org.bouncycastle.asn1.x509.Time;
-import com.android.org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
-import com.android.org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import com.android.org.bouncycastle.jce.X509Principal;
-import com.android.org.bouncycastle.jce.provider.X509CertificateObject;
-import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
+import android.system.keystore2.Domain;
+import android.system.keystore2.IKeystoreSecurityLevel;
+import android.system.keystore2.KeyDescriptor;
+import android.system.keystore2.KeyMetadata;
+import android.system.keystore2.KeyParameter;
+import android.system.keystore2.ResponseCode;
+import android.system.keystore2.SecurityLevel;
+import android.util.Log;
 
 import libcore.util.EmptyArray;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyPairGeneratorSpi;
-import java.security.PrivateKey;
 import java.security.ProviderException;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -76,7 +59,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -96,6 +78,7 @@ import java.util.Set;
  * @hide
  */
 public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
+    private static final String TAG = "AndroidKeyStoreKeyPairGeneratorSpi";
 
     public static class RSA extends AndroidKeyStoreKeyPairGeneratorSpi {
         public RSA() {
@@ -154,13 +137,12 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     private final int mOriginalKeymasterAlgorithm;
 
-    private KeyStore mKeyStore;
+    private KeyStore2 mKeyStore;
 
     private KeyGenParameterSpec mSpec;
 
     private String mEntryAlias;
     private int mEntryUid;
-    private boolean mEncryptionAtRestRequired;
     private @KeyProperties.KeyAlgorithmEnum String mJcaKeyAlgorithm;
     private int mKeymasterAlgorithm = -1;
     private int mKeySizeBits;
@@ -172,7 +154,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private int[] mKeymasterSignaturePaddings;
     private int[] mKeymasterDigests;
 
-    private BigInteger mRSAPublicExponent;
+    private Long mRSAPublicExponent;
 
     protected AndroidKeyStoreKeyPairGeneratorSpi(int keymasterAlgorithm) {
         mOriginalKeymasterAlgorithm = keymasterAlgorithm;
@@ -283,7 +265,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     specBuilder.setCertificateSerialNumber(legacySpec.getSerialNumber());
                     specBuilder.setCertificateNotBefore(legacySpec.getStartDate());
                     specBuilder.setCertificateNotAfter(legacySpec.getEndDate());
-                    encryptionAtRestRequired = legacySpec.isEncryptionRequired();
                     specBuilder.setUserAuthenticationRequired(false);
 
                     spec = specBuilder.build();
@@ -301,7 +282,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             mEntryUid = spec.getUid();
             mSpec = spec;
             mKeymasterAlgorithm = keymasterAlgorithm;
-            mEncryptionAtRestRequired = encryptionAtRestRequired;
             mKeySizeBits = spec.getKeySize();
             initAlgorithmSpecificParameters();
             if (mKeySizeBits == -1) {
@@ -355,7 +335,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
             mJcaKeyAlgorithm = jcaKeyAlgorithm;
             mRng = random;
-            mKeyStore = KeyStore.getInstance();
+            mKeyStore = KeyStore2.getInstance();
             success = true;
         } finally {
             if (!success) {
@@ -366,7 +346,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     private void resetAll() {
         mEntryAlias = null;
-        mEntryUid = KeyStore.UID_SELF;
+        mEntryUid = KeyProperties.NAMESPACE_APPLICATION;
         mJcaKeyAlgorithm = null;
         mKeymasterAlgorithm = -1;
         mKeymasterPurposes = null;
@@ -377,7 +357,6 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         mKeySizeBits = 0;
         mSpec = null;
         mRSAPublicExponent = null;
-        mEncryptionAtRestRequired = false;
         mRng = null;
         mKeyStore = null;
     }
@@ -409,12 +388,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     throw new InvalidAlgorithmParameterException(
                             "RSA public exponent must be positive: " + publicExponent);
                 }
-                if (publicExponent.compareTo(KeymasterArguments.UINT64_MAX_VALUE) > 0) {
+                if ((publicExponent.signum() == -1)
+                        || (publicExponent.compareTo(KeymasterArguments.UINT64_MAX_VALUE) > 0)) {
                     throw new InvalidAlgorithmParameterException(
                             "Unsupported RSA public exponent: " + publicExponent
                             + ". Maximum supported value: " + KeymasterArguments.UINT64_MAX_VALUE);
                 }
-                mRSAPublicExponent = publicExponent;
+                mRSAPublicExponent = publicExponent.longValue();
                 break;
             }
             case KeymasterDefs.KM_ALGORITHM_EC:
@@ -451,293 +431,184 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             throw new IllegalStateException("Not initialized");
         }
 
-        int flags = (mEncryptionAtRestRequired) ? KeyStore.FLAG_ENCRYPTED : 0;
-        if (((flags & KeyStore.FLAG_ENCRYPTED) != 0)
-                && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
-            throw new IllegalStateException(
-                    "Encryption at rest using secure lock screen credential requested for key pair"
-                    + ", but the user has not yet entered the credential");
-        }
+        final @SecurityLevel int securityLevel =
+                mSpec.isStrongBoxBacked()
+                        ? SecurityLevel.STRONGBOX
+                        : SecurityLevel.TRUSTED_ENVIRONMENT;
 
-        if (mSpec.isStrongBoxBacked()) {
-            flags |= KeyStore.FLAG_STRONGBOX;
-        }
-        if (mSpec.isCriticalToDeviceEncryption()) {
-            flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
-        }
+        final int flags =
+                mSpec.isCriticalToDeviceEncryption()
+                        ? IKeystoreSecurityLevel
+                                .KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING
+                        : 0;
 
         byte[] additionalEntropy =
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                         mRng, (mKeySizeBits + 7) / 8);
 
-        Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias, mEntryUid);
-        final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + mEntryAlias;
+        KeyDescriptor descriptor = new KeyDescriptor();
+        descriptor.alias = mEntryAlias;
+        descriptor.domain = mEntryUid == KeyProperties.NAMESPACE_APPLICATION
+                ? Domain.APP
+                : Domain.SELINUX;
+        descriptor.nspace = mEntryUid;
+        descriptor.blob = null;
+
         boolean success = false;
         try {
-            generateKeystoreKeyPair(
-                    privateKeyAlias, constructKeyGenerationArguments(), additionalEntropy, flags);
-            KeyPair keyPair = loadKeystoreKeyPair(privateKeyAlias);
+            KeyStoreSecurityLevel iSecurityLevel = mKeyStore.getSecurityLevel(securityLevel);
 
-            storeCertificateChain(flags, createCertificateChain(privateKeyAlias, keyPair));
+            KeyMetadata metadata = iSecurityLevel.generateKey(descriptor, null,
+                    constructKeyGenerationArguments(), flags, additionalEntropy);
+
+            AndroidKeyStorePublicKey publicKey =
+                    AndroidKeyStoreProvider.makeAndroidKeyStorePublicKeyFromKeyEntryResponse(
+                            descriptor, metadata, iSecurityLevel, mKeymasterAlgorithm);
 
             success = true;
-            return keyPair;
-        } catch (ProviderException e) {
-          if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
-              throw new SecureKeyImportUnavailableException(e);
-          } else {
-              throw e;
-          }
+            return new KeyPair(publicKey, publicKey.getPrivateKey());
+        } catch (android.security.KeyStoreException e) {
+            switch(e.getErrorCode()) {
+                case KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE:
+                    throw new StrongBoxUnavailableException("Failed to generated key pair.", e);
+                default:
+                    ProviderException p = new ProviderException("Failed to generate key pair.", e);
+                    if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
+                        throw new SecureKeyImportUnavailableException(p);
+                    }
+                    throw p;
+            }
+        } catch (UnrecoverableKeyException e) {
+            throw new ProviderException(
+                    "Failed to construct key object from newly generated key pair.", e);
         } finally {
             if (!success) {
-                Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias, mEntryUid);
+                try {
+                    mKeyStore.deleteKey(descriptor);
+                } catch (KeyStoreException e) {
+                    if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
+                        Log.e(TAG, "Failed to delete newly generated key after "
+                                + "generation failed unexpectedly.", e);
+                    }
+                }
             }
         }
     }
 
-    private Iterable<byte[]> createCertificateChain(final String privateKeyAlias, KeyPair keyPair)
+    private void addAttestationParameters(@NonNull List<KeyParameter> params)
             throws ProviderException {
         byte[] challenge = mSpec.getAttestationChallenge();
+
         if (challenge != null) {
-            KeymasterArguments args = new KeymasterArguments();
-            args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_CHALLENGE, challenge);
+            params.add(KeyStore2ParameterUtils.makeBytes(
+                    KeymasterDefs.KM_TAG_ATTESTATION_CHALLENGE, challenge
+            ));
 
             if (mSpec.isDevicePropertiesAttestationIncluded()) {
-                args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_BRAND,
-                        Build.BRAND.getBytes(StandardCharsets.UTF_8));
-                args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_DEVICE,
-                        Build.DEVICE.getBytes(StandardCharsets.UTF_8));
-                args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
-                        Build.PRODUCT.getBytes(StandardCharsets.UTF_8));
-                args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MANUFACTURER,
-                        Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8));
-                args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
-                        Build.MODEL.getBytes(StandardCharsets.UTF_8));
+                params.add(KeyStore2ParameterUtils.makeBytes(
+                        KeymasterDefs.KM_TAG_ATTESTATION_ID_BRAND,
+                        Build.BRAND.getBytes(StandardCharsets.UTF_8)
+                ));
+                params.add(KeyStore2ParameterUtils.makeBytes(
+                        KeymasterDefs.KM_TAG_ATTESTATION_ID_DEVICE,
+                        Build.DEVICE.getBytes(StandardCharsets.UTF_8)
+                ));
+                params.add(KeyStore2ParameterUtils.makeBytes(
+                        KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
+                        Build.PRODUCT.getBytes(StandardCharsets.UTF_8)
+                ));
+                params.add(KeyStore2ParameterUtils.makeBytes(
+                        KeymasterDefs.KM_TAG_ATTESTATION_ID_MANUFACTURER,
+                        Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8)
+                ));
+                params.add(KeyStore2ParameterUtils.makeBytes(
+                        KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
+                        Build.MODEL.getBytes(StandardCharsets.UTF_8)
+                ));
             }
-
-            return getAttestationChain(privateKeyAlias, keyPair, args);
-        }
-
-        // Very short certificate chain in the non-attestation case.
-        return Collections.singleton(generateSelfSignedCertificateBytes(keyPair));
-    }
-
-    private void generateKeystoreKeyPair(final String privateKeyAlias, KeymasterArguments args,
-            byte[] additionalEntropy, final int flags) throws ProviderException {
-        KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
-        int errorCode = mKeyStore.generateKey(privateKeyAlias, args, additionalEntropy,
-                mEntryUid, flags, resultingKeyCharacteristics);
-        if (errorCode != KeyStore.NO_ERROR) {
-            if (errorCode == KeyStore.HARDWARE_TYPE_UNAVAILABLE) {
-                throw new StrongBoxUnavailableException("Failed to generate key pair");
-            } else {
-                throw new ProviderException(
-                        "Failed to generate key pair", KeyStore.getKeyStoreException(errorCode));
+        } else {
+            if (mSpec.isDevicePropertiesAttestationIncluded()) {
+                throw new ProviderException("An attestation challenge must be provided when "
+                        + "requesting device properties attestation.");
             }
         }
     }
 
-    private KeyPair loadKeystoreKeyPair(final String privateKeyAlias) throws ProviderException {
-        try {
-            KeyPair result  = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
-                    mKeyStore, privateKeyAlias, mEntryUid);
-            if (!mJcaKeyAlgorithm.equalsIgnoreCase(result.getPrivate().getAlgorithm())) {
-                throw new ProviderException(
-                        "Generated key pair algorithm does not match requested algorithm: "
-                                + result.getPrivate().getAlgorithm() + " vs " + mJcaKeyAlgorithm);
-            }
-            return result;
-        } catch (UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
-            throw new ProviderException("Failed to load generated key pair from keystore", e);
+    private Collection<KeyParameter> constructKeyGenerationArguments() {
+        List<KeyParameter> params = new ArrayList<>();
+        params.add(KeyStore2ParameterUtils.makeInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits));
+        params.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm
+        ));
+        ArrayUtils.forEach(mKeymasterPurposes, (purpose) -> {
+            params.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_PURPOSE, purpose
+            ));
+        });
+        ArrayUtils.forEach(mKeymasterBlockModes, (blockMode) -> {
+            params.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_BLOCK_MODE, blockMode
+            ));
+        });
+        ArrayUtils.forEach(mKeymasterEncryptionPaddings, (padding) -> {
+            params.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_PADDING, padding
+            ));
+        });
+        ArrayUtils.forEach(mKeymasterSignaturePaddings, (padding) -> {
+            params.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_PADDING, padding
+            ));
+        });
+        ArrayUtils.forEach(mKeymasterDigests, (digest) -> {
+            params.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_DIGEST, digest
+            ));
+        });
+
+        KeyStore2ParameterUtils.addUserAuthArgs(params, mSpec);
+
+        if (mSpec.getKeyValidityStart() != null) {
+            params.add(KeyStore2ParameterUtils.makeDate(
+                    KeymasterDefs.KM_TAG_ACTIVE_DATETIME, mSpec.getKeyValidityStart()
+            ));
         }
+        if (mSpec.getKeyValidityForOriginationEnd() != null) {
+            params.add(KeyStore2ParameterUtils.makeDate(
+                    KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                    mSpec.getKeyValidityForOriginationEnd()
+            ));
+        }
+        if (mSpec.getKeyValidityForConsumptionEnd() != null) {
+            params.add(KeyStore2ParameterUtils.makeDate(
+                    KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                    mSpec.getKeyValidityForConsumptionEnd()
+            ));
+        }
+
+        addAlgorithmSpecificParameters(params);
+
+        if (mSpec.isUniqueIdIncluded()) {
+            params.add(KeyStore2ParameterUtils.makeBool(KeymasterDefs.KM_TAG_INCLUDE_UNIQUE_ID));
+        }
+
+        addAttestationParameters(params);
+
+        return params;
     }
 
-    private KeymasterArguments constructKeyGenerationArguments() {
-        KeymasterArguments args = new KeymasterArguments();
-        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
-        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
-        args.addEnums(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
-        args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
-        args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterEncryptionPaddings);
-        args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterSignaturePaddings);
-        args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
-
-        KeymasterUtils.addUserAuthArgs(args, mSpec);
-        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, mSpec.getKeyValidityStart());
-        args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                mSpec.getKeyValidityForOriginationEnd());
-        args.addDateIfNotNull(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                mSpec.getKeyValidityForConsumptionEnd());
-        addAlgorithmSpecificParameters(args);
-
-        if (mSpec.isUniqueIdIncluded())
-            args.addBoolean(KeymasterDefs.KM_TAG_INCLUDE_UNIQUE_ID);
-
-        return args;
-    }
-
-    private void storeCertificateChain(final int flags, Iterable<byte[]> iterable)
-            throws ProviderException {
-        Iterator<byte[]> iter = iterable.iterator();
-        storeCertificate(
-                Credentials.USER_CERTIFICATE, iter.next(), flags, "Failed to store certificate");
-
-        if (!iter.hasNext()) {
-            return;
-        }
-
-        ByteArrayOutputStream certificateConcatenationStream = new ByteArrayOutputStream();
-        while (iter.hasNext()) {
-            byte[] data = iter.next();
-            certificateConcatenationStream.write(data, 0, data.length);
-        }
-
-        storeCertificate(Credentials.CA_CERTIFICATE, certificateConcatenationStream.toByteArray(),
-                flags, "Failed to store attestation CA certificate");
-    }
-
-    private void storeCertificate(String prefix, byte[] certificateBytes, final int flags,
-            String failureMessage) throws ProviderException {
-        int insertErrorCode = mKeyStore.insert(
-                prefix + mEntryAlias,
-                certificateBytes,
-                mEntryUid,
-                flags);
-        if (insertErrorCode != KeyStore.NO_ERROR) {
-            throw new ProviderException(failureMessage,
-                    KeyStore.getKeyStoreException(insertErrorCode));
-        }
-    }
-
-    private byte[] generateSelfSignedCertificateBytes(KeyPair keyPair) throws ProviderException {
-        try {
-            return generateSelfSignedCertificate(keyPair.getPrivate(), keyPair.getPublic())
-                    .getEncoded();
-        } catch (IOException | CertificateParsingException e) {
-            throw new ProviderException("Failed to generate self-signed certificate", e);
-        } catch (CertificateEncodingException e) {
-            throw new ProviderException(
-                    "Failed to obtain encoded form of self-signed certificate", e);
-        }
-    }
-
-    private Iterable<byte[]> getAttestationChain(String privateKeyAlias,
-            KeyPair keyPair, KeymasterArguments args)
-                    throws ProviderException {
-        final KeymasterCertificateChain outChain = new KeymasterCertificateChain();
-        final int errorCode;
-        if (mSpec.isDevicePropertiesAttestationIncluded()
-                && mSpec.getAttestationChallenge() == null) {
-            throw new ProviderException("An attestation challenge must be provided when requesting "
-                    + "device properties attestation.");
-        }
-        errorCode = mKeyStore.attestKey(privateKeyAlias, args, outChain);
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw new ProviderException("Failed to generate attestation certificate chain",
-                    KeyStore.getKeyStoreException(errorCode));
-        }
-        Collection<byte[]> chain = outChain.getCertificates();
-        if (chain.size() < 2) {
-            throw new ProviderException("Attestation certificate chain contained "
-                    + chain.size() + " entries. At least two are required.");
-        }
-        return chain;
-    }
-
-    private void addAlgorithmSpecificParameters(KeymasterArguments keymasterArgs) {
+    private void addAlgorithmSpecificParameters(List<KeyParameter> params) {
         switch (mKeymasterAlgorithm) {
             case KeymasterDefs.KM_ALGORITHM_RSA:
-                keymasterArgs.addUnsignedLong(
-                        KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, mRSAPublicExponent);
+                params.add(KeyStore2ParameterUtils.makeLong(
+                        KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, mRSAPublicExponent
+                ));
                 break;
             case KeymasterDefs.KM_ALGORITHM_EC:
                 break;
             default:
                 throw new ProviderException("Unsupported algorithm: " + mKeymasterAlgorithm);
         }
-    }
-
-    private X509Certificate generateSelfSignedCertificate(PrivateKey privateKey,
-            PublicKey publicKey) throws CertificateParsingException, IOException {
-        String signatureAlgorithm =
-                getCertificateSignatureAlgorithm(mKeymasterAlgorithm, mKeySizeBits, mSpec);
-        if (signatureAlgorithm == null) {
-            // Key cannot be used to sign a certificate
-            return generateSelfSignedCertificateWithFakeSignature(publicKey);
-        } else {
-            // Key can be used to sign a certificate
-            try {
-                return generateSelfSignedCertificateWithValidSignature(
-                        privateKey, publicKey, signatureAlgorithm);
-            } catch (Exception e) {
-                // Failed to generate the self-signed certificate with valid signature. Fall back
-                // to generating a self-signed certificate with a fake signature. This is done for
-                // all exception types because we prefer key pair generation to succeed and end up
-                // producing a self-signed certificate with an invalid signature to key pair
-                // generation failing.
-                return generateSelfSignedCertificateWithFakeSignature(publicKey);
-            }
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private X509Certificate generateSelfSignedCertificateWithValidSignature(
-            PrivateKey privateKey, PublicKey publicKey, String signatureAlgorithm) throws Exception {
-        final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-        certGen.setPublicKey(publicKey);
-        certGen.setSerialNumber(mSpec.getCertificateSerialNumber());
-        certGen.setSubjectDN(mSpec.getCertificateSubject());
-        certGen.setIssuerDN(mSpec.getCertificateSubject());
-        certGen.setNotBefore(mSpec.getCertificateNotBefore());
-        certGen.setNotAfter(mSpec.getCertificateNotAfter());
-        certGen.setSignatureAlgorithm(signatureAlgorithm);
-        return certGen.generate(privateKey);
-    }
-
-    @SuppressWarnings("deprecation")
-    private X509Certificate generateSelfSignedCertificateWithFakeSignature(
-            PublicKey publicKey) throws IOException, CertificateParsingException {
-        V3TBSCertificateGenerator tbsGenerator = new V3TBSCertificateGenerator();
-        ASN1ObjectIdentifier sigAlgOid;
-        AlgorithmIdentifier sigAlgId;
-        byte[] signature;
-        switch (mKeymasterAlgorithm) {
-            case KeymasterDefs.KM_ALGORITHM_EC:
-                sigAlgOid = X9ObjectIdentifiers.ecdsa_with_SHA256;
-                sigAlgId = new AlgorithmIdentifier(sigAlgOid);
-                ASN1EncodableVector v = new ASN1EncodableVector();
-                v.add(new ASN1Integer(BigInteger.valueOf(0)));
-                v.add(new ASN1Integer(BigInteger.valueOf(0)));
-                signature = new DERSequence().getEncoded();
-                break;
-            case KeymasterDefs.KM_ALGORITHM_RSA:
-                sigAlgOid = PKCSObjectIdentifiers.sha256WithRSAEncryption;
-                sigAlgId = new AlgorithmIdentifier(sigAlgOid, DERNull.INSTANCE);
-                signature = new byte[1];
-                break;
-            default:
-                throw new ProviderException("Unsupported key algorithm: " + mKeymasterAlgorithm);
-        }
-
-        try (ASN1InputStream publicKeyInfoIn = new ASN1InputStream(publicKey.getEncoded())) {
-            tbsGenerator.setSubjectPublicKeyInfo(
-                    SubjectPublicKeyInfo.getInstance(publicKeyInfoIn.readObject()));
-        }
-        tbsGenerator.setSerialNumber(new ASN1Integer(mSpec.getCertificateSerialNumber()));
-        X509Principal subject =
-                new X509Principal(mSpec.getCertificateSubject().getEncoded());
-        tbsGenerator.setSubject(subject);
-        tbsGenerator.setIssuer(subject);
-        tbsGenerator.setStartDate(new Time(mSpec.getCertificateNotBefore()));
-        tbsGenerator.setEndDate(new Time(mSpec.getCertificateNotAfter()));
-        tbsGenerator.setSignature(sigAlgId);
-        TBSCertificate tbsCertificate = tbsGenerator.generateTBSCertificate();
-
-        ASN1EncodableVector result = new ASN1EncodableVector();
-        result.add(tbsCertificate);
-        result.add(sigAlgId);
-        result.add(new DERBitString(signature));
-        return new X509CertificateObject(Certificate.getInstance(new DERSequence(result)));
     }
 
     private static int getDefaultKeySize(int keymasterAlgorithm) {
