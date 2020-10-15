@@ -803,13 +803,13 @@ package android.net.wifi.hotspot2.pps {
     method public String getFriendlyName();
     method @Nullable public long[] getMatchAllOis();
     method @Nullable public long[] getMatchAnyOis();
-    method @Nullable public String[] getOtherHomePartners();
+    method @NonNull public java.util.Collection<java.lang.String> getOtherHomePartnersList();
     method public long[] getRoamingConsortiumOis();
     method public void setFqdn(String);
     method public void setFriendlyName(String);
     method public void setMatchAllOis(@Nullable long[]);
     method public void setMatchAnyOis(@Nullable long[]);
-    method public void setOtherHomePartners(@Nullable String[]);
+    method public void setOtherHomePartnersList(@NonNull java.util.Collection<java.lang.String>);
     method public void setRoamingConsortiumOis(long[]);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.pps.HomeSp> CREATOR;
