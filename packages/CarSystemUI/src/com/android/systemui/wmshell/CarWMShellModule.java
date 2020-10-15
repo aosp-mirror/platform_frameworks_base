@@ -26,19 +26,24 @@ import com.android.systemui.wm.DisplaySystemBarsController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.pip.Pip;
 
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 
 /** Provides dependencies from {@link com.android.wm.shell} for CarSystemUI. */
 @Module(includes = WMShellBaseModule.class)
-public class CarWMShellModule {
+public abstract class CarWMShellModule {
     @SysUISingleton
     @Provides
-    DisplayImeController provideDisplayImeController(Context context,
+    static DisplayImeController provideDisplayImeController(Context context,
             IWindowManager wmService, DisplayController displayController,
             @Main Handler mainHandler, TransactionPool transactionPool) {
         return new DisplaySystemBarsController(context, wmService, displayController,
                 mainHandler, transactionPool);
     }
+
+    @BindsOptionalOf
+    abstract Pip optionalPip();
 }

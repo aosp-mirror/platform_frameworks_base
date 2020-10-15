@@ -16,20 +16,13 @@
 
 package com.android.wm.shell.pip.phone;
 
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -58,39 +51,30 @@ import java.util.Optional;
 @TestableLooper.RunWithLooper
 public class PipTaskOrganizerTest extends PipTestCase {
     private PipTaskOrganizer mSpiedPipTaskOrganizer;
-    private TestableContext mSpiedContext;
 
     @Mock private DisplayController mMockdDisplayController;
-    @Mock private PackageManager mPackageManager;
     @Mock private PipBoundsHandler mMockPipBoundsHandler;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
     @Mock private Optional<SplitScreen> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
-    private PipBoundsState mPipBoundsState;
+    @Mock private PipBoundsState mMockPipBoundsState;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mPipBoundsState = new PipBoundsState();
-
-        mSpiedContext = spy(mContext);
-
-        when(mPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
-        when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
-
-        mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mSpiedContext, mPipBoundsState,
+        mSpiedPipTaskOrganizer = new PipTaskOrganizer(mContext, mMockPipBoundsState,
                 mMockPipBoundsHandler, mMockPipSurfaceTransactionHelper, mMockOptionalSplitScreen,
-                mMockdDisplayController, mMockPipUiEventLogger, mMockShellTaskOrganizer));
+                mMockdDisplayController, mMockPipUiEventLogger, mMockShellTaskOrganizer);
     }
 
     @Test
-    public void testNonPipDevice_shellTaskOrganizer_shouldNotAddListener() {
-        verify(mMockShellTaskOrganizer, never()).addListener(any(), anyInt());
+    public void instantiatePipTaskOrganizer_addsTaskListener() {
+        verify(mMockShellTaskOrganizer).addListener(any(), anyInt());
     }
 
     @Test
-    public void testNonPipDevice_displayController_shouldNotAddDisplayWindowListener() {
-        verify(mMockdDisplayController, never()).addDisplayWindowListener(any());
+    public void instantiatePipTaskOrganizer_addsDisplayWindowListener() {
+        verify(mMockdDisplayController).addDisplayWindowListener(any());
     }
 }

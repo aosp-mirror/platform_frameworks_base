@@ -167,9 +167,6 @@ public final class WMShell extends SystemUI
 
     @VisibleForTesting
     void initPip(Pip pip) {
-        if (!PipUtils.hasSystemFeature(mContext)) {
-            return;
-        }
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void showPictureInPictureMenu() {
