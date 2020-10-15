@@ -12358,37 +12358,34 @@ public final class Settings {
          * to dumpable apps that opt-in.
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE =
-                "angle_debug_package";
+        public static final String ANGLE_DEBUG_PACKAGE = "angle_debug_package";
 
         /**
          * Force all PKGs to use ANGLE, regardless of any other settings
          * The value is a boolean (1 or 0).
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE =
-                "angle_gl_driver_all_angle";
+        public static final String ANGLE_GL_DRIVER_ALL_ANGLE = "angle_gl_driver_all_angle";
 
         /**
          * List of PKGs that have an OpenGL driver selected
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS =
+        public static final String ANGLE_GL_DRIVER_SELECTION_PKGS =
                 "angle_gl_driver_selection_pkgs";
 
         /**
          * List of selected OpenGL drivers, corresponding to the PKGs in GLOBAL_SETTINGS_DRIVER_PKGS
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES =
+        public static final String ANGLE_GL_DRIVER_SELECTION_VALUES =
                 "angle_gl_driver_selection_values";
 
         /**
          * List of package names that should check ANGLE rules
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_ALLOWLIST =
-                "angle_allowlist";
+        public static final String ANGLE_ALLOWLIST = "angle_allowlist";
 
         /**
          * Lists of ANGLE EGL features for debugging.
@@ -12404,8 +12401,7 @@ public final class Settings {
          * The value is a boolean (1 or 0).
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX =
-                "show_angle_in_use_dialog_box";
+        public static final String SHOW_ANGLE_IN_USE_DIALOG_BOX = "show_angle_in_use_dialog_box";
 
         /**
          * Updatable driver global preference for all Apps.
