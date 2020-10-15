@@ -36,6 +36,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -135,7 +136,6 @@ public class PrivateAddressCoordinator {
     private void handleMaybePrefixConflict(final List<IpPrefix> prefixes) {
         for (IpServer downstream : mDownstreams) {
             final IpPrefix target = getDownstreamPrefix(downstream);
-            if (target == null) continue;
 
             for (IpPrefix source : prefixes) {
                 if (isConflictPrefix(source, target)) {
@@ -179,6 +179,7 @@ public class PrivateAddressCoordinator {
         final LinkAddress cachedAddress = mCachedAddresses.get(ipServer.interfaceType());
         if (useLastAddress && cachedAddress != null
                 && !isConflictWithUpstream(asIpPrefix(cachedAddress))) {
+            mDownstreams.add(ipServer);
             return cachedAddress;
         }
 
@@ -370,7 +371,6 @@ public class PrivateAddressCoordinator {
         // in mCachedAddresses.
         for (IpServer downstream : mDownstreams) {
             final IpPrefix target = getDownstreamPrefix(downstream);
-            if (target == null) continue;
 
             if (isConflictPrefix(prefix, target)) return target;
         }
@@ -378,9 +378,9 @@ public class PrivateAddressCoordinator {
         return null;
     }
 
+    @NonNull
     private IpPrefix getDownstreamPrefix(final IpServer downstream) {
         final LinkAddress address = downstream.getAddress();
-        if (address == null) return null;
 
         return asIpPrefix(address);
     }
