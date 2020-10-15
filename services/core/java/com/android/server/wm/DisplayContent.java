@@ -2985,6 +2985,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         pw.println();
+        pw.println(prefix + "Display areas in top down Z order:");
+        dumpChildDisplayArea(pw, subPrefix, dumpAll);
+
+        pw.println();
         pw.println(prefix + "Task display areas in top down Z order:");
         forAllTaskDisplayAreas(taskDisplayArea -> {
             taskDisplayArea.dump(pw, prefix + "  ", dumpAll);
