@@ -89,6 +89,12 @@ public:
 
     virtual ~DurationTracker(){};
 
+    void onConfigUpdated(const sp<ConditionWizard>& wizard, const int conditionTrackerIndex) {
+        sp<ConditionWizard> tmpWizard = mWizard;
+        mWizard = wizard;
+        mConditionTrackerIndex = conditionTrackerIndex;
+    };
+
     virtual void noteStart(const HashableDimensionKey& key, bool condition, const int64_t eventTime,
                            const ConditionKey& conditionKey) = 0;
     virtual void noteStop(const HashableDimensionKey& key, const int64_t eventTime,
@@ -191,7 +197,7 @@ protected:
 
     sp<ConditionWizard> mWizard;
 
-    const int mConditionTrackerIndex;
+    int mConditionTrackerIndex;
 
     const int64_t mBucketSizeNs;
 
@@ -217,6 +223,8 @@ protected:
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm);
+
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateDurationMetrics);
 };
 
 }  // namespace statsd
