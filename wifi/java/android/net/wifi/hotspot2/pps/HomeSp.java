@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,6 +25,7 @@ import android.util.Log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -214,9 +216,23 @@ public final class HomeSp implements Parcelable {
      *
      * @param otherHomePartners Array of Strings containing the FQDNs of other Home partner
      *                         providers
+     * @hide
      */
     public void setOtherHomePartners(@Nullable String[] otherHomePartners) {
         mOtherHomePartners = otherHomePartners;
+    }
+
+    /**
+     * Set the list of FQDN (Fully Qualified Domain Name) of other Home partner providers.
+     *
+     * @param otherHomePartners Collection of Strings containing the FQDNs of other Home partner
+     *                         providers
+     */
+    public void setOtherHomePartnersList(@NonNull Collection<String> otherHomePartners) {
+        if (otherHomePartners == null) {
+            return;
+        }
+        mOtherHomePartners = otherHomePartners.toArray(new String[otherHomePartners.size()]);
     }
 
     /**
@@ -225,9 +241,24 @@ public final class HomeSp implements Parcelable {
      *
      * @return Array of Strings containing the FQDNs of other Home partner providers set in the
      * profile
+     * @hide
      */
     public @Nullable String[] getOtherHomePartners() {
         return mOtherHomePartners;
+    }
+
+    /**
+     * Get the list of FQDN (Fully Qualified Domain Name) of other Home partner providers set in
+     * the profile.
+     *
+     * @return Collection of Strings containing the FQDNs of other Home partner providers set in the
+     * profile
+     */
+    public @NonNull Collection<String> getOtherHomePartnersList() {
+        if (mOtherHomePartners == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(mOtherHomePartners);
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -26,7 +27,9 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ import java.util.Map;
  */
 @SmallTest
 public class HomeSpTest {
+    private static final String[] OTHER_HOME_PARTNER_LIST = new String[]{"partner1", "partner2"};
 
     /**
      * Helper function for creating a map of home network IDs for testing.
@@ -62,7 +66,7 @@ public class HomeSpTest {
         homeSp.setHomeNetworkIds(homeNetworkIds);
         homeSp.setMatchAllOis(new long[] {0x11L, 0x22L});
         homeSp.setMatchAnyOis(new long[] {0x33L, 0x44L});
-        homeSp.setOtherHomePartners(new String[] {"partner1", "partner2"});
+        homeSp.setOtherHomePartners(OTHER_HOME_PARTNER_LIST);
         homeSp.setRoamingConsortiumOis(new long[] {0x55, 0x66});
         return homeSp;
     }
@@ -217,5 +221,35 @@ public class HomeSpTest {
         HomeSp sourceSp = createHomeSpWithHomeNetworkIds();
         HomeSp copySp = new HomeSp(sourceSp);
         assertTrue(copySp.equals(sourceSp));
+    }
+
+    /**
+     * Verify that the getOtherHomePartnersList gets the list of partners as expected.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateGetOtherHomePartnersList() throws Exception {
+        HomeSp homeSp = createHomeSpWithoutHomeNetworkIds();
+
+        Collection<String> otherHomePartnersList = homeSp.getOtherHomePartnersList();
+        assertEquals(2, otherHomePartnersList.size());
+        assertTrue(Arrays.equals(OTHER_HOME_PARTNER_LIST, otherHomePartnersList.toArray()));
+    }
+
+    /**
+     * Verify that the setOtherHomePartnersList sets the list of partners as expected.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateSetOtherHomePartnersList() throws Exception {
+        HomeSp homeSp = createHomeSpWithoutHomeNetworkIds();
+
+        final Collection<String> homePartners =
+                new ArrayList<>(Arrays.asList(OTHER_HOME_PARTNER_LIST));
+
+        homeSp.setOtherHomePartnersList(homePartners);
+        assertTrue(Arrays.equals(homeSp.getOtherHomePartners(), OTHER_HOME_PARTNER_LIST));
     }
 }
