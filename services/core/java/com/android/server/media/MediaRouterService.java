@@ -544,6 +544,18 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void startScan(IMediaRouter2Manager manager) {
+        mService2.startScan(manager);
+    }
+
+    // Binder call
+    @Override
+    public void stopScan(IMediaRouter2Manager manager) {
+        mService2.stopScan(manager);
+    }
+
+    // Binder call
+    @Override
     public void setRouteVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             MediaRoute2Info route, int volume) {
         mService2.setRouteVolumeWithManager(manager, requestId, route, volume);
