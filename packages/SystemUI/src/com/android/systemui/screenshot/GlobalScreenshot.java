@@ -45,6 +45,7 @@ import android.graphics.Region;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.media.MediaActionSound;
@@ -194,6 +195,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private ImageView mActionsContainerBackground;
     private HorizontalScrollView mActionsContainer;
     private LinearLayout mActionsView;
+    private ScreenshotActionChip mShareChip;
+    private ScreenshotActionChip mEditChip;
     private ImageView mBackgroundProtection;
     private FrameLayout mDismissButton;
 
@@ -214,6 +217,14 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private int mNavMode;
     private int mLeftInset;
     private int mRightInset;
+
+    private ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
+    private PendingInteraction mPendingInteraction;
+    private enum PendingInteraction {
+        PREVIEW,
+        EDIT,
+        SHARE
+    }
 
     // standard material ease
     private final Interpolator mFastOutSlowIn;
@@ -548,6 +559,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             mOnCompleteRunnable.run();
         });
 
+        mShareChip = mActionsContainer.findViewById(R.id.screenshot_share_chip);
+        mEditChip = mActionsContainer.findViewById(R.id.screenshot_edit_chip);
+
         mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
         mScreenshotLayout.setFocusable(true);
@@ -756,11 +770,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            createScreenshotActionsShadeAnimation(imageData).start();
+                            setChipIntents(imageData);
                         }
                     });
                 } else {
-                    createScreenshotActionsShadeAnimation(imageData).start();
+                    setChipIntents(imageData);
                 }
             });
         }
@@ -895,19 +909,14 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 mScreenshotAnimatedView.setVisibility(View.GONE);
                 mScreenshotPreview.setVisibility(View.VISIBLE);
                 mScreenshotLayout.forceLayout();
+                createScreenshotActionsShadeAnimation().start();
             }
         });
 
         return dropInAnimation;
     }
 
-    private ValueAnimator createScreenshotActionsShadeAnimation(SavedImageData imageData) {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        mActionsView.removeAllViews();
-        mScreenshotLayout.invalidate();
-        mScreenshotLayout.requestLayout();
-        mScreenshotLayout.getViewTreeObserver().dispatchOnGlobalLayout();
-
+    private ValueAnimator createScreenshotActionsShadeAnimation() {
         // By default the activities won't be able to start immediately; override this to keep
         // the same behavior as if started from a notification
         try {
@@ -917,61 +926,35 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         ArrayList<ScreenshotActionChip> chips = new ArrayList<>();
 
-        for (Notification.Action smartAction : imageData.smartActions) {
-            ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
-                    R.layout.global_screenshot_action_chip, mActionsView, false);
-            actionChip.setText(smartAction.title);
-            actionChip.setIcon(smartAction.getIcon(), false);
-            actionChip.setPendingIntent(smartAction.actionIntent,
-                    () -> {
-                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
-                        dismissScreenshot("chip tapped", false);
-                        mOnCompleteRunnable.run();
-                    });
-            mActionsView.addView(actionChip);
-            chips.add(actionChip);
-        }
-
-        ScreenshotActionChip shareChip = (ScreenshotActionChip) inflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-        shareChip.setText(imageData.shareAction.title);
-        shareChip.setIcon(imageData.shareAction.getIcon(), true);
-        shareChip.setPendingIntent(imageData.shareAction.actionIntent, () -> {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
-            dismissScreenshot("chip tapped", false);
-            mOnCompleteRunnable.run();
+        mShareChip.setText(mContext.getString(com.android.internal.R.string.share));
+        mShareChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_share), true);
+        mShareChip.setOnClickListener(v -> {
+            mShareChip.setIsPending(true);
+            mEditChip.setIsPending(false);
+            mPendingInteraction = PendingInteraction.SHARE;
         });
-        mActionsView.addView(shareChip);
-        chips.add(shareChip);
+        chips.add(mShareChip);
 
-        ScreenshotActionChip editChip = (ScreenshotActionChip) inflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-        editChip.setText(imageData.editAction.title);
-        editChip.setIcon(imageData.editAction.getIcon(), true);
-        editChip.setPendingIntent(imageData.editAction.actionIntent, () -> {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
-            dismissScreenshot("chip tapped", false);
-            mOnCompleteRunnable.run();
+        mEditChip.setText(mContext.getString(com.android.internal.R.string.screenshot_edit));
+        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
+        mEditChip.setOnClickListener(v -> {
+            mEditChip.setIsPending(true);
+            mShareChip.setIsPending(false);
+            mPendingInteraction = PendingInteraction.EDIT;
         });
-        mActionsView.addView(editChip);
-        chips.add(editChip);
+        chips.add(mEditChip);
 
         mScreenshotPreview.setOnClickListener(v -> {
-            try {
-                imageData.editAction.actionIntent.send();
-                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
-                dismissScreenshot("screenshot preview tapped", false);
-                mOnCompleteRunnable.run();
-            } catch (PendingIntent.CanceledException e) {
-                Log.e(TAG, "Intent cancelled", e);
-            }
+            mShareChip.setIsPending(false);
+            mEditChip.setIsPending(false);
+            mPendingInteraction = PendingInteraction.PREVIEW;
         });
-        mScreenshotPreview.setContentDescription(imageData.editAction.title);
 
         // remove the margin from the last chip so that it's correctly aligned with the end
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
-                mActionsView.getChildAt(mActionsView.getChildCount() - 1).getLayoutParams();
-        params.setMarginEnd(0);
+                mActionsView.getChildAt(0).getLayoutParams();
+        params.setMarginStart(0);
+        mActionsView.getChildAt(0).setLayoutParams(params);
 
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
         animator.setDuration(SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS);
@@ -1002,6 +985,63 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     mDirectionLTR ? 0 : mActionsContainerBackground.getWidth());
         });
         return animator;
+    }
+
+    private void setChipIntents(SavedImageData imageData) {
+        mShareChip.setPendingIntent(imageData.shareAction.actionIntent, () -> {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
+            dismissScreenshot("chip tapped", false);
+            mOnCompleteRunnable.run();
+        });
+
+        mEditChip.setPendingIntent(imageData.editAction.actionIntent, () -> {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
+            dismissScreenshot("chip tapped", false);
+            mOnCompleteRunnable.run();
+        });
+
+        mScreenshotPreview.setOnClickListener(v -> {
+            try {
+                imageData.editAction.actionIntent.send();
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
+                dismissScreenshot("screenshot preview tapped", false);
+                mOnCompleteRunnable.run();
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "Intent cancelled", e);
+            }
+        });
+
+        if (mPendingInteraction != null) {
+            switch(mPendingInteraction) {
+                case PREVIEW:
+                    mScreenshotPreview.callOnClick();
+                    break;
+                case SHARE:
+                    mShareChip.callOnClick();
+                    break;
+                case EDIT:
+                    mEditChip.callOnClick();
+                    break;
+            }
+        } else {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+
+            for (Notification.Action smartAction : imageData.smartActions) {
+                ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
+                        R.layout.global_screenshot_action_chip, mActionsView, false);
+                actionChip.setText(smartAction.title);
+                actionChip.setIcon(smartAction.getIcon(), false);
+                actionChip.setPendingIntent(smartAction.actionIntent,
+                        () -> {
+                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
+                            dismissScreenshot("chip tapped", false);
+                            mOnCompleteRunnable.run();
+                        });
+                actionChip.setAlpha(1);
+                mActionsView.addView(actionChip);
+                mSmartChips.add(actionChip);
+            }
+        }
     }
 
     private AnimatorSet createScreenshotDismissAnimation() {
@@ -1046,9 +1086,16 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mDismissButton.setVisibility(View.GONE);
         mScreenshotPreview.setVisibility(View.GONE);
         mScreenshotPreview.setLayerType(View.LAYER_TYPE_NONE, null);
-        mScreenshotPreview.setContentDescription(
-                mContext.getResources().getString(R.string.screenshot_preview_description));
         mScreenshotPreview.setOnClickListener(null);
+        mShareChip.setOnClickListener(null);
+        mEditChip.setOnClickListener(null);
+        mShareChip.setIsPending(false);
+        mEditChip.setIsPending(false);
+        mPendingInteraction = null;
+        for (ScreenshotActionChip chip : mSmartChips) {
+            mActionsView.removeView(chip);
+        }
+        mSmartChips.clear();
         mScreenshotLayout.setAlpha(1);
         mDismissButton.setTranslationY(0);
         mActionsContainer.setTranslationY(0);
