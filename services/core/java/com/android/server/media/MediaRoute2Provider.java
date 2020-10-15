@@ -77,7 +77,7 @@ abstract class MediaRoute2Provider {
     @NonNull
     public List<RoutingSessionInfo> getSessionInfos() {
         synchronized (mLock) {
-            return mSessionInfos;
+            return new ArrayList<>(mSessionInfos);
         }
     }
 
