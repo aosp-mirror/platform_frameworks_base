@@ -18,10 +18,7 @@ package com.android.systemui.media.dialog;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.MediaRoute2Info;
@@ -49,6 +46,8 @@ import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ import javax.inject.Inject;
 /**
  * Controller for media output dialog
  */
-public class MediaOutputController implements LocalMediaManager.DeviceCallback{
+public class MediaOutputController implements LocalMediaManager.DeviceCallback {
 
     private static final String TAG = "MediaOutputController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -73,6 +72,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
     private final ActivityStarter mActivityStarter;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
+    private final NotificationEntryManager mNotificationEntryManager;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
@@ -85,13 +85,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
-            lbm, ShadeController shadeController, ActivityStarter starter) {
+            lbm, ShadeController shadeController, ActivityStarter starter,
+            NotificationEntryManager notificationEntryManager) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
         mShadeController = shadeController;
         mActivityStarter = starter;
         mAboveStatusbar = aboveStatusbar;
+        mNotificationEntryManager = notificationEntryManager;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
     }
@@ -197,7 +199,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
         if (DEBUG) {
             Log.d(TAG, "Media meta data does not contain icon information");
         }
-        return getPackageIcon();
+        return getNotificationIcon();
     }
 
     IconCompat getDeviceIconCompat(MediaDevice device) {
@@ -213,24 +215,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
         return BluetoothUtils.createIconWithDrawable(drawable);
     }
 
-    private IconCompat getPackageIcon() {
+    IconCompat getNotificationIcon() {
         if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
-        try {
-            final Drawable drawable = mContext.getPackageManager().getApplicationIcon(mPackageName);
-            if (drawable instanceof BitmapDrawable) {
-                return IconCompat.createWithBitmap(((BitmapDrawable) drawable).getBitmap());
-            }
-            final Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-            final Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
-            return IconCompat.createWithBitmap(bitmap);
-        } catch (PackageManager.NameNotFoundException e) {
-            if (DEBUG) {
-                Log.e(TAG, "Package is not found. Unable to get package icon.");
+        for (NotificationEntry entry
+                : mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
+            if (entry.getSbn().getNotification().hasMediaSession()
+                    && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
+                return IconCompat.createFromIcon(entry.getSbn().getNotification().getLargeIcon());
             }
         }
         return null;

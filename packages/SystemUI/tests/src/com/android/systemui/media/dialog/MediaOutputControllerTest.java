@@ -27,15 +27,19 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Notification;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -45,6 +49,8 @@ import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
@@ -81,6 +87,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private RoutingSessionInfo mRemoteSessionInfo = mock(RoutingSessionInfo.class);
     private ShadeController mShadeController = mock(ShadeController.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
+    private NotificationEntryManager mNotificationEntryManager =
+            mock(NotificationEntryManager.class);
 
     private Context mSpyContext;
     private MediaOutputController mMediaOutputController;
@@ -100,8 +108,10 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 MediaSessionManager.class);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
                 mCachedBluetoothDeviceManager);
+
         mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -144,7 +154,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     @Test
     public void start_withoutPackageName_verifyMediaControllerInit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
 
         mMediaOutputController.start(mCb);
 
@@ -164,7 +175,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     @Test
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
+
         mMediaOutputController.start(mCb);
 
         mMediaOutputController.stop();
@@ -422,5 +435,54 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                     newDevices.get(i).getId())).isTrue();
         }
         assertThat(newDevices.get(4).getId()).isEqualTo(TEST_DEVICE_5_ID);
+    }
+
+    @Test
+    public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
+        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
+
+        assertThat(mMediaOutputController.getNotificationIcon()).isNull();
+    }
+
+    @Test
+    public void getNotificationLargeIcon_withPackageNameAndMediaSession_returnsIconCompat() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        final Icon icon = mock(Icon.class);
+        entryList.add(entry);
+
+        when(mNotificationEntryManager.getActiveNotificationsForCurrentUser())
+                .thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.hasMediaSession()).thenReturn(true);
+        when(notification.getLargeIcon()).thenReturn(icon);
+
+        assertThat(mMediaOutputController.getNotificationIcon() instanceof IconCompat).isTrue();
+    }
+
+    @Test
+    public void getNotificationLargeIcon_withPackageNameAndNoMediaSession_returnsNull() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        final Icon icon = mock(Icon.class);
+        entryList.add(entry);
+
+        when(mNotificationEntryManager.getActiveNotificationsForCurrentUser())
+                .thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.hasMediaSession()).thenReturn(false);
+        when(notification.getLargeIcon()).thenReturn(icon);
+
+        assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }
 }
