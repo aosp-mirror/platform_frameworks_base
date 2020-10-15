@@ -20,6 +20,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayArea.Type.ANY;
 import static com.android.server.wm.DisplayArea.Type.BELOW_TASKS;
@@ -29,11 +32,15 @@ import static com.android.server.wm.DisplayArea.Type.typeOf;
 import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
+import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.WindowManager;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -95,6 +102,42 @@ public class DisplayAreaTest {
         assertThrows(IllegalStateException.class, () -> checkChild(ABOVE_TASKS, ANY));
         assertThrows(IllegalStateException.class, () -> checkChild(BELOW_TASKS, ABOVE_TASKS));
         assertThrows(IllegalStateException.class, () -> checkChild(BELOW_TASKS, ANY));
+    }
+
+
+    @Test
+    public void testGetOrientation() {
+        final DisplayArea.Tokens area = new DisplayArea.Tokens(mWmsRule.getWindowManagerService(),
+                ABOVE_TASKS, "test");
+        final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
+        spyOn(token);
+        doReturn(mock(DisplayContent.class)).when(token).getDisplayContent();
+        doNothing().when(token).setParent(any());
+        final WindowState win = createWindowState(token);
+        spyOn(win);
+        doNothing().when(win).setParent(any());
+        win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        token.addChild(win, 0);
+        area.addChild(token);
+
+        doReturn(true).when(win).isVisible();
+
+        assertEquals("Visible window can request orientation",
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
+                area.getOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR));
+
+        doReturn(false).when(win).isVisible();
+
+        assertEquals("Invisible window cannot request orientation",
+                ActivityInfo.SCREEN_ORIENTATION_NOSENSOR,
+                area.getOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR));
+    }
+
+    private WindowState createWindowState(WindowToken token) {
+        return new WindowState(mWmsRule.getWindowManagerService(), mock(Session.class),
+                new TestIWindow(), token, null /* parentWindow */, 0 /* appOp */, 0 /* seq*/,
+                new WindowManager.LayoutParams(), View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
+                false /* ownerCanAddInternalSystemWindow */, null);
     }
 
     private WindowToken createWindowToken(int type) {
