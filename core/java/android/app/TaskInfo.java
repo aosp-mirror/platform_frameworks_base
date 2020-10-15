@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -203,6 +205,13 @@ public class TaskInfo {
      */
     public ArrayList<IBinder> launchCookies = new ArrayList<>();
 
+    /**
+     * The identifier of the parent task that is created by organizer, otherwise
+     * {@link ActivityTaskManager#INVALID_TASK_ID}.
+     * @hide
+     */
+    public int parentTaskId;
+
     TaskInfo() {
         // Do nothing
     }
@@ -245,6 +254,12 @@ public class TaskInfo {
         launchCookies.add(cookie);
     }
 
+    /** @hide */
+    @TestApi
+    public boolean hasParentTask() {
+        return parentTaskId != INVALID_TASK_ID;
+    }
+
     /**
      * Reads the TaskInfo from a parcel.
      */
@@ -275,6 +290,7 @@ public class TaskInfo {
         source.readBinderList(launchCookies);
         letterboxActivityBounds = source.readTypedObject(Rect.CREATOR);
         positionInParent = source.readTypedObject(Point.CREATOR);
+        parentTaskId = source.readInt();
     }
 
     /**
@@ -308,6 +324,7 @@ public class TaskInfo {
         dest.writeBinderList(launchCookies);
         dest.writeTypedObject(letterboxActivityBounds, flags);
         dest.writeTypedObject(positionInParent, flags);
+        dest.writeInt(parentTaskId);
     }
 
     @Override
@@ -330,6 +347,7 @@ public class TaskInfo {
                 + " launchCookies" + launchCookies
                 + " letterboxActivityBounds=" + letterboxActivityBounds
                 + " positionInParent=" + positionInParent
+                + " parentTaskId: " + parentTaskId
                 + "}";
     }
 }

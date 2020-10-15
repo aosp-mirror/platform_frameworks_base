@@ -335,6 +335,12 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         listener = mTaskListeners.get(taskId);
         if (listener != null) return listener;
 
+        // Next priority goes to the listener listening to its parent.
+        if (runningTaskInfo.hasParentTask()) {
+            listener = mTaskListeners.get(runningTaskInfo.parentTaskId);
+            if (listener != null) return listener;
+        }
+
         // Next we try type specific listeners.
         final int taskListenerType = taskInfoToTaskListenerType(runningTaskInfo);
         return mTaskListeners.get(taskListenerType);
