@@ -28,7 +28,18 @@ public class LatencyTrackerCompat {
         return LatencyTracker.isEnabled(context);
     }
 
+    /**
+     * @see LatencyTracker
+     * @deprecated Please use {@link LatencyTrackerCompat#logToggleRecents(Context, int)} instead.
+     */
+    @Deprecated
     public static void logToggleRecents(int duration) {
-        LatencyTracker.logAction(LatencyTracker.ACTION_TOGGLE_RECENTS, duration);
+        LatencyTracker.logActionDeprecated(LatencyTracker.ACTION_TOGGLE_RECENTS, duration, false);
+    }
+
+    /** @see LatencyTracker */
+    public static void logToggleRecents(Context context, int duration) {
+        LatencyTracker.getInstance(context).logAction(LatencyTracker.ACTION_TOGGLE_RECENTS,
+                duration);
     }
 }
