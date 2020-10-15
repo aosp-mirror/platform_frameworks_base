@@ -623,6 +623,10 @@ public class Tuner implements AutoCloseable  {
      * OnTuneEventListener#SIGNAL_NO_SIGNAL} events sent to the {@link OnTuneEventListener}
      * specified in {@link #setOnTuneEventListener(Executor, OnTuneEventListener)}.
      *
+     * <p>Tuning with {@link android.media.tv.tuner.frontend.DtmbFrontendSettings} is only
+     * supported in Tuner 1.1 or higher version. Unsupported version will cause no-op. Use {@link
+     * TunerVersionChecker.getTunerVersion()} to get the version information.
+     *
      * @param settings Signal delivery information the frontend uses to
      *                 search and lock the signal.
      * @return result status of tune operation.
@@ -633,6 +637,12 @@ public class Tuner implements AutoCloseable  {
     public int tune(@NonNull FrontendSettings settings) {
         Log.d(TAG, "Tune to " + settings.getFrequency());
         mFrontendType = settings.getType();
+        if (mFrontendType == FrontendSettings.TYPE_DTMB) {
+            if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_1_1, "Tuner with DTMB Frontend")) {
+                return RESULT_UNAVAILABLE;
+            }
+        }
         if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
             mFrontendInfo = null;
             Log.d(TAG, "Write Stats Log for tuning.");
@@ -662,6 +672,10 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>Details for channels found are returned via {@link ScanCallback}.
      *
+     * <p>Scanning with {@link android.media.tv.tuner.frontend.DtmbFrontendSettings} is only
+     * supported in Tuner 1.1 or higher version. Unsupported version will cause no-op. Use {@link
+     * TunerVersionChecker.getTunerVersion()} to get the version information.
+     *
      * @param settings A {@link FrontendSettings} to configure the frontend.
      * @param scanType The scan type.
      * @throws SecurityException     if the caller does not have appropriate permissions.
@@ -677,6 +691,12 @@ public class Tuner implements AutoCloseable  {
                             + "started.");
         }
         mFrontendType = settings.getType();
+        if (mFrontendType == FrontendSettings.TYPE_DTMB) {
+            if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_1_1, "Scan with DTMB Frontend")) {
+                return RESULT_UNAVAILABLE;
+            }
+        }
         if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
             mScanCallback = scanCallback;
             mScanCallbackExecutor = executor;
