@@ -29,7 +29,7 @@
 #include <SkSurface.h>
 #include <SkTypes.h>
 
-#include <GrContext.h>
+#include <GrDirectContext.h>
 #include <GrTypes.h>
 #include <vk/GrVkTypes.h>
 
