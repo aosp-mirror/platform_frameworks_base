@@ -123,13 +123,14 @@ public class DvrPlayback implements AutoCloseable {
     /**
      * Attaches a filter to DVR interface for playback.
      *
-     * <p>This method will be deprecated. Now it's a no-op.
-     * <p>Filters opened by {@link Tuner#openFilter} are used for DVR playback.
+     * @deprecated attaching filters is not valid in Dvr Playback use case. This API is a no-op.
+     *             Filters opened by {@link Tuner#openFilter} are used for DVR playback.
      *
      * @param filter the filter to be attached.
      * @return result status of the operation.
      */
     @Result
+    @Deprecated
     public int attachFilter(@NonNull Filter filter) {
         // no-op
         return Tuner.RESULT_UNAVAILABLE;
@@ -138,13 +139,14 @@ public class DvrPlayback implements AutoCloseable {
     /**
      * Detaches a filter from DVR interface.
      *
-     * <p>This method will be deprecated. Now it's a no-op.
-     * <p>Filters opened by {@link Tuner#openFilter} are used for DVR playback.
+     * @deprecated detaching filters is not valid in Dvr Playback use case. This API is a no-op.
+     *             Filters opened by {@link Tuner#openFilter} are used for DVR playback.
      *
      * @param filter the filter to be detached.
      * @return result status of the operation.
      */
     @Result
+    @Deprecated
     public int detachFilter(@NonNull Filter filter) {
         // no-op
         return Tuner.RESULT_UNAVAILABLE;
