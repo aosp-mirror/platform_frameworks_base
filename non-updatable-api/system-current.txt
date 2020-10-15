@@ -1391,20 +1391,20 @@ package android.app.time {
 package android.app.usage {
 
   public final class CacheQuotaHint implements android.os.Parcelable {
-    ctor public CacheQuotaHint(android.app.usage.CacheQuotaHint.Builder);
+    ctor public CacheQuotaHint(@NonNull android.app.usage.CacheQuotaHint.Builder);
     method public int describeContents();
     method public long getQuota();
     method public int getUid();
-    method public android.app.usage.UsageStats getUsageStats();
-    method public String getVolumeUuid();
-    method public void writeToParcel(android.os.Parcel, int);
+    method @Nullable public android.app.usage.UsageStats getUsageStats();
+    method @Nullable public String getVolumeUuid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.CacheQuotaHint> CREATOR;
     field public static final long QUOTA_NOT_SET = -1L; // 0xffffffffffffffffL
   }
 
   public static final class CacheQuotaHint.Builder {
     ctor public CacheQuotaHint.Builder();
-    ctor public CacheQuotaHint.Builder(android.app.usage.CacheQuotaHint);
+    ctor public CacheQuotaHint.Builder(@NonNull android.app.usage.CacheQuotaHint);
     method @NonNull public android.app.usage.CacheQuotaHint build();
     method @NonNull public android.app.usage.CacheQuotaHint.Builder setQuota(long);
     method @NonNull public android.app.usage.CacheQuotaHint.Builder setUid(int);
