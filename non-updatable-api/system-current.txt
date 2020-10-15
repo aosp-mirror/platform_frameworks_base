@@ -5051,10 +5051,10 @@ package android.media.tv.tuner {
 package android.media.tv.tuner.dvr {
 
   public class DvrPlayback implements java.lang.AutoCloseable {
-    method public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method @Deprecated public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.dvr.DvrSettings);
-    method public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method @Deprecated public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
     method public int flush();
     method public long read(long);
     method public long read(@NonNull byte[], long, long);
@@ -5648,9 +5648,9 @@ package android.media.tv.tuner.frontend {
     field public static final int OUTER_FEC_OUTER_FEC_NONE = 1; // 0x1
     field public static final int OUTER_FEC_OUTER_FEC_RS = 2; // 0x2
     field public static final int OUTER_FEC_UNDEFINED = 0; // 0x0
-    field public static final int SPECTRAL_INVERSION_INVERTED = 2; // 0x2
-    field public static final int SPECTRAL_INVERSION_NORMAL = 1; // 0x1
-    field public static final int SPECTRAL_INVERSION_UNDEFINED = 0; // 0x0
+    field @Deprecated public static final int SPECTRAL_INVERSION_INVERTED = 2; // 0x2
+    field @Deprecated public static final int SPECTRAL_INVERSION_NORMAL = 1; // 0x1
+    field @Deprecated public static final int SPECTRAL_INVERSION_UNDEFINED = 0; // 0x0
     field public static final int TIME_INTERLEAVE_MODE_128_1_0 = 2; // 0x2
     field public static final int TIME_INTERLEAVE_MODE_128_1_1 = 4; // 0x4
     field public static final int TIME_INTERLEAVE_MODE_128_2 = 128; // 0x80
