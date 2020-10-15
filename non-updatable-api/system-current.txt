@@ -4710,6 +4710,22 @@ package android.media.tv {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DvbDeviceInfo> CREATOR;
   }
 
+  public final class TunedInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAppTag();
+    method public int getAppType();
+    method @Nullable public android.net.Uri getChannelUri();
+    method @NonNull public String getInputId();
+    method public boolean isForeground();
+    method public boolean isRecordingSession();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int APP_TAG_SELF = 0; // 0x0
+    field public static final int APP_TYPE_NON_SYSTEM = 3; // 0x3
+    field public static final int APP_TYPE_SELF = 1; // 0x1
+    field public static final int APP_TYPE_SYSTEM = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TunedInfo> CREATOR;
+  }
+
   public final class TvContentRatingSystemInfo implements android.os.Parcelable {
     method public static android.media.tv.TvContentRatingSystemInfo createTvContentRatingSystemInfo(int, android.content.pm.ApplicationInfo);
     method public int describeContents();
@@ -4825,6 +4841,7 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
+    method @NonNull @RequiresPermission("com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS") public java.util.List<android.media.tv.TunedInfo> getCurrentTunedInfos();
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
@@ -4848,6 +4865,10 @@ package android.media.tv {
     ctor public TvInputManager.HardwareCallback();
     method public abstract void onReleased();
     method public abstract void onStreamConfigChanged(android.media.tv.TvStreamConfig[]);
+  }
+
+  public abstract static class TvInputManager.TvInputCallback {
+    method public void onCurrentTunedInfosUpdated(@NonNull java.util.List<android.media.tv.TunedInfo>);
   }
 
   public abstract class TvInputService extends android.app.Service {

@@ -906,8 +906,8 @@ public final class TvInputManager {
          * @param tunedInfos a list of {@link TunedInfo} objects of new tuned information.
          * @hide
          */
-        public void onCurrentTunedInfosUpdated(
-                @NonNull List<TunedInfo> tunedInfos) {
+        @SystemApi
+        public void onCurrentTunedInfosUpdated(@NonNull List<TunedInfo> tunedInfos) {
         }
     }
 
@@ -969,7 +969,7 @@ public final class TvInputManager {
             });
         }
 
-        public void onCurrentTunedInfosUpdated(final List<TunedInfo> currentTunedInfos) {
+        public void postCurrentTunedInfosUpdated(final List<TunedInfo> currentTunedInfos) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -1286,7 +1286,7 @@ public final class TvInputManager {
             public void onCurrentTunedInfosUpdated(List<TunedInfo> currentTunedInfos) {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
-                        record.onCurrentTunedInfosUpdated(currentTunedInfos);
+                        record.postCurrentTunedInfosUpdated(currentTunedInfos);
                     }
                 }
             }
@@ -1988,6 +1988,7 @@ public final class TvInputManager {
      * {@link TunedInfo#getChannelUri()} returns {@code null}.
      * @hide
      */
+    @SystemApi
     @RequiresPermission("com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS")
     @NonNull
     public List<TunedInfo> getCurrentTunedInfos() {
