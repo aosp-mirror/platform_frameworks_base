@@ -140,8 +140,14 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         d.setContentView(R.layout.shutdown_dialog);
         d.setCancelable(false);
 
-        int color = Utils.getColorAttrDefaultColor(mContext,
-                com.android.systemui.R.attr.wallpaperTextColor);
+        int color;
+        if (mBlurUtils.supportsBlursOnWindows()) {
+            color = Utils.getColorAttrDefaultColor(mContext,
+                    com.android.systemui.R.attr.wallpaperTextColor);
+        } else {
+            color = mContext.getResources().getColor(
+                    com.android.systemui.R.color.global_actions_shutdown_ui_text);
+        }
 
         ProgressBar bar = d.findViewById(R.id.progress);
         bar.getIndeterminateDrawable().setTint(color);
