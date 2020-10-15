@@ -160,36 +160,32 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsState requestedVisibility, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), requestedVisibility, outFrame,
-                outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
-                outInsetsState, outActiveControls);
+                UserHandle.getUserId(mUid), requestedVisibility, outFrame, outDisplayCutout,
+                outInputChannel, outInsetsState, outActiveControls);
     }
 
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
-            Rect outFrame, Rect outContentInsets, Rect outStableInsets,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+            Rect outFrame, DisplayCutout.ParcelableWrapper outDisplayCutout,
+            InputChannel outInputChannel, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibility, outFrame, outContentInsets, outStableInsets, outDisplayCutout,
-                outInputChannel, outInsetsState, outActiveControls);
+                requestedVisibility, outFrame, outDisplayCutout, outInputChannel, outInsetsState,
+                outActiveControls);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
-            InsetsState outInsetsState) {
+            int viewVisibility, int displayId, InsetsState outInsetsState) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), mDummyRequestedVisibility,
-                new Rect() /* outFrame */, outContentInsets, outStableInsets,
-                new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */,
-                outInsetsState, mDummyControls);
+                new Rect() /* outFrame */, new DisplayCutout.ParcelableWrapper() /* cutout */,
+                null /* outInputChannel */, outInsetsState, mDummyControls);
     }
 
     @Override

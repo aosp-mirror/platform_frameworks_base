@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.annotation.Nullable;
+import android.content.res.CompatibilityInfo;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -90,6 +91,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final WindowInsetsAnimation mAnimation;
     /** @see WindowInsetsAnimationController#hasZeroInsetsIme */
     private final boolean mHasZeroInsetsIme;
+    private final CompatibilityInfo.Translator mTranslator;
     private Insets mCurrentInsets;
     private Insets mPendingInsets;
     private float mPendingFraction;
@@ -107,7 +109,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            @AnimationType int animationType) {
+            @AnimationType int animationType, CompatibilityInfo.Translator translator) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -131,6 +133,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                 durationMs);
         mAnimation.setAlpha(getCurrentAlpha());
         mAnimationType = animationType;
+        mTranslator = translator;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
 
@@ -396,21 +399,23 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
     private void addTranslationToMatrix(@InternalInsetsSide int side, int inset, Matrix m,
             Rect frame) {
+        final float surfaceOffset = mTranslator != null
+                ? mTranslator.translateLengthInAppWindowToScreen(inset) : inset;
         switch (side) {
             case ISIDE_LEFT:
-                m.postTranslate(-inset, 0);
+                m.postTranslate(-surfaceOffset, 0);
                 frame.offset(-inset, 0);
                 break;
             case ISIDE_TOP:
-                m.postTranslate(0, -inset);
+                m.postTranslate(0, -surfaceOffset);
                 frame.offset(0, -inset);
                 break;
             case ISIDE_RIGHT:
-                m.postTranslate(inset, 0);
+                m.postTranslate(surfaceOffset, 0);
                 frame.offset(inset, 0);
                 break;
             case ISIDE_BOTTOM:
-                m.postTranslate(0, inset);
+                m.postTranslate(0, surfaceOffset);
                 frame.offset(0, inset);
                 break;
         }

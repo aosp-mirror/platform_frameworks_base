@@ -321,7 +321,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
             assertNull(controls[i].getLeash());
         }
 
-        final InsetsState state = policy.getInsetsForDispatch(mAppWindow);
+        final InsetsState state = policy.getInsetsForWindow(mAppWindow);
         state.setSourceVisible(ITYPE_STATUS_BAR, true);
         state.setSourceVisible(ITYPE_NAVIGATION_BAR, true);
 

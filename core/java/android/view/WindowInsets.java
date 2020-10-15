@@ -924,6 +924,15 @@ public final class WindowInsets {
         Preconditions.checkArgumentNonnegative(right);
         Preconditions.checkArgumentNonnegative(bottom);
 
+        return insetUnchecked(left, top, right, bottom);
+    }
+
+    /**
+     * @see #inset(int, int, int, int)
+     * @hide
+     */
+    @NonNull
+    public WindowInsets insetUnchecked(int left, int top, int right, int bottom) {
         return new WindowInsets(
                 mSystemWindowInsetsConsumed
                         ? null

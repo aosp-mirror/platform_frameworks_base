@@ -188,7 +188,6 @@ import com.android.server.policy.WindowOrientationListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.InputMonitor.EventReceiverInputConsumer;
-import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -1439,25 +1438,15 @@ public class DisplayPolicy {
      * @param attrs The LayoutParams of the window.
      * @param windowToken The token of the window.
      * @param outFrame The frame of the window.
-     * @param outContentInsets The areas covered by system windows, expressed as positive insets.
-     * @param outStableInsets The areas covered by stable system windows irrespective of their
-     *                        current visibility. Expressed as positive insets.
      * @param outDisplayCutout The area that has been cut away from the display.
+     * @param outInsetsState The insets state of this display from the client's perspective.
+     * @param localClient Whether the client is from the our process.
      * @return Whether to always consume the system bars.
      *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
      */
     boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets,
-            DisplayCutout.ParcelableWrapper outDisplayCutout) {
-        final int fl = attrs.flags;
-        final int pfl = attrs.privateFlags;
-        final int sysUiVis = attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility;
-
-        final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) != 0;
-        final boolean layoutInScreenAndInsetDecor = layoutInScreen
-                && (fl & FLAG_LAYOUT_INSET_DECOR) != 0;
-        final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
-
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InsetsState outInsetsState,
+            boolean localClient) {
         final boolean isFixedRotationTransforming =
                 windowToken != null && windowToken.isFixedRotationTransforming();
         final ActivityRecord activity = windowToken != null ? windowToken.asActivityRecord() : null;
@@ -1466,55 +1455,35 @@ public class DisplayPolicy {
                 // Use token (activity) bounds if it is rotated because its task is not rotated.
                 ? windowToken.getBounds()
                 : (task != null ? task.getBounds() : null);
+        final InsetsState state =
+                mDisplayContent.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
+        computeWindowBounds(attrs, state, outFrame);
+        if (taskBounds != null) {
+            outFrame.intersect(taskBounds);
+        }
+
+        final int fl = attrs.flags;
+        final int pfl = attrs.privateFlags;
+        final boolean layoutInScreenAndInsetDecor = (fl & FLAG_LAYOUT_IN_SCREEN) != 0
+                && (fl & FLAG_LAYOUT_INSET_DECOR) != 0;
+        final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
         final DisplayFrames displayFrames = isFixedRotationTransforming
                 ? windowToken.getFixedRotationTransformDisplayFrames()
                 : mDisplayContent.mDisplayFrames;
-
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
-                    || (attrs.getFitInsetsTypes() & Type.navigationBars()) == 0) {
-                outFrame.set(displayFrames.mUnrestricted);
-            } else {
-                outFrame.set(displayFrames.mRestricted);
-            }
-
-            final boolean isFloatingTask = task != null && task.isFloating();
-            final Rect sf = isFloatingTask ? null : displayFrames.mStable;
-            final Rect cf;
-            if (isFloatingTask) {
-                cf = null;
-            } else if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
-                if ((fl & FLAG_FULLSCREEN) != 0) {
-                    cf = displayFrames.mStableFullscreen;
-                } else {
-                    cf = displayFrames.mStable;
-                }
-            } else if ((fl & FLAG_FULLSCREEN) != 0) {
-                cf = displayFrames.mUnrestricted;
-            } else {
-                cf = displayFrames.mCurrent;
-            }
-
-            if (taskBounds != null) {
-                outFrame.intersect(taskBounds);
-            }
-            InsetUtils.insetsBetweenFrames(outFrame, cf, outContentInsets);
-            InsetUtils.insetsBetweenFrames(outFrame, sf, outStableInsets);
-            outDisplayCutout.set(displayFrames.mDisplayCutout.calculateRelativeTo(outFrame)
-                    .getDisplayCutout());
+            outDisplayCutout.set(
+                    displayFrames.mDisplayCutout.calculateRelativeTo(outFrame).getDisplayCutout());
         } else {
-            if (layoutInScreen) {
-                outFrame.set(displayFrames.mUnrestricted);
-            } else {
-                outFrame.set(displayFrames.mStable);
-            }
-            if (taskBounds != null) {
-                outFrame.intersect(taskBounds);
-            }
-
-            outContentInsets.setEmpty();
-            outStableInsets.setEmpty();
             outDisplayCutout.set(DisplayCutout.NO_CUTOUT);
+        }
+
+        final boolean inSizeCompatMode = WindowState.inSizeCompatMode(attrs, windowToken);
+        outInsetsState.set(state, inSizeCompatMode || localClient);
+        if (inSizeCompatMode) {
+            final float compatScale = windowToken != null
+                    ? windowToken.getSizeCompatScale()
+                    : mDisplayContent.mCompatibleScreenScale;
+            outInsetsState.scale(1f / compatScale);
         }
         return mForceShowSystemBars;
     }
@@ -1616,8 +1585,9 @@ public class DisplayPolicy {
      */
     public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
         displayFrames.onBeginLayout();
-        updateInsetsStateForDisplayCutout(displayFrames,
-                mDisplayContent.getInsetsStateController().getRawInsetsState());
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        updateInsetsStateForDisplayCutout(displayFrames, state);
+        state.setDisplayFrame(displayFrames.mUnrestricted);
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
 
@@ -1981,6 +1951,28 @@ public class DisplayPolicy {
         return !notFocusableForIm;
     }
 
+    private void computeWindowBounds(WindowManager.LayoutParams attrs, InsetsState state,
+            Rect outBounds) {
+        final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
+        final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
+        final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
+        final Rect dfu = state.getDisplayFrame();
+        Insets insets = Insets.of(0, 0, 0, 0);
+        for (int i = types.size() - 1; i >= 0; i--) {
+            final InsetsSource source = state.peekSource(types.valueAt(i));
+            if (source == null) {
+                continue;
+            }
+            insets = Insets.max(insets, source.calculateInsets(
+                    dfu, attrs.isFitInsetsIgnoringVisibility()));
+        }
+        final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
+        final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;
+        final int right = (sidesToFit & Side.RIGHT) != 0 ? insets.right : 0;
+        final int bottom = (sidesToFit & Side.BOTTOM) != 0 ? insets.bottom : 0;
+        outBounds.set(dfu.left + left, dfu.top + top, dfu.right - right, dfu.bottom - bottom);
+    }
+
     /**
      * Called for each window attached to the window manager as layout is proceeding. The
      * implementation of this function must take care of setting the window's frame, either here or
@@ -2027,31 +2019,12 @@ public class DisplayPolicy {
 
         sf.set(displayFrames.mStable);
 
-        final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
-        final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
-        final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
-        getRotatedWindowBounds(displayFrames, win, sTmpRect);
-        final Rect dfu = sTmpRect;
-        Insets insets = Insets.of(0, 0, 0, 0);
-        for (int i = types.size() - 1; i >= 0; i--) {
-            final InsetsSource source = mDisplayContent.getInsetsPolicy()
-                    .getInsetsForDispatch(win).peekSource(types.valueAt(i));
-            if (source == null) {
-                continue;
-            }
-            insets = Insets.max(insets, source.calculateInsets(
-                    dfu, attrs.isFitInsetsIgnoringVisibility()));
-        }
-        final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
-        final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;
-        final int right = (sidesToFit & Side.RIGHT) != 0 ? insets.right : 0;
-        final int bottom = (sidesToFit & Side.BOTTOM) != 0 ? insets.bottom : 0;
-        df.set(dfu.left + left, dfu.top + top, dfu.right - right, dfu.bottom - bottom);
+        final InsetsState state = mDisplayContent.getInsetsPolicy().getInsetsForWindow(win);
+        computeWindowBounds(attrs, state, df);
         if (attached == null) {
             pf.set(df);
             if ((pfl & PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME) != 0) {
-                final InsetsSource source = mDisplayContent.getInsetsPolicy()
-                        .getInsetsForDispatch(win).peekSource(ITYPE_IME);
+                final InsetsSource source = state.peekSource(ITYPE_IME);
                 if (source != null) {
                     pf.inset(source.calculateInsets(pf, false /* ignoreVisibility */));
                 }
@@ -2127,6 +2100,7 @@ public class DisplayPolicy {
             // They will later be cropped or shifted using the displayFrame in WindowState,
             // which prevents overlap with the DisplayCutout.
             if (!attachedInParent && !floatingInScreenWindow) {
+                getRotatedWindowBounds(displayFrames, win, sTmpRect);
                 sTmpRect.set(pf);
                 pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
                 windowFrames.setParentFrameWasClippedByDisplayCutout(!sTmpRect.equals(pf));

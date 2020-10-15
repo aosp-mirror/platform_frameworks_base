@@ -42,19 +42,11 @@ public class ClientWindowFrames implements Parcelable {
     /** The area cut from the display. */
     public final @NonNull DisplayCutout.ParcelableWrapper displayCutout;
 
-    // TODO(b/149813814): Remove legacy insets.
-    public final Rect contentInsets;
-    public final Rect visibleInsets;
-    public final Rect stableInsets;
-
     public ClientWindowFrames() {
         frame = new Rect();
         displayFrame = new Rect();
         backdropFrame = new Rect();
         displayCutout = new DisplayCutout.ParcelableWrapper();
-        contentInsets = new Rect();
-        visibleInsets = new Rect();
-        stableInsets = new Rect();
     }
 
     public ClientWindowFrames(ClientWindowFrames other) {
@@ -62,9 +54,6 @@ public class ClientWindowFrames implements Parcelable {
         displayFrame = new Rect(other.displayFrame);
         backdropFrame = new Rect(other.backdropFrame);
         displayCutout = new DisplayCutout.ParcelableWrapper(other.displayCutout.get());
-        contentInsets = new Rect(other.contentInsets);
-        visibleInsets = new Rect(other.visibleInsets);
-        stableInsets = new Rect(other.stableInsets);
     }
 
     private ClientWindowFrames(Parcel in) {
@@ -72,9 +61,6 @@ public class ClientWindowFrames implements Parcelable {
         displayFrame = Rect.CREATOR.createFromParcel(in);
         backdropFrame = Rect.CREATOR.createFromParcel(in);
         displayCutout = DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in);
-        contentInsets = Rect.CREATOR.createFromParcel(in);
-        visibleInsets = Rect.CREATOR.createFromParcel(in);
-        stableInsets = Rect.CREATOR.createFromParcel(in);
     }
 
     /** Needed for AIDL out parameters. */
@@ -83,9 +69,6 @@ public class ClientWindowFrames implements Parcelable {
         displayFrame.set(Rect.CREATOR.createFromParcel(in));
         backdropFrame.set(Rect.CREATOR.createFromParcel(in));
         displayCutout.set(DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in));
-        contentInsets.set(Rect.CREATOR.createFromParcel(in));
-        visibleInsets.set(Rect.CREATOR.createFromParcel(in));
-        stableInsets.set(Rect.CREATOR.createFromParcel(in));
     }
 
     @Override
@@ -94,9 +77,6 @@ public class ClientWindowFrames implements Parcelable {
         displayFrame.writeToParcel(dest, flags);
         backdropFrame.writeToParcel(dest, flags);
         displayCutout.writeToParcel(dest, flags);
-        contentInsets.writeToParcel(dest, flags);
-        visibleInsets.writeToParcel(dest, flags);
-        stableInsets.writeToParcel(dest, flags);
     }
 
     @Override

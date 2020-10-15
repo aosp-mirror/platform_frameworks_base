@@ -335,6 +335,13 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /**
+     * @return {@code true} if this window token has bounds for size compatibility mode.
+     */
+    boolean hasSizeCompatBounds() {
+        return false;
+    }
+
+    /**
      * Returns true if the new window is considered greater than the existing window in terms of
      * z-order.
      */

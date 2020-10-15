@@ -270,25 +270,6 @@ public class SystemWindows {
             mDisplayId = displayId;
         }
 
-        @Override
-        public int relayout(IWindow window, WindowManager.LayoutParams attrs,
-                int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-                long frameNumber, ClientWindowFrames outFrames,
-                MergedConfiguration mergedConfiguration,
-                SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-                InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
-            int res = super.relayout(window, attrs, requestedWidth, requestedHeight,
-                    viewVisibility, flags, frameNumber, outFrames,
-                    mergedConfiguration, outSurfaceControl, outInsetsState,
-                    outActiveControls, outSurfaceSize);
-            if (res != 0) {
-                return res;
-            }
-            DisplayLayout dl = mDisplayController.getDisplayLayout(mDisplayId);
-            outFrames.stableInsets.set(dl.stableInsets());
-            return 0;
-        }
-
         void updateConfiguration(Configuration configuration) {
             setConfiguration(configuration);
         }
