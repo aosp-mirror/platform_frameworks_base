@@ -60,7 +60,6 @@ public class PipBoundsHandler {
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
     private float mMaxAspectRatio;
-    private float mAspectRatio;
     private int mDefaultStackGravity;
     private int mDefaultMinSize;
     private Point mScreenEdgeInsets;
@@ -80,7 +79,7 @@ public class PipBoundsHandler {
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
         // triggers a configuration change and the resources to be reloaded.
-        mAspectRatio = mDefaultAspectRatio;
+        mPipBoundsState.setAspectRatio(mDefaultAspectRatio);
     }
 
     /**
@@ -126,10 +125,6 @@ public class PipBoundsHandler {
         mCurrentMinSize = minEdgeSize;
     }
 
-    protected float getAspectRatio() {
-        return mAspectRatio;
-    }
-
     /**
      * Sets both shelf visibility and its height if applicable.
      * @return {@code true} if the internal shelf state is changed, {@code false} otherwise.
@@ -165,8 +160,8 @@ public class PipBoundsHandler {
         if (animatingBounds.isEmpty()) {
             animatingBounds.set(defaultBounds);
         }
-        if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
-            transformBoundsToAspectRatio(normalBounds, mAspectRatio,
+        if (isValidPictureInPictureAspectRatio(mPipBoundsState.getAspectRatio())) {
+            transformBoundsToAspectRatio(normalBounds, mPipBoundsState.getAspectRatio(),
                     false /* useCurrentMinEdgeSize */, false /* useCurrentSize */);
         }
         displayInfo.copyFrom(mDisplayInfo);
@@ -205,27 +200,16 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Responds to IPinnedStackListener on resetting aspect ratio for the pinned window.
-     * It will normally follow up with a
-     * {@link #onMovementBoundsChanged(Rect, Rect, Rect, DisplayInfo)} callback.
+     * See {@link #getDestinationBounds(Rect, Size, boolean)}
      */
-    public void onAspectRatioChanged(float aspectRatio) {
-        mAspectRatio = aspectRatio;
-    }
-
-    /**
-     * See {@link #getDestinationBounds(float, Rect, Size, boolean)}
-     */
-    public Rect getDestinationBounds(float aspectRatio, Rect bounds, Size minimalSize) {
-        return getDestinationBounds(aspectRatio, bounds, minimalSize,
-                false /* useCurrentMinEdgeSize */);
+    public Rect getDestinationBounds(Rect bounds, Size minimalSize) {
+        return getDestinationBounds(bounds, minimalSize, false /* useCurrentMinEdgeSize */);
     }
 
     /**
      * @return {@link Rect} of the destination PiP window bounds.
      */
-    public Rect getDestinationBounds(float aspectRatio, Rect bounds,
-            Size minimalSize, boolean useCurrentMinEdgeSize) {
+    public Rect getDestinationBounds(Rect bounds, Size minimalSize, boolean useCurrentMinEdgeSize) {
         boolean isReentryBounds = false;
         final Rect destinationBounds;
         if (bounds == null) {
@@ -248,11 +232,10 @@ public class PipBoundsHandler {
             // Just adjusting bounds (e.g. on aspect ratio changed).
             destinationBounds = new Rect(bounds);
         }
-        if (isValidPictureInPictureAspectRatio(aspectRatio)) {
-            transformBoundsToAspectRatio(destinationBounds, aspectRatio, useCurrentMinEdgeSize,
-                    isReentryBounds);
+        if (isValidPictureInPictureAspectRatio(mPipBoundsState.getAspectRatio())) {
+            transformBoundsToAspectRatio(destinationBounds, mPipBoundsState.getAspectRatio(),
+                    useCurrentMinEdgeSize, isReentryBounds);
         }
-        mAspectRatio = aspectRatio;
         return destinationBounds;
     }
 
@@ -361,8 +344,8 @@ public class PipBoundsHandler {
      * @param stackBounds
      */
     public void transformBoundsToAspectRatio(Rect stackBounds) {
-        transformBoundsToAspectRatio(stackBounds, mAspectRatio, true /* useCurrentMinEdgeSize */,
-                true /* useCurrentSize */);
+        transformBoundsToAspectRatio(stackBounds, mPipBoundsState.getAspectRatio(),
+                true /* useCurrentMinEdgeSize */, true /* useCurrentSize */);
     }
 
     /**
@@ -507,7 +490,6 @@ public class PipBoundsHandler {
         pw.println(innerPrefix + "mDefaultAspectRatio=" + mDefaultAspectRatio);
         pw.println(innerPrefix + "mMinAspectRatio=" + mMinAspectRatio);
         pw.println(innerPrefix + "mMaxAspectRatio=" + mMaxAspectRatio);
-        pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDefaultStackGravity=" + mDefaultStackGravity);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);

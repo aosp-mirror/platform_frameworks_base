@@ -197,8 +197,10 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         @Override
         public void onAspectRatioChanged(float aspectRatio) {
+            // TODO(b/169373982): Remove this callback as it is redundant with PipTaskOrg params
+            // change.
             mHandler.post(() -> {
-                mPipBoundsHandler.onAspectRatioChanged(aspectRatio);
+                mPipBoundsState.setAspectRatio(aspectRatio);
                 mTouchHandler.onAspectRatioChanged();
             });
         }
