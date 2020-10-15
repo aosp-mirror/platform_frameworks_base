@@ -545,19 +545,14 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"আপুনি সীমিত প্ৰ\'ফাইল এটা সৃষ্টি কৰাৰ আগেয়ে, আপোনাৰ ব্যক্তিগত ডেটা আৰু এপবিলাকক সুৰক্ষিত কৰিবলৈ স্ক্ৰীণ লক এটা নিৰ্ধাৰণ কৰিব লাগিব।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক ছেট কৰক"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>লৈ সলনি কৰক"</string>
-    <!-- no translation found for creating_new_user_dialog_message (7232880257538970375) -->
-    <skip />
-    <!-- no translation found for user_nickname (262624187455825083) -->
-    <skip />
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰি থকা হৈছে…"</string>
+    <string name="user_nickname" msgid="262624187455825083">"উপনাম"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ কৰক"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি আঁতৰাওক"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>
-    <!-- no translation found for user_image_take_photo (467512954561638530) -->
-    <skip />
-    <!-- no translation found for user_image_choose_photo (1363820919146782908) -->
-    <skip />
-    <!-- no translation found for user_image_photo_selector (433658323306627093) -->
-    <skip />
+    <string name="user_image_take_photo" msgid="467512954561638530">"এখন ফট’ তোলক"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"এখন প্ৰতিচ্ছবি বাছনি কৰক"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"ফট’ বাছনি কৰক"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ডিভাইচ ডিফ’ল্ট"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"অক্ষম কৰা আছে"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"সক্ষম কৰা আছে"</string>
