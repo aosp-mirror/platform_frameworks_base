@@ -284,7 +284,7 @@ public final class UidPermissionState {
         final PermissionState permissionState = getOrCreatePermissionState(permission);
         final boolean changed = permissionState.updateFlags(flagMask, flagValues);
         if (changed && permissionState.isDefault()) {
-            removePermissionState(permission.name);
+            removePermissionState(permission.getName());
         }
         return changed;
     }
