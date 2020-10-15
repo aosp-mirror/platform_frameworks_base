@@ -465,6 +465,7 @@ void CanvasContext::draw() {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely
+        waitOnFences();
         for (auto& func : mFrameCompleteCallbacks) {
             std::invoke(func, mFrameNumber);
         }
