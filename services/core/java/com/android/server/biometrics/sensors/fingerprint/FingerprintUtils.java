@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Utility class for dealing with fingerprints and fingerprint settings.
  */
-public class FingerprintUtils implements BiometricUtils {
+public class FingerprintUtils implements BiometricUtils<Fingerprint> {
 
     private static final Object sInstanceLock = new Object();
     private static FingerprintUtils sInstance;
@@ -56,9 +56,8 @@ public class FingerprintUtils implements BiometricUtils {
     }
 
     @Override
-    public void addBiometricForUser(Context context, int userId,
-            BiometricAuthenticator.Identifier identifier) {
-        getStateForUser(context, userId).addBiometric(identifier);
+    public void addBiometricForUser(Context context, int userId, Fingerprint fingerprint) {
+        getStateForUser(context, userId).addBiometric(fingerprint);
     }
 
     @Override
