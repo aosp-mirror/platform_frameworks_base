@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -101,6 +102,7 @@ public final class IpFilterConfiguration extends FilterConfiguration {
      * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would return
      * default value. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
+    @IntRange(from = 0, to = 0xefff)
     public int getIpFilterContextId() {
         return mIpFilterContextId;
     }
