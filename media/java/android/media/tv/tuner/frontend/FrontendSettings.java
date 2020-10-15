@@ -37,7 +37,7 @@ public abstract class FrontendSettings {
     /** @hide */
     @IntDef(prefix = "TYPE_",
             value = {TYPE_UNDEFINED, TYPE_ANALOG, TYPE_ATSC, TYPE_ATSC3, TYPE_DVBC, TYPE_DVBS,
-                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT})
+                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT, TYPE_DTMB})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
@@ -81,7 +81,10 @@ public abstract class FrontendSettings {
      * Integrated Services Digital Broadcasting-Terrestrial (ISDB-T) frontend type.
      */
     public static final int TYPE_ISDBT = Constants.FrontendType.ISDBT;
-
+    /**
+     * Digital Terrestrial Multimedia Broadcast standard (DTMB) frontend type.
+     */
+    public static final int TYPE_DTMB = android.hardware.tv.tuner.V1_1.Constants.FrontendType.DTMB;
 
 
     /** @hide */
