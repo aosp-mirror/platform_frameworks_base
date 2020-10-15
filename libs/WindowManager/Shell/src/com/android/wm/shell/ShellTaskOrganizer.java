@@ -28,11 +28,13 @@ import android.annotation.IntDef;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.WindowingMode;
 import android.util.Log;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
+import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -42,6 +44,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Unified task organizer for all components in the shell.
@@ -82,7 +85,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     // Keeps track of all the tasks reported to this organizer (changes in windowing mode will
     // require us to report to both old and new listeners)
-    private final SparseArray<Pair<RunningTaskInfo, SurfaceControl>> mTasks = new SparseArray<>();
+    private final SparseArray<TaskAppearedInfo> mTasks = new SparseArray<>();
 
     // TODO(shell-transitions): move to a more "global" Shell location as this isn't only for Tasks
     private final Transitions mTransitions;
@@ -102,6 +105,19 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
     }
 
+    @Override
+    public List<TaskAppearedInfo> registerOrganizer() {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Registering organizer");
+        final List<TaskAppearedInfo> taskInfos = super.registerOrganizer();
+        for (int i = 0; i < taskInfos.size(); i++) {
+            final TaskAppearedInfo info = taskInfos.get(i);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Existing task: id=%d component=%s",
+                    info.getTaskInfo().taskId, info.getTaskInfo().baseIntent);
+            onTaskAppeared(info.getTaskInfo(), info.getLeash());
+        }
+        return taskInfos;
+    }
+
     /**
      * Adds a listener for tasks with given types.
      */
@@ -117,10 +133,11 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
             // Notify the listener of all existing tasks with the given type.
             for (int i = mTasks.size() - 1; i >= 0; i--) {
-                Pair<RunningTaskInfo, SurfaceControl> data = mTasks.valueAt(i);
-                final @TaskListenerType int taskListenerType = getTaskListenerType(data.first);
+                TaskAppearedInfo data = mTasks.valueAt(i);
+                final @TaskListenerType int taskListenerType = getTaskListenerType(
+                        data.getTaskInfo());
                 if (taskListenerType == listenerType) {
-                    listener.onTaskAppeared(data.first, data.second);
+                    listener.onTaskAppeared(data.getTaskInfo(), data.getLeash());
                 }
             }
         }
@@ -143,7 +160,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task appeared taskId=%d",
                 taskInfo.taskId);
-        mTasks.put(taskInfo.taskId, new Pair<>(taskInfo, leash));
+        mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, leash));
         final TaskListener listener = mTaskListenersByType.get(getTaskListenerType(taskInfo));
         if (listener != null) {
             listener.onTaskAppeared(taskInfo, leash);
@@ -154,10 +171,10 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task info changed taskId=%d",
                 taskInfo.taskId);
-        final Pair<RunningTaskInfo, SurfaceControl> data = mTasks.get(taskInfo.taskId);
+        final TaskAppearedInfo data = mTasks.get(taskInfo.taskId);
         final @TaskListenerType int listenerType = getTaskListenerType(taskInfo);
-        final @TaskListenerType int prevListenerType = getTaskListenerType(data.first);
-        mTasks.put(taskInfo.taskId, new Pair<>(taskInfo, data.second));
+        final @TaskListenerType int prevListenerType = getTaskListenerType(data.getTaskInfo());
+        mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, data.getLeash()));
         if (prevListenerType != listenerType) {
             // TODO: We currently send vanished/appeared as the task moves between types, but
             //       we should consider adding a different mode-changed callback
@@ -167,7 +184,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             }
             listener = mTaskListenersByType.get(listenerType);
             if (listener != null) {
-                SurfaceControl leash = data.second;
+                SurfaceControl leash = data.getLeash();
                 listener.onTaskAppeared(taskInfo, leash);
             }
         } else {
@@ -193,7 +210,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Task vanished taskId=%d",
                 taskInfo.taskId);
         final @TaskListenerType int prevListenerType =
-                getTaskListenerType(mTasks.get(taskInfo.taskId).first);
+                getTaskListenerType(mTasks.get(taskInfo.taskId).getTaskInfo());
         mTasks.remove(taskInfo.taskId);
         final TaskListener listener = mTaskListenersByType.get(prevListenerType);
         if (listener != null) {

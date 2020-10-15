@@ -238,10 +238,10 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Sets whether a container should ignore the orientation request from apps below it. It
-     * currently only applies to {@link com.android.server.wm.TaskDisplayArea}. When {@code false},
-     * it may rotate based on the orientation request; When {@code true}, it can never specify
-     * orientation, but shows the fixed-orientation apps in the letterbox.
+     * Sets whether a container should ignore the orientation request from apps and windows below
+     * it. It currently only applies to {@link com.android.server.wm.DisplayArea}. When
+     * {@code false}, it may rotate based on the orientation request; When {@code true}, it can
+     * never specify orientation, but shows the fixed-orientation apps below it in the letterbox.
      * @hide
      */
     @NonNull

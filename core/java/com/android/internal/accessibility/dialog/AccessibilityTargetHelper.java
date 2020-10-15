@@ -21,6 +21,7 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTT
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
 
@@ -112,7 +113,7 @@ public final class AccessibilityTargetHelper {
             @ShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
         targets.addAll(getAccessibilityFilteredTargets(context, shortcutType));
-        targets.addAll(getWhiteListingFeatureTargets(context, shortcutType));
+        targets.addAll(getAllowListingFeatureTargets(context, shortcutType));
 
         return targets;
     }
@@ -196,12 +197,12 @@ public final class AccessibilityTargetHelper {
         return targets;
     }
 
-    private static List<AccessibilityTarget> getWhiteListingFeatureTargets(Context context,
+    private static List<AccessibilityTarget> getAllowListingFeatureTargets(Context context,
             @ShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
 
-        final InvisibleToggleWhiteListingFeatureTarget magnification =
-                new InvisibleToggleWhiteListingFeatureTarget(context,
+        final InvisibleToggleAllowListingFeatureTarget magnification =
+                new InvisibleToggleAllowListingFeatureTarget(context,
                 shortcutType,
                 isShortcutContained(context, shortcutType, MAGNIFICATION_CONTROLLER_NAME),
                 MAGNIFICATION_CONTROLLER_NAME,
@@ -209,8 +210,8 @@ public final class AccessibilityTargetHelper {
                 context.getDrawable(R.drawable.ic_accessibility_magnification),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
 
-        final ToggleWhiteListingFeatureTarget daltonizer =
-                new ToggleWhiteListingFeatureTarget(context,
+        final ToggleAllowListingFeatureTarget daltonizer =
+                new ToggleAllowListingFeatureTarget(context,
                 shortcutType,
                 isShortcutContained(context, shortcutType,
                         DALTONIZER_COMPONENT_NAME.flattenToString()),
@@ -219,8 +220,8 @@ public final class AccessibilityTargetHelper {
                 context.getDrawable(R.drawable.ic_accessibility_color_correction),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
 
-        final ToggleWhiteListingFeatureTarget colorInversion =
-                new ToggleWhiteListingFeatureTarget(context,
+        final ToggleAllowListingFeatureTarget colorInversion =
+                new ToggleAllowListingFeatureTarget(context,
                 shortcutType,
                 isShortcutContained(context, shortcutType,
                         COLOR_INVERSION_COMPONENT_NAME.flattenToString()),
@@ -229,9 +230,21 @@ public final class AccessibilityTargetHelper {
                 context.getDrawable(R.drawable.ic_accessibility_color_inversion),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
+        // TODO: Update with shortcut icon
+        final ToggleAllowListingFeatureTarget reduceBrightColors =
+                new ToggleAllowListingFeatureTarget(context,
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                REDUCE_BRIGHT_COLORS_COMPONENT_NAME.flattenToString()),
+                        REDUCE_BRIGHT_COLORS_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.reduce_bright_colors_feature_name),
+                        null,
+                        Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
+
         targets.add(magnification);
         targets.add(daltonizer);
         targets.add(colorInversion);
+        targets.add(reduceBrightColors);
 
         return targets;
     }

@@ -3508,6 +3508,7 @@ public abstract class Context {
             PERMISSION_SERVICE,
             LIGHTS_SERVICE,
             //@hide: PEOPLE_SERVICE,
+            //@hide: DEVICE_STATE_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5244,6 +5245,14 @@ public abstract class Context {
      * @hide
      */
     public static final String PEOPLE_SERVICE = "people";
+
+    /**
+     * Use with {@link #getSystemService(String)} to access device state service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String DEVICE_STATE_SERVICE = "device_state";
 
     /**
      * Determine whether the given permission is allowed for a particular

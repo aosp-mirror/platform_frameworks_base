@@ -16,8 +16,11 @@
 
 package com.android.server.devicestate;
 
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.devicestate.IDeviceStateManager;
 import android.util.IntArray;
 import android.util.Slog;
 
@@ -49,9 +52,6 @@ import java.util.Arrays;
  * @see DeviceStatePolicy
  */
 public final class DeviceStateManagerService extends SystemService {
-    /** Invalid device state. */
-    public static final int INVALID_DEVICE_STATE = -1;
-
     private static final String TAG = "DeviceStateManagerService";
     private static final boolean DEBUG = false;
 
@@ -88,6 +88,7 @@ public final class DeviceStateManagerService extends SystemService {
     @Override
     public void onStart() {
         mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
+        publishBinderService(Context.DEVICE_STATE_SERVICE, new BinderService());
     }
 
     /**
@@ -266,5 +267,10 @@ public final class DeviceStateManagerService extends SystemService {
 
             requestState(state);
         }
+    }
+
+    /** Implementation of {@link IDeviceStateManager} published as a binder service. */
+    private final class BinderService extends IDeviceStateManager.Stub {
+
     }
 }

@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
+import com.android.ddmlib.Log;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.IFileEntry;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
@@ -53,6 +54,7 @@ import java.util.stream.Collectors;
  */
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedRollbackTest extends BaseHostJUnit4Test {
+    private static final String TAG = "StagedRollbackTest";
     private static final int NATIVE_CRASHES_THRESHOLD = 5;
 
     /**
@@ -556,16 +558,18 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         return String.format("/data/user_de/%d/%s", userId, apexName);
     }
 
-    private List<String> getSnapshotDirectories(String baseDir) {
-        try {
-            return getDevice().getFileEntry(baseDir).getChildren(false)
-                    .stream().filter(entry -> entry.getName().matches("\\d+(-prerestore)?"))
-                    .map(entry -> entry.getFullPath())
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            // Return an empty list if any error
+    private List<String> getSnapshotDirectories(String baseDir) throws Exception {
+        IFileEntry f = getDevice().getFileEntry(baseDir);
+        if (f == null) {
+            Log.d(TAG, "baseDir doesn't exist: " + baseDir);
             return Collections.EMPTY_LIST;
         }
+        List<String> list = f.getChildren(false)
+                .stream().filter(entry -> entry.getName().matches("\\d+(-prerestore)?"))
+                .map(entry -> entry.getFullPath())
+                .collect(Collectors.toList());
+        Log.d(TAG, "getSnapshotDirectories=" + list);
+        return list;
     }
 
     private void assertDirectoryIsEmpty(String path) {

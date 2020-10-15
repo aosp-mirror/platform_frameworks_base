@@ -687,7 +687,9 @@ public final class Font {
                 charBuffer[3] = (char) ((packedAxis & 0x0000_00FF_0000_0000L) >> 32);
                 axes[i] = new FontVariationAxis(new String(charBuffer), value);
             }
-            Font.Builder builder = new Font.Builder(buffer)
+            String path = nGetFontPath(ptr);
+            File file = (path == null) ? null : new File(path);
+            Font.Builder builder = new Font.Builder(buffer, file, "")
                     .setWeight(weight)
                     .setSlant(italic ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT)
                     .setTtcIndex(ttcIndex)
@@ -710,6 +712,9 @@ public final class Font {
 
     @CriticalNative
     private static native long nGetAxisInfo(long ptr, int i);
+
+    @FastNative
+    private static native String nGetFontPath(long ptr);
 
     @FastNative
     private static native float nGetGlyphBounds(long font, int glyphId, long paint, RectF rect);

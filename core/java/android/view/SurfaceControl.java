@@ -187,8 +187,6 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
     private static native void nativeSeverChildren(long transactionObj, long nativeObject);
-    private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
-            int scalingMode);
 
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
 
@@ -1515,16 +1513,6 @@ public final class SurfaceControl implements Parcelable {
     public void detachChildren() {
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.detachChildren(this);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setOverrideScalingMode(int scalingMode) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setOverrideScalingMode(this, scalingMode);
         }
     }
 
@@ -2985,16 +2973,6 @@ public final class SurfaceControl implements Parcelable {
         public Transaction detachChildren(SurfaceControl sc) {
             checkPreconditions(sc);
             nativeSeverChildren(mNativeObject, sc.mNativeObject);
-            return this;
-        }
-
-        /**
-         * @hide
-         */
-        public Transaction setOverrideScalingMode(SurfaceControl sc, int overrideScalingMode) {
-            checkPreconditions(sc);
-            nativeSetOverrideScalingMode(mNativeObject, sc.mNativeObject,
-                    overrideScalingMode);
             return this;
         }
 

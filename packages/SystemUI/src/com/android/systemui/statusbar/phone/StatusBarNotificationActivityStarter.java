@@ -30,6 +30,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -40,7 +41,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.view.RemoteAnimationAdapter;
-import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -402,7 +402,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             PendingIntent intent,
             Intent fillInIntent,
             NotificationEntry entry,
-            View row,
+            ExpandableNotificationRow row,
             boolean wasOccluded,
             boolean isActivityIntent) {
         RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(row,
@@ -414,8 +414,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                         .registerRemoteAnimationForNextActivityStart(
                                 intent.getCreatorPackage(), adapter);
             }
+            long eventTime = row.getAndResetLastActionUpTime();
+            Bundle options = eventTime > 0 ? getActivityOptions(adapter,
+                    mKeyguardStateController.isShowing(), eventTime) : getActivityOptions(adapter);
             int launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
-                    null, null, getActivityOptions(adapter));
+                    null, null, options);
             mMainThreadHandler.post(() -> {
                 mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
             });
