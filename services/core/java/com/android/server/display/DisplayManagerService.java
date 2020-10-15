@@ -226,8 +226,35 @@ public final class DisplayManagerService extends SystemService {
     private final CopyOnWriteArrayList<DisplayTransactionListener> mDisplayTransactionListeners =
             new CopyOnWriteArrayList<DisplayTransactionListener>();
 
-    // Display power controller.
-    private DisplayPowerController mDisplayPowerController;
+    /** All {@link DisplayPowerController}s indexed by {@link LogicalDisplay} ID. */
+    private final SparseArray<DisplayPowerController> mDisplayPowerControllers =
+            new SparseArray<>();
+
+    /** {@link DisplayBlanker} used by all {@link DisplayPowerController}s. */
+    private final DisplayBlanker mDisplayBlanker = new DisplayBlanker() {
+        @Override
+        public void requestDisplayState(int displayId, int state, float brightness) {
+            // The order of operations is important for legacy reasons.
+            if (state == Display.STATE_OFF) {
+                requestGlobalDisplayStateInternal(state, brightness);
+            }
+
+            mDisplayPowerCallbacks.onDisplayStateChange(state);
+
+            if (state != Display.STATE_OFF) {
+                requestGlobalDisplayStateInternal(state, brightness);
+            }
+        }
+    };
+
+    /**
+     * Used to inform {@link com.android.server.power.PowerManagerService} of changes to display
+     * state.
+     */
+    private DisplayManagerInternal.DisplayPowerCallbacks mDisplayPowerCallbacks;
+
+    /** The {@link Handler} used by all {@link DisplayPowerController}s. */
+    private Handler mPowerHandler;
 
     // The overall display state, independent of changes that might influence one
     // display or another in particular.
@@ -418,14 +445,16 @@ public final class DisplayManagerService extends SystemService {
         final int newUserId = to.getUserIdentifier();
         final int userSerial = getUserManager().getUserSerialNumber(newUserId);
         synchronized (mSyncRoot) {
+            final DisplayPowerController displayPowerController = mDisplayPowerControllers.get(
+                    Display.DEFAULT_DISPLAY);
             if (mCurrentUserId != newUserId) {
                 mCurrentUserId = newUserId;
                 BrightnessConfiguration config =
                         mPersistentDataStore.getBrightnessConfiguration(userSerial);
-                mDisplayPowerController.setBrightnessConfiguration(config);
+                displayPowerController.setBrightnessConfiguration(config);
                 handleSettingsChange();
             }
-            mDisplayPowerController.onSwitchUser(newUserId);
+            displayPowerController.onSwitchUser(newUserId);
         }
     }
 
@@ -956,6 +985,7 @@ public final class DisplayManagerService extends SystemService {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
+        addDisplayPowerControllerLocked(displayId);
 
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
@@ -989,6 +1019,7 @@ public final class DisplayManagerService extends SystemService {
 
     private void handleLogicalDisplayRemovedLocked(@NonNull LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
+        mDisplayPowerControllers.delete(displayId);
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         scheduleTraversalLocked(false);
@@ -1110,7 +1141,7 @@ public final class DisplayManagerService extends SystemService {
                 mPersistentDataStore.saveIfNeeded();
             }
             if (userId == mCurrentUserId) {
-                mDisplayPowerController.setBrightnessConfiguration(c);
+                mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY).setBrightnessConfiguration(c);
             }
         }
     }
@@ -1142,7 +1173,8 @@ public final class DisplayManagerService extends SystemService {
             final int userSerial = getUserManager().getUserSerialNumber(mCurrentUserId);
             BrightnessConfiguration config =
                     mPersistentDataStore.getBrightnessConfiguration(userSerial);
-            mDisplayPowerController.setBrightnessConfiguration(config);
+            mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY).setBrightnessConfiguration(
+                    config);
         }
     }
 
@@ -1348,25 +1380,31 @@ public final class DisplayManagerService extends SystemService {
     }
 
     void setAutoBrightnessLoggingEnabled(boolean enabled) {
-        if (mDisplayPowerController != null) {
-            synchronized (mSyncRoot) {
-                mDisplayPowerController.setAutoBrightnessLoggingEnabled(enabled);
+        synchronized (mSyncRoot) {
+            final DisplayPowerController displayPowerController = mDisplayPowerControllers.get(
+                    Display.DEFAULT_DISPLAY);
+            if (displayPowerController != null) {
+                displayPowerController.setAutoBrightnessLoggingEnabled(enabled);
             }
         }
     }
 
     void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
-        if (mDisplayPowerController != null) {
-            synchronized (mSyncRoot) {
-                mDisplayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
+        synchronized (mSyncRoot) {
+            final DisplayPowerController displayPowerController = mDisplayPowerControllers.get(
+                    Display.DEFAULT_DISPLAY);
+            if (displayPowerController != null) {
+                displayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
             }
         }
     }
 
     void setAmbientColorTemperatureOverride(float cct) {
-        if (mDisplayPowerController != null) {
-            synchronized (mSyncRoot) {
-                mDisplayPowerController.setAmbientColorTemperatureOverride(cct);
+        synchronized (mSyncRoot) {
+            final DisplayPowerController displayPowerController = mDisplayPowerControllers.get(
+                    Display.DEFAULT_DISPLAY);
+            if (displayPowerController != null) {
+                displayPowerController.setAmbientColorTemperatureOverride(cct);
             }
         }
     }
@@ -1592,8 +1630,11 @@ public final class DisplayManagerService extends SystemService {
                         + ", mWifiDisplayScanRequested=" + callback.mWifiDisplayScanRequested);
             }
 
-            if (mDisplayPowerController != null) {
-                mDisplayPowerController.dump(pw);
+            final int displayPowerControllerCount = mDisplayPowerControllers.size();
+            pw.println();
+            pw.println("Display Power Controllers: size=" + displayPowerControllerCount);
+            for (int i = 0; i < displayPowerControllerCount; i++) {
+                mDisplayPowerControllers.valueAt(i).dump(pw);
             }
 
             pw.println();
@@ -1664,6 +1705,22 @@ public final class DisplayManagerService extends SystemService {
             }
             return mVirtualDisplayAdapter.getVirtualDisplaySurfaceLocked(appToken);
         }
+    }
+
+    private void initializeDisplayPowerControllersLocked() {
+        mLogicalDisplayMapper.forEachLocked((logicalDisplay) -> addDisplayPowerControllerLocked(
+                logicalDisplay.getDisplayIdLocked()));
+    }
+
+    private void addDisplayPowerControllerLocked(int displayId) {
+        if (mPowerHandler == null) {
+            // initPowerManagement has not yet been called.
+            return;
+        }
+        final DisplayPowerController displayPowerController = new DisplayPowerController(
+                mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
+                mDisplayBlanker, displayId);
+        mDisplayPowerControllers.append(displayId, displayPowerController);
     }
 
     private final class DisplayManagerHandler extends Handler {
@@ -2174,7 +2231,8 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    return mDisplayPowerController.getBrightnessEvents(userId, hasUsageStats);
+                    return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                            .getBrightnessEvents(userId, hasUsageStats);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2191,7 +2249,8 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    return mDisplayPowerController.getAmbientBrightnessStats(userId);
+                    return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                            .getAmbientBrightnessStats(userId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2239,7 +2298,8 @@ public final class DisplayManagerService extends SystemService {
                     BrightnessConfiguration config =
                             mPersistentDataStore.getBrightnessConfiguration(userSerial);
                     if (config == null) {
-                        config = mDisplayPowerController.getDefaultBrightnessConfiguration();
+                        config = mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                                .getDefaultBrightnessConfiguration();
                     }
                     return config;
                 }
@@ -2256,7 +2316,8 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    return mDisplayPowerController.getDefaultBrightnessConfiguration();
+                    return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                            .getDefaultBrightnessConfiguration();
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2279,7 +2340,8 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    mDisplayPowerController.setTemporaryBrightness(brightness);
+                    mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                            .setTemporaryBrightness(brightness);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2294,7 +2356,8 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    mDisplayPowerController.setTemporaryAutoBrightnessAdjustment(adjustment);
+                    mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                            .setTemporaryAutoBrightnessAdjustment(adjustment);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2415,25 +2478,10 @@ public final class DisplayManagerService extends SystemService {
         public void initPowerManagement(final DisplayPowerCallbacks callbacks, Handler handler,
                 SensorManager sensorManager) {
             synchronized (mSyncRoot) {
-                DisplayBlanker blanker = new DisplayBlanker() {
-                    @Override
-                    public void requestDisplayState(int displayId, int state, float brightness) {
-                        // The order of operations is important for legacy reasons.
-                        if (state == Display.STATE_OFF) {
-                            requestGlobalDisplayStateInternal(state, brightness);
-                        }
-
-                        callbacks.onDisplayStateChange(state);
-
-                        if (state != Display.STATE_OFF) {
-                            requestGlobalDisplayStateInternal(state, brightness);
-                        }
-                    }
-                };
-                mDisplayPowerController = new DisplayPowerController(
-                        mContext, callbacks, handler, sensorManager, blanker,
-                        Display.DEFAULT_DISPLAY);
+                mDisplayPowerCallbacks = callbacks;
                 mSensorManager = sensorManager;
+                mPowerHandler = handler;
+                initializeDisplayPowerControllersLocked();
             }
 
             mHandler.sendEmptyMessage(MSG_LOAD_BRIGHTNESS_CONFIGURATION);
@@ -2443,14 +2491,16 @@ public final class DisplayManagerService extends SystemService {
         public boolean requestPowerState(DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
             synchronized (mSyncRoot) {
-                return mDisplayPowerController.requestPowerState(request, waitForNegativeProximity);
+                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                        .requestPowerState(request, waitForNegativeProximity);
             }
         }
 
         @Override
         public boolean isProximitySensorAvailable() {
             synchronized (mSyncRoot) {
-                return mDisplayPowerController.isProximitySensorAvailable();
+                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                        .isProximitySensorAvailable();
             }
         }
 
@@ -2539,7 +2589,8 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void persistBrightnessTrackerState() {
             synchronized (mSyncRoot) {
-                mDisplayPowerController.persistBrightnessTrackerState();
+                mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                        .persistBrightnessTrackerState();
             }
         }
 
@@ -2571,7 +2622,8 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void ignoreProximitySensorUntilChanged() {
-            mDisplayPowerController.ignoreProximitySensorUntilChanged();
+            mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                    .ignoreProximitySensorUntilChanged();
         }
     }
 
