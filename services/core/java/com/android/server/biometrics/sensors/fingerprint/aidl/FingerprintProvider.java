@@ -285,8 +285,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                        opPackageName, FingerprintUtils.getInstance(),
-                        BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
+                        opPackageName, FingerprintUtils.getInstance(), sensorId,
                         mUdfpsOverlayController, maxTemplatesPerUser);
                 scheduleForSensor(sensorId, client, new ClientMonitor.Callback() {
                     @Override
@@ -363,7 +362,31 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleRemove(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
             @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            final IFingerprint daemon = getHalInstance();
+            if (daemon == null) {
+                Slog.e(getTag(), "Null daemon during remove, sensorId: " + sensorId);
+                // If this happens, we need to send HW_UNAVAILABLE after the scheduler gets to
+                // this operation. We should not send the callback yet, since the scheduler may
+                // be processing something else.
+                return;
+            }
 
+            try {
+                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
+                    createNewSessionWithoutHandler(daemon, sensorId, userId);
+                }
+
+                final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
+                        mSensors.get(sensorId).getLazySession(), token,
+                        new ClientMonitorCallbackConverter(receiver), fingerId, userId,
+                        opPackageName, FingerprintUtils.getInstance(), sensorId,
+                        mSensors.get(sensorId).getAuthenticatorIds());
+                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Remote exception when scheduling remove", e);
+            }
+        });
     }
 
     @Override
