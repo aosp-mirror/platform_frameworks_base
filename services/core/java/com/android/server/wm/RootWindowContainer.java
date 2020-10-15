@@ -778,7 +778,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (surfaceController != null) {
                     ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                             "SURFACE RECOVER DESTROY: %s", winAnimator.mWin);
-                    winAnimator.destroySurface();
+                    SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
+                    winAnimator.destroySurface(t);
+                    t.apply();
                     if (winAnimator.mWin.mActivityRecord != null) {
                         winAnimator.mWin.mActivityRecord.removeStartingWindow();
                     }
@@ -926,7 +928,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 win.destroySurfaceUnchecked();
-                win.mWinAnimator.destroyPreservedSurfaceLocked();
+                win.mWinAnimator.destroyPreservedSurfaceLocked(win.getSyncTransaction());
             } while (i > 0);
             mWmService.mDestroySurface.clear();
         }

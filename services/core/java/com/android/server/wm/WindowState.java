@@ -617,6 +617,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Rect mTmpRect = new Rect();
     private final Point mTmpPoint = new Point();
 
+    private final Transaction mTmpTransaction;
+
     /**
      * If a window is on a display which has been re-parented to a view in another window,
      * use this offset to indicate the correct location.
@@ -861,6 +863,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow,
             PowerManagerWrapper powerManagerWrapper) {
         super(service);
+        mTmpTransaction = service.mTransactionFactory.get();
         mSession = s;
         mClient = c;
         mAppOp = appOp;
@@ -2176,8 +2179,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         disposeInputChannel();
 
-        mWinAnimator.destroyDeferredSurfaceLocked();
-        mWinAnimator.destroySurfaceLocked();
+        mWinAnimator.destroyDeferredSurfaceLocked(mTmpTransaction);
+        mWinAnimator.destroySurfaceLocked(mTmpTransaction);
+        mTmpTransaction.apply();
         mSession.windowRemovedLocked();
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);
@@ -3238,7 +3242,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (appStopped || mWindowRemovalAllowed) {
-            mWinAnimator.destroyPreservedSurfaceLocked();
+            mWinAnimator.destroyPreservedSurfaceLocked(mTmpTransaction);
+            mTmpTransaction.apply();
         }
 
         if (mDestroying) {
@@ -3274,7 +3279,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // various indicators of whether the client has released the surface.
     // This is in general unsafe, and most callers should use {@link #destroySurface}
     void destroySurfaceUnchecked() {
-        mWinAnimator.destroySurfaceLocked();
+        mWinAnimator.destroySurfaceLocked(mTmpTransaction);
+        mTmpTransaction.apply();
 
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
@@ -4942,7 +4948,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // on the new one. This prevents blinking when we change elevation of freeform and
             // pinned windows.
             if (!mWinAnimator.tryChangeFormatInPlaceLocked()) {
-                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
+                mWinAnimator.preserveSurfaceLocked(getSyncTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED
                         | RELAYOUT_RES_FIRST_TIME;
                 scheduleAnimation();
@@ -4961,7 +4967,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // to preserve and destroy windows which are attached to another, they
             // will keep their surface and its size may change over time.
             if (mHasSurface && !isChildWindow()) {
-                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
+                mWinAnimator.preserveSurfaceLocked(getSyncTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED |
                     RELAYOUT_RES_FIRST_TIME;
                 scheduleAnimation();
@@ -5264,7 +5270,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateFrameRateSelectionPriorityIfNeeded();
         updateGlobalScaleIfNeeded();
 
-        mWinAnimator.prepareSurfaceLocked(SurfaceControl.getGlobalTransaction(), true);
+        mWinAnimator.prepareSurfaceLocked(getSyncTransaction(), true);
         super.prepareSurfaces();
     }
 

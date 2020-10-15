@@ -362,7 +362,7 @@ class WindowStateAnimator {
                     mSurfaceController.mSurfaceControl,
                     mPendingDestroySurface.mSurfaceControl).apply();
             }
-            destroySurfaceLocked();
+            destroySurfaceLocked(t);
             mSurfaceDestroyDeferred = true;
             return;
         }
@@ -375,10 +375,10 @@ class WindowStateAnimator {
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
-        destroySurfaceLocked();
+        destroySurfaceLocked(t);
     }
 
-    void destroyPreservedSurfaceLocked() {
+    void destroyPreservedSurfaceLocked(SurfaceControl.Transaction t) {
         if (!mDestroyPreservedSurfaceUponRedraw) {
             return;
         }
@@ -397,7 +397,7 @@ class WindowStateAnimator {
                     mSurfaceController.mSurfaceControl).apply();
         }
 
-        destroyDeferredSurfaceLocked();
+        destroyDeferredSurfaceLocked(t);
         mDestroyPreservedSurfaceUponRedraw = false;
     }
 
@@ -529,7 +529,7 @@ class WindowStateAnimator {
         return mSurfaceController != null && mSurfaceController.hasSurface();
     }
 
-    void destroySurfaceLocked() {
+    void destroySurfaceLocked(SurfaceControl.Transaction t) {
         final ActivityRecord activity = mWin.mActivityRecord;
         if (activity != null) {
             if (mWin == activity.mStartingWindow) {
@@ -557,14 +557,14 @@ class WindowStateAnimator {
                     if (mPendingDestroySurface != null) {
                         ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
                                 mWin, new RuntimeException().fillInStackTrace());
-                        mPendingDestroySurface.destroyNotInTransaction();
+                        mPendingDestroySurface.destroy(t);
                     }
                     mPendingDestroySurface = mSurfaceController;
                 }
             } else {
                 ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
                         mWin, new RuntimeException().fillInStackTrace());
-                destroySurface();
+                destroySurface(t);
             }
             // Don't hide wallpaper if we're deferring the surface destroy
             // because of a surface change.
@@ -587,12 +587,12 @@ class WindowStateAnimator {
         mDrawState = NO_SURFACE;
     }
 
-    void destroyDeferredSurfaceLocked() {
+    void destroyDeferredSurfaceLocked(SurfaceControl.Transaction t) {
         try {
             if (mPendingDestroySurface != null) {
                 ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
                         mWin, new RuntimeException().fillInStackTrace());
-                mPendingDestroySurface.destroyNotInTransaction();
+                mPendingDestroySurface.destroy(t);
                 // Don't hide wallpaper if we're destroying a deferred surface
                 // after a surface mode change.
                 if (!mDestroyPreservedSurfaceUponRedraw) {
@@ -665,11 +665,17 @@ class WindowStateAnimator {
         final Task task = w.getTask();
 
         if (shouldConsumeMainWindowSizeTransaction()) {
-            t.deferTransactionUntil(task.getMainWindowSizeChangeTask().getSurfaceControl(),
-                mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-            t.deferTransactionUntil(mSurfaceController.mSurfaceControl,
-                mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-            t.merge(task.getMainWindowSizeChangeTransaction());
+            // Use pending transaction here instead of the transaction passed in because we want to
+            // ensure the defer transaction is applied on the main transaction and not on the sync
+            // transaction. This is because the sync transaction could contain the buffer and we'd
+            // defer the transaction that contains the buffer we're deferring on.
+            SurfaceControl.Transaction pendingTransaction = mWin.getPendingTransaction();
+            pendingTransaction.deferTransactionUntil(
+                    task.getMainWindowSizeChangeTask().getSurfaceControl(),
+                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
+            pendingTransaction.deferTransactionUntil(mSurfaceController.mSurfaceControl,
+                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
+            pendingTransaction.merge(task.getMainWindowSizeChangeTransaction());
             task.setMainWindowSizeChangeTransaction(null);
         }
 
@@ -804,7 +810,7 @@ class WindowStateAnimator {
                         mXOffset, mYOffset, mWallpaperScale, recoveringMemory);
             } else {
                 prepared =
-                    mSurfaceController.prepareToShowInTransaction(mShownAlpha,
+                    mSurfaceController.prepareToShowInTransaction(t, mShownAlpha,
                         mDsDx * w.mHScale,
                         mDtDx * w.mVScale,
                         mDtDy * w.mHScale,
@@ -814,7 +820,7 @@ class WindowStateAnimator {
 
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
-                    if (showSurfaceRobustlyLocked()) {
+                    if (showSurfaceRobustlyLocked(t)) {
                         markPreservedSurfaceForDestroy();
                         mAnimator.requestRemovalOfReplacedWindows(w);
                         mLastHidden = false;
@@ -974,8 +980,8 @@ class WindowStateAnimator {
      *
      * @return Returns true if the surface was successfully shown.
      */
-    private boolean showSurfaceRobustlyLocked() {
-        boolean shown = mSurfaceController.showRobustlyInTransaction();
+    private boolean showSurfaceRobustlyLocked(SurfaceControl.Transaction t) {
+        boolean shown = mSurfaceController.showRobustly(t);
         if (!shown)
             return false;
 
@@ -993,7 +999,7 @@ class WindowStateAnimator {
             }
         }
 
-        SurfaceControl.mergeToGlobalTransaction(mPostDrawTransaction);
+        t.merge(mPostDrawTransaction);
         return true;
     }
 
@@ -1174,10 +1180,10 @@ class WindowStateAnimator {
         return false;
     }
 
-    void destroySurface() {
+    void destroySurface(SurfaceControl.Transaction t) {
         try {
             if (mSurfaceController != null) {
-                mSurfaceController.destroyNotInTransaction();
+                mSurfaceController.destroy(t);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying surface " + this

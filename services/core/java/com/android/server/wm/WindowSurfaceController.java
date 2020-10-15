@@ -131,7 +131,7 @@ class WindowSurfaceController {
     void hide(SurfaceControl.Transaction transaction, String reason) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE HIDE ( %s ): %s", reason, title);
 
-        mAnimator.destroyPreservedSurfaceLocked();
+        mAnimator.destroyPreservedSurfaceLocked(transaction);
         if (mSurfaceShown) {
             hideSurface(transaction);
         }
@@ -149,12 +149,12 @@ class WindowSurfaceController {
         }
     }
 
-    void destroyNotInTransaction() {
+    void destroy(SurfaceControl.Transaction t) {
         ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                    "Destroying surface %s called by %s", this, Debug.getCallers(8));
+                "Destroying surface %s called by %s", this, Debug.getCallers(8));
         try {
             if (mSurfaceControl != null) {
-                mTmpTransaction.remove(mSurfaceControl).apply();
+                t.remove(mSurfaceControl);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
@@ -215,19 +215,18 @@ class WindowSurfaceController {
         }
     }
 
-    boolean prepareToShowInTransaction(float alpha,
+    boolean prepareToShowInTransaction(SurfaceControl.Transaction t, float alpha,
             float dsdx, float dtdx, float dsdy,
             float dtdy, boolean recoveringMemory) {
         if (mSurfaceControl != null) {
             try {
                 mSurfaceAlpha = alpha;
-                mSurfaceControl.setAlpha(alpha);
+                t.setAlpha(mSurfaceControl, alpha);
                 mLastDsdx = dsdx;
                 mLastDtdx = dtdx;
                 mLastDsdy = dsdy;
                 mLastDtdy = dtdy;
-                mSurfaceControl.setMatrix(
-                        dsdx, dtdx, dsdy, dtdy);
+                t.setMatrix(mSurfaceControl, dsdx, dtdx, dsdy, dtdy);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error updating surface in " + title, e);
                 if (!recoveringMemory) {
@@ -327,7 +326,7 @@ class WindowSurfaceController {
         }
     }
 
-    boolean showRobustlyInTransaction() {
+    boolean showRobustly(SurfaceControl.Transaction t) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", title);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
@@ -338,7 +337,7 @@ class WindowSurfaceController {
 
         try {
             setShown(true);
-            mSurfaceControl.show();
+            t.show(mSurfaceControl);
             return true;
         } catch (RuntimeException e) {
             Slog.w(TAG, "Failure showing surface " + mSurfaceControl + " in " + this, e);
@@ -346,11 +345,6 @@ class WindowSurfaceController {
 
         mAnimator.reclaimSomeSurfaceMemory("show", true);
         return false;
-    }
-
-    void deferTransactionUntil(SurfaceControl barrier, long frame) {
-        // TODO: Logging
-        mSurfaceControl.deferTransactionUntil(barrier, frame);
     }
 
     boolean clearWindowContentFrameStats() {

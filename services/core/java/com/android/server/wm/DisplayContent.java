@@ -3405,6 +3405,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean destroyLeakedSurfaces() {
         // Used to indicate that a surface was leaked.
         mTmpWindow = null;
+        final Transaction t = mWmService.mTransactionFactory.get();
         forAllWindows(w -> {
             final WindowStateAnimator wsa = w.mWinAnimator;
             if (wsa.mSurfaceController == null) {
@@ -3416,7 +3417,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         + " token=" + w.mToken
                         + " pid=" + w.mSession.mPid
                         + " uid=" + w.mSession.mUid);
-                wsa.destroySurface();
+                wsa.destroySurface(t);
                 mWmService.mForceRemoves.add(w);
                 mTmpWindow = w;
             } else if (w.mActivityRecord != null && !w.mActivityRecord.isClientVisible()) {
@@ -3424,10 +3425,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         + w + " surface=" + wsa.mSurfaceController
                         + " token=" + w.mActivityRecord);
                 ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE LEAK DESTROY: %s", w);
-                wsa.destroySurface();
+                wsa.destroySurface(t);
                 mTmpWindow = w;
             }
         }, false /* traverseTopToBottom */);
+        t.apply();
 
         return mTmpWindow != null;
     }

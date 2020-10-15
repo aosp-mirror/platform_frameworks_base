@@ -5349,7 +5349,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void destroyPreservedSurfaceLocked() {
         for (int i = mDestroyPreservedSurface.size() - 1; i >= 0 ; i--) {
             final WindowState w = mDestroyPreservedSurface.get(i);
-            w.mWinAnimator.destroyPreservedSurfaceLocked();
+            w.mWinAnimator.destroyPreservedSurfaceLocked(w.getSyncTransaction());
         }
         mDestroyPreservedSurface.clear();
     }
