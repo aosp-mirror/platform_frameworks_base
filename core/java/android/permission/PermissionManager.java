@@ -16,6 +16,8 @@
 
 package android.permission;
 
+import static android.os.Build.VERSION_CODES.S;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
@@ -30,6 +32,8 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -69,6 +73,17 @@ public final class PermissionManager {
     /** @hide */
     public static final String KILL_APP_REASON_GIDS_CHANGED =
             "permission grant or revoke changed gids";
+
+    /**
+     * Refuse to install package if groups of permissions are bad
+     * - Permission groups should only be shared between apps sharing a certificate
+     * - If a permission belongs to a group that group should be defined
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = S)
+    public static final long CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS = 146211400;
 
     private final @NonNull Context mContext;
 

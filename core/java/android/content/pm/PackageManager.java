@@ -1577,6 +1577,26 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_PARSE_FAILED_SKIPPED = -125;
 
+    /**
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because it is attempting to define a permission group that is already defined by some
+     * existing package.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP = -126;
+
+    /**
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because it is attempting to define a permission in a group that does not exists or that is
+     * defined by an packages with an incompatible certificate.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
