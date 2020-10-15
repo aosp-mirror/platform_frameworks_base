@@ -8,5 +8,10 @@
     {
       "name": "FrameworksNetDeflakeTest"
     }
+  ],
+  "imports": [
+    {
+      "path": "cts/tests/tests/net"
+    }
   ]
 }
