@@ -41,8 +41,6 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class RankingCoordinator implements Coordinator {
-    private static final String TAG = "RankingNotificationCoordinator";
-
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
     private final NodeController mSilentHeaderController;
@@ -65,7 +63,7 @@ public class RankingCoordinator implements Coordinator {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
-        pipeline.addPreGroupFilter(mDozingFilter);
+        pipeline.addPreGroupFilter(mDndVisualEffectsFilter);
     }
 
     public NotifSectioner getAlertingSectioner() {
@@ -114,10 +112,10 @@ public class RankingCoordinator implements Coordinator {
         }
     };
 
-    private final NotifFilter mDozingFilter = new NotifFilter("IsDozingFilter") {
+    private final NotifFilter mDndVisualEffectsFilter = new NotifFilter(
+            "DndSuppressingVisualEffects") {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            // Dozing + DND Settings from Ranking object
             if (mStatusBarStateController.isDozing() && entry.shouldSuppressAmbient()) {
                 return true;
             }
@@ -130,7 +128,7 @@ public class RankingCoordinator implements Coordinator {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozingChanged(boolean isDozing) {
-                    mDozingFilter.invalidateList();
+                    mDndVisualEffectsFilter.invalidateList();
                 }
             };
 }
