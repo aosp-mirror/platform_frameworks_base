@@ -1389,7 +1389,7 @@
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"बिग्रेको"</string>
     <string name="ext_media_status_unsupported" msgid="5460509911660539317">"असमर्थित"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"निकाल्दै..."</string>
-    <string name="ext_media_status_formatting" msgid="774148701503179906">"फरम्याट गर्दै…"</string>
+    <string name="ext_media_status_formatting" msgid="774148701503179906">"फर्म्याट गर्दै…"</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"सम्मिलित छैन"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"कुनै मिल्ने गतिविधि पाइएन।"</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"मिडिया निकास दिशानिर्देश गराउनुहोस्"</string>

@@ -194,17 +194,16 @@ public final class PrivateAddressCoordinatorTest {
 
     @Test
     public void testRequestLastDownstreamAddress() throws Exception {
-        final int fakeHotspotSubAddr = 0x2b05;
-        final IpPrefix predefinedPrefix = new IpPrefix("192.168.43.0/24");
+        final int fakeHotspotSubAddr = 0x2b05; // 43.5
         when(mPrivateAddressCoordinator.getRandomInt()).thenReturn(fakeHotspotSubAddr);
         final LinkAddress hotspotAddress = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer, true /* useLastAddress */);
-        assertEquals("Wrong wifi prefix: ", predefinedPrefix, asIpPrefix(hotspotAddress));
+        assertEquals("Wrong wifi prefix: ", new LinkAddress("192.168.43.5/24"), hotspotAddress);
         when(mHotspotIpServer.getAddress()).thenReturn(hotspotAddress);
 
         final LinkAddress usbAddress = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mUsbIpServer, true /* useLastAddress */);
-        assertNotEquals(predefinedPrefix, asIpPrefix(usbAddress));
+        assertEquals("Wrong wifi prefix: ", new LinkAddress("192.168.45.5/24"), usbAddress);
 
         mPrivateAddressCoordinator.releaseDownstream(mHotspotIpServer);
         mPrivateAddressCoordinator.releaseDownstream(mUsbIpServer);
@@ -218,6 +217,18 @@ public final class PrivateAddressCoordinatorTest {
         final LinkAddress newUsbAddress = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mUsbIpServer, true /* useLastAddress */);
         assertEquals(usbAddress, newUsbAddress);
+
+        // BUG: the code should detect a conflict, but it doesn't.
+        // Regression introduced in r.android.com/168169687.
+        // Ensure conflict notification works when using cached address.
+        when(mHotspotIpServer.getAddress()).thenReturn(newHotspotAddress);
+        when(mUsbIpServer.getAddress()).thenReturn(usbAddress);
+        final UpstreamNetworkState wifiUpstream = buildUpstreamNetworkState(mWifiNetwork,
+                new LinkAddress("192.168.88.23/16"), null,
+                makeNetworkCapabilities(TRANSPORT_WIFI));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(wifiUpstream);
+        verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
+        verify(mUsbIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
     }
 
     private UpstreamNetworkState buildUpstreamNetworkState(final Network network,

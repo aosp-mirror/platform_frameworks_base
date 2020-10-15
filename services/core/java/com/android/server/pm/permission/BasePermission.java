@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.parsing.component.ParsedPermission;
+import android.os.Build;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -445,36 +446,38 @@ public final class BasePermission {
         return null;
     }
 
-    public @Nullable PermissionInfo generatePermissionInfo(@NonNull String groupName, int flags) {
-        if (groupName == null) {
-            if (perm == null || perm.getGroup() == null) {
-                return generatePermissionInfo(protectionLevel, flags);
-            }
-        } else {
-            if (perm != null && groupName.equals(perm.getGroup())) {
-                return PackageInfoUtils.generatePermissionInfo(perm, flags);
-            }
-        }
-        return null;
+    @Nullable
+    public String getGroup() {
+        return perm != null ? perm.getGroup() : null;
     }
 
-    public @NonNull PermissionInfo generatePermissionInfo(int adjustedProtectionLevel, int flags) {
+    @NonNull
+    public PermissionInfo generatePermissionInfo(int flags) {
+        return generatePermissionInfo(flags, Build.VERSION_CODES.CUR_DEVELOPMENT);
+    }
+
+    @NonNull
+    public PermissionInfo generatePermissionInfo(int flags, int targetSdkVersion) {
         PermissionInfo permissionInfo;
         if (perm != null) {
-            final boolean protectionLevelChanged = protectionLevel != adjustedProtectionLevel;
             permissionInfo = PackageInfoUtils.generatePermissionInfo(perm, flags);
-            if (protectionLevelChanged) {
-                // if we return different protection level, don't use the cached info
-                permissionInfo = new PermissionInfo(permissionInfo);
-                permissionInfo.protectionLevel = adjustedProtectionLevel;
-            }
-            return permissionInfo;
+        } else {
+            permissionInfo = new PermissionInfo();
+            permissionInfo.name = name;
+            permissionInfo.packageName = sourcePackageName;
+            permissionInfo.nonLocalizedLabel = name;
         }
-        permissionInfo = new PermissionInfo();
-        permissionInfo.name = name;
-        permissionInfo.packageName = sourcePackageName;
-        permissionInfo.nonLocalizedLabel = name;
-        permissionInfo.protectionLevel = protectionLevel;
+        if (targetSdkVersion >= Build.VERSION_CODES.O) {
+            permissionInfo.protectionLevel = protectionLevel;
+        } else {
+            final int protection = protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
+            if (protection == PermissionInfo.PROTECTION_SIGNATURE) {
+                // Signature permission's protection flags are always reported.
+                permissionInfo.protectionLevel = protectionLevel;
+            } else {
+                permissionInfo.protectionLevel = protection;
+            }
+        }
         return permissionInfo;
     }
 

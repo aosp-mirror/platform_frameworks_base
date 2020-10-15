@@ -544,22 +544,35 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     @Nullable
-    public PermissionInfo getPermissionInfo(String permName, String packageName,
+    public PermissionInfo getPermissionInfo(@NonNull String permName, @NonNull String opPackageName,
             @PermissionInfoFlags int flags) {
         final int callingUid = getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
-        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
+        final AndroidPackage opPackage = mPackageManagerInt.getPackage(opPackageName);
+        final int targetSdkVersion = getPermissionInfoCallingTargetSdkVersion(opPackage,
+                callingUid);
         synchronized (mLock) {
             final BasePermission bp = mSettings.getPermissionLocked(permName);
             if (bp == null) {
                 return null;
             }
-            final int adjustedProtectionLevel = adjustPermissionProtectionFlagsLocked(
-                    bp.getProtectionLevel(), pkg, callingUid);
-            return bp.generatePermissionInfo(adjustedProtectionLevel, flags);
+            return bp.generatePermissionInfo(flags, targetSdkVersion);
         }
+    }
+
+    private int getPermissionInfoCallingTargetSdkVersion(@Nullable AndroidPackage pkg, int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID
+                || appId == Process.SHELL_UID) {
+            // System sees all flags.
+            return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+        if (pkg == null) {
+            return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+        return pkg.getTargetSdkVersion();
     }
 
     @Override
@@ -576,9 +589,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             final ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
             for (BasePermission bp : mSettings.mPermissions.values()) {
-                final PermissionInfo pi = bp.generatePermissionInfo(groupName, flags);
-                if (pi != null) {
-                    out.add(pi);
+                if (Objects.equals(bp.getGroup(), groupName)) {
+                    out.add(bp.generatePermissionInfo(flags));
                 }
             }
             return new ParceledListSlice<>(out);
@@ -2233,32 +2245,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0; i < listenerCount; i++) {
             listeners.get(i).onRuntimePermissionStateChanged(packageName, userId);
         }
-    }
-
-    private int adjustPermissionProtectionFlagsLocked(int protectionLevel,
-            @Nullable AndroidPackage pkg, int uid) {
-        // Signature permission flags area always reported
-        final int protectionLevelMasked = protectionLevel
-                & (PermissionInfo.PROTECTION_NORMAL
-                | PermissionInfo.PROTECTION_DANGEROUS
-                | PermissionInfo.PROTECTION_SIGNATURE);
-        if (protectionLevelMasked == PermissionInfo.PROTECTION_SIGNATURE) {
-            return protectionLevel;
-        }
-        // System sees all flags.
-        final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID
-                || appId == Process.SHELL_UID) {
-            return protectionLevel;
-        }
-        if (pkg == null) {
-            return protectionLevel;
-        }
-        if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
-            return protectionLevelMasked;
-        }
-        // Apps that target O see flags for all protection levels.
-        return protectionLevel;
     }
 
     /**
@@ -4903,8 +4889,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
                     if (bp.perm != null && bp.perm.getProtection() == protection) {
-                        matchingPermissions.add(
-                                PackageInfoUtils.generatePermissionInfo(bp.perm, 0));
+                        matchingPermissions.add(bp.generatePermissionInfo(0));
                     }
                 }
             }
@@ -4925,8 +4910,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                     if (bp.perm != null && (bp.perm.getProtectionFlags() & protectionFlags)
                             == protectionFlags) {
-                        matchingPermissions.add(
-                                PackageInfoUtils.generatePermissionInfo(bp.perm, 0));
+                        matchingPermissions.add(bp.generatePermissionInfo(0));
                     }
                 }
             }

@@ -29,11 +29,15 @@ import android.media.tv.tuner.filter.RecordSettings.ScHevcIndex;
 public class MmtpRecordEvent extends FilterEvent {
     private final int mScHevcIndexMask;
     private final long mDataLength;
+    private final int mMpuSequenceNumber;
+    private final long mPts;
 
     // This constructor is used by JNI code only
-    private MmtpRecordEvent(int scHevcIndexMask, long dataLength) {
+    private MmtpRecordEvent(int scHevcIndexMask, long dataLength, int mpuSequenceNumber, long pts) {
         mScHevcIndexMask = scHevcIndexMask;
         mDataLength = dataLength;
+        mMpuSequenceNumber = mpuSequenceNumber;
+        mPts = pts;
     }
 
     /**
@@ -50,5 +54,21 @@ public class MmtpRecordEvent extends FilterEvent {
     @BytesLong
     public long getDataLength() {
         return mDataLength;
+    }
+
+    /**
+     * Get the MPU sequence number of the filtered data.
+     */
+    public int getMpuSequenceNumber() {
+        return mMpuSequenceNumber;
+    }
+
+    /**
+     * Get the Presentation Time Stamp(PTS) for the audio or video frame. It is based on 90KHz
+     * and has the same format as the PTS in ISO/IEC 13818-1. It is used only for the SC and
+     * the SC_HEVC.
+     */
+    public long getPts() {
+        return mPts;
     }
 }

@@ -203,16 +203,14 @@ class ScreenRotationAnimation {
                     .setCallsite("ScreenRotationAnimation")
                     .build();
 
-            // In case display bounds change, screenshot buffer and surface may mismatch so set a
-            // scaling mode.
-            SurfaceControl.Transaction t2 = mService.mTransactionFactory.get();
-            t2.setOverrideScalingMode(mScreenshotLayer, Surface.SCALING_MODE_SCALE_TO_WINDOW);
-            t2.apply(true /* sync */);
-
             // Capture a screenshot into the surface we just created.
             final int displayId = displayContent.getDisplayId();
             final Surface surface = mService.mSurfaceFactory.get();
+            // In case display bounds change, screenshot buffer and surface may mismatch so set a
+            // scaling mode.
             surface.copyFrom(mScreenshotLayer);
+            surface.setScalingMode(Surface.SCALING_MODE_SCALE_TO_WINDOW);
+
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                     mService.mDisplayManagerInternal.systemScreenshot(displayId);
             if (screenshotBuffer != null) {

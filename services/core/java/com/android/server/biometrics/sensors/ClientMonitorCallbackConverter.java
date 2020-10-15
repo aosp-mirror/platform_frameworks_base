@@ -89,7 +89,8 @@ public final class ClientMonitorCallbackConverter {
         }
     }
 
-    void onError(int sensorId, int cookie, int error, int vendorCode) throws RemoteException {
+    public void onError(int sensorId, int cookie, int error, int vendorCode)
+            throws RemoteException {
         if (mSensorReceiver != null) {
             mSensorReceiver.onError(sensorId, cookie, error, vendorCode);
         } else if (mFaceServiceReceiver != null) {

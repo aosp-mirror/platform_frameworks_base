@@ -342,11 +342,9 @@ class WindowSurfaceController {
         return false;
     }
 
-    void forceScaleableInTransaction(boolean force) {
-        // -1 means we don't override the default or client specified
-        // scaling mode.
-        int scalingMode = force ? SCALING_MODE_SCALE_TO_WINDOW : -1;
-        mSurfaceControl.setOverrideScalingMode(scalingMode);
+    void deferTransactionUntil(SurfaceControl barrier, long frame) {
+        // TODO: Logging
+        mSurfaceControl.deferTransactionUntil(barrier, frame);
     }
 
     boolean clearWindowContentFrameStats() {

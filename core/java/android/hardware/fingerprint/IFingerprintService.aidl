@@ -17,7 +17,7 @@ package android.hardware.fingerprint;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.ITestService;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -32,8 +32,8 @@ import java.util.List;
  */
 interface IFingerprintService {
 
-    // Retrieves a test service
-    ITestService getTestService(String opPackageName);
+    // Creates a test session with the specified sensorId
+    ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Retrieve static sensor properties for all fingerprint sensors
     List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);

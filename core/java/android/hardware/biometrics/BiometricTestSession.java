@@ -23,10 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.RemoteException;
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.util.ArraySet;
 
 /**
  * Common set of interfaces to test biometric-related APIs, including {@link BiometricPrompt} and
@@ -35,37 +32,20 @@ import java.util.List;
  */
 @TestApi
 public class BiometricTestSession implements AutoCloseable {
-
-    private static final String TAG = "TestManager";
-
     private final Context mContext;
-    private final ITestService mTestService;
+    private final ITestSession mTestSession;
+
+    // Keep track of users that were tested, which need to be cleaned up when finishing.
+    private final ArraySet<Integer> mTestedUsers;
 
     /**
      * @hide
      */
-    public BiometricTestSession(@NonNull Context context, @NonNull ITestService testService) {
+    public BiometricTestSession(@NonNull Context context, @NonNull ITestSession testSession) {
         mContext = context;
-        mTestService = testService;
-    }
-
-    /**
-     * @return A list of {@link SensorProperties}
-     */
-    @NonNull
-    @RequiresPermission(TEST_BIOMETRIC)
-    public List<SensorProperties> getSensorProperties() {
-        try {
-            final List<SensorPropertiesInternal> internalProps =
-                    mTestService.getSensorPropertiesInternal(mContext.getOpPackageName());
-            final List<SensorProperties> props = new ArrayList<>();
-            for (SensorPropertiesInternal internalProp : internalProps) {
-                props.add(new SensorProperties(internalProp.sensorId, internalProp.sensorStrength));
-            }
-            return props;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mTestSession = testSession;
+        mTestedUsers = new ArraySet<>();
+        enableTestHal(true);
     }
 
     /**
@@ -75,105 +55,101 @@ public class BiometricTestSession implements AutoCloseable {
      * secure pathways such as HAT/Keystore are not testable, since they depend on the TEE or its
      * equivalent for the secret key.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param enableTestHal If true, enable testing with a fake HAL instead of the real HAL.
+     * @hide
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void enableTestHal(int sensorId, boolean enableTestHal) {
+    private void enableTestHal(boolean enableTestHal) {
         try {
-            mTestService.enableTestHal(sensorId, enableTestHal);
+            mTestSession.enableTestHal(enableTestHal);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Starts the enrollment process. This should generally be used when the test HAL is enabled.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void enrollStart(int sensorId, int userId) {
+    public void startEnroll(int userId) {
         try {
-            mTestService.enrollStart(sensorId, userId);
+            mTestedUsers.add(userId);
+            mTestSession.startEnroll(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Finishes the enrollment process. Simulates the HAL's callback.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void enrollFinish(int sensorId, int userId) {
+    public void finishEnroll(int userId) {
         try {
-            mTestService.enrollFinish(sensorId, userId);
+            mTestedUsers.add(userId);
+            mTestSession.finishEnroll(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Simulates a successful authentication, but does not provide a valid HAT.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void authenticateSuccess(int sensorId, int userId) {
+    public void acceptAuthentication(int userId) {
         try {
-            mTestService.authenticateSuccess(sensorId, userId);
+            mTestSession.acceptAuthentication(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Simulates a rejected attempt.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void authenticateReject(int sensorId, int userId) {
+    public void rejectAuthentication(int userId) {
         try {
-            mTestService.authenticateReject(sensorId, userId);
+            mTestSession.rejectAuthentication(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Simulates an acquired message from the HAL.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void notifyAcquired(int sensorId, int userId) {
+    public void notifyAcquired(int userId) {
         try {
-            mTestService.notifyAcquired(sensorId, userId);
+            mTestSession.notifyAcquired(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Simulates an error message from the HAL.
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void notifyError(int sensorId, int userId) {
+    public void notifyError(int userId) {
         try {
-            mTestService.notifyError(sensorId, userId);
+            mTestSession.notifyError(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -182,21 +158,24 @@ public class BiometricTestSession implements AutoCloseable {
      * that isn't known by both sides are deleted. This should generally be used when the test
      * HAL is disabled (e.g. to clean up after a test).
      *
-     * @param sensorId Sensor that this command applies to.
      * @param userId User that this command applies to.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void internalCleanup(int sensorId, int userId) {
+    public void cleanupInternalState(int userId) {
         try {
-            mTestService.internalCleanup(sensorId, userId);
+            mTestSession.cleanupInternalState(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Remote exception", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
     @RequiresPermission(TEST_BIOMETRIC)
     public void close() {
+        for (int user : mTestedUsers) {
+            cleanupInternalState(user);
+        }
 
+        enableTestHal(false);
     }
 }

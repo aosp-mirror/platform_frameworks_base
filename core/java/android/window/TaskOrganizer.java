@@ -17,6 +17,7 @@
 package android.window;
 
 import android.annotation.BinderThread;
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -51,11 +52,16 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /**
      * Register a TaskOrganizer to manage tasks as they enter a supported windowing mode.
+     *
+     * @return a list of the tasks that should be managed by the organizer, not including tasks
+     *         created via {@link #createRootTask}.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public final void registerOrganizer() {
+    @CallSuper
+    @NonNull
+    public List<TaskAppearedInfo> registerOrganizer() {
         try {
-            mTaskOrganizerController.registerTaskOrganizer(mInterface);
+            return mTaskOrganizerController.registerTaskOrganizer(mInterface).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -63,7 +69,8 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /** Unregisters a previously registered task organizer. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public final void unregisterOrganizer() {
+    @CallSuper
+    public void unregisterOrganizer() {
         try {
             mTaskOrganizerController.unregisterTaskOrganizer(mInterface);
         } catch (RemoteException e) {

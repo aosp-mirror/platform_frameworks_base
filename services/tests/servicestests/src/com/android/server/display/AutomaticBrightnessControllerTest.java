@@ -83,8 +83,8 @@ public class AutomaticBrightnessControllerTest {
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
-                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mContext,
-                mDisplayDeviceConfig);
+                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mContext
+        );
         controller.setLoggingEnabled(true);
 
         // Configure the brightness controller and grab an instance of the sensor listener,

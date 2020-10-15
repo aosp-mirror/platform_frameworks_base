@@ -21,37 +21,34 @@ import android.hardware.biometrics.SensorPropertiesInternal;
  * A test service for FingerprintManager and BiometricPrompt.
  * @hide
  */
-interface ITestService {
-    // Returns a list of sensor properties supported by the interface.
-    List<SensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
-
+interface ITestSession {
     // Switches the specified sensor to use a test HAL. In this mode, the framework will not invoke
     // any methods on the real HAL implementation. This allows the framework to test a substantial
     // portion of the framework code that would otherwise require human interaction. Note that
     // secure pathways such as HAT/Keystore are not testable, since they depend on the TEE or its
     // equivalent for the secret key.
-    void enableTestHal(int sensorId, boolean enableTestHal);
+    void enableTestHal(boolean enableTestHal);
 
     // Starts the enrollment process. This should generally be used when the test HAL is enabled.
-    void enrollStart(int sensorId, int userId);
+    void startEnroll(int userId);
 
     // Finishes the enrollment process. Simulates the HAL's callback.
-    void enrollFinish(int sensorId, int userId);
+    void finishEnroll(int userId);
 
     // Simulates a successful authentication, but does not provide a valid HAT.
-    void authenticateSuccess(int sensorId, int userId);
+    void acceptAuthentication(int userId);
 
     // Simulates a rejected attempt.
-    void authenticateReject(int sensorId, int userId);
+    void rejectAuthentication(int userId);
 
     // Simulates an acquired message from the HAL.
-    void notifyAcquired(int sensorId, int userId);
+    void notifyAcquired(int userId);
 
     // Simulates an error message from the HAL.
-    void notifyError(int sensorId, int userId);
+    void notifyError(int userId);
 
     // Matches the framework's cached enrollments against the HAL's enrollments. Any enrollment
     // that isn't known by both sides are deleted. This should generally be used when the test
     // HAL is disabled (e.g. to clean up after a test).
-    void internalCleanup(int sensorId, int userId);
+    void cleanupInternalState(int userId);
 }

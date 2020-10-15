@@ -81,6 +81,7 @@ import android.hardware.SystemSensorManager;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IAuthService;
 import android.hardware.camera2.CameraManager;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
@@ -1348,6 +1349,12 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         return new DreamManager(ctx);
                     }});
+        registerService(Context.DEVICE_STATE_SERVICE, DeviceStateManager.class,
+                new CachedServiceFetcher<DeviceStateManager>() {
+                    @Override
+                    public DeviceStateManager createService(ContextImpl ctx) {
+                        return new DeviceStateManager();
+                    }});
 
         sInitializing = true;
         try {
@@ -1404,6 +1411,7 @@ public final class SystemServiceRegistry {
                 case Context.CONTENT_CAPTURE_MANAGER_SERVICE:
                 case Context.APP_PREDICTION_SERVICE:
                 case Context.INCREMENTAL_SERVICE:
+                case Context.ETHERNET_SERVICE:
                     return null;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);

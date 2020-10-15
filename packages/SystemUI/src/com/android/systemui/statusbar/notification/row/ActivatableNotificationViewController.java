@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -91,6 +92,9 @@ public class ActivatableNotificationViewController {
             if (mBlockNextTouch) {
                 mBlockNextTouch = false;
                 return true;
+            }
+            if (ev.getAction() == MotionEvent.ACTION_UP) {
+                mView.setLastActionUpTime(SystemClock.uptimeMillis());
             }
             if (mNeedsDimming && !mAccessibilityManager.isTouchExplorationEnabled()
                     && mView.isInteractive()) {

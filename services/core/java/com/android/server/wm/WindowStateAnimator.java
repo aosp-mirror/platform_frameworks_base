@@ -971,10 +971,6 @@ class WindowStateAnimator {
      * @return Returns true if the surface was successfully shown.
      */
     private boolean showSurfaceRobustlyLocked() {
-        if (mWin.getWindowConfiguration().windowsAreScaleable()) {
-            mSurfaceController.forceScaleableInTransaction(true);
-        }
-
         boolean shown = mSurfaceController.showRobustlyInTransaction();
         if (!shown)
             return false;

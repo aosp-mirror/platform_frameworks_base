@@ -397,6 +397,13 @@ class ActivityMetricsLogger {
                     return -1;
             }
         }
+
+        PackageOptimizationInfo getPackageOptimizationInfo(ArtManagerInternal artManagerInternal) {
+            return artManagerInternal == null || launchedActivityAppRecordRequiredAbi == null
+                    ? PackageOptimizationInfo.createWithNoInfo()
+                    : artManagerInternal.getPackageOptimizationInfo(applicationInfo,
+                            launchedActivityAppRecordRequiredAbi, launchedActivityName);
+        }
     }
 
     ActivityMetricsLogger(ActivityStackSupervisor supervisor, Looper looper) {
@@ -857,14 +864,8 @@ class ActivityMetricsLogger {
                     info.bindApplicationDelayMs);
         }
         builder.addTaggedData(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, info.windowsDrawnDelayMs);
-        final ArtManagerInternal artManagerInternal = getArtManagerInternal();
         final PackageOptimizationInfo packageOptimizationInfo =
-                (artManagerInternal == null) || (info.launchedActivityAppRecordRequiredAbi == null)
-                ? PackageOptimizationInfo.createWithNoInfo()
-                : artManagerInternal.getPackageOptimizationInfo(
-                        info.applicationInfo,
-                        info.launchedActivityAppRecordRequiredAbi,
-                        info.launchedActivityName);
+                info.getPackageOptimizationInfo(getArtManagerInternal());
         builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_REASON,
                 packageOptimizationInfo.getCompilationReason());
         builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_FILTER,
@@ -985,6 +986,8 @@ class ActivityMetricsLogger {
         builder.addTaggedData(APP_TRANSITION_PROCESS_RUNNING,
                 info.mProcessRunning ? 1 : 0);
         mMetricsLogger.write(builder);
+        final PackageOptimizationInfo packageOptimizationInfo =
+                infoSnapshot.getPackageOptimizationInfo(getArtManagerInternal());
         FrameworkStatsLog.write(
                 FrameworkStatsLog.APP_START_FULLY_DRAWN,
                 info.mLastLaunchedActivity.info.applicationInfo.uid,
@@ -995,6 +998,8 @@ class ActivityMetricsLogger {
                 info.mLastLaunchedActivity.info.name,
                 info.mProcessRunning,
                 startupTimeMs,
+                packageOptimizationInfo.getCompilationReason(),
+                packageOptimizationInfo.getCompilationFilter(),
                 info.mSourceType,
                 info.mSourceEventDelayMs);
 

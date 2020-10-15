@@ -122,6 +122,7 @@ package android {
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_MUSIC_RECOGNITION = "android.permission.MANAGE_MUSIC_RECOGNITION";
+    field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
     field public static final String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
@@ -674,8 +675,10 @@ package android.app {
   public class NotificationManager {
     method @NonNull public java.util.List<java.lang.String> getAllowedAssistantAdjustments();
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public java.util.List<android.content.ComponentName> getEnabledNotificationListeners();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean);
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL = "android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL";
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_OPEN_NOTIFICATION_HANDLER_PANEL = "android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL";
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
@@ -5036,6 +5039,7 @@ package android.media.tv.tuner {
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
+    method public int linkFrontendToCiCam(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
     method @Nullable public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
     method @Nullable public android.media.tv.tuner.dvr.DvrRecorder openDvrRecorder(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnRecordStatusChangedListener);
@@ -5049,9 +5053,13 @@ package android.media.tv.tuner {
     method public void setResourceLostListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.Tuner.OnResourceLostListener);
     method public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
     method public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
+    method public int unlinkFrontendToCiCam(int);
     method public void updateResourcePriority(int, int);
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
+    field public static final long INVALID_FILTER_ID_64BIT = -1L; // 0xffffffffffffffffL
+    field public static final int INVALID_LTS_ID = -1; // 0xffffffff
+    field public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
     field public static final int INVALID_TS_PID = 65535; // 0xffff
@@ -5069,6 +5077,13 @@ package android.media.tv.tuner {
 
   public static interface Tuner.OnResourceLostListener {
     method public void onResourceLost(@NonNull android.media.tv.tuner.Tuner);
+  }
+
+  public final class TunerVersionChecker {
+    method public static int getTunerVersion();
+    field public static final int TUNER_VERSION_1_0 = 65536; // 0x10000
+    field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
+    field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
   }
 
 }
@@ -5204,6 +5219,7 @@ package android.media.tv.tuner.filter {
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
     method public int flush();
     method public int getId();
+    method public long getId64Bit();
     method public int read(@NonNull byte[], long, long);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int start();
@@ -5255,16 +5271,19 @@ package android.media.tv.tuner.filter {
     method @NonNull public static android.media.tv.tuner.filter.IpFilterConfiguration.Builder builder();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
     method public int getDstPort();
+    method public int getIpFilterContextId();
     method @NonNull @Size(min=4, max=16) public byte[] getSrcIpAddress();
     method public int getSrcPort();
     method public int getType();
     method public boolean isPassthrough();
+    field public static final int INVALID_IP_FILTER_CONTEXT_ID = -1; // 0xffffffff
   }
 
   public static final class IpFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setDstIpAddress(@NonNull byte[]);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setDstPort(int);
+    method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setIpFilterContextId(int);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setPassthrough(boolean);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSrcIpAddress(@NonNull byte[]);
@@ -5304,6 +5323,8 @@ package android.media.tv.tuner.filter {
 
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
+    method public int getMpuSequenceNumber();
+    method public long getPts();
     method public int getScHevcIndexMask();
   }
 
@@ -5466,6 +5487,7 @@ package android.media.tv.tuner.filter {
   public class TsRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
     method public int getPacketId();
+    method public long getPts();
     method public int getScIndexMask();
     method public int getTsIndexMask();
   }
@@ -11027,6 +11049,25 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
+  public final class ModemActivityInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.telephony.ModemActivityInfo getDelta(@NonNull android.telephony.ModemActivityInfo);
+    method public long getIdleTimeMillis();
+    method public static int getNumTxPowerLevels();
+    method public long getReceiveTimeMillis();
+    method public long getSleepTimeMillis();
+    method public long getTimestampMillis();
+    method public long getTransmitDurationMillisAtPowerLevel(int);
+    method @NonNull public android.util.Range<java.lang.Integer> getTransmitPowerRange(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
+    field public static final int TX_POWER_LEVEL_0 = 0; // 0x0
+    field public static final int TX_POWER_LEVEL_1 = 1; // 0x1
+    field public static final int TX_POWER_LEVEL_2 = 2; // 0x2
+    field public static final int TX_POWER_LEVEL_3 = 3; // 0x3
+    field public static final int TX_POWER_LEVEL_4 = 4; // 0x4
+  }
+
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getRegistrationState();
@@ -11520,7 +11561,6 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<java.lang.String> getEquivalentHomePlmns();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();

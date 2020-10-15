@@ -221,6 +221,17 @@ static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle, jint i
     return (static_cast<uint64_t>(var.axisTag) << 32) | static_cast<uint64_t>(floatBinary);
 }
 
+// FastNative
+static jstring Font_getFontPath(JNIEnv* env, jobject, jlong fontHandle) {
+    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->typeface().get());
+    const std::string& filePath = minikinSkia->getFilePath();
+    if (filePath.empty()) {
+        return nullptr;
+    }
+    return env->NewStringUTF(filePath.c_str());
+}
+
 // Critical Native
 static jlong Font_getNativeFontPtr(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
@@ -274,6 +285,7 @@ static const JNINativeMethod gFontMethods[] = {
     { "nGetFontMetrics", "(JJLandroid/graphics/Paint$FontMetrics;)F", (void*) Font_getFontMetrics },
     { "nGetFontInfo", "(J)J", (void*) Font_getFontInfo },
     { "nGetAxisInfo", "(JI)J", (void*) Font_getAxisInfo },
+    { "nGetFontPath", "(J)Ljava/lang/String;", (void*) Font_getFontPath },
     { "nGetNativeFontPtr", "(J)J", (void*) Font_getNativeFontPtr },
 };
 

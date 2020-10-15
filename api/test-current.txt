@@ -14,6 +14,7 @@ package android {
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
+    field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
@@ -79,6 +80,7 @@ package android.app {
   }
 
   public class ActivityManager {
+    method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
@@ -88,6 +90,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.INJECT_EVENTS) public void holdLock(int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void killProcessesWhenImperceptible(@NonNull int[], @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
@@ -458,6 +461,11 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
 
+  public abstract class HomeVisibilityListener {
+    ctor public HomeVisibilityListener();
+    method public abstract void onHomeVisibilityChanged(boolean);
+  }
+
   public final class NotificationChannel implements android.os.Parcelable {
     method public int getOriginalImportance();
     method public boolean isBlockable();
@@ -487,9 +495,11 @@ package android.app {
     method @NonNull public java.util.List<java.lang.String> getAllowedAssistantAdjustments();
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method public android.content.ComponentName getEffectsSuppressor();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public java.util.List<android.content.ComponentName> getEnabledNotificationListeners();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public boolean matchesCallFilter(android.os.Bundle);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
@@ -1227,20 +1237,19 @@ package android.graphics.drawable {
 package android.hardware.biometrics {
 
   public class BiometricManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession getTestSession();
+    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
   }
 
   public class BiometricTestSession implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void authenticateReject(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void authenticateSuccess(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void acceptAuthentication(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void cleanupInternalState(int);
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void close();
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enableTestHal(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enrollFinish(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void enrollStart(int, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void internalCleanup(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int, int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void finishEnroll(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void rejectAuthentication(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void startEnroll(int);
   }
 
   public class SensorProperties {
@@ -1361,7 +1370,8 @@ package android.hardware.display {
 package android.hardware.fingerprint {
 
   @Deprecated public class FingerprintManager {
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession getTestSession();
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
   }
 
 }
@@ -2126,6 +2136,21 @@ package android.media.tv {
   public final class TvInputManager {
     method public void addHardwareDevice(int);
     method public void removeHardwareDevice(int);
+  }
+
+}
+
+package android.media.tv.tuner {
+
+  public final class TunerVersionChecker {
+    method public static int getMajorVersion(int);
+    method public static int getMinorVersion(int);
+    method public static int getTunerVersion();
+    method public static boolean isHigherOrEqualVersionTo(int);
+    method public static boolean supportTunerVersion(int);
+    field public static final int TUNER_VERSION_1_0 = 65536; // 0x10000
+    field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
+    field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
   }
 
 }
@@ -3470,6 +3495,7 @@ package android.provider {
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
+    field public static final String HIDDEN_API_POLICY = "hidden_api_policy";
     field public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
     field public static final String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
@@ -4215,6 +4241,27 @@ package android.telephony {
 
   public class MbmsStreamingSession implements java.lang.AutoCloseable {
     field public static final String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA = "mbms-streaming-service-override";
+  }
+
+  public final class ModemActivityInfo implements android.os.Parcelable {
+    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    method public int describeContents();
+    method @NonNull public android.telephony.ModemActivityInfo getDelta(@NonNull android.telephony.ModemActivityInfo);
+    method public long getIdleTimeMillis();
+    method public static int getNumTxPowerLevels();
+    method public long getReceiveTimeMillis();
+    method public long getSleepTimeMillis();
+    method public long getTimestampMillis();
+    method public long getTransmitDurationMillisAtPowerLevel(int);
+    method @NonNull public android.util.Range<java.lang.Integer> getTransmitPowerRange(int);
+    method public boolean isValid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
+    field public static final int TX_POWER_LEVEL_0 = 0; // 0x0
+    field public static final int TX_POWER_LEVEL_1 = 1; // 0x1
+    field public static final int TX_POWER_LEVEL_2 = 2; // 0x2
+    field public static final int TX_POWER_LEVEL_3 = 3; // 0x3
+    field public static final int TX_POWER_LEVEL_4 = 4; // 0x4
   }
 
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
@@ -5769,6 +5816,15 @@ package android.window {
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
   }
 
+  public final class TaskAppearedInfo implements android.os.Parcelable {
+    ctor public TaskAppearedInfo(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
+    method public int describeContents();
+    method @NonNull public android.view.SurfaceControl getLeash();
+    method @NonNull public android.app.ActivityManager.RunningTaskInfo getTaskInfo();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskAppearedInfo> CREATOR;
+  }
+
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.app.ActivityManager.RunningTaskInfo createRootTask(int, int);
@@ -5780,10 +5836,10 @@ package android.window {
     method @BinderThread public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void registerOrganizer();
+    method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void unregisterOrganizer();
+    method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void unregisterOrganizer();
   }
 
   public final class WindowContainerToken implements android.os.Parcelable {

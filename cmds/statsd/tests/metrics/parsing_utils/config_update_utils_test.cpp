@@ -155,6 +155,20 @@ GaugeMetric createGaugeMetric(string name, int64_t what, GaugeMetric::SamplingTy
     return metric;
 }
 
+DurationMetric createDurationMetric(string name, int64_t what, optional<int64_t> condition,
+                                    vector<int64_t> states) {
+    DurationMetric metric;
+    metric.set_id(StringToId(name));
+    metric.set_what(what);
+    metric.set_bucket(TEN_MINUTES);
+    if (condition) {
+        metric.set_condition(condition.value());
+    }
+    for (const int64_t state : states) {
+        metric.add_slice_by_state(state);
+    }
+    return metric;
+}
 }  // anonymous namespace
 
 TEST_F(ConfigUpdateTest, TestSimpleMatcherPreserve) {
@@ -1395,6 +1409,130 @@ TEST_F(ConfigUpdateTest, TestGaugeMetricTriggerEventChanged) {
             config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
             /*replacedMatchers*/ {triggerEvent.id()}, /*replacedConditions=*/{},
             /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestDurationMetricPreserve) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+
+    Predicate what = CreateScreenIsOnPredicate();
+    *config.add_predicate() = what;
+    Predicate condition = CreateScreenIsOffPredicate();
+    *config.add_predicate() = condition;
+
+    State sliceState = CreateScreenState();
+    *config.add_state() = sliceState;
+
+    *config.add_duration_metric() =
+            createDurationMetric("DURATION1", what.id(), condition.id(), {sliceState.id()});
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                                 metricToActivationMap,
+                                                 /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+                                                 /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_PRESERVE);
+}
+
+TEST_F(ConfigUpdateTest, TestDurationMetricDefinitionChange) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+
+    Predicate what = CreateScreenIsOnPredicate();
+    *config.add_predicate() = what;
+
+    *config.add_duration_metric() = createDurationMetric("DURATION1", what.id(), nullopt, {});
+    EXPECT_TRUE(initConfig(config));
+
+    config.mutable_duration_metric(0)->set_aggregation_type(DurationMetric::MAX_SPARSE);
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                                 metricToActivationMap, /*replacedMatchers*/ {},
+                                                 /*replacedConditions=*/{}, /*replacedStates=*/{},
+                                                 metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestDurationMetricWhatChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+
+    Predicate what = CreateScreenIsOnPredicate();
+    *config.add_predicate() = what;
+
+    *config.add_duration_metric() = createDurationMetric("DURATION1", what.id(), nullopt, {});
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {}, /*replacedConditions=*/{what.id()},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestDurationMetricConditionChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+
+    Predicate what = CreateScreenIsOnPredicate();
+    *config.add_predicate() = what;
+    Predicate condition = CreateScreenIsOffPredicate();
+    *config.add_predicate() = condition;
+
+    *config.add_duration_metric() = createDurationMetric("DURATION", what.id(), condition.id(), {});
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {}, /*replacedConditions=*/{condition.id()},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestDurationMetricStateChange) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+
+    Predicate what = CreateScreenIsOnPredicate();
+    *config.add_predicate() = what;
+
+    State sliceState = CreateScreenState();
+    *config.add_state() = sliceState;
+
+    *config.add_duration_metric() =
+            createDurationMetric("DURATION1", what.id(), nullopt, {sliceState.id()});
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+            /*replacedStates=*/{sliceState.id()}, metricsToUpdate));
     EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
 }
 

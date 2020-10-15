@@ -1474,14 +1474,6 @@ class Task extends WindowContainer<WindowContainer> {
         // Update task bounds if needed.
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
-        if (getWindowConfiguration().windowsAreScaleable()) {
-            // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
-            // while a resize is pending.
-            forceWindowsScaleable(true /* force */);
-        } else {
-            forceWindowsScaleable(false /* force */);
-        }
-
         mRootWindowContainer.updateUIDsPresentOnDisplay();
 
         // Resume next focusable stack after reparenting to another display if we aren't removing
@@ -3780,17 +3772,6 @@ class Task extends WindowContainer<WindowContainer> {
         positionChildAt(position, child, false /* includeParents */);
     }
 
-    void forceWindowsScaleable(boolean force) {
-        mWmService.openSurfaceTransaction();
-        try {
-            for (int i = mChildren.size() - 1; i >= 0; i--) {
-                mChildren.get(i).forceWindowsScaleableInTransaction(force);
-            }
-        } finally {
-            mWmService.closeSurfaceTransaction("forceWindowsScaleable");
-        }
-    }
-
     void setTaskDescription(TaskDescription taskDescription) {
         mTaskDescription = taskDescription;
     }
@@ -4792,9 +4773,11 @@ class Task extends WindowContainer<WindowContainer> {
             // If the task is not yet visible when it is added to the task organizer, then we should
             // hide it to allow the task organizer to show it when it is properly reparented. We
             // skip this for tasks created by the organizer because they can synchronously update
-            // the leash before new children are added to the task.
+            // the leash before new children are added to the task.  Also skip this if the task
+            // has already been sent to the organizer which can happen before the first draw if
+            // an existing task is reported to the organizer when it first registers.
             if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
-                    && !mCreatedByOrganizer
+                    && !mCreatedByOrganizer && !mTaskAppearedSent
                     && mTaskOrganizer != null && !prevHasBeenVisible) {
                 getSyncTransaction().hide(getSurfaceControl());
                 commitPendingTransaction();
@@ -4846,6 +4829,11 @@ class Task extends WindowContainer<WindowContainer> {
 
     @VisibleForTesting
     boolean setTaskOrganizer(ITaskOrganizer organizer) {
+        return setTaskOrganizer(organizer, false /* skipTaskAppeared */);
+    }
+
+    @VisibleForTesting
+    boolean setTaskOrganizer(ITaskOrganizer organizer, boolean skipTaskAppeared) {
         if (mTaskOrganizer == organizer) {
             return false;
         }
@@ -4858,7 +4846,9 @@ class Task extends WindowContainer<WindowContainer> {
         sendTaskVanished(prevOrganizer);
 
         if (mTaskOrganizer != null) {
-            sendTaskAppeared();
+            if (!skipTaskAppeared) {
+                sendTaskAppeared();
+            }
         } else {
             // No longer managed by any organizer.
             mTaskAppearedSent = false;
@@ -4871,6 +4861,10 @@ class Task extends WindowContainer<WindowContainer> {
         return true;
     }
 
+    boolean updateTaskOrganizerState(boolean forceUpdate) {
+        return updateTaskOrganizerState(forceUpdate, false /* skipTaskAppeared */);
+    }
+
     /**
      * Called when the task state changes (ie. from windowing mode change) an the task organizer
      * state should also be updated.
@@ -4878,9 +4872,10 @@ class Task extends WindowContainer<WindowContainer> {
      * @param forceUpdate Updates the task organizer to the one currently specified in the task
      *                    org controller for the task's windowing mode, ignoring the cached
      *                    windowing mode checks.
+     * @param skipTaskAppeared Skips calling taskAppeared for the new organizer if it has changed
      * @return {@code true} if task organizer changed.
      */
-    boolean updateTaskOrganizerState(boolean forceUpdate) {
+    boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
         if (getSurfaceControl() == null) {
             // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
             // is created.
@@ -4896,7 +4891,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (!forceUpdate && mTaskOrganizer == organizer) {
             return false;
         }
-        return setTaskOrganizer(organizer);
+        return setTaskOrganizer(organizer, skipTaskAppeared);
     }
 
     @Override
@@ -5883,7 +5878,11 @@ class Task extends WindowContainer<WindowContainer> {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
         // If the top activity is the resumed one, nothing to do.
+        // For devices that are not in fullscreen mode (e.g. freeform windows), it's possible
+        // we still want to proceed if the visibility of other windows have changed (e.g. bringing
+        // a fullscreen window forward to cover another freeform activity.)
         if (mResumedActivity == next && next.isState(RESUMED)
+                && taskDisplayArea.getWindowingMode() != WINDOWING_MODE_FREEFORM
                 && taskDisplayArea.allResumedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.

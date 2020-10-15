@@ -22,6 +22,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_WINDOW;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,10 +33,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
+import android.window.TaskAppearedInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -93,8 +99,12 @@ public class ShellTaskOrganizerTests {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mOrganizer = new ShellTaskOrganizer(mTaskOrganizerController, mSyncTransactionQueue,
-                mTransactionPool, mTestExecutor, mTestExecutor);
+        try {
+            doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
+                    .when(mTaskOrganizerController).registerTaskOrganizer(any());
+        } catch (RemoteException e) {}
+        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mSyncTransactionQueue,
+                mTransactionPool, mTestExecutor, mTestExecutor));
     }
 
     @Test
@@ -116,8 +126,29 @@ public class ShellTaskOrganizerTests {
     }
 
     @Test
+    public void testRegisterWithExistingTasks() throws RemoteException {
+        // Setup some tasks
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
+        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        ArrayList<TaskAppearedInfo> taskInfos = new ArrayList<>();
+        taskInfos.add(new TaskAppearedInfo(task1, new SurfaceControl()));
+        taskInfos.add(new TaskAppearedInfo(task2, new SurfaceControl()));
+        doReturn(new ParceledListSlice(taskInfos))
+                .when(mTaskOrganizerController).registerTaskOrganizer(any());
+
+        // Register and expect the tasks to be stored
+        mOrganizer.registerOrganizer();
+
+        // Check that the tasks are next reported when the listener is added
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListener(listener, TASK_LISTENER_TYPE_MULTI_WINDOW);
+        assertTrue(listener.appeared.contains(task1));
+        assertTrue(listener.appeared.contains(task2));
+    }
+
+    @Test
     public void testAppearedVanished() {
-        RunningTaskInfo taskInfo = createTaskInfo(WINDOWING_MODE_MULTI_WINDOW);
+        RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
         TrackingTaskListener listener = new TrackingTaskListener();
         mOrganizer.addListener(listener, TASK_LISTENER_TYPE_MULTI_WINDOW);
         mOrganizer.onTaskAppeared(taskInfo, null);
@@ -129,7 +160,7 @@ public class ShellTaskOrganizerTests {
 
     @Test
     public void testAddListenerExistingTasks() {
-        RunningTaskInfo taskInfo = createTaskInfo(WINDOWING_MODE_MULTI_WINDOW);
+        RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
         mOrganizer.onTaskAppeared(taskInfo, null);
 
         TrackingTaskListener listener = new TrackingTaskListener();
@@ -139,7 +170,7 @@ public class ShellTaskOrganizerTests {
 
     @Test
     public void testWindowingModeChange() {
-        RunningTaskInfo taskInfo = createTaskInfo(WINDOWING_MODE_MULTI_WINDOW);
+        RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
         TrackingTaskListener mwListener = new TrackingTaskListener();
         TrackingTaskListener pipListener = new TrackingTaskListener();
         mOrganizer.addListener(mwListener, TASK_LISTENER_TYPE_MULTI_WINDOW);
@@ -148,14 +179,15 @@ public class ShellTaskOrganizerTests {
         assertTrue(mwListener.appeared.contains(taskInfo));
         assertTrue(pipListener.appeared.isEmpty());
 
-        taskInfo = createTaskInfo(WINDOWING_MODE_PINNED);
+        taskInfo = createTaskInfo(1, WINDOWING_MODE_PINNED);
         mOrganizer.onTaskInfoChanged(taskInfo);
         assertTrue(mwListener.vanished.contains(taskInfo));
         assertTrue(pipListener.appeared.contains(taskInfo));
     }
 
-    private RunningTaskInfo createTaskInfo(int windowingMode) {
+    private RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
+        taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         return taskInfo;
     }
