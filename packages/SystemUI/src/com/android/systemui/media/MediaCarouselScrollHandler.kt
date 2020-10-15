@@ -282,10 +282,12 @@ class MediaCarouselScrollHandler(
                 scrollXAmount = -1 * relativePos
             }
             if (scrollXAmount != 0) {
+                val dx = if (isRtl) -scrollXAmount else scrollXAmount
+                val newScrollX = scrollView.relativeScrollX + dx
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute {
-                    scrollView.smoothScrollBy(if (isRtl) -scrollXAmount else scrollXAmount, 0)
+                    scrollView.smoothScrollTo(newScrollX, scrollView.scrollY)
                 }
             }
             val currentTranslation = scrollView.getContentTranslation()
