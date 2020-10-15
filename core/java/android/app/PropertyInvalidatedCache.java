@@ -206,6 +206,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private static final String TAG = "PropertyInvalidatedCache";
     private static final boolean DEBUG = false;
     private static final boolean VERIFY = false;
+    // If this is true, dumpsys will dump the cache entries along with cache statistics.
+    // Most of the time this causes dumpsys to fail because the output stream is too
+    // large.  Only set it to true in development images.
+    private static final boolean DETAILED = false;
 
     // Per-Cache performance counters. As some cache instances are declared static,
     @GuardedBy("mLock")
@@ -912,14 +916,13 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
                     mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
             pw.println(String.format("    Enabled: %s", mDisabled ? "false" : "true"));
+            pw.println("");
 
             Set<Map.Entry<Query, Result>> cacheEntries = mCache.entrySet();
-            if (cacheEntries.size() == 0) {
-                pw.println("");
+            if (!DETAILED || cacheEntries.size() == 0) {
                 return;
             }
 
-            pw.println("");
             pw.println("    Contents:");
             for (Map.Entry<Query, Result> entry : cacheEntries) {
                 String key = Objects.toString(entry.getKey());
