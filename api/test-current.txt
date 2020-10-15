@@ -793,6 +793,28 @@ package android.app.role {
 
 package android.app.usage {
 
+  public final class CacheQuotaHint implements android.os.Parcelable {
+    ctor public CacheQuotaHint(@NonNull android.app.usage.CacheQuotaHint.Builder);
+    method public int describeContents();
+    method public long getQuota();
+    method public int getUid();
+    method @Nullable public android.app.usage.UsageStats getUsageStats();
+    method @Nullable public String getVolumeUuid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.CacheQuotaHint> CREATOR;
+    field public static final long QUOTA_NOT_SET = -1L; // 0xffffffffffffffffL
+  }
+
+  public static final class CacheQuotaHint.Builder {
+    ctor public CacheQuotaHint.Builder();
+    ctor public CacheQuotaHint.Builder(@NonNull android.app.usage.CacheQuotaHint);
+    method @NonNull public android.app.usage.CacheQuotaHint build();
+    method @NonNull public android.app.usage.CacheQuotaHint.Builder setQuota(long);
+    method @NonNull public android.app.usage.CacheQuotaHint.Builder setUid(int);
+    method @NonNull public android.app.usage.CacheQuotaHint.Builder setUsageStats(@Nullable android.app.usage.UsageStats);
+    method @NonNull public android.app.usage.CacheQuotaHint.Builder setVolumeUuid(@Nullable String);
+  }
+
   public class NetworkStatsManager {
     method public void setPollForce(boolean);
   }
@@ -803,6 +825,10 @@ package android.app.usage {
     method @NonNull @WorkerThread public java.util.Collection<android.os.storage.CrateInfo> queryCratesForPackage(@NonNull java.util.UUID, @NonNull String, @NonNull android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @WorkerThread public java.util.Collection<android.os.storage.CrateInfo> queryCratesForUid(@NonNull java.util.UUID, int) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_CRATES) @WorkerThread public java.util.Collection<android.os.storage.CrateInfo> queryCratesForUser(@NonNull java.util.UUID, @NonNull android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+  }
+
+  public final class UsageStats implements android.os.Parcelable {
+    ctor public UsageStats();
   }
 
   public final class UsageStatsManager {
