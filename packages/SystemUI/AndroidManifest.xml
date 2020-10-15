@@ -586,6 +586,24 @@
             </intent-filter>
         </activity>
 
+        <!-- People Space Widget -->
+        <receiver
+            android:name=".people.widget.PeopleSpaceWidgetProvider"
+            android:label="People Space"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/people_space_widget_info" />
+        </receiver>
+
+        <!-- Widget service -->
+        <service android:name=".people.widget.PeopleSpaceWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
         <!-- a gallery of delicious treats -->
         <service
             android:name=".DessertCaseDream"
