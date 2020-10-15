@@ -380,6 +380,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             Slog.w(TAG, "Abandoning old session created at "
                                         + session.createdMillis);
                             valid = false;
+                        } else if (isExtraSessionForStagedInstall(session)) {
+                            valid = false;
                         } else {
                             valid = true;
                         }
@@ -408,6 +410,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             PackageInstallerSession session = mSessions.valueAt(i);
             session.sealAndValidateIfNecessary();
         }
+    }
+
+    // Extra sessions are created during staged install on temporary basis. They should not be
+    // allowed to live across system server restart.
+    private boolean isExtraSessionForStagedInstall(PackageInstallerSession session) {
+        return (session.params.installFlags & PackageManager.INSTALL_DRY_RUN) != 0
+                || (session.params.installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
     }
 
     @GuardedBy("mSessions")
