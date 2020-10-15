@@ -21,6 +21,7 @@ import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
@@ -38,7 +39,7 @@ import dagger.Provides;
  * Module for QS dependencies
  */
 // TODO: Add other QS classes
-@Module
+@Module(includes = {MediaModule.class})
 public interface QSModule {
 
     @Provides
