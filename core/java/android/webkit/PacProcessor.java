@@ -34,7 +34,7 @@ public interface PacProcessor {
      *
      * <p> There can only be one default {@link PacProcessor} instance.
      * This method will create a new instance if one did not already exist, or
-     * if the previous instance was released with {@link #releasePacProcessor}.
+     * if the previous instance was released with {@link #release}.
      *
      * @return the default PacProcessor instance.
      */
@@ -47,7 +47,7 @@ public interface PacProcessor {
      * Create a new PacProcessor instance.
      *
      * <p> The created instance needs to be released manually once it is no longer needed
-     * by calling {@link #releasePacProcessor} to prevent memory leaks.
+     * by calling {@link #release} to prevent memory leaks.
      *
      * <p> The created instance is not tied to any particular {@link Network}.
      * To associate {@link PacProcessor} with a {@link Network} use {@link #setNetwork} method.
@@ -82,7 +82,7 @@ public interface PacProcessor {
      * {@link #getInstance} and {@link #getInstanceForNetwork}
      * for the same network will create a new instance.
      */
-    default void releasePacProcessor() {
+    default void release() {
         throw new UnsupportedOperationException("Not implemented");
     }
 

@@ -12077,7 +12077,7 @@ package android.webkit {
     method @Nullable public String findProxyForUrl(@NonNull String);
     method @NonNull public static android.webkit.PacProcessor getInstance();
     method @Nullable public default android.net.Network getNetwork();
-    method public default void releasePacProcessor();
+    method public default void release();
     method public default void setNetwork(@Nullable android.net.Network);
     method public boolean setProxyScript(@NonNull String);
   }
