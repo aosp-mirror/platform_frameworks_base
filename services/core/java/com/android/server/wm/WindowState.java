@@ -32,6 +32,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -2649,7 +2650,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
             }
             if (!isVisibleByPolicy()) {
-                mWinAnimator.hide("checkPolicyVisibilityChange");
+                mWinAnimator.hide(getGlobalTransaction(), "checkPolicyVisibilityChange");
                 if (isFocused()) {
                     ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
                             "setAnimationLocked: setting mFocusMayChange true");
@@ -3180,10 +3181,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // detaching any surface control the client added from the client.
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 final WindowState c = mChildren.get(i);
-                c.mWinAnimator.detachChildren();
+                c.mWinAnimator.detachChildren(getGlobalTransaction());
             }
 
-            mWinAnimator.detachChildren();
+            mWinAnimator.detachChildren(getGlobalTransaction());
         }
 
         try {
@@ -4806,7 +4807,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             c.hideWallpaperWindow(wasDeferred, reason);
         }
         if (!mWinAnimator.mLastHidden || wasDeferred) {
-            mWinAnimator.hide(reason);
+            mWinAnimator.hide(getGlobalTransaction(), reason);
             getDisplayContent().mWallpaperController.mDeferredHideWallpaper = null;
             dispatchWallpaperVisibility(false);
             final DisplayContent displayContent = getDisplayContent();
@@ -5270,7 +5271,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateFrameRateSelectionPriorityIfNeeded();
         updateGlobalScaleIfNeeded();
 
-        mWinAnimator.prepareSurfaceLocked(getSyncTransaction(), true);
+        mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
         super.prepareSurfaces();
     }
 

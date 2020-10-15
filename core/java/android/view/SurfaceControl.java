@@ -1526,25 +1526,6 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void detachChildren() {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.detachChildren(this);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setTransparentRegionHint(Region region) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setTransparentRegionHint(this, region);
-        }
-    }
-
-    /**
-     * @hide
-     */
     public boolean clearContentFrameStats() {
         checkNotReleased();
         return nativeClearContentFrameStats(mNativeObject);
@@ -1570,51 +1551,6 @@ public final class SurfaceControl implements Parcelable {
      */
     public static boolean getAnimationFrameStats(WindowAnimationFrameStats outStats) {
         return nativeGetAnimationFrameStats(outStats);
-    }
-
-    /**
-     * Sets the Surface to be color space agnostic. If a surface is color space agnostic,
-     * the color can be interpreted in any color space.
-     * @param agnostic A boolean to indicate whether the surface is color space agnostic
-     * @hide
-     */
-    public void setColorSpaceAgnostic(boolean agnostic) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setColorSpaceAgnostic(this, agnostic);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setBackgroundBlurRadius(int blur) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setBackgroundBlurRadius(this, blur);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setOpaque(boolean isOpaque) {
-        checkNotReleased();
-
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setOpaque(this, isOpaque);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setSecure(boolean isSecure) {
-        checkNotReleased();
-
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setSecure(this, isSecure);
-        }
     }
 
     /**
