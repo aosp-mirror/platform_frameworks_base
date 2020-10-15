@@ -95,7 +95,6 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.phone.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
@@ -151,7 +150,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private int mConnectionBackoffAttempts;
     private boolean mBound;
     private boolean mIsEnabled;
-    private boolean mHasPipFeature;
     private int mCurrentBoundedUserId = -1;
     private float mNavBarButtonAlpha;
     private boolean mInputFocusTransferStarted;
@@ -377,9 +375,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setShelfHeight(boolean visible, int shelfHeight) {
-            if (!verifyCaller("setShelfHeight") || !mHasPipFeature) {
-                Log.w(TAG_OPS,
-                        "ByPass setShelfHeight, FEATURE_PICTURE_IN_PICTURE:" + mHasPipFeature);
+            if (!verifyCaller("setShelfHeight")) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
@@ -405,9 +401,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void notifySwipeToHomeFinished() {
-            if (!verifyCaller("notifySwipeToHomeFinished") || !mHasPipFeature) {
-                Log.w(TAG_OPS, "ByPass notifySwipeToHomeFinished, FEATURE_PICTURE_IN_PICTURE:"
-                        + mHasPipFeature);
+            if (!verifyCaller("notifySwipeToHomeFinished")) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
@@ -422,9 +416,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
-            if (!verifyCaller("setPinnedStackAnimationListener") || !mHasPipFeature) {
-                Log.w(TAG_OPS, "ByPass setPinnedStackAnimationListener, FEATURE_PICTURE_IN_PICTURE:"
-                        + mHasPipFeature);
+            if (!verifyCaller("setPinnedStackAnimationListener")) {
                 return;
             }
             mIPinnedStackAnimationListener = listener;
@@ -509,7 +501,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
                 PictureInPictureParams pictureInPictureParams,
                 int launcherRotation, int shelfHeight) {
-            if (!verifyCaller("startSwipePipToHome") || !mHasPipFeature) {
+            if (!verifyCaller("startSwipePipToHome")) {
                 return null;
             }
             final long binderToken = Binder.clearCallingIdentity();
@@ -525,7 +517,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
-            if (!verifyCaller("stopSwipePipToHome") || !mHasPipFeature) {
+            if (!verifyCaller("stopSwipePipToHome")) {
                 return;
             }
             final long binderToken = Binder.clearCallingIdentity();
@@ -650,7 +642,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;
-        mHasPipFeature = PipUtils.hasSystemFeature(mContext);
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;

@@ -16,17 +16,12 @@
 
 package com.android.systemui.wmshell;
 
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.TestableContext;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -94,7 +89,6 @@ public class WMShellTest extends SysuiTestCase {
                 mTaskOrganizer, mProtoTracer);
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
-
     }
 
     @Test
@@ -109,26 +103,6 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initPip(mPip);
 
         verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
-    }
-
-    @Test
-    public void nonPipDevice_shouldNotInitPip() {
-        final TestableContext nonPipContext = getNonPipFeatureContext();
-        final WMShell nonPipWMShell = new WMShell(nonPipContext, mCommandQueue,
-                mConfigurationController, mMockInputConsumerController, mKeyguardUpdateMonitor,
-                mTaskStackChangeListeners, mDisplayImeController, mNavigationModeController,
-                mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
-                Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
-        nonPipWMShell.initPip(mPip);
-
-        verify(mCommandQueue, never()).addCallback(any());
-        verify(mKeyguardUpdateMonitor, never()).registerCallback(any());
-        verify(mConfigurationController, never()).addCallback(any());
-        verify(mSysUiState, never()).addCallback(any());
-        verify(mTaskStackChangeListeners, never()).registerTaskStackListener(any());
-        verify(mMockInputConsumerController, never()).setInputListener(any());
-        verify(mMockInputConsumerController, never()).setRegistrationListener(any());
-        verify(mPip, never()).registerSessionListenerForCurrentUser();
     }
 
     @Test
@@ -155,12 +129,5 @@ public class WMShellTest extends SysuiTestCase {
         verify(mOneHanded).registerGestureCallback(any(
                 OneHandedGestureHandler.OneHandedGestureEventCallback.class));
         verify(mOneHanded).registerTransitionCallback(any(OneHandedTransitionCallback.class));
-    }
-
-    TestableContext getNonPipFeatureContext() {
-        TestableContext spiedContext = spy(mContext);
-        when(mMockPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
-        when(spiedContext.getPackageManager()).thenReturn(mMockPackageManager);
-        return spiedContext;
     }
 }

@@ -67,7 +67,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
-import com.android.wm.shell.pip.phone.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
@@ -281,13 +280,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitScreenOptional = splitScreenOptional;
         mTaskOrganizer = shellTaskOrganizer;
-
-        if (!PipUtils.hasSystemFeature(context)) {
-            Log.w(TAG, "Device not support PIP feature");
-        } else {
-            mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_PIP);
-            displayController.addDisplayWindowListener(this);
-        }
+        mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_PIP);
+        displayController.addDisplayWindowListener(this);
     }
 
     public Handler getUpdateHandler() {

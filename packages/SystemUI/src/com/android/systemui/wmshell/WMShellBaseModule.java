@@ -41,7 +41,6 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
@@ -117,7 +116,7 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static PipSurfaceTransactionHelper providesPipSurfaceTransactionHelper(Context context) {
+    static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper(Context context) {
         return new PipSurfaceTransactionHelper(context);
     }
 
@@ -157,9 +156,6 @@ public abstract class WMShellBaseModule {
             DisplayMetrics displayMetrics) {
         return new FlingAnimationUtils.Builder(displayMetrics);
     }
-
-    @BindsOptionalOf
-    abstract Pip optionalPip();
 
     @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();

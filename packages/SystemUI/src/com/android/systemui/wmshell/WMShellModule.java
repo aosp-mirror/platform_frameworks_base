@@ -68,24 +68,6 @@ public class WMShellModule {
 
     @SysUISingleton
     @Provides
-    static Pip providePipController(Context context,
-            DisplayController displayController,
-            PipAppOpsListener pipAppOpsListener,
-            PipBoundsHandler pipBoundsHandler,
-            PipBoundsState pipBoundsState,
-            PipMediaController pipMediaController,
-            PipMenuActivityController pipMenuActivityController,
-            PipTaskOrganizer pipTaskOrganizer,
-            PipTouchHandler pipTouchHandler,
-            WindowManagerShellWrapper windowManagerShellWrapper) {
-        return new PipController(context, displayController,
-                pipAppOpsListener, pipBoundsHandler, pipBoundsState, pipMediaController,
-                pipMenuActivityController, pipTaskOrganizer, pipTouchHandler,
-                windowManagerShellWrapper);
-    }
-
-    @SysUISingleton
-    @Provides
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
@@ -97,26 +79,39 @@ public class WMShellModule {
 
     @SysUISingleton
     @Provides
+    static Optional<Pip> providePip(Context context, DisplayController displayController,
+            PipAppOpsListener pipAppOpsListener, PipBoundsHandler pipBoundsHandler,
+            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            PipMenuActivityController pipMenuActivityController, PipTaskOrganizer pipTaskOrganizer,
+            PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper) {
+        return Optional.ofNullable(PipController.create(context, displayController,
+                pipAppOpsListener, pipBoundsHandler, pipBoundsState, pipMediaController,
+                pipMenuActivityController, pipTaskOrganizer, pipTouchHandler,
+                windowManagerShellWrapper));
+    }
+
+    @SysUISingleton
+    @Provides
     static PipBoundsState providePipBoundsState() {
         return new PipBoundsState();
     }
 
     @SysUISingleton
     @Provides
-    static PipBoundsHandler providesPipBoundsHandler(Context context) {
+    static PipBoundsHandler providePipBoundsHandler(Context context) {
         return new PipBoundsHandler(context);
     }
 
     @SysUISingleton
     @Provides
-    static PipMenuActivityController providesPipMenuActivityController(Context context,
+    static PipMenuActivityController providePipMenuActivityController(Context context,
             PipMediaController pipMediaController, PipTaskOrganizer pipTaskOrganizer) {
         return new PipMenuActivityController(context, pipMediaController, pipTaskOrganizer);
     }
 
     @SysUISingleton
     @Provides
-    static PipTouchHandler providesPipTouchHandler(Context context,
+    static PipTouchHandler providePipTouchHandler(Context context,
             PipMenuActivityController menuActivityController, PipBoundsHandler pipBoundsHandler,
             PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
@@ -128,7 +123,7 @@ public class WMShellModule {
 
     @SysUISingleton
     @Provides
-    static PipTaskOrganizer providesPipTaskOrganizer(Context context,
+    static PipTaskOrganizer providePipTaskOrganizer(Context context,
             PipBoundsState pipBoundsState,
             PipBoundsHandler pipBoundsHandler,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
