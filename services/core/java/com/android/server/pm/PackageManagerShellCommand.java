@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 
 import android.accounts.IAccountManager;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.role.IRoleManager;
@@ -2686,9 +2687,18 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    // pm remove-user [--set-ephemeral-if-in-use] USER_ID
     public int runRemoveUser() throws RemoteException {
         int userId;
-        String arg = getNextArg();
+        String arg;
+        boolean setEphemeralIfInUse = false;
+        while ((arg = getNextOption()) != null) {
+            if (arg.equals("--set-ephemeral-if-in-use")) {
+                setEphemeralIfInUse = true;
+            }
+        }
+
+        arg = getNextArg();
         if (arg == null) {
             getErrPrintWriter().println("Error: no user id specified.");
             return 1;
@@ -2696,12 +2706,42 @@ class PackageManagerShellCommand extends ShellCommand {
         userId = UserHandle.parseUserArg(arg);
         IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
+        if (setEphemeralIfInUse) {
+            return removeUserOrSetEphemeral(um, userId);
+        } else {
+            return removeUser(um, userId);
+        }
+    }
+
+    private int removeUser(IUserManager um, @UserIdInt int userId) throws RemoteException {
+        Slog.i(TAG, "Removing user " + userId);
         if (um.removeUser(userId)) {
             getOutPrintWriter().println("Success: removed user");
             return 0;
         } else {
             getErrPrintWriter().println("Error: couldn't remove user id " + userId);
             return 1;
+        }
+    }
+
+    private int removeUserOrSetEphemeral(IUserManager um, @UserIdInt int userId)
+            throws RemoteException {
+        Slog.i(TAG, "Removing " + userId + " or set as ephemeral if in use.");
+        int result = um.removeUserOrSetEphemeral(userId);
+        switch (result) {
+            case UserManagerService.REMOVE_RESULT_REMOVED:
+                getOutPrintWriter().printf("Success: user %d removed\n", userId);
+                return 0;
+            case UserManagerService.REMOVE_RESULT_SET_EPHEMERAL:
+                getOutPrintWriter().printf("Success: user %d set as ephemeral\n", userId);
+                return 0;
+            case UserManagerService.REMOVE_RESULT_ALREADY_BEING_REMOVED:
+                getOutPrintWriter().printf("Success: user %d is already being removed\n", userId);
+                return 0;
+            default:
+                getErrPrintWriter().printf("Error: couldn't remove or mark ephemeral user id %d\n",
+                        userId);
+                return 1;
         }
     }
 
@@ -3769,9 +3809,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --restricted is shorthand for '--user-type android.os.usertype.full.RESTRICTED'.");
         pw.println("      --guest is shorthand for '--user-type android.os.usertype.full.GUEST'.");
         pw.println("");
-        pw.println("  remove-user USER_ID");
+        pw.println("  remove-user [--set-ephemeral-if-in-use] USER_ID");
         pw.println("    Remove the user with the given USER_IDENTIFIER, deleting all data");
-        pw.println("    associated with that user");
+        pw.println("    associated with that user.");
+        pw.println("      --set-ephemeral-if-in-use: If the user is currently running and");
+        pw.println("        therefore cannot be removed immediately, mark the user as ephemeral");
+        pw.println("        so that it will be automatically removed when possible (after user");
+        pw.println("        switch or reboot)");
         pw.println("");
         pw.println("  set-user-restriction [--user USER_ID] RESTRICTION VALUE");
         pw.println("");
