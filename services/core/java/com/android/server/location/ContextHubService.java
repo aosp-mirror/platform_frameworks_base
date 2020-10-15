@@ -26,8 +26,6 @@ import android.hardware.contexthub.V1_0.HubAppInfo;
 import android.hardware.contexthub.V1_0.IContexthubCallback;
 import android.hardware.contexthub.V1_0.Result;
 import android.hardware.contexthub.V1_0.TransactionResult;
-import android.hardware.contexthub.V1_1.Setting;
-import android.hardware.contexthub.V1_1.SettingValue;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubTransaction;
@@ -196,7 +194,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
         mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
 
-        if (mContextHubWrapper.supportsSettingNotifications()) {
+        if (mContextHubWrapper.supportsLocationSettingNotifications()) {
             sendLocationSettingUpdate();
             mContext.getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
@@ -925,9 +923,7 @@ public class ContextHubService extends IContextHubService.Stub {
     private void sendLocationSettingUpdate() {
         boolean enabled = mContext.getSystemService(LocationManager.class)
                 .isLocationEnabledForUser(UserHandle.CURRENT);
-
-        mContextHubWrapper.onSettingChanged(Setting.LOCATION,
-                enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+        mContextHubWrapper.onLocationSettingChanged(enabled);
     }
 
     private String getCallingPackageName() {

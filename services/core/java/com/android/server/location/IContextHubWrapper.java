@@ -45,12 +45,7 @@ public abstract class IContextHubWrapper {
             Log.i(TAG, "Context Hub HAL service not found");
         }
 
-        ContextHubWrapperV1_0 wrapper = null;
-        if (proxy != null) {
-            wrapper = new ContextHubWrapperV1_0(proxy);
-        }
-
-        return wrapper;
+        return (proxy == null) ? null : new ContextHubWrapperV1_0(proxy);
     }
 
     /**
@@ -69,12 +64,7 @@ public abstract class IContextHubWrapper {
             Log.i(TAG, "Context Hub HAL service not found");
         }
 
-        ContextHubWrapperV1_1 wrapper = null;
-        if (proxy != null) {
-            wrapper = new ContextHubWrapperV1_1(proxy);
-        }
-
-        return wrapper;
+        return (proxy == null) ? null : new ContextHubWrapperV1_1(proxy);
     }
 
     /**
@@ -83,19 +73,16 @@ public abstract class IContextHubWrapper {
     public abstract android.hardware.contexthub.V1_0.IContexthub getHub();
 
     /**
-     * @return True if this version of the Contexthub HAL supports setting notifications.
+     * @return True if this version of the Contexthub HAL supports Location setting notifications.
      */
-    public abstract boolean supportsSettingNotifications();
+    public abstract boolean supportsLocationSettingNotifications();
 
     /**
-     * Notifies the Contexthub implementation of a user setting change.
+     * Notifies the Contexthub implementation of a user Location setting change.
      *
-     * @param setting The user setting that has changed. MUST be one of the values from the
-     *     {@link Setting} enum
-     * @param newValue The value of the user setting that changed. MUST be one of the values
-     *     from the {@link SettingValue} enum.
+     * @param enabled True if the Location setting has been enabled.
      */
-    public abstract void onSettingChanged(byte setting, byte newValue);
+    public abstract void onLocationSettingChanged(boolean enabled);
 
     private static class ContextHubWrapperV1_0 extends IContextHubWrapper {
         private android.hardware.contexthub.V1_0.IContexthub mHub;
@@ -108,11 +95,11 @@ public abstract class IContextHubWrapper {
             return mHub;
         }
 
-        public boolean supportsSettingNotifications() {
+        public boolean supportsLocationSettingNotifications() {
             return false;
         }
 
-        public void onSettingChanged(byte setting, byte newValue) {}
+        public void onLocationSettingChanged(boolean enabled) {}
     }
 
     private static class ContextHubWrapperV1_1 extends IContextHubWrapper {
@@ -126,13 +113,14 @@ public abstract class IContextHubWrapper {
             return mHub;
         }
 
-        public boolean supportsSettingNotifications() {
+        public boolean supportsLocationSettingNotifications() {
             return true;
         }
 
-        public void onSettingChanged(byte setting, byte newValue) {
+        public void onLocationSettingChanged(boolean enabled) {
             try {
-                mHub.onSettingChanged(setting, newValue);
+                mHub.onSettingChanged(Setting.LOCATION,
+                        enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
             } catch  (RemoteException e) {
                 Log.e(TAG, "Failed to send setting change to Contexthub", e);
             }
