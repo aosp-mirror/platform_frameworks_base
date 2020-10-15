@@ -24,10 +24,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 import android.window.WindowContainerToken;
+
+import java.util.ArrayList;
 
 /**
  * Stores information about a particular Task.
@@ -177,6 +180,13 @@ public class TaskInfo {
      */
     public boolean isResizeable;
 
+    /**
+     * The launch cookies associated with activities in this task if any.
+     * @see ActivityOptions#setLaunchCookie(IBinder)
+     * @hide
+     */
+    public ArrayList<IBinder> launchCookies = new ArrayList<>();
+
     TaskInfo() {
         // Do nothing
     }
@@ -213,6 +223,11 @@ public class TaskInfo {
         return configuration;
     }
 
+    /** @hide */
+    public void addLaunchCookie(IBinder cookie) {
+        launchCookies.add(cookie);
+    }
+
     /**
      * Reads the TaskInfo from a parcel.
      */
@@ -222,9 +237,7 @@ public class TaskInfo {
         taskId = source.readInt();
         displayId = source.readInt();
         isRunning = source.readBoolean();
-        baseIntent = source.readInt() != 0
-                ? Intent.CREATOR.createFromParcel(source)
-                : null;
+        baseIntent = source.readTypedObject(Intent.CREATOR);
         baseActivity = ComponentName.readFromParcel(source);
         topActivity = ComponentName.readFromParcel(source);
         origActivity = ComponentName.readFromParcel(source);
@@ -233,21 +246,16 @@ public class TaskInfo {
         numActivities = source.readInt();
         lastActiveTime = source.readLong();
 
-        taskDescription = source.readInt() != 0
-                ? ActivityManager.TaskDescription.CREATOR.createFromParcel(source)
-                : null;
+        taskDescription = source.readTypedObject(ActivityManager.TaskDescription.CREATOR);
         supportsSplitScreenMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
         token = WindowContainerToken.CREATOR.createFromParcel(source);
         topActivityType = source.readInt();
-        pictureInPictureParams = source.readInt() != 0
-                ? PictureInPictureParams.CREATOR.createFromParcel(source)
-                : null;
-        topActivityInfo = source.readInt() != 0
-                ? ActivityInfo.CREATOR.createFromParcel(source)
-                : null;
+        pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
+        topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
+        source.readBinderList(launchCookies);
     }
 
     /**
@@ -259,13 +267,8 @@ public class TaskInfo {
         dest.writeInt(taskId);
         dest.writeInt(displayId);
         dest.writeBoolean(isRunning);
+        dest.writeTypedObject(baseIntent, 0);
 
-        if (baseIntent != null) {
-            dest.writeInt(1);
-            baseIntent.writeToParcel(dest, 0);
-        } else {
-            dest.writeInt(0);
-        }
         ComponentName.writeToParcel(baseActivity, dest);
         ComponentName.writeToParcel(topActivity, dest);
         ComponentName.writeToParcel(origActivity, dest);
@@ -274,30 +277,16 @@ public class TaskInfo {
         dest.writeInt(numActivities);
         dest.writeLong(lastActiveTime);
 
-        if (taskDescription != null) {
-            dest.writeInt(1);
-            taskDescription.writeToParcel(dest, flags);
-        } else {
-            dest.writeInt(0);
-        }
+        dest.writeTypedObject(taskDescription, flags);
         dest.writeBoolean(supportsSplitScreenMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
         token.writeToParcel(dest, flags);
         dest.writeInt(topActivityType);
-        if (pictureInPictureParams == null) {
-            dest.writeInt(0);
-        } else {
-            dest.writeInt(1);
-            pictureInPictureParams.writeToParcel(dest, flags);
-        }
-        if (topActivityInfo == null) {
-            dest.writeInt(0);
-        } else {
-            dest.writeInt(1);
-            topActivityInfo.writeToParcel(dest, flags);
-        }
+        dest.writeTypedObject(pictureInPictureParams, flags);
+        dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
+        dest.writeBinderList(launchCookies);
     }
 
     @Override
@@ -316,6 +305,7 @@ public class TaskInfo {
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
-                + " topActivityInfo=" + topActivityInfo;
+                + " topActivityInfo=" + topActivityInfo
+                + " launchCookies" + launchCookies;
     }
 }
