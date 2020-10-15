@@ -34,6 +34,7 @@ import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.After;
@@ -58,6 +59,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
     private MediaDevice mMediaDevice = mock(MediaDevice.class);
+    private NotificationEntryManager mNotificationEntryManager =
+            mock(NotificationEntryManager.class);
 
     private MediaOutputDialog mMediaOutputDialog;
     private MediaOutputController mMediaOutputController;
@@ -66,7 +69,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = new MediaOutputDialog(mContext, false, mMediaOutputController);
 
