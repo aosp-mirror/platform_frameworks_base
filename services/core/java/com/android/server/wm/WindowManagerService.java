@@ -3709,16 +3709,52 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void setFixedToUserRotation(int displayId, int fixedToUserRotation) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
-                "freezeRotation()")) {
+                "setFixedToUserRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent display = mRoot.getDisplayContent(displayId);
+                if (display == null) {
+                    Slog.w(TAG, "Trying to set rotate for app for a missing display.");
+                    return;
+                }
+                display.getDisplayRotation().setFixedToUserRotation(fixedToUserRotation);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(
+                android.Manifest.permission.SET_ORIENTATION, "setIgnoreOrientationRequest()");
+
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent display = mRoot.getDisplayContent(displayId);
+                if (display == null) {
+                    Slog.w(TAG, "Trying to setIgnoreOrientationRequest() for a missing display.");
+                    return;
+                }
+                display.setIgnoreOrientationRequest(ignoreOrientationRequest);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    boolean getIgnoreOrientationRequest(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display == null) {
-                Slog.w(TAG, "Trying to set rotate for app for a missing display.");
-                return;
+                Slog.w(TAG, "Trying to getIgnoreOrientationRequest() for a missing display.");
+                return false;
             }
-            display.getDisplayRotation().setFixedToUserRotation(fixedToUserRotation);
+            return display.getIgnoreOrientationRequest();
         }
     }
 
