@@ -42,7 +42,8 @@ class FingerprintInternalCleanupClient
     FingerprintInternalCleanupClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, int userId,
             @NonNull String owner, int sensorId, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
+            @NonNull BiometricUtils<Fingerprint> utils,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, enrolledList, utils, authenticatorIds);
     }
@@ -50,18 +51,17 @@ class FingerprintInternalCleanupClient
     @Override
     protected InternalEnumerateClient<IBiometricsFingerprint> getEnumerateClient(
             Context context, LazyDaemon<IBiometricsFingerprint> lazyDaemon, IBinder token,
-            int userId, String owner,
-            List<Fingerprint> enrolledList, BiometricUtils utils,
-            int sensorId) {
+            int userId, String owner, List<Fingerprint> enrolledList,
+            BiometricUtils<Fingerprint> utils, int sensorId) {
         return new FingerprintInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
     }
 
     @Override
-    protected RemovalClient<IBiometricsFingerprint> getRemovalClient(Context context,
+    protected RemovalClient<Fingerprint, IBiometricsFingerprint> getRemovalClient(Context context,
             LazyDaemon<IBiometricsFingerprint> lazyDaemon, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId,
-            Map<Integer, Long> authenticatorIds) {
+            int biometricId, int userId, String owner, BiometricUtils<Fingerprint> utils,
+            int sensorId, Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         return new FingerprintRemovalClient(context, lazyDaemon, token,

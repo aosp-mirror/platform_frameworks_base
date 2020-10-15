@@ -40,8 +40,8 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFac
 
     FaceInternalEnumerateClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token, int userId,
-            @NonNull String owner, @NonNull List<Face> enrolledList, @NonNull BiometricUtils utils,
-            int sensorId) {
+            @NonNull String owner, @NonNull List<Face> enrolledList,
+            @NonNull BiometricUtils<Face> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
                 BiometricsProtoEnums.MODALITY_FACE);
     }
