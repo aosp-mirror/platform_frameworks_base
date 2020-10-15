@@ -363,6 +363,7 @@ public final class PendingIntent implements Parcelable {
      * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
      * supplied.
      */
+    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public static PendingIntent getActivity(Context context, int requestCode,
             Intent intent, @Flags int flags) {
         return getActivity(context, requestCode, intent, flags, null);
@@ -489,6 +490,7 @@ public final class PendingIntent implements Parcelable {
      * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
      * supplied.
      */
+    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public static PendingIntent getActivities(Context context, int requestCode,
             @NonNull Intent[] intents, @Flags int flags) {
         return getActivities(context, requestCode, intents, flags, null);
@@ -611,6 +613,7 @@ public final class PendingIntent implements Parcelable {
      * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
      * supplied.
      */
+    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public static PendingIntent getBroadcast(Context context, int requestCode,
             Intent intent, @Flags int flags) {
         return getBroadcastAsUser(context, requestCode, intent, flags, context.getUser());
