@@ -13304,6 +13304,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String HIDDEN_API_POLICY = "hidden_api_policy";
 
         /**
