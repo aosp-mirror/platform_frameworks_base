@@ -141,6 +141,14 @@ using ::android::hardware::tv::tuner::V1_1::FrontendDvbsScanType;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbcSettingsExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbsSettingsExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbtSettingsExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbBandwidth;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbCapabilities;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbCodeRate;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbGuardInterval;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbModulation;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbSettings;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbTimeInterleaveMode;
+using ::android::hardware::tv::tuner::V1_1::FrontendDtmbTransmissionMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendSpectralInversion;
 
 struct fields_t {
@@ -1208,6 +1216,33 @@ jobject JTuner::getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabili
             guardIntervalCap);
 }
 
+jobject JTuner::getDtmbFrontendCaps(JNIEnv *env, int id) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DtmbFrontendCapabilities");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIII)V");
+
+    if (mTuner_1_1 == NULL) {
+        ALOGD("1.1 Tuner is not found. Dtmb Frontend Caps are not supported.");
+        return NULL;
+    }
+
+    Result result;
+    FrontendDtmbCapabilities dtmbCaps;
+    mTuner_1_1->getFrontendDtmbCapabilities(id,
+            [&](Result r, const FrontendDtmbCapabilities& caps) {
+        dtmbCaps = caps;
+        result = r;
+    });
+    jint modulationCap = dtmbCaps.modulationCap;
+    jint transmissionModeCap = dtmbCaps.transmissionModeCap;
+    jint guardIntervalCap = dtmbCaps.guardIntervalCap;
+    jint interleaveModeCap = dtmbCaps.interleaveModeCap;
+    jint codeRateCap = dtmbCaps.codeRateCap;
+    jint bandwidthCap = dtmbCaps.bandwidthCap;
+
+    return env->NewObject(clazz, capsInit, modulationCap, transmissionModeCap, guardIntervalCap,
+            interleaveModeCap, codeRateCap, bandwidthCap);
+}
+
 jobject JTuner::getFrontendInfo(int id) {
     FrontendInfo feInfo;
     Result res;
@@ -1238,6 +1273,15 @@ jobject JTuner::getFrontendInfo(int id) {
     FrontendInfo::FrontendCapabilities caps = feInfo.frontendCaps;
 
     jobject jcaps = NULL;
+
+    if (feInfo.type == static_cast<FrontendType>(
+            ::android::hardware::tv::tuner::V1_1::FrontendType::DTMB)) {
+        if (mTuner_1_1 == NULL) {
+            return NULL;
+        }
+        jcaps = getDtmbFrontendCaps(env, id);
+    }
+
     switch(feInfo.type) {
         case FrontendType::ANALOG:
             if (FrontendInfo::FrontendCapabilities::hidl_discriminator::analogCaps
@@ -2599,6 +2643,41 @@ static FrontendSettings getIsdbtFrontendSettings(JNIEnv *env, const jobject& set
     return frontendSettings;
 }
 
+static void getDtmbFrontendSettings(JNIEnv *env, const jobject& settings,
+        FrontendSettingsExt1_1& settingsExt1_1) {
+    uint32_t freq = getFrontendSettingsFreq(env, settings);
+    jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DtmbFrontendSettings");
+    FrontendDtmbModulation modulation =
+            static_cast<FrontendDtmbModulation>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mModulation", "I")));
+    FrontendDtmbBandwidth bandwidth =
+            static_cast<FrontendDtmbBandwidth>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mBandwidth", "I")));
+    FrontendDtmbTransmissionMode transmissionMode =
+            static_cast<FrontendDtmbTransmissionMode>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mTransmissionMode", "I")));
+    FrontendDtmbCodeRate codeRate =
+            static_cast<FrontendDtmbCodeRate>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mCodeRate", "I")));
+    FrontendDtmbGuardInterval guardInterval =
+            static_cast<FrontendDtmbGuardInterval>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mGuardInterval", "I")));
+    FrontendDtmbTimeInterleaveMode interleaveMode =
+            static_cast<FrontendDtmbTimeInterleaveMode>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mTimeInterleaveMode", "I")));
+
+    FrontendDtmbSettings frontendDtmbSettings {
+            .frequency = freq,
+            .modulation = modulation,
+            .bandwidth = bandwidth,
+            .transmissionMode = transmissionMode,
+            .codeRate = codeRate,
+            .guardInterval = guardInterval,
+            .interleaveMode = interleaveMode,
+    };
+    settingsExt1_1.settingExt.dtmb(frontendDtmbSettings);
+}
+
 static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject settings) {
     ALOGD("getFrontendSettings %d", type);
 
@@ -2639,36 +2718,41 @@ static FrontendSettingsExt1_1 getFrontendSettingsExt1_1(JNIEnv *env, int type, j
         .inversion = FrontendSpectralInversion::UNDEFINED,
     };
     settingsExt1_1.settingExt.noinit();
-    FrontendType feType = static_cast<FrontendType>(type);
-    switch(feType) {
-        case FrontendType::DVBS:
-            getDvbsFrontendSettingsExt1_1(env, settings, settingsExt1_1);
-            break;
-        case FrontendType::DVBT:
-            getDvbtFrontendSettingsExt1_1(env, settings, settingsExt1_1);
-            break;
-        case FrontendType::ANALOG:
-            getAnalogFrontendSettingsExt1_1(env, settings, settingsExt1_1);
-            break;
-        case FrontendType::ATSC3:
-            break;
-        case FrontendType::ATSC:
-            break;
-        case FrontendType::DVBC:
-            getDvbcFrontendSettingsExt1_1(env, settings, settingsExt1_1);
-            break;
-        case FrontendType::ISDBS:
-            break;
-        case FrontendType::ISDBS3:
-            break;
-        case FrontendType::ISDBT:
-            break;
-        default:
-            // should never happen because a type is associated with a subclass of
-            // FrontendSettings and not set by users
-            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-                "Unsupported frontend type %d", type);
-            return FrontendSettingsExt1_1();
+
+    if (type == static_cast<int>(::android::hardware::tv::tuner::V1_1::FrontendType::DTMB)) {
+        getDtmbFrontendSettings(env, settings, settingsExt1_1);
+    } else {
+        FrontendType feType = static_cast<FrontendType>(type);
+        switch(feType) {
+            case FrontendType::DVBS:
+                getDvbsFrontendSettingsExt1_1(env, settings, settingsExt1_1);
+                break;
+            case FrontendType::DVBT:
+                getDvbtFrontendSettingsExt1_1(env, settings, settingsExt1_1);
+                break;
+            case FrontendType::ANALOG:
+                getAnalogFrontendSettingsExt1_1(env, settings, settingsExt1_1);
+                break;
+            case FrontendType::ATSC3:
+                break;
+            case FrontendType::ATSC:
+                break;
+            case FrontendType::DVBC:
+                getDvbcFrontendSettingsExt1_1(env, settings, settingsExt1_1);
+                break;
+            case FrontendType::ISDBS:
+                break;
+            case FrontendType::ISDBS3:
+                break;
+            case FrontendType::ISDBT:
+                break;
+            default:
+                // should never happen because a type is associated with a subclass of
+                // FrontendSettings and not set by users
+                jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                    "Unsupported frontend type %d", type);
+                return FrontendSettingsExt1_1();
+        }
     }
 
     uint32_t endFreq = getFrontendSettingsEndFreq(env, settings);
