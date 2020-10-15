@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricAuthenticator;
 
 /**
@@ -28,5 +29,5 @@ public interface RemovalConsumer {
      * @param remaining number of templates that still need to be removed before the operation in
      *                  the HAL is complete (e.g. when removing all templates).
      */
-    void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining);
+    void onRemoved(@Nullable BiometricAuthenticator.Identifier identifier, int remaining);
 }

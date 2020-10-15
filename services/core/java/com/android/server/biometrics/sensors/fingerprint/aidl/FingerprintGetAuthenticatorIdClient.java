@@ -25,16 +25,21 @@ import android.util.Slog;
 
 import com.android.server.biometrics.sensors.ClientMonitor;
 
+import java.util.Map;
+
 class FingerprintGetAuthenticatorIdClient extends ClientMonitor<ISession> {
 
     private static final String TAG = "FingerprintGetAuthenticatorIdClient";
 
+    private final Map<Integer, Long> mAuthenticatorIds;
+
     FingerprintGetAuthenticatorIdClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, int userId, @NonNull String owner,
-            int sensorId) {
+            int sensorId, Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FINGERPRINT,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+        mAuthenticatorIds = authenticatorIds;
     }
 
     @Override
@@ -49,5 +54,10 @@ class FingerprintGetAuthenticatorIdClient extends ClientMonitor<ISession> {
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
+    }
+
+    void onAuthenticatorIdRetrieved(long authenticatorId) {
+        mAuthenticatorIds.put(getTargetUserId(), authenticatorId);
+        mCallback.onClientFinished(this, true /* success */);
     }
 }

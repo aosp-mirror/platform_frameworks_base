@@ -237,7 +237,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 final FingerprintGetAuthenticatorIdClient client =
                         new FingerprintGetAuthenticatorIdClient(mContext,
                                 mSensors.get(sensorId).getLazySession(), userId,
-                                mContext.getOpPackageName(), sensorId);
+                                mContext.getOpPackageName(), sensorId,
+                                mSensors.get(sensorId).getAuthenticatorIds());
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling loadAuthenticatorId"

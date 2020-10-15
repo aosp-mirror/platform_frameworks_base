@@ -78,4 +78,16 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
             mCallback.onClientFinished(this, false /* success */);
         }
     }
+
+    void onInteractionDetected() {
+        vibrateSuccess();
+
+        try {
+            getListener().onDetected(getSensorId(), getTargetUserId(), mIsStrongBiometric);
+            mCallback.onClientFinished(this, true /* success */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when sending onDetected", e);
+            mCallback.onClientFinished(this, false /* success */);
+        }
+    }
 }

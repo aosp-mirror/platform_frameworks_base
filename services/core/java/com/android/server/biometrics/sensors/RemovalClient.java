@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -64,8 +65,8 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     }
 
     @Override
-    public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (identifier.getBiometricId() != 0) {
+    public void onRemoved(@Nullable BiometricAuthenticator.Identifier identifier, int remaining) {
+        if (identifier != null) {
             mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
                     identifier.getBiometricId());
         }
