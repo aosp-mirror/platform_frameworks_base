@@ -582,6 +582,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
+            Log.i(TAG, "ScreenDecorations is disabled");
+            return;
+        }
         mHandler.post(() -> {
             int oldRotation = mRotation;
             mPendingRotationChange = false;
@@ -766,6 +770,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
+        if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
+            Log.i(TAG, "ScreenDecorations is disabled");
+            return;
+        }
         mHandler.post(() -> {
             if (mOverlays == null) return;
             if (SIZE.equals(key)) {
