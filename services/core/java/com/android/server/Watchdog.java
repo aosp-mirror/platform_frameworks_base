@@ -23,7 +23,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Debug;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
@@ -31,10 +33,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.sysprop.WatchdogProperties;
 
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
@@ -42,12 +46,16 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.wm.SurfaceAnimationThread;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.HashSet;
 import java.util.List;
 
@@ -74,6 +82,12 @@ public class Watchdog {
     private static final int WAITING = 1;
     private static final int WAITED_HALF = 2;
     private static final int OVERDUE = 3;
+
+    // Track watchdog timeout history and break the crash loop if there is.
+    private static final String TIMEOUT_HISTORY_FILE = "/data/system/watchdog-timeout-history.txt";
+    private static final String PROP_FATAL_LOOP_COUNT = "framework_watchdog.fatal_count";
+    private static final String PROP_FATAL_LOOP_WINDOWS_SECS =
+            "framework_watchdog.fatal_window.second";
 
     // Which native processes to dump into dropbox's stack traces
     public static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
@@ -699,6 +713,10 @@ public class Watchdog {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + subject);
                 WatchdogDiagnostics.diagnoseCheckers(blockedCheckers);
                 Slog.w(TAG, "*** GOODBYE!");
+                if (!Build.IS_USER && isCrashLoopFound()
+                        && !WatchdogProperties.is_fatal_ignore().orElse(false)) {
+                    breakCrashLoop();
+                }
                 Process.killProcess(Process.myPid());
                 System.exit(10);
             }
@@ -715,5 +733,108 @@ public class Watchdog {
         } catch (IOException e) {
             Slog.w(TAG, "Failed to write to /proc/sysrq-trigger", e);
         }
+    }
+
+    private void resetTimeoutHistory() {
+        writeTimeoutHistory(new ArrayList<String>());
+    }
+
+    private void writeTimeoutHistory(Iterable<String> crashHistory) {
+        String data = String.join(",", crashHistory);
+
+        try (FileWriter writer = new FileWriter(TIMEOUT_HISTORY_FILE)) {
+            writer.write(SystemProperties.get("ro.boottime.zygote"));
+            writer.write(":");
+            writer.write(data);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write file " + TIMEOUT_HISTORY_FILE, e);
+        }
+    }
+
+    private String[] readTimeoutHistory() {
+        final String[] emptyStringArray = {};
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(TIMEOUT_HISTORY_FILE))) {
+            String line = reader.readLine();
+            if (line == null) {
+                return emptyStringArray;
+            }
+
+            String[] data = line.trim().split(":");
+            String boottime = data.length >= 1 ? data[0] : "";
+            String history = data.length >= 2 ? data[1] : "";
+            if (SystemProperties.get("ro.boottime.zygote").equals(boottime) && !history.isEmpty()) {
+                return history.split(",");
+            } else {
+                return emptyStringArray;
+            }
+        } catch (FileNotFoundException e) {
+            return emptyStringArray;
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to read file " + TIMEOUT_HISTORY_FILE, e);
+            return emptyStringArray;
+        }
+    }
+
+    private boolean hasActiveUsbConnection() {
+        try {
+            final String state = FileUtils.readTextFile(
+                    new File("/sys/class/android_usb/android0/state"),
+                    128 /*max*/, null /*ellipsis*/).trim();
+            if ("CONFIGURED".equals(state)) {
+                return true;
+            }
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to determine if device was on USB", e);
+        }
+        return false;
+    }
+
+    private boolean isCrashLoopFound() {
+        int fatalCount = WatchdogProperties.fatal_count().orElse(0);
+        long fatalWindowMs = TimeUnit.SECONDS.toMillis(
+                WatchdogProperties.fatal_window_second().orElse(0));
+        if (fatalCount == 0 || fatalWindowMs == 0) {
+            if (fatalCount != fatalWindowMs) {
+                Slog.w(TAG, String.format("sysprops '%s' and '%s' should be set or unset together",
+                            PROP_FATAL_LOOP_COUNT, PROP_FATAL_LOOP_WINDOWS_SECS));
+            }
+            return false;
+        }
+
+        // new-history = [last (fatalCount - 1) items in old-history] + [nowMs].
+        long nowMs = SystemClock.elapsedRealtime(); // Time since boot including deep sleep.
+        String[] rawCrashHistory = readTimeoutHistory();
+        ArrayList<String> crashHistory = new ArrayList<String>(Arrays.asList(Arrays.copyOfRange(
+                        rawCrashHistory,
+                        Math.max(0, rawCrashHistory.length - fatalCount - 1),
+                        rawCrashHistory.length)));
+        // Something wrong here.
+        crashHistory.add(String.valueOf(nowMs));
+        writeTimeoutHistory(crashHistory);
+
+        // Returns false if the device has an active USB connection.
+        if (hasActiveUsbConnection()) {
+            return false;
+        }
+
+        long firstCrashMs;
+        try {
+            firstCrashMs = Long.parseLong(crashHistory.get(0));
+        } catch (NumberFormatException t) {
+            Slog.w(TAG, "Failed to parseLong " + crashHistory.get(0), t);
+            resetTimeoutHistory();
+            return false;
+        }
+        return crashHistory.size() >= fatalCount && nowMs - firstCrashMs < fatalWindowMs;
+    }
+
+    private void breakCrashLoop() {
+        try (FileWriter kmsg = new FileWriter("/dev/kmsg_debug", /* append= */ true)) {
+            kmsg.append("Fatal reset to escape the system_server crashing loop\n");
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to append to kmsg", e);
+        }
+        doSysRq('c');
     }
 }
