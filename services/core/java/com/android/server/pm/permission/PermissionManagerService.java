@@ -616,7 +616,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
             if (added) {
                 enforcePermissionCapLocked(info, tree);
-                bp = new BasePermission(info.name, tree.getSourcePackageName(),
+                bp = new BasePermission(info.name, tree.getPackageName(),
                         BasePermission.TYPE_DYNAMIC);
             } else if (!bp.isDynamic()) {
                 throw new SecurityException("Not allowed to modify non-dynamic permission "
@@ -2350,17 +2350,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 }
 
+                final PermissionInfo permissionInfo = PackageInfoUtils.generatePermissionInfo(p,
+                        PackageManager.GET_META_DATA);
                 if (p.isTree()) {
                     final BasePermission bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
-                            mSettings.getPermissionTreeLocked(p.getName()), p, pkg,
+                            mSettings.getPermissionTreeLocked(p.getName()), permissionInfo, pkg,
                             mSettings.getAllPermissionTreesLocked(), chatty);
                     mSettings.putPermissionTreeLocked(p.getName(), bp);
                 } else {
                     final BasePermission bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
                             mSettings.getPermissionLocked(p.getName()),
-                            p, pkg, mSettings.getAllPermissionTreesLocked(), chatty);
+                            permissionInfo, pkg, mSettings.getAllPermissionTreesLocked(), chatty);
                     mSettings.putPermissionLocked(p.getName(), bp);
                 }
             }
@@ -2420,7 +2422,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     bp = mSettings.mPermissionTrees.get(p.getName());
                 }
                 if (bp != null && bp.isPermission(p)) {
-                    bp.setPermission(null);
+                    bp.setPermissionInfo(null);
                     if (DEBUG_REMOVE && chatty) {
                         if (r == null) {
                             r = new StringBuilder(256);
@@ -2611,7 +2613,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         if (permission == null) {
                             continue;
                         }
-                        if (Objects.equals(permission.getSourcePackageName(), PLATFORM_PACKAGE_NAME)
+                        if (Objects.equals(permission.getPackageName(), PLATFORM_PACKAGE_NAME)
                                 && permission.isRuntime() && !permission.isRemoved()) {
                             if (permission.isHardOrSoftRestricted()
                                     || permission.isImmutablyRestricted()) {
@@ -2804,10 +2806,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         boolean wasChanged = false;
 
                         boolean restrictionExempt =
-                                (origState.getPermissionFlags(bp.name)
+                                (origState.getPermissionFlags(bp.getName())
                                         & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
                         boolean restrictionApplied = (origState.getPermissionFlags(
-                                bp.name) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                                bp.getName()) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
 
                         if (appSupportsRuntimePermissions) {
                             // If hard restricted we don't allow holding it
@@ -2855,7 +2857,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             if (origPermState == null) {
                                 // New permission
                                 if (PLATFORM_PACKAGE_NAME.equals(
-                                        bp.getSourcePackageName())) {
+                                        bp.getPackageName())) {
                                     if (!bp.isRemoved()) {
                                         flags |= FLAG_PERMISSION_REVIEW_REQUIRED
                                                 | FLAG_PERMISSION_REVOKED_COMPAT;
@@ -2864,7 +2866,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 }
                             }
 
-                            if (!uidState.isPermissionGranted(bp.name)
+                            if (!uidState.isPermissionGranted(bp.getName())
                                     && uidState.grantPermission(bp)) {
                                 wasChanged = true;
                             }
@@ -2901,7 +2903,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 flags);
                     } else {
                         if (DEBUG_PERMISSIONS) {
-                            boolean wasGranted = uidState.isPermissionGranted(bp.name);
+                            boolean wasGranted = uidState.isPermissionGranted(bp.getName());
                             if (wasGranted || bp.isAppOp()) {
                                 Slog.i(TAG, (wasGranted ? "Un-granting" : "Not granting")
                                         + " permission " + perm
@@ -2913,7 +2915,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                         + ")");
                             }
                         }
-                        if (uidState.removePermissionState(bp.name)) {
+                        if (uidState.removePermissionState(bp.getName())) {
                             changedInstallPermission = true;
                         }
                     }
@@ -3296,7 +3298,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final boolean isPrivilegedPermission = bp.isPrivileged() || isVendorPrivilegedPermission;
         final boolean isOemPermission = bp.isOEM();
         if (!allowed && (isPrivilegedPermission || isOemPermission) && pkg.isSystem()) {
-            final String permissionName = bp.name;
+            final String permissionName = bp.getName();
             // For updated system applications, a privileged/oem permission
             // is granted only if it had been defined by the original application.
             if (pkgSetting.getPkgState().isUpdatedSystemApp()) {
@@ -3444,7 +3446,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Nullable
     private PackageSetting getSourcePackageSetting(@NonNull BasePermission bp) {
-        final String sourcePackageName = bp.getSourcePackageName();
+        final String sourcePackageName = bp.getPackageName();
         return mPackageManagerInt.getPackageSetting(sourcePackageName);
     }
 
@@ -3454,14 +3456,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return false;
         }
         final boolean isPlatformPermission = PLATFORM_PACKAGE_NAME.equals(
-                permission.getSourcePackageName());
+                permission.getPackageName());
         if (!isPlatformPermission) {
             return true;
         }
         if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_DISABLE) {
             return true;
         }
-        final String permissionName = permission.name;
+        final String permissionName = permission.getName();
         if (isInSystemConfigPrivAppPermissions(pkg, permissionName)) {
             return true;
         }
@@ -3848,7 +3850,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 // TODO(zhanghai): Why are we only killing the UID when GIDs changed, instead of any
                 //  permission change?
-                if (uidState.removePermissionState(bp.name) && bp.hasGids()) {
+                if (uidState.removePermissionState(bp.getName()) && bp.hasGids()) {
                     affectedUserId = userId;
                 }
             }
@@ -3889,7 +3891,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!usedPermissions.contains(permissionState.getName())) {
                 BasePermission bp = mSettings.getPermissionLocked(permissionState.getName());
                 if (bp != null) {
-                    if (uidState.removePermissionState(bp.name) && permissionState.isRuntime()) {
+                    if (uidState.removePermissionState(bp.getName())
+                            && permissionState.isRuntime()) {
                         runtimePermissionChanged = true;
                     }
                 }
@@ -3960,9 +3963,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Only system declares background permissions, hence mapping does never change.
                 mBackgroundPermissions = new ArrayMap<>();
                 for (BasePermission bp : mSettings.getAllPermissionsLocked()) {
-                    if (bp.perm != null && bp.perm.getBackgroundPermission() != null) {
-                        String fgPerm = bp.name;
-                        String bgPerm = bp.perm.getBackgroundPermission();
+                    if (bp.getBackgroundPermission() != null) {
+                        String fgPerm = bp.getName();
+                        String bgPerm = bp.getBackgroundPermission();
 
                         List<String> fgPerms = mBackgroundPermissions.get(bgPerm);
                         if (fgPerms == null) {
@@ -4111,7 +4114,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (bp.isDynamic()) {
                     bp.updateDynamicPermission(mSettings.mPermissionTrees.values());
                 }
-                if (!packageName.equals(bp.getSourcePackageName())) {
+                if (!packageName.equals(bp.getPackageName())) {
                     // Not checking sourcePackageSetting because it can be null when
                     // the permission source package is the target package and the target package is
                     // being uninstalled,
@@ -4132,7 +4135,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // From all other packages
                 if (pkg == null || !hasPermission(pkg, bp.getName())) {
                     Slog.i(TAG, "Removing permission " + bp.getName()
-                            + " that used to be declared by " + bp.getSourcePackageName());
+                            + " that used to be declared by " + bp.getPackageName());
                     if (bp.isRuntime()) {
                         final int[] userIds = mUserManagerInt.getUserIds();
                         final int numUserIds = userIds.length;
@@ -4154,7 +4157,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                                 + p.getPackageName() + " and user " + userId);
                                         continue;
                                     }
-                                    uidState.removePermissionState(bp.name);
+                                    uidState.removePermissionState(bp.getName());
                                 }
                             }
                         });
@@ -4163,16 +4166,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     continue;
                 }
                 final AndroidPackage sourcePkg =
-                        mPackageManagerInt.getPackage(bp.getSourcePackageName());
+                        mPackageManagerInt.getPackage(bp.getPackageName());
                 final PackageSetting sourcePs =
                         (PackageSetting) mPackageManagerInt.getPackageSetting(
-                                bp.getSourcePackageName());
+                                bp.getPackageName());
                 synchronized (mLock) {
                     if (sourcePkg != null && sourcePs != null) {
                         continue;
                     }
                     Slog.w(TAG, "Removing dangling permission: " + bp.getName()
-                            + " from package " + bp.getSourcePackageName());
+                            + " from package " + bp.getPackageName());
                     mSettings.removePermissionLocked(bp.getName());
                 }
             }
@@ -4244,7 +4247,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final Iterator<BasePermission> it = mSettings.mPermissionTrees.values().iterator();
             while (it.hasNext()) {
                 final BasePermission bp = it.next();
-                if (!packageName.equals(bp.getSourcePackageName())) {
+                if (!packageName.equals(bp.getPackageName())) {
                     // Not checking sourcePackageSetting because it can be null when
                     // the permission source package is the target package and the target package is
                     // being uninstalled,
@@ -4255,7 +4258,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 changed = true;
                 if (pkg == null || !hasPermission(pkg, bp.getName())) {
                     Slog.i(TAG, "Removing permission tree " + bp.getName()
-                            + " that used to be declared by " + bp.getSourcePackageName());
+                            + " that used to be declared by " + bp.getPackageName());
                     it.remove();
                 }
                 if (needsUpdate == null) {
@@ -4267,16 +4270,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (needsUpdate != null) {
             for (final BasePermission bp : needsUpdate) {
                 final AndroidPackage sourcePkg =
-                        mPackageManagerInt.getPackage(bp.getSourcePackageName());
+                        mPackageManagerInt.getPackage(bp.getPackageName());
                 final PackageSetting sourcePs =
                         (PackageSetting) mPackageManagerInt.getPackageSetting(
-                                bp.getSourcePackageName());
+                                bp.getPackageName());
                 synchronized (mLock) {
                     if (sourcePkg != null && sourcePs != null) {
                         continue;
                     }
                     Slog.w(TAG, "Removing dangling permission tree: " + bp.getName()
-                            + " from package " + bp.getSourcePackageName());
+                            + " from package " + bp.getPackageName());
                     mSettings.removePermissionLocked(bp.getName());
                 }
             }
@@ -4889,7 +4892,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 for (int i = 0; i < numTotalPermissions; i++) {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
-                    if (bp.perm != null && bp.perm.getProtection() == protection) {
+                    if (bp.getProtection() == protection) {
                         matchingPermissions.add(bp.generatePermissionInfo(0));
                     }
                 }
@@ -4909,8 +4912,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 for (int i = 0; i < numTotalPermissions; i++) {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
-                    if (bp.perm != null && (bp.perm.getProtectionFlags() & protectionFlags)
-                            == protectionFlags) {
+                    if ((bp.getProtectionFlags() & protectionFlags) == protectionFlags) {
                         matchingPermissions.add(bp.generatePermissionInfo(0));
                     }
                 }
