@@ -499,7 +499,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                                         // process that it is hidden.
     private boolean mLastDeferHidingClient; // If true we will defer setting mClientVisible to false
                                            // and reporting to the client that it is hidden.
-    private boolean mSetToSleep; // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
     boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
     boolean idle;           // has the activity gone idle?
@@ -906,7 +905,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
-        pw.print(" setToSleep="); pw.print(mSetToSleep);
                 pw.print(" idle="); pw.print(idle);
                 pw.print(" mStartingWindowState=");
                 pw.println(startingWindowStateToString(mStartingWindowState));
@@ -4675,14 +4673,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if the activity is on a sleeping display
-        // TODO b/163993448 mSetToSleep is required when restarting an existing activity, try to
-        // remove it if possible.
-        if (mSetToSleep && mDisplayContent.isSleeping()) {
-            return false;
+        // Check if the activity is on a sleeping display, canTurnScreenOn will also check
+        // keyguard visibility
+        if (mDisplayContent.isSleeping()) {
+            return canTurnScreenOn();
+        } else {
+            return mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
         }
-
-        return mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 
     void updateVisibilityIgnoringKeyguard(boolean behindFullscreenActivity) {
@@ -4719,7 +4716,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 stack.mUndrawnActivitiesBelowTopTranslucent.add(this);
             }
             setVisibility(true);
-            mSetToSleep = false;
             app.postPendingUiCleanMsg(true);
             if (reportToClient) {
                 mClientVisibilityDeferred = false;
@@ -5118,9 +5114,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     StopActivityItem.obtain(configChangeFlags));
 
-            if (stack.shouldSleepOrShutDownActivities()) {
-                setSleeping(true);
-            }
             mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
             // Maybe just ignore exceptions here...  if the process has crashed, our death
@@ -5709,10 +5702,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     public boolean isInterestingToUserLocked() {
         return mVisibleRequested || nowVisible || mState == PAUSING || mState == RESUMED;
-    }
-
-    void setSleeping(boolean sleeping) {
-        mSetToSleep = sleeping;
     }
 
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
@@ -7561,7 +7550,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         final Task stack = getRootTask();
-        return stack != null
+        return mCurrentLaunchCanTurnScreenOn && stack != null
                 && mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 

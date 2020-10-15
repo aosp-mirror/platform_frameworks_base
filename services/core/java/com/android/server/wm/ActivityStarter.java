@@ -2546,6 +2546,10 @@ class ActivityStarter {
 
     private void resumeTargetStackIfNeeded() {
         if (mDoResume) {
+            final ActivityRecord next = mTargetStack.topRunningActivity(true /* focusableOnly */);
+            if (next != null) {
+                next.setCurrentLaunchCanTurnScreenOn(true);
+            }
             mRootWindowContainer.resumeFocusedStacksTopActivities(mTargetStack, null, mOptions);
         } else {
             ActivityOptions.abort(mOptions);
