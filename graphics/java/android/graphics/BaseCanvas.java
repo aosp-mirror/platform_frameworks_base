@@ -26,11 +26,13 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas.VertexMode;
 import android.graphics.fonts.Font;
 import android.graphics.text.MeasuredText;
+import android.graphics.text.TextRunShaper;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
 import android.text.PrecomputedText;
 import android.text.SpannableString;
 import android.text.SpannedString;
+import android.text.TextShaper;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -471,8 +473,8 @@ public abstract class BaseCanvas {
      * @param font Font used for drawing.
      * @param paint Paint used for drawing. The typeface set to this paint is ignored.
      *
-     * @see android.graphics.text.TextShaper
-     * @see android.text.StyledTextShaper
+     * @see TextRunShaper
+     * @see TextShaper
      */
     public void drawGlyphs(
             @NonNull int[] glyphIds,
