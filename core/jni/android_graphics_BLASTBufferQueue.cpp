@@ -69,13 +69,19 @@ static void nativeUpdate(JNIEnv*env, jclass clazz, jlong ptr, jlong surfaceContr
     queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height);
 }
 
+static void nativeFlushShadowQueue(JNIEnv* env, jclass clazz, jlong ptr) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    queue->flushShadowQueue();
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"nativeCreate", "(Ljava/lang/String;JJJZ)J", (void*)nativeCreate},
         {"nativeGetSurface", "(J)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
-        {"nativeUpdate", "(JJJJ)V", (void*)nativeUpdate}};
+        {"nativeUpdate", "(JJJJ)V", (void*)nativeUpdate},
+        {"nativeFlushShadowQueue", "(J)V", (void*)nativeFlushShadowQueue}};
 
 int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/graphics/BLASTBufferQueue",
