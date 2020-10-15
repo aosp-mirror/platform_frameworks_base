@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ConditionVariable;
@@ -55,7 +54,6 @@ import java.util.function.Supplier;
  * @hide
  */
 @SystemApi
-@TestApi
 public class TetheringManager {
     private static final String TAG = TetheringManager.class.getSimpleName();
     private static final int DEFAULT_TIMEOUT_MS = 60_000;
