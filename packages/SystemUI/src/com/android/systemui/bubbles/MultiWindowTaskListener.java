@@ -21,6 +21,7 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_W
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -29,6 +30,8 @@ import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+
+import java.util.ArrayList;
 
 /**
  * Manages tasks that are displayed in multi-window (e.g. bubbles). These are displayed in a
@@ -68,7 +71,7 @@ public class MultiWindowTaskListener implements ShellTaskOrganizer.TaskListener 
     private final ShellTaskOrganizer mTaskOrganizer;
     private final ArrayMap<WindowContainerToken, TaskData> mTasks = new ArrayMap<>();
 
-    private MultiWindowTaskListener.Listener mPendingListener;
+    private ArrayMap<IBinder, Listener> mLaunchCookieToListener = new ArrayMap<>();
 
     /**
      * Create a listener for tasks in multi-window mode.
@@ -86,10 +89,8 @@ public class MultiWindowTaskListener implements ShellTaskOrganizer.TaskListener 
         return mTaskOrganizer;
     }
 
-    // TODO(b/129067201): track launches for bubbles
-    // Once we have key in ActivityOptions, match listeners via that key
-    public void setPendingListener(Listener listener) {
-        mPendingListener = listener;
+    public void setPendingLaunchCookieListener(IBinder cookie, Listener listener) {
+        mLaunchCookieToListener.put(cookie, listener);
     }
 
     /**
@@ -98,9 +99,6 @@ public class MultiWindowTaskListener implements ShellTaskOrganizer.TaskListener 
     public void removeListener(Listener listener) {
         if (DEBUG) {
             Log.d(TAG, "removeListener: listener=" + listener);
-        }
-        if (mPendingListener == listener) {
-            mPendingListener = null;
         }
         for (int i = 0; i < mTasks.size(); i++) {
             if (mTasks.valueAt(i).listener == listener) {
@@ -112,28 +110,32 @@ public class MultiWindowTaskListener implements ShellTaskOrganizer.TaskListener 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         if (DEBUG) {
-            Log.d(TAG, "onTaskAppeared: taskInfo=" + taskInfo
-                    + " mPendingListener=" + mPendingListener);
+            Log.d(TAG, "onTaskAppeared: taskInfo=" + taskInfo);
         }
-        if (mPendingListener == null) {
-            // If there is no pending listener, then we are either receiving this task as a part of
-            // registering the task org again (ie. after SysUI dies) or the previously started
-            // task is no longer needed (ie. bubble is closed soon after), for now, just finish the
-            // associated task
-            try {
-                ActivityTaskManager.getService().removeTask(taskInfo.taskId);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to remove taskId " + taskInfo.taskId);
+
+        // We only care about task we launch which should all have a tracking launch cookie.
+        final ArrayList<IBinder> launchCookies = taskInfo.launchCookies;
+        if (launchCookies.isEmpty()) return;
+
+        // See if this task has one of our launch cookies.
+        Listener listener = null;
+        for (int i = launchCookies.size() - 1; i >= 0; --i) {
+            final IBinder cookie = launchCookies.get(i);
+            listener = mLaunchCookieToListener.get(cookie);
+            if (listener != null) {
+                mLaunchCookieToListener.remove(cookie);
+                break;
             }
-            return;
         }
+
+        // This is either not a task we launched or we have handled it previously.
+        if (listener == null) return;
 
         mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskInfo.token, true);
 
-        final TaskData data = new TaskData(taskInfo, mPendingListener);
+        final TaskData data = new TaskData(taskInfo, listener);
         mTasks.put(taskInfo.token, data);
         mHandler.post(() -> data.listener.onTaskAppeared(taskInfo, leash));
-        mPendingListener = null;
     }
 
     @Override

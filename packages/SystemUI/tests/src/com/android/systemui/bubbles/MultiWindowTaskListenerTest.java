@@ -26,6 +26,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -78,7 +79,9 @@ public class MultiWindowTaskListenerTest extends SysuiTestCase {
     }
 
     private void addTaskAndVerify() {
-        mTaskListener.setPendingListener(mPendingListener);
+        final Binder cookie = new Binder();
+        mTaskInfo.addLaunchCookie(cookie);
+        mTaskListener.setPendingLaunchCookieListener(cookie, mPendingListener);
         mTaskListener.onTaskAppeared(mTaskInfo, mLeash);
         mTestableLooper.processAllMessages();
         verify(mPendingListener).onTaskAppeared(eq(mTaskInfo), eq(mLeash));
