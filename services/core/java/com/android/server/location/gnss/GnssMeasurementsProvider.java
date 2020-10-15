@@ -19,6 +19,7 @@ package com.android.server.location.gnss;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssRequest;
@@ -32,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
+import com.android.server.location.util.LocationAttributionHelper;
 import com.android.server.location.util.LocationUsageLogger;
 import com.android.server.location.util.SettingsHelper;
 
@@ -44,11 +46,40 @@ import java.util.Objects;
  *
  * @hide
  */
-public class GnssMeasurementsProvider extends
+public final class GnssMeasurementsProvider extends
         GnssListenerMultiplexer<GnssRequest, IGnssMeasurementsListener, Boolean> implements
         SettingsHelper.GlobalSettingChangedListener {
 
+    private class GnssMeasurementListenerRegistration extends GnssListenerRegistration {
+
+        private static final String GNSS_MEASUREMENTS_BUCKET = "gnss_measurement";
+
+        protected GnssMeasurementListenerRegistration(
+                @Nullable GnssRequest gnssRequest,
+                CallerIdentity callerIdentity,
+                IGnssMeasurementsListener iGnssMeasurementsListener) {
+            super(gnssRequest, callerIdentity, iGnssMeasurementsListener);
+        }
+
+        @Nullable
+        @Override
+        protected ListenerOperation<IGnssMeasurementsListener> onActive() {
+            mLocationAttributionHelper.reportHighPowerLocationStart(
+                    getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
+            return null;
+        }
+
+        @Nullable
+        @Override
+        protected ListenerOperation<IGnssMeasurementsListener> onInactive() {
+            mLocationAttributionHelper.reportHighPowerLocationStop(
+                    getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
+            return null;
+        }
+    }
+
     private final AppOpsHelper mAppOpsHelper;
+    private final LocationAttributionHelper mLocationAttributionHelper;
     private final LocationUsageLogger mLogger;
     private final GnssMeasurementProviderNative mNative;
 
@@ -60,6 +91,7 @@ public class GnssMeasurementsProvider extends
     public GnssMeasurementsProvider(Injector injector, GnssMeasurementProviderNative aNative) {
         super(injector);
         mAppOpsHelper = injector.getAppOpsHelper();
+        mLocationAttributionHelper = injector.getLocationAttributionHelper();
         mLogger = injector.getLocationUsageLogger();
         mNative = aNative;
     }
@@ -73,6 +105,12 @@ public class GnssMeasurementsProvider extends
     public void addListener(GnssRequest request, CallerIdentity identity,
             IGnssMeasurementsListener listener) {
         super.addListener(request, identity, listener);
+    }
+
+    @Override
+    protected GnssListenerRegistration createRegistration(GnssRequest request,
+            CallerIdentity callerIdentity, IGnssMeasurementsListener listener) {
+        return new GnssMeasurementListenerRegistration(request, callerIdentity, listener);
     }
 
     @Override
