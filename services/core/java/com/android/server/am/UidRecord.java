@@ -107,17 +107,6 @@ public final class UidRecord {
             UidRecordProto.CHANGE_UNCACHED,
     };
 
-    static final class ChangeItem {
-        UidRecord uidRecord;
-        int uid;
-        int change;
-        int processState;
-        int capability;
-        boolean ephemeral;
-        long procStateSeq;
-    }
-
-    ChangeItem pendingChange;
     int lastReportedChange;
 
     public UidRecord(int _uid) {
