@@ -3174,12 +3174,6 @@ package android.provider {
     method @NonNull public static android.net.Uri setManageMode(@NonNull android.net.Uri);
   }
 
-  public final class MediaStore {
-    method @NonNull @WorkerThread public static android.net.Uri scanFile(@NonNull android.content.ContentResolver, @NonNull java.io.File);
-    method @WorkerThread public static void scanVolume(@NonNull android.content.ContentResolver, @NonNull String);
-    method @WorkerThread public static void waitForIdle(@NonNull android.content.ContentResolver);
-  }
-
   public final class Settings {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_MANAGE_APP_OVERLAY_PERMISSION = "android.settings.MANAGE_APP_OVERLAY_PERMISSION";
