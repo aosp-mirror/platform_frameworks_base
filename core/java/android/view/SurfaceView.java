@@ -41,7 +41,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -225,13 +224,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
     private SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
-    private int mParentSurfaceGenerationId;
+    private int mParentSurfaceSequenceId;
 
     private RemoteAccessibilityController mRemoteAccessibilityController =
         new RemoteAccessibilityController(this);
 
     private final Matrix mTmpMatrix = new Matrix();
-    private final float[] mMatrixValues = new float[9];
 
     SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
@@ -943,11 +941,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             // SurfaceChangedCallback to update the relative z. This is needed so that
             // we do not change the relative z before the server is ready to swap the
             // parent surface.
-            if (creating || (mParentSurfaceGenerationId
-                    == viewRoot.mSurface.getGenerationId())) {
+            if (creating || (mParentSurfaceSequenceId == viewRoot.getSurfaceSequenceId())) {
                 updateRelativeZ(mTmpTransaction);
             }
-            mParentSurfaceGenerationId = viewRoot.mSurface.getGenerationId();
+            mParentSurfaceSequenceId = viewRoot.getSurfaceSequenceId();
 
             if (mViewVisibility) {
                 mTmpTransaction.show(mSurfaceControl);
