@@ -705,12 +705,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         private boolean performA11yAction(int action) {
             if (action == R.id.accessibility_action_zoom_in) {
                 final float scale = mScale + A11Y_CHANGE_SCALE_DIFFERENCE;
-                setScale(A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
+                        A11Y_ACTION_SCALE_RANGE.clamp(scale));
                 return true;
             }
             if (action == R.id.accessibility_action_zoom_out) {
                 final float scale = mScale - A11Y_CHANGE_SCALE_DIFFERENCE;
-                setScale(A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
+                        A11Y_ACTION_SCALE_RANGE.clamp(scale));
                 return true;
             }
             if (action == R.id.accessibility_action_move_up) {

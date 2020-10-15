@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,11 +75,16 @@ public class MagnificationControllerTest {
     private static final int MODE_FULLSCREEN =
             Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
-    @Mock private AccessibilityManagerService mService;
-    @Mock private MagnificationController.TransitionCallBack mTransitionCallBack;
-    @Mock private Context mContext;
-    @Mock private FullScreenMagnificationController mScreenMagnificationController;
-    @Captor private ArgumentCaptor<MagnificationAnimationCallback> mCallbackArgumentCaptor;
+    @Mock
+    private AccessibilityManagerService mService;
+    @Mock
+    private MagnificationController.TransitionCallBack mTransitionCallBack;
+    @Mock
+    private Context mContext;
+    @Mock
+    private FullScreenMagnificationController mScreenMagnificationController;
+    @Captor
+    private ArgumentCaptor<MagnificationAnimationCallback> mCallbackArgumentCaptor;
 
     private MockWindowMagnificationConnection mMockConnection;
     private WindowMagnificationManager mWindowMagnificationManager;
@@ -96,7 +102,8 @@ public class MagnificationControllerTest {
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, DEFAULT_SCALE,
                 CURRENT_USER_ID);
         mWindowMagnificationManager = Mockito.spy(
-                new WindowMagnificationManager(mContext, CURRENT_USER_ID));
+                new WindowMagnificationManager(mContext, CURRENT_USER_ID,
+                        mock(WindowMagnificationManager.Callback.class)));
         mMockConnection = new MockWindowMagnificationConnection(true);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mMagnificationController = new MagnificationController(mService, new Object(), mContext,
@@ -259,6 +266,19 @@ public class MagnificationControllerTest {
         mMockConnection.invokeCallbacks();
 
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+    }
+
+    @Test
+    public void onPerformScaleAction_magnifierEnabled_handleScaleChange() throws RemoteException {
+        final float newScale = 4.0f;
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale);
+
+        verify(mWindowMagnificationManager).setScale(eq(TEST_DISPLAY), eq(newScale));
+        verify(mWindowMagnificationManager).persistScale(eq(TEST_DISPLAY));
+        verify(mService).onMagnificationScaleChanged(eq(TEST_DISPLAY),
+                eq(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
     }
 
     private void setMagnificationEnabled(int mode) throws RemoteException {

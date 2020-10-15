@@ -276,6 +276,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void performA11yActions_visible_expectedResults() {
+        final int displayId = mContext.getDisplayId();
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(2.5f, Float.NaN,
                     Float.NaN);
@@ -285,10 +286,10 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertTrue(
                 mMirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_out, null));
         // Minimum scale is 2.0.
-        assertEquals(2.0f, mWindowMagnificationController.getScale(), 0f);
+        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(2.0f));
 
         assertTrue(mMirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_in, null));
-        assertEquals(3.0f, mWindowMagnificationController.getScale(), 0f);
+        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(3.5f));
 
         // TODO: Verify the final state when the mirror surface is visible.
         assertTrue(mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_up, null));
