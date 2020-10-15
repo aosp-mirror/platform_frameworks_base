@@ -63,20 +63,17 @@ class PassiveLocationProviderManager extends LocationProviderManager {
 
     @Override
     protected ProviderRequest mergeRegistrations(Collection<Registration> registrations) {
-        boolean locationSettingsIgnored = false;
-        for (Registration registration : registrations) {
-            locationSettingsIgnored |= registration.getRequest().isLocationSettingsIgnored();
-        }
-
-        return new ProviderRequest.Builder()
-                .setIntervalMillis(0)
-                .setLocationSettingsIgnored(locationSettingsIgnored)
-                .build();
+        return new ProviderRequest.Builder().setIntervalMillis(0).build();
     }
 
     @Override
     protected long calculateRequestDelayMillis(long newIntervalMs,
             Collection<Registration> registrations) {
         return 0;
+    }
+
+    @Override
+    protected String getServiceState() {
+        return mProvider.getCurrentRequest().isActive() ? "registered" : "unregistered";
     }
 }

@@ -1777,11 +1777,11 @@ package android.location {
     method public boolean isHiddenFromAppOps();
     method public boolean isLocationSettingsIgnored();
     method public boolean isLowPower();
-    field public static final int ACCURACY_BLOCK = 102; // 0x66
-    field public static final int ACCURACY_CITY = 104; // 0x68
-    field public static final int ACCURACY_FINE = 100; // 0x64
-    field public static final int POWER_HIGH = 203; // 0xcb
-    field public static final int POWER_LOW = 201; // 0xc9
+    field @Deprecated public static final int ACCURACY_BLOCK = 102; // 0x66
+    field @Deprecated public static final int ACCURACY_CITY = 104; // 0x68
+    field @Deprecated public static final int ACCURACY_FINE = 100; // 0x64
+    field @Deprecated public static final int POWER_HIGH = 203; // 0xcb
+    field @Deprecated public static final int POWER_LOW = 201; // 0xc9
   }
 
   public static final class LocationRequest.Builder {
