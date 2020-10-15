@@ -56,7 +56,6 @@ public class BiometricTestSession implements AutoCloseable {
      * equivalent for the secret key.
      *
      * @param enableTestHal If true, enable testing with a fake HAL instead of the real HAL.
-     * @hide
      */
     @RequiresPermission(TEST_BIOMETRIC)
     private void enableTestHal(boolean enableTestHal) {
