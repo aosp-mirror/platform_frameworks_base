@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -423,7 +425,7 @@ public class SubscriptionInfo implements Parcelable {
         // Set text size scaled by density
         paint.setTextSize(TEXT_SIZE * metrics.density);
         // Convert sim slot index to localized string
-        final String index = String.format("%d", mSimSlotIndex + 1);
+        final String index = formatSimple("%d", mSimSlotIndex + 1);
         final Rect textBound = new Rect();
         paint.getTextBounds(index, 0, 1, textBound);
         final float xOffset = (width / 2.f) - textBound.centerX();
