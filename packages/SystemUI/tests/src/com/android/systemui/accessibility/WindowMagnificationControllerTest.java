@@ -224,11 +224,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
 
     @Test
-    public void onDensityChanged_enabled_updateDimensionsAndLayout() {
+    public void onDensityChanged_enabled_updateDimensionsAndResetWindowMagnification() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
             Mockito.reset(mWindowManager);
+            Mockito.reset(mMirrorWindowControl);
         });
 
         mInstrumentation.runOnMainSync(() -> {
@@ -237,7 +238,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         verify(mResources, atLeastOnce()).getDimensionPixelSize(anyInt());
         verify(mWindowManager).removeView(any());
+        verify(mMirrorWindowControl).destroyControl();
         verify(mWindowManager).addView(any(), any());
+        verify(mMirrorWindowControl).showControl();
     }
 
     @Test
