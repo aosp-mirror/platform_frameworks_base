@@ -17757,7 +17757,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // also includes the "updating the same package" case, of course.
                     // "updating same package" could also involve key-rotation.
                     final boolean sigsOk;
-                    final String sourcePackageName = bp.getSourcePackageName();
+                    final String sourcePackageName = bp.getPackageName();
                     final PackageSetting sourcePackageSetting;
                     synchronized (mLock) {
                         sourcePackageSetting = mSettings.getPackageLPr(sourcePackageName);

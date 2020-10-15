@@ -54,22 +54,6 @@ public class ParsedPermission extends ParsedComponent {
         this.parsedPermissionGroup = other.parsedPermissionGroup;
     }
 
-    public ParsedPermission(ParsedPermission other, PermissionInfo pendingPermissionInfo,
-            String packageName, String name) {
-        this(other);
-
-        this.flags = pendingPermissionInfo.flags;
-        this.descriptionRes = pendingPermissionInfo.descriptionRes;
-
-        this.backgroundPermission = pendingPermissionInfo.backgroundPermission;
-        this.group = pendingPermissionInfo.group;
-        this.requestRes = pendingPermissionInfo.requestRes;
-        this.protectionLevel = pendingPermissionInfo.protectionLevel;
-
-        setName(name);
-        setPackageName(packageName);
-    }
-
     public ParsedPermission setGroup(String group) {
         this.group = TextUtils.safeIntern(group);
         return this;
