@@ -2499,6 +2499,8 @@ NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_ENABL
     
 NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_BLACKLIST_EXEMPTIONS:
     
+NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_POLICY:
+    
 NoSettingsProvider: android.provider.Settings.Global#HIDE_ERROR_DIALOGS:
     
 NoSettingsProvider: android.provider.Settings.Global#LOCATION_GLOBAL_KILL_SWITCH:
