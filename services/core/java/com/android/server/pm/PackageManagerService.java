@@ -25662,12 +25662,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public IncrementalStatesInfo getIncrementalStatesInfo(
-                String packageName, int filterCallingUid, int userId) {
+                @NonNull String packageName, int filterCallingUid, int userId) {
             final PackageSetting ps = getPackageSettingForUser(packageName, filterCallingUid,
                     userId);
             if (ps == null) {
-                Slog.w(TAG, "Failed getting incremental state. Package " + packageName
-                        + " is not available");
                 return null;
             }
             return ps.getIncrementalStates();
