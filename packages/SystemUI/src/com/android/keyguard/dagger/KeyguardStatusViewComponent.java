@@ -18,6 +18,7 @@ package com.android.keyguard.dagger;
 
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardStatusViewController;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -36,4 +37,7 @@ public interface KeyguardStatusViewComponent {
 
     /** Builds a {@link com.android.keyguard.KeyguardClockSwitchController}. */
     KeyguardClockSwitchController getKeyguardClockSwitchController();
+
+    /** Builds a {@link com.android.keyguard.KeyguardStatusViewController}. */
+    KeyguardStatusViewController getKeyguardStatusViewController();
 }
