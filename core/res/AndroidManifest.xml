@@ -2539,8 +2539,7 @@
     <permission android:name="android.permission.START_ANY_ACTIVITY"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to start activities from background
-         @hide -->
+    <!-- @SystemApi @hide Allows an application to start activities from background -->
     <permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
         android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier" />
 
