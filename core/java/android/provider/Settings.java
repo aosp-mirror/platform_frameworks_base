@@ -9128,6 +9128,15 @@ public final class Settings {
                 "accessibility_magnification_capability";
 
         /**
+         *  Whether to show the window magnification prompt dialog when the user uses full-screen
+         *  magnification first time after database is upgraded .
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT =
+                "accessibility_show_window_magnification_prompt";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
