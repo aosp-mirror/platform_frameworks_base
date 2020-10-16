@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
@@ -70,7 +71,7 @@ public class QuickQSPanel extends QSPanel {
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            MediaHost mediaHost,
+            @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger,
             UserTracker userTracker
     ) {
@@ -108,6 +109,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
+
     protected void initMediaHostState() {
         mMediaHost.setExpansion(0.0f);
         mMediaHost.setShowsOnlyActiveMedia(true);
