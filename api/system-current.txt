@@ -5430,9 +5430,14 @@ package android.media.tv.tuner.filter {
     field public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA = 128; // 0x80
     field public static final int SC_HEVC_INDEX_SPS = 1; // 0x1
     field public static final int SC_INDEX_B_FRAME = 4; // 0x4
+    field public static final int SC_INDEX_B_SLICE = 64; // 0x40
     field public static final int SC_INDEX_I_FRAME = 1; // 0x1
+    field public static final int SC_INDEX_I_SLICE = 16; // 0x10
     field public static final int SC_INDEX_P_FRAME = 2; // 0x2
+    field public static final int SC_INDEX_P_SLICE = 32; // 0x20
     field public static final int SC_INDEX_SEQUENCE = 8; // 0x8
+    field public static final int SC_INDEX_SI_SLICE = 128; // 0x80
+    field public static final int SC_INDEX_SP_SLICE = 256; // 0x100
     field public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG = 4096; // 0x1000
     field public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED = 8; // 0x8
     field public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED = 4; // 0x4
