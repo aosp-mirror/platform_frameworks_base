@@ -16,8 +16,17 @@
 
 package com.android.wm.shell.draganddrop;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.content.ClipDescription.EXTRA_ACTIVITY_OPTIONS;
+import static android.content.ClipDescription.EXTRA_PENDING_INTENT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+import static android.content.Intent.EXTRA_PACKAGE_NAME;
+import static android.content.Intent.EXTRA_SHORTCUT_ID;
+import static android.content.Intent.EXTRA_TASK_ID;
+import static android.content.Intent.EXTRA_USER;
 import static android.view.DragEvent.ACTION_DRAG_ENDED;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
@@ -33,15 +42,24 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DragEvent;
@@ -68,6 +86,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
     private static final String TAG = DragAndDropController.class.getSimpleName();
 
+    private final Context mContext;
     private final DisplayController mDisplayController;
     private SplitScreen mSplitScreen;
 
@@ -76,7 +95,8 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     private DragLayout mDragLayout;
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
-    public DragAndDropController(DisplayController displayController) {
+    public DragAndDropController(Context context, DisplayController displayController) {
+        mContext = context;
         mDisplayController = displayController;
         mDisplayController.addDisplayWindowListener(this);
     }
@@ -135,13 +155,16 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 event.getOffsetX(), event.getOffsetY());
         final int displayId = target.getDisplay().getDisplayId();
         final PerDisplay pd = mDisplayDropTargets.get(displayId);
+        final ClipDescription description = event.getClipDescription();
 
         if (event.getAction() == ACTION_DRAG_STARTED) {
-            final ClipDescription description = event.getClipDescription();
-            final boolean hasValidClipData = description.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY);
+            final boolean hasValidClipData = description.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY)
+                    || description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT)
+                    || description.hasMimeType(MIMETYPE_APPLICATION_TASK);
             mIsHandlingDrag = hasValidClipData;
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Clip description: %s",
-                    getMimeTypes(description));
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                    "Clip description: handlingDrag=%b mimeTypes=%s",
+                    mIsHandlingDrag, getMimeTypes(description));
         }
 
         if (!mIsHandlingDrag) {
@@ -163,31 +186,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 mDragLayout.update(event);
                 break;
             case ACTION_DROP: {
-                final SurfaceControl dragSurface = event.getDragSurface();
-                final View dragLayout = mDragLayout;
-                final ClipData data = event.getClipData();
-                return mDragLayout.drop(event, dragSurface, (dropTargetBounds) -> {
-                    if (dropTargetBounds != null) {
-                        // TODO(b/169894807): Properly handle the drop, for now just launch it
-                        if (data.getItemCount() > 0) {
-                            Intent intent = data.getItemAt(0).getIntent();
-                            PendingIntent pi = intent.getParcelableExtra(
-                                    ClipDescription.EXTRA_PENDING_INTENT);
-                            try {
-                                pi.send();
-                            } catch (PendingIntent.CanceledException e) {
-                                Slog.e(TAG, "Failed to launch activity", e);
-                            }
-                        }
-                    }
-
-                    setDropTargetWindowVisibility(pd, View.INVISIBLE);
-                    pd.dropTarget.removeView(dragLayout);
-
-                    // Clean up the drag surface
-                    mTransaction.reparent(dragSurface, null);
-                    mTransaction.apply();
-                });
+                return handleDrop(event, pd);
             }
             case ACTION_DRAG_EXITED: {
                 // Either one of DROP or EXITED will happen, and when EXITED we won't consume
@@ -209,6 +208,62 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 break;
         }
         return true;
+    }
+
+    /**
+     * Handles dropping on the drop target.
+     */
+    private boolean handleDrop(DragEvent event, PerDisplay pd) {
+        final ClipData data = event.getClipData();
+        final ClipDescription description = event.getClipDescription();
+        final SurfaceControl dragSurface = event.getDragSurface();
+        final View dragLayout = mDragLayout;
+        final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
+        final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
+        return mDragLayout.drop(event, dragSurface, (dropTargetBounds) -> {
+            if (dropTargetBounds != null && data.getItemCount() > 0) {
+                final Intent intent = data.getItemAt(0).getIntent();
+                // TODO(b/169894807): Properly handle the drop, for now just launch it
+                if (isTask) {
+                    int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
+                    try {
+                        ActivityTaskManager.getService().startActivityFromRecents(
+                                taskId, null);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to launch task", e);
+                    }
+                } else if (isShortcut) {
+                    try {
+                        Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
+                                ? intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS)
+                                : null;
+                        LauncherApps launcherApps =
+                                mContext.getSystemService(LauncherApps.class);
+                        launcherApps.startShortcut(
+                                intent.getStringExtra(EXTRA_PACKAGE_NAME),
+                                intent.getStringExtra(EXTRA_SHORTCUT_ID),
+                                null /* sourceBounds */, opts,
+                                intent.getParcelableExtra(EXTRA_USER));
+                    } catch (ActivityNotFoundException e) {
+                        Slog.e(TAG, "Failed to launch shortcut", e);
+                    }
+                } else {
+                    PendingIntent pi = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
+                    try {
+                        pi.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Slog.e(TAG, "Failed to launch activity", e);
+                    }
+                }
+            }
+
+            setDropTargetWindowVisibility(pd, View.INVISIBLE);
+            pd.dropTarget.removeView(dragLayout);
+
+            // Clean up the drag surface
+            mTransaction.reparent(dragSurface, null);
+            mTransaction.apply();
+        });
     }
 
     private void setDropTargetWindowVisibility(PerDisplay pd, int visibility) {

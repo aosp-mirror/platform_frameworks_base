@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -82,6 +84,8 @@ import java.util.concurrent.TimeUnit;
 @RunWith(WindowTestRunner.class)
 public class DragDropControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 3000;
+    private static final int TEST_UID = 12345;
+
     private TestDragDropController mTarget;
     private WindowState mWindow;
     private IBinder mToken;
@@ -276,6 +280,42 @@ public class DragDropControllerTests extends WindowTestsBase {
                         MIMETYPE_APPLICATION_ACTIVITY}),
                 new ClipData.Item(data));
         return clipData;
+    }
+
+    @Test
+    public void testValidateAppShortcutArguments() {
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            final ClipData clipData = new ClipData(
+                    new ClipDescription("drag", new String[] { MIMETYPE_APPLICATION_SHORTCUT }),
+                    new ClipData.Item(new Intent()));
+
+            session.validateAndResolveDragMimeTypeExtras(clipData, TEST_UID);
+            fail("Expected failure without shortcut id");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
+    }
+
+    @Test
+    public void testValidateAppTaskArguments() {
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            final ClipData clipData = new ClipData(
+                    new ClipDescription("drag", new String[] { MIMETYPE_APPLICATION_TASK }),
+                    new ClipData.Item(new Intent()));
+
+            session.validateAndResolveDragMimeTypeExtras(clipData, TEST_UID);
+            fail("Expected failure without task id");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
     }
 
     private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {

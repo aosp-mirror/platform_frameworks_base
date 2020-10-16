@@ -102,8 +102,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DragAndDropController provideDragAndDropController(DisplayController displayController) {
-        return new DragAndDropController(displayController);
+    static DragAndDropController provideDragAndDropController(Context context,
+            DisplayController displayController) {
+        return new DragAndDropController(context, displayController);
     }
 
     @WMSingleton

@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -710,6 +711,29 @@ public class LauncherApps {
         try {
             return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
                     packageName, user), user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a PendingIntent that would start the same activity started from
+     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.
+     *
+     * @param component The ComponentName of the activity to launch
+     * @param startActivityOptions Options to pass to startActivity
+     * @param user The UserHandle of the profile
+     * @hide
+     */
+    @Nullable
+    public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
+            @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        if (DEBUG) {
+            Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
+        }
+        try {
+            return mService.getActivityLaunchIntent(component, startActivityOptions, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -3606,7 +3606,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** This can be called with or without the global lock held. */
-    private void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
+    void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
         if (!getRecentTasks().isCallerRecents(Binder.getCallingUid())) {
             mAmInternal.enforceCallingPermission(permission, func);
         }
