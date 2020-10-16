@@ -47,7 +47,6 @@ import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -67,6 +66,7 @@ import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSav
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -117,7 +117,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final Lazy<StatusBar> mStatusBarLazy;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
-    private final Optional<Bubbles> mBubblesOptional;
+    private final Optional<BubblesManager> mBubblesManagerOptional;
     private Runnable mOpenRunnable;
     private final INotificationManager mNotificationManager;
     private final LauncherApps mLauncherApps;
@@ -142,7 +142,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             UserContextProvider contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
-            Optional<Bubbles> bubblesOptional,
+            Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback) {
         mContext = context;
@@ -158,7 +158,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mBuilderProvider = builderProvider;
         mChannelEditorDialogController = channelEditorDialogController;
         mAssistantFeedbackController = assistantFeedbackController;
-        mBubblesOptional = bubblesOptional;
+        mBubblesManagerOptional = bubblesManagerOptional;
         mUiEventLogger = uiEventLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
     }
@@ -491,7 +491,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mMainHandler,
                 mBgHandler,
                 onConversationSettingsListener,
-                mBubblesOptional);
+                mBubblesManagerOptional);
     }
 
     /**

@@ -34,7 +34,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController.DismissReason;
+import com.android.systemui.bubbles.Bubbles.DismissReason;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -137,8 +137,8 @@ public class BubbleData {
     private Listener mListener;
 
     @Nullable
-    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
-    private BubbleController.PendingIntentCanceledListener mCancelledListener;
+    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.PendingIntentCanceledListener mCancelledListener;
 
     /**
      * We track groups with summaries that aren't visibly displayed but still kept around because
@@ -165,12 +165,12 @@ public class BubbleData {
     }
 
     public void setSuppressionChangedListener(
-            BubbleController.NotificationSuppressionChangedListener listener) {
+            Bubbles.NotificationSuppressionChangedListener listener) {
         mSuppressionListener = listener;
     }
 
     public void setPendingIntentCancelledListener(
-            BubbleController.PendingIntentCanceledListener listener) {
+            Bubbles.PendingIntentCanceledListener listener) {
         mCancelledListener = listener;
     }
 
@@ -344,7 +344,8 @@ public class BubbleData {
     /**
      * Whether the summary for the provided group key is suppressed.
      */
-    boolean isSummarySuppressed(String groupKey) {
+    @VisibleForTesting
+    public boolean isSummarySuppressed(String groupKey) {
         return mSuppressedGroupKeys.containsKey(groupKey);
     }
 
@@ -415,7 +416,7 @@ public class BubbleData {
                     // skip the selected bubble
                     .filter((b) -> !b.equals(mSelectedBubble))
                     .findFirst()
-                    .ifPresent((b) -> doRemove(b.getKey(), BubbleController.DISMISS_AGED));
+                    .ifPresent((b) -> doRemove(b.getKey(), Bubbles.DISMISS_AGED));
         }
     }
 
@@ -459,12 +460,12 @@ public class BubbleData {
         int indexToRemove = indexForKey(key);
         if (indexToRemove == -1) {
             if (hasOverflowBubbleWithKey(key)
-                && (reason == BubbleController.DISMISS_NOTIF_CANCEL
-                    || reason == BubbleController.DISMISS_GROUP_CANCELLED
-                    || reason == BubbleController.DISMISS_NO_LONGER_BUBBLE
-                    || reason == BubbleController.DISMISS_BLOCKED
-                    || reason == BubbleController.DISMISS_SHORTCUT_REMOVED
-                    || reason == BubbleController.DISMISS_PACKAGE_REMOVED)) {
+                    && (reason == Bubbles.DISMISS_NOTIF_CANCEL
+                        || reason == Bubbles.DISMISS_GROUP_CANCELLED
+                        || reason == Bubbles.DISMISS_NO_LONGER_BUBBLE
+                        || reason == Bubbles.DISMISS_BLOCKED
+                        || reason == Bubbles.DISMISS_SHORTCUT_REMOVED
+                        || reason == Bubbles.DISMISS_PACKAGE_REMOVED)) {
 
                 Bubble b = getOverflowBubbleWithKey(key);
                 if (DEBUG_BUBBLE_DATA) {
@@ -512,8 +513,8 @@ public class BubbleData {
 
     void overflowBubble(@DismissReason int reason, Bubble bubble) {
         if (bubble.getPendingIntentCanceled()
-                || !(reason == BubbleController.DISMISS_AGED
-                || reason == BubbleController.DISMISS_USER_GESTURE)) {
+                || !(reason == Bubbles.DISMISS_AGED
+                || reason == Bubbles.DISMISS_USER_GESTURE)) {
             return;
         }
         if (DEBUG_BUBBLE_DATA) {
@@ -529,7 +530,7 @@ public class BubbleData {
             if (DEBUG_BUBBLE_DATA) {
                 Log.d(TAG, "Overflow full. Remove: " + oldest);
             }
-            mStateChange.bubbleRemoved(oldest, BubbleController.DISMISS_OVERFLOW_MAX_REACHED);
+            mStateChange.bubbleRemoved(oldest, Bubbles.DISMISS_OVERFLOW_MAX_REACHED);
             mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
             mOverflowBubbles.remove(oldest);
             mStateChange.removedOverflowBubble = oldest;
@@ -694,7 +695,7 @@ public class BubbleData {
     }
 
     private void maybeSendDeleteIntent(@DismissReason int reason, @NonNull final Bubble bubble) {
-        if (reason != BubbleController.DISMISS_USER_GESTURE) return;
+        if (reason != Bubbles.DISMISS_USER_GESTURE) return;
         PendingIntent deleteIntent = bubble.getDeleteIntent();
         if (deleteIntent == null) return;
         try {
@@ -726,7 +727,7 @@ public class BubbleData {
      * The set of bubbles in overflow.
      */
     @VisibleForTesting(visibility = PRIVATE)
-    List<Bubble> getOverflowBubbles() {
+    public List<Bubble> getOverflowBubbles() {
         return Collections.unmodifiableList(mOverflowBubbles);
     }
 
@@ -742,7 +743,7 @@ public class BubbleData {
 
     @VisibleForTesting(visibility = PRIVATE)
     @Nullable
-    Bubble getBubbleInStackWithKey(String key) {
+    public Bubble getBubbleInStackWithKey(String key) {
         for (int i = 0; i < mBubbles.size(); i++) {
             Bubble bubble = mBubbles.get(i);
             if (bubble.getKey().equals(key)) {
@@ -764,7 +765,7 @@ public class BubbleData {
     }
 
     @VisibleForTesting(visibility = PRIVATE)
-    Bubble getOverflowBubbleWithKey(String key) {
+    public Bubble getOverflowBubbleWithKey(String key) {
         for (int i = 0; i < mOverflowBubbles.size(); i++) {
             Bubble bubble = mOverflowBubbles.get(i);
             if (bubble.getKey().equals(key)) {
@@ -788,7 +789,7 @@ public class BubbleData {
      * This method should only be used in tests, not in production.
      */
     @VisibleForTesting
-    void setMaxOverflowBubbles(int maxOverflowBubbles) {
+    public void setMaxOverflowBubbles(int maxOverflowBubbles) {
         mMaxOverflowBubbles = maxOverflowBubbles;
     }
 

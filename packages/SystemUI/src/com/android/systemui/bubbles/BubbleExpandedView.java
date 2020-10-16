@@ -54,7 +54,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
@@ -99,7 +98,7 @@ public class BubbleExpandedView extends LinearLayout {
     // TODO(b/170891664): Don't use a flag, set the BubbleOverflow object instead
     private boolean mIsOverflow;
 
-    private Bubbles mBubbles = Dependency.get(Bubbles.class);
+    private BubbleController mController;
     private BubbleStackView mStackView;
     private BubblePositioner mPositioner;
 
@@ -156,8 +155,7 @@ public class BubbleExpandedView extends LinearLayout {
                     // the bubble again so we'll just remove it.
                     Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                             + ", " + e.getMessage() + "; removing bubble");
-                    mBubbles.removeBubble(getBubbleKey(),
-                            BubbleController.DISMISS_INVALID_INTENT);
+                    mController.removeBubble(getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
                 }
             });
             mInitialized = true;
@@ -195,15 +193,15 @@ public class BubbleExpandedView extends LinearLayout {
             }
             if (mBubble != null) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbles.removeBubble(mBubble.getKey(),
-                        BubbleController.DISMISS_TASK_FINISHED));
+                post(() -> mController.removeBubble(
+                        mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED));
             }
         }
 
         @Override
         public void onBackPressedOnTaskRoot(int taskId) {
             if (mTaskId == taskId && mStackView.isExpanded()) {
-                mBubbles.collapseStack();
+                mController.collapseStack();
             }
         }
     };
@@ -250,9 +248,6 @@ public class BubbleExpandedView extends LinearLayout {
                 R.dimen.bubble_manage_button_height);
         mSettingsIcon = findViewById(R.id.settings_button);
 
-        mPositioner = mBubbles.getPositioner();
-
-        mTaskView = new TaskView(mContext, mBubbles.getTaskOrganizer());
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 
@@ -263,7 +258,6 @@ public class BubbleExpandedView extends LinearLayout {
             }
         });
         mExpandedViewContainer.setClipToOutline(true);
-        mExpandedViewContainer.addView(mTaskView);
         mExpandedViewContainer.setLayoutParams(
                 new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         addView(mExpandedViewContainer);
@@ -274,9 +268,7 @@ public class BubbleExpandedView extends LinearLayout {
         // ==> expanded view
         //   ==> activity view
         //   ==> manage button
-        bringChildToFront(mTaskView);
         bringChildToFront(mSettingsIcon);
-        mTaskView.setListener(mTaskViewListener);
 
         applyThemeAttrs();
 
@@ -313,6 +305,20 @@ public class BubbleExpandedView extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mTaskView.setExecutor(new HandlerExecutor(getHandler()));
+    }
+    /**
+     * Initialize {@link BubbleController} and {@link BubbleStackView} here, this method must need
+     * to be called after view inflate.
+     */
+    void initialize(BubbleController controller, BubbleStackView stackView) {
+        mController = controller;
+        mStackView = stackView;
+
+        mTaskView = new TaskView(mContext, mController.getTaskOrganizer());
+        mExpandedViewContainer.addView(mTaskView);
+        bringChildToFront(mTaskView);
+        mTaskView.setListener(mTaskViewListener);
+        mPositioner = mController.getPositioner();
     }
 
     void updateDimensions() {
@@ -464,16 +470,12 @@ public class BubbleExpandedView extends LinearLayout {
         return mTaskId;
     }
 
-    void setStackView(BubbleStackView stackView) {
-        mStackView = stackView;
-    }
-
     public void setOverflow(boolean overflow) {
         mIsOverflow = overflow;
 
         Intent target = new Intent(mContext, BubbleOverflowActivity.class);
         Bundle extras = new Bundle();
-        extras.putBinder(EXTRA_BUBBLE_CONTROLLER, ObjectWrapper.wrap(mBubbles));
+        extras.putBinder(EXTRA_BUBBLE_CONTROLLER, ObjectWrapper.wrap(mController));
         target.putExtras(extras);
         mPendingIntent = PendingIntent.getActivity(mContext, 0 /* requestCode */,
                 target, PendingIntent.FLAG_UPDATE_CURRENT);

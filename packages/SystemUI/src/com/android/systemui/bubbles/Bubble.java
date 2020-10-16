@@ -53,7 +53,8 @@ import java.util.Objects;
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
-class Bubble implements BubbleViewProvider {
+@VisibleForTesting
+public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
     private final String mKey;
@@ -62,7 +63,7 @@ class Bubble implements BubbleViewProvider {
     private long mLastAccessed;
 
     @Nullable
-    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
 
     /** Whether the bubble should show a dot for the notification indicating updated content. */
     private boolean mShowBubbleUpdateDot = true;
@@ -173,8 +174,8 @@ class Bubble implements BubbleViewProvider {
 
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(@NonNull final BubbleEntry entry,
-            @Nullable final BubbleController.NotificationSuppressionChangedListener listener,
-            final BubbleController.PendingIntentCanceledListener intentCancelListener) {
+            @Nullable final Bubbles.NotificationSuppressionChangedListener listener,
+            final Bubbles.PendingIntentCanceledListener intentCancelListener) {
         mKey = entry.getKey();
         mSuppressionListener = listener;
         mIntentCancelListener = intent -> {
@@ -309,11 +310,13 @@ class Bubble implements BubbleViewProvider {
      *
      * @param callback the callback to notify one the bubble is ready to be displayed.
      * @param context the context for the bubble.
+     * @param controller
      * @param stackView the stackView the bubble is eventually added to.
      * @param iconFactory the iconfactory use to create badged images for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
+            BubbleController controller,
             BubbleStackView stackView,
             BubbleIconFactory iconFactory,
             boolean skipInflation) {
@@ -322,6 +325,7 @@ class Bubble implements BubbleViewProvider {
         }
         mInflationTask = new BubbleViewInfoTask(this,
                 context,
+                controller,
                 stackView,
                 iconFactory,
                 skipInflation,
@@ -522,7 +526,8 @@ class Bubble implements BubbleViewProvider {
     /**
      * Sets whether this notification should be suppressed in the shade.
      */
-    void setSuppressNotification(boolean suppressNotification) {
+    @VisibleForTesting
+    public void setSuppressNotification(boolean suppressNotification) {
         boolean prevShowInShade = showInShade();
         if (suppressNotification) {
             mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
@@ -559,7 +564,8 @@ class Bubble implements BubbleViewProvider {
     /**
      * Whether the flyout for the bubble should be shown.
      */
-    boolean showFlyout() {
+    @VisibleForTesting
+    public boolean showFlyout() {
         return !mSuppressFlyout && !mShouldSuppressPeek
                 && !shouldSuppressNotification()
                 && !mShouldSuppressNotificationList;

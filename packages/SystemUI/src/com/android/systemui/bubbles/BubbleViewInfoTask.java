@@ -66,6 +66,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
     private Bubble mBubble;
     private WeakReference<Context> mContext;
+    private WeakReference<BubbleController> mController;
     private WeakReference<BubbleStackView> mStackView;
     private BubbleIconFactory mIconFactory;
     private boolean mSkipInflation;
@@ -77,12 +78,14 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
      */
     BubbleViewInfoTask(Bubble b,
             Context context,
+            BubbleController controller,
             BubbleStackView stackView,
             BubbleIconFactory factory,
             boolean skipInflation,
             Callback c) {
         mBubble = b;
         mContext = new WeakReference<>(context);
+        mController = new WeakReference<>(controller);
         mStackView = new WeakReference<>(stackView);
         mIconFactory = factory;
         mSkipInflation = skipInflation;
@@ -91,8 +94,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
     @Override
     protected BubbleViewInfo doInBackground(Void... voids) {
-        return BubbleViewInfo.populate(mContext.get(), mStackView.get(), mIconFactory, mBubble,
-                mSkipInflation);
+        return BubbleViewInfo.populate(mContext.get(), mController.get(), mStackView.get(),
+                mIconFactory, mBubble, mSkipInflation);
     }
 
     @Override
@@ -121,8 +124,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         Bubble.FlyoutMessage flyoutMessage;
 
         @Nullable
-        static BubbleViewInfo populate(Context c, BubbleStackView stackView,
-                BubbleIconFactory iconFactory, Bubble b, boolean skipInflation) {
+        static BubbleViewInfo populate(Context c, BubbleController controller,
+                BubbleStackView stackView, BubbleIconFactory iconFactory, Bubble b,
+                boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
 
             // View inflation: only should do this once per bubble
@@ -133,7 +137,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
                 info.expandedView = (BubbleExpandedView) inflater.inflate(
                         R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
-                info.expandedView.setStackView(stackView);
+                info.expandedView.initialize(controller, stackView);
             }
 
             if (b.getShortcutInfo() != null) {
