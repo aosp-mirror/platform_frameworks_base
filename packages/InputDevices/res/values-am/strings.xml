@@ -36,6 +36,7 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ስሎቫክ"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ስሎቫኒያ"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ቱርክኛ"</string>
+    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"ቱርክኛ F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ዩክሬን"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"አረብኛ"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"ግሪክኛ"</string>
