@@ -55,6 +55,7 @@ import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
+import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.InlineSuggestionRenderService;
@@ -429,9 +430,15 @@ final class AutofillManagerServiceImpl
             return;
         }
 
-        session.logContextCommitted();
+        final Session.SaveResult saveResult = session.showSaveLocked();
 
-        final boolean finished = session.showSaveLocked();
+        session.logContextCommitted(saveResult.getNoSaveReason());
+
+        if (saveResult.isLogSaveShown()) {
+            session.logSaveUiShown();
+        }
+
+        final boolean finished = saveResult.isRemoveSession();
         if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
 
         if (finished) {
@@ -868,7 +875,9 @@ final class AutofillManagerServiceImpl
             @NonNull ComponentName appComponentName, boolean compatMode) {
         logContextCommittedLocked(sessionId, clientState, selectedDatasets, ignoredDatasets,
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
-                manuallyFilledDatasetIds, null, null, appComponentName, compatMode);
+                manuallyFilledDatasetIds, /* detectedFieldIdsList= */ null,
+                /* detectedFieldClassificationsList= */ null, appComponentName, compatMode,
+                Event.NO_SAVE_REASON_NONE);
     }
 
     @GuardedBy("mLock")
@@ -881,7 +890,8 @@ final class AutofillManagerServiceImpl
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
-            @NonNull ComponentName appComponentName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode,
+            @NoSaveReason int saveDialogNotShowReason) {
         if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
             if (sVerbose) {
                 Slog.v(TAG, "logContextCommitted() with FieldClassification: id=" + sessionId
@@ -893,7 +903,8 @@ final class AutofillManagerServiceImpl
                         + ", detectedFieldIds=" + detectedFieldIdsList
                         + ", detectedFieldClassifications=" + detectedFieldClassificationsList
                         + ", appComponentName=" + appComponentName.toShortString()
-                        + ", compatMode=" + compatMode);
+                        + ", compatMode=" + compatMode
+                        + ", saveDialogNotShowReason=" + saveDialogNotShowReason);
             }
             AutofillId[] detectedFieldsIds = null;
             FieldClassification[] detectedFieldClassifications = null;
@@ -929,7 +940,7 @@ final class AutofillManagerServiceImpl
                     clientState, selectedDatasets, ignoredDatasets,
                     changedFieldIds, changedDatasetIds,
                     manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    detectedFieldsIds, detectedFieldClassifications));
+                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason));
         }
     }
 
