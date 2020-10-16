@@ -1,0 +1,75 @@
+
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<overlay>
+    <item target="layout/car_navigation_bar" value="@layout/car_navigation_bar"/>
+    <item target="layout/car_left_navigation_bar" value="@layout/car_left_navigation_bar"/>
+
+    <item target="bool/config_enableTopNavigationBar" value="@bool/config_enableTopNavigationBar"/>
+    <item target="bool/config_enableLeftNavigationBar" value="@bool/config_enableLeftNavigationBar"/>
+    <item target="bool/config_enableRightNavigationBar" value="@bool/config_enableRightNavigationBar"/>
+    <item target="bool/config_enableBottomNavigationBar" value="@bool/config_enableBottomNavigationBar"/>
+    <item target="bool/config_showHeadsUpNotificationOnBottom" value="@bool/config_showHeadsUpNotificationOnBottom"/>
+
+    <item target="attr/icon" value="@attr/icon"/>
+    <item target="attr/intent" value="@attr/intent"/>
+    <item target="attr/longIntent" value="@attr/longIntent"/>
+    <item target="attr/componentNames" value="@attr/componentNames"/>
+    <item target="attr/highlightWhenSelected" value="@attr/highlightWhenSelected"/>
+    <item target="attr/categories" value="@attr/categories"/>
+    <item target="attr/packages" value="@attr/packages"/>
+    <item target="attr/hvacAreaId" value="@attr/hvacAreaId"/>
+    <item target="attr/hvacPropertyId" value="@attr/hvacPropertyId"/>
+    <item target="attr/hvacTempFormat" value="@attr/hvacTempFormat"/>
+    <item target="attr/hvacPivotOffset" value="@attr/hvacPivotOffset"/>
+    <item target="attr/hvacMinValue" value="@attr/hvacMinValue"/>
+    <item target="attr/hvacMaxValue" value="@attr/hvacMaxValue"/>
+    <item target="attr/hvacMinText" value="@attr/hvacMinText"/>
+    <item target="attr/hvacMaxText" value="@attr/hvacMaxText"/>
+    <!-- start the intent as a broad cast instead of an activity if true-->
+    <item target="attr/broadcast" value="@attr/broadcast"/>
+
+    <item target="color/car_nav_icon_fill_color" value="@color/car_nav_icon_fill_color" />
+
+    <item target="drawable/car_ic_overview" value="@drawable/car_ic_overview" />
+    <item target="drawable/car_ic_home" value="@drawable/car_ic_home" />
+    <item target="drawable/car_ic_hvac" value="@drawable/car_ic_hvac" />
+    <item target="drawable/car_ic_apps" value="@drawable/car_ic_apps" />
+    <item target="drawable/car_ic_music" value="@drawable/car_ic_music" />
+    <item target="drawable/car_ic_notification" value="@drawable/car_ic_notification" />
+    <item target="drawable/car_ic_phone" value="@drawable/car_ic_phone" />
+    <item target="drawable/car_ic_navigation" value="@drawable/car_ic_navigation" />
+
+    <item target="dimen/car_left_navigation_bar_width" value="@dimen/car_left_navigation_bar_width" />
+    <item target="dimen/car_keyline_1" value="@dimen/car_keyline_1" />
+    <item target="dimen/system_bar_button_group_padding" value="@dimen/system_bar_button_group_padding" />
+    <item target="dimen/system_bar_icon_drawing_size" value="@dimen/system_bar_icon_drawing_size" />
+
+    <item target="integer/config_topSystemBarType" value="@integer/config_topSystemBarType"/>
+    <item target="integer/config_leftSystemBarType" value="@integer/config_leftSystemBarType"/>
+    <item target="integer/config_rightSystemBarType" value="@integer/config_rightSystemBarType"/>
+    <item target="integer/config_bottomSystemBarType" value="@integer/config_bottomSystemBarType"/>
+
+    <item target="integer/config_topSystemBarZOrder" value="@integer/config_topSystemBarZOrder"/>
+    <item target="integer/config_leftSystemBarZOrder" value="@integer/config_leftSystemBarZOrder"/>
+    <item target="integer/config_rightSystemBarZOrder" value="@integer/config_rightSystemBarZOrder"/>
+    <item target="integer/config_bottomSystemBarZOrder" value="@integer/config_bottomSystemBarZOrder"/>
+
+    <item target="string/config_notificationPanelViewMediator" value="@string/config_notificationPanelViewMediator"/>
+
+    <item target="style/NavigationBarButton" value="@style/NavigationBarButton"/>
+</overlay>
