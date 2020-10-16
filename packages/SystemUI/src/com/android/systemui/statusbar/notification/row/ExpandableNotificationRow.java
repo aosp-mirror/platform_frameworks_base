@@ -497,7 +497,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     /**
      * Returns whether this row is considered non-blockable (i.e. it's a non-blockable system notif
-     * or is in a whitelist).
+     * or is in an allowList).
      */
     public boolean getIsNonblockable() {
         // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
