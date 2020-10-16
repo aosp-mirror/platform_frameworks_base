@@ -2791,7 +2791,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                         memInfo.getTotalPrivateDirty(),
                         memInfo.getTotalPrivateClean(),
                         memInfo.hasSwappedOutPss ? memInfo.getTotalSwappedOutPss() :
-                        memInfo.getTotalSwappedOut(), memInfo.getTotalPss(),
+                        memInfo.getTotalSwappedOut(), memInfo.getTotalRss(),
                         nativeMax+dalvikMax,
                         nativeAllocated+dalvikAllocated, nativeFree+dalvikFree);
             }
