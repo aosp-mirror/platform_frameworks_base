@@ -847,6 +847,10 @@ public class DisplayRotation {
         }
     }
 
+    int getFixedToUserRotationMode() {
+        return mFixedToUserRotation;
+    }
+
     /**
      * Returns {@code true} if this display rotation takes app requested orientation into
      * consideration; {@code false} otherwise. For the time being the only case where this is {@code
