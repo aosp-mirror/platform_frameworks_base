@@ -312,6 +312,7 @@
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
+  <java-symbol type="bool" name="config_sms_ask_every_time_support" />
   <java-symbol type="bool" name="config_sms_capable" />
   <java-symbol type="bool" name="config_sms_utf8_support" />
   <java-symbol type="bool" name="config_mobile_data_capable" />
