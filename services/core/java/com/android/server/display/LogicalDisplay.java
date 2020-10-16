@@ -16,9 +16,11 @@
 
 package com.android.server.display;
 
+import android.annotation.NonNull;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
+import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -57,6 +59,7 @@ import java.util.Objects;
  * </p>
  */
 final class LogicalDisplay {
+    private static final String TAG = "LogicalDisplay";
     private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
     // The layer stack we use when the display has been blanked to prevent any
@@ -113,6 +116,12 @@ final class LogicalDisplay {
     // Temporary rectangle used when needed.
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
+
+    /**
+     * Indicates that the Logical display is enabled (default). See {@link #setEnabled} for
+     * more information.
+     */
+    private boolean mIsEnabled = true;
 
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
@@ -573,6 +582,44 @@ final class LogicalDisplay {
      */
     public void setDisplayScalingDisabledLocked(boolean disableScaling) {
         mDisplayScalingDisabled = disableScaling;
+    }
+
+    /**
+     * Swap the underlying {@link DisplayDevice} with the specificed LogicalDisplay.
+     *
+     * @param targetDisplay The display with which to swap display-devices.
+     * @return {@code true} if the displays were swapped, {@code false} otherwise.
+     */
+    public boolean swapDisplaysLocked(@NonNull LogicalDisplay targetDisplay) {
+        final DisplayDevice targetDevice = targetDisplay.getPrimaryDisplayDeviceLocked();
+        if (mPrimaryDisplayDevice == null || targetDevice == null) {
+            Slog.e(TAG, "Missing display device during swap: " + mPrimaryDisplayDevice + " , "
+                    + targetDevice);
+            return false;
+        }
+
+        final DisplayDevice tmpDevice = mPrimaryDisplayDevice;
+        mPrimaryDisplayDevice = targetDisplay.mPrimaryDisplayDevice;
+        targetDisplay.mPrimaryDisplayDevice = tmpDevice;
+        return true;
+    }
+
+    /**
+     * Sets the LogicalDisplay to be enabled or disabled. If the display is not enabled,
+     * the system will always set the display to power off, regardless of the global state of the
+     * device.
+     * TODO: b/170498827 - Remove when updateDisplayStateLocked is updated.
+     */
+    public void setEnabled(boolean isEnabled) {
+        mIsEnabled = isEnabled;
+    }
+
+    /**
+     * @return {@code true} iff the LogicalDisplay is enabled or {@code false}
+     * if disabled indicating that the display has been forced to be OFF.
+     */
+    public boolean isEnabled() {
+        return mIsEnabled;
     }
 
     public void dumpLocked(PrintWriter pw) {
