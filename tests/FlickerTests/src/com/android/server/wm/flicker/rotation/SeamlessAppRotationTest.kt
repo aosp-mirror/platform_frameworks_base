@@ -147,8 +147,7 @@ class SeamlessAppRotationTest(
                         navBarLayerIsAlwaysVisible(bugId = 140855415)
                         statusBarLayerIsAlwaysVisible(bugId = 140855415)
                         noUncoveredRegions(configuration.startRotation,
-                            configuration.endRotation, allStates = false
-                            /*, bugId = 147659548*/)
+                            configuration.endRotation, allStates = false, bugId = 147659548)
                         navBarLayerRotatesAndScales(configuration.startRotation,
                             configuration.endRotation)
                         statusBarLayerRotatesScales(configuration.startRotation,
@@ -161,7 +160,7 @@ class SeamlessAppRotationTest(
                         val endingBounds = WindowUtils
                             .getDisplayBounds(configuration.endRotation)
 
-                        all("appLayerRotates"/*, bugId = 147659548*/) {
+                        all("appLayerRotates", bugId = 147659548) {
                             if (startingBounds == endingBounds) {
                                 this.hasVisibleRegion(
                                     configuration.intentPackageName, startingBounds)
