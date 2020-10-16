@@ -97,6 +97,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -304,6 +305,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -714,7 +716,7 @@ public class NotificationManagerService extends SystemService {
 
         try {
             getBinderService().setNotificationListenerAccessGrantedForUser(cn,
-                        userId, true);
+                        userId, true, true);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -4822,9 +4824,9 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationListenerAccessGranted(ComponentName listener,
-                boolean granted) throws RemoteException {
+                boolean granted, boolean userSet) throws RemoteException {
             setNotificationListenerAccessGrantedForUser(
-                    listener, getCallingUserHandle().getIdentifier(), granted);
+                    listener, getCallingUserHandle().getIdentifier(), granted, userSet);
         }
 
         @Override
@@ -4836,17 +4838,21 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
-                boolean granted) {
+                boolean granted, boolean userSet) {
             Objects.requireNonNull(listener);
             checkNotificationListenerAccess();
+            if (!userSet && isNotificationListenerAccessUserSet(listener)) {
+                // Don't override user's choice
+                return;
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (mAllowedManagedServicePackages.test(
                         listener.getPackageName(), userId, mListeners.getRequiredPermission())) {
                     mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
-                            userId, false, granted);
+                            userId, false, granted, userSet);
                     mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
-                            userId, true, granted);
+                            userId, true, granted, userSet);
 
                     getContext().sendBroadcastAsUser(new Intent(
                             ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
@@ -4859,6 +4865,11 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        private boolean isNotificationListenerAccessUserSet(ComponentName listener) {
+            return mListeners.isPackageOrComponentUserSet(listener.flattenToString(),
+                    getCallingUserHandle().getIdentifier());
         }
 
         @Override
@@ -8823,14 +8834,12 @@ public class NotificationManagerService extends SystemService {
     public class NotificationAssistants extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
-        private static final String ATT_USER_SET = "user_set";
         private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "q_allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
-        private ArrayMap<Integer, Boolean> mUserSetMap = new ArrayMap<>();
         private Set<String> mAllowedAdjustments = new ArraySet<>();
 
         @Override
@@ -9019,19 +9028,30 @@ public class NotificationManagerService extends SystemService {
 
         boolean hasUserSet(int userId) {
             synchronized (mLock) {
-                return mUserSetMap.getOrDefault(userId, false);
+                ArraySet<String> userSetServices = mUserSetServices.get(userId);
+                if (userSetServices == null) {
+                    // Legacy case - no data means user-set, unless no assistant is set
+                    return !mApproved.isEmpty();
+                }
+                Map<Boolean, ArraySet<String>> approvedByType = emptyIfNull(mApproved.get(userId));
+                return userSetServices.containsAll(emptyIfNull(approvedByType.get(true)))
+                        && userSetServices.containsAll(emptyIfNull(approvedByType.get(false)));
             }
         }
 
         void setUserSet(int userId, boolean set) {
             synchronized (mLock) {
-                mUserSetMap.put(userId, set);
+                ArraySet<String> userSetServices = new ArraySet<>();
+                if (set) {
+                    ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+                    if (approvedByType != null) {
+                        for (int i = 0; i < approvedByType.size(); i++) {
+                            userSetServices.addAll(approvedByType.valueAt(i));
+                        }
+                    }
+                }
+                mUserSetServices.put(userId, userSetServices);
             }
-        }
-
-        @Override
-        protected void writeExtraAttributes(XmlSerializer out, int userId) throws IOException {
-            out.attribute(null, ATT_USER_SET, Boolean.toString(hasUserSet(userId)));
         }
 
         @Override
@@ -9272,18 +9292,6 @@ public class NotificationManagerService extends SystemService {
             super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled);
         }
 
-        @Override
-        public void dump(PrintWriter pw, DumpFilter filter) {
-            super.dump(pw, filter);
-            pw.println("    Has user set:");
-            synchronized (mLock) {
-                Set<Integer> userIds = mUserSetMap.keySet();
-                for (int userId : userIds) {
-                    pw.println("      userId=" + userId + " value=" + mUserSetMap.get(userId));
-                }
-            }
-        }
-
         private boolean isVerboseLogEnabled() {
             return Log.isLoggable("notification_assistant", Log.VERBOSE);
         }
@@ -9300,8 +9308,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void setPackageOrComponentEnabled(String pkgOrComponent, int userId,
-                boolean isPrimary, boolean enabled) {
-            super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled);
+                boolean isPrimary, boolean enabled, boolean userSet) {
+            super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled, userSet);
 
             getContext().sendBroadcastAsUser(
                     new Intent(ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED)

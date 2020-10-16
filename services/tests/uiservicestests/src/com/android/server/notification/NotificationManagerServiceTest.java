@@ -111,9 +111,9 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IIntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -2880,16 +2880,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetListenerAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        mBinderService.setNotificationListenerAccessGrantedForUser(c, user.getIdentifier(), true);
+        mBinderService.setNotificationListenerAccessGrantedForUser(
+                c, user.getIdentifier(), true, true);
 
 
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), user.getIdentifier(), true, true);
+                c.flattenToString(), user.getIdentifier(), true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), user.getIdentifier(), false, true);
+                c.flattenToString(), user.getIdentifier(), false, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
-                any(), anyInt(), anyBoolean(), anyBoolean());
+                any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -2958,12 +2959,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testSetListenerAccess() throws Exception {
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        mBinderService.setNotificationListenerAccessGranted(c, true);
+        mBinderService.setNotificationListenerAccessGranted(c, true, true);
 
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                c.flattenToString(), 0, true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                c.flattenToString(), 0, false, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -3112,12 +3113,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetListenerAccess_onLowRam() throws Exception {
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        mBinderService.setNotificationListenerAccessGranted(c, true);
+        mBinderService.setNotificationListenerAccessGranted(c, true, true);
 
         verify(mListeners).setPackageOrComponentEnabled(
-                anyString(), anyInt(), anyBoolean(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         verify(mConditionProviders).setPackageOrComponentEnabled(
-                anyString(), anyInt(), anyBoolean(), anyBoolean());
+                anyString(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         verify(mAssistants).migrateToXml();
         verify(mAssistants).resetDefaultAssistantsIfNecessary();
     }
@@ -3160,14 +3161,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
 
-        mBinderService.setNotificationListenerAccessGranted(c, true);
+        mBinderService.setNotificationListenerAccessGranted(c, true, true);
 
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                c.flattenToString(), 0, true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                c.flattenToString(), 0, false, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
-                any(), anyInt(), anyBoolean(), anyBoolean());
+                any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 
     @Test
