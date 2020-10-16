@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.HardwareRenderer;
@@ -26,7 +27,6 @@ import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
@@ -186,37 +186,12 @@ public final class ThreadedRenderer extends HardwareRenderer {
     public static int EGL_CONTEXT_PRIORITY_MEDIUM_IMG = 0x3102;
     public static int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
 
-    static {
-        // Try to check OpenGL support early if possible.
-        isAvailable();
-    }
-
-    /**
-     * A process can set this flag to false to prevent the use of threaded
-     * rendering.
-     *
-     * @hide
-     */
-    public static boolean sRendererDisabled = false;
-
     /**
      * Further threaded renderer disabling for the system process.
      *
      * @hide
      */
-    public static boolean sSystemRendererDisabled = false;
-
-    /**
-     * Invoke this method to disable threaded rendering in the current process.
-     *
-     * @hide
-     */
-    public static void disable(boolean system) {
-        sRendererDisabled = true;
-        if (system) {
-            sSystemRendererDisabled = true;
-        }
-    }
+    public static boolean sRendererEnabled = true;
 
     public static boolean sTrimForeground = false;
 
@@ -230,16 +205,19 @@ public final class ThreadedRenderer extends HardwareRenderer {
         sTrimForeground = true;
     }
 
-
     /**
-     * Indicates whether threaded rendering is available under any form for
-     * the view hierarchy.
-     *
-     * @return True if the view hierarchy can potentially be defer rendered,
-     *         false otherwise
+     * Initialize HWUI for being in a system process like system_server
+     * Should not be called in non-system processes
      */
-    public static boolean isAvailable() {
-        return true;
+    public static void initForSystemProcess() {
+        // The system process on low-memory devices do not get to use hardware
+        // accelerated drawing, since this can add too much overhead to the
+        // process.
+        if (!ActivityManager.isHighEndGfx()) {
+            sRendererEnabled = false;
+        } else {
+            enableForegroundTrimming();
+        }
     }
 
     /**
@@ -250,11 +228,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
      * @return A threaded renderer backed by OpenGL.
      */
     public static ThreadedRenderer create(Context context, boolean translucent, String name) {
-        ThreadedRenderer renderer = null;
-        if (isAvailable()) {
-            renderer = new ThreadedRenderer(context, translucent, name);
-        }
-        return renderer;
+        return new ThreadedRenderer(context, translucent, name);
     }
 
     private static final String[] VISUALIZERS = {
