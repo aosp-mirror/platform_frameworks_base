@@ -620,7 +620,6 @@ import java.util.TimeZone;
  *     <li> {@link #EXTRA_PHONE_NUMBER}
  *     <li> {@link #EXTRA_REFERRER}
  *     <li> {@link #EXTRA_REMOTE_INTENT_TOKEN}
- *     <li> {@link #EXTRA_REMOVED_BY_SYSTEM}
  *     <li> {@link #EXTRA_REPLACING}
  *     <li> {@link #EXTRA_SHORTCUT_ICON}
  *     <li> {@link #EXTRA_SHORTCUT_ICON_RESOURCE}
@@ -632,6 +631,7 @@ import java.util.TimeZone;
  *     <li> {@link #EXTRA_TEXT}
  *     <li> {@link #EXTRA_TITLE}
  *     <li> {@link #EXTRA_UID}
+ *     <li> {@link #EXTRA_USER_INITIATED}
  * </ul>
  *
  * <h3>Flags</h3>
@@ -2465,8 +2465,8 @@ public class Intent implements Parcelable, Cloneable {
      * application -- data and code -- is being removed.
      * <li> {@link #EXTRA_REPLACING} is set to true if this will be followed
      * by an {@link #ACTION_PACKAGE_ADDED} broadcast for the same package.
-     * <li> {@link #EXTRA_REMOVED_BY_SYSTEM} containing boolean field to to signal that the
-     * application was removed automatically without the user-initiated action.
+     * <li> {@link #EXTRA_USER_INITIATED} containing boolean field to signal that the application
+     * was removed with the user-initiated action.
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent
@@ -5561,11 +5561,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
-     * intents to signal that the application was removed automatically without the user-initiated
-     * action.
+     * intents to signal that the application was removed with the user-initiated action.
      */
-    public static final String EXTRA_REMOVED_BY_SYSTEM =
-            "android.intent.extra.REMOVED_BY_SYSTEM";
+    public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
 
     /**
      * A String holding the phone number originally entered in
