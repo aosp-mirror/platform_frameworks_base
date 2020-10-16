@@ -2027,7 +2027,7 @@ public class NotificationManager {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof Policy)) return false;
             if (o == this) return true;
             final Policy other = (Policy) o;

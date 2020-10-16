@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.Nullable;
+
 /**
  * Reference to a Handler, which others can use to send messages to it.
  * This allows for the implementation of message-based communication across
@@ -71,7 +73,7 @@ public final class Messenger implements Parcelable {
      * Comparison operator on two Messenger objects, such that true
      * is returned then they both point to the same Handler.
      */
-    public boolean equals(Object otherObj) {
+    public boolean equals(@Nullable Object otherObj) {
         if (otherObj == null) {
             return false;
         }

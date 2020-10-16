@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.Nullable;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 /**
@@ -90,7 +91,7 @@ public final class InputConfiguration {
      * @return {@code true} if the objects were equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof InputConfiguration)) {
             return false;
         }

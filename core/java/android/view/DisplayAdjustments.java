@@ -168,7 +168,7 @@ public class DisplayAdjustments {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof DisplayAdjustments)) {
             return false;
         }
@@ -220,7 +220,7 @@ public class DisplayAdjustments {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof FixedRotationAdjustments)) {
                 return false;
             }

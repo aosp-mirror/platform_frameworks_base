@@ -18,13 +18,13 @@ package android.app.compat;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.annotations.Immutable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
-
 
 /**
  * A key type for caching calls to {@link com.android.internal.compat.IPlatformCompat}
@@ -68,7 +68,7 @@ final class ChangeIdStateQuery {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (this == other) {
             return true;
         }

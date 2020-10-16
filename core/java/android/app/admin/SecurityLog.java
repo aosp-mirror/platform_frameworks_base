@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -745,7 +746,7 @@ public class SecurityLog {
          * @hide
          */
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SecurityEvent other = (SecurityEvent) o;

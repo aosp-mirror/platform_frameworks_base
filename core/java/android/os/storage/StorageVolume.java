@@ -435,7 +435,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof StorageVolume && mPath != null) {
             StorageVolume volume = (StorageVolume)obj;
             return (mPath.equals(volume.mPath));

@@ -1736,7 +1736,7 @@ public final class SurfaceControl implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             DisplayInfo that = (DisplayInfo) o;
@@ -1914,7 +1914,7 @@ public final class SurfaceControl implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return o instanceof DesiredDisplayConfigSpecs && equals((DesiredDisplayConfigSpecs) o);
         }
 

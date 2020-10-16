@@ -1144,7 +1144,7 @@ public class IntentFilter implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj instanceof AuthorityEntry) {
                 final AuthorityEntry other = (AuthorityEntry)obj;
                 return match(other);

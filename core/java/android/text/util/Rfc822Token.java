@@ -191,7 +191,7 @@ public class Rfc822Token {
         }
     }
 
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof Rfc822Token)) {
             return false;
         }

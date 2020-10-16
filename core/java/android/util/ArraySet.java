@@ -778,7 +778,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * returns true.
      */
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (this == object) {
             return true;
         }

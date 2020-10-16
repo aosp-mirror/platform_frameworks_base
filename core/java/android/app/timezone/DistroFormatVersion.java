@@ -16,6 +16,7 @@
 
 package android.app.timezone;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -86,7 +87,7 @@ public final class DistroFormatVersion implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
