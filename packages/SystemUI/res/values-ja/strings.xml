@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"スクリーンショットを撮り直してください"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"空き容量が足りないため、スクリーンショットを保存できません"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
@@ -1063,6 +1065,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"メディア"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"現在のセッションを非表示にします。"</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"閉じる"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>

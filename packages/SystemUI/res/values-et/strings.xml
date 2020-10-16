@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Proovige ekraanipilt uuesti jäädvustada"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Piiratud salvestusruumi tõttu ei saa ekraanipilti salvestada"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada"</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Sule ekraanipilt"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekraanipildi eelvaade"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
@@ -1021,7 +1023,7 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Suurenduse lüliti"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Kogu ekraanikuva suurendamine"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekraanikuva osa suurendamine"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Lüliti"</string>
+    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Vaheta"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhikud"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lisage juhtelemendid ühendatud seadmete jaoks"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Seadmete juhtimisvidinate seadistamine"</string>
@@ -1063,6 +1065,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Soovituste laadimine"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Meedia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Peidetakse praegune seanss."</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Loobu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Jätka"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Seaded"</string>
