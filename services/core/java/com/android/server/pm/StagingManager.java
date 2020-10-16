@@ -353,28 +353,30 @@ public class StagingManager {
         }
         // The APEX part of the session is activated, proceed with the installation of APKs.
         if (!installApksInSession(session, /* preReboot */ false)) {
-            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                    "Staged installation of APKs failed. Check logcat messages for"
-                        + "more information.");
-
-            if (!hasApex) {
-                return;
-            }
-
-            if (!mApexManager.abortActiveSession()) {
-                Slog.e(TAG, "Failed to abort APEXd session");
-            } else {
-                Slog.e(TAG,
-                        "Successfully aborted apexd session. Rebooting device in order to revert "
-                                + "to the previous state of APEXd.");
-                mPowerManager.reboot(null);
-            }
+            onInstallationFailure(session, new PackageManagerException(
+                    SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, "Staged installation of APKs "
+                    + "failed. Check logcat messages for more information."));
             return;
         }
 
         session.setStagedSessionApplied();
         if (hasApex) {
             mApexManager.markStagedSessionSuccessful(session.sessionId);
+        }
+    }
+
+    void onInstallationFailure(PackageInstallerSession session, PackageManagerException e) {
+        session.setStagedSessionFailed(e.error, e.getMessage());
+        if (!sessionContainsApex(session)) {
+            return;
+        }
+        if (!mApexManager.abortActiveSession()) {
+            Slog.e(TAG, "Failed to abort APEXd session");
+        } else {
+            Slog.e(TAG,
+                    "Successfully aborted apexd session. Rebooting device in order to revert "
+                            + "to the previous state of APEXd.");
+            mPowerManager.reboot(null);
         }
     }
 
@@ -671,7 +673,15 @@ public class StagingManager {
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
-            resumeSession(session);
+            try {
+                resumeSession(session);
+            } catch (Exception e) {
+                Slog.e(TAG, "Staged install failed due to unhandled exception", e);
+                onInstallationFailure(session, new PackageManagerException(
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Staged install failed due to unhandled exception: " + e));
+
+            }
         }
     }
 
