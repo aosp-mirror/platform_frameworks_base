@@ -50,7 +50,6 @@ import android.util.Slog;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -245,7 +244,6 @@ public class DnsManager {
     private final Map<Integer, LinkProperties> mLinkPropertiesMap;
     private final Map<Integer, int[]> mTransportsMap;
 
-    private int mNumDnsEntries;
     private int mSampleValidity;
     private int mSuccessThreshold;
     private int mMinSamples;
@@ -409,18 +407,6 @@ public class DnsManager {
         }
     }
 
-    public void setDefaultDnsSystemProperties(Collection<InetAddress> dnses) {
-        int last = 0;
-        for (InetAddress dns : dnses) {
-            ++last;
-            setNetDnsProperty(last, dns.getHostAddress());
-        }
-        for (int i = last + 1; i <= mNumDnsEntries; ++i) {
-            setNetDnsProperty(i, "");
-        }
-        mNumDnsEntries = last;
-    }
-
     /**
      * Flush DNS caches and events work before boot has completed.
      */
@@ -474,16 +460,6 @@ public class DnsManager {
 
     private int getIntSetting(String which, int dflt) {
         return Settings.Global.getInt(mContentResolver, which, dflt);
-    }
-
-    private void setNetDnsProperty(int which, String value) {
-        final String key = "net.dns" + which;
-        // Log and forget errors setting unsupported properties.
-        try {
-            mSystemProperties.set(key, value);
-        } catch (Exception e) {
-            Slog.e(TAG, "Error setting unsupported net.dns property: ", e);
-        }
     }
 
     private static String getPrivateDnsMode(ContentResolver cr) {
