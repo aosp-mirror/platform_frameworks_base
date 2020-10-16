@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.provider.DeviceConfig;
 import android.view.View;
 import android.view.ViewAttachTestActivity;
 
@@ -50,6 +52,7 @@ import org.mockito.ArgumentCaptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,8 +74,6 @@ public class InteractionJankMonitorTest {
         mView = mActivity.getWindow().getDecorView();
         assertThat(mView.isAttachedToWindow()).isTrue();
 
-        InteractionJankMonitor.abandon();
-
         Handler handler = spy(new Handler(mActivity.getMainLooper()));
         doReturn(true).when(handler).sendMessageAtTime(any(), anyLong());
         mWorker = spy(new HandlerThread("Interaction-jank-monitor-test"));
@@ -93,7 +94,7 @@ public class InteractionJankMonitorTest {
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
-                new FrameMetricsWrapper()));
+                new FrameMetricsWrapper(), 1, -1));
         doReturn(tracker).when(monitor).createFrameTracker(any());
 
         // Simulate a trace session and see if begin / end are invoked.
@@ -101,6 +102,21 @@ public class InteractionJankMonitorTest {
         verify(tracker).begin();
         assertThat(monitor.end(session.getCuj())).isTrue();
         verify(tracker).end();
+    }
+
+    @Test
+    public void testDisabledThroughDeviceConfig() {
+        InteractionJankMonitor monitor = new InteractionJankMonitor(mWorker);
+        monitor.init(mView);
+
+        HashMap<String, String> propertiesValues = new HashMap<>();
+        propertiesValues.put("enabled", "false");
+        DeviceConfig.Properties properties = new DeviceConfig.Properties(
+                DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR, propertiesValues);
+        monitor.getPropertiesChangedListener().onPropertiesChanged(properties);
+
+        assertThat(monitor.begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
+        assertThat(monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
     }
 
     @Test
@@ -134,12 +150,13 @@ public class InteractionJankMonitorTest {
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
-                new FrameMetricsWrapper()));
+                new FrameMetricsWrapper(), 1, -1));
         doReturn(tracker).when(monitor).createFrameTracker(any());
 
         assertThat(monitor.begin(session.getCuj())).isTrue();
         verify(tracker).begin();
-        verify(mWorker.getThreadHandler()).sendMessageAtTime(captor.capture(), anyLong());
+        verify(mWorker.getThreadHandler(), atLeastOnce()).sendMessageAtTime(captor.capture(),
+                anyLong());
         Runnable runnable = captor.getValue().getCallback();
         assertThat(runnable).isNotNull();
         mWorker.getThreadHandler().removeCallbacks(runnable);
