@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ફરીથી સ્ક્રીનશૉટ લેવાનો પ્રયાસ કરો"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"મર્યાદિત સ્ટોરેજ સ્પેસને કારણે સ્ક્રીનશૉટ સાચવી શકાતો નથી"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"સ્ક્રીનશૉટ છોડી દો"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"સ્ક્રીનશૉટનો પ્રીવ્યૂ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકૉર્ડર"</string>
@@ -1018,14 +1020,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"નીચે ખસેડો"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ડાબી બાજુ ખસેડો"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"જમણી બાજુ ખસેડો"</string>
-    <!-- no translation found for magnification_mode_switch_description (2698364322069934733) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_full_screen (2882507327576770574) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_window (8597100249594076965) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_click_label (2786203505805898199) -->
-    <skip />
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"મોટું કરવાની સુવિધાવાળી સ્વિચ"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"સંપૂર્ણ સ્ક્રીન મોટી કરો"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"સ્ક્રીનનો કોઈ ભાગ મોટો કરો"</string>
+    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"સ્વિચ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ડિવાઇસનાં નિયંત્રણો"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"તમારા કનેક્ટ કરેલા ડિવાઇસ માટે નિયંત્રણો ઉમેરો"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ડિવાઇસનાં નિયંત્રણો સેટઅપ કરો"</string>
@@ -1067,6 +1065,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"છોડી દો"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>

@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Încercați să faceți din nou o captură de ecran"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Captura de ecran nu poate fi salvată din cauza spațiului de stocare limitat"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Crearea capturilor de ecran nu este permisă de aplicație sau de organizația dvs."</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Închideți captura de ecran"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Previzualizare a capturii de ecran"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder pentru ecran"</string>
@@ -1069,6 +1071,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Se încarcă recomandările"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ascunde sesiunea actuală."</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Închideți"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>

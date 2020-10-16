@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट पुन्हा घेण्याचा प्रयत्न करा"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"स्क्रीनशॉट डिसमिस करा"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉटचे पूर्वावलोकन"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
@@ -265,7 +267,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi बंद झाले."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi सुरू झाले."</string>
-    <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"मोबाईल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"मोबाइल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"बॅटरी <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"विमान मोड बंद."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"विमान मोड सुरू."</string>
@@ -298,8 +300,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"फ्लॅशलाइट सुरू केला."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"रंग उत्क्रमण बंद केले."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"रंग उत्क्रमण सुरू केले."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाईल हॉटस्पॉट बंद केला."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाईल हॉटस्पॉट सुरू केला."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाइल हॉटस्पॉट बंद केला."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाइल हॉटस्पॉट सुरू केला."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"स्क्रीन कास्ट करणे थांबले."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"कार्य मोड बंद."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"कार्य मोड सुरू."</string>
@@ -723,7 +725,7 @@
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"अलीकडील कोणतेही बबल नाहीत"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉंफिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सर्व <xliff:g id="APP_NAME">%1$s</xliff:g> वरील सूचना"</string>
     <string name="see_more_title" msgid="7409317011708185729">"आणखी पाहा"</string>
@@ -1018,14 +1020,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"खाली हलवा"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"डावीकडे हलवा"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"उजवीकडे हलवा"</string>
-    <!-- no translation found for magnification_mode_switch_description (2698364322069934733) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_full_screen (2882507327576770574) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_window (8597100249594076965) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_click_label (2786203505805898199) -->
-    <skip />
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"मॅग्निफिकेशन स्विच"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"संपूर्ण स्क्रीन मॅग्निफाय करा"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीनचा काही भाग मॅग्निफाय करा"</string>
+    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच करा"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिव्हाइस नियंत्रणे"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"तुमच्या कनेक्ट केलेल्या डिव्हाइससाठी नियंत्रणे जोडा"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिव्हाइस नियंत्रणे सेट करा"</string>
@@ -1067,6 +1065,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"सध्याचे सेशन लपवा."</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"डिसमिस करा"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग्ज"</string>
