@@ -2301,10 +2301,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Called when the system is ready and ConnectivityService can initialize remaining components.
+     * Called by SystemServer through ConnectivityManager when the system is ready.
+     */
+    @Override
+    public void systemReady() {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Calling Uid is not system uid.");
+        }
+        systemReadyInternal();
+    }
+
+    /**
+     * Called when ConnectivityService can initialize remaining components.
      */
     @VisibleForTesting
-    public void systemReady() {
+    public void systemReadyInternal() {
         // Let PermissionMonitor#startMonitoring() running in the beginning of the systemReady
         // before MultipathPolicyTracker.start(). Since mApps in PermissionMonitor needs to be
         // populated first to ensure that listening network request which is sent by
