@@ -4081,4 +4081,5 @@
 
   <java-symbol type="array" name="config_keep_warming_services" />
   <java-symbol type="string" name="config_display_features" />
+  <java-symbol type="array" name="config_internalFoldedPhysicalDisplayIds" />
 </resources>

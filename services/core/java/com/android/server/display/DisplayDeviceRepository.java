@@ -112,6 +112,17 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
         }
     }
 
+    public DisplayDevice getByIdLocked(@NonNull String uniqueId) {
+        final int count = mDisplayDevices.size();
+        for (int i = 0; i < count; i++) {
+            final DisplayDevice d = mDisplayDevices.get(i);
+            if (uniqueId.equals(d.getUniqueId())) {
+                return d;
+            }
+        }
+        return null;
+    }
+
     private void handleDisplayDeviceAdded(DisplayDevice device) {
         synchronized (mSyncRoot) {
             DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
