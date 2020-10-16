@@ -43,7 +43,6 @@ import java.util.ArrayList;
 public class FaceUserState extends BiometricUserState<Face> {
 
     private static final String TAG = "FaceState";
-    private static final String FACE_FILE = "settings_face.xml";
 
     private static final String TAG_FACES = "faces";
     private static final String TAG_FACE = "face";
@@ -51,18 +50,13 @@ public class FaceUserState extends BiometricUserState<Face> {
     private static final String ATTR_FACE_ID = "faceId";
     private static final String ATTR_DEVICE_ID = "deviceId";
 
-    public FaceUserState(Context ctx, int userId) {
-        super(ctx, userId);
+    public FaceUserState(Context ctx, int userId, String fileName) {
+        super(ctx, userId, fileName);
     }
 
     @Override
     protected String getBiometricsTag() {
         return TAG_FACES;
-    }
-
-    @Override
-    protected String getBiometricFile() {
-        return FACE_FILE;
     }
 
     @Override

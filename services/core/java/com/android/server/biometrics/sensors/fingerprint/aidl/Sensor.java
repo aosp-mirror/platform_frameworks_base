@@ -162,7 +162,7 @@ class Sensor {
                     }
 
                     final int currentUserId = client.getTargetUserId();
-                    final CharSequence name = FingerprintUtils.getInstance()
+                    final CharSequence name = FingerprintUtils.getInstance(sensorId)
                             .getUniqueName(mContext, currentUserId);
                     final Fingerprint fingerprint = new Fingerprint(name, enrollmentId, sensorId);
 
