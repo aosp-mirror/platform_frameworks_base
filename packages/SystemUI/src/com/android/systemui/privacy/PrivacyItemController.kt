@@ -69,8 +69,10 @@ class PrivacyItemController @Inject constructor(
         private const val ALL_INDICATORS =
                 SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
+        private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
         private const val DEFAULT_ALL_INDICATORS = false
         private const val DEFAULT_MIC_CAMERA = true
+        private const val DEFAULT_LOCATION = false
     }
 
     @VisibleForTesting
@@ -86,6 +88,11 @@ class PrivacyItemController @Inject constructor(
     // TODO(b/168209929) Remove hardcode
     private fun isMicCameraEnabled(): Boolean {
         return true
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                LOCATION, DEFAULT_LOCATION)
     }
 
     private var currentUserIds = emptyList<Int>()
@@ -107,13 +114,15 @@ class PrivacyItemController @Inject constructor(
         private set
     var micCameraAvailable = isMicCameraEnabled()
         private set
+    var locationAvailable = isLocationEnabled()
 
     private val devicePropertiesChangedListener =
             object : DeviceConfig.OnPropertiesChangedListener {
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
             if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace()) &&
                     (properties.keyset.contains(ALL_INDICATORS) ||
-                    properties.keyset.contains(MIC_CAMERA))) {
+                            properties.keyset.contains(MIC_CAMERA) ||
+                            properties.keyset.contains(LOCATION))) {
 
                 // Running on the ui executor so can iterate on callbacks
                 if (properties.keyset.contains(ALL_INDICATORS)) {
@@ -126,6 +135,10 @@ class PrivacyItemController @Inject constructor(
 //                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
 //                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
 //                }
+                if (properties.keyset.contains(LOCATION)) {
+                    locationAvailable = properties.getBoolean(LOCATION, DEFAULT_LOCATION)
+                    callbacks.forEach { it.get()?.onFlagLocationChanged(locationAvailable) }
+                }
                 internalUiExecutor.updateListeningState()
             }
         }
@@ -139,7 +152,8 @@ class PrivacyItemController @Inject constructor(
             active: Boolean
         ) {
             // Check if we care about this code right now
-            if (!allIndicatorsAvailable && code in OPS_LOCATION) {
+            if (!allIndicatorsAvailable &&
+                    (code in OPS_LOCATION && !locationAvailable)) {
                 return
             }
             val userId = UserHandle.getUserId(uid)
@@ -195,7 +209,8 @@ class PrivacyItemController @Inject constructor(
      * main thread.
      */
     private fun setListeningState() {
-        val listen = !callbacks.isEmpty() and (allIndicatorsAvailable || micCameraAvailable)
+        val listen = !callbacks.isEmpty() and
+                (allIndicatorsAvailable || micCameraAvailable || locationAvailable)
         if (listening == listen) return
         listening = listen
         if (listening) {
@@ -258,7 +273,9 @@ class PrivacyItemController @Inject constructor(
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }
-        if (type == PrivacyType.TYPE_LOCATION && !allIndicatorsAvailable) return null
+        if (type == PrivacyType.TYPE_LOCATION && (!allIndicatorsAvailable && !locationAvailable)) {
+            return null
+        }
         val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid)
         return PrivacyItem(type, app)
     }
@@ -271,6 +288,9 @@ class PrivacyItemController @Inject constructor(
 
         @JvmDefault
         fun onFlagMicCameraChanged(flag: Boolean) {}
+
+        @JvmDefault
+        fun onFlagLocationChanged(flag: Boolean) {}
     }
 
     private class NotifyChangesToCallback(
