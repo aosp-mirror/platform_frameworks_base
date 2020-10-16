@@ -545,19 +545,14 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"તમે પ્રતિબંધિત પ્રોફાઇલ બનાવી શકો તે પહેલાં, તમારે તમારી ઍપ્લિકેશનો અને વ્યક્તિગત ડેટાની સુરક્ષા માટે એક લૉક સ્ક્રીન સેટ કરવાની જરૂર પડશે."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"લૉક સેટ કરો"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> પર સ્વિચ કરો"</string>
-    <!-- no translation found for creating_new_user_dialog_message (7232880257538970375) -->
-    <skip />
-    <!-- no translation found for user_nickname (262624187455825083) -->
-    <skip />
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"નવા વપરાશકર્તા બનાવી રહ્યાં છીએ…"</string>
+    <string name="user_nickname" msgid="262624187455825083">"ઉપનામ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"અતિથિ ઉમેરો"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"અતિથિને કાઢી નાખો"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"અતિથિ"</string>
-    <!-- no translation found for user_image_take_photo (467512954561638530) -->
-    <skip />
-    <!-- no translation found for user_image_choose_photo (1363820919146782908) -->
-    <skip />
-    <!-- no translation found for user_image_photo_selector (433658323306627093) -->
-    <skip />
+    <string name="user_image_take_photo" msgid="467512954561638530">"ફોટો લો"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"છબી પસંદ કરો"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"ફોટો પસંદ કરો"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ડિવાઇસ ડિફૉલ્ટ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"બંધ છે"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ચાલુ છે"</string>

@@ -111,9 +111,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var action2: ImageButton
     private lateinit var action3: ImageButton
     private lateinit var action4: ImageButton
+    private lateinit var settingsText: TextView
     private lateinit var settings: View
     private lateinit var cancel: View
-    private lateinit var dismiss: View
+    private lateinit var dismiss: FrameLayout
+    private lateinit var dismissLabel: View
 
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
@@ -171,12 +173,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.action3).thenReturn(action3)
         action4 = ImageButton(context)
         whenever(holder.action4).thenReturn(action4)
+        settingsText = TextView(context)
+        whenever(holder.settingsText).thenReturn(settingsText)
         settings = View(context)
         whenever(holder.settings).thenReturn(settings)
         cancel = View(context)
         whenever(holder.cancel).thenReturn(cancel)
-        dismiss = View(context)
+        dismiss = FrameLayout(context)
         whenever(holder.dismiss).thenReturn(dismiss)
+        dismissLabel = View(context)
+        whenever(holder.dismissLabel).thenReturn(dismissLabel)
 
         // Create media session
         val metadataBuilder = MediaMetadata.Builder().apply {
@@ -330,11 +336,24 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 notificationKey = KEY)
         player.bind(state, mediaKey)
 
+        assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
         val captor = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction::class.java)
         verify(keyguardDismissUtil).executeWhenUnlocked(captor.capture(), anyBoolean())
 
         captor.value.onDismiss()
         verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
+    }
+
+    @Test
+    fun dismissButtonDisabled() {
+        val mediaKey = "key for dismissal"
+        player.attach(holder)
+        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null,
+                isClearable = false, notificationKey = KEY)
+        player.bind(state, mediaKey)
+
+        assertThat(dismiss.isEnabled).isEqualTo(false)
     }
 }

@@ -51,7 +51,12 @@
         <LinearLayout
             android:id="@+id/global_screenshot_actions"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+            <include layout="@layout/global_screenshot_action_chip"
+                     android:id="@+id/screenshot_share_chip"/>
+            <include layout="@layout/global_screenshot_action_chip"
+                     android:id="@+id/screenshot_edit_chip"/>
+        </LinearLayout>
     </HorizontalScrollView>
     <include layout="@layout/global_screenshot_preview"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

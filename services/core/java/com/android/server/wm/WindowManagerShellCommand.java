@@ -106,6 +106,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runSetDisplayUserRotation(pw);
                 case "set-fix-to-user-rotation":
                     return runSetFixToUserRotation(pw);
+                case "set-ignore-orientation-request":
+                    return runSetIgnoreOrientationRequest(pw);
+                case "get-ignore-orientation-request":
+                    return runGetIgnoreOrientationRequest(pw);
                 case "dump-visible-window-views":
                     return runDumpVisibleWindowViews(pw);
                 default:
@@ -368,6 +372,47 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetIgnoreOrientationRequest(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArgRequired();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+            arg = getNextArgRequired();
+        }
+
+        final boolean ignoreOrientationRequest;
+        switch (arg) {
+            case "true":
+            case "1":
+                ignoreOrientationRequest = true;
+                break;
+            case "false":
+            case "0":
+                ignoreOrientationRequest = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expecting true, 1, false, 0, but we "
+                        + "get " + arg);
+                return -1;
+        }
+
+        mInterface.setIgnoreOrientationRequest(displayId, ignoreOrientationRequest);
+        return 0;
+    }
+
+    private int runGetIgnoreOrientationRequest(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArg();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+        }
+
+        final boolean ignoreOrientationRequest = mInternal.getIgnoreOrientationRequest(displayId);
+        pw.println("ignoreOrientationRequest " + ignoreOrientationRequest
+                + " for displayId=" + displayId);
+        return 0;
+    }
+
     private int runDumpVisibleWindowViews(PrintWriter pw) {
         if (!mInternal.checkCallingPermission(android.Manifest.permission.DUMP,
                 "runDumpVisibleWindowViews()")) {
@@ -433,8 +478,11 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
-        pw.println("  set-fix-to-user-rotation [-d DISPLAY_ID] [enabled|disabled]");
+        pw.println("  set-fix-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
         pw.println("    Enable or disable rotating display for app requested orientation.");
+        pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
+        pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
+        pw.println("    If app requested orientation should be ignored.");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");

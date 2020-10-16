@@ -3978,6 +3978,23 @@ public class UserManager {
     }
 
     /**
+     * Immediately removes the user or, if the user cannot be removed, such as when the user is
+     * the current user, then set the user as ephemeral so that it will be removed when it is
+     * stopped.
+     *
+     * @return the {@link com.android.server.pm.UserManagerService.RemoveResult} code
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public int removeUserOrSetEphemeral(@UserIdInt int userId) {
+        try {
+            return mService.removeUserOrSetEphemeral(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Updates the user's name.
      *
      * @param userId the user's integer id

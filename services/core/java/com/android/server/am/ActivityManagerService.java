@@ -1979,7 +1979,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = hasHandlerThread
                 ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
-        mUidObserverController = new UidObserverController(this);
         mPlatformCompat = null;
         mProcessList = injector.getProcessList(this);
         mProcessList.init(this, activeUids, mPlatformCompat);
@@ -1997,6 +1996,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mServices = hasHandlerThread ? new ActiveServices(this) : null;
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null /* service */);
+        mUidObserverController = new UidObserverController(mUiHandler);
         mUserController = hasHandlerThread ? new UserController(this) : null;
         mPendingIntentController = hasHandlerThread
                 ? new PendingIntentController(handlerThread.getLooper(), mUserController,
@@ -2077,7 +2077,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mCpHelper = new ContentProviderHelper(this, true);
         mPackageWatchdog = PackageWatchdog.getInstance(mUiContext);
         mAppErrors = new AppErrors(mUiContext, this, mPackageWatchdog);
-        mUidObserverController = new UidObserverController(this);
+        mUidObserverController = new UidObserverController(mUiHandler);
 
         final File systemDir = SystemServiceManager.ensureSystemDir();
 
@@ -8816,37 +8816,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return -1;
     }
 
-    boolean dumpUids(PrintWriter pw, String dumpPackage, int dumpAppId, ActiveUids uids,
-                String header, boolean needSep) {
-        boolean printed = false;
-        for (int i=0; i<uids.size(); i++) {
-            UidRecord uidRec = uids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != dumpAppId) {
-                continue;
-            }
-            if (!printed) {
-                printed = true;
-                if (needSep) {
-                    pw.println();
-                }
-                pw.print("  ");
-                pw.println(header);
-                needSep = true;
-            }
-            pw.print("    UID "); UserHandle.formatUid(pw, uidRec.uid);
-            pw.print(": "); pw.println(uidRec);
-            pw.print("      curProcState="); pw.print(uidRec.mCurProcState);
-            pw.print(" curCapability=");
-            ActivityManager.printCapabilitiesFull(pw, uidRec.curCapability);
-            pw.println();
-            for (int j = uidRec.procRecords.size() - 1; j >= 0; j--) {
-                pw.print("      proc=");
-                pw.println(uidRec.procRecords.valueAt(j));
-            }
-        }
-        return printed;
-    }
-
     void dumpBinderProxyInterfaceCounts(PrintWriter pw, String header) {
         final BinderProxy.InterfaceCount[] proxyCounts = BinderProxy.getSortedInterfaceCounts(50);
 
@@ -9096,19 +9065,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         needSep = dumpProcessesToGc(pw, needSep, dumpPackage);
 
         if (mProcessList.mActiveUids.size() > 0) {
-            if (dumpUids(pw, dumpPackage, dumpAppId, mProcessList.mActiveUids,
-                    "UID states:", needSep)) {
-                needSep = true;
-            }
+            needSep |= mProcessList.mActiveUids.dump(pw, dumpPackage, dumpAppId,
+                    "UID states:", needSep);
         }
 
         if (dumpAll) {
-            if (mUidObserverController.mValidateUids.size() > 0) {
-                if (dumpUids(pw, dumpPackage, dumpAppId, mUidObserverController.mValidateUids,
-                                "UID validation:", needSep)) {
-                    needSep = true;
-                }
-            }
+            needSep |= mUidObserverController.dumpValidateUids(pw,
+                    dumpPackage, dumpAppId, "UID validation:", needSep);
         }
 
         if (needSep) {
@@ -9377,22 +9340,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ActivityManagerServiceDumpProcessesProto.ACTIVE_INSTRUMENTATIONS);
         }
 
-        int whichAppId = getAppId(dumpPackage);
-        for (int i = 0; i < mProcessList.mActiveUids.size(); i++) {
-            UidRecord uidRec = mProcessList.mActiveUids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != whichAppId) {
-                continue;
-            }
-            uidRec.dumpDebug(proto, ActivityManagerServiceDumpProcessesProto.ACTIVE_UIDS);
-        }
+        final int dumpAppId = getAppId(dumpPackage);
+        mProcessList.mActiveUids.dumpProto(proto, dumpPackage, dumpAppId,
+                ActivityManagerServiceDumpProcessesProto.ACTIVE_UIDS);
 
-        for (int i = 0; i < mUidObserverController.mValidateUids.size(); i++) {
-            UidRecord uidRec = mUidObserverController.mValidateUids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != whichAppId) {
-                continue;
-            }
-            uidRec.dumpDebug(proto, ActivityManagerServiceDumpProcessesProto.VALIDATE_UIDS);
-        }
+        mUidObserverController.dumpValidateUidsProto(proto, dumpPackage, dumpAppId,
+                ActivityManagerServiceDumpProcessesProto.VALIDATE_UIDS);
 
         if (mProcessList.getLruSizeLocked() > 0) {
             long lruToken = proto.start(ActivityManagerServiceDumpProcessesProto.LRU_PROCS);
@@ -14892,6 +14845,58 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
+    private boolean isEphemeralLocked(int uid) {
+        final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
+        if (packages == null || packages.length != 1) { // Ephemeral apps cannot share uid
+            return false;
+        }
+        return getPackageManagerInternalLocked().isPackageEphemeral(
+                UserHandle.getUserId(uid), packages[0]);
+    }
+
+    void enqueueUidChangeLocked(UidRecord uidRec, int uid, int change) {
+        uid = uidRec != null ? uidRec.uid : uid;
+        if (uid < 0) {
+            throw new IllegalArgumentException("No UidRecord or uid");
+        }
+
+        final int procState = uidRec != null
+                ? uidRec.setProcState : PROCESS_STATE_NONEXISTENT;
+        final long procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
+        final int capability = uidRec != null ? uidRec.setCapability : 0;
+        final boolean ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
+
+        if (uidRec != null && !uidRec.idle && (change & UidRecord.CHANGE_GONE) != 0) {
+            // If this uid is going away, and we haven't yet reported it is gone,
+            // then do so now.
+            change |= UidRecord.CHANGE_IDLE;
+        }
+        final int enqueuedChange = mUidObserverController.enqueueUidChange(
+                uid, change, procState, procStateSeq, capability, ephemeral);
+        if (uidRec != null) {
+            uidRec.lastReportedChange = enqueuedChange;
+            uidRec.updateLastDispatchedProcStateSeq(enqueuedChange);
+        }
+
+        // Directly update the power manager, since we sit on top of it and it is critical
+        // it be kept in sync (so wake locks will be held as soon as appropriate).
+        if (mLocalPowerManager != null) {
+            // TODO: dispatch cached/uncached changes here, so we don't need to report
+            // all proc state changes.
+            if ((enqueuedChange & UidRecord.CHANGE_ACTIVE) != 0) {
+                mLocalPowerManager.uidActive(uid);
+            }
+            if ((enqueuedChange & UidRecord.CHANGE_IDLE) != 0) {
+                mLocalPowerManager.uidIdle(uid);
+            }
+            if ((enqueuedChange & UidRecord.CHANGE_GONE) != 0) {
+                mLocalPowerManager.uidGone(uid);
+            } else {
+                mLocalPowerManager.updateUidProcState(uid, procState);
+            }
+        }
+    }
+
     final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
         synchronized (mProcessStats.mLock) {
             if (proc.thread != null && proc.baseProcessTracker != null) {
@@ -15157,7 +15162,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final void doStopUidLocked(int uid, final UidRecord uidRec) {
         mServices.stopInBackgroundLocked(uid);
-        mUidObserverController.enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
+        enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
     }
 
     /**
@@ -16707,7 +16712,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record
                             + " validateUidRec: "
-                            + mUidObserverController.mValidateUids.get(callingUid));
+                            + mUidObserverController.getValidateUidRecord(callingUid));
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

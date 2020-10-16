@@ -708,12 +708,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // For fast GNSS TTFF
             provider = LocationManager.NETWORK_PROVIDER;
             locationListener = mNetworkLocationListener;
-            locationRequest.setQuality(LocationRequest.POWER_LOW);
+            locationRequest.setQuality(LocationRequest.QUALITY_LOW_POWER);
         } else {
             // For Device-Based Hybrid (E911)
             provider = LocationManager.FUSED_PROVIDER;
             locationListener = mFusedLocationListener;
-            locationRequest.setQuality(LocationRequest.ACCURACY_FINE);
+            locationRequest.setQuality(LocationRequest.QUALITY_HIGH_ACCURACY);
         }
 
         // Ignore location settings if in emergency mode. This is only allowed for

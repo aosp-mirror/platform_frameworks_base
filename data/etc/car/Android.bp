@@ -149,3 +149,11 @@ prebuilt_etc {
     src: "com.android.car.ui.paintbooth.xml",
     filename_from_src: true,
 }
+
+prebuilt_etc {
+    name: "allowed_privapp_com.android.car.provision",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.car.provision.xml",
+    filename_from_src: true,
+}

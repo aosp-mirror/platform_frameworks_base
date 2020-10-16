@@ -5356,8 +5356,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayPolicy.getSystemUiContext();
     }
 
-    Point getDisplayPosition() {
-        return mWmService.mDisplayManagerInternal.getDisplayPosition(getDisplayId());
+    @Override
+    boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
+        if (mIgnoreOrientationRequest == ignoreOrientationRequest) return false;
+        final boolean rotationChanged = super.setIgnoreOrientationRequest(ignoreOrientationRequest);
+        mWmService.mDisplayWindowSettings.setIgnoreOrientationRequest(
+                this, mIgnoreOrientationRequest);
+        return rotationChanged;
     }
 
     /**

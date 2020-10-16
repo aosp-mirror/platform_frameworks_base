@@ -4521,7 +4521,7 @@
     <!-- @SystemApi @TestApi Allows adding/removing enabled notification listener components.
         @hide -->
     <permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|installer" />
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
 
     <!-- Allows notifications to be colorized

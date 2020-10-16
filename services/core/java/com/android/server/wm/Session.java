@@ -204,15 +204,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
-            SurfaceControl outBLASTSurfaceControl) {
+            InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
                 outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
-                outActiveControls, outSurfaceSize, outBLASTSurfaceControl);
+                outActiveControls, outSurfaceSize);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());

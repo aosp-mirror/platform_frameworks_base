@@ -19,6 +19,7 @@ package android.media.tv;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +36,7 @@ import java.util.Objects;
  * or pass-through input.
  * @hide
  */
+@SystemApi
 public final class TunedInfo implements Parcelable {
     static final String TAG = "TunedInfo";
 

@@ -128,12 +128,14 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         }
 
         if (found) {
-            if (!getDevice().isAdbRoot()) {
+            try {
                 getDevice().enableAdbRoot();
-            }
-            getDevice().remountSystemWritable();
-            for (String file : files) {
-                getDevice().executeShellCommand("rm -rf " + file);
+                getDevice().remountSystemWritable();
+                for (String file : files) {
+                    getDevice().executeShellCommand("rm -rf " + file);
+                }
+            } finally {
+                getDevice().disableAdbRoot();
             }
             getDevice().reboot();
         }
@@ -334,8 +336,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + TEST_SUBDIR + TEST_FILENAME_2;
-        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
-        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+        pushString(TEST_STRING_1, oldFilePath1);
+        pushString(TEST_STRING_2, oldFilePath2);
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
@@ -347,8 +349,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String newFilePath3 = apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "/" + TEST_FILENAME_3;
         String newFilePath4 =
                 apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + TEST_SUBDIR + TEST_FILENAME_4;
-        assertTrue(getDevice().pushString(TEST_STRING_3, newFilePath3));
-        assertTrue(getDevice().pushString(TEST_STRING_4, newFilePath4));
+        pushString(TEST_STRING_3, newFilePath3);
+        pushString(TEST_STRING_4, newFilePath4);
 
         // Roll back the APEX
         runPhase("testRollbackApexDataDirectories_Phase2");
@@ -382,8 +384,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
-        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+        pushString(TEST_STRING_1, oldFilePath1);
+        pushString(TEST_STRING_2, oldFilePath2);
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
@@ -396,8 +398,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_3;
         String newFilePath4 =
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_4;
-        assertTrue(getDevice().pushString(TEST_STRING_3, newFilePath3));
-        assertTrue(getDevice().pushString(TEST_STRING_4, newFilePath4));
+        pushString(TEST_STRING_3, newFilePath3);
+        pushString(TEST_STRING_4, newFilePath4);
 
         // Roll back the APEX
         runPhase("testRollbackApexDataDirectories_Phase2");
@@ -430,8 +432,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
-        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+        pushString(TEST_STRING_1, oldFilePath1);
+        pushString(TEST_STRING_2, oldFilePath2);
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
@@ -443,8 +445,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String newFilePath3 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_3;
         String newFilePath4 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_4;
-        assertTrue(getDevice().pushString(TEST_STRING_3, newFilePath3));
-        assertTrue(getDevice().pushString(TEST_STRING_4, newFilePath4));
+        pushString(TEST_STRING_3, newFilePath3);
+        pushString(TEST_STRING_4, newFilePath4);
 
         // Roll back the APEX
         runPhase("testRollbackApexDataDirectories_Phase2");
@@ -476,8 +478,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Push files to apk data directory
         String oldFilePath1 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
-        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+        pushString(TEST_STRING_1, oldFilePath1);
+        pushString(TEST_STRING_2, oldFilePath2);
 
         // Install version 2 of TESTAPP_A with rollback enabled
         runPhase("testRollbackApkDataDirectories_Phase2");
@@ -488,8 +490,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().deleteFile(oldFilePath2);
         String newFilePath3 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_3;
         String newFilePath4 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_4;
-        assertTrue(getDevice().pushString(TEST_STRING_3, newFilePath3));
-        assertTrue(getDevice().pushString(TEST_STRING_4, newFilePath4));
+        pushString(TEST_STRING_3, newFilePath3);
+        pushString(TEST_STRING_4, newFilePath4);
 
         // Roll back the APK
         runPhase("testRollbackApkDataDirectories_Phase3");
@@ -511,8 +513,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
-        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+        pushString(TEST_STRING_1, oldFilePath1);
+        pushString(TEST_STRING_2, oldFilePath2);
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
@@ -534,11 +536,13 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
         final File apex = buildHelper.getTestFile(fileName);
-        if (!getDevice().isAdbRoot()) {
+        try {
             getDevice().enableAdbRoot();
+            getDevice().remountSystemWritable();
+            assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+        } finally {
+            getDevice().disableAdbRoot();
         }
-        getDevice().remountSystemWritable();
-        assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
         getDevice().reboot();
     }
 
@@ -614,6 +618,15 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
             return true;
         } catch (AssertionError ignore) {
             return false;
+        }
+    }
+
+    private void pushString(String contents, String deviceFilePath) throws Exception {
+        try {
+            getDevice().enableAdbRoot();
+            assertThat(getDevice().pushString(contents, deviceFilePath)).isTrue();
+        } finally {
+            getDevice().disableAdbRoot();
         }
     }
 }

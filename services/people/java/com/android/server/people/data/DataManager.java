@@ -1037,14 +1037,15 @@ public class DataManager {
      * A {@link Runnable} that queries the Usage Stats Service for recent events for a specified
      * user.
      */
-    private class UsageStatsQueryRunnable implements Runnable {
+    private class UsageStatsQueryRunnable implements Runnable,
+            UsageStatsQueryHelper.EventListener {
 
         private final UsageStatsQueryHelper mUsageStatsQueryHelper;
         private long mLastEventTimestamp;
 
         private UsageStatsQueryRunnable(int userId) {
             mUsageStatsQueryHelper = mInjector.createUsageStatsQueryHelper(userId,
-                    (packageName) -> getPackage(packageName, userId));
+                    (packageName) -> getPackage(packageName, userId), this);
             mLastEventTimestamp = System.currentTimeMillis() - QUERY_EVENTS_MAX_AGE_MS;
         }
 
@@ -1052,6 +1053,17 @@ public class DataManager {
         public void run() {
             if (mUsageStatsQueryHelper.querySince(mLastEventTimestamp)) {
                 mLastEventTimestamp = mUsageStatsQueryHelper.getLastEventTimestamp();
+            }
+        }
+
+        @Override
+        public void onEvent(PackageData packageData, ConversationInfo conversationInfo,
+                Event event) {
+            if (event.getType() == Event.TYPE_IN_APP_CONVERSATION) {
+                ConversationInfo updated = new ConversationInfo.Builder(conversationInfo)
+                        .setLastEventTimestamp(event.getTimestamp())
+                        .build();
+                packageData.getConversationStore().addOrUpdate(updated);
             }
         }
     }
@@ -1135,8 +1147,9 @@ public class DataManager {
         }
 
         UsageStatsQueryHelper createUsageStatsQueryHelper(@UserIdInt int userId,
-                Function<String, PackageData> packageDataGetter) {
-            return new UsageStatsQueryHelper(userId, packageDataGetter);
+                Function<String, PackageData> packageDataGetter,
+                UsageStatsQueryHelper.EventListener eventListener) {
+            return new UsageStatsQueryHelper(userId, packageDataGetter, eventListener);
         }
     }
 }

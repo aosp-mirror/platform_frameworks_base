@@ -30,6 +30,7 @@ import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -155,6 +156,7 @@ public final class UsageStats implements Parcelable {
     /**
      * {@hide}
      */
+    @TestApi
     public UsageStats() {
     }
 

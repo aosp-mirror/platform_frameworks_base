@@ -1048,9 +1048,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     if (unloadStatus != SoundTriggerInternal.STATUS_OK) {
                         Slog.w(TAG, "Unable to unload keyphrase sound model:" + unloadStatus);
                     }
-                    deleted = mDbHelper.deleteKeyphraseSoundModel(keyphraseId, callingUserId,
-                            bcp47Locale);
                 }
+                deleted = mDbHelper.deleteKeyphraseSoundModel(keyphraseId, callingUserId,
+                        bcp47Locale);
                 return deleted ? SoundTriggerInternal.STATUS_OK : SoundTriggerInternal.STATUS_ERROR;
             } finally {
                 if (deleted) {

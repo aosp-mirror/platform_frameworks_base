@@ -43,7 +43,9 @@ import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDisp
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Maintains the state of a single sensor within an instance of the
@@ -56,6 +58,7 @@ class Sensor {
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final LockoutCache mLockoutCache;
+    @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     @Nullable private Session mCurrentSession; // TODO: Death recipient
     @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
@@ -85,6 +88,7 @@ class Sensor {
         mSensorProperties = sensorProperties;
         mScheduler = new BiometricScheduler(tag, gestureAvailabilityDispatcher);
         mLockoutCache = new LockoutCache();
+        mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
 
@@ -290,5 +294,9 @@ class Sensor {
 
     @NonNull LockoutCache getLockoutCache() {
         return mLockoutCache;
+    }
+
+    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+        return mAuthenticatorIds;
     }
 }

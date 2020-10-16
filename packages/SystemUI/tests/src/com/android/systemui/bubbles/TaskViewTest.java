@@ -121,7 +121,7 @@ public class TaskViewTest extends SysuiTestCase {
         ActivityOptions options = ActivityOptions.makeBasic();
         mTaskView.startActivity(mock(PendingIntent.class), null, options);
 
-        verify(mTaskListener).setPendingListener(eq(mTaskView));
+        verify(mTaskListener).setPendingLaunchCookieListener(any(), eq(mTaskView));
         assertThat(options.getLaunchWindowingMode()).isEqualTo(WINDOWING_MODE_MULTI_WINDOW);
         assertThat(options.getTaskAlwaysOnTop()).isTrue();
     }

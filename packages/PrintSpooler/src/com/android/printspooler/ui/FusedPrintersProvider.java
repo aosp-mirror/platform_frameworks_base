@@ -254,7 +254,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         mLocationManager.requestLocationUpdates(
                 LocationManager.FUSED_PROVIDER,
                 new LocationRequest.Builder(LOCATION_UPDATE_MS)
-                        .setQuality(LocationRequest.POWER_LOW)
+                        .setQuality(LocationRequest.QUALITY_LOW_POWER)
                         .build(),
                 new HandlerExecutor(new Handler(Looper.getMainLooper())),
                 this);

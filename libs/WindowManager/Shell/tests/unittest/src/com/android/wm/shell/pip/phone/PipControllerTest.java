@@ -18,17 +18,18 @@ package com.android.wm.shell.pip.phone;
 
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -37,10 +38,6 @@ import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTestCase;
-import com.android.wm.shell.pip.phone.PipAppOpsListener;
-import com.android.wm.shell.pip.phone.PipController;
-import com.android.wm.shell.pip.phone.PipMediaController;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,49 +52,52 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class PipControllerTest extends PipTestCase {
-    private com.android.wm.shell.pip.phone.PipController mPipController;
-    private TestableContext mSpiedContext;
+    private PipController mPipController;
 
-    @Mock private DisplayController mMockdDisplayController;
-    @Mock private PackageManager mPackageManager;
-    @Mock private com.android.wm.shell.pip.phone.PipMenuActivityController
-            mMockPipMenuActivityController;
+    @Mock private DisplayController mMockDisplayController;
+    @Mock private PipMenuActivityController mMockPipMenuActivityController;
     @Mock private PipAppOpsListener mMockPipAppOpsListener;
     @Mock private PipBoundsHandler mMockPipBoundsHandler;
     @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
     @Mock private PipTouchHandler mMockPipTouchHandler;
     @Mock private WindowManagerShellWrapper mMockWindowManagerShellWrapper;
-    private PipBoundsState mPipBoundsState;
+    @Mock private PipBoundsState mMockPipBoundsState;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mPipBoundsState = new PipBoundsState();
-
-        mSpiedContext = spy(mContext);
-
-        when(mPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
-        when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
-
-        mPipController = new PipController(mSpiedContext, mMockdDisplayController,
-                mMockPipAppOpsListener, mMockPipBoundsHandler, mPipBoundsState,
+        mPipController = new PipController(mContext, mMockDisplayController,
+                mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipBoundsState,
                 mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockWindowManagerShellWrapper);
     }
 
     @Test
-    public void testNonPipDevice_shouldNotRegisterPipTransitionCallback() {
-        verify(mMockPipTaskOrganizer, never()).registerPipTransitionCallback(any());
+    public void instantiatePipController_registersPipTransitionCallback() {
+        verify(mMockPipTaskOrganizer).registerPipTransitionCallback(any());
     }
 
     @Test
-    public void testNonPipDevice_shouldNotAddDisplayChangingController() {
-        verify(mMockdDisplayController, never()).addDisplayChangingController(any());
+    public void instantiatePipController_addsDisplayChangingController() {
+        verify(mMockDisplayController).addDisplayChangingController(any());
     }
 
     @Test
-    public void testNonPipDevice_shouldNotAddDisplayWindowListener() {
-        verify(mMockdDisplayController, never()).addDisplayWindowListener(any());
+    public void instantiatePipController_addsDisplayWindowListener() {
+        verify(mMockDisplayController).addDisplayWindowListener(any());
+    }
+
+    @Test
+    public void createPip_notSupported_returnsNull() {
+        Context spyContext = spy(mContext);
+        PackageManager mockPackageManager = mock(PackageManager.class);
+        when(mockPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
+        when(spyContext.getPackageManager()).thenReturn(mockPackageManager);
+
+        assertNull(PipController.create(spyContext, mMockDisplayController,
+                mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipBoundsState,
+                mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
+                mMockPipTouchHandler, mMockWindowManagerShellWrapper));
     }
 }

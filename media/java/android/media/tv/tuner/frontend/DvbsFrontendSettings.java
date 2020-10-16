@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner;
+import android.media.tv.tuner.TunerVersionChecker;
+
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,6 +36,44 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public class DvbsFrontendSettings extends FrontendSettings {
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "SCAN_TYPE_",
+            value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_DIRECT, SCAN_TYPE_DISEQC,
+                    SCAN_TYPE_UNICABLE, SCAN_TYPE_JESS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScanType {}
+
+    /**
+     * Dvbs scan type undefined.
+     */
+    public static final int SCAN_TYPE_UNDEFINED =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbsScanType.UNDEFINED;
+
+    /**
+     * Dvbs scan type DIRECT.
+     */
+    public static final int SCAN_TYPE_DIRECT =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbsScanType.DIRECT;
+
+    /**
+     * Dvbs scan type DISEQC.
+     */
+    public static final int SCAN_TYPE_DISEQC =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbsScanType.DISEQC;
+
+    /**
+     * Dvbs scan type UNICABLE.
+     */
+    public static final int SCAN_TYPE_UNICABLE =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbsScanType.UNICABLE;
+
+    /**
+     * Dvbs scan type JESS.
+     */
+    public static final int SCAN_TYPE_JESS =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbsScanType.JESS;
+
     /** @hide */
     @IntDef(flag = true,
             prefix = "MODULATION_",
@@ -218,9 +258,12 @@ public class DvbsFrontendSettings extends FrontendSettings {
     private final int mInputStreamId;
     private final int mStandard;
     private final int mVcmMode;
+    // Dvbs scan type is only supported in Tuner 1.1 or higher.
+    private final int mScanType;
 
     private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate codeRate,
-            int symbolRate, int rolloff, int pilot, int inputStreamId, int standard, int vcm) {
+            int symbolRate, int rolloff, int pilot, int inputStreamId, int standard, int vcm,
+            int scanType) {
         super(frequency);
         mModulation = modulation;
         mCodeRate = codeRate;
@@ -230,6 +273,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         mInputStreamId = inputStreamId;
         mStandard = standard;
         mVcmMode = vcm;
+        mScanType = scanType;
     }
 
     /**
@@ -286,6 +330,13 @@ public class DvbsFrontendSettings extends FrontendSettings {
     public int getVcmMode() {
         return mVcmMode;
     }
+    /**
+     * Get scan type.
+     */
+    @ScanType
+    public int getScanType() {
+        return mScanType;
+    }
 
     /**
      * Creates a builder for {@link DvbsFrontendSettings}.
@@ -308,6 +359,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         private int mInputStreamId = Tuner.INVALID_STREAM_ID;
         private int mStandard = STANDARD_AUTO;
         private int mVcmMode = VCM_MODE_UNDEFINED;
+        private int mScanType = SCAN_TYPE_UNDEFINED;
 
         private Builder() {
         }
@@ -321,6 +373,24 @@ public class DvbsFrontendSettings extends FrontendSettings {
         @IntRange(from = 1)
         public Builder setFrequency(int frequency) {
             mFrequency = frequency;
+            return this;
+        }
+
+        /**
+         * Set the scan type.
+         *
+         * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         *
+         * @param scanType the value to set as the scan type. Default value is
+         * {@link android.media.tv.tuner.frontend.DvbsFrontendSettings#DVBS_SCAN_TYPE_UNDEFINED}.
+         */
+        @NonNull
+        public Builder setScanType(@ScanType int scanType) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_1_1, "setScanType")) {
+                mScanType = scanType;
+            }
             return this;
         }
 
@@ -411,7 +481,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         @NonNull
         public DvbsFrontendSettings build() {
             return new DvbsFrontendSettings(mFrequency, mModulation, mCodeRate, mSymbolRate,
-                    mRolloff, mPilot, mInputStreamId, mStandard, mVcmMode);
+                    mRolloff, mPilot, mInputStreamId, mStandard, mVcmMode, mScanType);
         }
     }
 

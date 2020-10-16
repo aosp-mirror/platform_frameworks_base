@@ -55,6 +55,7 @@ using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
 using ::android::hardware::tv::tuner::V1_0::FrontendSettings;
+using ::android::hardware::tv::tuner::V1_1::FrontendSettingsExt1_1;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 using ::android::hardware::tv::tuner::V1_0::IDescrambler;
 using ::android::hardware::tv::tuner::V1_0::IDvr;
@@ -217,9 +218,10 @@ struct JTuner : public RefBase {
     jobject openFrontendById(int id);
     jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
-    int tune(const FrontendSettings& settings);
+    int tune(const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
     int stopTune();
-    int scan(const FrontendSettings& settings, FrontendScanType scanType);
+    int scan(const FrontendSettings& settings, FrontendScanType scanType,
+            const FrontendSettingsExt1_1& settingsExt1_1);
     int stopScan();
     int setLnb(int id);
     int setLna(bool enable);
@@ -265,6 +267,7 @@ private:
     static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getDtmbFrontendCaps(JNIEnv *env, int id);
 };
 
 class C2DataIdInfo : public C2Param {

@@ -227,9 +227,6 @@ public abstract class WallpaperService extends Service {
 
         SurfaceControl mSurfaceControl = new SurfaceControl();
 
-        // Unused relayout out-param
-        SurfaceControl mTmpSurfaceControl = new SurfaceControl();
-
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
             {
                 mRequestedFormat = PixelFormat.RGBX_8888;
@@ -905,7 +902,7 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(
                             mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, -1, mWinFrames, mMergedConfiguration, mSurfaceControl,
-                            mInsetsState, mTempControls, mSurfaceSize, mTmpSurfaceControl);
+                            mInsetsState, mTempControls, mSurfaceSize);
                     if (mSurfaceControl.isValid()) {
                         mSurfaceHolder.mSurface.copyFrom(mSurfaceControl);
                     }

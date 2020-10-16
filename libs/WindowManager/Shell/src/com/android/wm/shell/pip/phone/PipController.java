@@ -17,11 +17,10 @@
 package com.android.wm.shell.pip.phone;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
@@ -34,10 +33,13 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Log;
+import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -196,7 +198,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
     }
 
-    public PipController(Context context,
+    protected PipController(Context context,
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsHandler pipBoundsHandler,
@@ -207,34 +209,13 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipTouchHandler pipTouchHandler,
             WindowManagerShellWrapper windowManagerShellWrapper
     ) {
-        mContext = context;
-
-        if (PipUtils.hasSystemFeature(mContext)) {
-            initController(context, displayController, pipAppOpsListener, pipBoundsHandler,
-                    pipBoundsState, pipMediaController, pipMenuActivityController, pipTaskOrganizer,
-                    pipTouchHandler, windowManagerShellWrapper);
-        } else {
-            Log.w(TAG, "Device not support PIP feature");
-        }
-    }
-
-    private void initController(Context context,
-            DisplayController displayController,
-            PipAppOpsListener pipAppOpsListener,
-            PipBoundsHandler pipBoundsHandler,
-            @NonNull PipBoundsState pipBoundsState,
-            PipMediaController pipMediaController,
-            PipMenuActivityController pipMenuActivityController,
-            PipTaskOrganizer pipTaskOrganizer,
-            PipTouchHandler pipTouchHandler,
-            WindowManagerShellWrapper windowManagerShellWrapper) {
-
         // Ensure that we are the primary user's SystemUI.
         final int processUser = UserManager.get(context).getUserHandle();
         if (processUser != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Non-primary Pip component not currently supported.");
         }
 
+        mContext = context;
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsHandler = pipBoundsHandler;
@@ -258,7 +239,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             mWindowManagerShellWrapper.addPinnedStackListener(
                     new PipControllerPinnedStackListener());
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to register pinned stack listener", e);
+            Slog.e(TAG, "Failed to register pinned stack listener", e);
         }
     }
 
@@ -464,5 +445,25 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipBoundsHandler.dump(pw, innerPrefix);
         mPipTaskOrganizer.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
+    }
+
+    /**
+     * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
+     */
+    @Nullable
+    public static PipController create(Context context, DisplayController displayController,
+            PipAppOpsListener pipAppOpsListener, PipBoundsHandler pipBoundsHandler,
+            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            PipMenuActivityController pipMenuActivityController,
+            PipTaskOrganizer pipTaskOrganizer, PipTouchHandler pipTouchHandler,
+            WindowManagerShellWrapper windowManagerShellWrapper) {
+        if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
+            Slog.w(TAG, "Device doesn't support Pip feature");
+            return null;
+        }
+
+        return new PipController(context, displayController, pipAppOpsListener, pipBoundsHandler,
+                pipBoundsState, pipMediaController, pipMenuActivityController,
+                pipTaskOrganizer, pipTouchHandler, windowManagerShellWrapper);
     }
 }

@@ -4043,6 +4043,9 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        forAllActivities(r -> {
+            info.addLaunchCookie(r.mLaunchCookie);
+        });
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {

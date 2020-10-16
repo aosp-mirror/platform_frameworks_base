@@ -531,7 +531,7 @@ final class InputMonitor {
                     // event. This is used to omit Surfaces from occlusion detection.
                     populateOverlayInputInfo(mInvalidInputWindow, w.getName(), type, isVisible);
                     mInputTransaction.setInputWindowInfo(
-                            w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
+                            w.mWinAnimator.mSurfaceController.mSurfaceControl,
                             mInvalidInputWindow);
                     return;
                 }
@@ -600,8 +600,7 @@ final class InputMonitor {
 
             if (w.mWinAnimator.hasSurface()) {
                 mInputTransaction.setInputWindowInfo(
-                    w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
-                    inputWindowHandle);
+                        w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
             }
         }
     }

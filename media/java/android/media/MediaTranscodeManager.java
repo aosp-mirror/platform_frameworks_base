@@ -443,7 +443,7 @@ public final class MediaTranscodeManager {
                 }
 
                 @Override
-                public void onAwaitNumberOfJobsChanged(int jobId, int oldAwaitNumber,
+                public void onAwaitNumberOfSessionsChanged(int jobId, int oldAwaitNumber,
                         int newAwaitNumber) throws RemoteException {
                     //TODO(hkuang): Implement this.
                 }
@@ -1081,7 +1081,7 @@ public final class MediaTranscodeManager {
         private final MediaTranscodeManager mManager;
         private Executor mListenerExecutor;
         private OnTranscodingFinishedListener mListener;
-        private int mJobId = -1;
+        private int mSessionId = -1;
         // Lock for internal state.
         private final Object mLock = new Object();
         @GuardedBy("mLock")
@@ -1104,7 +1104,7 @@ public final class MediaTranscodeManager {
         private TranscodingJob(
                 @NonNull MediaTranscodeManager manager,
                 @NonNull TranscodingRequest request,
-                @NonNull TranscodingJobParcel parcel,
+                @NonNull TranscodingSessionParcel parcel,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull OnTranscodingFinishedListener listener) {
             Objects.requireNonNull(manager, "manager must not be null");
@@ -1112,7 +1112,7 @@ public final class MediaTranscodeManager {
             Objects.requireNonNull(executor, "listenerExecutor must not be null");
             Objects.requireNonNull(listener, "listener must not be null");
             mManager = manager;
-            mJobId = parcel.jobId;
+            mSessionId = parcel.sessionId;
             mListenerExecutor = executor;
             mListener = listener;
             mRequest = request;
@@ -1196,16 +1196,16 @@ public final class MediaTranscodeManager {
                 synchronized (mManager.mPendingTranscodingJobs) {
                     try {
                         // Submits the request to MediaTranscoding service.
-                        TranscodingJobParcel jobParcel = new TranscodingJobParcel();
-                        if (!client.submitRequest(mRequest.writeToParcel(), jobParcel)) {
+                        TranscodingSessionParcel sessionParcel = new TranscodingSessionParcel();
+                        if (!client.submitRequest(mRequest.writeToParcel(), sessionParcel)) {
                             mHasRetried = true;
                             throw new UnsupportedOperationException("Failed to enqueue request");
                         }
 
                         // Replace the old job id wit the new one.
-                        mJobId = jobParcel.jobId;
+                        mSessionId = sessionParcel.sessionId;
                         // Adds the new job back into pending jobs.
-                        mManager.mPendingTranscodingJobs.put(mJobId, this);
+                        mManager.mPendingTranscodingJobs.put(mSessionId, this);
                     } catch (RemoteException re) {
                         throw new MediaTranscodingException.ServiceNotAvailableException(
                                 "Failed to resubmit request to Transcoding service");
@@ -1229,7 +1229,7 @@ public final class MediaTranscodeManager {
                         ITranscodingClient client = mManager.getTranscodingClient();
                         // The client may be gone.
                         if (client != null) {
-                            client.cancelJob(mJobId);
+                            client.cancelSession(mSessionId);
                         }
                     } catch (RemoteException re) {
                         //TODO(hkuang): Find out what to do if failing to cancel the job.
@@ -1272,7 +1272,7 @@ public final class MediaTranscodeManager {
          * @return job id.
          */
         public int getJobId() {
-            return mJobId;
+            return mSessionId;
         }
 
         /**
@@ -1326,7 +1326,7 @@ public final class MediaTranscodeManager {
                     break;
             }
             return String.format(" Job: {id: %d, status: %s, result: %s, progress: %d}",
-                    mJobId, status, result, mProgress);
+                    mSessionId, status, result, mProgress);
         }
 
         private void updateProgress(int newProgress) {
@@ -1383,7 +1383,7 @@ public final class MediaTranscodeManager {
 
         // Submits the request to MediaTranscoding service.
         try {
-            TranscodingJobParcel jobParcel = new TranscodingJobParcel();
+            TranscodingSessionParcel sessionParcel = new TranscodingSessionParcel();
             // Synchronizes the access to mPendingTranscodingJobs to make sure the job Id is
             // inserted in the mPendingTranscodingJobs in the callback handler.
             synchronized (mPendingTranscodingJobs) {
@@ -1399,15 +1399,15 @@ public final class MediaTranscodeManager {
                         }
                     }
 
-                    if (!mTranscodingClient.submitRequest(requestParcel, jobParcel)) {
+                    if (!mTranscodingClient.submitRequest(requestParcel, sessionParcel)) {
                         throw new UnsupportedOperationException("Failed to enqueue request");
                     }
                 }
 
-                // Wraps the TranscodingJobParcel into a TranscodingJob and returns it to client for
+                // Wraps the TranscodingSessionParcel into a TranscodingJob and returns it to client for
                 // tracking.
                 TranscodingJob job = new TranscodingJob(this, transcodingRequest,
-                        jobParcel,
+                        sessionParcel,
                         listenerExecutor,
                         listener);
 

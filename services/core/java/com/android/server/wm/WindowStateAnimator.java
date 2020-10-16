@@ -359,8 +359,8 @@ class WindowStateAnimator {
             // surface before destroying it.
             if (mSurfaceController != null && mPendingDestroySurface != null) {
                 mPostDrawTransaction.reparentChildren(
-                    mSurfaceController.getClientViewRootSurface(),
-                    mPendingDestroySurface.getClientViewRootSurface()).apply();
+                    mSurfaceController.mSurfaceControl,
+                    mPendingDestroySurface.mSurfaceControl).apply();
             }
             destroySurfaceLocked();
             mSurfaceDestroyDeferred = true;
@@ -371,7 +371,7 @@ class WindowStateAnimator {
             // Our SurfaceControl is always at layer 0 within the parent Surface managed by
             // window-state. We want this old Surface to stay on top of the new one
             // until we do the swap, so we place it at a positive layer.
-            t.setLayer(mSurfaceController.getClientViewRootSurface(), PRESERVED_SURFACE_LAYER);
+            t.setLayer(mSurfaceController.mSurfaceControl, PRESERVED_SURFACE_LAYER);
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
@@ -393,8 +393,8 @@ class WindowStateAnimator {
                 && !mPendingDestroySurface.mChildrenDetached
                 && (mWin.mActivityRecord == null || !mWin.mActivityRecord.isRelaunching())) {
             mPostDrawTransaction.reparentChildren(
-                    mPendingDestroySurface.getClientViewRootSurface(),
-                    mSurfaceController.getClientViewRootSurface()).apply();
+                    mPendingDestroySurface.mSurfaceControl,
+                    mSurfaceController.mSurfaceControl).apply();
         }
 
         destroyDeferredSurfaceLocked();
@@ -984,8 +984,8 @@ class WindowStateAnimator {
             // Instead let the children get removed when the old surface is deleted.
             if (!mPendingDestroySurface.mChildrenDetached) {
                 mPostDrawTransaction.reparentChildren(
-                        mPendingDestroySurface.getClientViewRootSurface(),
-                        mSurfaceController.getClientViewRootSurface());
+                        mPendingDestroySurface.mSurfaceControl,
+                        mSurfaceController.mSurfaceControl);
             }
         }
 
@@ -1201,10 +1201,10 @@ class WindowStateAnimator {
         mOffsetPositionForStackResize = offsetPositionForStackResize;
     }
 
-    SurfaceControl getClientViewRootSurface() {
+    SurfaceControl getSurfaceControl() {
         if (!hasSurface()) {
             return null;
         }
-        return mSurfaceController.getClientViewRootSurface();
+        return mSurfaceController.mSurfaceControl;
     }
 }

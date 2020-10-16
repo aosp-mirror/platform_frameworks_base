@@ -180,6 +180,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
@@ -17756,7 +17757,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // also includes the "updating the same package" case, of course.
                     // "updating same package" could also involve key-rotation.
                     final boolean sigsOk;
-                    final String sourcePackageName = bp.getSourcePackageName();
+                    final String sourcePackageName = bp.getPackageName();
                     final PackageSetting sourcePackageSetting;
                     synchronized (mLock) {
                         sourcePackageSetting = mSettings.getPackageLPr(sourcePackageName);
@@ -25658,7 +25659,19 @@ public class PackageManagerService extends IPackageManager.Stub
             return mIncrementalManager.unregisterCallback(ps.getPathString(),
                     (IPackageLoadingProgressCallback) callback.getBinder());
         }
+
+        @Override
+        public IncrementalStatesInfo getIncrementalStatesInfo(
+                @NonNull String packageName, int filterCallingUid, int userId) {
+            final PackageSetting ps = getPackageSettingForUser(packageName, filterCallingUid,
+                    userId);
+            if (ps == null) {
+                return null;
+            }
+            return ps.getIncrementalStates();
+        }
     }
+
 
     @GuardedBy("mLock")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {

@@ -115,6 +115,21 @@ public class Paint {
         Align.LEFT, Align.CENTER, Align.RIGHT
     };
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            ANTI_ALIAS_FLAG,
+            FILTER_BITMAP_FLAG,
+            DITHER_FLAG,
+            UNDERLINE_TEXT_FLAG,
+            STRIKE_THRU_TEXT_FLAG,
+            FAKE_BOLD_TEXT_FLAG,
+            LINEAR_TEXT_FLAG,
+            SUBPIXEL_TEXT_FLAG,
+            EMBEDDED_BITMAP_TEXT_FLAG
+    })
+    public @interface PaintFlag{}
+
     /**
      * Paint flag that enables antialiasing when drawing.
      *
@@ -724,7 +739,7 @@ public class Paint {
      *
      * @return the paint's flags (see enums ending in _Flag for bit masks)
      */
-    public int getFlags() {
+    public @PaintFlag int getFlags() {
         return nGetFlags(mNativePaint);
     }
 
@@ -733,7 +748,7 @@ public class Paint {
      *
      * @param flags The new flag bits for the paint
      */
-    public void setFlags(int flags) {
+    public void setFlags(@PaintFlag int flags) {
         nSetFlags(mNativePaint, flags);
     }
 
