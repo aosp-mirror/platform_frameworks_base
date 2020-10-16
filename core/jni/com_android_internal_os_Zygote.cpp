@@ -80,6 +80,7 @@
 #include <bionic/mte.h>
 #include <bionic/mte_kernel.h>
 #include <cutils/fs.h>
+#include <cutils/memory.h>
 #include <cutils/multiuser.h>
 #include <cutils/sockets.h>
 #include <private/android_filesystem_config.h>
@@ -647,6 +648,13 @@ static void PreApplicationInit() {
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
+
+  // Avoid potentially expensive memory mitigations, mostly meant for system
+  // processes, in apps. These may cause app compat problems, use more memory,
+  // or reduce performance. While it would be nice to have them for apps,
+  // we will have to wait until they are proven out, have more efficient
+  // hardware, and/or apply them only to new applications.
+  process_disable_memory_mitigations();
 }
 
 static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
