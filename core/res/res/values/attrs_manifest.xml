@@ -3200,6 +3200,15 @@
          then the system will set the same minimal height on all other activities in the task. It
          will also ignore any other minimal height attributes of non-root activities. -->
         <attr name="minHeight" />
+
+        <!-- Window layout affinity of this activity. Activities with the same window layout
+          affinity will share the same layout record. If an activity is launched in freeform window,
+          the activity will be launched to the latest position and size where any task, if the root
+          activity of that task shares the same window layout affinity with the activity being
+          launched. Window layout affinity is shared only among activities with the same UID.
+
+          <p>By default activity doesn't share any affinity with other activities. -->
+        <attr name="windowLayoutAffinity" format="string" />
     </declare-styleable>
 
     <!-- <code>restrict-update</code> tag restricts system apps from being updated unless the

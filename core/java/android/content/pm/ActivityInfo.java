@@ -1419,6 +1419,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final class WindowLayout {
         public WindowLayout(int width, float widthFraction, int height, float heightFraction,
                 int gravity, int minWidth, int minHeight) {
+            this(width, widthFraction, height, heightFraction, gravity, minWidth, minHeight,
+                    null /* windowLayoutAffinity */);
+        }
+
+        /** @hide */
+        public WindowLayout(int width, float widthFraction, int height, float heightFraction,
+                int gravity, int minWidth, int minHeight, String windowLayoutAffinity) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
@@ -1426,6 +1433,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             this.gravity = gravity;
             this.minWidth = minWidth;
             this.minHeight = minHeight;
+            this.windowLayoutAffinity = windowLayoutAffinity;
         }
 
         /** @hide */
@@ -1506,6 +1514,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         /**
          * Affinity of window layout parameters. Activities with the same UID and window layout
          * affinity will share the same window dimension record.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_windowLayoutAffinity
          * @hide
          */
         public String windowLayoutAffinity;
