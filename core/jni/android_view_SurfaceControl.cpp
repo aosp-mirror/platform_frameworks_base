@@ -110,6 +110,7 @@ static struct {
     jfieldID sourceCrop;
     jfieldID frameScale;
     jfieldID captureSecureLayers;
+    jfieldID allowProtected;
 } gCaptureArgsClassInfo;
 
 static struct {
@@ -362,6 +363,8 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
             env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScale);
     captureArgs.captureSecureLayers =
             env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.captureSecureLayers);
+    captureArgs.allowProtected =
+            env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.allowProtected);
 }
 
 static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
@@ -1876,6 +1879,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gCaptureArgsClassInfo.frameScale = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScale", "F");
     gCaptureArgsClassInfo.captureSecureLayers =
             GetFieldIDOrDie(env, captureArgsClazz, "mCaptureSecureLayers", "Z");
+    gCaptureArgsClassInfo.allowProtected =
+            GetFieldIDOrDie(env, captureArgsClazz, "mAllowProtected", "Z");
 
     jclass displayCaptureArgsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$DisplayCaptureArgs");

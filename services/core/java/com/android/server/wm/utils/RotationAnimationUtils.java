@@ -17,6 +17,7 @@
 package com.android.server.wm.utils;
 
 import static android.hardware.HardwareBuffer.RGBA_8888;
+import static android.hardware.HardwareBuffer.USAGE_PROTECTED_CONTENT;
 
 import android.graphics.Color;
 import android.graphics.ColorSpace;
@@ -38,12 +39,21 @@ import java.util.Arrays;
 public class RotationAnimationUtils {
 
     /**
+     * @return whether the hardwareBuffer passed in is marked as protected.
+     */
+    public static boolean hasProtectedContent(HardwareBuffer hardwareBuffer) {
+        return (hardwareBuffer.getUsage() & USAGE_PROTECTED_CONTENT) == USAGE_PROTECTED_CONTENT;
+    }
+
+    /**
      * Converts the provided {@link HardwareBuffer} and converts it to a bitmap to then sample the
      * luminance at the borders of the bitmap
      * @return the average luminance of all the pixels at the borders of the bitmap
      */
     public static float getMedianBorderLuma(HardwareBuffer hardwareBuffer, ColorSpace colorSpace) {
-        if (hardwareBuffer == null || hardwareBuffer.getFormat() != RGBA_8888) {
+        // Cannot read content from buffer with protected usage.
+        if (hardwareBuffer == null || hardwareBuffer.getFormat() != RGBA_8888
+                || hasProtectedContent(hardwareBuffer)) {
             return 0;
         }
 
