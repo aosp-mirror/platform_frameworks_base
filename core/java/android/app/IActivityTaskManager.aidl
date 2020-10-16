@@ -434,12 +434,6 @@ interface IActivityTaskManager {
     void clearLaunchParamsForPackages(in List<String> packageNames);
 
     /**
-     * Makes the display with the given id a single task instance display. I.e the display can only
-     * contain one task.
-     */
-    void setDisplayToSingleTaskInstance(int displayId);
-
-    /**
      * Restarts the activity by killing its process if it is visible. If the activity is not
      * visible, the activity will not be restarted immediately and just keep the activity record in
      * the stack. It also resets the current override configuration so the activity will use the

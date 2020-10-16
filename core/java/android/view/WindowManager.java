@@ -278,13 +278,6 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_TASK_CHANGE_WINDOWING_MODE = 27;
 
     /**
-     * A display which can only contain one task is being shown because the first activity is
-     * started or it's being turned on.
-     * @hide
-     */
-    int TRANSIT_SHOW_SINGLE_TASK_DISPLAY = 28;
-
-    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
@@ -310,8 +303,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
             TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
             TRANSIT_CRASHING_ACTIVITY_CLOSE,
-            TRANSIT_TASK_CHANGE_WINDOWING_MODE,
-            TRANSIT_SHOW_SINGLE_TASK_DISPLAY
+            TRANSIT_TASK_CHANGE_WINDOWING_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}

@@ -195,7 +195,7 @@ message DisplayContentProto {
     repeated WindowTokenProto overlay_windows = 20 [deprecated=true];
     optional DisplayAreaProto root_display_area = 21;
 
-    optional bool single_task_instance = 22;
+    optional bool single_task_instance = 22 [deprecated=true];
     optional int32 focused_root_task_id = 23;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
     repeated TaskProto tasks = 25 [deprecated=true];

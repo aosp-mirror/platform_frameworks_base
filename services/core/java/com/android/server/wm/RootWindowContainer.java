@@ -38,7 +38,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PER
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
@@ -2131,13 +2130,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     + displayId);
         }
 
-        if (displayContent.isSingleTaskInstance() && displayContent.getStackCount() > 0) {
-            // We don't allow moving stacks to single instance display that already has a child.
-            Slog.e(TAG, "Can not move stackId=" + stackId
-                    + " to single task instance display=" + displayContent);
-            return;
-        }
-
         moveStackToTaskDisplayArea(stackId, displayContent.getDefaultTaskDisplayArea(), onTop);
     }
 
@@ -2418,21 +2410,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     if (displayShouldSleep) {
                         stack.goToSleepIfPossible(false /* shuttingDown */);
                     } else {
-                        // When the display which can only contain one task turns on, start a
-                        // special transition.
-                        // {@link AppTransitionController#handleAppTransitionReady} later picks up
-                        // the transition, and schedules
-                        // {@link ITaskStackListener#onSingleTaskDisplayDrawn} callback which is
-                        // triggered after contents are drawn on the display.
-                        if (display.isSingleTaskInstance()) {
-                            display.mDisplayContent.prepareAppTransition(
-                                    TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false,
-                                    0 /* flags */, true /* forceOverride*/);
-                        }
                         stack.awakeFromSleepingLocked();
-                        if (display.isSingleTaskInstance()) {
-                            display.executeAppTransition();
-                        }
                         if (stack.isFocusedStackOnDisplay()
                                 && !mStackSupervisor.getKeyguardController()
                                 .isKeyguardOrAodShowing(display.mDisplayId)) {

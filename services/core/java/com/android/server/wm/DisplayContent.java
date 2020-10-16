@@ -605,9 +605,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mRemoved;
 
-    /** The display can only contain one task. */
-    boolean mSingleTaskInstance;
-
     /**
      * Non-null if the last size compatibility mode activity is using non-native screen
      * configuration. The activity is not able to put in multi-window mode, so it exists only one
@@ -2890,7 +2887,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mClosingApps.valueAt(i).writeIdentifierToProto(proto, CLOSING_APPS);
         }
 
-        proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
         final Task focusedStack = getFocusedStack();
         if (focusedStack != null) {
             proto.write(FOCUSED_ROOT_TASK_ID, focusedStack.getRootTaskId());
@@ -2935,8 +2931,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
-        pw.println("Display: mDisplayId=" + mDisplayId + " stacks=" + getStackCount() + (
-                mSingleTaskInstance ? " mSingleTaskInstance" : ""));
+        pw.println("Display: mDisplayId=" + mDisplayId + " stacks=" + getStackCount());
         final String subPrefix = "  " + prefix;
         pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
         pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
@@ -5303,40 +5298,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mSleeping = asleep;
     }
 
-    void setDisplayToSingleTaskInstance() {
-        int tdaCount = reduceOnAllTaskDisplayAreas((taskDisplayArea, count) -> ++count,
-                0 /* initValue */);
-        if (tdaCount > 1) {
-            throw new IllegalArgumentException(
-                    "Display already has multiple task display areas. display=" + this);
-        }
-        final int stackCount = getDefaultTaskDisplayArea().getStackCount();
-        if (stackCount > 1) {
-            throw new IllegalArgumentException("Display already has multiple stacks. display="
-                    + this);
-        }
-        if (stackCount > 0) {
-            final Task stack = getDefaultTaskDisplayArea().getStackAt(0);
-            if (stack.getChildCount() > 1) {
-                throw new IllegalArgumentException("Display stack already has multiple tasks."
-                        + " display=" + this + " stack=" + stack);
-            }
-        }
-
-        mSingleTaskInstance = true;
-    }
-
     /**
      * Check if the display has {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
     boolean canShowWithInsecureKeyguard() {
         final int flags = mDisplay.getFlags();
         return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
-    }
-
-    /** Returns true if the display can only contain one task */
-    boolean isSingleTaskInstance() {
-        return mSingleTaskInstance;
     }
 
     @VisibleForTesting

@@ -2507,13 +2507,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (taskOrgController.handleInterceptBackPressedOnTaskRoot(stack)) {
                 // This task is handled by a task organizer that has requested the back pressed
                 // callback
-            } else if (stack != null && (stack.isSingleTaskInstance())) {
-                // Single-task stacks are used for activities which are presented in floating
-                // windows above full screen activities. A task change listener is used to notify
-                // SystemUI so the back action can be handled specially.
-                final Task task = r.getTask();
-                mTaskChangeNotificationController
-                        .notifyBackPressedOnTaskRoot(task.getTaskInfo());
             } else {
                 moveActivityTaskToBack(token, false /* nonRoot */);
             }
@@ -4782,26 +4775,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Makes the display with the given id a single task instance display. I.e the display can only
-     * contain one task.
-     */
-    @Override
-    public void setDisplayToSingleTaskInstance(int displayId) {
-        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS,
-                "setDisplayToSingleTaskInstance");
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            final DisplayContent display =
-                    mRootWindowContainer.getDisplayContentOrCreate(displayId);
-            if (display != null) {
-                display.setDisplayToSingleTaskInstance();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    /**
      * Requests that an activity should enter picture-in-picture mode if possible.
      */
     @Override
@@ -6030,10 +6003,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return allUids.contains(uid);
     }
 
-    void notifySingleTaskDisplayEmpty(int displayId) {
-        mTaskChangeNotificationController.notifySingleTaskDisplayEmpty(displayId);
-    }
-
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
@@ -6098,11 +6067,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 onLocalVoiceInteractionStartedLocked(activity, voiceSession, voiceInteractor);
             }
-        }
-
-        @Override
-        public void notifySingleTaskDisplayDrawn(int displayId) {
-            mTaskChangeNotificationController.notifySingleTaskDisplayDrawn(displayId);
         }
 
         @Override
