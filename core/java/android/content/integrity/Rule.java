@@ -64,7 +64,7 @@ public final class Rule implements Parcelable {
     private final @Effect int mEffect;
 
     public Rule(@NonNull IntegrityFormula formula, @Effect int effect) {
-        checkArgument(isValidEffect(effect), String.format("Unknown effect: %d", effect));
+        checkArgument(isValidEffect(effect), "Unknown effect: %d", effect);
         this.mFormula = Objects.requireNonNull(formula);
         this.mEffect = effect;
     }

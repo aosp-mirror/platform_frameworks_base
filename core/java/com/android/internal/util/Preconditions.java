@@ -262,6 +262,25 @@ public class Preconditions {
     }
 
     /**
+     * Ensures the truth of an expression involving whether the calling identity is authorized to
+     * call the calling method.
+     *
+     * @param expression a boolean expression
+     * @param messageTemplate a printf-style message template to use if the check fails; will
+     *     be converted to a string using {@link String#format(String, Object...)}
+     * @param messageArgs arguments for {@code messageTemplate}
+     * @throws SecurityException if {@code expression} is false
+     */
+    public static void checkCallAuthorization(
+            final boolean expression,
+            final @NonNull String messageTemplate,
+            final Object... messageArgs) {
+        if (!expression) {
+            throw new SecurityException(String.format(messageTemplate, messageArgs));
+        }
+    }
+
+    /**
      * Ensures the truth of an expression involving whether the calling user is authorized to
      * call the calling method.
      *
@@ -694,7 +713,7 @@ public class Preconditions {
      */
     public static float[] checkArrayElementsInRange(float[] value, float lower, float upper,
             String valueName) {
-        checkNotNull(value, valueName + " must not be null");
+        checkNotNull(value, "%s must not be null", valueName);
 
         for (int i = 0; i < value.length; ++i) {
             float v = value[i];
@@ -730,7 +749,7 @@ public class Preconditions {
      */
     public static int[] checkArrayElementsInRange(int[] value, int lower, int upper,
             String valueName) {
-        checkNotNull(value, valueName + " must not be null");
+        checkNotNull(value, "%s must not be null", valueName);
 
         for (int i = 0; i < value.length; ++i) {
             int v = value[i];

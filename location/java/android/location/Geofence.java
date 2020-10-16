@@ -58,7 +58,7 @@ public final class Geofence implements Parcelable {
     Geofence(double latitude, double longitude, float radius, long expirationRealtimeMs) {
         Preconditions.checkArgumentInRange(latitude, -90.0, 90.0, "latitude");
         Preconditions.checkArgumentInRange(longitude, -180.0, 180.0, "latitude");
-        Preconditions.checkArgument(radius > 0, "invalid radius: " + radius);
+        Preconditions.checkArgument(radius > 0, "invalid radius: %f", radius);
 
         mLatitude = latitude;
         mLongitude = longitude;

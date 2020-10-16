@@ -926,7 +926,7 @@ public final class LocationRequest implements Parcelable {
             Preconditions.checkArgument(
                     quality == QUALITY_LOW_POWER || quality == QUALITY_BALANCED_POWER_ACCURACY
                             || quality == QUALITY_HIGH_ACCURACY,
-                    "quality must be a defined QUALITY constant, not " + quality);
+                    "quality must be a defined QUALITY constant, not %d", quality);
             mQuality = quality;
             return this;
         }

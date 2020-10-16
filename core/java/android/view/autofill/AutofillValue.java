@@ -65,7 +65,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a text value
      */
     @NonNull public CharSequence getTextValue() {
-        Preconditions.checkState(isText(), "value must be a text value, not type=" + mType);
+        Preconditions.checkState(isText(), "value must be a text value, not type=%d", mType);
         return (CharSequence) mValue;
     }
 
@@ -86,7 +86,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a toggle value
      */
     public boolean getToggleValue() {
-        Preconditions.checkState(isToggle(), "value must be a toggle value, not type=" + mType);
+        Preconditions.checkState(isToggle(), "value must be a toggle value, not type=%d", mType);
         return (Boolean) mValue;
     }
 
@@ -107,7 +107,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a list value
      */
     public int getListValue() {
-        Preconditions.checkState(isList(), "value must be a list value, not type=" + mType);
+        Preconditions.checkState(isList(), "value must be a list value, not type=%d", mType);
         return (Integer) mValue;
     }
 
@@ -128,7 +128,7 @@ public final class AutofillValue implements Parcelable {
      * @throws IllegalStateException if the value is not a date value
      */
     public long getDateValue() {
-        Preconditions.checkState(isDate(), "value must be a date value, not type=" + mType);
+        Preconditions.checkState(isDate(), "value must be a date value, not type=%d", mType);
         return (Long) mValue;
     }
 
@@ -150,7 +150,7 @@ public final class AutofillValue implements Parcelable {
      */
     public @NonNull ClipData getRichContentValue() {
         Preconditions.checkState(isRichContent(),
-                "value must be a rich content value, not type=" + mType);
+                "value must be a rich content value, not type=%d", mType);
         return (ClipData) mValue;
     }
 
