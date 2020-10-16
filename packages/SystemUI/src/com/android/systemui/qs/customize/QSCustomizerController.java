@@ -19,6 +19,7 @@ package com.android.systemui.qs.customize;
 import static com.android.systemui.qs.customize.QSCustomizer.EXTRA_QS_CUSTOMIZING;
 import static com.android.systemui.qs.customize.QSCustomizer.MENU_RESET;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,7 +38,10 @@ import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -54,17 +58,17 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     private final TileAdapter mTileAdapter;
     private final ScreenLifecycle mScreenLifecycle;
     private final KeyguardStateController mKeyguardStateController;
+    private final LightBarController mLightBarController;
+    private final ConfigurationController mConfigurationController;
     private final UiEventLogger mUiEventLogger;
     private final Toolbar mToolbar;
 
     private final OnMenuItemClickListener mOnMenuItemClickListener = new OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            switch (item.getItemId()) {
-                case MENU_RESET:
-                    mUiEventLogger.log(QSEditEvent.QS_EDIT_RESET);
-                    reset();
-                    break;
+            if (item.getItemId() == MENU_RESET) {
+                mUiEventLogger.log(QSEditEvent.QS_EDIT_RESET);
+                reset();
             }
             return false;
         }
@@ -72,25 +76,36 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     private final KeyguardStateController.Callback mKeyguardCallback =
             new KeyguardStateController.Callback() {
-                @Override
-                public void onKeyguardShowingChanged() {
-                    if (!mView.isAttachedToWindow()) return;
-                    if (mKeyguardStateController.isShowing() && !mView.isOpening()) {
-                        hide();
-                    }
-                }
-            };
+        @Override
+        public void onKeyguardShowingChanged() {
+            if (!mView.isAttachedToWindow()) return;
+            if (mKeyguardStateController.isShowing() && !mView.isOpening()) {
+                hide();
+            }
+        }
+    };
+
+    private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mView.updateNavBackDrop(newConfig, mLightBarController);
+            mView.updateResources();
+        }
+    };
 
     @Inject
     protected QSCustomizerController(QSCustomizer view, TileQueryHelper tileQueryHelper,
             QSTileHost qsTileHost, TileAdapter tileAdapter, ScreenLifecycle screenLifecycle,
-            KeyguardStateController keyguardStateController, UiEventLogger uiEventLogger) {
+            KeyguardStateController keyguardStateController, LightBarController lightBarController,
+            ConfigurationController configurationController, UiEventLogger uiEventLogger) {
         super(view);
         mTileQueryHelper = tileQueryHelper;
         mQsTileHost = qsTileHost;
         mTileAdapter = tileAdapter;
         mScreenLifecycle = screenLifecycle;
         mKeyguardStateController = keyguardStateController;
+        mLightBarController = lightBarController;
+        mConfigurationController = configurationController;
         mUiEventLogger = uiEventLogger;
 
         mToolbar = mView.findViewById(com.android.internal.R.id.action_bar);
@@ -98,6 +113,10 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     @Override
     protected void onViewAttached() {
+        mView.updateNavBackDrop(getResources().getConfiguration(), mLightBarController);
+
+        mConfigurationController.addCallback(mConfigurationListener);
+
         mTileQueryHelper.setListener(mTileAdapter);
         int halfMargin =
                 getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal) / 2;
@@ -119,18 +138,14 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         recyclerView.addItemDecoration(mTileAdapter.getMarginItemDecoration());
 
         mToolbar.setOnMenuItemClickListener(mOnMenuItemClickListener);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hide();
-            }
-        });
+        mToolbar.setNavigationOnClickListener(v -> hide());
     }
 
     @Override
     protected void onViewDetached() {
         mTileQueryHelper.setListener(null);
         mToolbar.setOnMenuItemClickListener(null);
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 
 
@@ -150,9 +165,11 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
                 mView.showImmediately();
             } else {
                 mView.show(x, y, mTileAdapter);
+                mUiEventLogger.log(QSEditEvent.QS_EDIT_OPEN);
             }
             mTileQueryHelper.queryTiles(mQsTileHost);
             mKeyguardStateController.addCallback(mKeyguardCallback);
+            mView.updateNavColors(mLightBarController);
         }
     }
 
@@ -160,6 +177,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     public void setQs(QSFragment qsFragment) {
         mView.setQs(qsFragment);
     }
+
     /** */
     public void restoreInstanceState(Bundle savedInstanceState) {
         boolean customizing = savedInstanceState.getBoolean(EXTRA_QS_CUSTOMIZING);
@@ -213,6 +231,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
             mView.setCustomizing(false);
             save();
             mView.hide(animate);
+            mView.updateNavColors(mLightBarController);
             mKeyguardStateController.removeCallback(mKeyguardCallback);
         }
     }
