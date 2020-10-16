@@ -745,7 +745,6 @@ public class SettingsBackupTest {
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL,
                  Settings.Secure.TAP_GESTURE,
                  Settings.Secure.NEARBY_SHARING_COMPONENT, // not user configurable
-                 Settings.Secure.WINDOW_MAGNIFICATION,
                  Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
                  Settings.Secure.SUPPRESS_DOZE,
                  Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
