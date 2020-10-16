@@ -428,11 +428,18 @@ public class GestureLauncherService extends SystemService {
                 mPowerButtonConsecutiveTaps++;
                 mPowerButtonSlowConsecutiveTaps++;
             }
-            if (mPanicButtonGestureEnabled
-                    && mPowerButtonConsecutiveTaps == PANIC_POWER_TAP_COUNT_THRESHOLD) {
-                launchPanic = true;
-                intercept = interactive;
-            } else if (mCameraDoubleTapPowerEnabled
+            // Check if we need to launch camera or panic flows
+            if (mPanicButtonGestureEnabled) {
+                // Commit to intercepting the powerkey event after the second "quick" tap to avoid
+                // lockscreen changes between launching camera and the panic flow.
+                if (mPowerButtonConsecutiveTaps > 1) {
+                    intercept = interactive;
+                }
+                if (mPowerButtonConsecutiveTaps == PANIC_POWER_TAP_COUNT_THRESHOLD) {
+                    launchPanic = true;
+                }
+            }
+            if (mCameraDoubleTapPowerEnabled
                     && powerTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS
                     && mPowerButtonConsecutiveTaps == CAMERA_POWER_TAP_COUNT_THRESHOLD) {
                 launchCamera = true;
@@ -462,8 +469,11 @@ public class GestureLauncherService extends SystemService {
         mMetricsLogger.histogram("power_consecutive_short_tap_count",
                 mPowerButtonSlowConsecutiveTaps);
         mMetricsLogger.histogram("power_double_tap_interval", (int) powerTapInterval);
+
         outLaunched.value = launchCamera || launchPanic;
-        return intercept && (launchCamera || launchPanic);
+        // Intercept power key event if the press is part of a gesture (camera, panic) and the user
+        // has completed setup.
+        return intercept && isUserSetupComplete();
     }
 
     /**
@@ -473,8 +483,7 @@ public class GestureLauncherService extends SystemService {
     boolean handleCameraGesture(boolean useWakelock, int source) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "GestureLauncher:handleCameraGesture");
         try {
-            boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+            boolean userSetupComplete = isUserSetupComplete();
             if (!userSetupComplete) {
                 if (DBG) {
                     Slog.d(TAG, String.format(
@@ -512,8 +521,7 @@ public class GestureLauncherService extends SystemService {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "GestureLauncher:handlePanicButtonGesture");
         try {
-            boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+            boolean userSetupComplete = isUserSetupComplete();
             if (!userSetupComplete) {
                 if (DBG) {
                     Slog.d(TAG, String.format(
@@ -534,6 +542,11 @@ public class GestureLauncherService extends SystemService {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+    }
+
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
