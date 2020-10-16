@@ -180,7 +180,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
-import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
@@ -25659,21 +25658,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mIncrementalManager.unregisterCallback(ps.getPathString(),
                     (IPackageLoadingProgressCallback) callback.getBinder());
         }
-
-        @Override
-        public IncrementalStatesInfo getIncrementalStatesInfo(
-                String packageName, int filterCallingUid, int userId) {
-            final PackageSetting ps = getPackageSettingForUser(packageName, filterCallingUid,
-                    userId);
-            if (ps == null) {
-                Slog.w(TAG, "Failed getting incremental state. Package " + packageName
-                        + " is not available");
-                return null;
-            }
-            return ps.getIncrementalStates();
-        }
     }
-
 
     @GuardedBy("mLock")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {

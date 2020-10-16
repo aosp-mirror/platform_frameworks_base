@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -34,19 +35,28 @@ public class LauncherActivityInfo {
     private static final String TAG = "LauncherActivityInfo";
 
     private final PackageManager mPm;
+
+    @UnsupportedAppUsage
+    private ActivityInfo mActivityInfo;
+    private ComponentName mComponentName;
     private UserHandle mUser;
-    private final LauncherActivityInfoInternal mInternal;
 
     /**
      * Create a launchable activity object for a given ResolveInfo and user.
      *
      * @param context The context for fetching resources.
-
+     * @param info ResolveInfo from which to create the LauncherActivityInfo.
+     * @param user The UserHandle of the profile to which this activity belongs.
      */
-    LauncherActivityInfo(Context context, UserHandle user, LauncherActivityInfoInternal internal) {
-        mPm = context.getPackageManager();
+    LauncherActivityInfo(Context context, ActivityInfo info, UserHandle user) {
+        this(context);
+        mActivityInfo = info;
+        mComponentName =  new ComponentName(info.packageName, info.name);
         mUser = user;
-        mInternal = internal;
+    }
+
+    LauncherActivityInfo(Context context) {
+        mPm = context.getPackageManager();
     }
 
     /**
@@ -55,7 +65,7 @@ public class LauncherActivityInfo {
      * @return ComponentName of the activity
      */
     public ComponentName getComponentName() {
-        return mInternal.getComponentName();
+        return mComponentName;
     }
 
     /**
@@ -80,28 +90,7 @@ public class LauncherActivityInfo {
      */
     public CharSequence getLabel() {
         // TODO: Go through LauncherAppsService
-        return mInternal.getActivityInfo().loadLabel(mPm);
-    }
-
-    /**
-     * @return whether the package is startable.
-     */
-    public boolean isStartable() {
-        return mInternal.getIncrementalStatesInfo().isStartable();
-    }
-
-    /**
-     * @return whether the package is still loading.
-     */
-    public boolean isLoading() {
-        return mInternal.getIncrementalStatesInfo().isLoading();
-    }
-
-    /**
-     * @return Package loading progress
-     */
-    public float getProgress() {
-        return mInternal.getIncrementalStatesInfo().getProgress();
+        return mActivityInfo.loadLabel(mPm);
     }
 
     /**
@@ -114,20 +103,20 @@ public class LauncherActivityInfo {
      */
     public Drawable getIcon(int density) {
         // TODO: Go through LauncherAppsService
-        final int iconRes = mInternal.getActivityInfo().getIconResource();
+        final int iconRes = mActivityInfo.getIconResource();
         Drawable icon = null;
         // Get the preferred density icon from the app's resources
         if (density != 0 && iconRes != 0) {
             try {
-                final Resources resources = mPm.getResourcesForApplication(
-                        mInternal.getActivityInfo().applicationInfo);
+                final Resources resources
+                        = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
                 icon = resources.getDrawableForDensity(iconRes, density);
             } catch (NameNotFoundException | Resources.NotFoundException exc) {
             }
         }
         // Get the default density icon
         if (icon == null) {
-            icon = mInternal.getActivityInfo().loadIcon(mPm);
+            icon = mActivityInfo.loadIcon(mPm);
         }
         return icon;
     }
@@ -139,7 +128,7 @@ public class LauncherActivityInfo {
      * @hide remove before shipping
      */
     public int getApplicationFlags() {
-        return mInternal.getActivityInfo().flags;
+        return mActivityInfo.applicationInfo.flags;
     }
 
     /**
@@ -147,7 +136,7 @@ public class LauncherActivityInfo {
      * @return
      */
     public ApplicationInfo getApplicationInfo() {
-        return mInternal.getActivityInfo().applicationInfo;
+        return mActivityInfo.applicationInfo;
     }
 
     /**
@@ -158,7 +147,7 @@ public class LauncherActivityInfo {
     public long getFirstInstallTime() {
         try {
             // TODO: Go through LauncherAppsService
-            return mPm.getPackageInfo(mInternal.getActivityInfo().packageName,
+            return mPm.getPackageInfo(mActivityInfo.packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES).firstInstallTime;
         } catch (NameNotFoundException nnfe) {
             // Sorry, can't find package
@@ -171,7 +160,7 @@ public class LauncherActivityInfo {
      * @return the name from android:name for the acitivity.
      */
     public String getName() {
-        return mInternal.getActivityInfo().name;
+        return mActivityInfo.name;
     }
 
     /**
