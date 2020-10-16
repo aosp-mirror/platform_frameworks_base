@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.face;
+package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.face.V1_0.IBiometricsFace;
-import android.hardware.face.Face;
+import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -31,25 +31,24 @@ import com.android.server.biometrics.sensors.InternalEnumerateClient;
 import java.util.List;
 
 /**
- * Face-specific internal enumerate client supporting the
- * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
- * HIDL interfaces.
+ * Fingerprint-specific internal client supporting the
+ * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFace> {
-    private static final String TAG = "FaceInternalEnumerateClient";
+class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISession> {
+    private static final String TAG = "FingerprintInternalEnumerateClient";
 
-    FaceInternalEnumerateClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token, int userId,
-            @NonNull String owner, @NonNull List<Face> enrolledList,
-            @NonNull BiometricUtils<Face> utils, int sensorId) {
+    protected FingerprintInternalEnumerateClient(@NonNull Context context,
+            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
+            @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                BiometricsProtoEnums.MODALITY_FACE);
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().enumerate();
+            getFreshDaemon().enumerateEnrollments(mSequentialId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);

@@ -35,7 +35,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
  * Updates the framework's lockout cache and notifies clients such as Keyguard when lockout is
  * cleared.
  */
-public class FingerprintResetLockoutClient extends ClientMonitor<ISession> {
+class FingerprintResetLockoutClient extends ClientMonitor<ISession> {
 
     private static final String TAG = "FingerprintResetLockoutClient";
 
@@ -43,7 +43,7 @@ public class FingerprintResetLockoutClient extends ClientMonitor<ISession> {
     private final LockoutCache mLockoutCache;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
 
-    public FingerprintResetLockoutClient(@NonNull Context context,
+    FingerprintResetLockoutClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {

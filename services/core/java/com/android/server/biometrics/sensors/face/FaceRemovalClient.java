@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
+import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -34,12 +35,12 @@ import java.util.Map;
  * Face-specific removal client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-class FaceRemovalClient extends RemovalClient<IBiometricsFace> {
+class FaceRemovalClient extends RemovalClient<Face, IBiometricsFace> {
     private static final String TAG = "FaceRemovalClient";
 
     FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils utils,
+            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<Face> utils,
             int sensorId, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FACE);

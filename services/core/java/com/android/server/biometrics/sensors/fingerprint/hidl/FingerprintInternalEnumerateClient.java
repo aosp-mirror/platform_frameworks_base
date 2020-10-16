@@ -41,7 +41,7 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiomet
     FingerprintInternalEnumerateClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             int userId, @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils utils, int sensorId) {
+            @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }

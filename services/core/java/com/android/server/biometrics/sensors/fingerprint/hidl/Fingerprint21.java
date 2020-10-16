@@ -632,7 +632,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void scheduleInternalCleanup(int userId, int sensorId) {
+    public void scheduleInternalCleanup(int sensorId, int userId) {
         scheduleInternalCleanup(userId);
     }
 

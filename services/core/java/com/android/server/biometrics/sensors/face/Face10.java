@@ -219,8 +219,7 @@ class Face10 implements IHwBinder.DeathRecipient {
                         removalConsumer.onRemoved(face, remaining);
                     }
                 } else {
-                    final Face face = new Face("", 0 /* identifier */, deviceId);
-                    removalConsumer.onRemoved(face, 0 /* remaining */);
+                    removalConsumer.onRemoved(null, 0 /* remaining */);
                 }
 
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
