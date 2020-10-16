@@ -435,7 +435,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o instanceof ProviderKey) {
                 final ProviderKey other = (ProviderKey) o;
                 return Objects.equals(authority, other.authority) && userId == other.userId;

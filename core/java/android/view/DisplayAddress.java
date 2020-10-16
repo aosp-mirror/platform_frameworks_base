@@ -110,7 +110,7 @@ public abstract class DisplayAddress implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return other instanceof Physical
                     && mPhysicalDisplayId == ((Physical) other).mPhysicalDisplayId;
         }
@@ -171,7 +171,7 @@ public abstract class DisplayAddress implements Parcelable {
         private final String mMacAddress;
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return other instanceof Network && mMacAddress.equals(((Network) other).mMacAddress);
         }
 

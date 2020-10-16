@@ -205,7 +205,7 @@ public final class DisplayCutout {
             return result;
         }
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -535,7 +535,7 @@ public final class DisplayCutout {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }
@@ -877,7 +877,7 @@ public final class DisplayCutout {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return o instanceof ParcelableWrapper
                     && mInner.equals(((ParcelableWrapper) o).mInner);
         }

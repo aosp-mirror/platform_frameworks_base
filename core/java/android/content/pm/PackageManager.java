@@ -8268,7 +8268,7 @@ public abstract class PackageManager {
         }
 
         @Override
-        public boolean equals(Object rval) {
+        public boolean equals(@Nullable Object rval) {
             if (rval == null) {
                 return false;
             }
@@ -8371,7 +8371,7 @@ public abstract class PackageManager {
         }
 
         @Override
-        public boolean equals(Object rval) {
+        public boolean equals(@Nullable Object rval) {
             if (rval == null) {
                 return false;
             }

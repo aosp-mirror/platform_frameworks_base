@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -153,7 +154,7 @@ public final class IpSecTransform implements AutoCloseable {
     /**
      * Standard equals.
      */
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (this == other) return true;
         if (!(other instanceof IpSecTransform)) return false;
         final IpSecTransform rhs = (IpSecTransform) other;

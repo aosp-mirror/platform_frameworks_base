@@ -17,6 +17,7 @@
 package android.app.time;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.os.Bundle;
@@ -155,7 +156,7 @@ public final class TimeZoneConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

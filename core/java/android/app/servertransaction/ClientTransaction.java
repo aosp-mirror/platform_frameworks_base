@@ -222,7 +222,7 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

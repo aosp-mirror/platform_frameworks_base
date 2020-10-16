@@ -520,7 +520,7 @@ public class VolumeInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof VolumeInfo) {
             return Objects.equals(id, ((VolumeInfo) o).id);
         } else {

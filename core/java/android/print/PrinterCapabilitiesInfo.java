@@ -17,6 +17,7 @@
 package android.print;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.print.PrintAttributes.ColorMode;
@@ -24,6 +25,7 @@ import android.print.PrintAttributes.DuplexMode;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -271,7 +273,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

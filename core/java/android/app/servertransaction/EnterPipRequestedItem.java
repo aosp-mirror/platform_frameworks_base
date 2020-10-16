@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.Parcel;
@@ -67,7 +68,7 @@ public final class EnterPipRequestedItem extends ActivityTransactionItem {
             };
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return this == o;
     }
 

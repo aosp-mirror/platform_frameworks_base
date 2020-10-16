@@ -31,6 +31,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -2221,7 +2222,7 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -2496,7 +2497,7 @@ public class GridLayout extends ViewGroup {
          *         {@code Interval}, {@code false} otherwise.
          */
         @Override
-        public boolean equals(Object that) {
+        public boolean equals(@Nullable Object that) {
             if (this == that) {
                 return true;
             }
@@ -2609,7 +2610,7 @@ public class GridLayout extends ViewGroup {
          *         {@code Spec}; {@code false} otherwise
          */
         @Override
-        public boolean equals(Object that) {
+        public boolean equals(@Nullable Object that) {
             if (this == that) {
                 return true;
             }

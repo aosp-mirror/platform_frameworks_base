@@ -528,7 +528,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @return True if the requests are the same, false otherwise.
      */
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return other instanceof CaptureRequest
                 && equals((CaptureRequest)other);
     }

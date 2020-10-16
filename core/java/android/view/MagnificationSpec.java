@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pools.SynchronizedPool;
@@ -106,7 +107,7 @@ public class MagnificationSpec implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (this == other) {
             return true;
         }

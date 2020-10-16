@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
@@ -4160,7 +4161,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             if (other instanceof PointerProperties) {
                 return equals((PointerProperties)other);
             }

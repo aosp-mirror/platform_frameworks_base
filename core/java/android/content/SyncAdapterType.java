@@ -176,7 +176,7 @@ public class SyncAdapterType implements Parcelable {
         return new SyncAdapterType(authority, accountType);
     }
 
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) return true;
         if (!(o instanceof SyncAdapterType)) return false;
         final SyncAdapterType other = (SyncAdapterType)o;
