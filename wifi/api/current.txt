@@ -584,7 +584,7 @@ package android.net.wifi.aware {
     method public void onPublishStarted(@NonNull android.net.wifi.aware.PublishDiscoverySession);
     method public void onServiceDiscovered(android.net.wifi.aware.PeerHandle, byte[], java.util.List<byte[]>);
     method public void onServiceDiscoveredWithinRange(android.net.wifi.aware.PeerHandle, byte[], java.util.List<byte[]>, int);
-    method public void onServiceLost(@NonNull android.net.wifi.aware.PeerHandle);
+    method public void onServiceLost(@NonNull android.net.wifi.aware.PeerHandle, int);
     method public void onSessionConfigFailed();
     method public void onSessionConfigUpdated();
     method public void onSessionTerminated();
@@ -664,6 +664,8 @@ package android.net.wifi.aware {
     field public static final String ACTION_WIFI_AWARE_STATE_CHANGED = "android.net.wifi.aware.action.WIFI_AWARE_STATE_CHANGED";
     field public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0; // 0x0
     field public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1; // 0x1
+    field public static final int WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE = 1; // 0x1
+    field public static final int WIFI_AWARE_DISCOVERY_LOST_REASON_UNKNOWN = 0; // 0x0
   }
 
   public final class WifiAwareNetworkInfo implements android.os.Parcelable android.net.TransportInfo {
