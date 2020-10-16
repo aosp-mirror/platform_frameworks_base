@@ -17,6 +17,7 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,6 +28,12 @@ import com.android.internal.util.HexDump;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * This class represents a single algorithm that can be used by an {@link IpSecTransform}.
@@ -50,6 +57,27 @@ public final class IpSecAlgorithm implements Parcelable {
      * <p>Valid lengths for this key are {128, 192, 256}.
      */
     public static final String CRYPT_AES_CBC = "cbc(aes)";
+
+    /**
+     * AES-CTR Encryption/Ciphering Algorithm.
+     *
+     * <p>Valid lengths for keying material are {160, 224, 288}.
+     *
+     * <p>As per <a href="https://tools.ietf.org/html/rfc3686#section-5.1">RFC3686 (Section
+     * 5.1)</a>, keying material consists of a 128, 192, or 256 bit AES key followed by a 32-bit
+     * nonce. RFC compliance requires that the nonce must be unique per security association.
+     *
+     * <p>This algorithm may be available on the device. Caller MUST check if it is supported before
+     * using it by calling {@link #getSupportedAlgorithms()} and checking if this algorithm is
+     * included in the returned algorithm set. The returned algorithm set will not change unless the
+     * device is rebooted. {@link IllegalArgumentException} will be thrown if this algorithm is
+     * requested on an unsupported device.
+     *
+     * <p>@see {@link #getSupportedAlgorithms()}
+     */
+    // This algorithm may be available on devices released before Android 12, and is guaranteed
+    // to be available on devices first shipped with Android 12 or later.
+    public static final String CRYPT_AES_CTR = "rfc3686(ctr(aes))";
 
     /**
      * MD5 HMAC Authentication/Integrity Algorithm. <b>This algorithm is not recommended for use in
@@ -99,6 +127,25 @@ public final class IpSecAlgorithm implements Parcelable {
     public static final String AUTH_HMAC_SHA512 = "hmac(sha512)";
 
     /**
+     * AES-XCBC Authentication/Integrity Algorithm.
+     *
+     * <p>Keys for this algorithm must be 128 bits in length.
+     *
+     * <p>The only valid truncation length is 96 bits.
+     *
+     * <p>This algorithm may be available on the device. Caller MUST check if it is supported before
+     * using it by calling {@link #getSupportedAlgorithms()} and checking if this algorithm is
+     * included in the returned algorithm set. The returned algorithm set will not change unless the
+     * device is rebooted. {@link IllegalArgumentException} will be thrown if this algorithm is
+     * requested on an unsupported device.
+     *
+     * <p>@see {@link #getSupportedAlgorithms()}
+     */
+    // This algorithm may be available on devices released before Android 12, and is guaranteed
+    // to be available on devices first shipped with Android 12 or later.
+    public static final String AUTH_AES_XCBC = "xcbc(aes)";
+
+    /**
      * AES-GCM Authentication/Integrity + Encryption/Ciphering Algorithm.
      *
      * <p>Valid lengths for keying material are {160, 224, 288}.
@@ -111,18 +158,66 @@ public final class IpSecAlgorithm implements Parcelable {
      */
     public static final String AUTH_CRYPT_AES_GCM = "rfc4106(gcm(aes))";
 
+    /**
+     * ChaCha20-Poly1305 Authentication/Integrity + Encryption/Ciphering Algorithm.
+     *
+     * <p>Keys for this algorithm must be 288 bits in length.
+     *
+     * <p>As per <a href="https://tools.ietf.org/html/rfc7634#section-2">RFC7634 (Section 2)</a>,
+     * keying material consists of a 256 bit key followed by a 32-bit salt. The salt is fixed per
+     * security association.
+     *
+     * <p>The only valid ICV (truncation) length is 128 bits.
+     *
+     * <p>This algorithm may be available on the device. Caller MUST check if it is supported before
+     * using it by calling {@link #getSupportedAlgorithms()} and checking if this algorithm is
+     * included in the returned algorithm set. The returned algorithm set will not change unless the
+     * device is rebooted. {@link IllegalArgumentException} will be thrown if this algorithm is
+     * requested on an unsupported device.
+     *
+     * <p>@see {@link #getSupportedAlgorithms()}
+     */
+    // This algorithm may be available on devices released before Android 12, and is guaranteed
+    // to be available on devices first shipped with Android 12 or later.
+    public static final String AUTH_CRYPT_CHACHA20_POLY1305 = "rfc7539esp(chacha20,poly1305)";
+
     /** @hide */
     @StringDef({
         CRYPT_AES_CBC,
+        CRYPT_AES_CTR,
         AUTH_HMAC_MD5,
         AUTH_HMAC_SHA1,
         AUTH_HMAC_SHA256,
         AUTH_HMAC_SHA384,
         AUTH_HMAC_SHA512,
-        AUTH_CRYPT_AES_GCM
+        AUTH_AES_XCBC,
+        AUTH_CRYPT_AES_GCM,
+        AUTH_CRYPT_CHACHA20_POLY1305
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AlgorithmName {}
+
+    /** @hide */
+    @VisibleForTesting
+    public static final Map<String, Integer> ALGO_TO_REQUIRED_FIRST_SDK = new HashMap<>();
+
+    static {
+        ALGO_TO_REQUIRED_FIRST_SDK.put(CRYPT_AES_CBC, Build.VERSION_CODES.P);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_HMAC_MD5, Build.VERSION_CODES.P);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_HMAC_SHA1, Build.VERSION_CODES.P);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_HMAC_SHA256, Build.VERSION_CODES.P);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_HMAC_SHA384, Build.VERSION_CODES.P);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_HMAC_SHA512, Build.VERSION_CODES.P);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_CRYPT_AES_GCM, Build.VERSION_CODES.P);
+
+        // STOPSHIP: b/170424293 Use Build.VERSION_CODES.S when it is defined
+        ALGO_TO_REQUIRED_FIRST_SDK.put(CRYPT_AES_CTR, Build.VERSION_CODES.R + 1);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_AES_XCBC, Build.VERSION_CODES.R + 1);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_CRYPT_CHACHA20_POLY1305, Build.VERSION_CODES.R + 1);
+    }
+
+    private static final Set<String> ENABLED_ALGOS =
+            Collections.unmodifiableSet(loadAlgos(Resources.getSystem()));
 
     private final String mName;
     private final byte[] mKey;
@@ -137,6 +232,7 @@ public final class IpSecAlgorithm implements Parcelable {
      *
      * @param algorithm name of the algorithm.
      * @param key key padded to a multiple of 8 bits.
+     * @throws IllegalArgumentException if algorithm or key length is invalid.
      */
     public IpSecAlgorithm(@NonNull @AlgorithmName String algorithm, @NonNull byte[] key) {
         this(algorithm, key, 0);
@@ -152,6 +248,7 @@ public final class IpSecAlgorithm implements Parcelable {
      * @param algorithm name of the algorithm.
      * @param key key padded to a multiple of 8 bits.
      * @param truncLenBits number of bits of output hash to use.
+     * @throws IllegalArgumentException if algorithm, key length or truncation length is invalid.
      */
     public IpSecAlgorithm(
             @NonNull @AlgorithmName String algorithm, @NonNull byte[] key, int truncLenBits) {
@@ -206,13 +303,59 @@ public final class IpSecAlgorithm implements Parcelable {
                 }
             };
 
-    private static void checkValidOrThrow(String name, int keyLen, int truncLen) {
-        boolean isValidLen = true;
-        boolean isValidTruncLen = true;
+    /**
+     * Returns supported IPsec algorithms for the current device.
+     *
+     * <p>Some algorithms may not be supported on old devices. Callers MUST check if an algorithm is
+     * supported before using it.
+     */
+    @NonNull
+    public static Set<String> getSupportedAlgorithms() {
+        return ENABLED_ALGOS;
+    }
 
-        switch(name) {
+    /** @hide */
+    @VisibleForTesting
+    public static Set<String> loadAlgos(Resources systemResources) {
+        final Set<String> enabledAlgos = new HashSet<>();
+
+        // Load and validate the optional algorithm resource. Undefined or duplicate algorithms in
+        // the resource are not allowed.
+        final String[] resourceAlgos = systemResources.getStringArray(
+                com.android.internal.R.array.config_optionalIpSecAlgorithms);
+        for (String str : resourceAlgos) {
+            if (!ALGO_TO_REQUIRED_FIRST_SDK.containsKey(str) || !enabledAlgos.add(str)) {
+                // This error should be caught by CTS and never be thrown to API callers
+                throw new IllegalArgumentException("Invalid or repeated algorithm " + str);
+            }
+        }
+
+        for (Entry<String, Integer> entry : ALGO_TO_REQUIRED_FIRST_SDK.entrySet()) {
+            if (Build.VERSION.FIRST_SDK_INT >= entry.getValue()) {
+                enabledAlgos.add(entry.getKey());
+            }
+        }
+
+        return enabledAlgos;
+    }
+
+    private static void checkValidOrThrow(String name, int keyLen, int truncLen) {
+        final boolean isValidLen;
+        final boolean isValidTruncLen;
+
+        if (!getSupportedAlgorithms().contains(name)) {
+            throw new IllegalArgumentException("Unsupported algorithm: " + name);
+        }
+
+        switch (name) {
             case CRYPT_AES_CBC:
                 isValidLen = keyLen == 128 || keyLen == 192 || keyLen == 256;
+                isValidTruncLen = true;
+                break;
+            case CRYPT_AES_CTR:
+                // The keying material for AES-CTR is a key plus a 32-bit salt
+                isValidLen = keyLen == 128 + 32 || keyLen == 192 + 32 || keyLen == 256 + 32;
+                isValidTruncLen = true;
                 break;
             case AUTH_HMAC_MD5:
                 isValidLen = keyLen == 128;
@@ -234,12 +377,22 @@ public final class IpSecAlgorithm implements Parcelable {
                 isValidLen = keyLen == 512;
                 isValidTruncLen = truncLen >= 256 && truncLen <= 512;
                 break;
+            case AUTH_AES_XCBC:
+                isValidLen = keyLen == 128;
+                isValidTruncLen = truncLen == 96;
+                break;
             case AUTH_CRYPT_AES_GCM:
                 // The keying material for GCM is a key plus a 32-bit salt
                 isValidLen = keyLen == 128 + 32 || keyLen == 192 + 32 || keyLen == 256 + 32;
                 isValidTruncLen = truncLen == 64 || truncLen == 96 || truncLen == 128;
                 break;
+            case AUTH_CRYPT_CHACHA20_POLY1305:
+                // The keying material for ChaCha20Poly1305 is a key plus a 32-bit salt
+                isValidLen = keyLen == 256 + 32;
+                isValidTruncLen = truncLen == 128;
+                break;
             default:
+                // Should never hit here.
                 throw new IllegalArgumentException("Couldn't find an algorithm: " + name);
         }
 
@@ -260,6 +413,7 @@ public final class IpSecAlgorithm implements Parcelable {
             case AUTH_HMAC_SHA256:
             case AUTH_HMAC_SHA384:
             case AUTH_HMAC_SHA512:
+            case AUTH_AES_XCBC:
                 return true;
             default:
                 return false;
@@ -268,12 +422,24 @@ public final class IpSecAlgorithm implements Parcelable {
 
     /** @hide */
     public boolean isEncryption() {
-        return getName().equals(CRYPT_AES_CBC);
+        switch (getName()) {
+            case CRYPT_AES_CBC: // fallthrough
+            case CRYPT_AES_CTR:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /** @hide */
     public boolean isAead() {
-        return getName().equals(AUTH_CRYPT_AES_GCM);
+        switch (getName()) {
+            case AUTH_CRYPT_AES_GCM: // fallthrough
+            case AUTH_CRYPT_CHACHA20_POLY1305:
+                return true;
+            default:
+                return false;
+        }
     }
 
     // Because encryption keys are sensitive and userdebug builds are used by large user pools
