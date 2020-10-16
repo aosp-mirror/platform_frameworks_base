@@ -32,6 +32,7 @@ public final class BLASTBufferQueue {
     private static native Surface nativeGetSurface(long ptr);
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height);
+    private static native void nativeFlushShadowQueue(long ptr);
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
@@ -68,5 +69,9 @@ public final class BLASTBufferQueue {
         } finally {
             super.finalize();
         }
+    }
+
+    public void flushShadowQueue() {
+        nativeFlushShadowQueue(mNativeObject);
     }
 }
