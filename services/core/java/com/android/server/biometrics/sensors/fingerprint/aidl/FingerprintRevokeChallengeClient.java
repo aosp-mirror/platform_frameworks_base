@@ -29,7 +29,7 @@ import com.android.server.biometrics.sensors.RevokeChallengeClient;
 /**
  * Fingerprint-specific revokeChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-public class FingerprintRevokeChallengeClient extends RevokeChallengeClient<IFingerprint> {
+class FingerprintRevokeChallengeClient extends RevokeChallengeClient<IFingerprint> {
 
     private static final String TAG = "FingerpirntRevokeChallengeClient";
 
@@ -44,10 +44,8 @@ public class FingerprintRevokeChallengeClient extends RevokeChallengeClient<IFin
         }
     };
 
-    public FingerprintRevokeChallengeClient(
-            @NonNull Context context,
-            @NonNull LazyDaemon<IFingerprint> lazyDaemon,
-            @NonNull IBinder token,
+    FingerprintRevokeChallengeClient(@NonNull Context context,
+            @NonNull LazyDaemon<IFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull String owner, int sensorId, long challenge) {
         super(context, lazyDaemon, token, owner, sensorId);
         mChallenge = challenge;

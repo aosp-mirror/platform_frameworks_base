@@ -30,7 +30,7 @@ import com.android.server.biometrics.sensors.GenerateChallengeClient;
 /**
  * Fingerprint-specific generateChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-public class FingerprintGenerateChallengeClient extends GenerateChallengeClient<IFingerprint> {
+class FingerprintGenerateChallengeClient extends GenerateChallengeClient<IFingerprint> {
     private static final String TAG = "FingerprintGenerateChallengeClient";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
@@ -50,7 +50,7 @@ public class FingerprintGenerateChallengeClient extends GenerateChallengeClient<
         }
     };
 
-    public FingerprintGenerateChallengeClient(@NonNull Context context,
+    FingerprintGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<IFingerprint> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,

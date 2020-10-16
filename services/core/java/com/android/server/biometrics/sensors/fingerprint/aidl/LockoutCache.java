@@ -23,7 +23,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 /**
  * For a single sensor, caches lockout states for all users.
  */
-public class LockoutCache implements LockoutTracker {
+class LockoutCache implements LockoutTracker {
 
     // Map of userId to LockoutMode
     private final SparseIntArray mUserLockoutStates;

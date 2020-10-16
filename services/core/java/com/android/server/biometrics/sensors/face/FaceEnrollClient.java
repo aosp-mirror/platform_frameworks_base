@@ -23,6 +23,7 @@ import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.Status;
+import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.NativeHandle;
@@ -53,9 +54,9 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
 
     FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
-            @NonNull int[] disabledFeatures, int timeoutSec, @Nullable NativeHandle surfaceHandle,
-            int sensorId) {
+            @NonNull byte[] hardwareAuthToken, @NonNull String owner,
+            @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
+            @Nullable NativeHandle surfaceHandle, int sensorId) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
                 false /* shouldVibrate */);

@@ -40,7 +40,7 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsF
 
     FaceInternalCleanupClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
-            int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils utils,
+            int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils<Face> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
                 enrolledList, utils, authenticatorIds);
@@ -49,15 +49,15 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsF
     @Override
     protected InternalEnumerateClient<IBiometricsFace> getEnumerateClient(Context context,
             LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token, int userId, String owner,
-            List<Face> enrolledList, BiometricUtils utils, int sensorId) {
+            List<Face> enrolledList, BiometricUtils<Face> utils, int sensorId) {
         return new FaceInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
     }
 
     @Override
-    protected RemovalClient<IBiometricsFace> getRemovalClient(Context context,
+    protected RemovalClient<Face, IBiometricsFace> getRemovalClient(Context context,
             LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils utils, int sensorId,
+            int biometricId, int userId, String owner, BiometricUtils<Face> utils, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.

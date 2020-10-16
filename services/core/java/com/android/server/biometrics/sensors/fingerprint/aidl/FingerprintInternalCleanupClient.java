@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.hidl;
+package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 
@@ -27,43 +27,38 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalCleanupClient;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.List;
 import java.util.Map;
 
 /**
  * Fingerprint-specific internal cleanup client supporting the
- * {@link android.hardware.biometrics.fingerprint.V2_1} and
- * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
+ * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintInternalCleanupClient
-        extends InternalCleanupClient<Fingerprint, IBiometricsFingerprint> {
+class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint, ISession> {
 
     FingerprintInternalCleanupClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, int userId,
-            @NonNull String owner, int sensorId, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils<Fingerprint> utils,
-            @NonNull Map<Integer, Long> authenticatorIds) {
+            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, @NonNull String owner,
+            int sensorId, @NonNull List<Fingerprint> enrolledList,
+            @NonNull FingerprintUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, enrolledList, utils, authenticatorIds);
     }
 
     @Override
-    protected InternalEnumerateClient<IBiometricsFingerprint> getEnumerateClient(
-            Context context, LazyDaemon<IBiometricsFingerprint> lazyDaemon, IBinder token,
-            int userId, String owner, List<Fingerprint> enrolledList,
-            BiometricUtils<Fingerprint> utils, int sensorId) {
+    protected InternalEnumerateClient<ISession> getEnumerateClient(Context context,
+            LazyDaemon<ISession> lazyDaemon, IBinder token, int userId, String owner,
+            List<Fingerprint> enrolledList, BiometricUtils<Fingerprint> utils, int sensorId) {
         return new FingerprintInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
     }
 
     @Override
-    protected RemovalClient<Fingerprint, IBiometricsFingerprint> getRemovalClient(Context context,
-            LazyDaemon<IBiometricsFingerprint> lazyDaemon, IBinder token,
-            int biometricId, int userId, String owner, BiometricUtils<Fingerprint> utils,
-            int sensorId, Map<Integer, Long> authenticatorIds) {
-        // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
-        // is all done internally.
+    protected RemovalClient<Fingerprint, ISession> getRemovalClient(Context context,
+            LazyDaemon<ISession> lazyDaemon, IBinder token, int biometricId, int userId,
+            String owner, BiometricUtils<Fingerprint> utils, int sensorId,
+            Map<Integer, Long> authenticatorIds) {
         return new FingerprintRemovalClient(context, lazyDaemon, token,
                 null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
                 sensorId, authenticatorIds);

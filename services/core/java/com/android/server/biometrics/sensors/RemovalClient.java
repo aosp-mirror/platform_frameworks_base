@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -29,17 +30,18 @@ import java.util.Map;
 /**
  * A class to keep track of the remove state for a given client.
  */
-public abstract class RemovalClient<T> extends ClientMonitor<T> implements RemovalConsumer {
+public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier, T>
+        extends ClientMonitor<T> implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
     protected final int mBiometricId;
-    private final BiometricUtils mBiometricUtils;
+    private final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
 
     public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils utils,
+            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils,
             int sensorId, @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_REMOVE,
@@ -63,8 +65,8 @@ public abstract class RemovalClient<T> extends ClientMonitor<T> implements Remov
     }
 
     @Override
-    public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (identifier.getBiometricId() != 0) {
+    public void onRemoved(@Nullable BiometricAuthenticator.Identifier identifier, int remaining) {
+        if (identifier != null) {
             mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
                     identifier.getBiometricId());
         }

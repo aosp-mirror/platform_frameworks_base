@@ -24,8 +24,8 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.IUdfpsOverlayController;
-import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -38,7 +38,7 @@ import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
-public class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
+class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     private static final String TAG = "FingerprintEnrollClient";
 
@@ -46,11 +46,11 @@ public class FingerprintEnrollClient extends EnrollClient<ISession> implements U
     @Nullable private ICancellationSignal mCancellationSignal;
     private final int mMaxTemplatesPerUser;
 
-    public FingerprintEnrollClient(@NonNull Context context,
+    FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
-            @NonNull FingerprintUtils utils, int sensorId,
+            @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @Nullable IUdfpsOverlayController udfpsOvelayController, int maxTemplatesPerUser) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
