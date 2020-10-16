@@ -368,8 +368,8 @@ public class ParsedActivityUtils {
                 }
                 result = intentResult;
             } else if (!isReceiver && !isAlias && parser.getName().equals("layout")) {
-                ParseResult<ActivityInfo.WindowLayout> layoutResult = parseLayout(resources, parser,
-                        input);
+                ParseResult<ActivityInfo.WindowLayout> layoutResult =
+                        parseActivityWindowLayout(resources, parser, input);
                 if (layoutResult.isSuccess()) {
                     activity.windowLayout = layoutResult.getResult();
                 }
@@ -383,7 +383,8 @@ public class ParsedActivityUtils {
             }
         }
 
-        ParseResult<ActivityInfo.WindowLayout> layoutResult = resolveWindowLayout(activity, input);
+        ParseResult<ActivityInfo.WindowLayout> layoutResult =
+                resolveActivityWindowLayout(activity, input);
         if (layoutResult.isError()) {
             return input.error(layoutResult);
         }
@@ -468,7 +469,7 @@ public class ParsedActivityUtils {
     }
 
     @NonNull
-    private static ParseResult<ActivityInfo.WindowLayout> parseLayout(Resources res,
+    private static ParseResult<ActivityInfo.WindowLayout> parseActivityWindowLayout(Resources res,
             AttributeSet attrs, ParseInput input) {
         TypedArray sw = res.obtainAttributes(attrs, R.styleable.AndroidManifestLayout);
         try {
@@ -496,8 +497,13 @@ public class ParsedActivityUtils {
             int minWidth = sw.getDimensionPixelSize(R.styleable.AndroidManifestLayout_minWidth, -1);
             int minHeight = sw.getDimensionPixelSize(R.styleable.AndroidManifestLayout_minHeight,
                     -1);
-            return input.success(new ActivityInfo.WindowLayout(width, widthFraction, height,
-                    heightFraction, gravity, minWidth, minHeight));
+            String windowLayoutAffinity =
+                    sw.getNonConfigurationString(
+                            R.styleable.AndroidManifestLayout_windowLayoutAffinity, 0);
+            final ActivityInfo.WindowLayout windowLayout = new ActivityInfo.WindowLayout(width,
+                    widthFraction, height, heightFraction, gravity, minWidth, minHeight,
+                    windowLayoutAffinity);
+            return input.success(windowLayout);
         } finally {
             sw.recycle();
         }
@@ -509,7 +515,7 @@ public class ParsedActivityUtils {
      * <p>{@link ActivityInfo.WindowLayout#windowLayoutAffinity} has a fallback metadata used in
      * Android R and some variants of pre-R.
      */
-    private static ParseResult<ActivityInfo.WindowLayout> resolveWindowLayout(
+    private static ParseResult<ActivityInfo.WindowLayout> resolveActivityWindowLayout(
             ParsedActivity activity, ParseInput input) {
         // There isn't a metadata for us to fall back. Whatever is in layout is correct.
         if (activity.metaData == null || !activity.metaData.containsKey(
@@ -528,9 +534,10 @@ public class ParsedActivityUtils {
         if (layout == null) {
             layout = new ActivityInfo.WindowLayout(-1 /* width */, -1 /* widthFraction */,
                     -1 /* height */, -1 /* heightFraction */, Gravity.NO_GRAVITY,
-                    -1 /* minWidth */, -1 /* minHeight */);
+                    -1 /* minWidth */, -1 /* minHeight */, windowLayoutAffinity);
+        } else {
+            layout.windowLayoutAffinity = windowLayoutAffinity;
         }
-        layout.windowLayoutAffinity = windowLayoutAffinity;
         return input.success(layout);
     }
 }
