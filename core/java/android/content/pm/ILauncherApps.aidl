@@ -21,9 +21,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.LocusId;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
-import android.content.pm.LauncherActivityInfoInternal;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.IPackageInstallerCallback;
@@ -47,7 +47,7 @@ interface ILauncherApps {
     void removeOnAppsChangedListener(in IOnAppsChangedListener listener);
     ParceledListSlice getLauncherActivities(
             String callingPackage, String packageName, in UserHandle user);
-    LauncherActivityInfoInternal resolveLauncherActivityInternal(
+    ActivityInfo resolveActivity(
             String callingPackage, in ComponentName component, in UserHandle user);
     void startSessionDetailsActivityAsUser(in IApplicationThread caller, String callingPackage,
                 String callingFeatureId, in PackageInstaller.SessionInfo sessionInfo,

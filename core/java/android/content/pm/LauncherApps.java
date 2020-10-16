@@ -218,7 +218,6 @@ public class LauncherApps {
          * Indicates that a package was modified in the specified profile.
          * This can happen, for example, when the package is updated or when
          * one or more components are enabled or disabled.
-         * It can also happen if package state has changed, i.e., package becomes unstartable.
          *
          * @param packageName The name of the package that has changed.
          * @param user The UserHandle of the profile that generated the change.
@@ -324,16 +323,6 @@ public class LauncherApps {
         public void onShortcutsChanged(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
         }
-
-        /**
-         * Indicates that the loading progress of an installed package has changed.
-         *
-         * @param packageName The name of the package that has changed.
-         * @param user The UserHandle of the profile that generated the change.
-         * @param progress The new progress value, between [0, 1].
-         */
-        public void onPackageProgressChanged(@NonNull String packageName,
-                @NonNull UserHandle user, float progress) {}
     }
 
     /**
@@ -726,15 +715,16 @@ public class LauncherApps {
     public LauncherActivityInfo resolveActivity(Intent intent, UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            LauncherActivityInfoInternal ai = mService.resolveLauncherActivityInternal(
-                    mContext.getPackageName(), intent.getComponent(), user);
-            if (ai == null) {
-                return null;
+            ActivityInfo ai = mService.resolveActivity(mContext.getPackageName(),
+                    intent.getComponent(), user);
+            if (ai != null) {
+                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ai, user);
+                return info;
             }
-            return new LauncherActivityInfo(mContext, user, ai);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+        return null;
     }
 
     /**
@@ -823,13 +813,13 @@ public class LauncherApps {
     }
 
     private List<LauncherActivityInfo> convertToActivityList(
-            @Nullable ParceledListSlice<LauncherActivityInfoInternal> internals, UserHandle user) {
-        if (internals == null || internals.getList().isEmpty()) {
+            @Nullable ParceledListSlice<ResolveInfo> activities, UserHandle user) {
+        if (activities == null) {
             return Collections.EMPTY_LIST;
         }
         ArrayList<LauncherActivityInfo> lais = new ArrayList<>();
-        for (LauncherActivityInfoInternal internal : internals.getList()) {
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, user, internal);
+        for (ResolveInfo ri : activities.getList()) {
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri.activityInfo, user);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
                         + lai.getComponentName());
@@ -1677,19 +1667,6 @@ public class LauncherApps {
                 }
             }
         }
-
-        public void onPackageProgressChanged(UserHandle user, String packageName,
-                float progress) {
-            if (DEBUG) {
-                Log.d(TAG, "onPackageProgressChanged " + user.getIdentifier() + ","
-                        + packageName + "," + progress);
-            }
-            synchronized (LauncherApps.this) {
-                for (CallbackMessageHandler callback : mCallbacks) {
-                    callback.postOnPackageProgressChanged(user, packageName, progress);
-                }
-            }
-        }
     };
 
     private static class CallbackMessageHandler extends Handler {
@@ -1701,7 +1678,6 @@ public class LauncherApps {
         private static final int MSG_SUSPENDED = 6;
         private static final int MSG_UNSUSPENDED = 7;
         private static final int MSG_SHORTCUT_CHANGED = 8;
-        private static final int MSG_LOADING_PROGRESS_CHANGED = 9;
 
         private LauncherApps.Callback mCallback;
 
@@ -1712,7 +1688,6 @@ public class LauncherApps {
             boolean replacing;
             UserHandle user;
             List<ShortcutInfo> shortcuts;
-            float mLoadingProgress;
         }
 
         public CallbackMessageHandler(Looper looper, LauncherApps.Callback callback) {
@@ -1751,10 +1726,6 @@ public class LauncherApps {
                     break;
                 case MSG_SHORTCUT_CHANGED:
                     mCallback.onShortcutsChanged(info.packageName, info.shortcuts, info.user);
-                    break;
-                case MSG_LOADING_PROGRESS_CHANGED:
-                    mCallback.onPackageProgressChanged(info.packageName, info.user,
-                            info.mLoadingProgress);
                     break;
             }
         }
@@ -1821,15 +1792,6 @@ public class LauncherApps {
             info.user = user;
             info.shortcuts = shortcuts;
             obtainMessage(MSG_SHORTCUT_CHANGED, info).sendToTarget();
-        }
-
-        public void postOnPackageProgressChanged(UserHandle user, String packageName,
-                float progress) {
-            CallbackInfo info = new CallbackInfo();
-            info.packageName = packageName;
-            info.user = user;
-            info.mLoadingProgress = progress;
-            obtainMessage(MSG_LOADING_PROGRESS_CHANGED, info).sendToTarget();
         }
     }
 
