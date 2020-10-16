@@ -142,7 +142,7 @@
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"برای لغو راستی‌آزمایی ضربه بزنید"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"لطفاً دوباره امتحان کنید"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"درحال جستجوی چهره"</string>
-    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره احراز هویت شد"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره اصالت‌سنجی شد"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تأیید شد"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید ضربه بزنید"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"راستی‌آزمایی‌شده"</string>
@@ -307,8 +307,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"حالت کار روشن شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"صرفه‌جویی داده خاموش شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"صرفه‌جویی داده روشن شد."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"«حریم خصوصی حسگر» خاموش است."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"«حریم خصوصی حسگر» روشن است."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"«حریم‌خصوصی حسگر» خاموش است."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"«حریم‌خصوصی حسگر» روشن است."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"روشنایی نمایشگر"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"درحال شارژ شدن"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5716594205739750015">"‏داده 2G-3G موقتاً متوقف شده است"</string>
