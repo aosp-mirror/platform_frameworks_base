@@ -171,6 +171,7 @@ static struct {
 static struct {
     jmethodID postDynPolicyEventFromNative;
     jmethodID postRecordConfigEventFromNative;
+    jmethodID postRoutingUpdatedFromNative;
 } gAudioPolicyEventHandlerMethods;
 
 static struct { jmethodID add; } gListMethods;
@@ -537,6 +538,21 @@ android_media_AudioSystem_recording_callback(int event,
     env->DeleteLocalRef(recParamArray);
     env->DeleteLocalRef(jClientEffects);
     env->DeleteLocalRef(jEffects);
+}
+
+static void
+android_media_AudioSystem_routing_callback()
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    // callback into java
+    jclass clazz = env->FindClass(kClassPathName);
+
+    if (env == NULL) {
+        return;
+    }
+    env->CallStaticVoidMethod(clazz,
+                              gAudioPolicyEventHandlerMethods.postRoutingUpdatedFromNative);
+    env->DeleteLocalRef(clazz);
 }
 
 static jint
@@ -1894,6 +1910,12 @@ android_media_AudioSystem_registerRecordingCallback(JNIEnv *env, jobject thiz)
     AudioSystem::setRecordConfigCallback(android_media_AudioSystem_recording_callback);
 }
 
+static void
+android_media_AudioSystem_registerRoutingCallback(JNIEnv *env, jobject thiz)
+{
+    AudioSystem::setRoutingCallback(android_media_AudioSystem_routing_callback);
+}
+
 
 static jint convertAudioMixToNative(JNIEnv *env,
                                     AudioMix *nAudioMix,
@@ -2579,6 +2601,8 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_registerDynPolicyCallback},
          {"native_register_recording_callback", "()V",
           (void *)android_media_AudioSystem_registerRecordingCallback},
+         {"native_register_routing_callback", "()V",
+          (void *)android_media_AudioSystem_registerRoutingCallback},
          {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
          {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
          {"native_get_offload_support", "(IIIII)I",
@@ -2762,6 +2786,9 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative =
             GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
                     "recordingCallbackFromNative", "(IIIIIIZ[I[Landroid/media/audiofx/AudioEffect$Descriptor;[Landroid/media/audiofx/AudioEffect$Descriptor;I)V");
+    gAudioPolicyEventHandlerMethods.postRoutingUpdatedFromNative =
+            GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
+                    "routingCallbackFromNative", "()V");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);
