@@ -53,6 +53,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
@@ -190,6 +191,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
+    private KeyguardStatusViewController mKeyguardStatusViewController;
+    @Mock
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
 
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -246,6 +249,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
                 .thenReturn(mKeyguardClockSwitchController);
+        when(mKeyguardStatusViewComponent.getKeyguardStatusViewController())
+                .thenReturn(mKeyguardStatusViewController);
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
                 mInjectionInflationController,
