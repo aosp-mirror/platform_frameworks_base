@@ -379,16 +379,23 @@ public class AlwaysOnHotwordDetector {
      * Callbacks for always-on hotword detection.
      */
     public static abstract class Callback {
+
         /**
-         * Called when the hotword availability changes.
-         * This indicates a change in the availability of recognition for the given keyphrase.
-         * It's called at least once with the initial availability.<p/>
+         * Updates the availability state of the active keyphrase and locale on every keyphrase
+         * sound model change.
          *
-         * Availability implies whether the hardware on this system is capable of listening for
-         * the given keyphrase or not. <p/>
+         * <p>This API is called whenever there's a possibility that the keyphrase associated
+         * with this detector has been updated. It is not guaranteed that there is in fact any
+         * change, as it may be called for other reasons.</p>
+         *
+         * <p>This API is also guaranteed to be called right after an AlwaysOnHotwordDetector
+         * instance is created to updated the current availability state.</p>
+         *
+         * <p>Availability implies the current enrollment state of the given keyphrase. If the
+         * hardware on this system is not capable of listening for the given keyphrase,
+         * {@link AlwaysOnHotwordDetector#STATE_HARDWARE_UNAVAILABLE} will be returned.
          *
          * @see AlwaysOnHotwordDetector#STATE_HARDWARE_UNAVAILABLE
-         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNSUPPORTED
          * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNENROLLED
          * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_ENROLLED
          */
