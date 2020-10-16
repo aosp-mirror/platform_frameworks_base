@@ -107,7 +107,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void generateChallenge(IBinder token, int sensorId,
+        public void generateChallenge(IBinder token, int sensorId, int userId,
                 IFingerprintServiceReceiver receiver, String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
@@ -117,20 +117,21 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            provider.scheduleGenerateChallenge(sensorId, token, receiver, opPackageName);
+            provider.scheduleGenerateChallenge(sensorId, userId, token, receiver, opPackageName);
         }
 
         @Override // Binder call
-        public void revokeChallenge(IBinder token, String opPackageName, long challenge) {
+        public void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName,
+                long challenge) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
-                Slog.w(TAG, "Null provider for revokeChallenge");
+                Slog.w(TAG, "No matching sensor for revokeChallenge, sensorId: " + sensorId);
                 return;
             }
 
-            provider.second.scheduleRevokeChallenge(provider.first, token, opPackageName,
+            provider.scheduleRevokeChallenge(sensorId, userId, token, opPackageName,
                     challenge);
         }
 

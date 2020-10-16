@@ -588,10 +588,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void generateChallenge(int sensorId, GenerateChallengeCallback callback) {
+    public void generateChallenge(int sensorId, int userId, GenerateChallengeCallback callback) {
         if (mService != null) try {
             mGenerateChallengeCallback = callback;
-            mService.generateChallenge(mToken, sensorId, mServiceReceiver,
+            mService.generateChallenge(mToken, sensorId, userId, mServiceReceiver,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -604,7 +604,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void generateChallenge(GenerateChallengeCallback callback) {
+    public void generateChallenge(int userId, GenerateChallengeCallback callback) {
         final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
                 getSensorPropertiesInternal();
         if (fingerprintSensorProperties.isEmpty()) {
@@ -613,7 +613,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
 
         final int sensorId = fingerprintSensorProperties.get(0).sensorId;
-        generateChallenge(sensorId, callback);
+        generateChallenge(sensorId, userId, callback);
     }
 
     /**
@@ -621,10 +621,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void revokeChallenge() {
+    public void revokeChallenge(int userId) {
         // On HALs with only single in-flight challenge such as IBiometricsFingerprint@2.1,
         // this parameter is ignored.
-        revokeChallenge(0L);
+        revokeChallenge(userId, 0L);
     }
 
     /**
@@ -632,9 +632,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void revokeChallenge(long challenge) {
+    public void revokeChallenge(int userId, long challenge) {
         if (mService != null) try {
-            mService.revokeChallenge(mToken, mContext.getOpPackageName(), challenge);
+            final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
+                    getSensorPropertiesInternal();
+            if (fingerprintSensorProperties.isEmpty()) {
+                Slog.e(TAG, "No sensors");
+                return;
+            }
+            final int sensorId = fingerprintSensorProperties.get(0).sensorId;
+            mService.revokeChallenge(mToken, sensorId, userId, mContext.getOpPackageName(),
+                    challenge);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
