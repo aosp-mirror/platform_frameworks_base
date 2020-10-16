@@ -180,7 +180,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
-import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
@@ -17334,7 +17333,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
-            extras.putInt(Intent.EXTRA_UNSTARTABLE_REASON, reason);
+            extras.putInt(Intent.EXTRA_REASON, reason);
             // send broadcast to users with this app installed
             sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTARTABLE, mPackageName,
                     extras, 0 /*flags*/,
@@ -25659,19 +25658,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mIncrementalManager.unregisterCallback(ps.getPathString(),
                     (IPackageLoadingProgressCallback) callback.getBinder());
         }
-
-        @Override
-        public IncrementalStatesInfo getIncrementalStatesInfo(
-                @NonNull String packageName, int filterCallingUid, int userId) {
-            final PackageSetting ps = getPackageSettingForUser(packageName, filterCallingUid,
-                    userId);
-            if (ps == null) {
-                return null;
-            }
-            return ps.getIncrementalStates();
-        }
     }
-
 
     @GuardedBy("mLock")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {
