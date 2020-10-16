@@ -11,7 +11,7 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import java.util.Objects
 import javax.inject.Inject
 
-class MediaHost @Inject constructor(
+class MediaHost constructor(
     private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val mediaDataManager: MediaDataManager,
