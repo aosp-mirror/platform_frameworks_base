@@ -225,7 +225,7 @@ droidstubs {
 
 droidstubs {
     name: "test-api-stubs-docs",
-    defaults: ["metalava-full-api-stubs-default"],
+    defaults: ["metalava-non-updatable-api-stubs-default"],
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
@@ -414,7 +414,19 @@ java_library_static {
 java_library_static {
     name: "android_test_stubs_current",
     srcs: [ ":test-api-stubs-docs" ],
-    static_libs: [ "private-stub-annotations-jar" ],
+    static_libs: [
+        // Modules do not have test APIs, but we want to include their SystemApis, like we include
+        // the SystemApi of framework-non-updatable-sources.
+        "conscrypt.module.public.api.stubs",
+        "framework-media.stubs.system",
+        "framework-mediaprovider.stubs.system",
+        "framework-permission.stubs.system",
+        "framework-sdkextensions.stubs.system",
+        "framework-statsd.stubs.system",
+        "framework-tethering.stubs.system",
+        "framework-wifi.stubs.system",
+        "private-stub-annotations-jar",
+    ],
     defaults: [
         "android_defaults_stubs_current",
         "android_stubs_dists_default",
