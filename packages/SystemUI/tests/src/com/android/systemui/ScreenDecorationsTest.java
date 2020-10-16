@@ -621,6 +621,44 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertEquals(mScreenDecorations.mRoundedDefault, new Point(5, 5));
     }
 
+    @Test
+    public void testOnlyRoundedCornerRadiusTop() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 10);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_roundedCornerMultipleRadius, false);
+
+        mScreenDecorations.start();
+        assertEquals(new Point(0, 0), mScreenDecorations.mRoundedDefault);
+        assertEquals(new Point(10, 10), mScreenDecorations.mRoundedDefaultTop);
+        assertEquals(new Point(0, 0), mScreenDecorations.mRoundedDefaultBottom);
+    }
+
+    @Test
+    public void testOnlyRoundedCornerRadiusBottom() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 20);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_roundedCornerMultipleRadius, false);
+
+        mScreenDecorations.start();
+        assertEquals(new Point(0, 0), mScreenDecorations.mRoundedDefault);
+        assertEquals(new Point(0, 0), mScreenDecorations.mRoundedDefaultTop);
+        assertEquals(new Point(20, 20), mScreenDecorations.mRoundedDefaultBottom);
+    }
+
 
     @Test
     public void testBoundingRectsToRegion() throws Exception {
