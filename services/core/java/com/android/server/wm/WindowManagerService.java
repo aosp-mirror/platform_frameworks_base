@@ -6910,6 +6910,9 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestScrollCapture()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
+        if (behindClient != null && !isWindowToken(behindClient)) {
+            throw new IllegalArgumentException("behindClient must be a window token");
+        }
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -6922,7 +6925,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 WindowState topWindow = null;
                 if (behindClient != null) {
-                    topWindow = windowForClientLocked(null, behindClient, /* throwOnError*/ true);
+                    topWindow = windowForClientLocked(null, behindClient, /* throwOnError*/ false);
                 }
                 WindowState targetWindow = dc.findScrollCaptureTargetWindow(topWindow, taskId);
                 if (targetWindow == null) {
