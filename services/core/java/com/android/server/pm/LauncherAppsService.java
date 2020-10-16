@@ -548,13 +548,8 @@ public class LauncherAppsService extends SystemService {
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                         callingUid, user.getIdentifier());
-                final IncrementalStatesInfo incrementalStatesInfo;
-                if (component.getPackageName() == null) {
-                    incrementalStatesInfo = null;
-                } else {
-                    incrementalStatesInfo = pmInt.getIncrementalStatesInfo(
-                            component.getPackageName(), callingUid, user.getIdentifier());
-                }
+                final IncrementalStatesInfo incrementalStatesInfo = pmInt.getIncrementalStatesInfo(
+                        component.getPackageName(), callingUid, user.getIdentifier());
                 return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -597,12 +592,11 @@ public class LauncherAppsService extends SystemService {
             List<LauncherActivityInfoInternal> results = new ArrayList<>();
             for (int i = 0; i < numResolveInfos; i++) {
                 final ResolveInfo ri = apps.get(i);
-                final IncrementalStatesInfo incrementalStatesInfo;
-                if (ri.resolvePackageName == null) {
-                    incrementalStatesInfo = null;
-                } else {
-                    incrementalStatesInfo = pmInt.getIncrementalStatesInfo(
-                            ri.resolvePackageName, callingUid, user.getIdentifier());
+                final IncrementalStatesInfo incrementalStatesInfo =
+                        pmInt.getIncrementalStatesInfo(ri.resolvePackageName, callingUid,
+                                user.getIdentifier());
+                if (incrementalStatesInfo == null) {
+                    continue;
                 }
                 results.add(new LauncherActivityInfoInternal(ri.activityInfo,
                         incrementalStatesInfo));

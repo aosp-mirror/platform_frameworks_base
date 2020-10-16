@@ -16,8 +16,6 @@
 
 package android.content.pm;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Parcel;
@@ -30,23 +28,17 @@ public class LauncherActivityInfoInternal implements Parcelable {
     @UnsupportedAppUsage
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
-    @NonNull private IncrementalStatesInfo mIncrementalStatesInfo;
+    private IncrementalStatesInfo mIncrementalStatesInfo;
 
     /**
      * @param info ActivityInfo from which to create the LauncherActivityInfo.
      * @param incrementalStatesInfo The package's states.
      */
     public LauncherActivityInfoInternal(ActivityInfo info,
-            @Nullable IncrementalStatesInfo incrementalStatesInfo) {
+            IncrementalStatesInfo incrementalStatesInfo) {
         mActivityInfo = info;
         mComponentName = new ComponentName(info.packageName, info.name);
-        if (incrementalStatesInfo == null) {
-            // default value for non-incremental apps
-            mIncrementalStatesInfo = new IncrementalStatesInfo(
-                    true /* isStartable */, false /* isLoading */, 1 /* progress */);
-        } else {
-            mIncrementalStatesInfo = incrementalStatesInfo;
-        }
+        mIncrementalStatesInfo = incrementalStatesInfo;
     }
 
     public LauncherActivityInfoInternal(Parcel source) {
