@@ -26,7 +26,9 @@ import android.annotation.Size;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.Font;
 import android.graphics.text.MeasuredText;
+import android.graphics.text.TextRunShaper;
 import android.os.Build;
+import android.text.TextShaper;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -2053,7 +2055,7 @@ public class Canvas extends BaseCanvas {
      * Draw array of glyphs with specified font.
      *
      * @param glyphIds Array of glyph IDs. The length of array must be greater than or equal to
-     *                 {@code glyphStart + glyphCount}.
+     *                 {@code glyphIdOffset + glyphCount}.
      * @param glyphIdOffset Number of elements to skip before drawing in <code>glyphIds</code>
      *                     array.
      * @param positions A flattened X and Y position array. The first glyph X position must be
@@ -2071,8 +2073,8 @@ public class Canvas extends BaseCanvas {
      * @param font Font used for drawing.
      * @param paint Paint used for drawing. The typeface set to this paint is ignored.
      *
-     * @see android.graphics.text.TextShaper
-     * @see android.text.StyledTextShaper
+     * @see TextRunShaper
+     * @see TextShaper
      */
     public void drawGlyphs(
             @NonNull int[] glyphIds,

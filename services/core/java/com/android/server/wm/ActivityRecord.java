@@ -701,6 +701,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
 
+    // Tracking cookie for the launch of this activity and it's task.
+    IBinder mLaunchCookie;
+
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -1643,6 +1646,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mHandoverTaskDisplayArea = daToken != null
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
+            mLaunchCookie = options.getLaunchCookie();
         }
     }
 
@@ -3986,10 +3990,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    ActivityOptions getOptionsForTargetActivityLocked() {
-        return pendingOptions != null ? pendingOptions.forTargetActivity() : null;
-    }
-
     void clearOptionsLocked() {
         clearOptionsLocked(true /* withAbort */);
     }
@@ -4761,14 +4761,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     supportsEnterPipOnTaskSwitch = false;
                     break;
                 case RESUMED:
-                    // If the app is capable of entering PIP, we should try pausing it now
-                    // so it can PIP correctly.
-                    if (deferHidingClient) {
-                        getRootTask().startPausingLocked(
-                                mStackSupervisor.mUserLeaving /* userLeaving */,
-                                false /* uiSleeping */, null /* resuming */, "makeInvisible");
+                    // Do nothing if currently in the process of resuming the activity. Otherwise,
+                    // starting to pause it since it is not visible.
+                    if (task.mInResumeTopActivity
+                            && task.topRunningActivity(true /* focusableOnly */) == this) {
                         break;
                     }
+                    getRootTask().startPausingLocked(mStackSupervisor.mUserLeaving,
+                            false /* uiSleeping */, null /* resuming */, "makeInvisible");
+                    // fall through
                 case INITIALIZING:
                 case PAUSING:
                 case PAUSED:

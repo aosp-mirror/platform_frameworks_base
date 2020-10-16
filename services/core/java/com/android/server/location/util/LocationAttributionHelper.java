@@ -38,12 +38,12 @@ import java.util.Set;
  */
 public class LocationAttributionHelper {
 
-    private static class ProviderListener {
-        private final String mProvider;
+    private static class BucketKey {
+        private final String mBucket;
         private final Object mKey;
 
-        private ProviderListener(String provider, Object key) {
-            mProvider = Objects.requireNonNull(provider);
+        private BucketKey(String bucket, Object key) {
+            mBucket = Objects.requireNonNull(bucket);
             mKey = Objects.requireNonNull(key);
         }
 
@@ -56,23 +56,23 @@ public class LocationAttributionHelper {
                 return false;
             }
 
-            ProviderListener that = (ProviderListener) o;
-            return mProvider.equals(that.mProvider)
+            BucketKey that = (BucketKey) o;
+            return mBucket.equals(that.mBucket)
                     && mKey.equals(that.mKey);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mProvider, mKey);
+            return Objects.hash(mBucket, mKey);
         }
     }
 
     private final AppOpsHelper mAppOpsHelper;
 
     @GuardedBy("this")
-    private final Map<CallerIdentity, Set<ProviderListener>> mAttributions;
+    private final Map<CallerIdentity, Set<BucketKey>> mAttributions;
     @GuardedBy("this")
-    private final Map<CallerIdentity, Set<ProviderListener>> mHighPowerAttributions;
+    private final Map<CallerIdentity, Set<BucketKey>> mHighPowerAttributions;
 
     public LocationAttributionHelper(AppOpsHelper appOpsHelper) {
         mAppOpsHelper = appOpsHelper;
@@ -82,14 +82,14 @@ public class LocationAttributionHelper {
     }
 
     /**
-     * Report normal location usage for the given caller on the given provider, with a unique key.
+     * Report normal location usage for the given caller in the given bucket, with a unique key.
      */
-    public synchronized void reportLocationStart(CallerIdentity identity, String provider,
+    public synchronized void reportLocationStart(CallerIdentity identity, String bucket,
             Object key) {
-        Set<ProviderListener> keySet = mAttributions.computeIfAbsent(identity,
+        Set<BucketKey> keySet = mAttributions.computeIfAbsent(identity,
                 i -> new ArraySet<>());
         boolean empty = keySet.isEmpty();
-        if (keySet.add(new ProviderListener(provider, key)) && empty) {
+        if (keySet.add(new BucketKey(bucket, key)) && empty) {
             if (!mAppOpsHelper.startOpNoThrow(OP_MONITOR_LOCATION, identity)) {
                 mAttributions.remove(identity);
             }
@@ -97,13 +97,13 @@ public class LocationAttributionHelper {
     }
 
     /**
-     * Report normal location usage has stopped for the given caller on the given provider, with a
+     * Report normal location usage has stopped for the given caller in the given bucket, with a
      * unique key.
      */
-    public synchronized void reportLocationStop(CallerIdentity identity, String provider,
+    public synchronized void reportLocationStop(CallerIdentity identity, String bucket,
             Object key) {
-        Set<ProviderListener> keySet = mAttributions.get(identity);
-        if (keySet != null && keySet.remove(new ProviderListener(provider, key))
+        Set<BucketKey> keySet = mAttributions.get(identity);
+        if (keySet != null && keySet.remove(new BucketKey(bucket, key))
                 && keySet.isEmpty()) {
             mAttributions.remove(identity);
             mAppOpsHelper.finishOp(OP_MONITOR_LOCATION, identity);
@@ -111,15 +111,15 @@ public class LocationAttributionHelper {
     }
 
     /**
-     * Report high power location usage for the given caller on the given provider, with a unique
+     * Report high power location usage for the given caller in the given bucket, with a unique
      * key.
      */
-    public synchronized void reportHighPowerLocationStart(CallerIdentity identity, String provider,
+    public synchronized void reportHighPowerLocationStart(CallerIdentity identity, String bucket,
             Object key) {
-        Set<ProviderListener> keySet = mHighPowerAttributions.computeIfAbsent(identity,
+        Set<BucketKey> keySet = mHighPowerAttributions.computeIfAbsent(identity,
                 i -> new ArraySet<>());
         boolean empty = keySet.isEmpty();
-        if (keySet.add(new ProviderListener(provider, key)) && empty) {
+        if (keySet.add(new BucketKey(bucket, key)) && empty) {
             if (mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, identity)) {
                 if (D) {
                     Log.v(TAG, "starting high power location attribution for " + identity);
@@ -131,13 +131,13 @@ public class LocationAttributionHelper {
     }
 
     /**
-     * Report high power location usage has stopped for the given caller on the given provider,
+     * Report high power location usage has stopped for the given caller in the given bucket,
      * with a unique key.
      */
-    public synchronized void reportHighPowerLocationStop(CallerIdentity identity, String provider,
+    public synchronized void reportHighPowerLocationStop(CallerIdentity identity, String bucket,
             Object key) {
-        Set<ProviderListener> keySet = mHighPowerAttributions.get(identity);
-        if (keySet != null && keySet.remove(new ProviderListener(provider, key))
+        Set<BucketKey> keySet = mHighPowerAttributions.get(identity);
+        if (keySet != null && keySet.remove(new BucketKey(bucket, key))
                 && keySet.isEmpty()) {
             if (D) {
                 Log.v(TAG, "stopping high power location attribution for " + identity);

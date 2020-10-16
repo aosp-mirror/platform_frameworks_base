@@ -23,15 +23,12 @@ import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.KEY_LOCATION_CHANGED;
 import static android.location.LocationManager.KEY_PROVIDER_ENABLED;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
-import static android.location.LocationRequest.PASSIVE_INTERVAL;
 import static android.os.IPowerManager.LOCATION_MODE_NO_CHANGE;
 import static android.os.PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
-import static com.android.internal.location.ProviderRequest.EMPTY_REQUEST;
-import static com.android.internal.location.ProviderRequest.INTERVAL_DISABLED;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -503,14 +500,7 @@ class LocationProviderManager extends
             LocationRequest.Builder builder = new LocationRequest.Builder(baseRequest);
 
             if (mPermissionLevel < PERMISSION_FINE) {
-                switch (baseRequest.getQuality()) {
-                    case LocationRequest.ACCURACY_FINE:
-                        builder.setQuality(LocationRequest.ACCURACY_BLOCK);
-                        break;
-                    case LocationRequest.POWER_HIGH:
-                        builder.setQuality(LocationRequest.POWER_LOW);
-                        break;
-                }
+                builder.setQuality(LocationRequest.QUALITY_LOW_POWER);
                 if (baseRequest.getIntervalMillis() < MIN_COARSE_INTERVAL_MS) {
                     builder.setIntervalMillis(MIN_COARSE_INTERVAL_MS);
                 }
@@ -1709,7 +1699,7 @@ class LocationProviderManager extends
     @Override
     protected boolean registerWithService(ProviderRequest request,
             Collection<Registration> registrations) {
-        return reregisterWithService(EMPTY_REQUEST, request, registrations);
+        return reregisterWithService(ProviderRequest.EMPTY_REQUEST, request, registrations);
     }
 
     @GuardedBy("mLock")
@@ -1778,8 +1768,8 @@ class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        mLocationEventLog.logProviderUpdateRequest(mName, EMPTY_REQUEST);
-        mProvider.setRequest(EMPTY_REQUEST);
+        mLocationEventLog.logProviderUpdateRequest(mName, ProviderRequest.EMPTY_REQUEST);
+        mProvider.setRequest(ProviderRequest.EMPTY_REQUEST);
     }
 
     @GuardedBy("mLock")
@@ -1839,27 +1829,27 @@ class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        long intervalMs = INTERVAL_DISABLED;
+        long intervalMs = ProviderRequest.INTERVAL_DISABLED;
+        int quality = LocationRequest.QUALITY_LOW_POWER;
         boolean locationSettingsIgnored = false;
         boolean lowPower = true;
-        ArrayList<LocationRequest> locationRequests = new ArrayList<>(registrations.size());
 
         for (Registration registration : registrations) {
             LocationRequest request = registration.getRequest();
 
             // passive requests do not contribute to the provider request
-            if (request.getIntervalMillis() == PASSIVE_INTERVAL) {
+            if (request.getIntervalMillis() == LocationRequest.PASSIVE_INTERVAL) {
                 continue;
             }
 
             intervalMs = min(request.getIntervalMillis(), intervalMs);
+            quality = min(request.getQuality(), quality);
             locationSettingsIgnored |= request.isLocationSettingsIgnored();
             lowPower &= request.isLowPower();
-            locationRequests.add(request);
         }
 
-        if (intervalMs == INTERVAL_DISABLED) {
-            return EMPTY_REQUEST;
+        if (intervalMs == ProviderRequest.INTERVAL_DISABLED) {
+            return ProviderRequest.EMPTY_REQUEST;
         }
 
         // calculate who to blame for power in a somewhat arbitrary fashion. we pick a threshold
@@ -1872,7 +1862,7 @@ class LocationProviderManager extends
         } catch (ArithmeticException e) {
             // check for and handle overflow by setting to one below the passive interval so passive
             // requests are automatically skipped
-            thresholdIntervalMs = PASSIVE_INTERVAL - 1;
+            thresholdIntervalMs = LocationRequest.PASSIVE_INTERVAL - 1;
         }
 
         WorkSource workSource = new WorkSource();
@@ -1884,9 +1874,9 @@ class LocationProviderManager extends
 
         return new ProviderRequest.Builder()
                 .setIntervalMillis(intervalMs)
+                .setQuality(quality)
                 .setLocationSettingsIgnored(locationSettingsIgnored)
                 .setLowPower(lowPower)
-                .setLocationRequests(locationRequests)
                 .setWorkSource(workSource)
                 .build();
     }

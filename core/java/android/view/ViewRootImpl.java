@@ -105,6 +105,7 @@ import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.FrameInfo;
+import android.graphics.HardwareRenderer;
 import android.graphics.HardwareRenderer.FrameDrawingCallback;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -519,7 +520,6 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
     private final SurfaceControl mSurfaceControl = new SurfaceControl();
-    private SurfaceControl mBlastSurfaceControl = new SurfaceControl();
 
     private BLASTBufferQueue mBlastBufferQueue;
 
@@ -701,6 +701,11 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mSendNextFrameToWm = false;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
+
+    /**
+     * Increment this value when the surface has been replaced.
+     */
+    private int mSurfaceSequenceId = 0;
 
     private String mTag = TAG;
 
@@ -1808,7 +1813,7 @@ public final class ViewRootImpl implements ViewParent,
             mBoundsLayer = new SurfaceControl.Builder(mSurfaceSession)
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
-                    .setParent(getRenderSurfaceControl())
+                    .setParent(getSurfaceControl())
                     .setCallsite("ViewRootImpl.getBoundsLayer")
                     .build();
             setBoundsLayerCrop(mTransaction);
@@ -1818,22 +1823,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     Surface getOrCreateBLASTSurface(int width, int height) {
-        if (mSurfaceControl == null
-                || !mSurfaceControl.isValid()
-                || mBlastSurfaceControl == null
-                || !mBlastSurfaceControl.isValid()) {
+        if (!mSurfaceControl.isValid()) {
             return null;
         }
 
         Surface ret = null;
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(mTag,
-                mBlastSurfaceControl, width, height, mEnableTripleBuffering);
+                    mSurfaceControl, width, height, mEnableTripleBuffering);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
         } else {
-            mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
+            mBlastBufferQueue.update(mSurfaceControl, width, height);
         }
 
         return ret;
@@ -1855,7 +1857,7 @@ public final class ViewRootImpl implements ViewParent,
     private boolean updateBoundsLayer(SurfaceControl.Transaction t) {
         if (mBoundsLayer != null) {
             setBoundsLayerCrop(t);
-            t.deferTransactionUntil(mBoundsLayer, getRenderSurfaceControl(),
+            t.deferTransactionUntil(mBoundsLayer, getSurfaceControl(),
                 mSurface.getNextFrameNumber());
             return true;
         }
@@ -1864,7 +1866,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private void prepareSurfaces(boolean sizeChanged) {
         final SurfaceControl.Transaction t = mTransaction;
-        final SurfaceControl sc = getRenderSurfaceControl();
+        final SurfaceControl sc = getSurfaceControl();
         if (!sc.isValid()) return;
 
         boolean applyTransaction = updateBoundsLayer(t);
@@ -1885,7 +1887,6 @@ public final class ViewRootImpl implements ViewParent,
         mSurface.release();
         mSurfaceControl.release();
 
-        mBlastSurfaceControl.release();
         // We should probably add an explicit dispose.
         mBlastBufferQueue = null;
     }
@@ -2613,7 +2614,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean surfaceSizeChanged = false;
         boolean surfaceCreated = false;
         boolean surfaceDestroyed = false;
-        /* True if surface generation id changes. */
+        // True if surface generation id changes or relayout result is RELAYOUT_RES_SURFACE_CHANGED.
         boolean surfaceReplaced = false;
 
         final boolean windowAttributesChanged = mWindowAttributesChanged;
@@ -2708,6 +2709,7 @@ public final class ViewRootImpl implements ViewParent,
                 updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();
                 surfaceDestroyed = hadSurface && !mSurface.isValid();
+
                 // When using Blast, the surface generation id may not change when there's a new
                 // SurfaceControl. In that case, we also check relayout flag
                 // RELAYOUT_RES_SURFACE_CHANGED since it should indicate that WMS created a new
@@ -2716,6 +2718,9 @@ public final class ViewRootImpl implements ViewParent,
                         || (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
                         == RELAYOUT_RES_SURFACE_CHANGED)
                         && mSurface.isValid();
+                if (surfaceReplaced) {
+                    mSurfaceSequenceId++;
+                }
 
                 if (cutoutChanged) {
                     mAttachInfo.mDisplayCutout.set(mPendingDisplayCutout);
@@ -3815,6 +3820,82 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * The callback will run on the render thread.
+     */
+    private HardwareRenderer.FrameCompleteCallback createFrameCompleteCallback(Handler handler,
+            boolean reportNextDraw, ArrayList<Runnable> commitCallbacks) {
+        return frameNr -> {
+            // Use a new transaction here since mRtBLASTSyncTransaction can only be accessed by
+            // the render thread and mSurfaceChangedTransaction can only be accessed by the UI
+            // thread. The temporary transaction is used so mRtBLASTSyncTransaction can be merged
+            // with mSurfaceChangedTransaction without synchronization issues.
+            final Transaction t = new Transaction();
+            finishBLASTSyncOnRT(!mSendNextFrameToWm, t);
+            handler.postAtFrontOfQueue(() -> {
+                mSurfaceChangedTransaction.merge(t);
+                if (reportNextDraw) {
+                    // TODO: Use the frame number
+                    pendingDrawFinished();
+                }
+                if (commitCallbacks != null) {
+                    for (int i = 0; i < commitCallbacks.size(); i++) {
+                        commitCallbacks.get(i).run();
+                    }
+                }
+            });
+        };
+    }
+
+    private boolean addFrameCompleteCallbackIfNeeded() {
+        if (mAttachInfo.mThreadedRenderer == null || !mAttachInfo.mThreadedRenderer.isEnabled()) {
+            return false;
+        }
+
+        ArrayList<Runnable> commitCallbacks = mAttachInfo.mTreeObserver
+                .captureFrameCommitCallbacks();
+        final boolean needFrameCompleteCallback =
+                mNextDrawUseBLASTSyncTransaction || mReportNextDraw
+                        || (commitCallbacks != null && commitCallbacks.size() > 0);
+        if (needFrameCompleteCallback) {
+            mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(
+                    createFrameCompleteCallback(mAttachInfo.mHandler, mReportNextDraw,
+                            commitCallbacks));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * The callback will run on a worker thread pool from the render thread.
+     */
+    private HardwareRenderer.FrameDrawingCallback createFrameDrawingCallback() {
+        return frame -> {
+            mRtNextFrameReportedConsumeWithBlast = true;
+            if (mBlastBufferQueue != null) {
+                // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
+                // being modified and only sent to BlastBufferQueue.
+                mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
+            }
+        };
+    }
+
+    private void addFrameCallbackIfNeeded() {
+        if (!mNextDrawUseBLASTSyncTransaction) {
+            return;
+        }
+
+        // Frame callbacks will always occur after submitting draw requests and before
+        // the draw actually occurs. This will ensure that we set the next transaction
+        // for the frame that's about to get drawn and not on a previous frame that.
+        //
+        // This is thread safe since mRtNextFrameReportConsumeWithBlast will only be
+        // modified in onFrameDraw and then again in onFrameComplete. This is to ensure the
+        // next frame completed should be reported with the blast sync transaction.
+        registerRtFrameCallback(createFrameDrawingCallback());
+        mNextDrawUseBLASTSyncTransaction = false;
+    }
+
     private void performDraw() {
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
             return;
@@ -3828,58 +3909,14 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        boolean usingAsyncReport = false;
-        boolean reportNextDraw = mReportNextDraw; // Capture the original value
-        if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
-            ArrayList<Runnable> commitCallbacks = mAttachInfo.mTreeObserver
-                    .captureFrameCommitCallbacks();
-            final boolean needFrameCompleteCallback = mNextDrawUseBLASTSyncTransaction ||
-                (commitCallbacks != null && commitCallbacks.size() > 0) ||
-                mReportNextDraw;
-            usingAsyncReport = mReportNextDraw;
-            if (needFrameCompleteCallback) {
-                final Handler handler = mAttachInfo.mHandler;
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
-                        finishBLASTSync(!mSendNextFrameToWm);
-                        handler.postAtFrontOfQueue(() -> {
-                            if (reportNextDraw) {
-                                // TODO: Use the frame number
-                                pendingDrawFinished();
-                            }
-                            if (commitCallbacks != null) {
-                                for (int i = 0; i < commitCallbacks.size(); i++) {
-                                    commitCallbacks.get(i).run();
-                                }
-                            }
-                        });
-                });
-            }
-        }
+        boolean usingAsyncReport = addFrameCompleteCallbackIfNeeded();
+        addFrameCallbackIfNeeded();
 
         try {
-            if (mNextDrawUseBLASTSyncTransaction) {
-                // Frame callbacks will always occur after submitting draw requests and before
-                // the draw actually occurs. This will ensure that we set the next transaction
-                // for the frame that's about to get drawn and not on a previous frame that.
-                //
-                // This is thread safe since mRtNextFrameReportConsumeWithBlast will only be
-                // modified in onFrameDraw and then again in onFrameComplete. This is to ensure the
-                // next frame completed should be reported with the blast sync transaction.
-                registerRtFrameCallback(frame -> {
-                    mRtNextFrameReportedConsumeWithBlast = true;
-                    if (mBlastBufferQueue != null) {
-                        // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
-                        // being modified and only sent to BlastBufferQueue.
-                        mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
-                    }
-                });
-                mNextDrawUseBLASTSyncTransaction = false;
-            }
             boolean canUseAsync = draw(fullRedrawNeeded);
             if (usingAsyncReport && !canUseAsync) {
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(null);
                 usingAsyncReport = false;
-                finishBLASTSync(true /* apply */);
             }
         } finally {
             mIsDrawing = false;
@@ -7447,7 +7484,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f), viewVisibility,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
-                mTempControls, mSurfaceSize, mBlastSurfaceControl);
+                mTempControls, mSurfaceSize);
         mPendingDisplayCutout.set(mTmpFrames.displayCutout);
         mPendingBackDropFrame.set(mTmpFrames.backdropFrame);
         if (mSurfaceControl.isValid()) {
@@ -9844,7 +9881,12 @@ public final class ViewRootImpl implements ViewParent,
         mNextDrawUseBLASTSyncTransaction = true;
     }
 
-    private void finishBLASTSync(boolean apply) {
+    /**
+     * This should only be called from the render thread.
+     */
+    private void finishBLASTSyncOnRT(boolean apply, Transaction t) {
+        // This is safe to modify on the render thread since the only other place it's modified
+        // is on the UI thread when the render thread is paused.
         mSendNextFrameToWm = false;
         if (mRtNextFrameReportedConsumeWithBlast) {
             mRtNextFrameReportedConsumeWithBlast = false;
@@ -9855,7 +9897,7 @@ public final class ViewRootImpl implements ViewParent,
             if (apply) {
                 mRtBLASTSyncTransaction.apply();
             } else {
-                mSurfaceChangedTransaction.merge(mRtBLASTSyncTransaction);
+                t.merge(mRtBLASTSyncTransaction);
             }
         }
     }
@@ -9866,17 +9908,6 @@ public final class ViewRootImpl implements ViewParent,
 
     Object getBlastTransactionLock() {
         return mRtBLASTSyncTransaction;
-    }
-
-    /**
-     * @hide
-     */
-    public SurfaceControl getRenderSurfaceControl() {
-        if (useBLAST()) {
-            return mBlastSurfaceControl;
-        } else {
-            return mSurfaceControl;
-        }
     }
 
     @Override
@@ -9894,5 +9925,9 @@ public final class ViewRootImpl implements ViewParent,
 
     boolean useBLAST() {
         return mUseBLASTAdapter && !mForceDisableBLAST;
+    }
+
+    int getSurfaceSequenceId() {
+        return mSurfaceSequenceId;
     }
 }

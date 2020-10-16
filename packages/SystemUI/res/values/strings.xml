@@ -233,6 +233,8 @@
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
         your organization</string>
+    <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
+    <string name="screenshot_edit">Edit screenshot</string>
     <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
     <string name="screenshot_dismiss_ui_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
@@ -2782,6 +2784,8 @@
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=NONE] -->
     <string name="controls_media_close_session">Hide the current session.</string>
+    <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_active_session">Current session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
     <string name="controls_media_dismiss_button">Dismiss</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->

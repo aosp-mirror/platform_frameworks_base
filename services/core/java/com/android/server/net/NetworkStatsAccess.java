@@ -27,6 +27,7 @@ import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 
@@ -110,11 +111,12 @@ public final class NetworkStatsAccess {
         boolean hasCarrierPrivileges = tm != null &&
                 tm.checkCarrierPrivilegesForPackageAnyPhone(callingPackage) ==
                         TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
-        boolean isDeviceOwner = dpmi != null && dpmi.isActiveDeviceOwner(callingUid);
+        final boolean isDeviceOwner = dpmi != null && dpmi.isActiveDeviceOwner(callingUid);
+        final int appId = UserHandle.getAppId(callingUid);
         if (hasCarrierPrivileges || isDeviceOwner
-                || UserHandle.getAppId(callingUid) == android.os.Process.SYSTEM_UID) {
-            // Carrier-privileged apps and device owners, and the system can access data usage for
-            // all apps on the device.
+                || appId == Process.SYSTEM_UID || appId == Process.NETWORK_STACK_UID) {
+            // Carrier-privileged apps and device owners, and the system (including the
+            // network stack) can access data usage for all apps on the device.
             return NetworkStatsAccess.Level.DEVICE;
         }
 

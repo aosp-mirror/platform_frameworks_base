@@ -44,9 +44,7 @@ import java.net.UnknownHostException;
  * You can then <a href="{@docRoot}studio/debug/am-logcat.html">view the logs in logcat</a>.
  *
  * <p>The order in terms of verbosity, from least to most is
- * ERROR, WARN, INFO, DEBUG, VERBOSE.  Verbose should never be compiled
- * into an application except during development.  Debug logs are compiled
- * in but stripped at runtime.  Error, warning and info logs are always kept.
+ * ERROR, WARN, INFO, DEBUG, VERBOSE.
  *
  * <p><b>Tip:</b> A good convention is to declare a <code>TAG</code> constant
  * in your class:

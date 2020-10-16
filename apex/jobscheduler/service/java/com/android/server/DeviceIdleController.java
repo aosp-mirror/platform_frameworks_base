@@ -2179,7 +2179,7 @@ public class DeviceIdleController extends SystemService
                 if (getContext().getResources().getBoolean(
                         com.android.internal.R.bool.config_autoPowerModePrefetchLocation)) {
                     mLocationRequest = new LocationRequest.Builder(/*intervalMillis=*/ 0)
-                        .setQuality(LocationRequest.ACCURACY_FINE)
+                        .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
                         .setMaxUpdates(1)
                         .build();
                 }

@@ -181,6 +181,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return false;
     }
 
+    boolean getIgnoreOrientationRequest() {
+        return mIgnoreOrientationRequest;
+    }
+
     /**
      * When a {@link DisplayArea} is repositioned, it should only be moved among its siblings of the
      * same {@link Type}.

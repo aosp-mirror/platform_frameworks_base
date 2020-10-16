@@ -175,8 +175,8 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     /**
-      * Update lock screen mode for testing different layouts
-      */
+     * Update lock screen mode for testing different layouts
+     */
     public void onLockScreenModeChanged(int mode) {
         mLockScreenMode = mode;
     }
@@ -241,6 +241,13 @@ public class KeyguardClockPositionAlgorithm {
         clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
         float darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : mDarkAmount;
+
+        // TODO(b/12836565) - prototyping only adjustment
+        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
+            // This will keep the clock at the top for AOD
+            darkAmount = 0f;
+        }
+
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }
 

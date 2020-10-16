@@ -1263,14 +1263,20 @@ public class AudioTrack extends PlayerBase
 
             // TODO: Check mEncapsulationMode compatibility with MODE_STATIC, etc?
 
-            try {
-                // If the buffer size is not specified in streaming mode,
-                // use a single frame for the buffer size and let the
-                // native code figure out the minimum buffer size.
-                if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
-                    mBufferSizeInBytes = mFormat.getChannelCount()
-                            * mFormat.getBytesPerSample(mFormat.getEncoding());
+            // If the buffer size is not specified in streaming mode,
+            // use a single frame for the buffer size and let the
+            // native code figure out the minimum buffer size.
+            if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
+                int bytesPerSample = 1;
+                try {
+                    bytesPerSample = mFormat.getBytesPerSample(mFormat.getEncoding());
+                } catch (IllegalArgumentException e) {
+                    // do nothing
                 }
+                mBufferSizeInBytes = mFormat.getChannelCount() * bytesPerSample;
+            }
+
+            try {
                 final AudioTrack track = new AudioTrack(
                         mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload,
                         mEncapsulationMode, mTunerConfiguration);

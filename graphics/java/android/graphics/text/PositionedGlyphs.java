@@ -35,11 +35,12 @@ import java.util.Objects;
  * Text shaping result object for single style text.
  *
  * You can get text shaping result by
- * {@link TextShaper#shapeTextRun(char[], int, int, int, int, float, float, boolean, Paint)} and
- * {@link TextShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)}.
+ * {@link TextRunShaper#shapeTextRun(char[], int, int, int, int, float, float, boolean, Paint)} and
+ * {@link TextRunShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean,
+ * Paint)}.
  *
- * @see TextShaper#shapeTextRun(char[], int, int, int, int, float, float, boolean, Paint)
- * @see TextShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)
+ * @see TextRunShaper#shapeTextRun(char[], int, int, int, int, float, float, boolean, Paint)
+ * @see TextRunShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)
  */
 public final class PositionedGlyphs {
     private static final NativeAllocationRegistry REGISTRY =
@@ -49,7 +50,6 @@ public final class PositionedGlyphs {
     private final long mLayoutPtr;
     private final float mXOffset;
     private final float mYOffset;
-    private final GlyphStyle mGlyphStyle;
     private final ArrayList<Font> mFonts;
 
     /**
@@ -62,7 +62,7 @@ public final class PositionedGlyphs {
      *
      * @return total amount of advance
      */
-    public float getTotalAdvance() {
+    public float getAdvance() {
         return nGetTotalAdvance(mLayoutPtr);
     }
 
@@ -91,21 +91,11 @@ public final class PositionedGlyphs {
     }
 
     /**
-     * Returns the glyph style used for drawing the glyph at the given index.
-     *
-     * @return A glyph style
-     */
-    @NonNull
-    public GlyphStyle getStyle() {
-        return mGlyphStyle;
-    }
-
-    /**
      * Returns the amount of X offset added to glyph position.
      *
      * @return The X offset added to glyph position.
      */
-    public float getOriginX() {
+    public float getOffsetX() {
         return mXOffset;
     }
 
@@ -114,7 +104,7 @@ public final class PositionedGlyphs {
      *
      * @return The Y offset added to glyph position.
      */
-    public float getOriginY() {
+    public float getOffsetY() {
         return mYOffset;
     }
 
@@ -144,7 +134,7 @@ public final class PositionedGlyphs {
      * Returns the glyph ID used for drawing the glyph at the given index.
      *
      * @param index the glyph index
-     * @return A font object
+     * @return An glyph ID of the font.
      */
     @IntRange(from = 0)
     public int getGlyphId(@IntRange(from = 0) int index) {
@@ -158,7 +148,7 @@ public final class PositionedGlyphs {
      * @param index the glyph index
      * @return A X offset in pixels
      */
-    public float getPositionX(@IntRange(from = 0) int index) {
+    public float getGlyphX(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
         return nGetX(mLayoutPtr, index) + mXOffset;
     }
@@ -169,7 +159,7 @@ public final class PositionedGlyphs {
      * @param index the glyph index
      * @return A Y offset in pixels.
      */
-    public float getPositionY(@IntRange(from = 0) int index) {
+    public float getGlyphY(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
         return nGetY(mLayoutPtr, index) + mYOffset;
     }
@@ -184,7 +174,6 @@ public final class PositionedGlyphs {
      */
     public PositionedGlyphs(long layoutPtr, @NonNull Paint paint, float xOffset, float yOffset) {
         mLayoutPtr = layoutPtr;
-        mGlyphStyle = new GlyphStyle(paint);
         int glyphCount = nGetGlyphCount(layoutPtr);
         mFonts = new ArrayList<>(glyphCount);
         mXOffset = xOffset;
@@ -229,14 +218,13 @@ public final class PositionedGlyphs {
         if (!(o instanceof PositionedGlyphs)) return false;
         PositionedGlyphs that = (PositionedGlyphs) o;
 
-        if (!mGlyphStyle.equals(that.mGlyphStyle)) return false;
         if (mXOffset != that.mXOffset || mYOffset != that.mYOffset) return false;
         if (glyphCount() != that.glyphCount()) return false;
 
         for (int i = 0; i < glyphCount(); ++i) {
             if (getGlyphId(i) != that.getGlyphId(i)) return false;
-            if (getPositionX(i) != that.getPositionX(i)) return false;
-            if (getPositionY(i) != that.getPositionY(i)) return false;
+            if (getGlyphX(i) != that.getGlyphX(i)) return false;
+            if (getGlyphY(i) != that.getGlyphY(i)) return false;
             // Intentionally using reference equality since font equality is heavy due to buffer
             // compare.
             if (getFont(i) != that.getFont(i)) return false;
@@ -247,10 +235,10 @@ public final class PositionedGlyphs {
 
     @Override
     public int hashCode() {
-        int hashCode = Objects.hash(mXOffset, mYOffset, mGlyphStyle);
+        int hashCode = Objects.hash(mXOffset, mYOffset);
         for (int i = 0; i < glyphCount(); ++i) {
             hashCode = Objects.hash(hashCode,
-                    getGlyphId(i), getPositionX(i), getPositionY(i), getFont(i));
+                    getGlyphId(i), getGlyphX(i), getGlyphY(i), getFont(i));
         }
         return hashCode;
     }
@@ -263,7 +251,7 @@ public final class PositionedGlyphs {
                 sb.append(", ");
             }
             sb.append("[ ID = " + getGlyphId(i) + ","
-                    + " pos = (" + getPositionX(i) + "," + getPositionY(i) + ")"
+                    + " pos = (" + getGlyphX(i) + "," + getGlyphY(i) + ")"
                     + " font = " + getFont(i) + " ]");
         }
         sb.append("]");
@@ -271,7 +259,6 @@ public final class PositionedGlyphs {
                 + "glyphs = " + sb.toString()
                 + ", mXOffset=" + mXOffset
                 + ", mYOffset=" + mYOffset
-                + ", mGlyphStyle=" + mGlyphStyle
                 + '}';
     }
 }

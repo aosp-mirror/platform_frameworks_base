@@ -34,10 +34,6 @@ public class ViewRootImplCompat {
     }
 
     public SurfaceControl getRenderSurfaceControl() {
-        return mViewRoot == null ? null : mViewRoot.getRenderSurfaceControl();
-    }
-
-    public SurfaceControl getSurfaceControl() {
         return mViewRoot == null ? null : mViewRoot.getSurfaceControl();
     }
 

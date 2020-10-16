@@ -264,6 +264,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             }
         }
 
+        /**
+         * Notifies the status bar that a Emergency Action launch gesture has been detected.
+         *
+         * TODO (b/169175022) Update method name and docs when feature name is locked.
+         */
+        @Override
+        public void onEmergencyActionLaunchGestureDetected() {
+            if (SPEW) Slog.d(TAG, "Launching emergency action");
+            if (mBar != null) {
+                try {
+                    mBar.onEmergencyActionLaunchGestureDetected();
+                } catch (RemoteException e) {
+                    if (SPEW) Slog.d(TAG, "Failed to launch emergency action");
+                }
+            }
+        }
+
         @Override
         public void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
             StatusBarManagerService.this.topAppWindowChanged(displayId, isFullscreen, isImmersive);

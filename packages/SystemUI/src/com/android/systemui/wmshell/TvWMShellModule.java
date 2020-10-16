@@ -52,6 +52,8 @@ public class TvWMShellModule {
                 transactionPool);
     }
 
+    @SysUISingleton
+    @Provides
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,

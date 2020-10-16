@@ -196,7 +196,7 @@ static const JNINativeMethod gResultMethods[] = {
 };
 
 int register_android_graphics_text_TextShaper(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/graphics/text/TextShaper", gMethods,
+    return RegisterMethodsOrDie(env, "android/graphics/text/TextRunShaper", gMethods,
                                 NELEM(gMethods))
         + RegisterMethodsOrDie(env, "android/graphics/text/PositionedGlyphs",
             gResultMethods, NELEM(gResultMethods));

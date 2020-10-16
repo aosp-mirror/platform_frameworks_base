@@ -112,6 +112,7 @@ class DisplayWindowSettings {
         private boolean mShouldShowSystemDecors = false;
         private boolean mShouldShowIme = false;
         private int mFixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
+        private boolean mIgnoreOrientationRequest = false;
 
         private Entry(String name) {
             mName = name;
@@ -131,6 +132,7 @@ class DisplayWindowSettings {
             mShouldShowSystemDecors = copyFrom.mShouldShowSystemDecors;
             mShouldShowIme = copyFrom.mShouldShowIme;
             mFixedToUserRotation = copyFrom.mFixedToUserRotation;
+            mIgnoreOrientationRequest = copyFrom.mIgnoreOrientationRequest;
         }
 
         /** @return {@code true} if all values are default. */
@@ -144,7 +146,8 @@ class DisplayWindowSettings {
                     && !mShouldShowWithInsecureKeyguard
                     && !mShouldShowSystemDecors
                     && !mShouldShowIme
-                    && mFixedToUserRotation == IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
+                    && mFixedToUserRotation == IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT
+                    && !mIgnoreOrientationRequest;
         }
     }
 
@@ -245,6 +248,15 @@ class DisplayWindowSettings {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Entry entry = getOrCreateEntry(displayInfo);
         entry.mFixedToUserRotation = fixedToUserRotation;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    void setIgnoreOrientationRequest(
+            DisplayContent displayContent, boolean ignoreOrientationRequest) {
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        if (entry.mIgnoreOrientationRequest == ignoreOrientationRequest) return;
+        entry.mIgnoreOrientationRequest = ignoreOrientationRequest;
         writeSettingsIfNeeded(entry, displayInfo);
     }
 
@@ -389,6 +401,7 @@ class DisplayWindowSettings {
         final boolean hasSizeOverride = entry.mForcedWidth != 0 && entry.mForcedHeight != 0;
         dc.mIsDensityForced = hasDensityOverride;
         dc.mIsSizeForced = hasSizeOverride;
+        dc.setIgnoreOrientationRequest(entry.mIgnoreOrientationRequest);
 
         final int width = hasSizeOverride ? entry.mForcedWidth : dc.mBaseDisplayWidth;
         final int height = hasSizeOverride ? entry.mForcedHeight : dc.mBaseDisplayHeight;
@@ -529,6 +542,8 @@ class DisplayWindowSettings {
             entry.mShouldShowSystemDecors = getBooleanAttribute(parser, "shouldShowSystemDecors");
             entry.mShouldShowIme = getBooleanAttribute(parser, "shouldShowIme");
             entry.mFixedToUserRotation = getIntAttribute(parser, "fixedToUserRotation");
+            entry.mIgnoreOrientationRequest
+                    = getBooleanAttribute(parser, "ignoreOrientationRequest");
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
@@ -612,6 +627,10 @@ class DisplayWindowSettings {
                 if (entry.mFixedToUserRotation != IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT) {
                     out.attribute(null, "fixedToUserRotation",
                             Integer.toString(entry.mFixedToUserRotation));
+                }
+                if (entry.mIgnoreOrientationRequest) {
+                    out.attribute(null, "ignoreOrientationRequest",
+                            Boolean.toString(entry.mIgnoreOrientationRequest));
                 }
                 out.endTag(null, "display");
             }

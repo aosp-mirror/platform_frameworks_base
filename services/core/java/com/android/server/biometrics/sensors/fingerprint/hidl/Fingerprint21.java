@@ -594,16 +594,12 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void startPreparedClient(int sensorId, int cookie) {
-        mHandler.post(() -> {
-            mScheduler.startPreparedClient(cookie);
-        });
+        mHandler.post(() -> mScheduler.startPreparedClient(cookie));
     }
 
     @Override
     public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
-        mHandler.post(() -> {
-            mScheduler.cancelAuthentication(token);
-        });
+        mHandler.post(() -> mScheduler.cancelAuthentication(token));
     }
 
     @Override

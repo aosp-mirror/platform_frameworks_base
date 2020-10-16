@@ -17,10 +17,14 @@
 package android.text.format;
 
 import android.annotation.NonNull;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.icu.text.DateFormatSymbols;
 import android.icu.text.DateTimePatternGenerator;
+import android.os.Build;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -159,6 +163,16 @@ public class DateFormat {
     private static boolean sIs24Hour;
 
     /**
+     * {@link #getBestDateTimePattern(Locale, String)} does not allow non-consecutive repeated
+     * symbol in the skeleton. For example, please use a skeleton of {@code "jmm"} or
+     * {@code "hmma"} instead of {@code "ahmma"} or {@code "jmma"}, because the field 'j' could
+     * mean using 12-hour in some locales and, in this case, is duplicated as the 'a' field.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    static final long DISALLOW_DUPLICATE_FIELD_IN_SKELETON = 170233598L;
+
+    /**
      * Returns true if times should be formatted as 24 hour times, false if times should be
      * formatted as 12 hour (AM/PM) times. Based on the user's chosen locale and other preferences.
      * @param context the context to use for the content resolver
@@ -251,7 +265,9 @@ public class DateFormat {
      */
     public static String getBestDateTimePattern(Locale locale, String skeleton) {
         DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(locale);
-        return dtpg.getBestPattern(skeleton);
+        boolean allowDuplicateFields = !CompatChanges.isChangeEnabled(
+                DISALLOW_DUPLICATE_FIELD_IN_SKELETON);
+        return dtpg.getBestPattern(skeleton, allowDuplicateFields);
     }
 
     /**

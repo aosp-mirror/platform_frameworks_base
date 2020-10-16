@@ -37,12 +37,15 @@ import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
+import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Maintains the state of a single sensor within an instance of the
@@ -55,6 +58,7 @@ class Sensor {
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final LockoutCache mLockoutCache;
+    @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     @Nullable private Session mCurrentSession; // TODO: Death recipient
     @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
@@ -84,6 +88,7 @@ class Sensor {
         mSensorProperties = sensorProperties;
         mScheduler = new BiometricScheduler(tag, gestureAvailabilityDispatcher);
         mLockoutCache = new LockoutCache();
+        mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
 
@@ -209,12 +214,32 @@ class Sensor {
 
             @Override
             public void onLockoutTimed(long durationMillis) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof LockoutConsumer)) {
+                        Slog.e(mTag, "onLockoutTimed for non-lockout consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
+                    lockoutConsumer.onLockoutTimed(durationMillis);
+                });
             }
 
             @Override
             public void onLockoutPermanent() {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof LockoutConsumer)) {
+                        Slog.e(mTag, "onLockoutPermanent for non-lockout consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
+                    lockoutConsumer.onLockoutPermanent();
+                });
             }
 
             @Override
@@ -269,5 +294,9 @@ class Sensor {
 
     @NonNull LockoutCache getLockoutCache() {
         return mLockoutCache;
+    }
+
+    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+        return mAuthenticatorIds;
     }
 }

@@ -38,7 +38,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telecom.TelecomManager;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
@@ -46,7 +45,6 @@ import android.view.KeyEvent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -529,15 +527,9 @@ public class GestureLauncherService extends SystemService {
                         "userSetupComplete = %s, performing panic gesture.",
                         userSetupComplete));
             }
-            // TODO(b/160006048): Not all devices have telephony. Check system feature first.
-            TelecomManager telecomManager = (TelecomManager) mContext.getSystemService(
-                    Context.TELECOM_SERVICE);
-            mContext.startActivity(telecomManager.createLaunchEmergencyDialerIntent(null).addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                            | Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra(
-                    "com.android.phone.EmergencyDialer.extra.ENTRY_TYPE",
-                    2)); // 2 maps to power button, forcing into fast emergency dialer experience.
+            StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            service.onEmergencyActionLaunchGestureDetected();
             return true;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

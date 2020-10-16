@@ -1569,10 +1569,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Creates a new {@link CallerIdentity} object to represent the caller's identity. If no
-     * component name is provided, look up the component name and fill it in for the caller.
+     * Creates a new {@link CallerIdentity} object to represent the caller's identity, which should
+     * be an admin of a profile on the device. If no component name is provided, look up the
+     * component name and fill it in for the caller.
+     *
+     * Note: this method should only be called when the expected caller is an admin.
+     *
+     * @throws SecurityException if the caller is not an active admin.
      */
-    private CallerIdentity getCallerIdentityOptionalAdmin(@Nullable ComponentName adminComponent) {
+    private CallerIdentity getAdminCallerIdentity(@Nullable ComponentName adminComponent) {
         if (adminComponent == null) {
             ActiveAdmin admin = getActiveAdminOfCaller();
             if (admin != null) {
@@ -1586,24 +1591,66 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Creates a new {@link CallerIdentity} object to represent the caller's identity. If no
-     * package name is provided, look up the package name and fill it in for the caller.
+     * component name is provided, look up the component name and fill it in for the caller.
+     *
+     * Note: this method should only be called when the caller may not be an admin. If the caller
+     * is not an admin, the ComponentName in the returned identity will be null.
      */
-    private CallerIdentity getCallerIdentityOptionalPackage(@Nullable String callerPackage) {
+    private CallerIdentity getNonPrivilegedOrAdminCallerIdentity(
+            @Nullable ComponentName adminComponent) {
+        if (adminComponent == null) {
+            ActiveAdmin admin = getActiveAdminOfCaller();
+            if (admin != null) {
+                adminComponent = admin.info.getComponent();
+            } else {
+                return getCallerIdentity();
+            }
+        }
+        return getCallerIdentity(adminComponent);
+
+    }
+
+    /**
+     * Creates a new {@link CallerIdentity} object to represent the caller's identity. If no
+     * package name is provided, look up the package name and fill it in for the caller.
+     *
+     * Note: this method should only be called when the expected caller is an admin.
+     *
+     * @throws SecurityException if the caller is not an active admin.
+     */
+    private CallerIdentity getAdminCallerIdentityUsingPackage(@Nullable String callerPackage) {
         if (callerPackage == null) {
             ActiveAdmin admin = getActiveAdminOfCaller();
             if (admin != null) {
                 return getCallerIdentity(admin.info.getPackageName());
             }
             throw new SecurityException("Caller is not an active admin");
-        } else {
-            return getCallerIdentity(callerPackage);
         }
+        return getCallerIdentity(callerPackage);
+    }
+
+    /**
+     * Creates a new {@link CallerIdentity} object to represent the caller's identity. If no
+     * package name is provided, look up the package name and fill it in for the caller.
+     */
+    private CallerIdentity getNonPrivilegedOrAdminCallerIdentityUsingPackage(
+            @Nullable String callerPackage) {
+        if (callerPackage == null) {
+            ActiveAdmin admin = getActiveAdminOfCaller();
+            if (admin != null) {
+                callerPackage = admin.info.getPackageName();
+            } else {
+                return getCallerIdentity();
+            }
+        }
+        return getCallerIdentity(callerPackage);
     }
 
     /**
      * Retrieves the active admin of the caller. This method should not be called directly and
-     * should only be called by {@link #getCallerIdentityOptionalAdmin} or
-     * {@link #getCallerIdentityOptionalPackage}.
+     * should only be called by {@link #getAdminCallerIdentity},
+     * {@link #getNonPrivilegedOrAdminCallerIdentity}, {@link #getAdminCallerIdentityUsingPackage}
+     * or {@link #getNonPrivilegedOrAdminCallerIdentityUsingPackage}.
      */
     private ActiveAdmin getActiveAdminOfCaller() {
         final int callerUid = mInjector.binderGetCallingUid();
@@ -6023,7 +6070,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentityOptionalAdmin(comp);
+        final CallerIdentity caller = getAdminCallerIdentity(comp);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
@@ -6463,12 +6510,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentityOptionalAdmin(who);
+        final CallerIdentity caller = getAdminCallerIdentity(who);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             // Check for permissions if a particular caller is specified
-            if (who != null) {
+            if (caller.hasAdminComponent()) {
                 // When checking for a single caller, status is based on caller's request
                 ActiveAdmin ap = getActiveAdminUncheckedLocked(who, userHandle);
                 return ap != null ? ap.encryptionRequested : false;
@@ -6497,7 +6544,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentityOptionalPackage(callerPackage);
+        final CallerIdentity caller = getAdminCallerIdentityUsingPackage(callerPackage);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         // It's not critical here, but let's make sure the package name is correct, in case
@@ -8614,12 +8661,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(agent, "agent null");
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentityOptionalAdmin(admin);
+        final CallerIdentity caller = getAdminCallerIdentity(admin);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             final String componentName = agent.flattenToString();
-            if (admin != null) {
+            if (caller.hasAdminComponent()) {
                 final ActiveAdmin ap = getActiveAdminUncheckedLocked(admin, userHandle, parent);
                 if (ap == null) return null;
                 TrustAgentInfo trustAgentInfo = ap.trustAgentInfos.get(componentName);

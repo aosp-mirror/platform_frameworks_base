@@ -70,6 +70,13 @@
             android:exported="false"
             android:resizeableActivity="true" />
 
+        <activity android:name="com.android.systemui.emergency.EmergencyActivityTest"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.LAUNCH_EMERGENCY"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name="com.android.systemui.globalactions.GlobalActionsImeTest$TestActivity"
             android:excludeFromRecents="true"

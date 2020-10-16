@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -111,7 +112,6 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void startShortcutActivity(@NonNull ShortcutInfo shortcut,
             @NonNull ActivityOptions options, @Nullable Rect sourceBounds) {
-        mMultiWindowTaskListener.setPendingListener(this);
         prepareActivityOptions(options);
         LauncherApps service = mContext.getSystemService(LauncherApps.class);
         try {
@@ -130,7 +130,6 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @NonNull ActivityOptions options) {
-        mMultiWindowTaskListener.setPendingListener(this);
         prepareActivityOptions(options);
         try {
             pendingIntent.send(mContext, 0 /* code */, fillInIntent,
@@ -142,6 +141,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private void prepareActivityOptions(ActivityOptions options) {
+        final Binder launchCookie = new Binder();
+        mMultiWindowTaskListener.setPendingLaunchCookieListener(launchCookie, this);
+        options.setLaunchCookie(launchCookie);
         options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         options.setTaskAlwaysOnTop(true);
     }

@@ -337,10 +337,15 @@ interface IWindowManager
      */
     boolean isDisplayRotationFrozen(int displayId);
 
-    /**
+   /**
     *  Sets if display rotation is fixed to user specified value for given displayId.
     */
     void setFixedToUserRotation(int displayId, int fixedToUserRotation);
+
+   /**
+    *  Sets if all requested fixed orientation should be ignored for given displayId.
+    */
+    void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest);
 
     /**
      * Screenshot the current wallpaper layer, including the whole screen.

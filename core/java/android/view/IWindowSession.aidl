@@ -98,9 +98,6 @@ interface IWindowSession {
      * @param outSurface Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
      * @param outSurfaceSize The width and height of the surface control
-     * @param outBlastSurfaceControl A BLAST SurfaceControl allocated by the WindowManager
-     * the SurfaceControl willl be managed by the client side, but the WindowManager
-     * may use it as a deferTransaction barrier.
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
@@ -110,7 +107,7 @@ interface IWindowSession {
             int flags, long frameNumber, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Point outSurfaceSize, out SurfaceControl outBlastSurfaceControl);
+            out Point outSurfaceSize);
 
     /*
      * Notify the window manager that an application is relaunching and

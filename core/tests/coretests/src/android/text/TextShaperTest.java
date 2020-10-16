@@ -18,15 +18,11 @@ package android.text;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.graphics.text.PositionedGlyphs;
-
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -36,11 +32,10 @@ public class TextShaperTest {
     public void testFontWithPath() {
         TextPaint p = new TextPaint();
         p.setFontFeatureSettings("'wght' 900");
-        List<PositionedGlyphs> glyphs = StyledTextShaper.shapeText("a", 0, 1,
-                TextDirectionHeuristics.LTR, p);
-        assertThat(glyphs.size()).isEqualTo(1);
-        // This test only passes if the font of the Latin font is variable font.
-        assertThat(glyphs.get(0).getFont(0).getFile()).isNotNull();
-
+        TextShaper.shapeText("a", 0, 1, TextDirectionHeuristics.LTR, p,
+                (start, end, glyphs, paint) -> {
+                // This test only passes if the font of the Latin font is variable font.
+                assertThat(glyphs.getFont(0).getFile()).isNotNull();
+            });
     }
 }

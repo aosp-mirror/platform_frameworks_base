@@ -102,6 +102,18 @@ public class WindowManagerWrapper {
     }
 
     /**
+     *  Sets if app requested fixed orientation should be ignored for given displayId.
+     */
+    public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setIgnoreOrientationRequest(
+                    displayId, ignoreOrientationRequest);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to setIgnoreOrientationRequest()", e);
+        }
+    }
+
+    /**
      * @return the stable insets for the primary display.
      */
     public void getStableInsets(Rect outStableInsets) {

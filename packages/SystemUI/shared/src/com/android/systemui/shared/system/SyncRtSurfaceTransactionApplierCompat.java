@@ -65,7 +65,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
     public SyncRtSurfaceTransactionApplierCompat(View targetView) {
         mTargetViewRootImpl = targetView != null ? targetView.getViewRootImpl() : null;
         mBarrierSurfaceControl = mTargetViewRootImpl != null
-            ? mTargetViewRootImpl.getRenderSurfaceControl() : null;
+            ? mTargetViewRootImpl.getSurfaceControl() : null;
 
         mApplyHandler = new Handler(new Callback() {
             @Override

@@ -140,6 +140,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 56 << MSG_SHIFT;
     private static final int MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION = 57 << MSG_SHIFT;
     private static final int MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND = 58 << MSG_SHIFT;
+    //TODO(b/169175022) Update name and when feature name is locked.
+    private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 59 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -258,6 +260,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         default void showAssistDisclosure() { }
         default void startAssist(Bundle args) { }
         default void onCameraLaunchGestureDetected(int source) { }
+
+        /**
+         * Notifies SysUI that the emergency action gesture was detected.
+         */
+        default void onEmergencyActionLaunchGestureDetected() { }
         default void showPictureInPictureMenu() { }
         default void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) { }
 
@@ -730,6 +737,14 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
+    public void onEmergencyActionLaunchGestureDetected() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_EMERGENCY_ACTION_LAUNCH_GESTURE);
+            mHandler.obtainMessage(MSG_EMERGENCY_ACTION_LAUNCH_GESTURE).sendToTarget();
+        }
+    }
+
+    @Override
     public void addQsTile(ComponentName tile) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_ADD_QS_TILE, tile).sendToTarget();
@@ -1186,6 +1201,10 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                         mCallbacks.get(i).onCameraLaunchGestureDetected(msg.arg1);
                     }
                     break;
+                case MSG_EMERGENCY_ACTION_LAUNCH_GESTURE:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onEmergencyActionLaunchGestureDetected();
+                    }
                 case MSG_SHOW_PICTURE_IN_PICTURE_MENU:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showPictureInPictureMenu();
