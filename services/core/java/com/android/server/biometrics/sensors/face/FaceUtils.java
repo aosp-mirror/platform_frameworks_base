@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.face.Face;
@@ -33,21 +34,56 @@ import java.util.List;
 public class FaceUtils implements BiometricUtils<Face> {
 
     private static final Object sInstanceLock = new Object();
-    private static FaceUtils sInstance;
+    // Map<SensorId, FaceUtils>
+    private static SparseArray<FaceUtils> sInstances;
+    private static final String LEGACY_FACE_FILE = "settings_face.xml";
 
     @GuardedBy("this")
-    private final SparseArray<FaceUserState> mUsers = new SparseArray<>();
+    private final SparseArray<FaceUserState> mUserStates;
+    private final String mFileName;
 
-    public static FaceUtils getInstance() {
-        synchronized (sInstanceLock) {
-            if (sInstance == null) {
-                sInstance = new FaceUtils();
-            }
-        }
-        return sInstance;
+    public static FaceUtils getInstance(int sensorId) {
+        // Specify a null fileName to use an auto-generated sensorId-specific filename.
+        return getInstance(sensorId, null /* fileName */);
     }
 
-    private FaceUtils() {
+    /**
+     * Retrieves an instance for the specified sensorId. If the fileName is null, a default
+     * filename (e.g. settings_face_<sensorId>.xml will be generated.
+     *
+     * Specifying an explicit fileName allows for backward compatibility with legacy devices,
+     * where everything is stored in settings_face.xml.
+     */
+    private static FaceUtils getInstance(int sensorId, @Nullable String fileName) {
+        final FaceUtils utils;
+        synchronized (sInstanceLock) {
+            if (sInstances == null) {
+                sInstances = new SparseArray<>();
+            }
+            if (sInstances.get(sensorId) == null) {
+                if (fileName == null) {
+                    fileName = "settings_face_" + sensorId + ".xml";
+                }
+                sInstances.put(sensorId, new FaceUtils(fileName));
+            }
+            utils = sInstances.get(sensorId);
+        }
+        return utils;
+    }
+
+    /**
+     * Legacy getter for {@link android.hardware.biometrics.face.V1_0} and its extended subclasses,
+     * which do not support a well defined sensorId from the HAL.
+     */
+    public static FaceUtils getInstance() {
+        // Note that sensorId for legacy services can be hard-coded to 0 since it's only used
+        // to index into the sensor states map.
+        return getInstance(0 /* sensorId */, LEGACY_FACE_FILE);
+    }
+
+    private FaceUtils(String fileName) {
+        mUserStates = new SparseArray<>();
+        mFileName = fileName;
     }
 
     @Override
@@ -81,10 +117,10 @@ public class FaceUtils implements BiometricUtils<Face> {
 
     private FaceUserState getStateForUser(Context ctx, int userId) {
         synchronized (this) {
-            FaceUserState state = mUsers.get(userId);
+            FaceUserState state = mUserStates.get(userId);
             if (state == null) {
-                state = new FaceUserState(ctx, userId);
-                mUsers.put(userId, state);
+                state = new FaceUserState(ctx, userId, mFileName);
+                mUserStates.put(userId, state);
             }
             return state;
         }
