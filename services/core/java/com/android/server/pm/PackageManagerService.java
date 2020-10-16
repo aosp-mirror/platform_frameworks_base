@@ -17334,7 +17334,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
             extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
-            extras.putInt(Intent.EXTRA_UNSTARTABLE_REASON, reason);
+            extras.putInt(Intent.EXTRA_REASON, reason);
             // send broadcast to users with this app installed
             sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTARTABLE, mPackageName,
                     extras, 0 /*flags*/,

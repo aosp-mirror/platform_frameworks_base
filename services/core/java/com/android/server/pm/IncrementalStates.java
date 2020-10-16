@@ -376,10 +376,10 @@ public final class IncrementalStates {
                 case IDataLoaderStatusListener.STREAM_INTEGRITY_ERROR:
                     // fall through
                 case IDataLoaderStatusListener.STREAM_SOURCE_ERROR: {
-                    return PackageManager.UNSTARTABLE_REASON_CONNECTION_ERROR;
+                    return PackageManager.UNSTARTABLE_REASON_DATALOADER_TRANSPORT;
                 }
                 case IDataLoaderStatusListener.STREAM_STORAGE_ERROR: {
-                    return PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE;
+                    return PackageManager.UNSTARTABLE_REASON_DATALOADER_STORAGE;
                 }
                 default:
                     return PackageManager.UNSTARTABLE_REASON_UNKNOWN;
