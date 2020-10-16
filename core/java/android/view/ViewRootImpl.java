@@ -3876,10 +3876,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void addFrameCallbackIfNeeded() {
-        if (!mNextDrawUseBLASTSyncTransaction) {
-            return;
-        }
-
         // Frame callbacks will always occur after submitting draw requests and before
         // the draw actually occurs. This will ensure that we set the next transaction
         // for the frame that's about to get drawn and not on a previous frame that.
@@ -3887,8 +3883,19 @@ public final class ViewRootImpl implements ViewParent,
         // This is thread safe since mRtNextFrameReportConsumeWithBlast will only be
         // modified in onFrameDraw and then again in onFrameComplete. This is to ensure the
         // next frame completed should be reported with the blast sync transaction.
-        registerRtFrameCallback(createFrameDrawingCallback());
-        mNextDrawUseBLASTSyncTransaction = false;
+        if (mNextDrawUseBLASTSyncTransaction) {
+            registerRtFrameCallback(createFrameDrawingCallback());
+            mNextDrawUseBLASTSyncTransaction = false;
+        } else if (mReportNextDraw) {
+            registerRtFrameCallback(frame -> {
+                if (mBlastBufferQueue != null) {
+                    // If we need to report next draw, wait for adapter to flush its shadow queue
+                    // by processing previously queued buffers so that we can submit the
+                    // transaction a timely manner.
+                    mBlastBufferQueue.flushShadowQueue();
+                }
+            });
+        }
     }
 
     private void performDraw() {
