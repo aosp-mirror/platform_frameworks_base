@@ -54,6 +54,10 @@ public class AppSearchException extends Exception {
         mResultCode = resultCode;
     }
 
+    public @AppSearchResult.ResultCode int getResultCode() {
+        return mResultCode;
+    }
+
     /**
      * Converts this {@link java.lang.Exception} into a failed {@link AppSearchResult}
      */
