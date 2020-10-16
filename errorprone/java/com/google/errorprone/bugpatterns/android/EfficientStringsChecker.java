@@ -18,7 +18,11 @@ package com.google.errorprone.bugpatterns.android;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.allOf;
+import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.contains;
+import static com.google.errorprone.matchers.Matchers.hasModifier;
+import static com.google.errorprone.matchers.Matchers.instanceMethod;
+import static com.google.errorprone.matchers.Matchers.isSubtypeOf;
 import static com.google.errorprone.matchers.Matchers.kindIs;
 import static com.google.errorprone.matchers.Matchers.methodInvocation;
 import static com.google.errorprone.matchers.Matchers.not;
@@ -28,19 +32,28 @@ import com.google.auto.service.AutoService;
 import com.google.errorprone.BugPattern;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
+import com.google.errorprone.bugpatterns.BugChecker.CompoundAssignmentTreeMatcher;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
+import com.google.errorprone.bugpatterns.BugChecker.NewClassTreeMatcher;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.matchers.Matcher;
 import com.google.errorprone.predicates.TypePredicate;
 import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.code.Type;
 
 import java.util.List;
+import java.util.Objects;
+
+import javax.lang.model.element.Modifier;
 
 /**
  * Android offers several efficient alternatives to some upstream {@link String}
@@ -52,7 +65,7 @@ import java.util.List;
     summary = "Verifies efficient Strings best-practices",
     severity = WARNING)
 public final class EfficientStringsChecker extends BugChecker
-        implements MethodInvocationTreeMatcher {
+        implements MethodInvocationTreeMatcher, NewClassTreeMatcher, CompoundAssignmentTreeMatcher {
 
     private static final Matcher<ExpressionTree> FORMAT_CALL = methodInvocation(
             staticMethod().onClass("java.lang.String").named("format"));
@@ -60,17 +73,37 @@ public final class EfficientStringsChecker extends BugChecker
             staticMethod().onClass(withSimpleName("Preconditions")).withAnyName());
     private static final Matcher<ExpressionTree> OBJECTS_CALL = methodInvocation(
             staticMethod().onClass("java.util.Objects").named("requireNonNull"));
+    private static final Matcher<ExpressionTree> APPEND_CALL = methodInvocation(
+            instanceMethod().onExactClass("java.lang.StringBuilder")
+                    .withSignature("append(java.lang.String)"));
 
     /**
-     * Match an expression which combines both string literals any other dynamic
-     * values, since these allocate a transparent StringBuilder.
-     * <p>
-     * This won't match a single isolated string literal, or a chain consisting
-     * of only string literals, since those don't require dynamic construction.
+     * Identify any dynamic values that will likely cause us to allocate a
+     * transparent StringBuilder.
      */
-    private static final Matcher<ExpressionTree> CONTAINS_DYNAMIC_STRING = allOf(
-            contains(ExpressionTree.class, kindIs(Kind.STRING_LITERAL)),
-            contains(ExpressionTree.class, not(kindIs(Kind.STRING_LITERAL))));
+    private static final Matcher<ExpressionTree> DYNAMIC_VALUE = anyOf(
+            allOf(kindIs(Kind.MEMBER_SELECT),
+                    not(allOf(hasModifier(Modifier.STATIC), hasModifier(Modifier.FINAL)))),
+            allOf(kindIs(Kind.IDENTIFIER),
+                    not(allOf(hasModifier(Modifier.STATIC), hasModifier(Modifier.FINAL)))),
+            kindIs(Kind.METHOD_INVOCATION));
+
+    /**
+     * Identify an expression that is either a direct "+" binary operator, or
+     * that contains a "+" binary operator nested deep inside.
+     */
+    private static final Matcher<Tree> PLUS = anyOf(kindIs(Kind.PLUS),
+            contains(BinaryTree.class, kindIs(Kind.PLUS)));
+
+    /**
+     * Identify an expression that is using a "+" binary operator to combine
+     * dynamic values, which will likely end up allocating a transparent
+     * {@link StringBuilder}.
+     */
+    private static final Matcher<Tree> PLUS_DYNAMIC_VALUE = allOf(
+            PLUS, contains(ExpressionTree.class, DYNAMIC_VALUE));
+
+    private static final Matcher<Tree> IS_STRING_BUFFER = isSubtypeOf("java.lang.StringBuffer");
 
     @Override
     public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
@@ -98,9 +131,9 @@ public final class EfficientStringsChecker extends BugChecker
         } else if (PRECONDITIONS_CALL.matches(tree, state)
                 || OBJECTS_CALL.matches(tree, state)) {
             final List<? extends ExpressionTree> args = tree.getArguments();
-            for (int i = 1 ; i < args.size(); i++) {
-                final ExpressionTree arg = args.get(i);
-                if (CONTAINS_DYNAMIC_STRING.matches(arg, state)) {
+            if (args.size() > 1) {
+                final ExpressionTree arg = args.get(1);
+                if (PLUS_DYNAMIC_VALUE.matches(arg, state)) {
                     return buildDescription(arg)
                             .setMessage("Building dynamic messages is discouraged, since they "
                                     + "always allocate a transparent StringBuilder, even in "
@@ -108,6 +141,37 @@ public final class EfficientStringsChecker extends BugChecker
                             .build();
                 }
             }
+        } else if (APPEND_CALL.matches(tree, state)) {
+            final ExpressionTree arg = tree.getArguments().get(0);
+            if (PLUS_DYNAMIC_VALUE.matches(arg, state)) {
+                return buildDescription(arg)
+                        .setMessage("Call append() directly for each argument instead of "
+                                + "allocating a transparent StringBuilder")
+                        .build();
+            }
+        }
+        return Description.NO_MATCH;
+    }
+
+    @Override
+    public Description matchNewClass(NewClassTree tree, VisitorState state) {
+        if (IS_STRING_BUFFER.matches(tree, state)) {
+            return buildDescription(tree)
+                    .setMessage("Strongly encouraged to replace with StringBuilder "
+                            + "which avoids synchronization overhead")
+                    .build();
+        }
+        return Description.NO_MATCH;
+    }
+
+    @Override
+    public Description matchCompoundAssignment(CompoundAssignmentTree tree, VisitorState state) {
+        if (tree.getKind() == Kind.PLUS_ASSIGNMENT && "java.lang.String"
+                .equals(String.valueOf(ASTHelpers.getType(tree.getVariable())))) {
+            return buildDescription(tree)
+                    .setMessage("Strongly encouraged to replace with StringBuilder "
+                            + "which avoids transparent StringBuilder allocations")
+                    .build();
         }
         return Description.NO_MATCH;
     }

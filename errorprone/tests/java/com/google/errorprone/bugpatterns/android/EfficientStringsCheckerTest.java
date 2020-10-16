@@ -116,4 +116,126 @@ public class EfficientStringsCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testPreconditions_Complex() {
+        compilationHelper
+                .addSourceFile("/android/util/Preconditions.java")
+                .addSourceLines("Example.java",
+                        "import android.util.Preconditions;",
+                        "public class Example {",
+                        "  String[] classArray = new String[] { null };",
+                        "  String classVar;",
+                        "  static final String CONST_VAR = \"baz\";",
+                        "  public String classMethod() { return \"baz\"; }",
+                        "  public static final String CONST_METHOD() { return \"baz\"; }",
+                        "  public void checkNotNull(Example example, Object val) {",
+                        "    String methodVar = \"baz\";",
+                        "    Preconditions.checkNotNull(val, \"foo\");",
+                        "    Preconditions.checkNotNull(val, (\"foo\"));",
+                        "    Preconditions.checkNotNull(val, classArray[0]);",
+                        "    Preconditions.checkNotNull(val, classVar);",
+                        "    Preconditions.checkNotNull(val, CONST_VAR);",
+                        "    Preconditions.checkNotNull(val, example.classVar);",
+                        "    Preconditions.checkNotNull(val, Example.CONST_VAR);",
+                        "    Preconditions.checkNotNull(val, methodVar);",
+                        "    Preconditions.checkNotNull(val, classMethod());",
+                        "    Preconditions.checkNotNull(val, CONST_METHOD());",
+                        "    Preconditions.checkNotNull(val, \"foo\" + \"bar\");",
+                        "    Preconditions.checkNotNull(val, (\"foo\" + \"bar\"));",
+                        "    // BUG: Diagnostic contains:",
+                        "    Preconditions.checkNotNull(val, \"foo\" + classArray[0]);",
+                        "    // BUG: Diagnostic contains:",
+                        "    Preconditions.checkNotNull(val, \"foo\" + classVar);",
+                        "    Preconditions.checkNotNull(val, \"foo\" + CONST_VAR);",
+                        "    // BUG: Diagnostic contains:",
+                        "    Preconditions.checkNotNull(val, \"foo\" + methodVar);",
+                        "    // BUG: Diagnostic contains:",
+                        "    Preconditions.checkNotNull(val, \"foo\" + classMethod());",
+                        "    // BUG: Diagnostic contains:",
+                        "    Preconditions.checkNotNull(val, \"foo\" + CONST_METHOD());",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testStringBuffer() {
+        compilationHelper
+                .addSourceLines("Example.java",
+                        "public class Example {",
+                        "  public void example() {",
+                        "    // BUG: Diagnostic contains:",
+                        "    StringBuffer sb = new StringBuffer();",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testStringBuilder() {
+        compilationHelper
+                .addSourceLines("Example.java",
+                        "public class Example {",
+                        "  StringBuilder sb = new StringBuilder();",
+                        "  String[] classArray = new String[] { null };",
+                        "  String classVar;",
+                        "  static final String CONST_VAR = \"baz\";",
+                        "  public String classMethod() { return \"baz\"; }",
+                        "  public static final String CONST_METHOD() { return \"baz\"; }",
+                        "  public void generic(Example example) {",
+                        "    sb.append(\"foo\");",
+                        "    sb.append(\"foo\" + \"bar\");",
+                        "    sb.append(classArray[0]);",
+                        "    sb.append(example.classArray[0]);",
+                        "    sb.append(classVar);",
+                        "    sb.append(CONST_VAR);",
+                        "    sb.append(example.classVar);",
+                        "    sb.append(Example.CONST_VAR);",
+                        "    sb.append(classMethod());",
+                        "    sb.append(CONST_METHOD());",
+                        "  }",
+                        "  public void string(String val) {",
+                        "    sb.append(\"foo\").append(val);",
+                        "    sb.append(\"foo\").append(val != null ? \"bar\" : \"baz\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    sb.append(\"foo\" + val);",
+                        "  }",
+                        "  public void number(int val) {",
+                        "    sb.append(\"foo\").append(val);",
+                        "    sb.append(\"foo\").append(val + val);",
+                        "    sb.append(\"foo\").append(val > 0 ? \"bar\" : \"baz\");",
+                        "    // BUG: Diagnostic contains:",
+                        "    sb.append(\"foo\" + val);",
+                        "    // BUG: Diagnostic contains:",
+                        "    sb.append(\"foo\" + String.valueOf(val));",
+                        "    // BUG: Diagnostic contains:",
+                        "    sb.append(\"foo\" + Integer.toString(val));",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testPlusAssignment() {
+        compilationHelper
+                .addSourceLines("Example.java",
+                        "public class Example {",
+                        "  public void string(String val) {",
+                        "    String s = \"foo\";",
+                        "    // BUG: Diagnostic contains:",
+                        "    s += \"bar\";",
+                        "    // BUG: Diagnostic contains:",
+                        "    s += val;",
+                        "    // BUG: Diagnostic contains:",
+                        "    s += (\"bar\" + \"baz\");",
+                        "  }",
+                        "  public void number(int val) {",
+                        "    int other = 42;",
+                        "    other += 24;",
+                        "    other += val;",
+                        "  }",
+                        "}")
+                .doTest();
+    }
 }
