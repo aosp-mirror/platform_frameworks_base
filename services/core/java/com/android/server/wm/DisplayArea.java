@@ -263,6 +263,26 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         if (mIgnoreOrientationRequest) {
             pw.println(prefix + "mIgnoreOrientationRequest=true");
         }
+        if (hasRequestedOverrideConfiguration()) {
+            pw.println(prefix + "overrideConfig=" + getRequestedOverrideConfiguration());
+        }
+    }
+
+    void dumpChildDisplayArea(PrintWriter pw, String prefix, boolean dumpAll) {
+        final String doublePrefix = prefix + "  ";
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            final DisplayArea<?> childArea = getChildAt(i).asDisplayArea();
+            if (childArea == null) {
+                continue;
+            }
+            pw.println(prefix + "* " + childArea.getName());
+            if (childArea.isTaskDisplayArea()) {
+                // TaskDisplayArea can only contain task. And it is already printed by display.
+                continue;
+            }
+            childArea.dump(pw, doublePrefix, dumpAll);
+            childArea.dumpChildDisplayArea(pw, doublePrefix, dumpAll);
+        }
     }
 
     @Override
