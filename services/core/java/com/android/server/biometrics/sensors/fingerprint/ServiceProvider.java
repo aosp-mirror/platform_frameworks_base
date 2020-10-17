@@ -64,10 +64,10 @@ public interface ServiceProvider {
 
     void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken);
 
-    void scheduleGenerateChallenge(int sensorId, @NonNull IBinder token,
+    void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, String opPackageName);
 
-    void scheduleRevokeChallenge(int sensorId, @NonNull IBinder token,
+    void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge);
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,

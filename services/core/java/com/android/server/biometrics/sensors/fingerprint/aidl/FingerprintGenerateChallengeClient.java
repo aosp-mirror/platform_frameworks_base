@@ -19,7 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.IGenerateChallengeCallback;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -30,28 +30,12 @@ import com.android.server.biometrics.sensors.GenerateChallengeClient;
 /**
  * Fingerprint-specific generateChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintGenerateChallengeClient extends GenerateChallengeClient<IFingerprint> {
+class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISession> {
     private static final String TAG = "FingerprintGenerateChallengeClient";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
-    private final IGenerateChallengeCallback mGenerateChallengeCallback =
-            new IGenerateChallengeCallback.Stub() {
-        @Override
-        public void onChallengeGenerated(int sensorId, int userId, long challenge) {
-            try {
-                getListener().onChallengeGenerated(sensorId, challenge);
-                mCallback.onClientFinished(FingerprintGenerateChallengeClient.this,
-                        true /* success */);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to send challenge", e);
-                mCallback.onClientFinished(FingerprintGenerateChallengeClient.this,
-                        false /* success */);
-            }
-        }
-    };
-
     FingerprintGenerateChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<IFingerprint> lazyDaemon,
+            @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
             @NonNull String owner, int sensorId) {
@@ -61,11 +45,21 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<IFinger
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().generateChallenge(getSensorId(), getTargetUserId(),
-                    CHALLENGE_TIMEOUT_SEC,
-                    mGenerateChallengeCallback);
+            getFreshDaemon().generateChallenge(mSequentialId, CHALLENGE_TIMEOUT_SEC);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
+        }
+    }
+
+    void onChallengeGenerated(int sensorId, int userId, long challenge) {
+        try {
+            getListener().onChallengeGenerated(sensorId, challenge);
+            mCallback.onClientFinished(FingerprintGenerateChallengeClient.this,
+                    true /* success */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to send challenge", e);
+            mCallback.onClientFinished(FingerprintGenerateChallengeClient.this,
+                    false /* success */);
         }
     }
 }

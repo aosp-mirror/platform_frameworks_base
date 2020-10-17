@@ -505,7 +505,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void scheduleGenerateChallenge(int sensorId, @NonNull IBinder token,
+    public void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             final FingerprintGenerateChallengeClient client =
@@ -517,7 +517,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void scheduleRevokeChallenge(int sensorId, @NonNull IBinder token,
+    public void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
             final FingerprintRevokeChallengeClient client = new FingerprintRevokeChallengeClient(

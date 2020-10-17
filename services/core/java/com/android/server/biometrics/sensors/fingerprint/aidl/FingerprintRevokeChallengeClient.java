@@ -19,7 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.IRevokeChallengeCallback;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -29,23 +29,14 @@ import com.android.server.biometrics.sensors.RevokeChallengeClient;
 /**
  * Fingerprint-specific revokeChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintRevokeChallengeClient extends RevokeChallengeClient<IFingerprint> {
+class FingerprintRevokeChallengeClient extends RevokeChallengeClient<ISession> {
 
     private static final String TAG = "FingerpirntRevokeChallengeClient";
 
     private final long mChallenge;
 
-    private final IRevokeChallengeCallback mRevokeChallengeCallback =
-            new IRevokeChallengeCallback.Stub() {
-        @Override
-        public void onChallengeRevoked(int sensorId, int userId, long challenge) {
-            final boolean success = challenge == mChallenge;
-            mCallback.onClientFinished(FingerprintRevokeChallengeClient.this, success);
-        }
-    };
-
     FingerprintRevokeChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<IFingerprint> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
             @NonNull String owner, int sensorId, long challenge) {
         super(context, lazyDaemon, token, owner, sensorId);
         mChallenge = challenge;
@@ -54,10 +45,14 @@ class FingerprintRevokeChallengeClient extends RevokeChallengeClient<IFingerprin
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().revokeChallenge(getSensorId(), getTargetUserId(), mChallenge,
-                    mRevokeChallengeCallback);
+            getFreshDaemon().revokeChallenge(mSequentialId, mChallenge);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to revokeChallenge", e);
         }
+    }
+
+    void onChallengeRevoked(int sensorId, int userId, long challenge) {
+        final boolean success = challenge == mChallenge;
+        mCallback.onClientFinished(FingerprintRevokeChallengeClient.this, success);
     }
 }

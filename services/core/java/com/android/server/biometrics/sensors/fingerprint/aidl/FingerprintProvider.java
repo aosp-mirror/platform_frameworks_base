@@ -274,24 +274,55 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void scheduleGenerateChallenge(int sensorId, @NonNull IBinder token,
+    public void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, String opPackageName) {
         mHandler.post(() -> {
-            final FingerprintGenerateChallengeClient client =
-                    new FingerprintGenerateChallengeClient(mContext, mLazyDaemon, token,
-                            new ClientMonitorCallbackConverter(receiver), opPackageName, sensorId);
-            scheduleForSensor(sensorId, client);
+            final IFingerprint daemon = getHalInstance();
+            if (daemon == null) {
+                Slog.e(getTag(), "Null daemon during generateChallenge, sensorId: " + sensorId);
+                return;
+            }
+
+            try {
+                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
+                    createNewSessionWithoutHandler(daemon, sensorId, userId);
+                }
+
+                final FingerprintGenerateChallengeClient client =
+                        new FingerprintGenerateChallengeClient(mContext,
+                                mSensors.get(sensorId).getLazySession(), token,
+                                new ClientMonitorCallbackConverter(receiver), opPackageName,
+                                sensorId);
+                scheduleForSensor(sensorId, client);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Remote exception when scheduling generateChallenge", e);
+            }
         });
     }
 
     @Override
-    public void scheduleRevokeChallenge(int sensorId, @NonNull IBinder token,
+    public void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
-            final FingerprintRevokeChallengeClient client =
-                    new FingerprintRevokeChallengeClient(mContext, mLazyDaemon, token,
-                            opPackageName, sensorId, challenge);
-            scheduleForSensor(sensorId, client);
+            final IFingerprint daemon = getHalInstance();
+            if (daemon == null) {
+                Slog.e(getTag(), "Null daemon during revokeChallenge, sensorId: " + sensorId);
+                return;
+            }
+
+            try {
+                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
+                    createNewSessionWithoutHandler(daemon, sensorId, userId);
+                }
+
+                final FingerprintRevokeChallengeClient client =
+                        new FingerprintRevokeChallengeClient(mContext,
+                                mSensors.get(sensorId).getLazySession(), token,
+                                opPackageName, sensorId, challenge);
+                scheduleForSensor(sensorId, client);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Remote exception when scheduling revokeChallenge", e);
+            }
         });
     }
 
