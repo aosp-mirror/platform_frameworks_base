@@ -45,12 +45,13 @@ import java.util.List;
  */
 interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out Rect outFrame,
-            out Rect outContentInsets, out Rect outStableInsets,
+            in int viewVisibility, in int layerStackId, in InsetsState requestedVisibility,
+            out Rect outFrame, out Rect outContentInsets, out Rect outStableInsets,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
                 in int viewVisibility, in int layerStackId, in int userId,
+                in InsetsState requestedVisibility,
                 out Rect outFrame, out Rect outContentInsets, out Rect outStableInsets,
                 out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
                 out InsetsState insetsState, out InsetsSourceControl[] activeControls);

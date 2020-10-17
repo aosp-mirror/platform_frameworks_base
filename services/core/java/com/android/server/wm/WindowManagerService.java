@@ -1375,10 +1375,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
-            int displayId, Rect outFrame, Rect outContentInsets, Rect outStableInsets,
+            int displayId, int requestUserId, InsetsState requestedVisibility, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
-            int requestUserId) {
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
@@ -1573,6 +1573,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs, callingPid, callingUid);
+            win.updateRequestedVisibility(requestedVisibility);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
             if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -4034,8 +4035,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
                     return;
                 }
-                dc.getInsetsStateController().onInsetsModified(
-                        dc.mRemoteInsetsControlTarget, state);
+                dc.mRemoteInsetsControlTarget.updateRequestedVisibility(state);
+                dc.getInsetsStateController().onInsetsModified(dc.mRemoteInsetsControlTarget);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

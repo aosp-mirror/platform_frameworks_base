@@ -63,8 +63,6 @@ import java.util.StringJoiner;
  */
 public class InsetsState implements Parcelable {
 
-    public static final InsetsState EMPTY = new InsetsState();
-
     /**
      * Internal representation of inset source types. This is different from the public API in
      * {@link WindowInsets.Type} as one type from the public API might indicate multiple windows

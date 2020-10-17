@@ -224,6 +224,7 @@ import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -719,20 +720,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final WindowProcessController mWpcForDisplayConfigChanges;
 
     /**
-     * @return The insets state as requested by the client, i.e. the dispatched insets state
-     *         for which the visibilities are overridden with what the client requested.
+     * Returns the visibility of the given {@link InternalInsetsType type} requested by the client.
+     *
+     * @param type the given {@link InternalInsetsType type}.
+     * @return {@code true} if the type is requested visible.
      */
     @Override
-    public InsetsState getRequestedInsetsState() {
-        return mRequestedInsetsState;
+    public boolean getRequestedVisibility(@InternalInsetsType int type) {
+        return mRequestedInsetsState.getSourceOrDefaultVisibility(type);
     }
 
     /**
-     * @see #getRequestedInsetsState()
+     * @see #getRequestedVisibility(int)
      */
-    void updateRequestedInsetsState(InsetsState state) {
-
-        // Only update the sources the client is actually controlling.
+    void updateRequestedVisibility(InsetsState state) {
         for (int i = 0; i < InsetsState.SIZE; i++) {
             final InsetsSource source = state.peekSource(i);
             if (source == null) continue;

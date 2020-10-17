@@ -1021,8 +1021,10 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
                     adjustLayoutParamsForCompatibility(mWindowAttributes);
+                    controlInsetsForCompatibility(mWindowAttributes);
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
-                            getHostVisibility(), mDisplay.getDisplayId(), userId, mTmpFrames.frame,
+                            getHostVisibility(), mDisplay.getDisplayId(), userId,
+                            mInsetsController.getRequestedVisibility(), mTmpFrames.frame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
                             mAttachInfo.mDisplayCutout, inputChannel,
                             mTempInsets, mTempControls);

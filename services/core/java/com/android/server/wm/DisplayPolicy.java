@@ -1659,10 +1659,8 @@ public class DisplayPolicy {
                 provider != null ? provider.getControlTarget() : null;
         final WindowState navControllingWin =
                 navControlTarget instanceof WindowState ? (WindowState) navControlTarget : null;
-        final InsetsState requestedState = navControllingWin != null
-                ? navControllingWin.getRequestedInsetsState() : null;
-        final boolean navVisible = requestedState != null
-                ? requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+        final boolean navVisible = navControllingWin != null
+                ? navControllingWin.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                 : InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR);
         final boolean showBarsByTouch = navControllingWin != null
                 && navControllingWin.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_BARS_BY_TOUCH;
@@ -2073,11 +2071,10 @@ public class DisplayPolicy {
         // the cutout safe zone.
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             final boolean attachedInParent = attached != null && !layoutInScreen;
-            final InsetsState requestedInsetsState = win.getRequestedInsetsState();
             final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
-                    || !requestedInsetsState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR);
+                    || !win.getRequestedVisibility(ITYPE_STATUS_BAR);
             final boolean requestedHideNavigation =
-                    !requestedInsetsState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR);
+                    !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
 
             // TYPE_BASE_APPLICATION windows are never considered floating here because they don't
             // get cropped / shifted to the displayFrame in WindowState.
@@ -2423,14 +2420,8 @@ public class DisplayPolicy {
         }
         final LayoutParams attrs = mTopFullscreenOpaqueWindowState.getAttrs();
         final int fl = attrs.flags;
-        final InsetsSource request = mTopFullscreenOpaqueWindowState.getRequestedInsetsState()
-                .peekSource(ITYPE_STATUS_BAR);
-        if (WindowManagerDebugConfig.DEBUG) {
-            Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrame());
-            Slog.d(TAG, "attr: " + attrs + " request: " + request);
-        }
         return (fl & LayoutParams.FLAG_FULLSCREEN) != 0
-                || (request != null && !request.isVisible());
+                || !mTopFullscreenOpaqueWindowState.getRequestedVisibility(ITYPE_STATUS_BAR);
     }
 
     /**
@@ -2864,18 +2855,15 @@ public class DisplayPolicy {
             return;
         }
 
-        final InsetsState requestedState = controlTarget.getRequestedInsetsState();
         final @InsetsType int restorePositionTypes =
-                (requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                (controlTarget.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                         ? Type.navigationBars() : 0)
-                | (requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
+                | (controlTarget.getRequestedVisibility(ITYPE_STATUS_BAR)
                         ? Type.statusBars() : 0)
-                | (mExtraNavBarAlt != null
-                        && requestedState.getSourceOrDefaultVisibility(
+                | (mExtraNavBarAlt != null && controlTarget.getRequestedVisibility(
                                 ITYPE_EXTRA_NAVIGATION_BAR)
                         ? Type.navigationBars() : 0)
-                | (mClimateBarAlt != null
-                        && requestedState.getSourceOrDefaultVisibility(
+                | (mClimateBarAlt != null && controlTarget.getRequestedVisibility(
                                 ITYPE_CLIMATE_BAR)
                         ? Type.statusBars() : 0);
 
@@ -2981,12 +2969,11 @@ public class DisplayPolicy {
                 win.mAttrs.insetsFlags.appearance, mTopFullscreenOpaqueWindowState,
                 mTopFullscreenOpaqueOrDimmingWindowState,
                 mDisplayContent.mInputMethodWindow, navColorWin) | opaqueAppearance;
-        final InsetsState requestedInsets = win.getRequestedInsetsState();
         final int behavior = win.mAttrs.insetsFlags.behavior;
         final boolean isImmersive = behavior == BEHAVIOR_SHOW_BARS_BY_SWIPE
                 || behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-        final boolean isFullscreen = !requestedInsets.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
-                || !requestedInsets.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR);
+        final boolean isFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR)
+                || !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
         if (mLastDisableFlags == disableFlags
                 && mLastAppearance == appearance
                 && mLastFullscreenAppearance == fullscreenAppearance
@@ -3152,10 +3139,7 @@ public class DisplayPolicy {
                 freeformStackVisible, resizing, fullscreenDrawsNavBarBackground,
                 dockedDrawsNavigationBarBackground);
 
-        final InsetsState requestedInsetsState = win.getRequestedInsetsState();
-        final boolean requestHideNavBar = !requestedInsetsState.getSourceOrDefaultVisibility(
-                        ITYPE_NAVIGATION_BAR);
-
+        final boolean requestHideNavBar = !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
         final long now = SystemClock.uptimeMillis();
         final boolean pendingPanic = mPendingPanicGestureUptime != 0
                 && now - mPendingPanicGestureUptime <= PANIC_GESTURE_EXPIRATION;
