@@ -77,6 +77,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Manages PiP tasks such as resize and offset.
@@ -246,6 +247,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     private PictureInPictureParams mPictureInPictureParams;
+    private IntConsumer mOnDisplayIdChangeCallback;
 
     /**
      * If set to {@code true}, the entering animation will be skipped and we will wait for
@@ -310,6 +312,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void registerPipTransitionCallback(PipTransitionCallback callback) {
         mPipTransitionCallbacks.add(callback);
+    }
+
+    /**
+     * Registers a callback when a display change has been detected when we enter PiP.
+     */
+    public void registerOnDisplayIdChangeCallback(IntConsumer onDisplayIdChangeCallback) {
+        mOnDisplayIdChangeCallback = onDisplayIdChangeCallback;
     }
 
     /**
@@ -468,6 +477,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
         mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
+
+        // If the displayId of the task is different than what PipBoundsHandler has, then update
+        // it. This is possible if we entered PiP on an external display.
+        if (info.displayId != mPipBoundsHandler.getDisplayInfo().displayId
+                && mOnDisplayIdChangeCallback != null) {
+            mOnDisplayIdChangeCallback.accept(info.displayId);
+        }
 
         if (mShouldIgnoreEnteringPipTransition) {
             // Animation has been finished together with Recents, directly apply the sync

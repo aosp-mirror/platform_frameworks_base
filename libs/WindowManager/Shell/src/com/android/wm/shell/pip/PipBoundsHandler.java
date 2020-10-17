@@ -121,6 +121,13 @@ public class PipBoundsHandler {
     }
 
     /**
+     * Get the current saved display info.
+     */
+    public DisplayInfo getDisplayInfo() {
+        return mDisplayInfo;
+    }
+
+    /**
      * Update the Min edge size for {@link PipSnapAlgorithm} to calculate corresponding bounds
      * @param minEdgeSize
      */

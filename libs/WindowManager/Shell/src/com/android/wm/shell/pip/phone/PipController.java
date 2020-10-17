@@ -222,6 +222,14 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipBoundsState = pipBoundsState;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
+        mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
+            final DisplayInfo newDisplayInfo = new DisplayInfo();
+            displayController.getDisplay(displayId).getDisplayInfo(newDisplayInfo);
+            mPipBoundsHandler.onDisplayInfoChanged(newDisplayInfo);
+            updateMovementBounds(null /* toBounds */, false /* fromRotation */,
+                    false /* fromImeAdjustment */, false /* fromShelfAdustment */,
+                    null /* wct */);
+        });
         mMediaController = pipMediaController;
         mMenuController = pipMenuActivityController;
         mTouchHandler = pipTouchHandler;
