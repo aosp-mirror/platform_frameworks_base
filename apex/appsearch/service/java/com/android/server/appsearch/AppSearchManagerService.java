@@ -17,10 +17,12 @@ package com.android.server.appsearch;
 
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
-import android.app.appsearch.AppSearchDocument;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
+import android.app.appsearch.GenericDocument;
 import android.app.appsearch.IAppSearchManager;
+import android.app.appsearch.SearchResult;
+import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
@@ -32,7 +34,9 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localbackend.AppSearchImpl;
+import com.android.server.appsearch.external.localbackend.converter.GenericDocumentToProtoConverter;
 import com.android.server.appsearch.external.localbackend.converter.SchemaToProtoConverter;
+import com.android.server.appsearch.external.localbackend.converter.SearchResultToProtoConverter;
 import com.android.server.appsearch.external.localbackend.converter.SearchSpecToProtoConverter;
 
 import com.google.android.icing.proto.DocumentProto;
@@ -80,7 +84,7 @@ public class AppSearchManagerService extends SystemService {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
                 impl.setSchema(databaseName, schemaProtoBuilder.build(), forceOverride);
-                callback.complete(AppSearchResult.newSuccessfulResult(/*value=*/ null));
+                callback.complete(AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {
                 callback.complete(throwableToFailedResult(t));
             } finally {
@@ -90,9 +94,9 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void putDocuments(
-                @NonNull List documentsBytes,
+                @NonNull List<Bundle> documentBundles,
                 @NonNull AndroidFuture<AppSearchBatchResult> callback) {
-            Preconditions.checkNotNull(documentsBytes);
+            Preconditions.checkNotNull(documentBundles);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
@@ -102,12 +106,12 @@ public class AppSearchManagerService extends SystemService {
                 String databaseName = makeDatabaseName(callingUid);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
-                for (int i = 0; i < documentsBytes.size(); i++) {
-                    byte[] documentBytes = (byte[]) documentsBytes.get(i);
-                    DocumentProto document = DocumentProto.parseFrom(documentBytes);
+                for (int i = 0; i < documentBundles.size(); i++) {
+                    GenericDocument document = new GenericDocument(documentBundles.get(i));
+                    DocumentProto documentProto = GenericDocumentToProtoConverter.convert(document);
                     try {
-                        impl.putDocument(databaseName, document);
-                        resultBuilder.setSuccess(document.getUri(), /*value=*/ null);
+                        impl.putDocument(databaseName, documentProto);
+                        resultBuilder.setSuccess(document.getUri(), /*result=*/ null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(document.getUri(), throwableToFailedResult(t));
                     }
@@ -131,18 +135,20 @@ public class AppSearchManagerService extends SystemService {
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String databaseName = makeDatabaseName(callingUid);
-                AppSearchBatchResult.Builder<String, byte[]> resultBuilder =
+                AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        DocumentProto document = impl.getDocument(
-                                databaseName, AppSearchDocument.DEFAULT_NAMESPACE, uri);
-                        if (document == null) {
+                        DocumentProto documentProto = impl.getDocument(
+                                databaseName, GenericDocument.DEFAULT_NAMESPACE, uri);
+                        if (documentProto == null) {
                             resultBuilder.setFailure(
                                     uri, AppSearchResult.RESULT_NOT_FOUND, /*errorMessage=*/ null);
                         } else {
-                            resultBuilder.setSuccess(uri, document.toByteArray());
+                            GenericDocument genericDocument =
+                                    GenericDocumentToProtoConverter.convert(documentProto);
+                            resultBuilder.setSuccess(uri, genericDocument.getBundle());
                         }
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
@@ -182,8 +188,11 @@ public class AppSearchManagerService extends SystemService {
                         searchSpecProto,
                         SearchSpecToProtoConverter.toResultSpecProto(searchSpec),
                         SearchSpecToProtoConverter.toScoringSpecProto(searchSpec));
-                callback.complete(
-                        AppSearchResult.newSuccessfulResult(searchResultProto.toByteArray()));
+                List<SearchResult> searchResultList =
+                        SearchResultToProtoConverter.convert(searchResultProto);
+                SearchResults searchResults =
+                        new SearchResults(searchResultList, searchResultProto.getNextPageToken());
+                callback.complete(AppSearchResult.newSuccessfulResult(searchResults));
             } catch (Throwable t) {
                 callback.complete(throwableToFailedResult(t));
             } finally {
@@ -206,8 +215,8 @@ public class AppSearchManagerService extends SystemService {
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        impl.remove(databaseName, AppSearchDocument.DEFAULT_NAMESPACE, uri);
-                        resultBuilder.setSuccess(uri, /*value= */null);
+                        impl.remove(databaseName, GenericDocument.DEFAULT_NAMESPACE, uri);
+                        resultBuilder.setSuccess(uri, /*result= */null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
                     }
@@ -237,7 +246,7 @@ public class AppSearchManagerService extends SystemService {
                     String schemaType = schemaTypes.get(i);
                     try {
                         impl.removeByType(databaseName, schemaType);
-                        resultBuilder.setSuccess(schemaType, /*value=*/ null);
+                        resultBuilder.setSuccess(schemaType, /*result=*/ null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(schemaType, throwableToFailedResult(t));
                     }

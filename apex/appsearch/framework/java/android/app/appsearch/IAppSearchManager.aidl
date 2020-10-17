@@ -21,6 +21,7 @@ import com.android.internal.infra.AndroidFuture;
 
 parcelable AppSearchResult;
 parcelable AppSearchBatchResult;
+parcelable SearchResults;
 
 /** {@hide} */
 interface IAppSearchManager {
@@ -41,7 +42,7 @@ interface IAppSearchManager {
     /**
      * Inserts documents into the index.
      *
-     * @param documentsBytes {@link List}&lt;byte[]&gt; of serialized DocumentProtos.
+     * @param documentBundes List of GenericDocument bundles.
      * @param callback
      *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
      *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
@@ -49,18 +50,19 @@ interface IAppSearchManager {
      *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;
      *     where the keys are document URIs, and the values are {@code null}.
      */
-    void putDocuments(in List documentsBytes, in AndroidFuture<AppSearchBatchResult> callback);
+    void putDocuments(
+        in List<Bundle> documentBundles, in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Retrieves documents from the index.
      *
      * @param uris The URIs of the documents to retrieve
      * @param callback
-     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link byte[]}&gt;&gt;.
+     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Bundle}&gt;&gt;.
      *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
      *     {@code callback} will be completed with an
-     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link byte[]}&gt;
-     *     where the keys are document URIs, and the values are serialized Document protos.
+     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Bundle}&gt;
+     *     where the keys are document URIs, and the values are Document bundles.
      */
     void getDocuments(in List<String> uris, in AndroidFuture<AppSearchBatchResult> callback);
 
@@ -69,8 +71,7 @@ interface IAppSearchManager {
      *
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
-     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link byte[]}&gt;&gt;
-     *     Will be completed with a serialized {@link SearchResultsProto}.
+     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link SearchResults}&gt;&gt;
      */
     void query(
         in String queryExpression,
