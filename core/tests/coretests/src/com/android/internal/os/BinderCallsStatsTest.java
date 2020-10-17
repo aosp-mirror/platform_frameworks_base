@@ -497,9 +497,9 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
         PrintWriter pw = new PrintWriter(new StringWriter());
-        bcs.dump(pw, new AppIdToPackageMap(new HashMap<>()), Process.INVALID_UID, true);
+        bcs.dump(pw, new AppIdToPackageMap(new SparseArray<>()), Process.INVALID_UID, true);
 
-        bcs.dump(pw, new AppIdToPackageMap(new HashMap<>()), WORKSOURCE_UID, true);
+        bcs.dump(pw, new AppIdToPackageMap(new SparseArray<>()), WORKSOURCE_UID, true);
     }
 
     @Test

@@ -2010,13 +2010,13 @@ public final class Parcel {
      * A map used by {@link #readSquashed} to cache parcelables. It's a map from
      * an absolute position in a Parcel to the parcelable stored at the position.
      */
-    private ArrayMap<Integer, Parcelable> mReadSquashableParcelables;
+    private SparseArray<Parcelable> mReadSquashableParcelables;
 
     private void ensureReadSquashableParcelables() {
         if (mReadSquashableParcelables != null) {
             return;
         }
-        mReadSquashableParcelables = new ArrayMap<>();
+        mReadSquashableParcelables = new SparseArray<>();
     }
 
     /**
@@ -2112,9 +2112,13 @@ public final class Parcel {
 
         final Parcelable p = mReadSquashableParcelables.get(firstAbsolutePos);
         if (p == null) {
+            final StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mReadSquashableParcelables.size(); i++) {
+                sb.append(mReadSquashableParcelables.keyAt(i)).append(' ');
+            }
             Slog.wtfStack(TAG, "Map doesn't contain offset "
                     + firstAbsolutePos
-                    + " : contains=" + new ArrayList<>(mReadSquashableParcelables.keySet()));
+                    + " : contains=" + sb.toString());
         }
         return (T) p;
     }
