@@ -25,7 +25,7 @@
     <string name="wifi_remembered" msgid="3266709779723179188">"सेव्ह केले"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"अक्षम"</string>
-    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्फिगरेशन अयशस्वी"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉंफिगरेशन अयशस्वी"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"कमी दर्जाच्या नेटवर्कमुळे कनेक्ट केलेले नाही"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi कनेक्शन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>

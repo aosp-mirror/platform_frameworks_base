@@ -89,7 +89,7 @@
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"सम्पर्क साझेदारी"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"सम्पर्क साझेदारीका लागि प्रयोग"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इन्टरनेट जडान साझेदारी गर्दै"</string>
-    <string name="bluetooth_profile_map" msgid="8907204701162107271">"पाठ सन्देशहरू"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"टेक्स्ट म्यासेजहरू"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM पहुँच"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD अडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD अडियो"</string>
