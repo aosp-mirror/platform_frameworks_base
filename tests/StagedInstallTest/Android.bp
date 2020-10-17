@@ -29,6 +29,7 @@ java_test_host {
         "compatibility-tradefed",
         "module_test_util",
         "frameworks-base-hostutils",
+        "cts-install-lib-host",
     ],
     data: [
         ":com.android.apex.cts.shim.v2_prebuilt",

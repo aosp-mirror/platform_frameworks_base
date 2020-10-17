@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import com.android.cts.install.lib.host.InstallUtilsHost;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tests.util.ModuleTestUtils;
@@ -49,6 +50,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     private static final String APK_A = "TestAppAv1.apk";
 
     private final ModuleTestUtils mTestUtils = new ModuleTestUtils(this);
+    private final InstallUtilsHost mHostUtils = new InstallUtilsHost(this);
 
     /**
      * Runs the given phase of a test by calling into the device.
@@ -93,7 +95,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Test
     public void testAdbStagedInstallWaitForReadyFlagWorks() throws Exception {
         assumeTrue("Device does not support updating APEX",
-                mTestUtils.isApexUpdateSupported());
+                mHostUtils.isApexUpdateSupported());
 
         File apexFile = mTestUtils.getTestFile(SHIM_V2);
         String output = getDevice().executeAdbCommand("install", "--staged",
@@ -107,7 +109,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Test
     public void testAdbStagedInstallNoWaitFlagWorks() throws Exception {
         assumeTrue("Device does not support updating APEX",
-                mTestUtils.isApexUpdateSupported());
+                mHostUtils.isApexUpdateSupported());
 
         File apexFile = mTestUtils.getTestFile(SHIM_V2);
         String output = getDevice().executeAdbCommand("install", "--staged",
@@ -122,7 +124,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     @Test
     public void testAdbInstallMultiPackageCommandWorks() throws Exception {
         assumeTrue("Device does not support updating APEX",
-                mTestUtils.isApexUpdateSupported());
+                mHostUtils.isApexUpdateSupported());
 
         File apexFile = mTestUtils.getTestFile(SHIM_V2);
         File apkFile = mTestUtils.getTestFile(APK_A);
