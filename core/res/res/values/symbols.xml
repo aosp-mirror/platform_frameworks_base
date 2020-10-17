@@ -3201,6 +3201,9 @@
   <!-- Network Recommendation -->
   <java-symbol type="string" name="config_defaultNetworkRecommendationProviderPackage" />
 
+  <!-- Optional IPsec algorithms -->
+  <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
+
   <!-- Whether allow 3rd party apps on internal storage. -->
   <java-symbol type="bool" name="config_allow3rdPartyAppOnInternal" />
 
