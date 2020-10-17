@@ -130,8 +130,8 @@ public class WindowlessWindowManager implements IWindowSession {
      */
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
-            Rect outStableInsets,
+            int viewVisibility, int displayId, InsetsState requestedVisibility, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
@@ -166,11 +166,11 @@ public class WindowlessWindowManager implements IWindowSession {
      */
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, int userId, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets,
+            int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
+            Rect outFrame, Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
-        return addToDisplay(window, attrs, viewVisibility, displayId,
+        return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibility,
                 outFrame, outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
                 outInsetsState, outActiveControls);
     }

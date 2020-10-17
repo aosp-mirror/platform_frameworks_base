@@ -92,6 +92,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
+    private final InsetsState mDummyRequestedVisibility = new InsetsState();
     private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
@@ -158,25 +159,26 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
-            Rect outStableInsets,
+            int viewVisibility, int displayId, InsetsState requestedVisibility, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
-        return mService.addWindow(this, window, attrs, viewVisibility, displayId, outFrame,
+        return mService.addWindow(this, window, attrs, viewVisibility, displayId,
+                UserHandle.getUserId(mUid), requestedVisibility, outFrame,
                 outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
-                outInsetsState, outActiveControls, UserHandle.getUserId(mUid));
+                outInsetsState, outActiveControls);
     }
 
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, int userId, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets,
+            int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
+            Rect outFrame, Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
-        return mService.addWindow(this, window, attrs, viewVisibility, displayId, outFrame,
-                outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
-                outInsetsState, outActiveControls, userId);
+        return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
+                requestedVisibility, outFrame, outContentInsets, outStableInsets, outDisplayCutout,
+                outInputChannel, outInsetsState, outActiveControls);
     }
 
     @Override
@@ -184,9 +186,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
             InsetsState outInsetsState) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
+                UserHandle.getUserId(mUid), mDummyRequestedVisibility,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets,
                 new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */,
-                outInsetsState, mDummyControls, UserHandle.getUserId(mUid));
+                outInsetsState, mDummyControls);
     }
 
     @Override
@@ -493,9 +496,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final WindowState windowState = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (windowState != null) {
-                windowState.updateRequestedInsetsState(state);
-                windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(
-                        windowState, state);
+                windowState.updateRequestedVisibility(state);
+                windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(windowState);
             }
         }
     }

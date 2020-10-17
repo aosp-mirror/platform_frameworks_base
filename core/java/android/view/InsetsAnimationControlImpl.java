@@ -212,21 +212,21 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     /**
      * @return Whether the finish callback of this animation should be invoked.
      */
-    public boolean applyChangeInsets(InsetsState state) {
+    public boolean applyChangeInsets(@Nullable InsetsState outState) {
         if (mCancelled) {
             if (DEBUG) Log.d(TAG, "applyChangeInsets canceled");
             return false;
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         ArrayList<SurfaceParams> params = new ArrayList<>();
-        updateLeashesForSide(ISIDE_LEFT, offset.left, mShownInsets.left, mPendingInsets.left,
-                params, state, mPendingAlpha);
-        updateLeashesForSide(ISIDE_TOP, offset.top, mShownInsets.top, mPendingInsets.top, params,
-                state, mPendingAlpha);
-        updateLeashesForSide(ISIDE_RIGHT, offset.right, mShownInsets.right, mPendingInsets.right,
-                params, state, mPendingAlpha);
-        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, mShownInsets.bottom,
-                mPendingInsets.bottom, params, state, mPendingAlpha);
+        updateLeashesForSide(ISIDE_LEFT, offset.left, mPendingInsets.left, params, outState,
+                mPendingAlpha);
+        updateLeashesForSide(ISIDE_TOP, offset.top, mPendingInsets.top, params, outState,
+                mPendingAlpha);
+        updateLeashesForSide(ISIDE_RIGHT, offset.right, mPendingInsets.right, params, outState,
+                mPendingAlpha);
+        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params, outState,
+                mPendingAlpha);
 
         mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -357,8 +357,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return alpha >= 1 ? 1 : (alpha <= 0 ? 0 : alpha);
     }
 
-    private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int maxInset,
-            int inset, ArrayList<SurfaceParams> surfaceParams, InsetsState state, Float alpha) {
+    private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int inset,
+            ArrayList<SurfaceParams> surfaceParams, @Nullable InsetsState outState, float alpha) {
         ArraySet<InsetsSourceControl> items = mSideSourceMap.get(side);
         if (items == null) {
             return;
@@ -377,8 +377,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                     ? (mAnimationType == ANIMATION_TYPE_SHOW ? true : !mFinished)
                     : inset != 0;
 
-            state.getSource(source.getType()).setVisible(visible);
-            state.getSource(source.getType()).setFrame(mTmpFrame);
+            if (outState != null) {
+                outState.getSource(source.getType()).setVisible(visible);
+                outState.getSource(source.getType()).setFrame(mTmpFrame);
+            }
 
             // If the system is controlling the insets source, the leash can be null.
             if (leash != null) {

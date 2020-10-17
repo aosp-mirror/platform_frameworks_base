@@ -289,16 +289,10 @@ class InsetsStateController {
         winInsetsChanged.clear();
     }
 
-    void onInsetsModified(InsetsControlTarget windowState, InsetsState state) {
+    void onInsetsModified(InsetsControlTarget caller) {
         boolean changed = false;
-        for (int i = 0; i < InsetsState.SIZE; i++) {
-            final InsetsSource source = state.peekSource(i);
-            if (source == null) continue;
-            final InsetsSourceProvider provider = mProviders.get(source.getType());
-            if (provider == null) {
-                continue;
-            }
-            changed |= provider.onInsetsModified(windowState, source);
+        for (int i = mProviders.size() - 1; i >= 0; i--) {
+            changed |= mProviders.valueAt(i).updateClientVisibility(caller);
         }
         if (changed) {
             notifyInsetsChanged();
@@ -464,11 +458,24 @@ class InsetsStateController {
                 final InsetsSourceProvider provider = mProviders.valueAt(i);
                 provider.onSurfaceTransactionApplied();
             }
+            final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
                 final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
                 controlTarget.notifyInsetsControlChanged();
+                if (mControlTargetTypeMap.containsKey(controlTarget)) {
+                    // We only collect targets who get controls, not lose controls.
+                    newControlTargets.add(controlTarget);
+                }
             }
             mPendingControlChanged.clear();
+
+            // This updates the insets visibilities AFTER sending current insets state and controls
+            // to the clients, so that the clients can change the current visibilities to the
+            // requested visibilities with animations.
+            for (int i = newControlTargets.size() - 1; i >= 0; i--) {
+                onInsetsModified(newControlTargets.valueAt(i));
+            }
+            newControlTargets.clear();
         });
     }
 

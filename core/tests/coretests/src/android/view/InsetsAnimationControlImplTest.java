@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -89,6 +90,7 @@ public class InsetsAnimationControlImplTest {
         mInsetsState = new InsetsState();
         mInsetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 500, 100));
         mInsetsState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
+        doNothing().when(mMockController).onRequestedVisibilityChanged(any());
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
@@ -130,7 +132,7 @@ public class InsetsAnimationControlImplTest {
     public void testChangeInsets() {
         mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 1f /* alpha */,
                 0f /* fraction */);
-        mController.applyChangeInsets(new InsetsState());
+        mController.applyChangeInsets(null /* outState */);
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
         assertEquals(1f, mController.getCurrentAlpha(), 1f - mController.getCurrentAlpha());
 
@@ -150,7 +152,7 @@ public class InsetsAnimationControlImplTest {
     public void testChangeAlphaNoInsets() {
         Insets initialInsets = mController.getCurrentInsets();
         mController.setInsetsAndAlpha(null, 0.5f, 0f /* fraction*/);
-        mController.applyChangeInsets(new InsetsState());
+        mController.applyChangeInsets(null /* outState */);
         assertEquals(0.5f, mController.getCurrentAlpha(), 0.5f - mController.getCurrentAlpha());
         assertEquals(initialInsets, mController.getCurrentInsets());
     }
@@ -158,7 +160,7 @@ public class InsetsAnimationControlImplTest {
     @Test
     public void testChangeInsetsAndAlpha() {
         mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 0.5f, 1f);
-        mController.applyChangeInsets(new InsetsState());
+        mController.applyChangeInsets(null /* outState */);
         assertEquals(0.5f, mController.getCurrentAlpha(), 0.5f - mController.getCurrentAlpha());
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
     }
