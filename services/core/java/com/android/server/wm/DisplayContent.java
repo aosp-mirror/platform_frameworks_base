@@ -96,6 +96,7 @@ import static com.android.server.wm.DisplayContentProto.CURRENT_FOCUS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_READY;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_ROTATION;
 import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
@@ -107,7 +108,6 @@ import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
-import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
@@ -2871,7 +2871,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         proto.write(ID, mDisplayId);
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
-        proto.write(ROTATION, getRotation());
+        mDisplayRotation.dumpDebug(proto, DISPLAY_ROTATION);
         final ScreenRotationAnimation screenRotationAnimation = getRotationAnimation();
         if (screenRotationAnimation != null) {
             screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
