@@ -41,9 +41,13 @@ public class EfficientStringsCheckerTest {
         assertTrue(EfficientStringsChecker.isSimple(""));
         assertTrue(EfficientStringsChecker.isSimple("%s"));
         assertTrue(EfficientStringsChecker.isSimple("String %s%s and %%%% number %d%d together"));
+        assertTrue(EfficientStringsChecker.isSimple("%04d"));
+        assertTrue(EfficientStringsChecker.isSimple("%02x:%02x:%02x"));
+        assertTrue(EfficientStringsChecker.isSimple("%10d"));
 
-        assertFalse(EfficientStringsChecker.isSimple("%04d"));
-        assertFalse(EfficientStringsChecker.isSimple("%02x:%02x:%02x"));
+        assertFalse(EfficientStringsChecker.isSimple("%0.4f"));
+        assertFalse(EfficientStringsChecker.isSimple("%t"));
+        assertFalse(EfficientStringsChecker.isSimple("%1$s"));
     }
 
     @Test
@@ -58,6 +62,7 @@ public class EfficientStringsCheckerTest {
                         "    String.format(\"foo %s bar\", str);",
                         "    // BUG: Diagnostic contains:",
                         "    String.format(\"foo %d bar\", 42);",
+                        "    // BUG: Diagnostic contains:",
                         "    String.format(\"foo %04d bar\", 42);",
                         "  }",
                         "  public void exampleLocale(String str) {",
@@ -66,6 +71,7 @@ public class EfficientStringsCheckerTest {
                         "    String.format(Locale.US, \"foo %s bar\", str);",
                         "    // BUG: Diagnostic contains:",
                         "    String.format(Locale.US, \"foo %d bar\", 42);",
+                        "    // BUG: Diagnostic contains:",
                         "    String.format(Locale.US, \"foo %04d bar\", 42);",
                         "  }",
                         "}")

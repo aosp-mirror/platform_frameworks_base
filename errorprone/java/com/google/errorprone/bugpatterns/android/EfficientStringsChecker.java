@@ -180,8 +180,10 @@ public final class EfficientStringsChecker extends BugChecker
         for (int i = 0; i < format.length(); i++) {
             char c = format.charAt(i);
             if (c == '%') {
-                i++;
-                c = format.charAt(i);
+                c = format.charAt(++i);
+                while ('0' <= c && c <= '9') {
+                    c = format.charAt(++i);
+                }
                 switch (c) {
                     case 'b':
                     case 'c':
