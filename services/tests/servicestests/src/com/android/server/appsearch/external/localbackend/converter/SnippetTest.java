@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package android.app.appsearch;
+package com.android.server.appsearch.external.localbackend.converter;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.app.appsearch.proto.DocumentProto;
-import android.app.appsearch.proto.PropertyProto;
-import android.app.appsearch.proto.SearchResultProto;
-import android.app.appsearch.proto.SnippetMatchProto;
-import android.app.appsearch.proto.SnippetProto;
+import android.app.appsearch.SearchResult;
 
-import androidx.test.filters.SmallTest;
+import com.android.server.appsearch.proto.DocumentProto;
+import com.android.server.appsearch.proto.PropertyProto;
+import com.android.server.appsearch.proto.SearchResultProto;
+import com.android.server.appsearch.proto.SnippetMatchProto;
+import com.android.server.appsearch.proto.SnippetProto;
 
 import org.junit.Test;
 
-@SmallTest
 public class SnippetTest {
 
-    // TODO(sidchhabra): Add tests for Double and Long Snippets.
+    // TODO(tytytyww): Add tests for Double and Long Snippets.
     @Test
     public void testSingleStringSnippet() {
 
@@ -74,22 +73,26 @@ public class SnippetTest {
         SearchResultProto searchResultProto = SearchResultProto.newBuilder()
                 .addResults(resultProto)
                 .build();
-        SearchResults searchResults = new SearchResults(searchResultProto);
 
         // Making ResultReader and getting Snippet values.
-        while (searchResults.hasNext()) {
-            SearchResults.Result result = searchResults.next();
-            MatchInfo match = result.getMatchInfo().get(0);
+        for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
+            SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
+            SearchResult.MatchInfo match = result.getMatches().get(0);
             assertThat(match.getPropertyPath()).isEqualTo(propertyKeyString);
             assertThat(match.getFullText()).isEqualTo(propertyValueString);
             assertThat(match.getExactMatch()).isEqualTo(exactMatch);
+            assertThat(match.getExactMatchPosition()).isEqualTo(
+                    new SearchResult.MatchRange(/*lower=*/29, /*upper=*/32));
+            assertThat(match.getFullText()).isEqualTo(propertyValueString);
+            assertThat(match.getSnippetPosition()).isEqualTo(
+                    new SearchResult.MatchRange(/*lower=*/26, /*upper=*/32));
             assertThat(match.getSnippet()).isEqualTo(window);
         }
     }
 
-    // TODO(sidchhabra): Add tests for Double and Long Snippets.
+    // TODO(tytytyww): Add tests for Double and Long Snippets.
     @Test
-    public void testNoSnippets() {
+    public void testNoSnippets() throws Exception {
 
         final String propertyKeyString = "content";
         final String propertyValueString = "A commonly used fake word is foo.\n"
@@ -117,16 +120,15 @@ public class SnippetTest {
         SearchResultProto searchResultProto = SearchResultProto.newBuilder()
                 .addResults(resultProto)
                 .build();
-        SearchResults searchResults = new SearchResults(searchResultProto);
 
-        while (searchResults.hasNext()) {
-            SearchResults.Result result = searchResults.next();
-            assertThat(result.getMatchInfo()).isEqualTo(null);
+        for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
+            SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
+            assertThat(result.getMatches()).isEqualTo(null);
         }
     }
 
     @Test
-    public void testMultipleStringSnippet() {
+    public void testMultipleStringSnippet() throws Exception {
         final String searchWord = "Test";
 
         // Building the SearchResult received from query.
@@ -178,22 +180,29 @@ public class SnippetTest {
         SearchResultProto searchResultProto = SearchResultProto.newBuilder()
                 .addResults(resultProto)
                 .build();
-        SearchResults searchResults = new SearchResults(searchResultProto);
 
         // Making ResultReader and getting Snippet values.
-        while (searchResults.hasNext()) {
-            SearchResults.Result result = searchResults.next();
+        for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
+            SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
 
-            MatchInfo match1 = result.getMatchInfo().get(0);
+            SearchResult.MatchInfo match1 = result.getMatches().get(0);
             assertThat(match1.getPropertyPath()).isEqualTo("sender.name");
             assertThat(match1.getFullText()).isEqualTo("Test Name Jr.");
+            assertThat(match1.getExactMatchPosition()).isEqualTo(
+                    new SearchResult.MatchRange(/*lower=*/0, /*upper=*/4));
             assertThat(match1.getExactMatch()).isEqualTo("Test");
+            assertThat(match1.getSnippetPosition()).isEqualTo(
+                    new SearchResult.MatchRange(/*lower=*/0, /*upper=*/9));
             assertThat(match1.getSnippet()).isEqualTo("Test Name");
 
-            MatchInfo match2 = result.getMatchInfo().get(1);
+            SearchResult.MatchInfo match2 = result.getMatches().get(1);
             assertThat(match2.getPropertyPath()).isEqualTo("sender.email");
             assertThat(match2.getFullText()).isEqualTo("TestNameJr@gmail.com");
+            assertThat(match2.getExactMatchPosition()).isEqualTo(
+                    new SearchResult.MatchRange(/*lower=*/0, /*upper=*/20));
             assertThat(match2.getExactMatch()).isEqualTo("TestNameJr@gmail.com");
+            assertThat(match2.getSnippetPosition()).isEqualTo(
+                    new SearchResult.MatchRange(/*lower=*/0, /*upper=*/20));
             assertThat(match2.getSnippet()).isEqualTo("TestNameJr@gmail.com");
         }
     }

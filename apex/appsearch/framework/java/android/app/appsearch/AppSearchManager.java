@@ -23,11 +23,6 @@ import android.os.RemoteException;
 
 import com.android.internal.infra.AndroidFuture;
 
-import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.SearchResultProto;
-import com.google.android.icing.proto.StatusProto;
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,8 +73,8 @@ public class AppSearchManager {
      *     <li>Removal of an existing type
      *     <li>Removal of a property from a type
      *     <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
-     *     <li>For properties of {@code AppSearchDocument} type, changing the schema type of
-     *         {@code AppSearchDocument}s of that property
+     *     <li>For properties of {@code GenericDocument} type, changing the schema type of
+     *         {@code GenericDocument}s of that property
      *     <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an
      *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
      *             OPTIONAL} property into a
@@ -148,31 +143,31 @@ public class AppSearchManager {
     }
 
     /**
-     * Index {@link AppSearchDocument}s into AppSearch.
+     * Index {@link GenericDocument}s into AppSearch.
      *
      * <p>You should not call this method directly; instead, use the
      * {@code AppSearch#putDocuments()} API provided by JetPack.
      *
-     * <p>Each {@link AppSearchDocument}'s {@code schemaType} field must be set to the name of a
+     * <p>Each {@link GenericDocument}'s {@code schemaType} field must be set to the name of a
      * schema type previously registered via the {@link #setSchema} method.
      *
-     * @param documents {@link AppSearchDocument}s that need to be indexed.
+     * @param documents {@link GenericDocument}s that need to be indexed.
      * @return An {@link AppSearchBatchResult} mapping the document URIs to {@link Void} if they
      *     were successfully indexed, or a {@link Throwable} describing the failure if they could
      *     not be indexed.
      * @hide
      */
     public AppSearchBatchResult<String, Void> putDocuments(
-            @NonNull List<AppSearchDocument> documents) {
+            @NonNull List<GenericDocument> documents) {
         // TODO(b/146386470): Transmit these documents as a RemoteStream instead of sending them in
         // one big list.
-        List<byte[]> documentsBytes = new ArrayList<>(documents.size());
-        for (AppSearchDocument document : documents) {
-            documentsBytes.add(document.getProto().toByteArray());
+        List<Bundle> documentBundles = new ArrayList<>(documents.size());
+        for (GenericDocument document : documents) {
+            documentBundles.add(document.getBundle());
         }
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.putDocuments(documentsBytes, future);
+            mService.putDocuments(documentBundles, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -180,19 +175,18 @@ public class AppSearchManager {
     }
 
     /**
-     * Retrieves {@link AppSearchDocument}s by URI.
+     * Retrieves {@link GenericDocument}s by URI.
      *
      * <p>You should not call this method directly; instead, use the
      * {@code AppSearch#getDocuments()} API provided by JetPack.
      *
      * @param uris URIs of the documents to look up.
      * @return An {@link AppSearchBatchResult} mapping the document URIs to
-     *     {@link AppSearchDocument} values if they were successfully retrieved, a {@code null}
+     *     {@link GenericDocument} values if they were successfully retrieved, a {@code null}
      *     failure if they were not found, or a {@link Throwable} failure describing the problem if
      *     an error occurred.
      */
-    public AppSearchBatchResult<String, AppSearchDocument> getDocuments(
-            @NonNull List<String> uris) {
+    public AppSearchBatchResult<String, GenericDocument> getDocuments(@NonNull List<String> uris) {
         // TODO(b/146386470): Transmit the result documents as a RemoteStream instead of sending
         //     them in one big list.
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
@@ -202,43 +196,35 @@ public class AppSearchManager {
             future.completeExceptionally(e);
         }
 
-        // Deserialize the protos into Document objects
-        AppSearchBatchResult<String, byte[]> protoResults = getFutureOrThrow(future);
-        AppSearchBatchResult.Builder<String, AppSearchDocument> documentResultBuilder =
+        // Translate from document bundles to GenericDocument instances
+        AppSearchBatchResult<String, Bundle> bundleResult = getFutureOrThrow(future);
+        AppSearchBatchResult.Builder<String, GenericDocument> documentResultBuilder =
                 new AppSearchBatchResult.Builder<>();
 
         // Translate successful results
-        for (Map.Entry<String, byte[]> protoResult : protoResults.getSuccesses().entrySet()) {
-            DocumentProto documentProto;
+        for (Map.Entry<String, Bundle> bundleEntry : bundleResult.getSuccesses().entrySet()) {
+            GenericDocument document;
             try {
-                documentProto = DocumentProto.parseFrom(protoResult.getValue());
-            } catch (InvalidProtocolBufferException e) {
-                documentResultBuilder.setFailure(
-                        protoResult.getKey(), AppSearchResult.RESULT_IO_ERROR, e.getMessage());
-                continue;
-            }
-            AppSearchDocument document;
-            try {
-                document = new AppSearchDocument(documentProto);
+                document = new GenericDocument(bundleEntry.getValue());
             } catch (Throwable t) {
                 // These documents went through validation, so how could this fail? We must have
                 // done something wrong.
                 documentResultBuilder.setFailure(
-                        protoResult.getKey(),
+                        bundleEntry.getKey(),
                         AppSearchResult.RESULT_INTERNAL_ERROR,
                         t.getMessage());
                 continue;
             }
-            documentResultBuilder.setSuccess(protoResult.getKey(), document);
+            documentResultBuilder.setSuccess(bundleEntry.getKey(), document);
         }
 
         // Translate failed results
-        for (Map.Entry<String, AppSearchResult<byte[]>> protoResult :
-                protoResults.getFailures().entrySet()) {
+        for (Map.Entry<String, AppSearchResult<Bundle>> bundleEntry :
+                bundleResult.getFailures().entrySet()) {
             documentResultBuilder.setFailure(
-                    protoResult.getKey(),
-                    protoResult.getValue().getResultCode(),
-                    protoResult.getValue().getErrorMessage());
+                    bundleEntry.getKey(),
+                    bundleEntry.getValue().getResultCode(),
+                    bundleEntry.getValue().getErrorMessage());
         }
 
         return documentResultBuilder.build();
@@ -287,43 +273,29 @@ public class AppSearchManager {
      * @hide
      */
     @NonNull
-    public AppSearchResult<SearchResults> query(
+    public AppSearchResult<List<SearchResult>> query(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         // TODO(b/146386470): Transmit the result documents as a RemoteStream instead of sending
         //     them in one big list.
-        AndroidFuture<AppSearchResult> searchResultFuture = new AndroidFuture<>();
+        AndroidFuture<AppSearchResult> searchResultsFuture = new AndroidFuture<>();
         try {
-            mService.query(queryExpression, searchSpec.getBundle(), searchResultFuture);
+            mService.query(queryExpression, searchSpec.getBundle(), searchResultsFuture);
         } catch (RemoteException e) {
-            searchResultFuture.completeExceptionally(e);
+            searchResultsFuture.completeExceptionally(e);
         }
 
-        // Deserialize the protos into Document objects
-        AppSearchResult<byte[]> searchResultBytes = getFutureOrThrow(searchResultFuture);
-        if (!searchResultBytes.isSuccess()) {
+        // Translate the list of Bundle into a list of SearchResult
+        AppSearchResult<SearchResults> searchResultsResult = getFutureOrThrow(searchResultsFuture);
+        if (!searchResultsResult.isSuccess()) {
             return AppSearchResult.newFailedResult(
-                    searchResultBytes.getResultCode(), searchResultBytes.getErrorMessage());
+                    searchResultsResult.getResultCode(), searchResultsResult.getErrorMessage());
         }
-        SearchResultProto searchResultProto;
-        try {
-            searchResultProto = SearchResultProto.parseFrom(searchResultBytes.getResultValue());
-        } catch (InvalidProtocolBufferException e) {
-            return AppSearchResult.newFailedResult(
-                    AppSearchResult.RESULT_INTERNAL_ERROR, e.getMessage());
-        }
-        if (searchResultProto.getStatus().getCode() != StatusProto.Code.OK) {
-            // This should never happen; AppSearchManagerService should catch failed searchResults
-            // entries and transmit them as a failed AppSearchResult.
-            return AppSearchResult.newFailedResult(
-                    AppSearchResult.RESULT_INTERNAL_ERROR,
-                    searchResultProto.getStatus().getMessage());
-        }
-
-        return AppSearchResult.newSuccessfulResult(new SearchResults(searchResultProto));
+        SearchResults searchResults = searchResultsResult.getResultValue();
+        return AppSearchResult.newSuccessfulResult(searchResults.mResults);
     }
 
     /**
-     * Deletes {@link AppSearchDocument}s by URI.
+     * Deletes {@link GenericDocument}s by URI.
      *
      * <p>You should not call this method directly; instead, use the {@code AppSearch#delete()} API
      * provided by JetPack.
