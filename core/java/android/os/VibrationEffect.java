@@ -539,7 +539,7 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof VibrationEffect.OneShot)) {
                 return false;
             }
@@ -705,7 +705,7 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof VibrationEffect.Waveform)) {
                 return false;
             }
@@ -872,7 +872,7 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof VibrationEffect.Prebaked)) {
                 return false;
             }
@@ -998,7 +998,7 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Composed composed = (Composed) o;
@@ -1244,7 +1244,7 @@ public abstract class VibrationEffect implements Parcelable {
             }
 
             @Override
-            public boolean equals(Object o) {
+            public boolean equals(@Nullable Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 PrimitiveEffect that = (PrimitiveEffect) o;

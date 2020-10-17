@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
@@ -26,7 +27,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
-
 
 /**
  * A description of an Intent and target action to perform with it.
@@ -284,7 +284,7 @@ public class IntentSender implements Parcelable {
      * same package.
      */
     @Override
-    public boolean equals(Object otherObj) {
+    public boolean equals(@Nullable Object otherObj) {
         if (otherObj instanceof IntentSender) {
             return mTarget.asBinder().equals(((IntentSender)otherObj)
                     .mTarget.asBinder());

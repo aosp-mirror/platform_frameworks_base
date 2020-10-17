@@ -19,25 +19,31 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.Error;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.ISessionCallback;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutConsumer;
+import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
@@ -51,7 +57,8 @@ import java.util.Map;
  * Maintains the state of a single sensor within an instance of the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} HAL.
  */
-class Sensor {
+@SuppressWarnings("deprecation")
+class Sensor implements IBinder.DeathRecipient {
     @NonNull private final String mTag;
     @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
@@ -60,8 +67,29 @@ class Sensor {
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
-    @Nullable private Session mCurrentSession; // TODO: Death recipient
+    @Nullable private Session mCurrentSession;
     @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
+
+    @Override
+    public void binderDied() {
+        Slog.e(mTag, "Binder died");
+        mHandler.post(() -> {
+            final ClientMonitor<?> client = mScheduler.getCurrentClient();
+            if (client instanceof Interruptable) {
+                Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
+                final Interruptable interruptable = (Interruptable) client;
+                interruptable.onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+
+                mScheduler.recordCrashState();
+
+                FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                        BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                        BiometricsProtoEnums.ISSUE_HAL_DEATH);
+                mCurrentSession = null;
+            }
+        });
+    }
 
     private static class Session {
         @NonNull private final String mTag;
@@ -100,6 +128,7 @@ class Sensor {
         return mSensorProperties;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean hasSessionForUser(int userId) {
         return mCurrentSession != null && mCurrentSession.mUserId == userId;
     }
@@ -109,7 +138,7 @@ class Sensor {
         final ISessionCallback callback = new ISessionCallback.Stub() {
             @Override
             public void onStateChanged(int cookie, byte state) {
-
+                // TODO(b/162973174)
             }
 
             @Override
@@ -162,7 +191,7 @@ class Sensor {
                     }
 
                     final int currentUserId = client.getTargetUserId();
-                    final CharSequence name = FingerprintUtils.getInstance()
+                    final CharSequence name = FingerprintUtils.getInstance(sensorId)
                             .getUniqueName(mContext, currentUserId);
                     final Fingerprint fingerprint = new Fingerprint(name, enrollmentId, sensorId);
 
@@ -260,31 +289,89 @@ class Sensor {
 
             @Override
             public void onInteractionDetected() {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof FingerprintDetectClient)) {
+                        Slog.e(mTag, "onInteractionDetected for non-detect client: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final FingerprintDetectClient fingerprintDetectClient =
+                            (FingerprintDetectClient) client;
+                    fingerprintDetectClient.onInteractionDetected();
+                });
             }
 
             @Override
             public void onEnrollmentsEnumerated(int[] enrollmentIds) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof EnumerateConsumer)) {
+                        Slog.e(mTag, "onEnrollmentsEnumerated for non-enumerate consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final EnumerateConsumer enumerateConsumer =
+                            (EnumerateConsumer) client;
+                    if (enrollmentIds.length > 0) {
+                        for (int i = 0; i < enrollmentIds.length; i++) {
+                            final Fingerprint fp = new Fingerprint("", enrollmentIds[i], sensorId);
+                            enumerateConsumer.onEnumerationResult(fp, enrollmentIds.length - i - 1);
+                        }
+                    } else {
+                        enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
+                    }
+                });
             }
 
             @Override
             public void onEnrollmentsRemoved(int[] enrollmentIds) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof RemovalConsumer)) {
+                        Slog.e(mTag, "onRemoved for non-removal consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final RemovalConsumer removalConsumer = (RemovalConsumer) client;
+                    if (enrollmentIds.length > 0) {
+                        for (int i  = 0; i < enrollmentIds.length; i++) {
+                            final Fingerprint fp = new Fingerprint("", enrollmentIds[i], sensorId);
+                            removalConsumer.onRemoved(fp, enrollmentIds.length - i - 1);
+                        }
+                    } else {
+                        removalConsumer.onRemoved(null, 0);
+                    }
+                });
             }
 
             @Override
             public void onAuthenticatorIdRetrieved(long authenticatorId) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof FingerprintGetAuthenticatorIdClient)) {
+                        Slog.e(mTag, "onAuthenticatorIdRetrieved for wrong consumer: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
 
+                    final FingerprintGetAuthenticatorIdClient getAuthenticatorIdClient =
+                            (FingerprintGetAuthenticatorIdClient) client;
+                    getAuthenticatorIdClient.onAuthenticatorIdRetrieved(authenticatorId);
+                });
             }
 
             @Override
             public void onAuthenticatorIdInvalidated() {
-
+                // TODO(159667191)
             }
         };
 
         final ISession newSession = daemon.createSession(sensorId, userId, callback);
+        newSession.asBinder().linkToDeath(this, 0 /* flags */);
         mCurrentSession = new Session(mTag, newSession, userId, callback);
     }
 

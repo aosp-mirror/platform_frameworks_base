@@ -25,6 +25,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVE
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.providers.settings.SettingsState.FALLBACK_FILE_SUFFIX;
 
 import android.Manifest;
@@ -3341,7 +3342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 192;
+            private static final int SETTINGS_VERSION = 193;
 
             private final int mUserId;
 
@@ -4724,6 +4725,35 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 192;
                 }
 
+                if (currentVersion == 192) {
+                    // Version 192: set the default value for magnification capabilities. If
+                    // magnification is enabled by the user, set it to full-screen, and set a value
+                    // to show a prompt when using the magnification first time after upgrading.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting magnificationCapabilities = secureSettings.getSettingLocked(
+                            Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
+                    if (magnificationCapabilities.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
+                                String.valueOf(getContext().getResources().getInteger(
+                                        R.integer.def_accessibility_magnification_capabilities)),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        if (isMagnificationSettingsOn(secureSettings)) {
+                            secureSettings.insertSettingLocked(
+                                    Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY, String.valueOf(
+                                            Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN),
+                                    null, false  /* makeDefault */,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                            secureSettings.insertSettingLocked(
+                                    Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT, "1",
+                                    null, false /* makeDefault */,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 193;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
@@ -4861,6 +4891,46 @@ public class SettingsProvider extends ContentProvider {
 
                 }
             }
+        }
+
+        private boolean isMagnificationSettingsOn(SettingsState secureSettings) {
+            if ("1".equals(secureSettings.getSettingLocked(
+                    Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED).getValue())) {
+                return true;
+            }
+
+            final Set<String> a11yButtonTargets = transformColonDelimitedStringToSet(
+                    secureSettings.getSettingLocked(
+                            Secure.ACCESSIBILITY_BUTTON_TARGETS).getValue());
+            if (a11yButtonTargets != null && a11yButtonTargets.contains(
+                    MAGNIFICATION_CONTROLLER_NAME)) {
+                return true;
+            }
+
+            final Set<String> a11yShortcutServices = transformColonDelimitedStringToSet(
+                    secureSettings.getSettingLocked(
+                            Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE).getValue());
+            if (a11yShortcutServices != null && a11yShortcutServices.contains(
+                    MAGNIFICATION_CONTROLLER_NAME)) {
+                return true;
+            }
+            return false;
+        }
+
+        @Nullable
+        private Set<String> transformColonDelimitedStringToSet(String value) {
+            if (TextUtils.isEmpty(value)) return null;
+            final TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
+            splitter.setString(value);
+            final Set<String> items = new HashSet<>();
+            while (splitter.hasNext()) {
+                final String str = splitter.next();
+                if (TextUtils.isEmpty(str)) {
+                    continue;
+                }
+                items.add(str);
+            }
+            return items;
         }
     }
 }

@@ -23,6 +23,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -430,7 +431,7 @@ public class ZenModeConfig implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof ZenModeConfig)) return false;
         if (o == this) return true;
         final ZenModeConfig other = (ZenModeConfig) o;
@@ -1527,7 +1528,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof ScheduleInfo)) return false;
             final ScheduleInfo other = (ScheduleInfo) o;
             return toDayList(days).equals(toDayList(other.days))
@@ -1629,7 +1630,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof EventInfo)) return false;
             final EventInfo other = (EventInfo) o;
             return userId == other.userId
@@ -1934,7 +1935,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof ZenRule)) return false;
             if (o == this) return true;
             final ZenRule other = (ZenRule) o;

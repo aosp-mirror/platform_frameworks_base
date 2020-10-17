@@ -217,7 +217,7 @@ public class InsetsSource implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return equals(o, false);
     }
 
@@ -225,7 +225,7 @@ public class InsetsSource implements Parcelable {
      * @param excludeInvisibleImeFrames If {@link InsetsState#ITYPE_IME} frames should be ignored
      *                                  when IME is not visible.
      */
-    public boolean equals(Object o, boolean excludeInvisibleImeFrames) {
+    public boolean equals(@Nullable Object o, boolean excludeInvisibleImeFrames) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

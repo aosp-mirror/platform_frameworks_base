@@ -527,7 +527,7 @@ public final class WindowManagerGlobal {
             }
             allViewsRemoved = mRoots.isEmpty();
         }
-        if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
+        if (ThreadedRenderer.sTrimForeground) {
             doTrimForeground();
         }
 
@@ -561,29 +561,28 @@ public final class WindowManagerGlobal {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void trimMemory(int level) {
-        if (ThreadedRenderer.isAvailable()) {
-            if (shouldDestroyEglContext(level)) {
-                // Destroy all hardware surfaces and resources associated to
-                // known windows
-                synchronized (mLock) {
-                    for (int i = mRoots.size() - 1; i >= 0; --i) {
-                        mRoots.get(i).destroyHardwareResources();
-                    }
+
+        if (shouldDestroyEglContext(level)) {
+            // Destroy all hardware surfaces and resources associated to
+            // known windows
+            synchronized (mLock) {
+                for (int i = mRoots.size() - 1; i >= 0; --i) {
+                    mRoots.get(i).destroyHardwareResources();
                 }
-                // Force a full memory flush
-                level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             }
+            // Force a full memory flush
+            level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+        }
 
-            ThreadedRenderer.trimMemory(level);
+        ThreadedRenderer.trimMemory(level);
 
-            if (ThreadedRenderer.sTrimForeground) {
-                doTrimForeground();
-            }
+        if (ThreadedRenderer.sTrimForeground) {
+            doTrimForeground();
         }
     }
 
     public static void trimForeground() {
-        if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
+        if (ThreadedRenderer.sTrimForeground) {
             WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
             wm.doTrimForeground();
         }

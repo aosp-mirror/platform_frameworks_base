@@ -17,6 +17,7 @@
 package android.hardware.lights;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -78,7 +79,7 @@ public final class Light implements Parcelable {
             };
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof Light) {
             Light light = (Light) obj;
             return mId == light.mId && mOrdinal == light.mOrdinal && mType == light.mType;

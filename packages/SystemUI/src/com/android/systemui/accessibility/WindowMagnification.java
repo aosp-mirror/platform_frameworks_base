@@ -72,8 +72,7 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         super(context);
         mHandler = mainHandler;
         mLastConfiguration = new Configuration(context.getResources().getConfiguration());
-        mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
         final WindowMagnificationController controller = new WindowMagnificationController(mContext,

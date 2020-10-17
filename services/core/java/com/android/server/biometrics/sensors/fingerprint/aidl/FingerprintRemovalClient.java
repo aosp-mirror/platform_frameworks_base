@@ -17,16 +17,18 @@
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.Map;
 
@@ -34,13 +36,13 @@ import java.util.Map;
  * Fingerprint-specific removal client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} interface.
  */
-public class FingerprintRemovalClient extends RemovalClient<ISession> {
+class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
     private static final String TAG = "FingerprintRemovalClient";
 
-    public FingerprintRemovalClient(@NonNull Context context,
+    FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull FingerprintUtils utils, int sensorId,
+            @Nullable ClientMonitorCallbackConverter listener, int biometricId, int userId,
+            @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);

@@ -267,6 +267,12 @@ public abstract class DisplayManagerInternal {
     public abstract void ignoreProximitySensorUntilChanged();
 
     /**
+     * Sets the folded state of the device.
+     * TODO: b/168208522 - Remove in favor of DisplayStatePolicy when that is available.
+     */
+    public abstract void setDeviceFolded(boolean isFolded);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the
@@ -372,7 +378,7 @@ public abstract class DisplayManagerInternal {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return o instanceof DisplayPowerRequest
                     && equals((DisplayPowerRequest)o);
         }

@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -291,7 +292,7 @@ public final class NotificationChannelGroup implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NotificationChannelGroup that = (NotificationChannelGroup) o;

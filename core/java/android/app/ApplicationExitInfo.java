@@ -1164,7 +1164,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (other == null || !(other instanceof ApplicationExitInfo)) {
             return false;
         }

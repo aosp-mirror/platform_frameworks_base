@@ -83,21 +83,22 @@ public class Shader {
 
     public enum TileMode {
         /**
-         * replicate the edge color if the shader draws outside of its
-         * original bounds
+         * Replicate the edge color if the shader draws outside of its
+         * original bounds.
          */
         CLAMP   (0),
         /**
-         * repeat the shader's image horizontally and vertically
+         * Repeat the shader's image horizontally and vertically.
          */
         REPEAT  (1),
         /**
-         * repeat the shader's image horizontally and vertically, alternating
-         * mirror images so that adjacent images always seam
+         * Repeat the shader's image horizontally and vertically, alternating
+         * mirror images so that adjacent images always seam.
          */
         MIRROR(2),
         /**
-         * Only draw within the original domain, return transparent-black everywhere else
+         * Render the shader's image pixels only within its original bounds. If the shader
+         * draws outside of its original bounds, transparent black is drawn instead.
          */
         DECAL(3);
 

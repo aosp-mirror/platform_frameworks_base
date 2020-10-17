@@ -369,7 +369,7 @@ public class PackageUserState {
     }
 
     @Override
-    final public boolean equals(Object obj) {
+    final public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof PackageUserState)) {
             return false;
         }
@@ -527,7 +527,7 @@ public class PackageUserState {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }

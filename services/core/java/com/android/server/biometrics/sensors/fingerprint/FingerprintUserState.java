@@ -42,7 +42,6 @@ import java.util.ArrayList;
 public class FingerprintUserState extends BiometricUserState<Fingerprint> {
 
     private static final String TAG = "FingerprintState";
-    private static final String FINGERPRINT_FILE = "settings_fingerprint.xml";
 
     private static final String TAG_FINGERPRINTS = "fingerprints";
     private static final String TAG_FINGERPRINT = "fingerprint";
@@ -51,18 +50,13 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
     private static final String ATTR_FINGER_ID = "fingerId";
     private static final String ATTR_DEVICE_ID = "deviceId";
 
-    public FingerprintUserState(Context context, int userId) {
-        super(context, userId);
+    public FingerprintUserState(Context context, int userId, String fileName) {
+        super(context, userId, fileName);
     }
 
     @Override
     protected String getBiometricsTag() {
         return TAG_FINGERPRINTS;
-    }
-
-    @Override
-    protected String getBiometricFile() {
-        return FINGERPRINT_FILE;
     }
 
     @Override

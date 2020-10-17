@@ -17,6 +17,8 @@
 
 package android.hardware.camera2.params;
 
+import static com.android.internal.util.Preconditions.*;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -30,8 +32,6 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
-
-import static com.android.internal.util.Preconditions.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -677,7 +677,7 @@ public final class OutputConfiguration implements Parcelable {
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         } else if (this == obj) {

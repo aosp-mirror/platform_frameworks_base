@@ -19,6 +19,7 @@ package android.graphics.text;
 import android.annotation.NonNull;
 import android.graphics.Paint;
 import android.text.TextDirectionHeuristic;
+import android.text.TextPaint;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -31,15 +32,18 @@ import dalvik.annotation.optimization.FastNative;
  * Text shaping is a preprocess for drawing text into canvas with glyphs. The glyph is a most
  * primitive unit of the text drawing, consist of glyph identifier in the font file and its position
  * and style. You can draw the shape result to Canvas by calling Canvas#drawGlyphs.
-
  *
- * @see TextShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)
- * @see TextShaper#shapeTextRun(char[], int, int, int, int, float, float, boolean, Paint)
- * @see android.text.StyledTextShaper#shapeText(CharSequence, int, int, TextDirectionHeuristic,
- * TextPaint)
+ * For most of the use cases, {@link android.text.TextShaper} will provide text shaping
+ * functionalities needed. {@link TextRunShaper} is a lower level API that is used by
+ * {@link android.text.TextShaper}.
+ *
+ * @see TextRunShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)
+ * @see TextRunShaper#shapeTextRun(char[], int, int, int, int, float, float, boolean, Paint)
+ * @see android.text.TextShaper#shapeText(CharSequence, int, int, TextDirectionHeuristic, TextPaint,
+ * TextShaper.GlyphsConsumer)
  */
-public class TextShaper {
-    private TextShaper() {}  // Do not instantiate
+public class TextRunShaper {
+    private TextRunShaper() {}  // Do not instantiate
 
     /**
      * Shape non-styled text.

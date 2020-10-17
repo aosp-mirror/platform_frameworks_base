@@ -44,6 +44,7 @@ import static com.android.internal.widget.PasswordValidationError.WEAK_CREDENTIA
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -705,7 +706,7 @@ public final class PasswordMetrics implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final PasswordMetrics that = (PasswordMetrics) o;

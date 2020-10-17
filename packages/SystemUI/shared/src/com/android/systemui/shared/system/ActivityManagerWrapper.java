@@ -20,10 +20,6 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -58,7 +54,6 @@ import android.view.RemoteAnimationTarget;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
@@ -226,6 +221,22 @@ public class ActivityManagerWrapper {
     public void startRecentsActivity(Intent intent, long eventTime,
             final RecentsAnimationListener animationHandler, final Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
+        boolean result = startRecentsActivity(intent, eventTime, animationHandler);
+        if (resultCallback != null) {
+            resultCallbackHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    resultCallback.accept(result);
+                }
+            });
+        }
+    }
+
+    /**
+     * Starts the recents activity. The caller should manage the thread on which this is called.
+     */
+    public boolean startRecentsActivity(
+            Intent intent, long eventTime, RecentsAnimationListener animationHandler) {
         try {
             IRecentsAnimationRunner runner = null;
             if (animationHandler != null) {
@@ -257,23 +268,9 @@ public class ActivityManagerWrapper {
                 };
             }
             ActivityTaskManager.getService().startRecentsActivity(intent, eventTime, runner);
-            if (resultCallback != null) {
-                resultCallbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        resultCallback.accept(true);
-                    }
-                });
-            }
+            return true;
         } catch (Exception e) {
-            if (resultCallback != null) {
-                resultCallbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        resultCallback.accept(false);
-                    }
-                });
-            }
+            return false;
         }
     }
 
@@ -291,56 +288,28 @@ public class ActivityManagerWrapper {
     /**
      * Starts a task from Recents.
      *
-     * @see {@link #startActivityFromRecentsAsync(TaskKey, ActivityOptions, int, int, Consumer, Handler)}
-     */
-    public void startActivityFromRecentsAsync(Task.TaskKey taskKey, ActivityOptions options,
-            Consumer<Boolean> resultCallback, Handler resultCallbackHandler) {
-        startActivityFromRecentsAsync(taskKey, options, WINDOWING_MODE_UNDEFINED,
-                ACTIVITY_TYPE_UNDEFINED, resultCallback, resultCallbackHandler);
-    }
-
-    /**
-     * Starts a task from Recents.
-     *
      * @param resultCallback The result success callback
      * @param resultCallbackHandler The handler to receive the result callback
      */
-    public void startActivityFromRecentsAsync(final Task.TaskKey taskKey, ActivityOptions options,
-            int windowingMode, int activityType, final Consumer<Boolean> resultCallback,
-            final Handler resultCallbackHandler) {
-        if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // We show non-visible docked tasks in Recents, but we always want to launch
-            // them in the fullscreen stack.
-            if (options == null) {
-                options = ActivityOptions.makeBasic();
-            }
-            options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        } else if (windowingMode != WINDOWING_MODE_UNDEFINED
-                || activityType != ACTIVITY_TYPE_UNDEFINED) {
-            if (options == null) {
-                options = ActivityOptions.makeBasic();
-            }
-            options.setLaunchWindowingMode(windowingMode);
-            options.setLaunchActivityType(activityType);
-        }
-        final ActivityOptions finalOptions = options;
-
-
-        boolean result = false;
-        try {
-            result = startActivityFromRecents(taskKey.id, finalOptions);
-        } catch (Exception e) {
-            // Fall through
-        }
-        final boolean finalResult = result;
+    public void startActivityFromRecentsAsync(Task.TaskKey taskKey, ActivityOptions options,
+            Consumer<Boolean> resultCallback, Handler resultCallbackHandler) {
+        final boolean result = startActivityFromRecents(taskKey, options);
         if (resultCallback != null) {
             resultCallbackHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    resultCallback.accept(finalResult);
+                    resultCallback.accept(result);
                 }
             });
         }
+    }
+
+    /**
+     * Starts a task from Recents synchronously.
+     */
+    public boolean startActivityFromRecents(Task.TaskKey taskKey, ActivityOptions options) {
+        ActivityOptionsCompat.addTaskInfo(options, taskKey);
+        return startActivityFromRecents(taskKey.id, options);
     }
 
     /**

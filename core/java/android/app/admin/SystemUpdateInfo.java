@@ -179,7 +179,7 @@ public final class SystemUpdateInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SystemUpdateInfo that = (SystemUpdateInfo) o;

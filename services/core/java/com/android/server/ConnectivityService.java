@@ -236,7 +236,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -2301,10 +2300,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Called when the system is ready and ConnectivityService can initialize remaining components.
+     * Called by SystemServer through ConnectivityManager when the system is ready.
+     */
+    @Override
+    public void systemReady() {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Calling Uid is not system uid.");
+        }
+        systemReadyInternal();
+    }
+
+    /**
+     * Called when ConnectivityService can initialize remaining components.
      */
     @VisibleForTesting
-    public void systemReady() {
+    public void systemReadyInternal() {
         // Let PermissionMonitor#startMonitoring() running in the beginning of the systemReady
         // before MultipathPolicyTracker.start(). Since mApps in PermissionMonitor needs to be
         // populated first to ensure that listening network request which is sent by
@@ -6192,20 +6202,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;  // no updating necessary
         }
 
-        final NetworkAgentInfo defaultNai = getDefaultNetwork();
-        final boolean isDefaultNetwork = (defaultNai != null && defaultNai.network.netId == netId);
-
         if (DBG) {
             final Collection<InetAddress> dnses = newLp.getDnsServers();
             log("Setting DNS servers for network " + netId + " to " + dnses);
         }
         try {
             mDnsManager.noteDnsServersForNetwork(netId, newLp);
-            // TODO: netd should listen on [::1]:53 and proxy queries to the current
-            // default network, and we should just set net.dns1 to ::1, not least
-            // because applications attempting to use net.dns resolvers will bypass
-            // the privacy protections of things like DNS-over-TLS.
-            if (isDefaultNetwork) mDnsManager.setDefaultDnsSystemProperties(newLp.getDnsServers());
             mDnsManager.flushVmDnsCache();
         } catch (Exception e) {
             loge("Exception in setDnsConfigurationForNetwork: " + e);
@@ -6720,8 +6722,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ? newNetwork.linkProperties.getHttpProxy() : null);
         updateTcpBufferSizes(null != newNetwork
                 ? newNetwork.linkProperties.getTcpBufferSizes() : null);
-        mDnsManager.setDefaultDnsSystemProperties(null != newNetwork
-                ? newNetwork.linkProperties.getDnsServers() : Collections.EMPTY_LIST);
         notifyIfacesChangedForNetworkStats();
         // Fix up the NetworkCapabilities of any VPNs that don't specify underlying networks.
         updateAllVpnsCapabilities();

@@ -17,7 +17,10 @@
 package com.android.server.location;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -41,6 +44,7 @@ import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.location.LocationManager;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -108,6 +112,12 @@ public class ContextHubService extends IContextHubService.Stub {
 
     // The manager for the internal nanoapp state cache
     private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
+
+    // True if WiFi is available for the Context Hub
+    private boolean mIsWifiAvailable = false;
+
+    // Lock object for sendWifiSettingUpdate()
+    private final Object mSendWifiSettingUpdateLock = new Object();
 
     /**
      * Class extending the callback to register with a Context Hub.
@@ -203,6 +213,32 @@ public class ContextHubService extends IContextHubService.Stub {
                         @Override
                         public void onChange(boolean selfChange) {
                             sendLocationSettingUpdate();
+                        }
+                    }, UserHandle.USER_ALL);
+        }
+
+        if (mContextHubWrapper.supportsWifiSettingNotifications()) {
+            sendWifiSettingUpdate(true /* forceUpdate */);
+
+            BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+                        sendWifiSettingUpdate(false /* forceUpdate */);
+                    }
+                }
+            };
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+            mContext.registerReceiver(wifiReceiver, filter);
+
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE),
+                    true /* notifyForDescendants */,
+                    new ContentObserver(null /* handler */) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            sendWifiSettingUpdate(false /* forceUpdate */);
                         }
                     }, UserHandle.USER_ALL);
         }
@@ -455,7 +491,6 @@ public class ContextHubService extends IContextHubService.Stub {
      *
      * @param contextHubId the ID of the hub to do the query
      * @return the result of the query
-     *
      * @throws IllegalStateException if the transaction queue is full
      */
     private int queryNanoAppsInternal(int contextHubId) {
@@ -529,7 +564,6 @@ public class ContextHubService extends IContextHubService.Stub {
 
     /**
      * A helper function to handle a load response from the Context Hub for the old API.
-     *
      * TODO(b/69270990): Remove this once the old APIs are obsolete.
      */
     private void handleLoadResponseOldApi(
@@ -579,6 +613,7 @@ public class ContextHubService extends IContextHubService.Stub {
     private void handleHubEventCallback(int contextHubId, int eventType) {
         if (eventType == AsyncEventType.RESTARTED) {
             sendLocationSettingUpdate();
+            sendWifiSettingUpdate(true /* forceUpdate */);
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -629,10 +664,9 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId   the ID of the hub this client is attached to
      * @param clientCallback the client interface to register with the service
      * @return the generated client interface, null if registration was unsuccessful
-     *
      * @throws IllegalArgumentException if contextHubId is not a valid ID
-     * @throws IllegalStateException if max number of clients have already registered
-     * @throws NullPointerException if clientCallback is null
+     * @throws IllegalStateException    if max number of clients have already registered
+     * @throws NullPointerException     if clientCallback is null
      */
     @Override
     public IContextHubClient createClient(
@@ -656,7 +690,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param pendingIntent the PendingIntent associated with this client
      * @param nanoAppId     the ID of the nanoapp PendingIntent events will be sent for
      * @return the generated client interface
-     *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub
      * @throws IllegalStateException    if there were too many registered clients at the service
      */
@@ -678,7 +711,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId        the ID of the hub to load the binary
      * @param transactionCallback the client-facing transaction callback interface
      * @param nanoAppBinary       the binary to load
-     *
      * @throws IllegalStateException if the transaction queue is full
      */
     @Override
@@ -708,7 +740,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId        the ID of the hub to unload the nanoapp
      * @param transactionCallback the client-facing transaction callback interface
      * @param nanoAppId           the ID of the nanoapp to unload
-     *
      * @throws IllegalStateException if the transaction queue is full
      */
     @Override
@@ -732,7 +763,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId        the ID of the hub to enable the nanoapp
      * @param transactionCallback the client-facing transaction callback interface
      * @param nanoAppId           the ID of the nanoapp to enable
-     *
      * @throws IllegalStateException if the transaction queue is full
      */
     @Override
@@ -756,7 +786,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId        the ID of the hub to disable the nanoapp
      * @param transactionCallback the client-facing transaction callback interface
      * @param nanoAppId           the ID of the nanoapp to disable
-     *
      * @throws IllegalStateException if the transaction queue is full
      */
     @Override
@@ -779,7 +808,6 @@ public class ContextHubService extends IContextHubService.Stub {
      *
      * @param contextHubId        the ID of the hub to query
      * @param transactionCallback the client-facing transaction callback interface
-     *
      * @throws IllegalStateException if the transaction queue is full
      */
     @Override
@@ -890,7 +918,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId    the ID of the hub to start the transaction
      * @param callback        the client transaction callback interface
      * @param transactionType the type of the transaction
-     *
      * @return {@code true} if mContextHubWrapper and contextHubId is valid, {@code false} otherwise
      */
     private boolean checkHalProxyAndContextHubId(
@@ -921,12 +948,28 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * Obtains the latest location setting value and notifies the Contexthub.
+     * Obtains the latest location setting value and notifies the Context Hub.
      */
     private void sendLocationSettingUpdate() {
         boolean enabled = mContext.getSystemService(LocationManager.class)
                 .isLocationEnabledForUser(UserHandle.CURRENT);
         mContextHubWrapper.onLocationSettingChanged(enabled);
+    }
+
+    /**
+     * Obtains the latest WiFi availability setting value and notifies the Context Hub.
+     * @param forceUpdate True to force send update to the Context Hub, otherwise only send the
+     *                    update when the WiFi availability changes.
+     */
+    private void sendWifiSettingUpdate(boolean forceUpdate) {
+        synchronized (mSendWifiSettingUpdateLock) {
+            WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
+            boolean enabled = wifiManager.isWifiEnabled() || wifiManager.isScanAlwaysAvailable();
+            if (forceUpdate || mIsWifiAvailable != enabled) {
+                mIsWifiAvailable = enabled;
+                mContextHubWrapper.onWifiSettingChanged(enabled);
+            }
+        }
     }
 
     private String getCallingPackageName() {

@@ -67,7 +67,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     /**
      * Registration object for GNSS listeners.
      */
-    protected final class GnssListenerRegistration extends
+    protected class GnssListenerRegistration extends
             BinderListenerRegistration<TRequest, TListener> {
 
         // we store these values because we don't trust the listeners not to give us dupes, not to
@@ -232,10 +232,18 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         final long identity = Binder.clearCallingIdentity();
         try {
             addRegistration(listener.asBinder(),
-                    new GnssListenerRegistration(request, callerIdentity, listener));
+                    createRegistration(request, callerIdentity, listener));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * May be overridden by subclasses to change the registration type.
+     */
+    protected GnssListenerRegistration createRegistration(TRequest request,
+            CallerIdentity callerIdentity, TListener listener) {
+        return new GnssListenerRegistration(request, callerIdentity, listener);
     }
 
     /**

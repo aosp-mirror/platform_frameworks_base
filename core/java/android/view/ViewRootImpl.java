@@ -1291,10 +1291,6 @@ public final class ViewRootImpl implements ViewParent,
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
 
         if (hardwareAccelerated) {
-            if (!ThreadedRenderer.isAvailable()) {
-                return;
-            }
-
             // Persistent processes (including the system) should not do
             // accelerated rendering on low-end devices.  In that case,
             // sRendererDisabled will be set.  In addition, the system process
@@ -1314,8 +1310,7 @@ public final class ViewRootImpl implements ViewParent,
                 // shows for launching applications, so they will look more like
                 // the app being launched.
                 mAttachInfo.mHardwareAccelerationRequested = true;
-            } else if (!ThreadedRenderer.sRendererDisabled
-                    || (ThreadedRenderer.sSystemRendererDisabled && forceHwAccelerated)) {
+            } else if (ThreadedRenderer.sRendererEnabled || forceHwAccelerated) {
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mThreadedRenderer.destroy();
                 }

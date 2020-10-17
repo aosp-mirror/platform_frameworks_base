@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -35,13 +36,13 @@ import java.util.Map;
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
+class FingerprintRemovalClient extends RemovalClient<Fingerprint, IBiometricsFingerprint> {
     private static final String TAG = "FingerprintRemovalClient";
 
     FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);

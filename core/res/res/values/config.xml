@@ -1803,6 +1803,9 @@
          Note: This config is deprecated, please use config_defaultSms instead. -->
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
+    <!-- Flag indicating whether the current device supports "Ask every time" for sms-->
+    <bool name="config_sms_ask_every_time_support">true</bool>
+
     <!-- Flag indicating whether the current device allows data.
          If true, this means that the device supports data connectivity through
          the telephony network.
@@ -4440,4 +4443,13 @@
 
     <!-- WindowsManager JetPack display features -->
     <string name="config_display_features" translatable="false" />
+
+    <!-- Physical Display IDs of the display-devices that are swapped when a folding device folds.
+         This list is expected to contain two elements: the first is the display to use
+         when the device is folded, the second is the display to use when unfolded. If the array
+         is empty or the display IDs are not recognized, this feature is turned off and the value
+         ignored.
+         TODO: b/170470621 - remove once we can have multiple Internal displays in DMS as
+               well as a notification from DisplayStateManager. -->
+    <string-array name="config_internalFoldedPhysicalDisplayIds" translatable="false" />
 </resources>

@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Provo ta nxjerrësh përsëri pamjen e ekranit"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Pamja e ekranit nuk mund të ruhet për shkak të hapësirës ruajtëse të kufizuar"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nxjerrja e pamjeve të ekranit nuk lejohet nga aplikacioni ose organizata jote."</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Hiq pamjen e ekranit"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pamja paraprake e imazhit"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Regjistruesi i ekranit"</string>
@@ -1018,14 +1020,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Lëvize poshtë"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Lëvize majtas"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Lëvize djathtas"</string>
-    <!-- no translation found for magnification_mode_switch_description (2698364322069934733) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_full_screen (2882507327576770574) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_state_window (8597100249594076965) -->
-    <skip />
-    <!-- no translation found for magnification_mode_switch_click_label (2786203505805898199) -->
-    <skip />
+    <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Ndërrimi i zmadhimit"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Zmadho të gjithë ekranin"</string>
+    <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zmadho një pjesë të ekranit"</string>
+    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Ndërro"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrollet e pajisjes"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Shto kontrolle për pajisjet e tua të lidhura"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfiguro kontrollet e pajisjes"</string>
@@ -1067,6 +1065,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Po ngarkon rekomandimet"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Fshih sesionin aktual."</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Hiq"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Vazhdo"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cilësimet"</string>

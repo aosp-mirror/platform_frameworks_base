@@ -78,18 +78,18 @@
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवाको व्यवस्था छैन।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"तपाईं कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"कुनै पनि मोबाइल डेटा सेवा उपलब्ध छैन"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"आपतकालीन कल सेवा उपलब्ध छैन"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"आपत्‌कालीन कल सेवा उपलब्ध छैन"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"कुनै पनि भ्वाइस सेवा उपलब्ध छैन"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"कुनै पनि भ्वाइस वा आपातकालीन कल सेवा उपलब्ध छैन"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"तपाईंको सेवा प्रदायकले अस्थायी रूपमा निष्क्रिय पार्नुभएको"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> का लागि तपाईंको सेवा प्रदायकले अस्थायी रूपमा निष्क्रिय पार्नुभएको"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"मोबाइल नेटवर्कमाथि पहुँच राख्न सकिएन"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"रुचाइएको नेटवर्क परिवर्तन गरी हेर्नुहोस्‌। परिवर्तन गर्न ट्याप गर्नुहोस्‌।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आपतकालीन कल सेवा अनुपलब्ध छ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi मार्फत आपतकालीन कल गर्न सकिँदैन"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आपत्‌कालीन कल सेवा अनुपलब्ध छ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi मार्फत आपत्‌कालीन कल गर्न सकिँदैन"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"अलर्टहरू"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कल फर्वार्ड गर्ने सेवा"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"आपतकालीन कलब्याक मोड"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"आपत्‌कालीन कलब्याक मोड"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"मोबाइल डेटाको स्थिति"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS सन्देशहरू"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"भ्वाइस मेल सन्देशहरू"</string>
@@ -241,7 +241,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"बन्द गर्नुहोस्"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"पुनः सुरु गर्नुहोस्"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"आपतकालीन"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"आपत्‌कालीन"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"बग रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्रको अन्त्य गर्नुहोस्"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रिनसट"</string>
@@ -345,24 +345,24 @@
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"एपलाई अन्य नम्बरमा कल पुर्ननिर्देश वा समग्र कल परित्याग विकल्प सहित बहिर्गमन कल समयमा डायल गर्दाको नम्बर हेर्न अनुमति दिन्छ।"</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"फोन कलहरूको जवाफ दिनुहोस्"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"एपलाई आगमन फोन कलको जवाफ दिन अनुमति दिन्छ।"</string>
-    <string name="permlab_receiveSms" msgid="505961632050451881">"पाठ सन्देशहरू (SMS) प्राप्त गर्नुहोस्"</string>
+    <string name="permlab_receiveSms" msgid="505961632050451881">"टेक्स्ट म्यासेजहरू (SMS) प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"एपलाई SMS सन्देशहरू प्राप्त गर्न र प्रक्रिया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"पाठ सन्देश (MMS) प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"एपलाई MMS सन्देशहरू प्राप्त गर्न र प्रकृया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"मोबाइल प्रसारणसम्बन्धी सन्देशहरू फर्वार्ड गर्नुहोस्"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"मोबाइल प्रसारणसम्बन्धी सन्देशहरू प्राप्त हुनासाथै तिनीहरूलाई फर्वार्ड गर्नका लागि यसले एपलाई मोबाइल प्रसारण मोड्युलमा जोडिने अनुमति दिन्छ। तपाईंलाई कतिपय स्थानमा आपत्कालीन अवस्थाका बारेमा जानकारी दिनका लागि मोबाइल प्रसारणसम्बन्धी अलर्टहरू पठाइन्छ। हानिकारक एपहरूले आपत्कालीन मोबाइल प्रसारण प्राप्त हुँदा तपाईंको यन्त्रलाई कार्य सम्पादन गर्ने वा सञ्चालित हुने क्रममा हस्तक्षेप गर्न सक्छन्।"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"मोबाइल प्रसारणसम्बन्धी सन्देशहरू प्राप्त हुनासाथै तिनीहरूलाई फर्वार्ड गर्नका लागि यसले एपलाई मोबाइल प्रसारण मोड्युलमा जोडिने अनुमति दिन्छ। तपाईंलाई कतिपय स्थानमा आपत्‌कालीन अवस्थाका बारेमा जानकारी दिनका लागि मोबाइल प्रसारणसम्बन्धी अलर्टहरू पठाइन्छ। हानिकारक एपहरूले आपत्‌कालीन मोबाइल प्रसारण प्राप्त हुँदा तपाईंको यन्त्रलाई कार्य सम्पादन गर्ने वा सञ्चालित हुने क्रममा हस्तक्षेप गर्न सक्छन्।"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"सेल प्रसारित सन्देशहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"तपाईंको उपकरणद्वारा प्राप्त सेल प्रसारण सन्देशहरू एपलाई पढ्न अनुमति दिन्छ। सेल प्रसारण चेतावनीहरू केही स्थानहरूमा तपाईंलाई आपतकालीन गतिविधिहरूको बारेमा सचेत गराउन गरिएका छन्। खराब एपहरूले एउटा आपतकालीन सेल प्रसारण प्राप्त गर्दछ जब तपाईंको उपकरणको प्रदर्शन वा अपरेशनको साथ हस्तक्षेप गर्न सक्दछन्।"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"तपाईंको उपकरणद्वारा प्राप्त सेल प्रसारण सन्देशहरू एपलाई पढ्न अनुमति दिन्छ। सेल प्रसारण चेतावनीहरू केही स्थानहरूमा तपाईंलाई आपत्‌कालीन गतिविधिहरूको बारेमा सचेत गराउन गरिएका छन्। खराब एपहरूले एउटा आपत्‌कालीन सेल प्रसारण प्राप्त गर्दछ जब तपाईंको उपकरणको प्रदर्शन वा अपरेशनको साथ हस्तक्षेप गर्न सक्दछन्।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"सदस्य बनाइका फिडहरू पढ्नुहोस्"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"एपलाई अहिलेको समीकरण गरिएका सूचकहरू बारे विवरणहरू लिने अनुमति दिन्छ।"</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"एपलाई SMS सन्देशहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब एपहरूले तपाईंको पुष्टि बिना सन्देशहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
-    <string name="permlab_readSms" msgid="5164176626258800297">"तपाईंका पाठ सन्देशहरू (SMS वा MMS) पढ्नुहोस्"</string>
+    <string name="permlab_readSms" msgid="5164176626258800297">"तपाईंका टेक्स्ट म्यासेजहरू (SMS वा MMS) पढ्नुहोस्"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"यस अनुप्रयोगले तपाईंको ट्याब्लेटमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
     <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"यस अनुप्रयोगले तपाईंको Android टिभी यन्त्रमा भण्डार गरिएका सबै SMS.(पाठ) सन्देशहरू पढ्न सक्छ।"</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"यस अनुप्रयोगले तपाईंको फोनमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
-    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"पाठ सन्देशहरू (WAP) प्राप्त गर्नुहोस्"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न एपलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका सन्देशहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
+    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"टेक्स्ट म्यासेजहरू (WAP) प्राप्त गर्नुहोस्"</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न एपलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका म्यासेजहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"चलिरहेका एपहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न एपलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन एपलाई अनुमति दिन सक्छ।"</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"प्रोफाइल र यन्त्र मालिकहरूको व्यवस्थापन गराउनुहोस्"</string>
@@ -451,7 +451,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"एपलाई भाइब्रेटर नियन्त्रण गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"यो एपलाई कम्पनको स्थितिमाथि पहुँच राख्न दिनुहोस्।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नम्बरहरूमा सीधै कल गर्नुहोस्"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"तपाईँको हस्तक्षेप बेगरै फोन नम्बर कल गर्न एपलाई अनुमति दिन्छ। यसले अनपेक्षित शुल्क वा कलहरू गराउन सक्छ। यसले एपलाई आपतकालीन नम्बरहरू कल गर्न अनुमति दिँदैन विचार गर्नुहोस्। खराब एपहरूले तपाईँको स्वीकार बिना कलहरू गरेर तपाईँलाई बढी पैसा तिराउन सक्छ।"</string>
+    <string name="permdesc_callPhone" msgid="5439809516131609109">"तपाईँको हस्तक्षेप बेगरै फोन नम्बर कल गर्न एपलाई अनुमति दिन्छ। यसले अनपेक्षित शुल्क वा कलहरू गराउन सक्छ। यसले एपलाई आपत्‌कालीन नम्बरहरू कल गर्न अनुमति दिँदैन विचार गर्नुहोस्। खराब एपहरूले तपाईँको स्वीकार बिना कलहरू गरेर तपाईँलाई बढी पैसा तिराउन सक्छ।"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS कल सेवा पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"तपाईँको हस्तक्षेप बिना नै कल गर्न IMS सेवा प्रयोग गर्न एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिति र पहिचान पढ्नुहोस्"</string>
@@ -830,13 +830,13 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"अनलक गर्न PIN कोड टाइप गर्नुहोस्"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"गलत PIN कोड।"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"अनलक गर्न मेनु थिच्नुहोस् र त्यसपछि ० थिच्नुहोस्।"</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"आपतकालीन नम्बर"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"आपत्‌कालीन नम्बर"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"कुनै सेवा छैन"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"स्क्रिन लक गरिएको।"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलक वा आपतकालीन कल गर्न मेनु थिच्नुहोस्।"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलक वा आपत्‌कालीन कल गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"अनलक गर्नु ढाँचा खिच्नुहोस्"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"आपतकालीन कल"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"आपत्‌कालीन कल"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"कलमा फर्किनुहोस्"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"सही!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"फेरि प्रयास गर्नुहोस्"</string>
@@ -858,7 +858,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"रोक्नुहोस्"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"दोहोर्याउनुहोस्"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"फास्ट फर्वार्ड"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"आपतकालीन कलहरू मात्र"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"आपत्‌कालीन कलहरू मात्र"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"नेटवर्क लक छ"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM कार्ड PUK-लक गरिएको छ।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"प्रयोगकर्ता निर्देशक वा ग्राहक सेवा सम्पर्क हर्नुहोस्।"</string>
@@ -1654,6 +1654,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (6722364385073799185) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अन भयो।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अफ भयो।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
@@ -1966,7 +1968,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"तटीय क्षेत्र र नदीछेउका ठाउँहरू छाडी उच्च सतहमा अवस्थित कुनै अझ सुरक्षित ठाउँमा जानुहोस्।"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="4888224011071875068">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
-    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"आपतकालीन सन्देशहरूको परीक्षण"</string>
+    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"आपत्‌कालीन सन्देशहरूको परीक्षण"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"जवाफ दिनु…"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
     <string name="mmcc_authentication_reject" msgid="4891965994643876369">"SIM मार्फत भ्वाइस कल गर्न मिल्दैन"</string>

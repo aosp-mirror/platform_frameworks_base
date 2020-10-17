@@ -587,7 +587,7 @@ public final class PermissionManager {
         }
 
         @Override
-        public boolean equals(Object rval) {
+        public boolean equals(@Nullable Object rval) {
             // N.B. pid doesn't count toward equality!
             if (rval == null) {
                 return false;
@@ -660,7 +660,7 @@ public final class PermissionManager {
         }
 
         @Override
-        public boolean equals(Object rval) {
+        public boolean equals(@Nullable Object rval) {
             if (rval == null) {
                 return false;
             }

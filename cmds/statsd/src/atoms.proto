@@ -495,13 +495,15 @@ message Atom {
         HdmiCecMessageReported hdmi_cec_message_reported = 310 [(module) = "framework"];
         AirplaneMode airplane_mode = 311 [(module) = "telephony"];
         ModemRestart modem_restart = 312 [(module) = "telephony"];
+        CarrierIdMismatchEvent carrier_id_mismatch_event = 313 [(module) = "telephony"];
+        CarrierIdMatchingTable carrier_id_table_update = 314 [(module) = "telephony"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10088
+    // Next: 10089
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -602,6 +604,7 @@ message Atom {
             10085 [(module) = "mediaprovider"];
         IncomingSms incoming_sms = 10086 [(module) = "telephony"];
         OutgoingSms outgoing_sms = 10087 [(module) = "telephony"];
+        CarrierIdMatchingTable carrier_id_table_version = 10088 [(module) = "telephony"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -10629,6 +10632,43 @@ message ModemRestart {
     // Carrier ID of the first SIM card.
     // See https://source.android.com/devices/tech/config/carrierid.
     optional int32 carrier_id = 3;
+}
+
+/**
+ * Push the SIM card details when the carrier ID match is not complete.
+ *
+ * The atom is pushed when a SIM card is initialized and the MCC/MNC is not present in the
+ * carrier ID table, or the SIM card contains a GID1 value that is not present in the carrier ID
+ * table. This atom is pushed only once for each type of SIM card.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/CarrierIdMatchStats.java
+ */
+message CarrierIdMismatchEvent {
+    // Matched carrier ID. The value -1 is used if no match is found.
+    optional int32 carrier_id = 1;
+
+    // MCC/MNC of the SIM card.
+    optional string mcc_mnc = 2;
+
+    // Group identifier (level 1) of the SIM card.
+    optional string gid1 = 3;
+
+    // SPN value of the SIM card.
+    optional string spn = 4;
+}
+
+/**
+ * Pulls/pushes the version of the carrier ID matching table.
+ *
+ * The atom is pushed when a new version is detected.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/CarrierIdMatchStats.java
+ */
+message CarrierIdMatchingTable {
+    // Version of the CarrierId matching table.
+    optional int32 table_version = 1;
 }
 
 /**

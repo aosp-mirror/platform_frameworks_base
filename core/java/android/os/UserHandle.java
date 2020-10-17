@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -532,7 +533,7 @@ public final class UserHandle implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         try {
             if (obj != null) {
                 UserHandle other = (UserHandle)obj;

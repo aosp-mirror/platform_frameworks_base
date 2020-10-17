@@ -24,6 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
@@ -64,6 +65,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     ColorExtractor.GradientColors mGradientColors;
     @Mock
     KeyguardSliceViewController mKeyguardSliceViewController;
+    @Mock
+    Resources mResources;
 
     private KeyguardClockSwitchController mController;
 
@@ -72,9 +75,13 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mView.isAttachedToWindow()).thenReturn(true);
-
+        when(mResources.getString(anyInt())).thenReturn("h:mm");
         mController = new KeyguardClockSwitchController(
-                mView, mStatusBarStateController, mColorExtractor, mClockManager,
+                mView,
+                mResources,
+                mStatusBarStateController,
+                mColorExtractor,
+                mClockManager,
                 mKeyguardSliceViewController);
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);

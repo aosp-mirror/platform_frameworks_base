@@ -86,6 +86,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوباره نماگرفت بگیرید"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توان نماگرفت را ذخیره کرد"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند نماگرفت بگیرید."</string>
+    <!-- no translation found for screenshot_edit (3510496440489019191) -->
+    <skip />
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"رد کردن نماگرفت"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"پیش‌نمایش نماگرفت"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ضبط‌کننده صفحه‌نمایش"</string>
@@ -142,7 +144,7 @@
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"برای لغو راستی‌آزمایی ضربه بزنید"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"لطفاً دوباره امتحان کنید"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"درحال جستجوی چهره"</string>
-    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره احراز هویت شد"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره اصالت‌سنجی شد"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تأیید شد"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید ضربه بزنید"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"راستی‌آزمایی‌شده"</string>
@@ -307,8 +309,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"حالت کار روشن شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"صرفه‌جویی داده خاموش شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"صرفه‌جویی داده روشن شد."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"«حریم خصوصی حسگر» خاموش است."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"«حریم خصوصی حسگر» روشن است."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"«حریم‌خصوصی حسگر» خاموش است."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"«حریم‌خصوصی حسگر» روشن است."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"روشنایی نمایشگر"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"درحال شارژ شدن"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5716594205739750015">"‏داده 2G-3G موقتاً متوقف شده است"</string>
@@ -1063,6 +1065,8 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"درحال بار کردن توصیه‌ها"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"رسانه"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"جلسه فعلی پنهان شود."</string>
+    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"رد کردن"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ازسرگیری"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"تنظیمات"</string>
