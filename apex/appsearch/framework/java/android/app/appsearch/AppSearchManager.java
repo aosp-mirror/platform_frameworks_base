@@ -22,9 +22,9 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -96,46 +96,23 @@ public class AppSearchManager {
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
      * efficiently.
      *
-     * @param schemas The schema configs for the types used by the calling app.
+     * @param request The schema update request.
      * @return the result of performing this operation.
      *
      * @hide
      */
     @NonNull
-    public AppSearchResult<Void> setSchema(@NonNull AppSearchSchema... schemas) {
-        return setSchema(Arrays.asList(schemas), /*forceOverride=*/false);
-    }
-
-    /**
-     * Sets the schema being used by documents provided to the {@link #putDocuments} method.
-     *
-     * <p>This method is similar to {@link #setSchema(AppSearchSchema...)}, except for the
-     * {@code forceOverride} parameter. If a backwards-incompatible schema is specified but the
-     * {@code forceOverride} parameter is set to {@code true}, instead of returning an
-     * {@link AppSearchResult} with the {@link AppSearchResult#RESULT_INVALID_SCHEMA} code, all
-     * documents which are not compatible with the new schema will be deleted and the incompatible
-     * schema will be applied.
-     *
-     * @param schemas The schema configs for the types used by the calling app.
-     * @param forceOverride Whether to force the new schema to be applied even if there are
-     *     incompatible changes versus the previously set schema. Documents which are incompatible
-     *     with the new schema will be deleted.
-     * @return the result of performing this operation.
-     *
-     * @hide
-     */
-    @NonNull
-    public AppSearchResult<Void> setSchema(
-            @NonNull List<AppSearchSchema> schemas, boolean forceOverride) {
+    public AppSearchResult<Void> setSchema(@NonNull SetSchemaRequest request) {
+        Preconditions.checkNotNull(request);
         // TODO: This should use com.android.internal.infra.RemoteStream or another mechanism to
         //  avoid binder limits.
-        List<Bundle> schemaBundles = new ArrayList<>(schemas.size());
-        for (AppSearchSchema schema : schemas) {
+        List<Bundle> schemaBundles = new ArrayList<>(request.getSchemas().size());
+        for (AppSearchSchema schema : request.getSchemas()) {
             schemaBundles.add(schema.getBundle());
         }
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.setSchema(schemaBundles, forceOverride, future);
+            mService.setSchema(schemaBundles, request.isForceOverride(), future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -151,19 +128,20 @@ public class AppSearchManager {
      * <p>Each {@link GenericDocument}'s {@code schemaType} field must be set to the name of a
      * schema type previously registered via the {@link #setSchema} method.
      *
-     * @param documents {@link GenericDocument}s that need to be indexed.
-     * @return An {@link AppSearchBatchResult} mapping the document URIs to {@link Void} if they
-     *     were successfully indexed, or a {@link Throwable} describing the failure if they could
-     *     not be indexed.
+     * @param request {@link PutDocumentsRequest} containing documents to be indexed
+     * @return The pending result of performing this operation. The keys of the returned
+     * {@link AppSearchBatchResult} are the URIs of the input documents. The values are
+     * {@code null} if they were successfully indexed, or a failed {@link AppSearchResult}
+     * otherwise.
      * @hide
      */
-    public AppSearchBatchResult<String, Void> putDocuments(
-            @NonNull List<GenericDocument> documents) {
+    public AppSearchBatchResult<String, Void> putDocuments(@NonNull PutDocumentsRequest request) {
         // TODO(b/146386470): Transmit these documents as a RemoteStream instead of sending them in
         // one big list.
+        List<GenericDocument> documents = request.getDocuments();
         List<Bundle> documentBundles = new ArrayList<>(documents.size());
-        for (GenericDocument document : documents) {
-            documentBundles.add(document.getBundle());
+        for (int i = 0; i < documents.size(); i++) {
+            documentBundles.add(documents.get(i).getBundle());
         }
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
@@ -180,15 +158,18 @@ public class AppSearchManager {
      * <p>You should not call this method directly; instead, use the
      * {@code AppSearch#getDocuments()} API provided by JetPack.
      *
-     * @param uris URIs of the documents to look up.
-     * @return An {@link AppSearchBatchResult} mapping the document URIs to
-     *     {@link GenericDocument} values if they were successfully retrieved, a {@code null}
-     *     failure if they were not found, or a {@link Throwable} failure describing the problem if
-     *     an error occurred.
+     * @param request {@link GetByUriRequest} containing URIs to be retrieved.
+     * @return The pending result of performing this operation. The keys of the returned
+     * {@link AppSearchBatchResult} are the input URIs. The values are the returned
+     * {@link GenericDocument}s on success, or a failed {@link AppSearchResult} otherwise.
+     * URIs that are not found will return a failed {@link AppSearchResult} with a result code
+     * of {@link AppSearchResult#RESULT_NOT_FOUND}.
      */
-    public AppSearchBatchResult<String, GenericDocument> getDocuments(@NonNull List<String> uris) {
+    public AppSearchBatchResult<String, GenericDocument> getByUri(
+            @NonNull GetByUriRequest request) {
         // TODO(b/146386470): Transmit the result documents as a RemoteStream instead of sending
         //     them in one big list.
+        List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
             mService.getDocuments(uris, future);
@@ -300,12 +281,15 @@ public class AppSearchManager {
      * <p>You should not call this method directly; instead, use the {@code AppSearch#delete()} API
      * provided by JetPack.
      *
-     * @param uris URIs of the documents to delete
-     * @return An {@link AppSearchBatchResult} mapping each URI to a {@code null} success if
-     *     deletion was successful, to a {@code null} failure if the document did not exist, or to a
-     *     {@code throwable} failure if deletion failed for another reason.
+     * @param request Request containing URIs to be removed.
+     * @return The pending result of performing this operation. The keys of the returned
+     * {@link AppSearchBatchResult} are the input URIs. The values are {@code null} on success,
+     * or a failed {@link AppSearchResult} otherwise. URIs that are not found will return a
+     * failed {@link AppSearchResult} with a result code of
+     * {@link AppSearchResult#RESULT_NOT_FOUND}.
      */
-    public AppSearchBatchResult<String, Void> delete(@NonNull List<String> uris) {
+    public AppSearchBatchResult<String, Void> removeByUri(@NonNull RemoveByUriRequest request) {
+        List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
             mService.delete(uris, future);
