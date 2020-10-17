@@ -411,7 +411,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 final SystemConfig.PermissionEntry perm = permConfig.valueAt(i);
                 BasePermission bp = mSettings.getPermissionLocked(perm.name);
                 if (bp == null) {
-                    bp = new BasePermission(perm.name, "android", BasePermission.TYPE_BUILTIN);
+                    bp = new BasePermission(perm.name, "android", BasePermission.TYPE_CONFIG);
                     mSettings.putPermissionLocked(perm.name, bp);
                 }
                 if (perm.gids != null) {
@@ -3300,7 +3300,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         PackageParser.SigningDetails.CertCapabilities.PERMISSION);
         final boolean isVendorPrivilegedPermission = bp.isVendorPrivileged();
         final boolean isPrivilegedPermission = bp.isPrivileged() || isVendorPrivilegedPermission;
-        final boolean isOemPermission = bp.isOEM();
+        final boolean isOemPermission = bp.isOem();
         if (!allowed && (isPrivilegedPermission || isOemPermission) && pkg.isSystem()) {
             final String permissionName = bp.getName();
             // For updated system applications, a privileged/oem permission
