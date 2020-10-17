@@ -522,7 +522,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow)
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
-        mWindow.getRequestedInsetsState().getSource(ITYPE_STATUS_BAR).setVisible(false);
+        final InsetsState requestedState = new InsetsState();
+        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        mWindow.updateRequestedVisibility(requestedState);
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -544,7 +546,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow)
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
-        mWindow.getRequestedInsetsState().getSource(ITYPE_STATUS_BAR).setVisible(false);
+        final InsetsState requestedState = new InsetsState();
+        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        mWindow.updateRequestedVisibility(requestedState);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindow(mWindow);
 

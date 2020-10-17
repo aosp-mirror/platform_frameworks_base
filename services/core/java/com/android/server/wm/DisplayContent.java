@@ -96,6 +96,7 @@ import static com.android.server.wm.DisplayContentProto.CURRENT_FOCUS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_READY;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_ROTATION;
 import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
@@ -107,7 +108,6 @@ import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
-import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
@@ -192,6 +192,8 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputWindowHandle;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
@@ -2871,7 +2873,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         proto.write(ID, mDisplayId);
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
-        proto.write(ROTATION, getRotation());
+        mDisplayRotation.dumpDebug(proto, DISPLAY_ROTATION);
         final ScreenRotationAnimation screenRotationAnimation = getRotationAnimation();
         if (screenRotationAnimation != null) {
             screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
@@ -4830,7 +4832,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             boolean ignoreRequest) {
         final int type = win.mAttrs.type;
         final boolean stickyHideNav =
-                !win.getRequestedInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                         && win.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
         return (!stickyHideNav || ignoreRequest) && type != TYPE_INPUT_METHOD
                 && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME;
@@ -5557,6 +5559,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
+        private final InsetsState mRequestedInsetsState = new InsetsState();
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
@@ -5610,6 +5613,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mRemoteInsetsController.hideInsets(types, fromIme);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
+            }
+        }
+
+        @Override
+        public boolean getRequestedVisibility(@InternalInsetsType int type) {
+            return mRequestedInsetsState.getSourceOrDefaultVisibility(type);
+        }
+
+        void updateRequestedVisibility(InsetsState state) {
+            for (int i = 0; i < InsetsState.SIZE; i++) {
+                final InsetsSource source = state.peekSource(i);
+                if (source == null) continue;
+                mRequestedInsetsState.addSource(source);
             }
         }
     }

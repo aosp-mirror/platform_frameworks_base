@@ -350,6 +350,7 @@ public class InsetsSourceConsumer {
         if (mRequestedVisible != requestedVisible) {
             mRequestedVisible = requestedVisible;
             mIsAnimationPending = false;
+            mController.onRequestedVisibilityChanged(this);
             if (DEBUG) Log.d(TAG, "setRequestedVisible: " + requestedVisible);
         }
         if (applyLocalVisibilityOverride()) {

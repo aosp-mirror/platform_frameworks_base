@@ -71,7 +71,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 import android.view.DisplayCutout;
-import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
@@ -426,10 +426,11 @@ public class WindowStateTests extends WindowTestsBase {
                 .setWindow(statusBar, null /* frameProvider */, null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
-        final InsetsSource source = new InsetsSource(ITYPE_STATUS_BAR);
-        source.setVisible(false);
+        final InsetsState state = new InsetsState();
+        state.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        app.updateRequestedVisibility(state);
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
-                .onInsetsModified(app, source);
+                .updateClientVisibility(app);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
     }

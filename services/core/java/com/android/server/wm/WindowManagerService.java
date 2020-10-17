@@ -122,10 +122,8 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_DISPLA
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
 import static com.android.server.wm.WindowManagerServiceDumpProto.HARD_KEYBOARD_AVAILABLE;
 import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
-import static com.android.server.wm.WindowManagerServiceDumpProto.LAST_ORIENTATION;
 import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
-import static com.android.server.wm.WindowManagerServiceDumpProto.ROTATION;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -1377,10 +1375,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
-            int displayId, Rect outFrame, Rect outContentInsets, Rect outStableInsets,
+            int displayId, int requestUserId, InsetsState requestedVisibility, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
-            int requestUserId) {
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
@@ -1575,6 +1573,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs, callingPid, callingUid);
+            win.updateRequestedVisibility(requestedVisibility);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
             if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -4036,8 +4035,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
                     return;
                 }
-                dc.getInsetsStateController().onInsetsModified(
-                        dc.mRemoteInsetsControlTarget, state);
+                dc.mRemoteInsetsControlTarget.updateRequestedVisibility(state);
+                dc.getInsetsStateController().onInsetsModified(dc.mRemoteInsetsControlTarget);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -6051,8 +6050,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         proto.write(DISPLAY_FROZEN, mDisplayFrozen);
         final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
-        proto.write(ROTATION, defaultDisplayContent.getRotation());
-        proto.write(LAST_ORIENTATION, defaultDisplayContent.getLastOrientation());
         proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
         proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
     }

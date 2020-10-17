@@ -338,11 +338,12 @@ class InsetsSourceProvider {
         }
     }
 
-    boolean onInsetsModified(InsetsControlTarget caller, InsetsSource modifiedSource) {
-        if (mControlTarget != caller || modifiedSource.isVisible() == mClientVisible) {
+    boolean updateClientVisibility(InsetsControlTarget caller) {
+        final boolean requestedVisible = caller.getRequestedVisibility(mSource.getType());
+        if (caller != mControlTarget || requestedVisible == mClientVisible) {
             return false;
         }
-        setClientVisible(modifiedSource.isVisible());
+        setClientVisible(requestedVisible);
         return true;
     }
 
@@ -350,7 +351,7 @@ class InsetsSourceProvider {
         mIsLeashReadyForDispatching = true;
     }
 
-    private void setClientVisible(boolean clientVisible) {
+    void setClientVisible(boolean clientVisible) {
         if (mClientVisible == clientVisible) {
             return;
         }

@@ -48,8 +48,8 @@ message WindowManagerServiceDumpProto {
     optional string focused_app = 4;
     optional IdentifierProto input_method_window = 5;
     optional bool display_frozen = 6;
-    optional int32 rotation = 7 [(.android.typedef) = "android.view.Surface.Rotation"];
-    optional int32 last_orientation = 8 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
+    optional int32 rotation = 7 [(.android.typedef) = "android.view.Surface.Rotation", deprecated=true];
+    optional int32 last_orientation = 8 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation", deprecated=true];
     optional int32 focused_display_id = 9;
     optional bool hard_keyboard_available = 10;
 }
@@ -183,7 +183,7 @@ message DisplayContentProto {
     repeated WindowTokenProto ime_windows = 8 [deprecated=true];
     optional int32 dpi = 9;
     optional .android.view.DisplayInfoProto display_info = 10;
-    optional int32 rotation = 11 [(.android.typedef) = "android.view.Surface.Rotation"];
+    optional int32 rotation = 11 [(.android.typedef) = "android.view.Surface.Rotation", deprecated=true];
     optional ScreenRotationAnimationProto screen_rotation_animation = 12;
     optional DisplayFramesProto display_frames = 13;
     optional int32 surface_size = 14 [deprecated=true];
@@ -207,6 +207,8 @@ message DisplayContentProto {
     optional WindowStateProto current_focus = 30;
     optional ImeInsetsSourceProviderProto ime_insets_source_provider = 31;
     optional bool can_show_ime = 32;
+
+    optional DisplayRotationProto display_rotation = 33;
 }
 
 /* represents DisplayArea object */
@@ -240,6 +242,16 @@ message DisplayFramesProto {
     optional .android.graphics.RectProto stable_bounds = 1;
     optional .android.graphics.RectProto dock = 2;
     optional .android.graphics.RectProto current = 3;
+}
+
+message DisplayRotationProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 rotation = 1 [(.android.typedef) = "android.view.Surface.Rotation"];
+    optional bool frozen_to_user_rotation = 2;
+    optional int32 user_rotation = 3 [(.android.typedef) = "android.view.Surface.Rotation"];
+    optional int32 fixed_to_user_rotation_mode = 4;
+    optional int32 last_orientation = 5 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
 }
 
 /* represents DockedStackDividerController */
