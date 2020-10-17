@@ -142,6 +142,38 @@ class Sensor implements IBinder.DeathRecipient {
             }
 
             @Override
+            public void onChallengeGenerated(long challenge) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof FingerprintGenerateChallengeClient)) {
+                        Slog.e(mTag, "onChallengeGenerated for wrong client: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
+
+                    final FingerprintGenerateChallengeClient generateChallengeClient =
+                            (FingerprintGenerateChallengeClient) client;
+                    generateChallengeClient.onChallengeGenerated(sensorId, userId, challenge);
+                });
+            }
+
+            @Override
+            public void onChallengeRevoked(long challenge) {
+                mHandler.post(() -> {
+                    final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                    if (!(client instanceof FingerprintRevokeChallengeClient)) {
+                        Slog.e(mTag, "onChallengeRevoked for wrong client: "
+                                + Utils.getClientName(client));
+                        return;
+                    }
+
+                    final FingerprintRevokeChallengeClient revokeChallengeClient =
+                            (FingerprintRevokeChallengeClient) client;
+                    revokeChallengeClient.onChallengeRevoked(sensorId, userId, challenge);
+                });
+            }
+
+            @Override
             public void onAcquired(byte info, int vendorCode) {
                 mHandler.post(() -> {
                     final ClientMonitor<?> client = mScheduler.getCurrentClient();
