@@ -1914,7 +1914,7 @@
     <string name="app_info" msgid="6113278084877079851">"Հավելվածի մասին"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ցուցադրական օգտատերը գործարկվում է…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարաքը վերակայվում է…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարքը վերակայվում է…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Անջատած <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="5731633152336490471">"Կոնֆերանս զանգ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Հուշակ"</string>

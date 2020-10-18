@@ -156,9 +156,9 @@
     <string name="httpErrorOk" msgid="6206751415788256357">"تأیید"</string>
     <string name="httpError" msgid="3406003584150566720">"خطایی در شبکه وجود داشت."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"نشانی اینترنتی پیدا نشد."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"‏طرح کلی احراز هویت سایت پشتیبانی نمی‌‎شود."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"‏طرح کلی اصالت‌سنجی سایت پشتیبانی نمی‌‎شود."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"راستی‌آزمایی ناموفق بود."</string>
-    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"احراز هویت از طریق سرور پروکسی انجام نشد."</string>
+    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"اصالت‌سنجی از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"اتصال به سرور انجام نشد."</string>
     <string name="httpErrorIO" msgid="3860318696166314490">"برقراری ارتباط با سرور ممکن نبود. بعداً دوباره امتحان کنید."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"زمان اتصال به سرور تمام شده است."</string>
@@ -529,11 +529,11 @@
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"درخواست پیچیدگی قفل صفحه"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"به برنامه اجازه می‌دهد سطح پیچیدگی قفل صفحه (بالا، متوسط، پایین، یا هیچ‌کدام) را بیاموزد که نشان‌دهنده بازه ممکن طول و نوع قفل صفحه است. همچنین برنامه می‌تواند به کاربران پیشنهاد دهد قفل صفحه را به سطح خاصی به‌روزرسانی کنند، اما کاربران می‌توانند آزادانه این پیشنهاد را نادیده بگیرند و به سطح دیگری بروند. توجه داشته باشید که قفل صفحه در قالب نوشتار ساده ذخیره نمی‌شود، بنابراین برنامه گذرواژه دقیق را نمی‌داند."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"استفاده از سخت‌افزار بیومتریک"</string>
-    <string name="permdesc_useBiometric" msgid="7502858732677143410">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای احراز هویت استفاده کند"</string>
+    <string name="permdesc_useBiometric" msgid="7502858732677143410">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"مدیریت سخت‌افزار اثر انگشت"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای اثر انگشت جهت استفاده، فعال کند."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"استفاده از سخت‌افزار اثر انگشت"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای احراز هویت استفاده کند"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"تغییر مجموعه موسیقی شما"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"به برنامه اجازه می‌دهد مجموعه موسیقی‌تان را تغییر دهد."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیوی شما"</string>
@@ -544,11 +544,11 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
-    <string name="biometric_error_user_canceled" msgid="6732303949695293730">"احراز هویت لغو شد"</string>
+    <string name="biometric_error_user_canceled" msgid="6732303949695293730">"اصالت‌سنجی لغو شد"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"شناسایی نشد"</string>
-    <string name="biometric_error_canceled" msgid="8266582404844179778">"احراز هویت لغو شد"</string>
+    <string name="biometric_error_canceled" msgid="8266582404844179778">"اصالت‌سنجی لغو شد"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"پین، الگو یا گذرواژه‌ای تنظیم نشده است"</string>
-    <string name="biometric_error_generic" msgid="6784371929985434439">"خطا هنگام احراز هویت"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"خطا هنگام اصالت‌سنجی"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"بخشی از اثر انگشت شناسایی شد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"حسگر اثر انگشت کثیف است. لطفاً آن را تمیز کنید و دوباره امتحان نمایید."</string>
@@ -556,9 +556,9 @@
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت احراز هویت شد"</string>
-    <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره احراز هویت شد"</string>
-    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره احراز هویت شد، لطفاً تأیید را فشار دهید"</string>
+    <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
+    <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
+    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"ذخیره اثر انگشت ممکن نیست. لطفاً یک اثر انگشت موجود را حذف کنید."</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"درنگ ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
@@ -577,7 +577,7 @@
     <string name="permlab_manageFace" msgid="4569549381889283282">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای احراز هویت استفاده کند"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای اصالت‌سنجی استفاده کند"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"بازگشایی با چهره"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ثبت مجدد چهره"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
