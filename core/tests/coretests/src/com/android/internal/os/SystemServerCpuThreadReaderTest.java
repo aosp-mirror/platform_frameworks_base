@@ -16,146 +16,86 @@
 
 package com.android.internal.os;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
-import android.content.Context;
-import android.os.FileUtils;
-
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SystemServerCpuThreadReaderTest {
-    private File mProcDirectory;
-
-    @Before
-    public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-        mProcDirectory = context.getDir("proc", Context.MODE_PRIVATE);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        FileUtils.deleteContents(mProcDirectory);
-    }
 
     @Test
-    public void testReaderDelta_firstTime() throws IOException {
+    public void testReadDelta() throws IOException {
         int pid = 42;
-        setupDirectory(
-                pid,
-                new int[] {42, 1, 2, 3},
-                new int[] {1000, 2000},
-                // Units are 10ms aka 10000Us
-                new int[][] {{100, 200}, {0, 200}, {0, 300}, {0, 400}},
-                new int[] {1400, 1500});
 
-        SystemServerCpuThreadReader reader = new SystemServerCpuThreadReader(
-                mProcDirectory.toPath(), pid);
-        reader.setBinderThreadNativeTids(new int[] {1, 3});
-        SystemServerCpuThreadReader.SystemServiceCpuThreadTimes systemServiceCpuThreadTimes =
-                reader.readDelta();
-        assertArrayEquals(new long[] {100 * 10000, 1100 * 10000},
-                systemServiceCpuThreadTimes.threadCpuTimesUs);
-        assertArrayEquals(new long[] {0, 600 * 10000},
-                systemServiceCpuThreadTimes.binderThreadCpuTimesUs);
-    }
+        MockCpuTimeInStateReader mockReader = new MockCpuTimeInStateReader(4);
+        // Units are nanoseconds
+        mockReader.setAggregatedTaskCpuFreqTimes(new String[] {
+                "0:1000000000 2000000000 3000000000:4000000000",
+                "1:100000000 200000000 300000000:400000000",
+        });
 
-    @Test
-    public void testReaderDelta_nextTime() throws IOException {
-        int pid = 42;
-        setupDirectory(
-                pid,
-                new int[] {42, 1, 2, 3},
-                new int[] {1000, 2000},
-                new int[][] {{100, 200}, {0, 200}, {0, 300}, {0, 400}},
-                new int[] {1400, 1500});
-
-        SystemServerCpuThreadReader reader = new SystemServerCpuThreadReader(
-                mProcDirectory.toPath(), pid);
+        SystemServerCpuThreadReader reader = new SystemServerCpuThreadReader(pid, mockReader);
         reader.setBinderThreadNativeTids(new int[] {1, 3});
 
-        // First time, populate "last" snapshot
-        reader.readDelta();
-
-        FileUtils.deleteContents(mProcDirectory);
-        setupDirectory(
-                pid,
-                new int[] {42, 1, 2, 3},
-                new int[] {1000, 2000},
-                new int[][] {{500, 600}, {700, 800}, {900, 1000}, {1100, 1200}},
-                new int[] {2400, 2500});
-
-        // Second time, get the actual delta
+        // The first invocation of readDelta populates the "last" snapshot
         SystemServerCpuThreadReader.SystemServiceCpuThreadTimes systemServiceCpuThreadTimes =
                 reader.readDelta();
 
-        assertArrayEquals(new long[] {3100 * 10000, 2500 * 10000},
-                systemServiceCpuThreadTimes.threadCpuTimesUs);
-        assertArrayEquals(new long[] {1800 * 10000, 1400 * 10000},
-                systemServiceCpuThreadTimes.binderThreadCpuTimesUs);
+        assertThat(systemServiceCpuThreadTimes.threadCpuTimesUs)
+                .isEqualTo(new long[] {1100000, 2200000, 3300000, 4400000});
+        assertThat(systemServiceCpuThreadTimes.binderThreadCpuTimesUs)
+                .isEqualTo(new long[] {100000, 200000, 300000, 400000});
+
+        mockReader.setAggregatedTaskCpuFreqTimes(new String[] {
+                "0:1010000000 2020000000 3030000000:4040000000",
+                "1:101000000 202000000 303000000:404000000",
+        });
+
+        // The second invocation gets the actual delta
+        systemServiceCpuThreadTimes = reader.readDelta();
+
+        assertThat(systemServiceCpuThreadTimes.threadCpuTimesUs)
+                .isEqualTo(new long[] {11000, 22000, 33000, 44000});
+        assertThat(systemServiceCpuThreadTimes.binderThreadCpuTimesUs)
+                .isEqualTo(new long[] {1000, 2000, 3000, 4000});
     }
 
-    private void setupDirectory(int pid, int[] threadIds, int[] cpuFrequencies, int[][] cpuTimes,
-            int[] processCpuTimes)
-            throws IOException {
+    public static class MockCpuTimeInStateReader implements
+            KernelSingleProcessCpuThreadReader.CpuTimeInStateReader {
+        private final int mCpuFrequencyCount;
+        private String[] mAggregatedTaskCpuFreqTimes;
 
-        assertTrue(mProcDirectory.toPath().resolve("self").toFile().mkdirs());
-
-        try (OutputStream timeInStateStream =
-                     Files.newOutputStream(
-                             mProcDirectory.toPath().resolve("self").resolve("time_in_state"))) {
-            for (int i = 0; i < cpuFrequencies.length; i++) {
-                final String line = cpuFrequencies[i] + " 0\n";
-                timeInStateStream.write(line.getBytes());
-            }
+        MockCpuTimeInStateReader(int frequencyCount) {
+            mCpuFrequencyCount = frequencyCount;
         }
 
-        Path processPath = mProcDirectory.toPath().resolve(String.valueOf(pid));
-        // Make /proc/$PID
-        assertTrue(processPath.toFile().mkdirs());
-
-        // Write /proc/$PID/stat. Only the fields 14-17 matter.
-        try (OutputStream timeInStateStream = Files.newOutputStream(processPath.resolve("stat"))) {
-            timeInStateStream.write(
-                    (pid + " (test) S 4 5 6 7 8 9 10 11 12 13 "
-                            + processCpuTimes[0] + " "
-                            + processCpuTimes[1] + " "
-                            + "16 17 18 19 20 ...").getBytes());
+        @Override
+        public int getCpuFrequencyCount() {
+            return mCpuFrequencyCount;
         }
 
-        // Make /proc/$PID/task
-        final Path selfThreadsPath = processPath.resolve("task");
-        assertTrue(selfThreadsPath.toFile().mkdirs());
+        @Override
+        public boolean startTrackingProcessCpuTimes(int tgid) {
+            return true;
+        }
 
-        // Make thread directories
-        for (int i = 0; i < threadIds.length; i++) {
-            // Make /proc/$PID/task/$TID
-            final Path threadPath = selfThreadsPath.resolve(String.valueOf(threadIds[i]));
-            assertTrue(threadPath.toFile().mkdirs());
+        public boolean startAggregatingTaskCpuTimes(int pid, int aggregationKey) {
+            return true;
+        }
 
-            // Make /proc/$PID/task/$TID/time_in_state
-            try (OutputStream timeInStateStream =
-                         Files.newOutputStream(threadPath.resolve("time_in_state"))) {
-                for (int j = 0; j < cpuFrequencies.length; j++) {
-                    final String line = cpuFrequencies[j] + " " + cpuTimes[i][j] + "\n";
-                    timeInStateStream.write(line.getBytes());
-                }
-            }
+        public void setAggregatedTaskCpuFreqTimes(String[] mAggregatedTaskCpuFreqTimes) {
+            this.mAggregatedTaskCpuFreqTimes = mAggregatedTaskCpuFreqTimes;
+        }
+
+        public String[] getAggregatedTaskCpuFreqTimes(int pid) {
+            return mAggregatedTaskCpuFreqTimes;
         }
     }
 }
