@@ -523,6 +523,9 @@ public final class Font {
     /**
      * Returns a font file buffer.
      *
+     * Duplicate before reading values by {@link ByteBuffer#duplicate()} for avoiding unexpected
+     * reading position sharing.
+     *
      * @return a font buffer
      */
     public @NonNull ByteBuffer getBuffer() {
@@ -628,18 +631,49 @@ public final class Font {
         if (o == this) {
             return true;
         }
-        if (o == null || !(o instanceof Font)) {
+        if (!(o instanceof Font)) {
             return false;
         }
         Font f = (Font) o;
-        return mFontStyle.equals(f.mFontStyle) && f.mTtcIndex == mTtcIndex
-                && Arrays.equals(f.mAxes, mAxes) && f.mBuffer.equals(mBuffer)
-                && Objects.equals(f.mLocaleList, mLocaleList);
+        boolean paramEqual = mFontStyle.equals(f.mFontStyle) && f.mTtcIndex == mTtcIndex
+                && Arrays.equals(f.mAxes, mAxes) && Objects.equals(f.mLocaleList, mLocaleList)
+                && Objects.equals(mFile, f.mFile);
+
+        if (!paramEqual) {
+            return false;
+        }
+
+        // Shortcut for different font buffer check by comparing size.
+        if (mBuffer.capacity() != f.mBuffer.capacity()) {
+            return false;
+        }
+
+        // ByteBuffer#equals compares all bytes which is not performant for e.g HashMap. Since
+        // underlying native font object holds buffer address, check if this buffer points exactly
+        // the same address as a shortcut of equality. For being compatible with of API30 or before,
+        // check buffer position even if the buffer points the same address.
+        if (nIsSameBufferAddress(mNativePtr, f.mNativePtr)
+                && mBuffer.position() == f.mBuffer.position()) {
+            return true;
+        }
+
+        // Unfortunately, need to compare bytes one-by-one since the buffer may be different font
+        // file but has the same file size, or two font has same content but they are allocated
+        // differently. For being compatible with API30 ore before, compare with ByteBuffer#equals.
+        return mBuffer.equals(f.mBuffer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFontStyle, mTtcIndex, Arrays.hashCode(mAxes), mBuffer, mLocaleList);
+        return Objects.hash(
+                mFontStyle,
+                mTtcIndex,
+                Arrays.hashCode(mAxes),
+                // Use Buffer size instead of ByteBuffer#hashCode since ByteBuffer#hashCode traverse
+                // data which is not performant e.g. for HashMap. The hash collision are less likely
+                // happens because it is unlikely happens the different font files has exactly the
+                // same size.
+                mLocaleList);
     }
 
     @Override
@@ -724,4 +758,7 @@ public final class Font {
 
     @CriticalNative
     private static native long nGetNativeFontPtr(long ptr);
+
+    @CriticalNative
+    private static native boolean nIsSameBufferAddress(long lFontPtr, long rFontPtr);
 }
