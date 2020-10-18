@@ -4049,7 +4049,8 @@ public abstract class BatteryStats implements Parcelable {
         if (cpuFreqs != null) {
             sb.setLength(0);
             for (int i = 0; i < cpuFreqs.length; ++i) {
-                sb.append((i == 0 ? "" : ",") + cpuFreqs[i]);
+                if (i != 0) sb.append(',');
+                sb.append(cpuFreqs[i]);
             }
             dumpLine(pw, 0 /* uid */, category, GLOBAL_CPU_FREQ_DATA, sb.toString());
         }
@@ -4368,12 +4369,13 @@ public abstract class BatteryStats implements Parcelable {
                 if (cpuFreqTimeMs != null && cpuFreqTimeMs.length == cpuFreqs.length) {
                     sb.setLength(0);
                     for (int i = 0; i < cpuFreqTimeMs.length; ++i) {
-                        sb.append((i == 0 ? "" : ",") + cpuFreqTimeMs[i]);
+                        if (i != 0) sb.append(',');
+                        sb.append(cpuFreqTimeMs[i]);
                     }
                     final long[] screenOffCpuFreqTimeMs = u.getScreenOffCpuFreqTimes(which);
                     if (screenOffCpuFreqTimeMs != null) {
                         for (int i = 0; i < screenOffCpuFreqTimeMs.length; ++i) {
-                            sb.append("," + screenOffCpuFreqTimeMs[i]);
+                            sb.append(',').append(screenOffCpuFreqTimeMs[i]);
                         }
                     } else {
                         for (int i = 0; i < cpuFreqTimeMs.length; ++i) {
@@ -4389,13 +4391,14 @@ public abstract class BatteryStats implements Parcelable {
                     if (timesMs != null && timesMs.length == cpuFreqs.length) {
                         sb.setLength(0);
                         for (int i = 0; i < timesMs.length; ++i) {
-                            sb.append((i == 0 ? "" : ",") + timesMs[i]);
+                            if (i != 0) sb.append(',');
+                            sb.append(timesMs[i]);
                         }
                         final long[] screenOffTimesMs = u.getScreenOffCpuFreqTimes(
                                 which, procState);
                         if (screenOffTimesMs != null) {
                             for (int i = 0; i < screenOffTimesMs.length; ++i) {
-                                sb.append("," + screenOffTimesMs[i]);
+                                sb.append(',').append(screenOffTimesMs[i]);
                             }
                         } else {
                             for (int i = 0; i < timesMs.length; ++i) {
@@ -5427,7 +5430,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append("  CPU freqs:");
             for (int i = 0; i < cpuFreqs.length; ++i) {
-                sb.append(" " + cpuFreqs[i]);
+                sb.append(' ').append(cpuFreqs[i]);
             }
             pw.println(sb.toString());
             pw.println();
@@ -6036,7 +6039,7 @@ public abstract class BatteryStats implements Parcelable {
                 sb.setLength(0);
                 sb.append("    Total cpu time per freq:");
                 for (int i = 0; i < cpuFreqTimes.length; ++i) {
-                    sb.append(" " + cpuFreqTimes[i]);
+                    sb.append(' ').append(cpuFreqTimes[i]);
                 }
                 pw.println(sb.toString());
             }
@@ -6045,7 +6048,7 @@ public abstract class BatteryStats implements Parcelable {
                 sb.setLength(0);
                 sb.append("    Total screen-off cpu time per freq:");
                 for (int i = 0; i < screenOffCpuFreqTimes.length; ++i) {
-                    sb.append(" " + screenOffCpuFreqTimes[i]);
+                    sb.append(' ').append(screenOffCpuFreqTimes[i]);
                 }
                 pw.println(sb.toString());
             }
@@ -6054,8 +6057,8 @@ public abstract class BatteryStats implements Parcelable {
                 final long[] cpuTimes = u.getCpuFreqTimes(which, procState);
                 if (cpuTimes != null) {
                     sb.setLength(0);
-                    sb.append("    Cpu times per freq at state "
-                            + Uid.PROCESS_STATE_NAMES[procState] + ":");
+                    sb.append("    Cpu times per freq at state ")
+                            .append(Uid.PROCESS_STATE_NAMES[procState]).append(':');
                     for (int i = 0; i < cpuTimes.length; ++i) {
                         sb.append(" " + cpuTimes[i]);
                     }
@@ -6065,8 +6068,8 @@ public abstract class BatteryStats implements Parcelable {
                 final long[] screenOffCpuTimes = u.getScreenOffCpuFreqTimes(which, procState);
                 if (screenOffCpuTimes != null) {
                     sb.setLength(0);
-                    sb.append("   Screen-off cpu times per freq at state "
-                            + Uid.PROCESS_STATE_NAMES[procState] + ":");
+                    sb.append("   Screen-off cpu times per freq at state ")
+                            .append(Uid.PROCESS_STATE_NAMES[procState]).append(':');
                     for (int i = 0; i < screenOffCpuTimes.length; ++i) {
                         sb.append(" " + screenOffCpuTimes[i]);
                     }

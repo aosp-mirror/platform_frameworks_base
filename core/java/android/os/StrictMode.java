@@ -2168,16 +2168,17 @@ public final class StrictMode {
         }
 
         final int uid = android.os.Process.myUid();
-        String msg = "Detected cleartext network traffic from UID " + uid;
+        final StringBuilder msg = new StringBuilder("Detected cleartext network traffic from UID ")
+                .append(uid);
         if (rawAddr != null) {
             try {
-                msg += " to " + InetAddress.getByAddress(rawAddr);
+                msg.append(" to ").append(InetAddress.getByAddress(rawAddr));
             } catch (UnknownHostException ignored) {
             }
         }
-        msg += HexDump.dumpHexString(firstPacket).trim() + " ";
+        msg.append(HexDump.dumpHexString(firstPacket).trim()).append(' ');
         final boolean forceDeath = (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
-        onVmPolicyViolation(new CleartextNetworkViolation(msg), forceDeath);
+        onVmPolicyViolation(new CleartextNetworkViolation(msg.toString()), forceDeath);
     }
 
     /** @hide */
