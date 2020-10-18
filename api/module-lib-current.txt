@@ -103,6 +103,10 @@ package android.media.session {
     field public static final int RESULT_MEDIA_KEY_NOT_HANDLED = 0; // 0x0
   }
 
+  public final class PlaybackState implements android.os.Parcelable {
+    method public boolean isActiveState();
+  }
+
 }
 
 package android.net {
