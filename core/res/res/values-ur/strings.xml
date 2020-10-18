@@ -274,8 +274,8 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"سیکیورٹی"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"کار وضع"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"اکاؤنٹ اسٹیٹس"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"ڈیولپر کے پیغامات"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"اہم ڈیولپر پیغامات"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"ڈویلپر کے پیغامات"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"اہم ڈویلپر پیغامات"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"اپ ڈیٹس"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"نیٹ ورک اسٹیٹس"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"نیٹ ورک الرٹس"</string>
@@ -1218,7 +1218,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> ہیپ ڈمپ تیار ہے"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ہیپ ڈمپ جمع ہو گیا ہے۔ اشتراک کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ہیپ ڈمپ کا اشتراک کریں؟"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> کارروائی اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے تجاوز کر گئی ہے۔ آپ کے لیے ایک ہیپ ڈمپ اس کے ڈیولپر کے ساتھ اشتراک کرنے کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں آپ کی کوئی ایسی ذاتی معلومات بھی شامل ہو سکتی ہے جس تک ایپلیکیشن کو رسائی حاصل ہے۔"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> کارروائی اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے تجاوز کر گئی ہے۔ آپ کے لیے ایک ہیپ ڈمپ اس کے ڈویلپر کے ساتھ اشتراک کرنے کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں آپ کی کوئی ایسی ذاتی معلومات بھی شامل ہو سکتی ہے جس تک ایپلیکیشن کو رسائی حاصل ہے۔"</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> پروسیس نے اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے بڑھا لی ہے۔ آپ کے اشتراک کرنے کے لیے ہیپ ڈمپ دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں حساس ذاتی معلومات ہو سکتی ہے، جس میں آپ کے ذریعے ٹائپ کردہ چیزیں شامل ہو سکتی ہیں، جس تک پروسیس کو رسائی حاصل ہو سکتی ہے۔"</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> کے پروسیس کا ہیپ ڈمپ آپ کے اشتراک کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں ممکنہ طور پر حساس ذاتی معلومات ہو سکتی ہے، جس میں آپ کے ذریعے ٹائپ کردہ چیزیں شامل ہو سکتی ہیں، جس تک پروسیس کو رسائی حاصل ہو سکتی ہے۔"</string>
     <string name="sendText" msgid="493003724401350724">"متن کیلئے ایک کارروائی منتخب کریں"</string>
@@ -1898,7 +1898,7 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"آن کریں"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ایپ دستیاب نہیں ہے"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ابھی دستیاب نہیں ہے۔"</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏یہ ایپ Android کے پرانے ورژن کے لئے بنائی گئی ہے اور ہو سکتا ہے صحیح طور پر کام نہ کرے۔ اپ ڈیٹس چیک کر کے آزمائیں یا ڈیولپر سے رابطہ کریں۔"</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏یہ ایپ Android کے پرانے ورژن کے لئے بنائی گئی ہے اور ہو سکتا ہے صحیح طور پر کام نہ کرے۔ اپ ڈیٹس چیک کر کے آزمائیں یا ڈویلپر سے رابطہ کریں۔"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"اپ ڈیٹ چیک کریں"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"آپ کے پاس نئے پیغامات ہیں"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏دیکھنے کیلئے SMS ایپ کھولیں"</string>

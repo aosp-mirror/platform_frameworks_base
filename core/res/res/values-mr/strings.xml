@@ -197,7 +197,7 @@
     <string name="country_detector" msgid="7023275114706088854">"कंट्री डिटेक्टर"</string>
     <string name="location_service" msgid="2439187616018455546">"स्थान सेवा"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
-    <string name="sensor_notification_service" msgid="7474531979178682676">"सेंसर सूचना सेवा"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सर सूचना सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वायलाइट सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासक अ‍ॅप वापरता येणार नाही. तुमचे डिव्हाइस आता साफ केले जाईल.\n\nतुम्हाला कुठलेही प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
@@ -316,7 +316,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"फोन कॉल आणि व्यवस्थापित"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"शरीर सेन्सर"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"आपल्‍या महत्त्वाच्या मापनांविषयी सेंसर डेटा अ‍ॅक्सेस करा"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"आपल्‍या महत्त्वाच्या मापनांविषयी सेन्सर डेटा अ‍ॅक्सेस करा"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"विंडोमधील आशय पुन्हा मिळवा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"तुम्ही वापरत असलेल्‍या विंडोमधील आशय तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"स्पर्श करून अन्वेषण सुरू करा"</string>
@@ -388,7 +388,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"अ‍ॅप ला त्याचा कोड, डेटा आणि कॅशे    आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टम सेटिंग्ज सुधारित करा"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉन्फिगरेशन दूषित करू शकतात."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉंफिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"सुरूवातीस चालवा"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे टॅबलेट प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"सिस्टम बूट होणे संपल्यावर ॲपला स्वतः सुरू होण्याची अनुमती देते. यामुळे तुमच्या Android TV डिव्हाइसला सुरू होण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर डिव्हाइसलाच धीमे करण्याची अनुमती ॲपला देते."</string>
@@ -411,7 +411,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, तुमच्या Android TV डिव्हाइसचा कॉल लॉग सुधारित करण्यासाठी ॲपला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीर सेंसर (हृदय गती मॉनिटरसारखे) अ‍ॅक्सेस करा"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीर सेन्सर (हृदय गती मॉनिटरसारखे) अ‍ॅक्सेस करा"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"हा अ‍ॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
@@ -565,7 +565,7 @@
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"खूप प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"खूप प्रयत्न करून झाले. फिंगरप्रिंट सेंसर बंद आहे."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"खूप प्रयत्न करून झाले. फिंगरप्रिंट सेन्सर बंद आहे."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोणत्याही फिंगरप्रिंटची नोंद झाली नाही"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"या डिव्हाइसमध्ये फिंगरप्रिंट सेन्सर नाही."</string>
@@ -657,7 +657,7 @@
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"स्‍वप्न सेवेवर प्रतिबद्ध करा"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"होल्‍डरला स्‍वप्नसेवेच्या शीर्ष-स्‍तराच्या इंटरफेसशी प्रतिबद्ध करण्‍यास अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
     <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"वाहकाद्वारे-प्रदान केलेल्‍या कॉन्‍फिगरेशन अ‍ॅपची विनंती करा"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"होल्‍डरला वाहकद्वारे-प्रदान केलेल्या कॉन्फिगरेशन अ‍ॅपची विनंती करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"होल्‍डरला वाहकद्वारे-प्रदान केलेल्या कॉंफिगरेशन अ‍ॅपची विनंती करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"नेटवर्क स्‍थितींवरील निरीक्षणांसाठी ऐका"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"अनु्प्रयोगाला नेटवर्क स्‍थितींवरील निरीक्षणे ऐकण्‍यासाठी अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"इनपुट डिव्हाइस कॅलिब्रेशन बदला"</string>
@@ -673,7 +673,7 @@
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"वाहक सेवांवर प्रतिबद्ध करा"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"वाहक सेवांवर प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्य ॲप्ससाठी कधीही आवश्यकता नसावी."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"व्यत्यय आणू नका अ‍ॅक्सेस करा"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका कॉंफिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करा"</string>
@@ -752,7 +752,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="5120365721260686814">"कस्टम"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"घर"</string>
-    <string name="phoneTypeMobile" msgid="1178852541462086735">"मोबाईल"</string>
+    <string name="phoneTypeMobile" msgid="1178852541462086735">"मोबाइल"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"कार्य"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"कार्य फॅक्स"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"निवास फॅक्स"</string>
@@ -767,7 +767,7 @@
     <string name="phoneTypeRadio" msgid="2637819130239264771">"रेडिओ"</string>
     <string name="phoneTypeTelex" msgid="2558783611711876562">"टेलेक्स"</string>
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"कार्य मोबाईल"</string>
+    <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"कार्य मोबाइल"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"कार्य पेजर"</string>
     <string name="phoneTypeAssistant" msgid="757550783842231039">"असिस्टंट"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
@@ -779,7 +779,7 @@
     <string name="emailTypeHome" msgid="1597116303154775999">"घर"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"कार्य"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"अन्य"</string>
-    <string name="emailTypeMobile" msgid="787155077375364230">"मोबाईल"</string>
+    <string name="emailTypeMobile" msgid="787155077375364230">"मोबाइल"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"कस्टम"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"घर"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"कार्य"</string>
@@ -1273,8 +1273,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"अनुमती द्या"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"नकार द्या"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; हा &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;वर एक मेसेज पाठवू इच्छितो."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"यामुळे आपल्या मोबाईल खात्यावर "<b>"शुल्क आकारले जाऊ शकते"</b>"."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"यामुळे आपल्या मोबाईल खात्यावर शुल्क आकारले जाऊ शकते."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"यामुळे आपल्या मोबाइल खात्यावर "<b>"शुल्क आकारले जाऊ शकते"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"यामुळे आपल्या मोबाइल खात्यावर शुल्क आकारले जाऊ शकते."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"पाठवा"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"रद्द करा"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"माझी वड लक्षात ठेवा"</string>
@@ -1282,10 +1282,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"नेहमी अनुमती द्या"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"कधीही अनुमती देऊ नका"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"सिम कार्ड काढले"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"तुम्ही एक वैध सिम कार्ड घालून प्रारंभ करेपर्यंत मोबाईल नेटवर्क अनुपलब्ध असेल."</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"तुम्ही एक वैध सिम कार्ड घालून प्रारंभ करेपर्यंत मोबाइल नेटवर्क अनुपलब्ध असेल."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"पूर्ण झाले"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"सिम कार्ड जोडले"</string>
-    <string name="sim_added_message" msgid="6602906609509958680">"मोबाईल नेटवर्कवर अ‍ॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
+    <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्कवर अ‍ॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"रीस्टार्ट"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा अ‍ॅक्टिव्हेट करा"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"तुमचे नवीन सिम अ‍ॅक्टिव्हेट करण्यासाठी वाहकाचे अ‍ॅप डाउनलोड करा"</string>
@@ -1336,7 +1336,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"इनपुट पद्धत निवडा"</string>
     <string name="show_ime" msgid="6406112007347443383">"भौतिक कीबोर्ड सक्रिय असताना त्यास स्क्रीनवर ठेवा"</string>
     <string name="hardware" msgid="1800597768237606953">"व्हर्च्युअल कीबोर्ड दर्शवा"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"वास्तविक कीबोर्ड कॉन्फिगर करा"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"वास्तविक कीबोर्ड कॉंफिगर करा"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा आणि लेआउट निवडण्यासाठी टॅप करा"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1916,7 +1916,7 @@
     <string name="demo_starting_message" msgid="6577581216125805905">"डेमो प्रारंभ करत आहे..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"डिव्हाइस रीसेट करत आहे..."</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
-    <string name="conference_call" msgid="5731633152336490471">"कॉन्फरन्स कॉल"</string>
+    <string name="conference_call" msgid="5731633152336490471">"कॉंफरन्स कॉल"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"टूलटिप"</string>
     <string name="app_category_game" msgid="4534216074910244790">"गेम"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"संगीत आणि ऑडिओ"</string>
