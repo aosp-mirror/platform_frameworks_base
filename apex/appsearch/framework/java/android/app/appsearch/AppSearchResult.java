@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,12 @@ import java.util.Objects;
  * @param <ValueType> The type of result object for successful calls.
  * @hide
  */
-public class AppSearchResult<ValueType> implements Parcelable {
-    /** Result codes from {@link AppSearchManager} methods. */
-    @IntDef(prefix = {"RESULT_"}, value = {
+public final class AppSearchResult<ValueType> implements Parcelable {
+    /**
+     * Result codes from {@link AppSearchManager} methods.
+     * @hide
+     */
+    @IntDef(value = {
             RESULT_OK,
             RESULT_UNKNOWN_ERROR,
             RESULT_INTERNAL_ERROR,
@@ -120,15 +123,18 @@ public class AppSearchResult<ValueType> implements Parcelable {
     }
 
     /**
-     * Returns the returned value associated with this result.
+     * Returns the result value associated with this result, if it was successful.
      *
-     * <p>If {@link #isSuccess} is {@code false}, the result value is always {@code null}. The value
-     * may be {@code null} even if {@link #isSuccess} is {@code true}. See the documentation of the
-     * particular {@link AppSearchManager} call producing this {@link AppSearchResult} for what is
-     * returned by {@link #getResultValue}.
+     * <p>See the documentation of the particular {@link AppSearchManager} call producing this
+     * {@link AppSearchResult} for what is placed in the result value by that call.
+     *
+     * @throws IllegalStateException if this {@link AppSearchResult} is not successful.
      */
     @Nullable
     public ValueType getResultValue() {
+        if (!isSuccess()) {
+            throw new IllegalStateException("AppSearchResult is a failure: " + this);
+        }
         return mResultValue;
     }
 
@@ -146,14 +152,14 @@ public class AppSearchResult<ValueType> implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (this == other) {
             return true;
         }
         if (!(other instanceof AppSearchResult)) {
             return false;
         }
-        AppSearchResult<?> otherResult = (AppSearchResult) other;
+        AppSearchResult<?> otherResult = (AppSearchResult<?>) other;
         return mResultCode == otherResult.mResultCode
                 && Objects.equals(mResultValue, otherResult.mResultValue)
                 && Objects.equals(mErrorMessage, otherResult.mErrorMessage);
@@ -168,9 +174,9 @@ public class AppSearchResult<ValueType> implements Parcelable {
     @NonNull
     public String toString() {
         if (isSuccess()) {
-            return "AppSearchResult [SUCCESS]: " + mResultValue;
+            return "[SUCCESS]: " + mResultValue;
         }
-        return "AppSearchResult [FAILURE(" + mResultCode + ")]: " + mErrorMessage;
+        return "[FAILURE(" + mResultCode + ")]: " + mErrorMessage;
     }
 
     @Override

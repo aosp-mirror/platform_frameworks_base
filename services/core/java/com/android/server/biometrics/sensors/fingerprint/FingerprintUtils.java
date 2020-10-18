@@ -16,8 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.fingerprint.Fingerprint;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -33,21 +33,59 @@ import java.util.List;
 public class FingerprintUtils implements BiometricUtils<Fingerprint> {
 
     private static final Object sInstanceLock = new Object();
-    private static FingerprintUtils sInstance;
+    // Map<SensorId, FingerprintUtils>
+    private static SparseArray<FingerprintUtils> sInstances;
+    private static final String LEGACY_FINGERPRINT_FILE = "settings_fingerprint.xml";
 
     @GuardedBy("this")
-    private final SparseArray<FingerprintUserState> mUsers = new SparseArray<>();
+    private final SparseArray<FingerprintUserState> mUserStates;
+    private final String mFileName;
 
-    public static FingerprintUtils getInstance() {
-        synchronized (sInstanceLock) {
-            if (sInstance == null) {
-                sInstance = new FingerprintUtils();
-            }
-        }
-        return sInstance;
+    /**
+     * Retrieves an instance for the specified sensorId.
+     */
+    public static FingerprintUtils getInstance(int sensorId) {
+        // Specify a null fileName to use an auto-generated sensorId-specific filename.
+        return getInstance(sensorId, null /* fileName */);
     }
 
-    private FingerprintUtils() {
+    /**
+     * Retrieves an instance for the specified sensorId. If the fileName is null, a default
+     * filename (e.g. settings_fingerprint_<sensorId>.xml will be generated.
+     *
+     * Specifying an explicit fileName allows for backward compatibility with legacy devices,
+     * where everything is stored in settings_fingerprint.xml.
+     */
+    private static FingerprintUtils getInstance(int sensorId, @Nullable String fileName) {
+        final FingerprintUtils utils;
+        synchronized (sInstanceLock) {
+            if (sInstances == null) {
+                sInstances = new SparseArray<>();
+            }
+            if (sInstances.get(sensorId) == null) {
+                if (fileName == null) {
+                    fileName = "settings_fingerprint_" + sensorId + ".xml";
+                }
+                sInstances.put(sensorId, new FingerprintUtils(fileName));
+            }
+            utils = sInstances.get(sensorId);
+        }
+        return utils;
+    }
+
+    /**
+     * Legacy getter for {@link android.hardware.biometrics.fingerprint.V2_1} ands its extended
+     * subclasses, which do not support a well defined sensorId from the HAL.
+     */
+    public static FingerprintUtils getInstance() {
+        // Note that sensorId for legacy services can be hard-coded to 0 since it's only used
+        // to index into the sensor states map.
+        return getInstance(0 /* sensorId */, LEGACY_FINGERPRINT_FILE);
+    }
+
+    private FingerprintUtils(String fileName) {
+        mUserStates = new SparseArray<>();
+        mFileName = fileName;
     }
 
     @Override
@@ -82,10 +120,10 @@ public class FingerprintUtils implements BiometricUtils<Fingerprint> {
 
     private FingerprintUserState getStateForUser(Context ctx, int userId) {
         synchronized (this) {
-            FingerprintUserState state = mUsers.get(userId);
+            FingerprintUserState state = mUserStates.get(userId);
             if (state == null) {
-                state = new FingerprintUserState(ctx, userId);
-                mUsers.put(userId, state);
+                state = new FingerprintUserState(ctx, userId, mFileName);
+                mUserStates.put(userId, state);
             }
             return state;
         }

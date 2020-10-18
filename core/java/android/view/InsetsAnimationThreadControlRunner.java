@@ -44,7 +44,6 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     private final InsetsAnimationControlImpl mControl;
     private final InsetsAnimationControlCallbacks mOuterCallbacks;
     private final Handler mMainThreadHandler;
-    private final InsetsState mState = new InsetsState();
     private final InsetsAnimationControlCallbacks mCallbacks =
             new InsetsAnimationControlCallbacks() {
 
@@ -60,7 +59,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
 
         @Override
         public void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner) {
-            mControl.applyChangeInsets(mState);
+            mControl.applyChangeInsets(null /* outState */);
         }
 
         @Override

@@ -313,8 +313,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
         // App requests to hide navigation bar.
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
-        mAppWindow.updateRequestedInsetsState(requestedState);
-        insetsPolicy.onInsetsModified(mAppWindow, requestedState);
+        mAppWindow.updateRequestedVisibility(requestedState);
+        insetsPolicy.onInsetsModified(mAppWindow);
         assertNotNull(displayPolicy.mInputConsumer);
 
         // App still requests to hide navigation bar, but without BEHAVIOR_SHOW_BARS_BY_TOUCH.

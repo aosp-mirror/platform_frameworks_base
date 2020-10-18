@@ -596,7 +596,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Subclasses can not override equals().
      */
-    @Override final public boolean equals(Object o) {
+    @Override final public boolean equals(@Nullable Object o) {
         return super.equals(o);
     }
 

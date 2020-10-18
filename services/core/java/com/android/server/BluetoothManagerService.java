@@ -23,7 +23,9 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProtoEnums;
 import android.bluetooth.IBluetooth;
@@ -63,7 +65,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -118,6 +119,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     // Delay for retrying enable and disable in msec
     private static final int ENABLE_DISABLE_DELAY_MS = 300;
     private static final int DELAY_BEFORE_RESTART_DUE_TO_INIT_FLAGS_CHANGED_MS = 300;
+    private static final int DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS = 86400;
 
     private static final int MESSAGE_ENABLE = 1;
     private static final int MESSAGE_DISABLE = 2;
@@ -178,7 +180,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private int mWaitForEnableRetry;
     private int mWaitForDisableRetry;
 
+    private BluetoothModeChangeHelper mBluetoothModeChangeHelper;
+
     private BluetoothAirplaneModeListener mBluetoothAirplaneModeListener;
+
+    private BluetoothDeviceConfigListener mBluetoothDeviceConfigListener;
 
     // used inside handler thread
     private boolean mQuietEnable = false;
@@ -284,29 +290,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
             };
 
-    private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigChangedListener =
-            new DeviceConfig.OnPropertiesChangedListener() {
-                @Override
-                public void onPropertiesChanged(DeviceConfig.Properties properties) {
-                    if (!properties.getNamespace().equals(DeviceConfig.NAMESPACE_BLUETOOTH)) {
-                        return;
-                    }
-                    boolean foundInit = false;
-                    for (String name : properties.getKeyset()) {
-                        if (name.startsWith("INIT_")) {
-                            foundInit = true;
-                            break;
-                        }
-                    }
-                    if (!foundInit) {
-                        return;
-                    }
-                    mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
-                    mHandler.sendEmptyMessageDelayed(
-                            MESSAGE_INIT_FLAGS_CHANGED,
-                            DELAY_BEFORE_RESTART_DUE_TO_INIT_FLAGS_CHANGED_MS);
-                }
-            };
+    @VisibleForTesting
+    public void onInitFlagsChanged() {
+        mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
+        mHandler.sendEmptyMessageDelayed(
+                MESSAGE_INIT_FLAGS_CHANGED,
+                DELAY_BEFORE_RESTART_DUE_TO_INIT_FLAGS_CHANGED_MS);
+    }
 
     public boolean onFactoryReset() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PRIVILEGED,
@@ -457,6 +447,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mHandler.sendMessage(msg);
                     }
                 }
+            } else if (BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED.equals(action)
+                    || BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+                final int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                        BluetoothProfile.STATE_CONNECTED);
+                if (mHandler.hasMessages(MESSAGE_INIT_FLAGS_CHANGED)
+                        && state == BluetoothProfile.STATE_DISCONNECTED
+                        && !mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                    onInitFlagsChanged();
+                }
             }
         }
     };
@@ -508,6 +507,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         filter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_BLUETOOTH_ADDRESS_CHANGED);
         filter.addAction(Intent.ACTION_SETTING_RESTORED);
+        filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mReceiver, filter);
 
@@ -542,10 +543,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Slog.w(TAG, "Unable to resolve SystemUI's UID.");
         }
         mSystemUiUid = systemUiUid;
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_BLUETOOTH,
-                (Runnable r) -> r.run(),
-                mDeviceConfigChangedListener);
     }
 
     /**
@@ -1383,10 +1380,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
             mHandler.sendMessage(getMsg);
         }
+
+        mBluetoothModeChangeHelper = new BluetoothModeChangeHelper(mContext);
         if (mBluetoothAirplaneModeListener != null) {
-            mBluetoothAirplaneModeListener.start(
-                    new BluetoothAirplaneModeListener.AirplaneModeHelper(mContext));
+            mBluetoothAirplaneModeListener.start(mBluetoothModeChangeHelper);
         }
+        mBluetoothDeviceConfigListener = new BluetoothDeviceConfigListener(this);
     }
 
     /**
@@ -2229,6 +2228,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         Slog.d(TAG, "MESSAGE_INIT_FLAGS_CHANGED");
                     }
                     mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
+                    if (mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                        mHandler.sendEmptyMessageDelayed(
+                                MESSAGE_INIT_FLAGS_CHANGED,
+                                DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS);
+                        break;
+                    }
                     if (mBluetooth != null && isEnabled()) {
                         restartForReason(
                                 BluetoothProtoEnums.ENABLE_DISABLE_REASON_INIT_FLAGS_CHANGED);

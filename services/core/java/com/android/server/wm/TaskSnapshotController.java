@@ -482,8 +482,7 @@ class TaskSnapshotController {
         final int color = ColorUtils.setAlphaComponent(
                 task.getTaskDescription().getBackgroundColor(), 255);
         final LayoutParams attrs = mainWindow.getAttrs();
-        final InsetsState insetsState = new InsetsState(mainWindow.getInsetsState());
-        mergeInsetsSources(insetsState, mainWindow.getRequestedInsetsState());
+        final InsetsState insetsState = getInsetsStateWithVisibilityOverride(mainWindow);
         final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrame(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.insetsFlags.appearance, task.getTaskDescription(),
@@ -603,13 +602,18 @@ class TaskSnapshotController {
         return 0;
     }
 
-    static void mergeInsetsSources(InsetsState base, InsetsState other) {
+    static InsetsState getInsetsStateWithVisibilityOverride(WindowState win) {
+        final InsetsState state = new InsetsState(win.getInsetsState());
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            final InsetsSource source = other.peekSource(type);
-            if (source != null) {
-                base.addSource(source);
+            final boolean requestedVisible = win.getRequestedVisibility(type);
+            InsetsSource source = state.peekSource(type);
+            if (source != null && source.isVisible() != requestedVisible) {
+                source = new InsetsSource(source);
+                source.setVisible(requestedVisible);
+                state.addSource(source);
             }
         }
+        return state;
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {

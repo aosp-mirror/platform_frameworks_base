@@ -183,7 +183,7 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj){
+    public boolean equals(@Nullable Object obj){
         if (obj == null) {
             return false;
         }

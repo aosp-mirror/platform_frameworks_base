@@ -157,6 +157,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         mResolvedOverrideConfiguration.setTo(mRequestedOverrideConfiguration);
     }
 
+    /** Returns {@code true} if requested override override configuration is not empty. */
+    boolean hasRequestedOverrideConfiguration() {
+        return mHasOverrideConfiguration;
+    }
+
     /** Returns requested override configuration applied to this configuration container. */
     public Configuration getRequestedOverrideConfiguration() {
         return mRequestedOverrideConfiguration;

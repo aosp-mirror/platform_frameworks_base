@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.AsyncTask;
@@ -62,11 +63,6 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
     protected abstract String getBiometricsTag();
 
     /**
-     * @return The file where the biometric metadata should be stored.
-     */
-    protected abstract String getBiometricFile();
-
-    /**
      * @return The resource for the name template, this is used to generate the default name.
      */
     protected abstract int getNameTemplateResource();
@@ -88,8 +84,8 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
             throws IOException, XmlPullParserException;
 
 
-    public BiometricUserState(Context context, int userId) {
-        mFile = getFileForUser(userId);
+    public BiometricUserState(Context context, int userId, @NonNull String fileName) {
+        mFile = getFileForUser(userId, fileName);
         mContext = context;
         synchronized (this) {
             readStateSyncLocked();
@@ -159,8 +155,8 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
         return true;
     }
 
-    private File getFileForUser(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), getBiometricFile());
+    private File getFileForUser(int userId, @NonNull String fileName) {
+        return new File(Environment.getUserSystemDirectory(userId), fileName);
     }
 
     private void scheduleWriteStateLocked() {

@@ -313,6 +313,7 @@
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
+  <java-symbol type="bool" name="config_sms_ask_every_time_support" />
   <java-symbol type="bool" name="config_sms_capable" />
   <java-symbol type="bool" name="config_sms_utf8_support" />
   <java-symbol type="bool" name="config_mobile_data_capable" />
@@ -3200,6 +3201,9 @@
   <!-- Network Recommendation -->
   <java-symbol type="string" name="config_defaultNetworkRecommendationProviderPackage" />
 
+  <!-- Optional IPsec algorithms -->
+  <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
+
   <!-- Whether allow 3rd party apps on internal storage. -->
   <java-symbol type="bool" name="config_allow3rdPartyAppOnInternal" />
 
@@ -4080,4 +4084,5 @@
 
   <java-symbol type="array" name="config_keep_warming_services" />
   <java-symbol type="string" name="config_display_features" />
+  <java-symbol type="array" name="config_internalFoldedPhysicalDisplayIds" />
 </resources>

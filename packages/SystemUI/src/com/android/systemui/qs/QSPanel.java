@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
@@ -158,7 +159,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            MediaHost mediaHost,
+            @Named(QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger,
             UserTracker userTracker
     ) {

@@ -349,7 +349,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof SuggestionSpan) {
             return ((SuggestionSpan)o).hashCode() == mHashCode;
         }

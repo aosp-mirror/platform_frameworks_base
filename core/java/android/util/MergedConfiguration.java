@@ -17,6 +17,7 @@
 package android.util;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -167,7 +168,7 @@ public class MergedConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object that) {
+    public boolean equals(@Nullable Object that) {
         if (!(that instanceof MergedConfiguration)) {
             return false;
         }

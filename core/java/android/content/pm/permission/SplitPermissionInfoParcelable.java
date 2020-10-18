@@ -18,6 +18,7 @@ package android.content.pm.permission;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -122,7 +123,7 @@ public class SplitPermissionInfoParcelable implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         // You can override field equality logic by defining either of the methods like:
         // boolean fieldNameEquals(SplitPermissionInfoParcelable other) { ... }
         // boolean fieldNameEquals(FieldType otherValue) { ... }

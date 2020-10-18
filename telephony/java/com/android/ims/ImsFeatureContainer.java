@@ -17,12 +17,14 @@
 package com.android.ims;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.aidl.ISipTransport;
 import android.telephony.ims.feature.ImsFeature;
 
 import java.util.Objects;
@@ -49,6 +51,11 @@ public final class ImsFeatureContainer implements Parcelable {
     public final IImsRegistration imsRegistration;
 
     /**
+     * An optional interface containing the SIP transport implementation from the ImsService.
+     */
+    public final ISipTransport sipTransport;
+
+    /**
      * State of the feature that is being tracked.
      */
     private @ImsFeature.ImsState int mState = ImsFeature.STATE_UNAVAILABLE;
@@ -66,10 +73,11 @@ public final class ImsFeatureContainer implements Parcelable {
      * @param initialCaps The initial capabilities that the ImsService supports.
      */
     public ImsFeatureContainer(@NonNull IBinder iFace, @NonNull IImsConfig iConfig,
-            @NonNull IImsRegistration iReg, long initialCaps) {
+            @NonNull IImsRegistration iReg, @Nullable ISipTransport transport, long initialCaps) {
         imsFeature = iFace;
         imsConfig = iConfig;
         imsRegistration = iReg;
+        sipTransport = transport;
         mCapabilities = initialCaps;
     }
 
@@ -80,6 +88,7 @@ public final class ImsFeatureContainer implements Parcelable {
         imsFeature = in.readStrongBinder();
         imsConfig = IImsConfig.Stub.asInterface(in.readStrongBinder());
         imsRegistration = IImsRegistration.Stub.asInterface(in.readStrongBinder());
+        sipTransport = ISipTransport.Stub.asInterface(in.readStrongBinder());
         mState = in.readInt();
         mCapabilities = in.readLong();
     }
@@ -123,13 +132,15 @@ public final class ImsFeatureContainer implements Parcelable {
         return imsFeature.equals(that.imsFeature) &&
                 imsConfig.equals(that.imsConfig) &&
                 imsRegistration.equals(that.imsRegistration) &&
+                sipTransport.equals(that.sipTransport) &&
                 mState == that.getState() &&
                 mCapabilities == that.getCapabilities();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(imsFeature, imsConfig, imsRegistration, mState, mCapabilities);
+        return Objects.hash(imsFeature, imsConfig, imsRegistration, sipTransport, mState,
+                mCapabilities);
     }
 
     @Override
@@ -138,6 +149,7 @@ public final class ImsFeatureContainer implements Parcelable {
                 "imsFeature=" + imsFeature +
                 ", imsConfig=" + imsConfig +
                 ", imsRegistration=" + imsRegistration +
+                ", sipTransport=" + sipTransport +
                 ", state=" + ImsFeature.STATE_LOG_MAP.get(mState) +
                 ", capabilities = " + ImsService.getCapabilitiesString(mCapabilities) +
                 '}';
@@ -153,6 +165,7 @@ public final class ImsFeatureContainer implements Parcelable {
         dest.writeStrongBinder(imsFeature);
         dest.writeStrongInterface(imsConfig);
         dest.writeStrongInterface(imsRegistration);
+        dest.writeStrongInterface(sipTransport);
         dest.writeInt(mState);
         dest.writeLong(mCapabilities);
     }

@@ -21,6 +21,7 @@ import android.annotation.DimenRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.Activity;
 import android.app.ActivityOptions;
@@ -348,7 +349,7 @@ public class RemoteViews implements Parcelable, Filter {
         public String methodName;
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof MethodKey)) {
                 return false;
             }

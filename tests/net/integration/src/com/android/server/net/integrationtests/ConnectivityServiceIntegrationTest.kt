@@ -167,7 +167,7 @@ class ConnectivityServiceIntegrationTest {
         cm = ConnectivityManager(context, service)
         context.addMockSystemService(Context.CONNECTIVITY_SERVICE, cm)
 
-        service.systemReady()
+        service.systemReadyInternal()
     }
 
     private inner class TestConnectivityService(deps: Dependencies) : ConnectivityService(

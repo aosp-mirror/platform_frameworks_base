@@ -2744,6 +2744,7 @@ public class Intent implements Parcelable, Cloneable {
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_STARTABLE = "android.intent.action.PACKAGE_STARTABLE";
@@ -2754,13 +2755,13 @@ public class Intent implements Parcelable, Cloneable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
      * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * <li> {@link #EXTRA_UNSTARTABLE_REASON} containing the integer indicating the reason for
-     * the state change,
+     * <li> {@link #EXTRA_REASON} containing the integer indicating the reason for the state change,
      * @see PackageManager.UnstartableReason
      * </li>
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_UNSTARTABLE =
@@ -2775,6 +2776,7 @@ public class Intent implements Parcelable, Cloneable {
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_FULLY_LOADED =
@@ -6012,13 +6014,6 @@ public class Intent implements Parcelable, Cloneable {
      * </p>
      */
     public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
-
-    /**
-     * Intent extra: the reason that the package associated with this intent has become unstartable.
-     *
-     * <p>Type: String
-     */
-    public static final String EXTRA_UNSTARTABLE_REASON = "android.intent.extra.UNSTARTABLE_REASON";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -10378,7 +10373,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj instanceof FilterComparison) {
                 Intent other = ((FilterComparison)obj).mIntent;
                 return mIntent.filterEquals(other);

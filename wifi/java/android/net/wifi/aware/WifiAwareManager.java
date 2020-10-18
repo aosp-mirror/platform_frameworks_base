@@ -151,6 +151,27 @@ public class WifiAwareManager {
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1;
 
+    /** @hide */
+    @IntDef({
+            WIFI_AWARE_DISCOVERY_LOST_REASON_UNKNOWN,
+            WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DiscoveryLostReasonCode {
+    }
+
+    /**
+     * Reason code provided in {@link DiscoverySessionCallback#onServiceLost(PeerHandle, int)}
+     * indicating that the service was lost for unknown reason.
+     */
+    public static final int WIFI_AWARE_DISCOVERY_LOST_REASON_UNKNOWN = 0;
+
+    /**
+     * Reason code provided in {@link DiscoverySessionCallback#onServiceLost(PeerHandle, int)}
+     * indicating that the service advertised by the peer is no longer visible. This may be because
+     * the peer is out of range or because the peer stopped advertising this service.
+     */
+    public static final int WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE = 1;
+
     private final Context mContext;
     private final IWifiAwareManager mService;
 
@@ -695,7 +716,8 @@ public class WifiAwareManager {
                             break;
                         case CALLBACK_MATCH_EXPIRED:
                             mOriginalCallback
-                                    .onServiceLost(new PeerHandle(msg.arg1));
+                                    .onServiceLost(new PeerHandle(msg.arg1),
+                                            WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE);
                     }
                 }
             };

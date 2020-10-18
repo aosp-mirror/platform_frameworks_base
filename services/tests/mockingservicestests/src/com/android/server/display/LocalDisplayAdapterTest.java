@@ -83,6 +83,8 @@ public class LocalDisplayAdapterTest {
 
     private LinkedList<DisplayAddress.Physical> mAddresses = new LinkedList<>();
 
+    private Injector mInjector;
+
     @Before
     public void setUp() throws Exception {
         mMockitoSession = mockitoSession()
@@ -94,8 +96,9 @@ public class LocalDisplayAdapterTest {
         doReturn(mMockedResources).when(mMockedContext).getResources();
         LocalServices.removeServiceForTest(LightsManager.class);
         LocalServices.addService(LightsManager.class, mMockedLightsManager);
+        mInjector = new Injector();
         mAdapter = new LocalDisplayAdapter(mMockedSyncRoot, mMockedContext, mHandler,
-                mListener);
+                mListener, mInjector);
         spyOn(mAdapter);
         doReturn(mMockedContext).when(mAdapter).getOverlayContext();
     }
@@ -222,7 +225,7 @@ public class LocalDisplayAdapterTest {
         display.configs = configs;
         display.activeConfig = 1;
         setUpDisplay(display);
-        mAdapter.registerLocked();
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
 
         assertThat(SurfaceControl.getActiveConfig(display.token)).isEqualTo(1);
@@ -272,7 +275,7 @@ public class LocalDisplayAdapterTest {
                 new int[Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS], 1000, 1000, 0);
         display.hdrCapabilities = changedHdrCapabilities;
         setUpDisplay(display);
-        mAdapter.registerLocked();
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
 
         assertThat(mListener.addedDisplays.size()).isEqualTo(1);
@@ -308,7 +311,7 @@ public class LocalDisplayAdapterTest {
         final int[] changedColorModes = new int[]{Display.COLOR_MODE_DEFAULT};
         display.colorModes = changedColorModes;
         setUpDisplay(display);
-        mAdapter.registerLocked();
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
 
         assertThat(mListener.addedDisplays.size()).isEqualTo(1);
@@ -320,6 +323,35 @@ public class LocalDisplayAdapterTest {
 
         assertThat(displayDeviceInfo.colorMode).isEqualTo(Display.COLOR_MODE_DEFAULT);
         assertThat(displayDeviceInfo.supportedColorModes).isEqualTo(changedColorModes);
+    }
+
+    @Test
+    public void testDisplayChange_withStaleDesiredDisplayConfigSpecs() throws Exception {
+        SurfaceControl.DisplayConfig[] configs = new SurfaceControl.DisplayConfig[]{
+                createFakeDisplayConfig(1920, 1080, 60f),
+                createFakeDisplayConfig(1920, 1080, 50f)
+        };
+        final int activeConfig = 0;
+        FakeDisplay display = new FakeDisplay(PORT_A, configs, activeConfig);
+        display.desiredDisplayConfigSpecs.defaultConfig = 1;
+
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        // Change the display
+        display.configs = new SurfaceControl.DisplayConfig[]{
+                createFakeDisplayConfig(1920, 1080, 60f)
+        };
+        // SurfaceFlinger can return a stale defaultConfig. Make sure this doesn't
+        // trigger ArrayOutOfBoundsException.
+        display.desiredDisplayConfigSpecs.defaultConfig = 1;
+
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
     }
 
     private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,
@@ -356,6 +388,8 @@ public class LocalDisplayAdapterTest {
         public int[] colorModes = new int[]{ Display.COLOR_MODE_DEFAULT };
         public Display.HdrCapabilities hdrCapabilities = new Display.HdrCapabilities(new int[0],
                 1000, 1000, 0);
+        public SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs =
+                new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f, 60.f, 60.f);
 
         private FakeDisplay(int port) {
             this.address = createDisplayAddress(port);
@@ -387,7 +421,7 @@ public class LocalDisplayAdapterTest {
                 () -> SurfaceControl.getDisplayColorModes(display.token));
         doReturn(display.hdrCapabilities).when(
                 () -> SurfaceControl.getHdrCapabilities(display.token));
-        doReturn(new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f, 60.f, 60.f))
+        doReturn(display.desiredDisplayConfigSpecs)
                 .when(() -> SurfaceControl.getDesiredDisplayConfigSpecs(display.token));
     }
 
@@ -422,7 +456,7 @@ public class LocalDisplayAdapterTest {
         return config;
     }
 
-    private void waitForHandlerToComplete(Handler handler, long waitTimeMs)
+    private static void waitForHandlerToComplete(Handler handler, long waitTimeMs)
             throws InterruptedException {
         final Object lock = new Object();
         synchronized (lock) {
@@ -432,6 +466,35 @@ public class LocalDisplayAdapterTest {
                 }
             });
             lock.wait(waitTimeMs);
+        }
+    }
+
+    private class HotplugTransmitter {
+        private final Handler mHandler;
+        private final LocalDisplayAdapter.DisplayEventListener mListener;
+
+        HotplugTransmitter(Looper looper, LocalDisplayAdapter.DisplayEventListener listener) {
+            mHandler = new Handler(looper);
+            mListener = listener;
+        }
+
+        public void sendHotplug(FakeDisplay display, boolean connected)
+                throws InterruptedException {
+            mHandler.post(() -> mListener.onHotplug(/* timestampNanos = */ 0,
+                    display.address.getPhysicalDisplayId(), connected));
+            waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        }
+    }
+
+    private class Injector extends LocalDisplayAdapter.Injector {
+        private HotplugTransmitter mTransmitter;
+        @Override
+        public void setDisplayEventListenerLocked(Looper looper,
+                LocalDisplayAdapter.DisplayEventListener listener) {
+            mTransmitter = new HotplugTransmitter(looper, listener);
+        }
+        public HotplugTransmitter getTransmitter() {
+            return mTransmitter;
         }
     }
 

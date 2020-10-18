@@ -186,7 +186,7 @@ public class UsbAccessory implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof UsbAccessory) {
             UsbAccessory accessory = (UsbAccessory)obj;
             return (compare(mManufacturer, accessory.getManufacturer()) &&

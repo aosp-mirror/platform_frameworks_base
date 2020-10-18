@@ -683,71 +683,15 @@ public class InsetsControllerTest {
     @Test
     public void testRequestedState() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final InsetsState state = mTestHost.getRequestedState();
 
-            // The modified state can be controlled when we have control.
-            mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
-            mController.hide(statusBars());
-            assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
+            mController.hide(statusBars() | navigationBars());
+            assertFalse(state.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR));
+            assertFalse(state.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
 
-            // The modified state won't be changed while losing control.
-            mController.onControlsChanged(null /* activeControls */);
-            assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
-
-            // The modified state won't be changed while state changed while we don't have control.
-            InsetsState newState = new InsetsState(mController.getState(), true /* copySource */);
-            mController.onStateChanged(newState);
-            assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
-
-            // The modified state won't be changed while controlling an insets without having the
-            // control.
-            mController.show(statusBars());
-            assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
-
-            // The modified state can be updated while gaining control.
-            mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
-            assertTrue(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
-
-            // The modified state can still be updated if the local state and the requested state
-            // are the same.
-            mController.onControlsChanged(null /* activeControls */);
-            mController.hide(statusBars());
-            newState = new InsetsState(mController.getState(), true /* copySource */);
-            newState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-            mController.onStateChanged(newState);
-            mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
-            assertFalse(mTestHost.getModifiedState().peekSource(ITYPE_STATUS_BAR).isVisible());
-
-            // The modified state will always be updated while receiving IME control if IME is
-            // requested visible.
-            mController.getSourceConsumer(ITYPE_IME).show(false /* fromIme */);
-            newState = new InsetsState(mController.getState(), true /* copySource */);
-            newState.getSource(ITYPE_IME).setVisible(true);
-            newState.getSource(ITYPE_IME).setFrame(1, 2, 3, 4);
-            mController.onStateChanged(newState);
-            mController.onControlsChanged(createSingletonControl(ITYPE_IME));
-            assertEquals(newState.getSource(ITYPE_IME),
-                    mTestHost.getModifiedState().peekSource(ITYPE_IME));
-            newState = new InsetsState(mController.getState(), true /* copySource */);
-            newState.getSource(ITYPE_IME).setVisible(true);
-            newState.getSource(ITYPE_IME).setFrame(5, 6, 7, 8);
-            mController.onStateChanged(newState);
-            mController.onControlsChanged(createSingletonControl(ITYPE_IME));
-            assertEquals(newState.getSource(ITYPE_IME),
-                    mTestHost.getModifiedState().peekSource(ITYPE_IME));
-
-            // The modified frames cannot be updated if there is an animation.
-            mController.onControlsChanged(createSingletonControl(ITYPE_NAVIGATION_BAR));
-            mController.hide(navigationBars());
-            newState = new InsetsState(mController.getState(), true /* copySource */);
-            newState.getSource(ITYPE_NAVIGATION_BAR).getFrame().top--;
-            mController.onStateChanged(newState);
-            assertNotEquals(newState.getSource(ITYPE_NAVIGATION_BAR),
-                    mTestHost.getModifiedState().peekSource(ITYPE_NAVIGATION_BAR));
-
-            // The modified frames can be updated while the animation is done.
-            mController.cancelExistingAnimations();
-            assertEquals(newState.getSource(ITYPE_NAVIGATION_BAR),
-                    mTestHost.getModifiedState().peekSource(ITYPE_NAVIGATION_BAR));
+            mController.show(statusBars() | navigationBars());
+            assertTrue(state.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR));
+            assertTrue(state.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
         });
     }
 
@@ -878,7 +822,7 @@ public class InsetsControllerTest {
 
     public static class TestHost extends ViewRootInsetsControllerHost {
 
-        private InsetsState mModifiedState = new InsetsState();
+        private final InsetsState mRequestedState = new InsetsState();
 
         TestHost(ViewRootImpl viewRoot) {
             super(viewRoot);
@@ -886,12 +830,12 @@ public class InsetsControllerTest {
 
         @Override
         public void onInsetsModified(InsetsState insetsState) {
-            mModifiedState = new InsetsState(insetsState, true /* copySource */);
+            mRequestedState.set(insetsState, true);
             super.onInsetsModified(insetsState);
         }
 
-        public InsetsState getModifiedState() {
-            return mModifiedState;
+        public InsetsState getRequestedState() {
+            return mRequestedState;
         }
     }
 }

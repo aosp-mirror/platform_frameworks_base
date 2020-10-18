@@ -16,6 +16,8 @@
 
 package android.text;
 
+import static android.text.TextUtils.formatSimple;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -793,5 +795,54 @@ public class TextUtilsTest {
         assertEquals("ABC", TextUtils.trimToLengthWithEllipsis("ABC", 3));
         assertEquals("", TextUtils.trimToLengthWithEllipsis("", 3));
         assertNull(TextUtils.trimToLengthWithEllipsis(null, 3));
+    }
+
+    @Test
+    public void testFormatSimple_Types() {
+        assertEquals("true", formatSimple("%b", true));
+        assertEquals("false", formatSimple("%b", false));
+        assertEquals("true", formatSimple("%b", this));
+        assertEquals("false", formatSimple("%b", new Object[] { null }));
+
+        assertEquals("!", formatSimple("%c", '!'));
+
+        assertEquals("42", formatSimple("%d", 42));
+        assertEquals("281474976710656", formatSimple("%d", 281474976710656L));
+
+        assertEquals("3.14159", formatSimple("%f", 3.14159));
+        assertEquals("NaN", formatSimple("%f", Float.NaN));
+
+        assertEquals("example", formatSimple("%s", "example"));
+        assertEquals("null", formatSimple("%s", new Object[] { null }));
+
+        assertEquals("2a", formatSimple("%x", 42));
+        assertEquals("1000000000000", formatSimple("%x", 281474976710656L));
+
+        assertEquals("%", formatSimple("%%"));
+    }
+
+    @Test
+    public void testFormatSimple_Empty() {
+        assertEquals("", formatSimple(""));
+    }
+
+    @Test
+    public void testFormatSimple_Typical() {
+        assertEquals("String foobar and %% number -42 together",
+                formatSimple("String %s%s and %%%% number %d%d together", "foo", "bar", -4, 2));
+    }
+
+    @Test
+    public void testFormatSimple_Mismatch() {
+        try {
+            formatSimple("%s");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            formatSimple("%s", "foo", "bar");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
     }
 }

@@ -2151,7 +2151,7 @@ public class Camera {
          *         same as those of this size. {@code false} otherwise.
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (!(obj instanceof Size)) {
                 return false;
             }
@@ -2222,7 +2222,7 @@ public class Camera {
          *         the same as those of this area. {@code false} otherwise.
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (!(obj instanceof Area)) {
                 return false;
             }

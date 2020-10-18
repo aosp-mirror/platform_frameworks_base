@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,26 @@
 
 package android.app.appsearch;
 
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+
 import android.app.appsearch.AppSearchSchema.PropertyConfig;
 
 /**
- * Encapsulates a {@link AppSearchDocument} that represent an email.
+ * Encapsulates a {@link GenericDocument} that represent an email.
  *
- * <p>This class is a higher level implement of {@link AppSearchDocument}.
+ * <p>This class is a higher level implement of {@link GenericDocument}.
  *
  * <p>This class will eventually migrate to Jetpack, where it will become public API.
  *
  * @hide
  */
-public class AppSearchEmail extends AppSearchDocument {
+
+public class AppSearchEmail extends GenericDocument {
+    /** The name of the schema type for {@link AppSearchEmail} documents.*/
+    public static final String SCHEMA_TYPE = "builtin:Email";
+
     private static final String KEY_FROM = "from";
     private static final String KEY_TO = "to";
     private static final String KEY_CC = "cc";
@@ -37,46 +43,43 @@ public class AppSearchEmail extends AppSearchDocument {
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_BODY = "body";
 
-    /** The name of the schema type for {@link AppSearchEmail} documents.*/
-    public static final String SCHEMA_TYPE = "builtin:Email";
-
     public static final AppSearchSchema SCHEMA = new AppSearchSchema.Builder(SCHEMA_TYPE)
-            .addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_FROM)
+            .addProperty(new PropertyConfig.Builder(KEY_FROM)
                     .setDataType(PropertyConfig.DATA_TYPE_STRING)
                     .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_TO)
+            ).addProperty(new PropertyConfig.Builder(KEY_TO)
                     .setDataType(PropertyConfig.DATA_TYPE_STRING)
                     .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
                     .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_CC)
+            ).addProperty(new PropertyConfig.Builder(KEY_CC)
                     .setDataType(PropertyConfig.DATA_TYPE_STRING)
                     .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
                     .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_BCC)
+            ).addProperty(new PropertyConfig.Builder(KEY_BCC)
                     .setDataType(PropertyConfig.DATA_TYPE_STRING)
                     .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
                     .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_SUBJECT)
+            ).addProperty(new PropertyConfig.Builder(KEY_SUBJECT)
                     .setDataType(PropertyConfig.DATA_TYPE_STRING)
                     .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_BODY)
+            ).addProperty(new PropertyConfig.Builder(KEY_BODY)
                     .setDataType(PropertyConfig.DATA_TYPE_STRING)
                     .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
@@ -87,12 +90,11 @@ public class AppSearchEmail extends AppSearchDocument {
 
     /**
      * Creates a new {@link AppSearchEmail} from the contents of an existing
-     * {@link AppSearchDocument}.
+     * {@link GenericDocument}.
      *
-     * @param document The {@link AppSearchDocument} containing the email content.
-     * @hide
+     * @param document The {@link GenericDocument} containing the email content.
      */
-    public AppSearchEmail(@NonNull AppSearchDocument document) {
+    public AppSearchEmail(@NonNull GenericDocument document) {
         super(document);
     }
 
@@ -101,7 +103,6 @@ public class AppSearchEmail extends AppSearchDocument {
      *
      * @return Returns the subject of {@link AppSearchEmail} or {@code null} if it's not been set
      *         yet.
-     * @hide
      */
     @Nullable
     public String getFrom() {
@@ -113,7 +114,6 @@ public class AppSearchEmail extends AppSearchDocument {
      *
      * @return Returns the destination addresses of {@link AppSearchEmail} or {@code null} if it's
      *         not been set yet.
-     * @hide
      */
     @Nullable
     public String[] getTo() {
@@ -125,7 +125,6 @@ public class AppSearchEmail extends AppSearchDocument {
      *
      * @return Returns the CC list of {@link AppSearchEmail} or {@code null} if it's not been set
      *         yet.
-     * @hide
      */
     @Nullable
     public String[] getCc() {
@@ -137,7 +136,6 @@ public class AppSearchEmail extends AppSearchDocument {
      *
      * @return Returns the BCC list of {@link AppSearchEmail} or {@code null} if it's not been set
      *         yet.
-     * @hide
      */
     @Nullable
     public String[] getBcc() {
@@ -149,7 +147,6 @@ public class AppSearchEmail extends AppSearchDocument {
      *
      * @return Returns the value subject of {@link AppSearchEmail} or {@code null} if it's not been
      *         set yet.
-     * @hide
      */
     @Nullable
     public String getSubject() {
@@ -160,7 +157,6 @@ public class AppSearchEmail extends AppSearchDocument {
      * Get the body of {@link AppSearchEmail}.
      *
      * @return Returns the body of {@link AppSearchEmail} or {@code null} if it's not been set yet.
-     * @hide
      */
     @Nullable
     public String getBody() {
@@ -169,14 +165,12 @@ public class AppSearchEmail extends AppSearchDocument {
 
     /**
      * The builder class for {@link AppSearchEmail}.
-     * @hide
      */
-    public static class Builder extends AppSearchDocument.Builder<AppSearchEmail.Builder> {
+    public static class Builder extends GenericDocument.Builder<AppSearchEmail.Builder> {
 
         /**
          * Create a new {@link AppSearchEmail.Builder}
          * @param uri The Uri of the Email.
-         * @hide
          */
         public Builder(@NonNull String uri) {
             super(uri, SCHEMA_TYPE);
@@ -184,7 +178,6 @@ public class AppSearchEmail extends AppSearchDocument {
 
         /**
          * Set the from address of {@link AppSearchEmail}
-         * @hide
          */
         @NonNull
         public AppSearchEmail.Builder setFrom(@NonNull String from) {
@@ -194,7 +187,6 @@ public class AppSearchEmail extends AppSearchDocument {
 
         /**
          * Set the destination address of {@link AppSearchEmail}
-         * @hide
          */
         @NonNull
         public AppSearchEmail.Builder setTo(@NonNull String... to) {
@@ -204,7 +196,6 @@ public class AppSearchEmail extends AppSearchDocument {
 
         /**
          * Set the CC list of {@link AppSearchEmail}
-         * @hide
          */
         @NonNull
         public AppSearchEmail.Builder setCc(@NonNull String... cc) {
@@ -214,7 +205,6 @@ public class AppSearchEmail extends AppSearchDocument {
 
         /**
          * Set the BCC list of {@link AppSearchEmail}
-         * @hide
          */
         @NonNull
         public AppSearchEmail.Builder setBcc(@NonNull String... bcc) {
@@ -224,7 +214,6 @@ public class AppSearchEmail extends AppSearchDocument {
 
         /**
          * Set the subject of {@link AppSearchEmail}
-         * @hide
          */
         @NonNull
         public AppSearchEmail.Builder setSubject(@NonNull String subject) {
@@ -234,7 +223,6 @@ public class AppSearchEmail extends AppSearchDocument {
 
         /**
          * Set the body of {@link AppSearchEmail}
-         * @hide
          */
         @NonNull
         public AppSearchEmail.Builder setBody(@NonNull String body) {
@@ -242,11 +230,7 @@ public class AppSearchEmail extends AppSearchDocument {
             return this;
         }
 
-        /**
-         * Builds the {@link AppSearchEmail} object.
-         *
-         * @hide
-         */
+        /** Builds the {@link AppSearchEmail} object. */
         @NonNull
         @Override
         public AppSearchEmail build() {

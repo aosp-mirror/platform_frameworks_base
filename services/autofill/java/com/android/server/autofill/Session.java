@@ -71,6 +71,8 @@ import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FieldClassificationUserData;
 import android.service.autofill.FillContext;
+import android.service.autofill.FillEventHistory.Event;
+import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.InlinePresentation;
@@ -1596,10 +1598,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * when necessary.
      */
     public void logContextCommitted() {
-        mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this));
+        mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
+                Event.NO_SAVE_REASON_NONE));
     }
 
-    private void handleLogContextCommitted() {
+    /**
+     * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
+     * when necessary.
+     *
+     * @param saveDialogNotShowReason The reason why a save dialog was not shown.
+     */
+    public void logContextCommitted(@NoSaveReason int saveDialogNotShowReason) {
+        mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
+                saveDialogNotShowReason));
+    }
+
+    private void handleLogContextCommitted(@NoSaveReason int saveDialogNotShowReason) {
         final FillResponse lastResponse;
         synchronized (mLock) {
             lastResponse = getLastResponseLocked("logContextCommited(%s)");
@@ -1629,22 +1643,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Sets field classification scores
         if (userData != null && fcStrategy != null) {
-            logFieldClassificationScore(fcStrategy, userData);
+            logFieldClassificationScore(fcStrategy, userData, saveDialogNotShowReason);
         } else {
-            logContextCommitted(null, null);
+            logContextCommitted(null, null, saveDialogNotShowReason);
         }
     }
 
     private void logContextCommitted(@Nullable ArrayList<AutofillId> detectedFieldIds,
-            @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
+            @Nullable ArrayList<FieldClassification> detectedFieldClassifications,
+            @NoSaveReason int saveDialogNotShowReason) {
         synchronized (mLock) {
-            logContextCommittedLocked(detectedFieldIds, detectedFieldClassifications);
+            logContextCommittedLocked(detectedFieldIds, detectedFieldClassifications,
+                    saveDialogNotShowReason);
         }
     }
 
     @GuardedBy("mLock")
     private void logContextCommittedLocked(@Nullable ArrayList<AutofillId> detectedFieldIds,
-            @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
+            @Nullable ArrayList<FieldClassification> detectedFieldClassifications,
+            @NoSaveReason int saveDialogNotShowReason) {
         final FillResponse lastResponse = getLastResponseLocked("logContextCommited(%s)");
         if (lastResponse == null) return;
 
@@ -1822,10 +1839,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                ignoredDatasets, changedFieldIds, changedDatasetIds,
-                manuallyFilledFieldIds, manuallyFilledDatasetIds, detectedFieldIds,
-                detectedFieldClassifications, mComponentName, mCompatMode);
+        mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
+                changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
+                manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
+                mComponentName, mCompatMode, saveDialogNotShowReason);
     }
 
     /**
@@ -1833,7 +1850,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * {@code fieldId} based on its {@code currentValue} and {@code userData}.
      */
     private void logFieldClassificationScore(@NonNull FieldClassificationStrategy fcStrategy,
-            @NonNull FieldClassificationUserData userData) {
+            @NonNull FieldClassificationUserData userData,
+            @NoSaveReason int saveDialogNotShowReason) {
 
         final String[] userValues = userData.getValues();
         final String[] categoryIds = userData.getCategoryIds();
@@ -1879,7 +1897,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final RemoteCallback callback = new RemoteCallback((result) -> {
             if (result == null) {
                 if (sDebug) Slog.d(TAG, "setFieldClassificationScore(): no results");
-                logContextCommitted(null, null);
+                logContextCommitted(null, null, saveDialogNotShowReason);
                 return;
             }
             final Scores scores = result.getParcelable(EXTRA_SCORES);
@@ -1940,7 +1958,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
-            logContextCommitted(detectedFieldIds, detectedFieldClassifications);
+            logContextCommitted(detectedFieldIds, detectedFieldClassifications,
+                    saveDialogNotShowReason);
         });
 
         fcStrategy.calculateScores(callback, currentValues, userValues, categoryIds,
@@ -1948,17 +1967,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
+     * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_SAVE_SHOWN}
+     * when necessary.
+     *
+     * <p>Note: It is necessary to call logContextCommitted() first before calling this method.
+     */
+    public void logSaveUiShown() {
+        mHandler.sendMessage(obtainMessage(Session::logSaveShown, this));
+    }
+
+    /**
      * Shows the save UI, when session can be saved.
      *
-     * @return {@code true} if session is done and could be removed, or {@code false} if it's
-     * pending user action or the service asked to keep it alive (for multi-screens workflow).
+     * @return {@link SaveResult} that contains the save ui display status information.
      */
     @GuardedBy("mLock")
-    public boolean showSaveLocked() {
+    @NonNull
+    public SaveResult showSaveLocked() {
         if (mDestroyed) {
             Slog.w(TAG, "Call to Session#showSaveLocked() rejected - session: "
                     + id + " destroyed");
-            return false;
+            return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ false,
+                    Event.NO_SAVE_REASON_NONE);
         }
         final FillResponse response = getLastResponseLocked("showSaveLocked(%s)");
         final SaveInfo saveInfo = response == null ? null : response.getSaveInfo();
@@ -1975,13 +2005,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          */
         if (saveInfo == null) {
             if (sVerbose) Slog.v(TAG, "showSaveLocked(" + this.id + "): no saveInfo from service");
-            return true;
+            return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                    Event.NO_SAVE_REASON_NO_SAVE_INFO);
         }
 
         if ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
             // TODO(b/113281366): log metrics
             if (sDebug) Slog.v(TAG, "showSaveLocked(" + this.id + "): service asked to delay save");
-            return false;
+            return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ false,
+                    Event.NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG);
         }
 
         final ArrayMap<AutofillId, InternalSanitizer> sanitizers = createSanitizers(saveInfo);
@@ -2073,7 +2105,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.v(TAG, "allRequiredAreNotEmpty: " + allRequiredAreNotEmpty + " hasOptional: "
                     + (optionalIds != null));
         }
-        if (allRequiredAreNotEmpty) {
+        int saveDialogNotShowReason;
+        if (!allRequiredAreNotEmpty) {
+            saveDialogNotShowReason = Event.NO_SAVE_REASON_HAS_EMPTY_REQUIRED;
+        } else {
             // Must look up all optional ids in 2 scenarios:
             // - if no required id changed but an optional id did, it should trigger save / update
             // - if at least one required id changed but it was not part of a filled dataset, we
@@ -2124,7 +2159,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
             }
-            if (atLeastOneChanged) {
+            if (!atLeastOneChanged) {
+                saveDialogNotShowReason = Event.NO_SAVE_REASON_NO_VALUE_CHANGED;
+            } else {
                 if (sDebug) {
                     Slog.d(TAG, "at least one field changed, validate fields for save UI");
                 }
@@ -2142,13 +2179,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         Slog.e(TAG, "Not showing save UI because validation failed:", e);
                         log.setType(MetricsEvent.TYPE_FAILURE);
                         mMetricsLogger.write(log);
-                        return true;
+                        return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                                Event.NO_SAVE_REASON_FIELD_VALIDATION_FAILED);
                     }
 
                     mMetricsLogger.write(log);
                     if (!isValid) {
                         Slog.i(TAG, "not showing save UI because fields failed validation");
-                        return true;
+                        return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                                Event.NO_SAVE_REASON_FIELD_VALIDATION_FAILED);
                     }
                 }
 
@@ -2187,7 +2226,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             Slog.d(TAG, "ignoring Save UI because all fields match contents of "
                                     + "dataset #" + i + ": " + dataset);
                         }
-                        return true;
+                        return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                                Event.NO_SAVE_REASON_DATASET_MATCH);
                     }
                 }
 
@@ -2195,9 +2235,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.d(TAG, "Good news, everyone! All checks passed, show save UI for "
                             + id + "!");
                 }
-
-                // Use handler so logContextCommitted() is logged first
-                mHandler.sendMessage(obtainMessage(Session::logSaveShown, this));
 
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(new Binder(), id, client);
@@ -2210,8 +2247,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 if (serviceLabel == null || serviceIcon == null) {
                     wtf(null, "showSaveLocked(): no service label or icon");
-                    return true;
+                    return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                            Event.NO_SAVE_REASON_NONE);
                 }
+
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
                         mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode);
@@ -2223,7 +2262,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
                 mIsSaving = true;
-                return false;
+                return new SaveResult(/* logSaveShown= */ true, /* removeSession= */ false,
+                        Event.NO_SAVE_REASON_NONE);
             }
         }
         // Nothing changed...
@@ -2232,7 +2272,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + "allRequiredAreNotNull=" + allRequiredAreNotEmpty
                     + ", atLeastOneChanged=" + atLeastOneChanged);
         }
-        return true;
+        return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                saveDialogNotShowReason);
     }
 
     private void logSaveShown() {
@@ -3605,6 +3646,97 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Error launching auth intent", e);
+        }
+    }
+
+    /**
+     * The result of checking whether to show the save dialog, when session can be saved.
+     *
+     * @hide
+     */
+    static final class SaveResult {
+        /**
+         * Whether to record the save dialog has been shown.
+         */
+        private boolean mLogSaveShown;
+
+        /**
+         * Whether to remove the session.
+         */
+        private boolean mRemoveSession;
+
+        /**
+         * The reason why a save dialog was not shown.
+         */
+        @NoSaveReason private int mSaveDialogNotShowReason;
+
+        SaveResult(boolean logSaveShown, boolean removeSession,
+                @NoSaveReason int saveDialogNotShowReason) {
+            mLogSaveShown = logSaveShown;
+            mRemoveSession = removeSession;
+            mSaveDialogNotShowReason = saveDialogNotShowReason;
+        }
+
+        /**
+         * Returns whether to record the save dialog has been shown.
+         *
+         * @return Whether to record the save dialog has been shown.
+         */
+        public boolean isLogSaveShown() {
+            return mLogSaveShown;
+        }
+
+        /**
+         * Sets whether to record the save dialog has been shown.
+         *
+         * @param logSaveShown Whether to record the save dialog has been shown.
+         */
+        public void setLogSaveShown(boolean logSaveShown) {
+            mLogSaveShown = logSaveShown;
+        }
+
+        /**
+         * Returns whether to remove the session.
+         *
+         * @return Whether to remove the session.
+         */
+        public boolean isRemoveSession() {
+            return mRemoveSession;
+        }
+
+        /**
+         * Sets whether to remove the session.
+         *
+         * @param removeSession Whether to remove the session.
+         */
+        public void setRemoveSession(boolean removeSession) {
+            mRemoveSession = removeSession;
+        }
+
+        /**
+         * Returns the reason why a save dialog was not shown.
+         *
+         * @return The reason why a save dialog was not shown.
+         */
+        @NoSaveReason
+        public int getNoSaveReason() {
+            return mSaveDialogNotShowReason;
+        }
+
+        /**
+         * Sets the reason why a save dialog was not shown.
+         *
+         * @param saveDialogNotShowReason The reason why a save dialog was not shown.
+         */
+        public void setSaveDialogNotShowReason(@NoSaveReason int saveDialogNotShowReason) {
+            mSaveDialogNotShowReason = saveDialogNotShowReason;
+        }
+
+        @Override
+        public String toString() {
+            return "SaveResult: [logSaveShown=" + mLogSaveShown
+                    + ", removeSession=" + mRemoveSession
+                    + ", saveDialogNotShowReason=" + mSaveDialogNotShowReason + "]";
         }
     }
 

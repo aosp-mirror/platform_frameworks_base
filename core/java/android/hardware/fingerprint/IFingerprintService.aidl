@@ -93,10 +93,10 @@ interface IFingerprintService {
     boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
-    void generateChallenge(IBinder token, int sensorId, IFingerprintServiceReceiver receiver, String opPackageName);
+    void generateChallenge(IBinder token, int sensorId, int userId, IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    void revokeChallenge(IBinder token, String opPackageName, long challenge);
+    void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled fingerprint
     boolean hasEnrolledFingerprints(int userId, String opPackageName);

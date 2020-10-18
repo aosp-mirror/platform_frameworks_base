@@ -63,8 +63,6 @@ import java.util.StringJoiner;
  */
 public class InsetsState implements Parcelable {
 
-    public static final InsetsState EMPTY = new InsetsState();
-
     /**
      * Internal representation of inset source types. This is different from the public API in
      * {@link WindowInsets.Type} as one type from the public API might indicate multiple windows
@@ -606,7 +604,7 @@ public class InsetsState implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return equals(o, false, false);
     }
 
@@ -621,7 +619,7 @@ public class InsetsState implements Parcelable {
      * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
      */
     @VisibleForTesting
-    public boolean equals(Object o, boolean excludingCaptionInsets,
+    public boolean equals(@Nullable Object o, boolean excludingCaptionInsets,
             boolean excludeInvisibleImeFrames) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }

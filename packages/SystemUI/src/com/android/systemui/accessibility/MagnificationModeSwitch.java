@@ -31,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.ImageView;
@@ -48,15 +49,16 @@ class MagnificationModeSwitch {
 
     @VisibleForTesting
     static final long FADING_ANIMATION_DURATION_MS = 300;
-    private static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 3000;
-    // The button visible duration starting from the last showButton() called.
-    private int mVisibleDuration = DEFAULT_FADE_OUT_ANIMATION_DELAY_MS;
+    @VisibleForTesting
+    static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 3000;
+    private int mUiTimeout;
     private final Runnable mFadeInAnimationTask;
     private final Runnable mFadeOutAnimationTask;
     @VisibleForTesting
     boolean mIsFadeOutAnimating = false;
 
     private final Context mContext;
+    private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
     private final ImageView mImageView;
     private final PointF mLastDown = new PointF();
@@ -74,6 +76,7 @@ class MagnificationModeSwitch {
     @VisibleForTesting
     MagnificationModeSwitch(Context context, @NonNull ImageView imageView) {
         mContext = context;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
         mParams = createLayoutParams();
@@ -202,6 +205,10 @@ class MagnificationModeSwitch {
             mWindowManager.addView(mImageView, mParams);
             mIsVisible = true;
             mImageView.postOnAnimation(mFadeInAnimationTask);
+            mUiTimeout = mAccessibilityManager.getRecommendedTimeoutMillis(
+                    DEFAULT_FADE_OUT_ANIMATION_DELAY_MS,
+                    AccessibilityManager.FLAG_CONTENT_ICONS
+                            | AccessibilityManager.FLAG_CONTENT_CONTROLS);
         }
         if (mIsFadeOutAnimating) {
             mImageView.animate().cancel();
@@ -209,7 +216,7 @@ class MagnificationModeSwitch {
         }
         // Refresh the time slot of the fade-out task whenever this method is called.
         mImageView.removeCallbacks(mFadeOutAnimationTask);
-        mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mVisibleDuration);
+        mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mUiTimeout);
     }
 
     void onConfigurationChanged(int configDiff) {

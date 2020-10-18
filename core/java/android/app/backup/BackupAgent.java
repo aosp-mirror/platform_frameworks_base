@@ -1358,7 +1358,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
         /**  @hide */
         @Override
-        public boolean equals(Object object) {
+        public boolean equals(@Nullable Object object) {
             if (this == object) {
                 return true;
             }

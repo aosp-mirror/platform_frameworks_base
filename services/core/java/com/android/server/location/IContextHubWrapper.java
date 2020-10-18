@@ -135,9 +135,11 @@ public abstract class IContextHubWrapper {
             return false;
         }
 
-        public void onLocationSettingChanged(boolean enabled) {}
+        public void onLocationSettingChanged(boolean enabled) {
+        }
 
-        public void onWifiSettingChanged(boolean enabled) {}
+        public void onWifiSettingChanged(boolean enabled) {
+        }
     }
 
     private static class ContextHubWrapperV1_1 extends IContextHubWrapper {
@@ -163,12 +165,13 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.onSettingChanged(Setting.LOCATION,
                         enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
-            } catch  (RemoteException e) {
+            } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send setting change to Contexthub", e);
             }
         }
 
-        public void onWifiSettingChanged(boolean enabled) {}
+        public void onWifiSettingChanged(boolean enabled) {
+        }
     }
 
     private static class ContextHubWrapperV1_2 extends IContextHubWrapper {

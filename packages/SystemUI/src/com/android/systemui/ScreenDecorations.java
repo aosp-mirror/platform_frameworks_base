@@ -317,10 +317,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                         updateColorInversion(value);
                     }
                 };
-
-                mColorInversionSetting.setListening(true);
-                mColorInversionSetting.onChange(false);
             }
+            mColorInversionSetting.setListening(true);
+            mColorInversionSetting.onChange(false);
 
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -640,8 +639,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 com.android.internal.R.dimen.rounded_corner_radius_bottom);
 
         final boolean changed = mRoundedDefault.x != newRoundedDefault
-                        || mRoundedDefaultTop.x != newRoundedDefault
-                        || mRoundedDefaultBottom.x != newRoundedDefault;
+                        || mRoundedDefaultTop.x != newRoundedDefaultTop
+                        || mRoundedDefaultBottom.x != newRoundedDefaultBottom;
 
         if (changed) {
             // If config_roundedCornerMultipleRadius set as true, ScreenDecorations respect the

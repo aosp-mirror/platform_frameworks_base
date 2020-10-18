@@ -189,8 +189,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().onImeControlTargetChanged(mDisplayContent.mInputMethodInputTarget);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_IME).setVisible(true);
-        mDisplayContent.mInputMethodInputTarget.updateRequestedInsetsState(requestedState);
-        getController().onInsetsModified(mDisplayContent.mInputMethodInputTarget, requestedState);
+        mDisplayContent.mInputMethodInputTarget.updateRequestedVisibility(requestedState);
+        getController().onInsetsModified(mDisplayContent.mInputMethodInputTarget);
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");

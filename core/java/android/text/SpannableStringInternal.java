@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
@@ -501,7 +502,7 @@ import java.lang.reflect.Array;
 
     // Same as SpannableStringBuilder
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof Spanned &&
                 toString().equals(o.toString())) {
             final Spanned other = (Spanned) o;
