@@ -55,6 +55,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "-848099324": {
+      "message": "Letterbox Task Appeared: #%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/LetterboxTaskListener.java"
+    },
     "-712674749": {
       "message": "Clip description: %s",
       "level": "VERBOSE",
@@ -115,11 +121,23 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "1104702476": {
+      "message": "Letterbox Task Changed: #%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/LetterboxTaskListener.java"
+    },
     "1184615936": {
       "message": "Set drop target window visibility: displayId=%d visibility=%d",
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
+    },
+    "1218010718": {
+      "message": "Letterbox Task Vanished: #%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/LetterboxTaskListener.java"
     },
     "1481772149": {
       "message": "Current target: %s",

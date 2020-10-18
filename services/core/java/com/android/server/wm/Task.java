@@ -528,6 +528,11 @@ class Task extends WindowContainer<WindowContainer> {
     // {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag of the root activity.
     boolean mSupportsPictureInPicture;
 
+    // Activity bounds if this task or its top activity is presented in letterbox mode and
+    // {@code null} otherwise.
+    @Nullable
+    private Rect mLetterboxActivityBounds;
+
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
     private int mDragResizeMode;
@@ -4058,6 +4063,12 @@ class Task extends WindowContainer<WindowContainer> {
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
         info.isResizeable = isResizeable();
+        // Don't query getTopNonFinishingActivity().getBounds() directly because when fillTaskInfo
+        // is triggered for the first time after activities change, getBounds() may return non final
+        // bounds, e.g. fullscreen bounds instead of letterboxed bounds. To work around this,
+        // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
+        info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
+        info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
@@ -4074,6 +4085,21 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityRecord rootActivity = top.getRootActivity();
         return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
                 ? null : rootActivity.pictureInPictureArgs;
+    }
+
+    void maybeUpdateLetterboxBounds(
+                ActivityRecord activityRecord, @Nullable Rect letterboxActivityBounds) {
+        if (isOrganized()
+                && mReuseActivitiesReport.top == activityRecord
+                // Want to force update only if letterbox bounds have changed.
+                && !Objects.equals(
+                    mLetterboxActivityBounds,
+                    letterboxActivityBounds)) {
+            mLetterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
+            // Forcing update to reduce visual jank during the transition.
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                        this, /* force= */ true);
+        }
     }
 
     /**
@@ -7451,6 +7477,12 @@ class Task extends WindowContainer<WindowContainer> {
         final int outset = getTaskOutset();
         outPos.x -= outset;
         outPos.y -= outset;
+    }
+
+    private Point getRelativePosition() {
+        Point position = new Point();
+        getRelativePosition(position);
+        return position;
     }
 
     boolean shouldIgnoreInput() {
