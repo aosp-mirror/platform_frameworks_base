@@ -132,6 +132,7 @@ package android.provider {
 
   public final class DeviceConfig {
     field public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
+    field public static final String NAMESPACE_APP_STANDBY = "app_standby";
     field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
   }
 

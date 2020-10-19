@@ -102,6 +102,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_APP_COMPAT = "app_compat";
 
     /**
+     * Namespace for app standby configurations.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String NAMESPACE_APP_STANDBY = "app_standby";
+
+    /**
      * Namespace for AttentionManagerService related features.
      *
      * @hide
