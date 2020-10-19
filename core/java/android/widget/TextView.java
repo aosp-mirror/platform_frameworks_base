@@ -80,6 +80,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -889,13 +890,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @UnsupportedAppUsage
     private Editor mEditor;
-
-    /**
-     * The default content insertion callback used by {@link TextView}. See
-     * {@link #setOnReceiveContentCallback} for more info.
-     */
-    private static final TextViewOnReceiveContentCallback DEFAULT_ON_RECEIVE_CONTENT_CALLBACK =
-            new TextViewOnReceiveContentCallback();
 
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
     private static final int DEVICE_PROVISIONED_NO = 1;
@@ -13723,6 +13717,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /** @hide */
+    @Override
+    public void onInputConnectionOpenedInternal(@NonNull InputConnection ic,
+            @NonNull EditorInfo editorInfo, @Nullable Handler handler) {
+        if (mEditor != null) {
+            mEditor.getDefaultOnReceiveContentCallback().setInputConnectionInfo(ic, editorInfo);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void onInputConnectionClosedInternal() {
+        if (mEditor != null) {
+            mEditor.getDefaultOnReceiveContentCallback().clearInputConnectionInfo();
+        }
+    }
+
     /**
      * Returns the callback used for handling insertion of content into this view. See
      * {@link #setOnReceiveContentCallback} for more info.
@@ -13773,8 +13784,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ClipDescription description = payload.getClip().getDescription();
         if (receiver != null && receiver.supports(this, description)) {
             receiver.onReceiveContent(this, payload);
-        } else {
-            DEFAULT_ON_RECEIVE_CONTENT_CALLBACK.onReceiveContent(this, payload);
+        } else if (mEditor != null) {
+            mEditor.getDefaultOnReceiveContentCallback().onReceiveContent(this, payload);
         }
     }
 
