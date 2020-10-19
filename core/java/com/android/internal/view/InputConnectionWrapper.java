@@ -36,6 +36,7 @@ import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.ResultCallbacks;
 
 import java.lang.ref.WeakReference;
@@ -84,9 +85,10 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     @AnyThread
-    private static int getResultOrZero(@NonNull CancellationGroup.Completable.Int value,
-             @NonNull String methodName) {
-        final boolean timedOut = value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS);
+    private static int getResultOrZero(@NonNull Completable.Int value, @NonNull String methodName,
+            @Nullable CancellationGroup cancellationGroup) {
+        final boolean timedOut =
+                value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS, cancellationGroup);
         if (value.hasValue()) {
             return value.getValue();
         }
@@ -96,9 +98,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     @Nullable
-    private static <T> T getResultOrNull(@NonNull CancellationGroup.Completable.Values<T> value,
-            @NonNull String methodName) {
-        final boolean timedOut = value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS);
+    private static <T> T getResultOrNull(@NonNull Completable.Values<T> value,
+            @NonNull String methodName, @Nullable CancellationGroup cancellationGroup) {
+        final boolean timedOut =
+                value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS, cancellationGroup);
         if (value.hasValue()) {
             return value.getValue();
         }
@@ -112,14 +115,13 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final CancellationGroup.Completable.CharSequence value =
-                mCancellationGroup.createCompletableCharSequence();
+        final Completable.CharSequence value = Completable.createCharSequence();
         try {
             mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getTextAfterCursor()");
+        return getResultOrNull(value, "getTextAfterCursor()", mCancellationGroup);
     }
 
     @AnyThread
@@ -128,14 +130,13 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final CancellationGroup.Completable.CharSequence value =
-                mCancellationGroup.createCompletableCharSequence();
+        final Completable.CharSequence value = Completable.createCharSequence();
         try {
             mIInputContext.getTextBeforeCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getTextBeforeCursor()");
+        return getResultOrNull(value, "getTextBeforeCursor()", mCancellationGroup);
     }
 
     @AnyThread
@@ -148,14 +149,13 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final CancellationGroup.Completable.CharSequence value =
-                mCancellationGroup.createCompletableCharSequence();
+        final Completable.CharSequence value = Completable.createCharSequence();
         try {
             mIInputContext.getSelectedText(flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getSelectedText()");
+        return getResultOrNull(value, "getSelectedText()", mCancellationGroup);
     }
 
     /**
@@ -179,15 +179,14 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        final CancellationGroup.Completable.SurroundingText value =
-                mCancellationGroup.createCompletableSurroundingText();
+        final Completable.SurroundingText value = Completable.createSurroundingText();
         try {
             mIInputContext.getSurroundingText(beforeLength, afterLength, flags,
                     ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getSurroundingText()");
+        return getResultOrNull(value, "getSurroundingText()", mCancellationGroup);
     }
 
     @AnyThread
@@ -196,14 +195,13 @@ public class InputConnectionWrapper implements InputConnection {
             return 0;
         }
 
-        final CancellationGroup.Completable.Int value =
-                mCancellationGroup.createCompletableInt();
+        final Completable.Int value = Completable.createInt();
         try {
             mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return 0;
         }
-        return getResultOrZero(value, "getCursorCapsMode()");
+        return getResultOrZero(value, "getCursorCapsMode()", mCancellationGroup);
     }
 
     @AnyThread
@@ -212,14 +210,13 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
 
-        final CancellationGroup.Completable.ExtractedText value =
-                mCancellationGroup.createCompletableExtractedText();
+        final Completable.ExtractedText value = Completable.createExtractedText();
         try {
             mIInputContext.getExtractedText(request, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return getResultOrNull(value, "getExtractedText()");
+        return getResultOrNull(value, "getExtractedText()", mCancellationGroup);
     }
 
     @AnyThread
@@ -423,14 +420,14 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final CancellationGroup.Completable.Int value = mCancellationGroup.createCompletableInt();
+        final Completable.Int value = Completable.createInt();
         try {
             mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode,
                     ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return false;
         }
-        return getResultOrZero(value, "requestUpdateCursorAnchorInfo()") != 0;
+        return getResultOrZero(value, "requestUpdateCursorAnchorInfo()", mCancellationGroup) != 0;
     }
 
     @AnyThread
@@ -464,13 +461,13 @@ public class InputConnectionWrapper implements InputConnection {
             inputMethodService.exposeContent(inputContentInfo, this);
         }
 
-        final CancellationGroup.Completable.Int value = mCancellationGroup.createCompletableInt();
+        final Completable.Int value = Completable.createInt();
         try {
             mIInputContext.commitContent(inputContentInfo, flags, opts, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return false;
         }
-        return getResultOrZero(value, "commitContent()") != 0;
+        return getResultOrZero(value, "commitContent()", mCancellationGroup) != 0;
     }
 
     @AnyThread

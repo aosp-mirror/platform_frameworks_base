@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Defines a set of factory methods to create {@link android.os.IBinder}-based callbacks that are
- * associated with completable objects defined in {@link CancellationGroup.Completable}.
+ * associated with completable objects defined in {@link Completable}.
  */
 public final class ResultCallbacks {
 
@@ -50,22 +50,22 @@ public final class ResultCallbacks {
     }
 
     /**
-     * Creates {@link IIntResultCallback.Stub} that is to set
-     * {@link CancellationGroup.Completable.Int} when receiving the result.
+     * Creates {@link IIntResultCallback.Stub} that is to set {@link Completable.Int} when receiving
+     * the result.
      *
-     * @param value {@link CancellationGroup.Completable.Int} to be set when receiving the result.
+     * @param value {@link Completable.Int} to be set when receiving the result.
      * @return {@link IIntResultCallback.Stub} that can be passed as a binder IPC parameter.
      */
     @AnyThread
-    public static IIntResultCallback.Stub of(@NonNull CancellationGroup.Completable.Int value) {
-        final AtomicReference<WeakReference<CancellationGroup.Completable.Int>>
+    public static IIntResultCallback.Stub of(@NonNull Completable.Int value) {
+        final AtomicReference<WeakReference<Completable.Int>>
                 atomicRef = new AtomicReference<>(new WeakReference<>(value));
 
         return new IIntResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(int result) {
-                final CancellationGroup.Completable.Int value = unwrap(atomicRef);
+                final Completable.Int value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
@@ -76,24 +76,23 @@ public final class ResultCallbacks {
 
     /**
      * Creates {@link ICharSequenceResultCallback.Stub} that is to set
-     * {@link CancellationGroup.Completable.CharSequence} when receiving the result.
+     * {@link Completable.CharSequence} when receiving the result.
      *
-     * @param value {@link CancellationGroup.Completable.CharSequence} to be set when receiving the
-     *              result.
+     * @param value {@link Completable.CharSequence} to be set when receiving the result.
      * @return {@link ICharSequenceResultCallback.Stub} that can be passed as a binder IPC
      *         parameter.
      */
     @AnyThread
     public static ICharSequenceResultCallback.Stub of(
-            @NonNull CancellationGroup.Completable.CharSequence value) {
-        final AtomicReference<WeakReference<CancellationGroup.Completable.CharSequence>> atomicRef =
+            @NonNull Completable.CharSequence value) {
+        final AtomicReference<WeakReference<Completable.CharSequence>> atomicRef =
                 new AtomicReference<>(new WeakReference<>(value));
 
         return new ICharSequenceResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(CharSequence result) {
-                final CancellationGroup.Completable.CharSequence value = unwrap(atomicRef);
+                final Completable.CharSequence value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
@@ -104,24 +103,23 @@ public final class ResultCallbacks {
 
     /**
      * Creates {@link IExtractedTextResultCallback.Stub} that is to set
-     * {@link CancellationGroup.Completable.ExtractedText} when receiving the result.
+     * {@link Completable.ExtractedText} when receiving the result.
      *
-     * @param value {@link CancellationGroup.Completable.ExtractedText} to be set when receiving the
-     *              result.
+     * @param value {@link Completable.ExtractedText} to be set when receiving the result.
      * @return {@link IExtractedTextResultCallback.Stub} that can be passed as a binder IPC
      *         parameter.
      */
     @AnyThread
     public static IExtractedTextResultCallback.Stub of(
-            @NonNull CancellationGroup.Completable.ExtractedText value) {
-        final AtomicReference<WeakReference<CancellationGroup.Completable.ExtractedText>>
+            @NonNull Completable.ExtractedText value) {
+        final AtomicReference<WeakReference<Completable.ExtractedText>>
                 atomicRef = new AtomicReference<>(new WeakReference<>(value));
 
         return new IExtractedTextResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(android.view.inputmethod.ExtractedText result) {
-                final CancellationGroup.Completable.ExtractedText value = unwrap(atomicRef);
+                final Completable.ExtractedText value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
@@ -132,24 +130,23 @@ public final class ResultCallbacks {
 
     /**
      * Creates {@link ISurroundingTextResultCallback.Stub} that is to set
-     * {@link CancellationGroup.Completable.SurroundingText} when receiving the result.
+     * {@link Completable.SurroundingText} when receiving the result.
      *
-     * @param value {@link CancellationGroup.Completable.SurroundingText} to be set when receiving
-     *              the result.
+     * @param value {@link Completable.SurroundingText} to be set when receiving the result.
      * @return {@link ISurroundingTextResultCallback.Stub} that can be passed as a binder IPC
      *         parameter.
      */
     @AnyThread
     public static ISurroundingTextResultCallback.Stub of(
-            @NonNull CancellationGroup.Completable.SurroundingText value) {
-        final AtomicReference<WeakReference<CancellationGroup.Completable.SurroundingText>>
+            @NonNull Completable.SurroundingText value) {
+        final AtomicReference<WeakReference<Completable.SurroundingText>>
                 atomicRef = new AtomicReference<>(new WeakReference<>(value));
 
         return new ISurroundingTextResultCallback.Stub() {
             @BinderThread
             @Override
             public void onResult(android.view.inputmethod.SurroundingText result) {
-                final CancellationGroup.Completable.SurroundingText value = unwrap(atomicRef);
+                final Completable.SurroundingText value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }
