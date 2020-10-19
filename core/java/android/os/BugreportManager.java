@@ -24,13 +24,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
@@ -48,7 +48,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 @SystemService(Context.BUGREPORT_SERVICE)
 public final class BugreportManager {
 

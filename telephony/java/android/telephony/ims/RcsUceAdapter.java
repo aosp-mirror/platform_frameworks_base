@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
@@ -31,7 +30,6 @@ import android.os.RemoteException;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
-import android.telephony.ims.feature.RcsFeature;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -380,7 +378,6 @@ public class RcsUceAdapter {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setUceSettingEnabled(boolean isEnabled) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();

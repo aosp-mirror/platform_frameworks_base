@@ -18,7 +18,6 @@ package android.net.metrics;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
 import android.net.Network;
@@ -35,7 +34,6 @@ import com.android.internal.util.BitUtils;
  * {@hide}
  */
 @SystemApi
-@TestApi
 public class IpConnectivityLog {
     private static final String TAG = IpConnectivityLog.class.getSimpleName();
     private static final boolean DBG = false;
@@ -52,7 +50,6 @@ public class IpConnectivityLog {
 
     /** @hide */
     @SystemApi
-    @TestApi
     public IpConnectivityLog() {
     }
 

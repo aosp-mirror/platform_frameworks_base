@@ -20,7 +20,6 @@ import android.Manifest.permission;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -392,7 +391,6 @@ public class BatteryManager {
      */
     @RequiresPermission(permission.POWER_SAVER)
     @SystemApi
-    @TestApi
     public boolean setChargingStateUpdateDelayMillis(int delayMillis) {
         try {
             return mBatteryStats.setChargingStateUpdateDelayMillis(delayMillis);

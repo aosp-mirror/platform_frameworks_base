@@ -4036,7 +4036,6 @@ public final class Telephony {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final class CellBroadcasts implements BaseColumns {
 
         /**
