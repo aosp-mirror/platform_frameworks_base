@@ -296,6 +296,37 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         assertThat(taskDisplayArea.getOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSET);
     }
 
+    @Test
+    @UseTestDisplay
+    public void testRemove_reparentToDefault() {
+        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final TaskDisplayArea displayArea = task.getDisplayArea();
+        displayArea.remove();
+        assertTrue(displayArea.isRemoved());
+        assertFalse(displayArea.hasChild());
+
+        final RootWindowContainer rootWindowContainer = mWm.mAtmService.mRootWindowContainer;
+        final TaskDisplayArea defaultTaskDisplayArea =
+                rootWindowContainer.getDefaultTaskDisplayArea();
+        assertTrue(defaultTaskDisplayArea.mChildren.contains(task));
+    }
+
+    @Test
+    @UseTestDisplay
+    public void testRemove_stackCreatedByOrganizer() {
+        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        task.mCreatedByOrganizer = true;
+        final TaskDisplayArea displayArea = task.getDisplayArea();
+        displayArea.remove();
+        assertTrue(displayArea.isRemoved());
+        assertFalse(displayArea.hasChild());
+
+        final RootWindowContainer rootWindowContainer = mWm.mAtmService.mRootWindowContainer;
+        final TaskDisplayArea defaultTaskDisplayArea =
+                rootWindowContainer.getDefaultTaskDisplayArea();
+        assertFalse(defaultTaskDisplayArea.mChildren.contains(task));
+    }
+
     private void assertGetOrCreateStack(int windowingMode, int activityType, Task candidateTask,
             boolean reuseCandidate) {
         final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
