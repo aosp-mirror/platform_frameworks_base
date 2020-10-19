@@ -5030,6 +5030,7 @@ package android.media.tv.tuner {
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final long INVALID_FILTER_ID_64BIT = -1L; // 0xffffffffffffffffL
+    field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
     field public static final int INVALID_LTS_ID = -1; // 0xffffffff
     field public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM = -1; // 0xffffffff
@@ -5330,6 +5331,7 @@ package android.media.tv.tuner.filter {
 
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
+    method public int getFirstMbInSlice();
     method public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
@@ -5493,6 +5495,7 @@ package android.media.tv.tuner.filter {
 
   public class TsRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
+    method public int getFirstMbInSlice();
     method public int getPacketId();
     method public long getPts();
     method public int getScIndexMask();
