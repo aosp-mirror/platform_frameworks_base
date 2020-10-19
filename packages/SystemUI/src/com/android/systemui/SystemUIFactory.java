@@ -30,6 +30,7 @@ import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
@@ -49,6 +50,11 @@ public class SystemUIFactory {
     }
 
     public static void createFromConfig(Context context) {
+        createFromConfig(context, false);
+    }
+
+    @VisibleForTesting
+    public static void createFromConfig(Context context, boolean fromTest) {
         if (mFactory != null) {
             return;
         }
@@ -62,7 +68,7 @@ public class SystemUIFactory {
             Class<?> cls = null;
             cls = context.getClassLoader().loadClass(clsName);
             mFactory = (SystemUIFactory) cls.newInstance();
-            mFactory.init(context);
+            mFactory.init(context, fromTest);
         } catch (Throwable t) {
             Log.w(TAG, "Error creating SystemUIFactory component: " + clsName, t);
             throw new RuntimeException(t);
@@ -76,21 +82,53 @@ public class SystemUIFactory {
 
     public SystemUIFactory() {}
 
-    private void init(Context context) throws ExecutionException, InterruptedException {
+    @VisibleForTesting
+    public void init(Context context, boolean fromTest)
+            throws ExecutionException, InterruptedException {
         mRootComponent = buildGlobalRootComponent(context);
         // Stand up WMComponent
         mWMComponent = mRootComponent.getWMComponentBuilder().build();
+        if (!fromTest) {
+            // Only initialize when not starting from tests since this currently initializes some
+            // components that shouldn't be run in the test environment
+            mWMComponent.init();
+        }
 
         // And finally, retrieve whatever SysUI needs from WMShell and build SysUI.
-        // TODO: StubAPIClass is just a placeholder.
-        mSysUIComponent = mRootComponent.getSysUIComponent()
-                .setStubAPIClass(mWMComponent.createStubAPIClass())
+        SysUIComponent.Builder builder = mRootComponent.getSysUIComponent();
+        if (!fromTest) {
+            // Only initialize when not starting from tests since this currently initializes some
+            // components that shouldn't be run in the test environment
+            builder = builder.setPip(mWMComponent.getPip())
+                    .setSplitScreen(mWMComponent.getSplitScreen())
+                    .setOneHanded(mWMComponent.getOneHanded());
+        } else {
+            builder = builder.setPip(Optional.ofNullable(null))
+                    .setSplitScreen(Optional.ofNullable(null))
+                    .setOneHanded(Optional.ofNullable(null));
+        }
+        mSysUIComponent = builder
+                .setInputConsumerController(mWMComponent.getInputConsumerController())
+                .setShellTaskOrganizer(mWMComponent.getShellTaskOrganizer())
                 .build();
+        if (!fromTest) {
+            mSysUIComponent.init();
+        }
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
         Dependency dependency = mSysUIComponent.createDependency();
         dependency.start();
+    }
+
+    /**
+     * Prepares the SysUIComponent builder before it is built.
+     * @param sysUIBuilder the builder provided by the root component's getSysUIComponent() method
+     * @param wm the built WMComponent from the root component's getWMComponent() method
+     */
+    protected SysUIComponent.Builder prepareSysUIComponentBuilder(
+            SysUIComponent.Builder sysUIBuilder, WMComponent wm) {
+        return sysUIBuilder;
     }
 
     protected GlobalRootComponent buildGlobalRootComponent(Context context) {

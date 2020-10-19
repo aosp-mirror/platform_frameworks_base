@@ -20,21 +20,16 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.bubbles.Bubbles;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.InputConsumerController;
-import com.android.systemui.util.DeviceConfigProxy;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.WindowManagerShellWrapper;
-import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -58,41 +53,28 @@ import dagger.Provides;
  * Provides basic dependencies from {@link com.android.wm.shell}, the dependencies declared here
  * should be shared among different branches of SystemUI.
  */
-// TODO(b/162923491): Move most of these dependencies into WMSingleton scope.
 @Module
 public abstract class WMShellBaseModule {
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static TransactionPool provideTransactionPool() {
         return new TransactionPool();
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static DisplayController provideDisplayController(Context context, @Main Handler handler,
             IWindowManager wmService) {
         return new DisplayController(context, handler, wmService);
     }
 
-    @SysUISingleton
-    @Provides
-    static DeviceConfigProxy provideDeviceConfigProxy() {
-        return new DeviceConfigProxy();
-    }
-
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static InputConsumerController provideInputConsumerController() {
         return InputConsumerController.getPipInputConsumer();
     }
 
-    @SysUISingleton
-    @Provides
-    static FloatingContentCoordinator provideFloatingContentCoordinator() {
-        return new FloatingContentCoordinator();
-    }
-
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipAppOpsListener providePipAppOpsListener(Context context,
             IActivityManager activityManager,
@@ -100,61 +82,46 @@ public abstract class WMShellBaseModule {
         return new PipAppOpsListener(context, activityManager, pipTouchHandler.getMotionHelper());
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipMediaController providePipMediaController(Context context,
             IActivityManager activityManager) {
         return new PipMediaController(context, activityManager);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger,
             PackageManager packageManager) {
         return new PipUiEventLogger(uiEventLogger, packageManager);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper(Context context) {
         return new PipSurfaceTransactionHelper(context);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
         return new SystemWindows(displayController, wmService);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static SyncTransactionQueue provideSyncTransactionQueue(@Main Handler handler,
             TransactionPool pool) {
         return new SyncTransactionQueue(pool, handler);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
             @Main Handler handler, TransactionPool transactionPool) {
-        ShellTaskOrganizer organizer = new ShellTaskOrganizer(syncQueue, transactionPool,
+        return new ShellTaskOrganizer(syncQueue, transactionPool,
                 new HandlerExecutor(handler), AnimationThread.instance().getExecutor());
-        organizer.registerOrganizer();
-        return organizer;
-    }
-
-    @SysUISingleton
-    @Provides
-    static WindowManagerShellWrapper provideWindowManagerShellWrapper() {
-        return new WindowManagerShellWrapper();
-    }
-
-    @SysUISingleton
-    @Provides
-    static FlingAnimationUtils.Builder provideFlingAnimationUtilsBuilder(
-            DisplayMetrics displayMetrics) {
-        return new FlingAnimationUtils.Builder(displayMetrics);
     }
 
     @BindsOptionalOf
@@ -163,7 +130,7 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract Bubbles optionalBubbles();
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static Optional<OneHanded> provideOneHandedController(Context context,
             DisplayController displayController) {

@@ -16,7 +16,15 @@
 
 package com.android.systemui.dagger;
 
-import javax.inject.Inject;
+import com.android.systemui.shared.system.InputConsumerController;
+import com.android.systemui.wmshell.WMShellModule;
+import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.splitscreen.SplitScreen;
+
+import java.util.Optional;
 
 import dagger.Subcomponent;
 
@@ -24,7 +32,7 @@ import dagger.Subcomponent;
  * Dagger Subcomponent for WindowManager.
  */
 @WMSingleton
-@Subcomponent(modules = {})
+@Subcomponent(modules = {WMShellModule.class})
 public interface WMComponent {
 
     /**
@@ -35,18 +43,36 @@ public interface WMComponent {
         WMComponent build();
     }
 
-
     /**
-     *  Example class used for passing an API to SysUI from WMShell.
-     *
-     *  TODO: Remove this once real WM classes are ready to go.
-     **/
-    @WMSingleton
-    class StubAPIClass {
-        @Inject
-        StubAPIClass() {}
+     * Initializes all the WMShell components before starting any of the SystemUI components.
+     */
+    default void init() {
+        // This is to prevent circular init problem by separating registration step out of its
+        // constructor. And make sure the initialization of DisplayImeController won't depend on
+        // specific feature anymore.
+        getDisplayImeController().startMonitorDisplays();
+        getShellTaskOrganizer().registerOrganizer();
     }
 
-    /** Create a StubAPIClass. */
-    StubAPIClass createStubAPIClass();
+    // Required components to be initialized at start up
+    @WMSingleton
+    ShellTaskOrganizer getShellTaskOrganizer();
+
+    @WMSingleton
+    DisplayImeController getDisplayImeController();
+
+    @WMSingleton
+    InputConsumerController getInputConsumerController();
+
+    // TODO(b/162923491): We currently pass the instances through to SysUI, but that may change
+    //                    depending on the threading mechanism we go with
+
+    @WMSingleton
+    Optional<OneHanded> getOneHanded();
+
+    @WMSingleton
+    Optional<Pip> getPip();
+
+    @WMSingleton
+    Optional<SplitScreen> getSplitScreen();
 }

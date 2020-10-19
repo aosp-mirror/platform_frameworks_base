@@ -69,11 +69,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
     private final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
-    @Deprecated
-    public DisplayImeController(IWindowManager wmService, DisplayController displayController,
-            Handler mainHandler, TransactionPool transactionPool) {
-        this(wmService, displayController, mainHandler::post, transactionPool);
-    }
 
     public DisplayImeController(IWindowManager wmService, DisplayController displayController,
             Executor mainExecutor, TransactionPool transactionPool) {
