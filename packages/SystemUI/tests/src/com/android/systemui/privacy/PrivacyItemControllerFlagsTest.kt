@@ -54,6 +54,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
         private const val ALL_INDICATORS =
                 SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
+        private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
     }
 
     @Mock
@@ -116,6 +117,15 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLocationChanged() {
+        changeLocation(true)
+        executor.runAllReady()
+
+        verify(callback).onFlagLocationChanged(true)
+        assertTrue(privacyItemController.locationAvailable)
+    }
+
+    @Test
     fun testAllChanged() {
         changeAll(true)
         executor.runAllReady()
@@ -152,6 +162,14 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     @Ignore // TODO(b/168209929)
     fun testMicCamera_listening() {
         changeMicCamera(true)
+        executor.runAllReady()
+
+        verify(appOpsController).addCallback(eq(PrivacyItemController.OPS), any())
+    }
+
+    @Test
+    fun testLocation_listening() {
+        changeLocation(true)
         executor.runAllReady()
 
         verify(appOpsController).addCallback(eq(PrivacyItemController.OPS), any())
@@ -205,6 +223,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)
+    private fun changeLocation(value: Boolean?) = changeProperty(LOCATION, value)
     private fun changeAll(value: Boolean?) = changeProperty(ALL_INDICATORS, value)
 
     private fun changeProperty(name: String, value: Boolean?) {
