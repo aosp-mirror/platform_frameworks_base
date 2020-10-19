@@ -20,11 +20,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.AttributeSet;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -106,10 +104,9 @@ public class KeyguardPresentationTest extends SysuiTestCase {
 
     @Test
     public void testInflation_doesntCrash() {
-        final Display display = mContext.getSystemService(DisplayManager.class).getDisplay(
-                Display.DEFAULT_DISPLAY);
-        KeyguardPresentation keyguardPresentation = new KeyguardPresentation(mContext, display,
-                mKeyguardStatusViewComponentFactory);
+        KeyguardPresentation keyguardPresentation = new KeyguardPresentation(mContext,
+                mContext.getDisplayNoVerify(), mKeyguardStatusViewComponentFactory,
+                mLayoutInflater);
         keyguardPresentation.onCreate(null /*savedInstanceState */);
     }
 }
