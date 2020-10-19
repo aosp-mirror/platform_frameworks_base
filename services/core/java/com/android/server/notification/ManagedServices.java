@@ -67,6 +67,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
+import com.android.server.utils.TimingsTraceAndSlog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1225,6 +1226,8 @@ abstract public class ManagedServices {
      */
     @VisibleForTesting
     void unbindOtherUserServices(int currentUser) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("ManagedServices.unbindOtherUserServices_current" + currentUser);
         final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
 
         synchronized (mMutex) {
@@ -1239,6 +1242,7 @@ abstract public class ManagedServices {
             }
         }
         unbindFromServices(componentsToUnbind);
+        t.traceEnd();
     }
 
     protected void unbindFromServices(SparseArray<Set<ComponentName>> componentsToUnbind) {
