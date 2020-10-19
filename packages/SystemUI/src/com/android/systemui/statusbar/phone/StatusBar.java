@@ -3987,7 +3987,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         PackageManager pm = mContext.getPackageManager();
         ResolveInfo resolveInfo = pm.resolveActivity(emergencyIntent, /*flags=*/0);
         if (resolveInfo == null) {
-            Log.wtf(TAG, "Couldn't find an app to process the emergency intent.");
+            // TODO(b/171084088) Upgrade log to wtf when we have default app in main branch.
+            Log.d(TAG, "Couldn't find an app to process the emergency intent.");
             return;
         }
 
