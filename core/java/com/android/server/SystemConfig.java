@@ -250,7 +250,7 @@ public class SystemConfig {
     // partition that is used to verify if an overlay package fulfills
     // the 'config_signature' policy by comparing their signatures:
     // if the overlay package is signed with the same certificate as
-    // the package declared in 'config-signature' tag, then the
+    // the package declared in 'overlay-config-signature' tag, then the
     // overlay package fulfills the 'config_signature' policy.
     private String mOverlayConfigSignaturePackage;
 
