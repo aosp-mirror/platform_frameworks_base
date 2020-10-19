@@ -120,7 +120,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public interface OnPermissionsChangedListener {
 
         /**
@@ -479,7 +478,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int MATCH_FACTORY_ONLY = 0x00200000;
 
     /**
@@ -611,7 +609,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int MODULE_APEX_NAME = 0x00000001;
 
     /** @hide */
@@ -3319,7 +3316,6 @@ public abstract class PackageManager {
     * @hide
     */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_USER_SET = 1 << 0;
 
     /**
@@ -3330,7 +3326,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_USER_FIXED =  1 << 1;
 
     /**
@@ -3341,7 +3336,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_POLICY_FIXED =  1 << 2;
 
     /**
@@ -3358,7 +3352,6 @@ public abstract class PackageManager {
      */
     @Deprecated
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
 
     /**
@@ -3368,7 +3361,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_SYSTEM_FIXED =  1 << 4;
 
     /**
@@ -3380,7 +3372,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
 
     /**
@@ -3390,7 +3381,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_REVIEW_REQUIRED =  1 << 6;
 
     /**
@@ -3428,7 +3418,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT =  1 << 11;
 
@@ -3440,7 +3429,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT =  1 << 12;
 
@@ -3453,7 +3441,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT =  1 << 13;
 
@@ -3466,7 +3453,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int FLAG_PERMISSION_APPLY_RESTRICTION =  1 << 14;
 
@@ -3476,7 +3462,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_GRANTED_BY_ROLE =  1 << 15;
 
     /**
@@ -3488,7 +3473,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_REVOKED_COMPAT =  FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 
     /**
@@ -3498,7 +3482,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
 
     /**
@@ -3516,7 +3499,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT =  1 << 18;
 
@@ -4083,7 +4065,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi @SystemApi
+    @SystemApi
     public abstract boolean arePermissionsIndividuallyControlled();
 
     /**
@@ -4334,7 +4316,6 @@ public abstract class PackageManager {
      * @hide
      */
     @NonNull
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
@@ -4495,7 +4476,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
     public abstract void grantRuntimePermission(@NonNull String packageName,
@@ -4522,7 +4502,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public abstract void revokeRuntimePermission(@NonNull String packageName,
@@ -4550,7 +4529,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public void revokeRuntimePermission(@NonNull String packageName,
@@ -4569,7 +4547,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
@@ -4592,7 +4569,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
@@ -6440,7 +6416,6 @@ public abstract class PackageManager {
      * @hide
      */
     @Nullable
-    @TestApi
     @SystemApi
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract String getDefaultBrowserPackageNameAsUser(@UserIdInt int userId);
@@ -7094,7 +7069,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public abstract void addOnPermissionsChangeListener(
             @NonNull OnPermissionsChangedListener listener);
@@ -7107,7 +7081,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public abstract void removeOnPermissionsChangeListener(
             @NonNull OnPermissionsChangedListener listener);
@@ -8126,7 +8099,6 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @Nullable
     public String getIncidentReportApproverPackageName() {
         throw new UnsupportedOperationException(

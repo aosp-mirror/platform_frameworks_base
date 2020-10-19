@@ -1407,8 +1407,7 @@ public class UserManager {
      *
      * @hide
      */
-    @SystemApi
-    @TestApi // To allow seeing it from CTS.
+    @SystemApi // To allow seeing it from CTS.
     public static final String ACTION_USER_RESTRICTIONS_CHANGED =
             "android.os.action.USER_RESTRICTIONS_CHANGED";
 

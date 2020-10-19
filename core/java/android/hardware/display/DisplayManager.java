@@ -699,7 +699,6 @@ public final class DisplayManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public Point getStableDisplaySize() {
         return mGlobal.getStableDisplaySize();
     }
@@ -709,7 +708,6 @@ public final class DisplayManager {
      * @hide until we make it a system api.
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.BRIGHTNESS_SLIDER_USAGE)
     public List<BrightnessChangeEvent> getBrightnessEvents() {
         return mGlobal.getBrightnessEvents(mContext.getOpPackageName());
@@ -721,7 +719,6 @@ public final class DisplayManager {
      * @hide until we make it a system api
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS)
     public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
         return mGlobal.getAmbientBrightnessStats();
@@ -733,7 +730,6 @@ public final class DisplayManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
         setBrightnessConfigurationForUser(c, mContext.getUserId(), mContext.getPackageName());
@@ -758,7 +754,6 @@ public final class DisplayManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public BrightnessConfiguration getBrightnessConfiguration() {
         return getBrightnessConfigurationForUser(mContext.getUserId());
@@ -784,7 +779,6 @@ public final class DisplayManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     @Nullable
     public BrightnessConfiguration getDefaultBrightnessConfiguration() {

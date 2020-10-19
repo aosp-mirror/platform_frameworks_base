@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -57,7 +56,6 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-@TestApi
 @SystemApi
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
@@ -115,7 +113,6 @@ public final class PermissionManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
@@ -136,7 +133,6 @@ public final class PermissionManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,

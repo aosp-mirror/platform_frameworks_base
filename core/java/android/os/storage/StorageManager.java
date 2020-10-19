@@ -43,7 +43,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -1701,7 +1700,6 @@ public class StorageManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static boolean hasIsolatedStorage() {
         // Prefer to use snapshot for current boot when available
         return SystemProperties.getBoolean(PROP_ISOLATED_STORAGE_SNAPSHOT,

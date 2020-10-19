@@ -27,7 +27,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -101,7 +100,6 @@ public final class LocationRequest implements Parcelable {
      */
     @Deprecated
     @SystemApi
-    @TestApi
     public static final int ACCURACY_FINE = QUALITY_HIGH_ACCURACY;
 
     /**
@@ -116,7 +114,6 @@ public final class LocationRequest implements Parcelable {
      */
     @Deprecated
     @SystemApi
-    @TestApi
     public static final int ACCURACY_BLOCK = QUALITY_BALANCED_POWER_ACCURACY;
 
     /**
@@ -131,7 +128,6 @@ public final class LocationRequest implements Parcelable {
      */
     @Deprecated
     @SystemApi
-    @TestApi
     public static final int ACCURACY_CITY = QUALITY_LOW_POWER;
 
     /**
@@ -159,7 +155,6 @@ public final class LocationRequest implements Parcelable {
      */
     @Deprecated
     @SystemApi
-    @TestApi
     public static final int POWER_LOW = 201;
 
     /**
@@ -172,7 +167,6 @@ public final class LocationRequest implements Parcelable {
      */
     @Deprecated
     @SystemApi
-    @TestApi
     public static final int POWER_HIGH = 203;
 
     private static final long IMPLICIT_MIN_UPDATE_INTERVAL = -1;
@@ -618,7 +612,6 @@ public final class LocationRequest implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isHiddenFromAppOps() {
         return mHideFromAppOps;
@@ -644,7 +637,6 @@ public final class LocationRequest implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isLocationSettingsIgnored() {
         return mLocationSettingsIgnored;
@@ -680,7 +672,6 @@ public final class LocationRequest implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isLowPower() {
         return mLowPower;
@@ -707,7 +698,6 @@ public final class LocationRequest implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public @NonNull WorkSource getWorkSource() {
         return mWorkSource;
@@ -1038,7 +1028,6 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
         public @NonNull Builder setHiddenFromAppOps(boolean hiddenFromAppOps) {
@@ -1057,7 +1046,6 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
@@ -1075,7 +1063,6 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
         public @NonNull Builder setLowPower(boolean lowPower) {
@@ -1093,7 +1080,6 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         @RequiresPermission(Manifest.permission.UPDATE_DEVICE_STATS)
         public @NonNull Builder setWorkSource(@Nullable WorkSource workSource) {

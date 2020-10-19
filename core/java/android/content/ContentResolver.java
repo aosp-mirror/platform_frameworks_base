@@ -4098,7 +4098,6 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
-    @TestApi
     // We can't accept an already-opened FD here, since these methods are
     // rewriting actual filesystem paths
     @SuppressLint("StreamFiles")
@@ -4118,7 +4117,6 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
-    @TestApi
     // We can't accept an already-opened FD here, since these methods are
     // rewriting actual filesystem paths
     @SuppressLint("StreamFiles")
