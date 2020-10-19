@@ -177,6 +177,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
     private ScrimView mBubbleScrim;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
+    private BubblePositioner mBubblePositioner;
 
     /**
      * The relative position of the stack when we removed it and nulled it out. If the stack is
@@ -387,7 +388,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 dumpManager, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps), sysUiState, notificationManager,
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps, logger,
-                mainHandler, organizer);
+                mainHandler, organizer, new BubblePositioner(context, windowManager));
     }
 
     /**
@@ -419,7 +420,8 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
             Handler mainHandler,
-            ShellTaskOrganizer organizer) {
+            ShellTaskOrganizer organizer,
+            BubblePositioner positioner) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -530,6 +532,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
 
         mBubbleIconFactory = new BubbleIconFactory(context);
         mTaskListener = new MultiWindowTaskListener(mMainHandler, organizer);
+        mBubblePositioner = positioner;
 
         launcherApps.registerCallback(new LauncherApps.Callback() {
             @Override
@@ -809,6 +812,11 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
         return mTaskListener;
     }
 
+    @Override
+    public BubblePositioner getPositioner() {
+        return mBubblePositioner;
+    }
+
     /**
      * BubbleStackView is lazily created by this method the first time a Bubble is added. This
      * method initializes the stack view and adds it to the StatusBar just above the scrim.
@@ -818,9 +826,10 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
                     this::onAllBubblesAnimatedOut, this::onImeVisibilityChanged,
-                    this::hideCurrentInputMethod, this::onBubbleExpandChanged);
+                    this::hideCurrentInputMethod, this::onBubbleExpandChanged, mBubblePositioner);
             mStackView.setStackStartPosition(mPositionFromRemovedStack);
             mStackView.addView(mBubbleScrim);
+            mStackView.onOrientationChanged();
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
             }
@@ -978,10 +987,14 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
+        if (mBubblePositioner != null) {
+            // This doesn't trigger any changes, always update it
+            mBubblePositioner.update(newConfig.orientation);
+        }
         if (mStackView != null && newConfig != null) {
             if (newConfig.orientation != mOrientation) {
                 mOrientation = newConfig.orientation;
-                mStackView.onOrientationChanged(newConfig.orientation);
+                mStackView.onOrientationChanged();
             }
             if (newConfig.densityDpi != mDensityDpi) {
                 mDensityDpi = newConfig.densityDpi;

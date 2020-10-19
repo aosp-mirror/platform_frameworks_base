@@ -17,26 +17,30 @@
 package com.android.systemui.bubbles.animation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Point;
+import android.graphics.Insets;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubblePositioner;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 
 @SmallTest
@@ -46,47 +50,45 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private int mDisplayWidth = 500;
     private int mDisplayHeight = 1000;
     private int mExpandedViewPadding = 10;
-    private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
-    private float mLauncherGridDiff = 30f;
 
-    private Runnable mOnBubbleAnimatedOutAction = Mockito.mock(Runnable.class);
-
+    private Runnable mOnBubbleAnimatedOutAction = mock(Runnable.class);
     @Spy
-    private ExpandedAnimationController mExpandedController =
-            new ExpandedAnimationController(
-                    new Point(mDisplayWidth, mDisplayHeight) /* displaySize */,
-                    mExpandedViewPadding, mOrientation, mOnBubbleAnimatedOutAction);
+    ExpandedAnimationController mExpandedController;
 
     private int mStackOffset;
-    private float mBubblePaddingTop;
-    private float mBubbleSize;
-
     private PointF mExpansionPoint;
 
+    @SuppressLint("VisibleForTests")
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        BubblePositioner positioner = new BubblePositioner(getContext(), mock(WindowManager.class));
+        positioner.update(Configuration.ORIENTATION_PORTRAIT,
+                Insets.of(0, 0, 0, 0),
+                new Rect(0, 0, mDisplayWidth, mDisplayHeight));
+        mExpandedController = new ExpandedAnimationController(positioner, mExpandedViewPadding,
+                mOnBubbleAnimatedOutAction);
+
         addOneMoreThanBubbleLimitBubbles();
         mLayout.setActiveController(mExpandedController);
 
         Resources res = mLayout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mExpansionPoint = new PointF(100, 100);
     }
 
     @Test
     @Ignore
     public void testExpansionAndCollapse() throws InterruptedException {
-        Runnable afterExpand = Mockito.mock(Runnable.class);
+        Runnable afterExpand = mock(Runnable.class);
         mExpandedController.expandFromStack(afterExpand);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testBubblesInCorrectExpandedPositions();
         verify(afterExpand).run();
 
-        Runnable afterCollapse = Mockito.mock(Runnable.class);
+        Runnable afterCollapse = mock(Runnable.class);
         mExpandedController.collapseBackToStack(mExpansionPoint, afterCollapse);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
@@ -121,7 +123,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     /** Expand the stack and wait for animations to finish. */
     private void expand() throws InterruptedException {
-        mExpandedController.expandFromStack(Mockito.mock(Runnable.class));
+        mExpandedController.expandFromStack(mock(Runnable.class));
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
     }
 
@@ -141,51 +143,12 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private void testBubblesInCorrectExpandedPositions() {
         // Check all the visible bubbles to see if they're in the right place.
         for (int i = 0; i < mLayout.getChildCount(); i++) {
-            assertEquals(getBubbleLeft(i),
+            float expectedPosition = mExpandedController.getBubbleXOrYForOrientation(i);
+            assertEquals(expectedPosition,
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
-            assertEquals(mExpandedController.getExpandedY(),
+            assertEquals(expectedPosition,
                     mLayout.getChildAt(i).getTranslationY(), 2f);
         }
-    }
-
-    /**
-     * @param index Bubble index in row.
-     * @return Bubble left x from left edge of screen.
-     */
-    public float getBubbleLeft(int index) {
-        final float bubbleLeft = index * (mBubbleSize + getSpaceBetweenBubbles());
-        return getRowLeft() + bubbleLeft;
-    }
-
-    private float getRowLeft() {
-        if (mLayout == null) {
-            return 0;
-        }
-        int bubbleCount = mLayout.getChildCount();
-        final float totalBubbleWidth = bubbleCount * mBubbleSize;
-        final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
-        final float rowWidth = totalGapWidth + totalBubbleWidth;
-
-        final float centerScreen = mDisplayWidth / 2f;
-        final float halfRow = rowWidth / 2f;
-        final float rowLeft = centerScreen - halfRow;
-
-        return rowLeft;
-    }
-
-    /**
-     * @return Space between bubbles in row above expanded view.
-     */
-    private float getSpaceBetweenBubbles() {
-        final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
-        final float maxRowWidth = mDisplayWidth - rowMargins;
-
-        final float totalBubbleWidth = mMaxBubbles * mBubbleSize;
-        final float totalGapWidth = maxRowWidth - totalBubbleWidth;
-
-        final int gapCount = mMaxBubbles - 1;
-        final float gapWidth = totalGapWidth / gapCount;
-        return gapWidth;
     }
 }
