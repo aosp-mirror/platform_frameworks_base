@@ -19,6 +19,7 @@ package com.android.server.om;
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
+import static android.os.OverlayablePolicy.CONFIG_SIGNATURE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -48,6 +49,10 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
 
     private static final String OVERLAY3 = OVERLAY + "3";
     private static final int USER3 = USER2 + 1;
+
+    private static final String CONFIG_SIGNATURE_REFERENCE_PKG = "com.dummy.ref";
+    private static final String CERT_CONFIG_OK = "config_certificate_ok";
+    private static final String CERT_CONFIG_NOK = "config_certificate_nok";
 
     @Test
     public void testGetOverlayInfo() {
@@ -203,5 +208,88 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
 
         impl.setEnabled(OVERLAY, true, USER);
         assertEquals(0, listener.count);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyOk() {
+        setConfigSignaturePackageName(CONFIG_SIGNATURE_REFERENCE_PKG);
+        reinitializeImpl();
+
+        addPackage(target(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_OK), USER);
+
+        final DummyIdmapDaemon idmapd = getIdmapd();
+        final DummyDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == CONFIG_SIGNATURE);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyCertNok() {
+        setConfigSignaturePackageName(CONFIG_SIGNATURE_REFERENCE_PKG);
+        reinitializeImpl();
+
+        addPackage(target(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final DummyIdmapDaemon idmapd = getIdmapd();
+        final DummyDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyNoConfig() {
+        addPackage(target(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final DummyIdmapDaemon idmapd = getIdmapd();
+        final DummyDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyNoRefPkg() {
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final DummyIdmapDaemon idmapd = getIdmapd();
+        final DummyDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyRefPkgNotSystem() {
+        setConfigSignaturePackageName(CONFIG_SIGNATURE_REFERENCE_PKG);
+        reinitializeImpl();
+
+        addPackage(app(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final DummyIdmapDaemon idmapd = getIdmapd();
+        final DummyDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        DummyIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
     }
 }
