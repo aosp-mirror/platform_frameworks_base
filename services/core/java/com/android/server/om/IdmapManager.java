@@ -57,7 +57,7 @@ final class IdmapManager {
     private final PackageManagerHelper mPackageManager;
 
     /**
-     * Package name of the reference package defined in 'config-signature' tag of
+     * Package name of the reference package defined in 'overlay-config-signature' tag of
      * SystemConfig or empty String if tag not defined. This package is vetted on scan by
      * PackageManagerService that it's a system package and is used to check if overlay matches
      * its signature in order to fulfill the config_signature policy.
@@ -159,7 +159,7 @@ final class IdmapManager {
             fulfilledPolicies |= OverlayablePolicy.ACTOR_SIGNATURE;
         }
 
-        // If SystemConfig defines 'config-signature' package, given that
+        // If SystemConfig defines 'overlay-config-signature' package, given that
         // this package is vetted by OverlayManagerService that it's a
         // preinstalled package, check if overlay matches its signature.
         if (!TextUtils.isEmpty(mConfigSignaturePackage)
