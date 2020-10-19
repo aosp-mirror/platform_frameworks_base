@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.RemoteException;
 import android.util.ArraySet;
 
@@ -128,11 +129,14 @@ public class BiometricTestSession implements AutoCloseable {
      * Simulates an acquired message from the HAL.
      *
      * @param userId User that this command applies to.
+     * @param acquireInfo See
+     * {@link BiometricPrompt.AuthenticationCallback#onAuthenticationAcquired(int)} and
+     * {@link FingerprintManager.AuthenticationCallback#onAuthenticationAcquired(int)}
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void notifyAcquired(int userId) {
+    public void notifyAcquired(int userId, int acquireInfo) {
         try {
-            mTestSession.notifyAcquired(userId);
+            mTestSession.notifyAcquired(userId, acquireInfo);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -142,11 +146,14 @@ public class BiometricTestSession implements AutoCloseable {
      * Simulates an error message from the HAL.
      *
      * @param userId User that this command applies to.
+     * @param errorCode See
+     * {@link BiometricPrompt.AuthenticationCallback#onAuthenticationError(int, CharSequence)} and
+     * {@link FingerprintManager.AuthenticationCallback#onAuthenticationError(int, CharSequence)}
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    public void notifyError(int userId) {
+    public void notifyError(int userId, int errorCode) {
         try {
-            mTestSession.notifyError(userId);
+            mTestSession.notifyError(userId, errorCode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -16,10 +16,14 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.IntDef;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.fingerprint.FingerprintManager;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface containing all of the fingerprint-specific constants.
@@ -34,6 +38,27 @@ public interface BiometricFingerprintConstants {
     // Error messages from fingerprint hardware during initilization, enrollment, authentication or
     // removal. Must agree with the list in fingerprint.h
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({FINGERPRINT_ERROR_HW_UNAVAILABLE,
+            FINGERPRINT_ERROR_UNABLE_TO_PROCESS,
+            FINGERPRINT_ERROR_TIMEOUT,
+            FINGERPRINT_ERROR_NO_SPACE,
+            FINGERPRINT_ERROR_CANCELED,
+            FINGERPRINT_ERROR_UNABLE_TO_REMOVE,
+            FINGERPRINT_ERROR_LOCKOUT,
+            FINGERPRINT_ERROR_VENDOR,
+            FINGERPRINT_ERROR_LOCKOUT_PERMANENT,
+            FINGERPRINT_ERROR_USER_CANCELED,
+            FINGERPRINT_ERROR_NO_FINGERPRINTS,
+            FINGERPRINT_ERROR_HW_NOT_PRESENT,
+            FINGERPRINT_ERROR_NEGATIVE_BUTTON,
+            BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FingerprintError {}
 
     /**
      * The hardware is unavailable. Try again later.
@@ -148,6 +173,20 @@ public interface BiometricFingerprintConstants {
     //
     // Image acquisition messages. Must agree with those in fingerprint.h
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({FINGERPRINT_ACQUIRED_GOOD,
+            FINGERPRINT_ACQUIRED_PARTIAL,
+            FINGERPRINT_ACQUIRED_INSUFFICIENT,
+            FINGERPRINT_ACQUIRED_IMAGER_DIRTY,
+            FINGERPRINT_ACQUIRED_TOO_SLOW,
+            FINGERPRINT_ACQUIRED_TOO_FAST,
+            FINGERPRINT_ACQUIRED_VENDOR,
+            FINGERPRINT_ACQUIRED_START})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FingerprintAcquired {}
 
     /**
      * The image acquired was good.

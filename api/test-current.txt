@@ -1272,8 +1272,8 @@ package android.hardware.biometrics {
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void cleanupInternalState(int);
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void close();
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void finishEnroll(int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int);
-    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyAcquired(int, int);
+    method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void notifyError(int, int);
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void rejectAuthentication(int);
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void startEnroll(int);
   }
