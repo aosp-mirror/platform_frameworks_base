@@ -27,6 +27,7 @@ import android.os.Trace;
 import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -49,7 +50,7 @@ import java.util.ArrayList;
  *
  * {@hide}
  */
-public final class SystemServiceManager {
+public final class SystemServiceManager implements Dumpable {
     private static final String TAG = SystemServiceManager.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final int SERVICE_CALL_WARN_TIME_MS = 50;
@@ -489,31 +490,39 @@ public final class SystemServiceManager {
         return sSystemDir;
     }
 
-    /**
-     * Outputs the state of this manager to the System log.
-     */
-    public void dump() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Current phase: ").append(mCurrentPhase).append('\n');
-        builder.append("Services:\n");
-        final int startedLen = mServices.size();
-        for (int i = 0; i < startedLen; i++) {
-            final SystemService service = mServices.get(i);
-            builder.append("\t")
-                    .append(service.getClass().getSimpleName())
-                    .append("\n");
-        }
+    @Override
+    public void dump(IndentingPrintWriter pw, String[] args) {
+        pw.printf("Current phase: %d\n", mCurrentPhase);
         synchronized (mTargetUsers) {
-            builder.append("Current user: ").append(mCurrentUser).append('\n');
-            builder.append("Target users: ");
-            final int targetUsersSize = mTargetUsers.size();
-            for (int i = 0; i < targetUsersSize; i++) {
-                mTargetUsers.valueAt(i).dump(builder);
-                if (i != targetUsersSize - 1) builder.append(',');
+            if (mCurrentUser != null) {
+                pw.print("Current user: "); mCurrentUser.dump(pw); pw.println();
+            } else {
+                pw.println("Current user not set!");
             }
-            builder.append('\n');
-        }
 
-        Slog.e(TAG, builder.toString());
+            final int targetUsersSize = mTargetUsers.size();
+            if (targetUsersSize > 0) {
+                pw.printf("%d target users: ", targetUsersSize);
+                for (int i = 0; i < targetUsersSize; i++) {
+                    mTargetUsers.valueAt(i).dump(pw);
+                    if (i != targetUsersSize - 1) pw.print(", ");
+                }
+                pw.println();
+            } else {
+                pw.println("No target users");
+            }
+        }
+        final int startedLen = mServices.size();
+        if (startedLen > 0) {
+            pw.printf("%d started services:\n", startedLen);
+            pw.increaseIndent();
+            for (int i = 0; i < startedLen; i++) {
+                final SystemService service = mServices.get(i);
+                pw.println(service.getClass().getCanonicalName());
+            }
+            pw.decreaseIndent();
+        } else {
+            pw.println("No started services");
+        }
     }
 }
