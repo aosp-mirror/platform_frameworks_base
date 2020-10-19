@@ -616,7 +616,7 @@ public final class Sensor {
     public static final String STRING_TYPE_MOTION_DETECT = "android.sensor.motion_detect";
 
     /**
-     * A constant describing a motion detect sensor.
+     * A constant describing a heart beat sensor.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      *
