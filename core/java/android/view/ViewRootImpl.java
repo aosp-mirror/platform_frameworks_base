@@ -1758,7 +1758,6 @@ public final class ViewRootImpl implements ViewParent,
                 destroySurface();
             }
         }
-        scheduleConsumeBatchedInputImmediately();
     }
 
 
@@ -8314,11 +8313,8 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onBatchedInputEventPending(int source) {
-            // mStopped: There will be no more choreographer callbacks if we are stopped,
-            // so we must consume all input immediately to prevent ANR
             final boolean unbuffered = mUnbufferedInputDispatch
-                    || (source & mUnbufferedInputSource) != SOURCE_CLASS_NONE
-                    || mStopped;
+                    || (source & mUnbufferedInputSource) != SOURCE_CLASS_NONE;
             if (unbuffered) {
                 if (mConsumeBatchedInputScheduled) {
                     unscheduleConsumeBatchedInput();
