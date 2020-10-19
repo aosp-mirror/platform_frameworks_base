@@ -1829,7 +1829,7 @@
       <item quantity="other">I %d tim</item>
       <item quantity="one">I en 1 tim</item>
     </plurals>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Till kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nästa alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Tills du stänger av"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Tills du inaktiverar Stör ej"</string>

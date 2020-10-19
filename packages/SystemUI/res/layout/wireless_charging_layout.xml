@@ -36,14 +36,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/reverse_wireless_charging_percentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/reverse_wireless_charging_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_reverse_charging"
+            android:visibility="gone"/>
         <TextView
             android:id="@+id/wireless_charging_percentage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textSize="24sp"/>
+            android:layout_gravity="center"/>
     </LinearLayout>
 
 </FrameLayout>

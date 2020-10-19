@@ -95,12 +95,11 @@ static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobjec
 {
     int optval_ignored = 0;
     int fd = jniGetFDFromFileDescriptor(env, javaFd);
-    if (setsockopt(
-            fd, SOL_SOCKET, SO_DETACH_FILTER, &optval_ignored, sizeof(optval_ignored)) != 0) {
+    if (setsockopt(fd, SOL_SOCKET, SO_DETACH_FILTER, &optval_ignored, sizeof(optval_ignored)) !=
+        0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
                 "setsockopt(SO_DETACH_FILTER): %s", strerror(errno));
     }
-
 }
 
 static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)

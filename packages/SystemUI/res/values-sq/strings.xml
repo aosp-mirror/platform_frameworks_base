@@ -248,7 +248,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Pastro njoftimin."</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS-ja është e aktivizuar."</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Po siguron GPS-në."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teleprinteri është i aktivizuar."</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletajpi është i aktivizuar."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Zile me dridhje."</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Zilja është heshtur."</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -482,7 +482,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Mirë se erdhe, i ftuar!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Fillo nga e para"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo!"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Përdorues vizitor"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Për të fshirë aplikacionet dhe të dhënat, hiqe përdoruesin vizitor"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"HIQ VIZITORIN"</string>

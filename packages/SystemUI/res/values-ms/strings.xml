@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Penjimat Bateri akan dihidupkan secara automatik setelah kuasa bateri kurang daripada <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Tetapan"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Longgok Tmbunn SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"DumpSys"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Penderia dimatikan"</string>
     <string name="device_services" msgid="1549944177856658705">"Perkhidmatan Peranti"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Tiada tajuk"</string>
