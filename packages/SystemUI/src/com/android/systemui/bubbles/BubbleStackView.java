@@ -2216,9 +2216,10 @@ public class BubbleStackView extends FrameLayout
             }
 
             // Stop suppressing the dot now that the flyout has morphed into the dot.
-            bubble.getIconView().removeDotSuppressionFlag(
-                    BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
-
+            if (bubble.getIconView() != null) {
+                bubble.getIconView().removeDotSuppressionFlag(
+                        BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
+            }
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
         };
