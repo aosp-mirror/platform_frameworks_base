@@ -976,19 +976,19 @@ public class StackAnimationController extends
             return;
         }
 
-        final float xOffset =
-                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
+        final float yOffset =
+                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_Y);
 
         // Position the new bubble in the correct position, scaled down completely.
-        child.setTranslationX(mStackPosition.x + xOffset * index);
-        child.setTranslationY(mStackPosition.y);
+        child.setTranslationX(mStackPosition.x);
+        child.setTranslationY(mStackPosition.y + yOffset * index);
         child.setScaleX(0f);
         child.setScaleY(0f);
 
         // Push the subsequent views out of the way, if there are subsequent views.
         if (index + 1 < mLayout.getChildCount()) {
             animationForChildAtIndex(index + 1)
-                    .translationX(mStackPosition.x + xOffset * (index + 1))
+                    .translationY(mStackPosition.y + yOffset * (index + 1))
                     .withStiffness(SpringForce.STIFFNESS_LOW)
                     .start();
         }
