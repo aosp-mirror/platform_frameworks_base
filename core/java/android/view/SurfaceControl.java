@@ -546,6 +546,12 @@ public final class SurfaceControl implements Parcelable {
     public static final int METADATA_ACCESSIBILITY_ID = 5;
 
     /**
+     * owner PID.
+     * @hide
+     */
+    public static final int METADATA_OWNER_PID = 6;
+
+    /**
      * A wrapper around HardwareBuffer that contains extra information about how to
      * interpret the screenshot HardwareBuffer.
      *

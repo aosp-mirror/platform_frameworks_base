@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+import static android.view.SurfaceControl.METADATA_OWNER_PID;
 import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
@@ -103,6 +103,7 @@ class WindowSurfaceController {
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
                 .setMetadata(METADATA_OWNER_UID, ownerUid)
+                .setMetadata(METADATA_OWNER_PID, mWindowSession.mPid)
                 .setCallsite("WindowSurfaceController");
 
         final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags &
