@@ -506,6 +506,8 @@ public class BackupManagerService extends IBackupManager.Stub {
      */
     @Override
     public boolean isBackupServiceActive(int userId) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                "isBackupServiceActive");
         synchronized (mStateLock) {
             return !mGlobalDisable && isBackupActivatedForUser(userId);
         }

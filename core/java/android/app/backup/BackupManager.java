@@ -401,8 +401,6 @@ public class BackupManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public boolean isBackupServiceActive(UserHandle user) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "isBackupServiceActive");
         checkServiceBinder();
         if (sService != null) {
             try {
