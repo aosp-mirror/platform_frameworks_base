@@ -26,10 +26,8 @@ java_sdk_library {
     srcs: [ ":framework-appsearch-sources" ],
     sdk_version: "core_platform", // TODO(b/146218515) should be module_current
     impl_only_libs: ["framework-minus-apex"], // TODO(b/146218515) should be removed
-    static_libs: ["icing-java-proto-lite"],
     defaults: ["framework-module-defaults"],
     permitted_packages: ["android.app.appsearch"],
-    jarjar_rules: "jarjar-rules.txt",
     aidl: {
         include_dirs: ["frameworks/base/core/java"], // TODO(b/146218515) should be removed
     },
