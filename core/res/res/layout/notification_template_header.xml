@@ -160,9 +160,5 @@
         android:visibility="gone"
         android:contentDescription="@string/notification_work_profile_content_description"
         />
-    <include
-        layout="@layout/notification_material_media_transfer_action"
-        android:id="@+id/media_seamless"
-    />
 </NotificationHeaderView>
 

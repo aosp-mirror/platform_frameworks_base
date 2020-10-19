@@ -8457,9 +8457,7 @@ public class Notification implements Parcelable
                 Action action, StandardTemplateParams p) {
             final boolean tombstone = (action.actionIntent == null);
             container.setViewVisibility(buttonId, View.VISIBLE);
-            if (buttonId != R.id.media_seamless) {
-                container.setImageViewIcon(buttonId, action.getIcon());
-            }
+            container.setImageViewIcon(buttonId, action.getIcon());
 
             // If the action buttons should not be tinted, then just use the default
             // notification color. Otherwise, just use the passed-in color.
@@ -8513,10 +8511,6 @@ public class Notification implements Parcelable
                     view.setViewVisibility(MEDIA_BUTTON_IDS[i], View.GONE);
                 }
             }
-            bindMediaActionButton(view, R.id.media_seamless, new Action(
-                    R.drawable.ic_media_seamless, mBuilder.mContext.getString(
-                            com.android.internal.R.string.ext_media_seamless_action), null), p);
-            view.setViewVisibility(R.id.media_seamless, View.GONE);
             handleImage(view);
             // handle the content margin
             int endMargin = R.dimen.notification_content_margin_end;
@@ -8553,10 +8547,6 @@ public class Notification implements Parcelable
                     big.setViewVisibility(MEDIA_BUTTON_IDS[i], View.GONE);
                 }
             }
-            bindMediaActionButton(big, R.id.media_seamless, new Action(R.drawable.ic_media_seamless,
-                    mBuilder.mContext.getString(
-                            com.android.internal.R.string.ext_media_seamless_action), null), p);
-            big.setViewVisibility(R.id.media_seamless, View.GONE);
             handleImage(big);
             return big;
         }
