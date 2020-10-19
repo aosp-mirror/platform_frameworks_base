@@ -269,7 +269,6 @@ public class ConnectivityManager {
      * {@hide}
      */
     @SystemApi
-    @TestApi
     public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC =
             "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
 
@@ -278,7 +277,6 @@ public class ConnectivityManager {
      * {@hide}
      */
     @SystemApi
-    @TestApi
     public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT =
             "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
 
@@ -4401,7 +4399,6 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
     public void startCaptivePortalApp(@NonNull Network network, @NonNull Bundle appExtras) {
         try {
