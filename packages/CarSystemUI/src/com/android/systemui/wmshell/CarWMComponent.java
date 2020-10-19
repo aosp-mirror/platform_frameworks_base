@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui.wmshell;
 
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.wmshell.TvPipModule;
+import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.dagger.WMSingleton;
 
-import dagger.Binds;
-import dagger.Module;
+import dagger.Subcomponent;
 
-@Module
-interface TvSystemUIBinder {
-    @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
+
+/**
+ * Dagger Subcomponent for WindowManager.
+ */
+@WMSingleton
+@Subcomponent(modules = {CarWMShellModule.class})
+public interface CarWMComponent extends WMComponent {
+
+    /**
+     * Builder for a SysUIComponent.
+     */
+    @Subcomponent.Builder
+    interface Builder extends WMComponent.Builder {
+        CarWMComponent build();
+    }
 }

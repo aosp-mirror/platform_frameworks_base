@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.VolumeDialogComponent;
-import com.android.systemui.wmshell.CarWMShellModule;
 
 import javax.inject.Named;
 
@@ -74,8 +73,7 @@ import dagger.Provides;
 
 @Module(
         includes = {
-                QSModule.class,
-                CarWMShellModule.class
+                QSModule.class
         })
 abstract class CarSystemUIModule {
 

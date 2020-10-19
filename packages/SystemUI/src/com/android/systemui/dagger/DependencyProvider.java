@@ -38,7 +38,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
@@ -338,13 +337,6 @@ public class DependencyProvider {
     @SysUISingleton
     public Choreographer providesChoreographer() {
         return Choreographer.getInstance();
-    }
-
-    /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
-    @Provides
-    @SysUISingleton
-    static UiEventLogger provideUiEventLogger() {
-        return new UiEventLoggerImpl();
     }
 
     /** */

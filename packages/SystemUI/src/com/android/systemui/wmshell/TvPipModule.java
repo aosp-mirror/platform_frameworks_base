@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
 
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
@@ -46,7 +46,7 @@ import dagger.Provides;
  */
 @Module
 public abstract class TvPipModule {
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static Optional<Pip> providePip(
             Context context,
@@ -61,7 +61,7 @@ public abstract class TvPipModule {
                         windowManagerShellWrapper));
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipControlsViewController providePipControlsViewController(
             PipControlsView pipControlsView, PipController pipController,
@@ -70,32 +70,32 @@ public abstract class TvPipModule {
                 handler);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipControlsView providePipControlsView(Context context) {
         return new PipControlsView(context, null);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipNotification providePipNotification(Context context,
             PipController pipController) {
         return new PipNotification(context, pipController);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipBoundsHandler providePipBoundsHandler(Context context) {
         return new PipBoundsHandler(context);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipBoundsState providePipBoundsState() {
         return new PipBoundsState();
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             PipBoundsState pipBoundsState,

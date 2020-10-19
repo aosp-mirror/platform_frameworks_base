@@ -27,6 +27,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
@@ -53,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -64,7 +66,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ConfigurationController mConfigurationController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock TaskStackChangeListeners mTaskStackChangeListeners;
-    @Mock DisplayImeController mDisplayImeController;
     @Mock InputConsumerController mMockInputConsumerController;
     @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
@@ -73,7 +74,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock PipTouchHandler mPipTouchHandler;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
-    @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock ProtoTracer mProtoTracer;
     @Mock PackageManager mMockPackageManager;
 
@@ -84,18 +84,10 @@ public class WMShellTest extends SysuiTestCase {
 
         mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
                 mInputConsumerController, mKeyguardUpdateMonitor, mTaskStackChangeListeners,
-                mDisplayImeController, mNavigationModeController, mScreenLifecycle, mSysUiState,
-                Optional.of(mPip), Optional.of(mSplitScreen), Optional.of(mOneHanded),
-                mTaskOrganizer, mProtoTracer);
+                mNavigationModeController, mScreenLifecycle, mSysUiState, Optional.of(mPip),
+                Optional.of(mSplitScreen), Optional.of(mOneHanded), mProtoTracer);
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
-    }
-
-    @Test
-    public void start_startsMonitorDisplays() {
-        mWMShell.start();
-
-        verify(mDisplayImeController).startMonitorDisplays();
     }
 
     @Test

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.wm.DisplaySystemBarsController;
 import com.android.wm.shell.common.DisplayController;
@@ -35,7 +35,7 @@ import dagger.Provides;
 /** Provides dependencies from {@link com.android.wm.shell} for CarSystemUI. */
 @Module(includes = WMShellBaseModule.class)
 public abstract class CarWMShellModule {
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(Context context,
             IWindowManager wmService, DisplayController displayController,

@@ -62,7 +62,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.wmshell.TvWMShellModule;
 
 import javax.inject.Named;
 
@@ -75,8 +74,7 @@ import dagger.Provides;
  * overridden by the System UI implementation.
  */
 @Module(includes = {
-            QSModule.class,
-            TvWMShellModule.class,
+            QSModule.class
         },
         subcomponents = {
         })
