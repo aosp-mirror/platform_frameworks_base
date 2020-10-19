@@ -84,6 +84,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
+    // If non-system overlays from this process can be hidden by the user or app using
+    // HIDE_NON_SYSTEM_OVERLAY_WINDOWS.
+    final boolean mOverlaysCanBeHidden;
     final boolean mCanHideNonSystemOverlayWindows;
     final boolean mCanAcquireSleepToken;
     private AlertWindowNotification mAlertWindowNotification;
@@ -105,6 +108,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
         mCanHideNonSystemOverlayWindows = service.mContext.checkCallingOrSelfPermission(
                 HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED;
+        mOverlaysCanBeHidden = !mCanAddInternalSystemWindow
+                && !mService.mAtmInternal.isCallerRecents(mUid);
         mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)
                 == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
@@ -534,7 +539,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         boolean changed;
 
-        if (!mCanAddInternalSystemWindow) {
+        if (mOverlaysCanBeHidden) {
             // We want to track non-system signature apps adding alert windows so we can post an
             // on-going notification for the user to control their visibility.
             if (visible) {
