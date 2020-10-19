@@ -19,6 +19,7 @@ package android.media.tv.tuner.frontend;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.util.Log;
 
 /**
  * Scan callback.
@@ -27,6 +28,8 @@ import android.annotation.SystemApi;
  */
 @SystemApi
 public interface ScanCallback {
+    /** @hide **/
+    String TAG = "ScanCallback";
 
     /** Scan locked the signal. */
     void onLocked();
@@ -70,4 +73,13 @@ public interface ScanCallback {
     /** Frontend signal type. */
     void onSignalTypeReported(@AnalogFrontendSettings.SignalType int signalType);
 
+    /** Frontend modulation reported. */
+    default void onModulationReported(@FrontendStatus.FrontendModulation int modulation) {
+        Log.d(TAG, "Received modulation scan message");
+    }
+
+    /** Frontend scan message priority reported. */
+    default void onPriorityReported(boolean isHighPriority) {
+        Log.d(TAG, "Received priority scan message: isHighPriority=" + isHighPriority);
+    }
 }

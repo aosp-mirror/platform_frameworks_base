@@ -6309,7 +6309,9 @@ package android.media.tv.tuner.frontend {
     method public void onHierarchyReported(int);
     method public void onInputStreamIdsReported(@NonNull int[]);
     method public void onLocked();
+    method public default void onModulationReported(int);
     method public void onPlpIdsReported(@NonNull int[]);
+    method public default void onPriorityReported(boolean);
     method public void onProgress(@IntRange(from=0, to=100) int);
     method public void onScanStopped();
     method public void onSignalTypeReported(int);
