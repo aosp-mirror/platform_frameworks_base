@@ -24,6 +24,7 @@ import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
@@ -38,6 +39,7 @@ import android.os.ServiceManager;
 import android.os.UserManager;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.server.biometrics.Utils;
@@ -561,13 +563,24 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void dumpProto(int sensorId, @NonNull FileDescriptor fd) {
+    public void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
+
+    }
+
+    @Override
+    public void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd) {
 
     }
 
     @Override
     public void dumpInternal(int sensorId, @NonNull PrintWriter pw) {
 
+    }
+
+    @NonNull
+    @Override
+    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        return null;
     }
 
     @Override

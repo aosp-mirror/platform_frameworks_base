@@ -27,7 +27,7 @@ interface ITestSession {
     // portion of the framework code that would otherwise require human interaction. Note that
     // secure pathways such as HAT/Keystore are not testable, since they depend on the TEE or its
     // equivalent for the secret key.
-    void enableTestHal(boolean enableTestHal);
+    void setTestHalEnabled(boolean enableTestHal);
 
     // Starts the enrollment process. This should generally be used when the test HAL is enabled.
     void startEnroll(int userId);
