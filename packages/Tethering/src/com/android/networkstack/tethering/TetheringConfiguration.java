@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.StringJoiner;
 
-
 /**
  * A utility class to encapsulate the various tethering configuration elements.
  *
@@ -88,6 +87,13 @@ public class TetheringConfiguration {
             "use_legacy_wifi_p2p_dedicated_ip";
 
     /**
+     * Flag use to enable select all prefix ranges feature.
+     * TODO: Remove this flag if there are no problems after M-2020-12 rolls out.
+     */
+    public static final String TETHER_ENABLE_SELECT_ALL_PREFIX_RANGES =
+            "tether_enable_select_all_prefix_ranges";
+
+    /**
      * Default value that used to periodic polls tether offload stats from tethering offload HAL
      * to make the data warnings work.
      */
@@ -117,6 +123,8 @@ public class TetheringConfiguration {
     // TODO: Add to TetheringConfigurationParcel if required.
     private final boolean mEnableBpfOffload;
     private final boolean mEnableWifiP2pDedicatedIp;
+
+    private final boolean mEnableSelectAllPrefixRange;
 
     public TetheringConfiguration(Context ctx, SharedLog log, int id) {
         final SharedLog configLog = log.forSubComponent("config");
@@ -163,6 +171,11 @@ public class TetheringConfiguration {
         mEnableWifiP2pDedicatedIp = getResourceBoolean(res,
                 R.bool.config_tether_enable_legacy_wifi_p2p_dedicated_ip,
                 false /* defaultValue */);
+
+        // Flags should normally not be booleans, but this is a kill-switch flag that is only used
+        // to turn off the feature, so binary rollback problems do not apply.
+        mEnableSelectAllPrefixRange = getDeviceConfigBoolean(
+                TETHER_ENABLE_SELECT_ALL_PREFIX_RANGES, true /* defaultValue */);
 
         configLog.log(toString());
     }
@@ -249,6 +262,9 @@ public class TetheringConfiguration {
 
         pw.print("enableWifiP2pDedicatedIp: ");
         pw.println(mEnableWifiP2pDedicatedIp);
+
+        pw.print("mEnableSelectAllPrefixRange: ");
+        pw.println(mEnableSelectAllPrefixRange);
     }
 
     /** Returns the string representation of this object.*/
@@ -308,6 +324,10 @@ public class TetheringConfiguration {
 
     public boolean isBpfOffloadEnabled() {
         return mEnableBpfOffload;
+    }
+
+    public boolean isSelectAllPrefixRangeEnabled() {
+        return mEnableSelectAllPrefixRange;
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
