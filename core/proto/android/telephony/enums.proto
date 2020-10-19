@@ -220,3 +220,43 @@ enum SmsSendResultEnum {
     // Error over IMS, retry on CS
     SMS_SEND_RESULT_ERROR_FALLBACK = 4;
 }
+
+// Data profile of the data call. From
+// frameworks/base/telephony/java/com/android/internal/telephony/RILConstants.java
+enum DataProfileEnum {
+    DATA_PROFILE_INVALID = -1;
+    DATA_PROFILE_DEFAULT = 0;
+    DATA_PROFILE_TETHERED = 1;
+    DATA_PROFILE_IMS = 2;
+    DATA_PROFILE_FOTA = 3;
+    DATA_PROFILE_CBS = 4;
+    DATA_PROFILE_OEM_BASE = 1000;
+}
+
+// Reason of data call deactivation. From
+// frameworks/base/telephony/java/android/telephony/data/DataService.java#DeactivateDataReason
+enum DataDeactivateReasonEnum {
+    DEACTIVATE_REASON_UNKNOWN = 0;
+    DEACTIVATE_REASON_NORMAL = 1;
+    DEACTIVATE_REASON_RADIO_OFF = 2;
+    DEACTIVATE_REASON_HANDOVER = 3;
+}
+
+// IP type of the data call
+// see frameworks/base/telephony/java/android/telephony/data/ApnSetting.java#ProtocolType
+enum ApnProtocolEnum {
+    APN_PROTOCOL_IPV4 = 0;
+    APN_PROTOCOL_IPV6 = 1;
+    APN_PROTOCOL_IPV4V6 = 2;
+    APN_PROTOCOL_PPP = 3;
+}
+
+// Action taken to recover a data call that is stalled. From
+// frameworks/opt/telephony/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
+// #RecoveryAction
+enum DataStallRecoveryActionEnum {
+    RECOVERY_ACTION_GET_DATA_CALL_LIST = 0;
+    RECOVERY_ACTION_CLEANUP = 1;
+    RECOVERY_ACTION_REREGISTER = 2;
+    RECOVERY_ACTION_RADIO_RESTART = 3;
+}
