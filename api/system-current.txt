@@ -5293,7 +5293,7 @@ package android.media.tv.tuner.filter {
     method @NonNull public static android.media.tv.tuner.filter.IpFilterConfiguration.Builder builder();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
     method public int getDstPort();
-    method public int getIpFilterContextId();
+    method @IntRange(from=0, to=61439) public int getIpFilterContextId();
     method @NonNull @Size(min=4, max=16) public byte[] getSrcIpAddress();
     method public int getSrcPort();
     method public int getType();
