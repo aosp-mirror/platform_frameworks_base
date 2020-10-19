@@ -14576,19 +14576,6 @@ public final class Settings {
          */
         public static final String MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH =
                 "maximum_obscuring_opacity_for_touch";
-
-        /**
-         * LatencyTracker settings.
-         *
-         * The following strings are supported as keys:
-         * <pre>
-         *     enabled              (boolean)
-         *     sampling_interval    (int)
-         * </pre>
-         *
-         * @hide
-         */
-        public static final String LATENCY_TRACKER = "latency_tracker";
     }
 
     /**

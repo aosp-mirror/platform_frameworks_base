@@ -457,6 +457,13 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_CONFIGURATION = "configuration";
 
+    /**
+     * LatencyTracker properties definitions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_LATENCY_TRACKER = "latency_tracker";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
