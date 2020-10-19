@@ -259,10 +259,12 @@ public class BrightnessSynchronizer{
             }
             if (BRIGHTNESS_URI.equals(uri)) {
                 int currentBrightness = getScreenBrightnessInt(mContext);
+                mHandler.removeMessages(MSG_UPDATE_FLOAT);
                 mHandler.obtainMessage(MSG_UPDATE_FLOAT, currentBrightness, 0).sendToTarget();
             } else if (BRIGHTNESS_FLOAT_URI.equals(uri)) {
                 float currentFloat = getScreenBrightnessFloat(mContext);
                 int toSend = Float.floatToIntBits(currentFloat);
+                mHandler.removeMessages(MSG_UPDATE_INT);
                 mHandler.obtainMessage(MSG_UPDATE_INT, toSend, 0).sendToTarget();
             }
         }
