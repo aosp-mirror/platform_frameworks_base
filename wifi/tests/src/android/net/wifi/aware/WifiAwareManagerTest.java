@@ -154,6 +154,7 @@ public class WifiAwareManagerTest {
      */
     @Test
     public void testIsAttached() throws Exception {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
         mDut.isDeviceAttached();
         verify(mockAwareService).isDeviceAttached();
     }
@@ -169,6 +170,16 @@ public class WifiAwareManagerTest {
         verify(mockAwareService).isInstantCommunicationModeEnabled();
         mDut.enableInstantCommunicationMode(true);
         verify(mockAwareService).enableInstantCommunicationMode(anyString(), eq(true));
+    }
+
+    /**
+     * Validate pass-through of getAvailableAwareResources() API.
+     */
+    @Test
+    public void testGetAvailableAwareResource() throws Exception {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+        mDut.getAvailableAwareResources();
+        verify(mockAwareService).getAvailableAwareResources();
     }
 
     /*
