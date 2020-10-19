@@ -144,7 +144,8 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
 
                     final PendingIntent contentIntent;
                     if (context.getPackageManager().resolveActivity(intent, 0) != null) {
-                        contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                        contentIntent = PendingIntent.getActivity(context, 0, intent,
+                                PendingIntent.FLAG_IMMUTABLE);
                     } else {
                         contentIntent = null;
                     }
