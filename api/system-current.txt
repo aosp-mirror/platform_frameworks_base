@@ -9374,8 +9374,13 @@ package android.security.keystore {
     ctor public DeviceIdAttestationException(@Nullable String, @Nullable Throwable);
   }
 
+  public final class KeyGenParameterSpec implements java.security.spec.AlgorithmParameterSpec {
+    method public int getNamespace();
+  }
+
   public static final class KeyGenParameterSpec.Builder {
-    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUid(int);
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setNamespace(int);
+    method @Deprecated @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUid(int);
   }
 
 }
