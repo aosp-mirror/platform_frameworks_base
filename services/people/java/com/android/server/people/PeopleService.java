@@ -122,7 +122,7 @@ public class PeopleService extends SystemService {
 
         @Override
         public ParceledListSlice<ConversationChannel> getRecentConversations() {
-            enforceSystemOrRoot("get recent conversations");
+            enforceSystemRootOrSystemUI(getContext(), "get recent conversations");
             return new ParceledListSlice<>(
                     mDataManager.getRecentConversations(
                             Binder.getCallingUserHandle().getIdentifier()));
