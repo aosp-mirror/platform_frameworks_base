@@ -14551,6 +14551,16 @@ public final class Settings {
         public static final String SHOW_PEOPLE_SPACE = "show_people_space";
 
         /**
+         * Which types of conversations to show in People Space.
+         * Values are:
+         * 0: All conversations (default)
+         * 1: Priority conversations only
+         * @hide
+         */
+        public static final String PEOPLE_SPACE_CONVERSATION_TYPE =
+                "people_space_conversation_type";
+
+        /**
          * Whether to show new lockscreen & AOD UI.
          * Values are:
          * 0: Disabled (default)

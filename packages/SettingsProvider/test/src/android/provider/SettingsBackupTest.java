@@ -408,6 +408,7 @@ public class SettingsBackupTest {
                     Settings.Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
                     Settings.Global.PDP_WATCHDOG_POLL_INTERVAL_MS,
                     Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
+                    Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE,
                     Settings.Global.POLICY_CONTROL,
                     Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE,
                     Settings.Global.POWER_MANAGER_CONSTANTS,
