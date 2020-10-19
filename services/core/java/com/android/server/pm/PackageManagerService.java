@@ -120,6 +120,7 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceUtils.comparePackageSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
 import static com.android.server.pm.PackageManagerServiceUtils.decompressFile;
@@ -1114,6 +1115,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public @Nullable String storageManagerPackage;
         public @Nullable String defaultTextClassifierPackage;
         public @Nullable String systemTextClassifierPackage;
+        public @Nullable String overlayConfigSignaturePackage;
         public ViewCompiler viewCompiler;
         public @Nullable String wellbeingPackage;
         public @Nullable String retailDemoPackage;
@@ -1646,6 +1648,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mServicesExtensionPackageName;
     final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
+    final @Nullable String mOverlayConfigSignaturePackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -2808,6 +2811,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
         mServicesExtensionPackageName = testParams.servicesExtensionPackageName;
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
+        mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
 
         mResolveComponentName = testParams.resolveComponentName;
         mPackages.putAll(testParams.packages);
@@ -3373,6 +3377,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mRetailDemoPackage = getRetailDemoPackageName();
+            mOverlayConfigSignaturePackage = getOverlayConfigSignaturePackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -12111,12 +12116,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
                     // Exempt SharedUsers signed with the platform key.
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
-                    if ((platformPkgSetting.signatures.mSigningDetails
-                            != PackageParser.SigningDetails.UNKNOWN)
-                            && (compareSignatures(
-                                    platformPkgSetting.signatures.mSigningDetails.signatures,
-                            pkg.getSigningDetails().signatures)
-                                            != PackageManager.SIGNATURE_MATCH)) {
+                    if (!comparePackageSignatures(platformPkgSetting,
+                            pkg.getSigningDetails().signatures)) {
                         throw new PackageManagerException("Apps that share a user with a " +
                                 "privileged app must themselves be marked as privileged. " +
                                 pkg.getPackageName() + " shares privileged user " +
@@ -12163,12 +12164,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.Q) {
                         final PackageSetting platformPkgSetting =
                                 mSettings.getPackageLPr("android");
-                        if ((platformPkgSetting.signatures.mSigningDetails
-                                    != PackageParser.SigningDetails.UNKNOWN)
-                                && (compareSignatures(
-                                        platformPkgSetting.signatures.mSigningDetails.signatures,
-                                pkg.getSigningDetails().signatures)
-                                    != PackageManager.SIGNATURE_MATCH)) {
+                        if (!comparePackageSignatures(platformPkgSetting,
+                                pkg.getSigningDetails().signatures)) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " must target Q or later, "
@@ -12177,24 +12174,35 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     // A non-preloaded overlay package, without <overlay android:targetName>, will
-                    // only be used if it is signed with the same certificate as its target. If the
-                    // target is already installed, check this here to augment the last line of
-                    // defence which is OMS.
+                    // only be used if it is signed with the same certificate as its target OR if
+                    // it is signed with the same certificate as a reference package declared
+                    // in 'config-signature' tag of SystemConfig.
+                    // If the target is already installed or 'config-signature' tag in SystemConfig
+                    // is set, check this here to augment the last line of defence which is OMS.
                     if (pkg.getOverlayTargetName() == null) {
                         final PackageSetting targetPkgSetting =
                                 mSettings.getPackageLPr(pkg.getOverlayTarget());
                         if (targetPkgSetting != null) {
-                            if ((targetPkgSetting.signatures.mSigningDetails
-                                        != PackageParser.SigningDetails.UNKNOWN)
-                                    && (compareSignatures(
-                                            targetPkgSetting.signatures.mSigningDetails.signatures,
-                                    pkg.getSigningDetails().signatures)
-                                        != PackageManager.SIGNATURE_MATCH)) {
-                                throw new PackageManagerException("Overlay "
-                                        + pkg.getPackageName() + " and target "
-                                        + pkg.getOverlayTarget() + " signed with"
-                                        + " different certificates, and the overlay lacks"
-                                        + " <overlay android:targetName>");
+                            if (!comparePackageSignatures(targetPkgSetting,
+                                    pkg.getSigningDetails().signatures)) {
+                                // check reference signature
+                                if (mOverlayConfigSignaturePackage == null) {
+                                    throw new PackageManagerException("Overlay "
+                                            + pkg.getPackageName() + " and target "
+                                            + pkg.getOverlayTarget() + " signed with"
+                                            + " different certificates, and the overlay lacks"
+                                            + " <overlay android:targetName>");
+                                }
+                                final PackageSetting refPkgSetting =
+                                        mSettings.getPackageLPr(mOverlayConfigSignaturePackage);
+                                if (!comparePackageSignatures(refPkgSetting,
+                                        pkg.getSigningDetails().signatures)) {
+                                    throw new PackageManagerException("Overlay "
+                                            + pkg.getPackageName() + " signed with a different "
+                                            + "certificate than both the reference package and "
+                                            + "target " + pkg.getOverlayTarget() + ", and the "
+                                            + "overlay lacks <overlay android:targetName>");
+                                }
                             }
                         }
                     }
@@ -20734,6 +20742,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return ensureSystemPackageName(contentCaptureServiceComponentName.getPackageName());
     }
 
+    public String getOverlayConfigSignaturePackageName() {
+        return ensureSystemPackageName(SystemConfig.getInstance()
+                .getOverlayConfigSignaturePackage());
+    }
+
     @Nullable
     private String getRetailDemoPackageName() {
         final String predefinedPkgName = mContext.getString(R.string.config_retailDemoPackage);
@@ -24250,6 +24263,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return TextUtils.isEmpty(mRetailDemoPackage)
                             ? ArrayUtils.emptyArray(String.class)
                             : new String[] {mRetailDemoPackage};
+                case PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE:
+                    return filterOnlySystemPackages(getOverlayConfigSignaturePackageName());
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

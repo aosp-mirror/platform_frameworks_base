@@ -27,6 +27,7 @@ import android.content.om.OverlayInfo.State;
 import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -52,6 +53,7 @@ class OverlayManagerServiceImplTestsBase {
     private DummyPackageManagerHelper mPackageManager;
     private DummyIdmapDaemon mIdmapDaemon;
     private OverlayConfig mOverlayConfig;
+    private String mConfigSignaturePackageName;
 
     @Before
     public void setUp() {
@@ -83,6 +85,18 @@ class OverlayManagerServiceImplTestsBase {
         return mListener;
     }
 
+    DummyIdmapDaemon getIdmapd() {
+        return mIdmapDaemon;
+    }
+
+    DummyDeviceState getState() {
+        return mState;
+    }
+
+    void setConfigSignaturePackageName(String packageName) {
+        mConfigSignaturePackageName = packageName;
+    }
+
     void assertState(@State int expected, final String overlayPackageName, int userId) {
         final OverlayInfo info = mImpl.getOverlayInfo(overlayPackageName, userId);
         if (info == null) {
@@ -102,9 +116,14 @@ class OverlayManagerServiceImplTestsBase {
         assertEquals(expected, actual);
     }
 
+    DummyDeviceState.PackageBuilder app(String packageName) {
+        return new DummyDeviceState.PackageBuilder(packageName, null /* targetPackageName */,
+                null /* targetOverlayableName */, "data");
+    }
+
     DummyDeviceState.PackageBuilder target(String packageName) {
         return new DummyDeviceState.PackageBuilder(packageName, null /* targetPackageName */,
-                null /* targetOverlayableName */);
+                null /* targetOverlayableName */, "");
     }
 
     DummyDeviceState.PackageBuilder overlay(String packageName, String targetPackageName) {
@@ -114,10 +133,10 @@ class OverlayManagerServiceImplTestsBase {
     DummyDeviceState.PackageBuilder overlay(String packageName, String targetPackageName,
             String targetOverlayableName) {
         return new DummyDeviceState.PackageBuilder(packageName, targetPackageName,
-                targetOverlayableName);
+                targetOverlayableName, "");
     }
 
-    void addSystemPackage(DummyDeviceState.PackageBuilder pkg, int userId) {
+    void addPackage(DummyDeviceState.PackageBuilder pkg, int userId) {
         mState.add(pkg, userId);
     }
 
@@ -242,15 +261,17 @@ class OverlayManagerServiceImplTestsBase {
             private String packageName;
             private String targetPackage;
             private String certificate = "[default]";
+            private String partition;
             private int version = 0;
             private ArrayList<String> overlayableNames = new ArrayList<>();
             private String targetOverlayableName;
 
             private PackageBuilder(String packageName, String targetPackage,
-                    String targetOverlayableName) {
+                    String targetOverlayableName, String partition) {
                 this.packageName = packageName;
                 this.targetPackage = targetPackage;
                 this.targetOverlayableName = targetOverlayableName;
+                this.partition = partition;
             }
 
             PackageBuilder setCertificate(String certificate) {
@@ -269,9 +290,19 @@ class OverlayManagerServiceImplTestsBase {
             }
 
             Package build() {
-                final String apkPath = String.format("%s/%s/base.apk",
-                        targetPackage == null ? "/system/app/:" : "/vendor/overlay/:",
-                        packageName);
+                String path = "";
+                if (TextUtils.isEmpty(partition)) {
+                    if (targetPackage == null) {
+                        path = "/system/app";
+                    } else {
+                        path = "/vendor/overlay";
+                    }
+                } else {
+                    String type = targetPackage == null ? "app" : "overlay";
+                    path = String.format("%s/%s", partition, type);
+                }
+
+                final String apkPath = String.format("%s/%s/base.apk", path, packageName);
                 final Package newPackage = new Package(packageName, targetPackage,
                         targetOverlayableName, version, apkPath, certificate);
                 newPackage.overlayableNames.addAll(overlayableNames);
@@ -302,8 +333,7 @@ class OverlayManagerServiceImplTestsBase {
         }
     }
 
-    static final class DummyPackageManagerHelper implements PackageManagerHelper,
-            OverlayableInfoCallback {
+    final class DummyPackageManagerHelper implements PackageManagerHelper {
         private final DummyDeviceState mState;
 
         private DummyPackageManagerHelper(DummyDeviceState state) {
@@ -341,6 +371,11 @@ class OverlayManagerServiceImplTestsBase {
                     .filter(p -> p.targetPackageName != null)
                     .map(p -> getPackageInfo(p.packageName, userId))
                     .collect(Collectors.toList());
+        }
+
+        @Override
+        public @NonNull String getConfigSignaturePackage() {
+            return mConfigSignaturePackageName;
         }
 
         @Nullable

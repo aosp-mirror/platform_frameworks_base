@@ -1717,6 +1717,10 @@ struct ResTable_overlayable_policy_header
     // The overlay must be signed with the same signature as the actor declared for the target
     // resource
     ACTOR_SIGNATURE = 0x00000080,
+
+    // The overlay must be signed with the same signature as the reference package declared
+    // in the SystemConfig
+    CONFIG_SIGNATURE = 0x00000100,
   };
 
   using PolicyBitmask = uint32_t;
