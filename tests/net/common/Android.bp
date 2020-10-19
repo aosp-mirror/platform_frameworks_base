@@ -25,6 +25,7 @@ java_library {
         "junit",
         "mockito-target-minus-junit4",
         "net-tests-utils",
+        "net-utils-framework-common",
         "platform-test-annotations",
     ],
     libs: [

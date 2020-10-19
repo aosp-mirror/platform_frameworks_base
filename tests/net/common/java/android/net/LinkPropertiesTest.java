@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.LinkProperties.ProvisioningChange;
-import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.os.Build;
 import android.system.OsConstants;
 import android.util.ArraySet;
@@ -41,6 +40,7 @@ import androidx.core.os.BuildCompat;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.testutils.DevSdkIgnoreRule;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
@@ -447,23 +447,21 @@ public class LinkPropertiesTest {
         assertEquals(3, lp.getRoutes().size());
         assertAllRoutesHaveInterface("wlan0", lp);
 
-        // Check comparisons work.
+        // Check routes are updated correctly when calling setInterfaceName.
         LinkProperties lp2 = new LinkProperties(lp);
         assertAllRoutesHaveInterface("wlan0", lp2);
-        // LinkProperties#compareAllRoutes exists both in R and before R, but the return type
-        // changed in R, so a test compiled with the R version of LinkProperties cannot run on Q.
-        if (isAtLeastR()) {
-            assertEquals(0, lp.compareAllRoutes(lp2).added.size());
-            assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
-        }
+        final CompareResult<RouteInfo> cr1 =
+                new CompareResult<>(lp.getAllRoutes(), lp2.getAllRoutes());
+        assertEquals(0, cr1.added.size());
+        assertEquals(0, cr1.removed.size());
 
         lp2.setInterfaceName("p2p0");
         assertAllRoutesHaveInterface("p2p0", lp2);
         assertAllRoutesNotHaveInterface("wlan0", lp2);
-        if (isAtLeastR()) {
-            assertEquals(3, lp.compareAllRoutes(lp2).added.size());
-            assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
-        }
+        final CompareResult<RouteInfo> cr2 =
+                new CompareResult<>(lp.getAllRoutes(), lp2.getAllRoutes());
+        assertEquals(3, cr2.added.size());
+        assertEquals(3, cr2.removed.size());
 
         // Remove route with incorrect interface, no route removed.
         lp.removeRoute(new RouteInfo(prefix2, null, null));
