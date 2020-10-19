@@ -31,6 +31,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -51,6 +52,9 @@ import com.android.server.am.UidObserverController.ChangeRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 @SmallTest
 public class UidObserverControllerTest {
@@ -66,36 +70,41 @@ public class UidObserverControllerTest {
 
     @Before
     public void setUp() {
-        mUidObserverController = new UidObserverController(Mockito.mock(Handler.class));
+        MockitoAnnotations.initMocks(this);
+        mUidObserverController = new UidObserverController(mock(Handler.class));
     }
 
     @Test
     public void testEnqueueUidChange() {
-        int change = mUidObserverController.enqueueUidChange(TEST_UID1, UidRecord.CHANGE_ACTIVE,
-                PROCESS_STATE_FOREGROUND_SERVICE, PROCESS_CAPABILITY_ALL, 0, false);
+        int change = mUidObserverController.enqueueUidChange(null, TEST_UID1,
+                UidRecord.CHANGE_ACTIVE, PROCESS_STATE_FOREGROUND_SERVICE,
+                PROCESS_CAPABILITY_ALL, 0, false);
         assertEquals("expected=ACTIVE,actual=" + changeToStr(change),
                 UidRecord.CHANGE_ACTIVE, change);
         assertPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE, PROCESS_STATE_FOREGROUND_SERVICE,
-                PROCESS_CAPABILITY_ALL, 0, false);
-        assertNull(getPendingChange(TEST_UID2));
+                PROCESS_CAPABILITY_ALL, 0, false, null);
+        final ChangeRecord record1 = getLatestPendingChange(TEST_UID1);
+        assertNull(getLatestPendingChange(TEST_UID2));
 
-        change = mUidObserverController.enqueueUidChange(TEST_UID2, UidRecord.CHANGE_CACHED,
-                PROCESS_STATE_CACHED_RECENT, PROCESS_CAPABILITY_NONE, 99, true);
+        final ChangeRecord record2 = new ChangeRecord();
+        change = mUidObserverController.enqueueUidChange(record2, TEST_UID2,
+                UidRecord.CHANGE_CACHED, PROCESS_STATE_CACHED_RECENT, PROCESS_CAPABILITY_NONE,
+                99, true);
         assertEquals("expected=ACTIVE,actual=" + changeToStr(change),
                 UidRecord.CHANGE_CACHED, change);
         assertPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE, PROCESS_STATE_FOREGROUND_SERVICE,
-                PROCESS_CAPABILITY_ALL, 0, false);
+                PROCESS_CAPABILITY_ALL, 0, false, null);
         assertPendingChange(TEST_UID2, UidRecord.CHANGE_CACHED, PROCESS_STATE_CACHED_RECENT,
-                PROCESS_CAPABILITY_NONE, 99, true);
+                PROCESS_CAPABILITY_NONE, 99, true, record2);
 
-        change = mUidObserverController.enqueueUidChange(TEST_UID1, UidRecord.CHANGE_UNCACHED,
-                PROCESS_STATE_TOP, PROCESS_CAPABILITY_ALL, 0, false);
+        change = mUidObserverController.enqueueUidChange(record1, TEST_UID1,
+                UidRecord.CHANGE_UNCACHED, PROCESS_STATE_TOP, PROCESS_CAPABILITY_ALL, 0, false);
         assertEquals("expected=ACTIVE|UNCACHED,actual=" + changeToStr(change),
                 UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_UNCACHED, change);
         assertPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_UNCACHED,
-                PROCESS_STATE_TOP, PROCESS_CAPABILITY_ALL, 0, false);
+                PROCESS_STATE_TOP, PROCESS_CAPABILITY_ALL, 0, false, record1);
         assertPendingChange(TEST_UID2, UidRecord.CHANGE_CACHED, PROCESS_STATE_CACHED_RECENT,
-                PROCESS_CAPABILITY_NONE, 99, true);
+                PROCESS_CAPABILITY_NONE, 99, true, record2);
     }
 
     @Test
@@ -135,11 +144,11 @@ public class UidObserverControllerTest {
         addPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_PROCSTATE,
                 PROCESS_STATE_TOP, 0, PROCESS_CAPABILITY_ALL, false);
 
-        final IUidObserver observer1 = Mockito.mock(IUidObserver.Stub.class);
+        final IUidObserver observer1 = mock(IUidObserver.Stub.class);
         registerObserver(observer1,
                 ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_ACTIVE,
                 PROCESS_STATE_IMPORTANT_FOREGROUND, TEST_PKG2, TEST_UID2);
-        final IUidObserver observer2 = Mockito.mock(IUidObserver.Stub.class);
+        final IUidObserver observer2 = mock(IUidObserver.Stub.class);
         registerObserver(observer2, ActivityManager.UID_OBSERVER_PROCSTATE,
                 PROCESS_STATE_SERVICE, TEST_PKG3, TEST_UID3);
 
@@ -209,13 +218,16 @@ public class UidObserverControllerTest {
         record.procStateSeq = procStateSeq;
         record.capability = capability;
         record.ephemeral = ephemeral;
-        mUidObserverController.getPendingUidChangesForTest().put(uid, record);
+        mUidObserverController.getPendingUidChangesForTest().add(record);
     }
 
     private void assertPendingChange(int uid, int change, int procState, long procStateSeq,
-            int capability, boolean ephemeral) {
-        final ChangeRecord record = getPendingChange(uid);
+            int capability, boolean ephemeral, ChangeRecord expectedRecord) {
+        final ChangeRecord record = getLatestPendingChange(uid);
         assertNotNull(record);
+        if (expectedRecord != null) {
+            assertEquals(expectedRecord, record);
+        }
         assertEquals(change, record.change);
         assertEquals(procState, record.procState);
         assertEquals(procStateSeq, record.procStateSeq);
@@ -223,8 +235,16 @@ public class UidObserverControllerTest {
         assertEquals(ephemeral, record.ephemeral);
     }
 
-    private ChangeRecord getPendingChange(int uid) {
-        return mUidObserverController.getPendingUidChangesForTest().get(uid);
+    private ChangeRecord getLatestPendingChange(int uid) {
+        final ArrayList<ChangeRecord> changeRecords = mUidObserverController
+                .getPendingUidChangesForTest();
+        for (int i = changeRecords.size() - 1; i >= 0; --i) {
+            final ChangeRecord record = changeRecords.get(i);
+            if (record.uid == uid) {
+                return record;
+            }
+        }
+        return null;
     }
 
     private static String changeToStr(int change) {
