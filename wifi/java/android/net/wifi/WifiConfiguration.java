@@ -1626,6 +1626,14 @@ public class WifiConfiguration implements Parcelable {
         private boolean mHasEverConnected;
 
         /**
+         * Boolean indicating if captive portal has never been detected on this network.
+         *
+         * This should be true by default, for newly created WifiConfigurations until a captive
+         * portal is detected.
+         */
+        private boolean mHasNeverDetectedCaptivePortal = true;
+
+        /**
          * set whether this network is visible in latest Qualified Network Selection
          * @param seen value set to candidate
          * @hide
@@ -1712,6 +1720,19 @@ public class WifiConfiguration implements Parcelable {
         /** True if the device has ever connected to this network, false otherwise. */
         public boolean hasEverConnected() {
             return mHasEverConnected;
+        }
+
+        /**
+         * Set whether a captive portal has never been detected on this network.
+         * @hide
+         */
+        public void setHasNeverDetectedCaptivePortal(boolean value) {
+            mHasNeverDetectedCaptivePortal = value;
+        }
+
+        /** @hide */
+        public boolean hasNeverDetectedCaptivePortal() {
+            return mHasNeverDetectedCaptivePortal;
         }
 
         /** @hide */
@@ -1989,6 +2010,7 @@ public class WifiConfiguration implements Parcelable {
             setCandidateScore(source.getCandidateScore());
             setConnectChoice(source.getConnectChoice());
             setHasEverConnected(source.hasEverConnected());
+            setHasNeverDetectedCaptivePortal(source.hasNeverDetectedCaptivePortal());
         }
 
         /** @hide */
@@ -2008,6 +2030,7 @@ public class WifiConfiguration implements Parcelable {
                 dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
             }
             dest.writeInt(hasEverConnected() ? 1 : 0);
+            dest.writeInt(hasNeverDetectedCaptivePortal() ? 1 : 0);
         }
 
         /** @hide */
@@ -2026,6 +2049,7 @@ public class WifiConfiguration implements Parcelable {
                 setConnectChoice(null);
             }
             setHasEverConnected(in.readInt() != 0);
+            setHasNeverDetectedCaptivePortal(in.readInt() != 0);
         }
     }
 
@@ -2287,6 +2311,8 @@ public class WifiConfiguration implements Parcelable {
         }
         sbuf.append(" hasEverConnected: ")
                 .append(mNetworkSelectionStatus.hasEverConnected()).append("\n");
+        sbuf.append(" hasNeverDetectedCaptivePortal: ")
+                .append(mNetworkSelectionStatus.hasNeverDetectedCaptivePortal()).append("\n");
 
         if (this.numAssociation > 0) {
             sbuf.append(" numAssociation ").append(this.numAssociation).append("\n");
