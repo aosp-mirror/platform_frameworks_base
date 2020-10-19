@@ -41,7 +41,7 @@
 namespace android {
 
 constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const static uint32_t kIdmapCurrentVersion = 0x00000004u;
+constexpr const static uint32_t kIdmapCurrentVersion = 0x00000005u;
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
@@ -1476,7 +1476,7 @@ struct ResTable_entry
         // If set, this is a weak resource and may be overriden by strong
         // resources of the same name/type. This is only useful during
         // linking with other resource tables.
-        FLAG_WEAK = 0x0004
+        FLAG_WEAK = 0x0004,
     };
     uint16_t flags;
     
@@ -1586,50 +1586,6 @@ struct ResTable_map
     Res_value value;
 };
 
-
-// A ResTable_entry variant that either holds an unmanaged pointer to a constant ResTable_entry or
-// holds a ResTable_entry which is tied to the lifetime of the handle.
-class ResTable_entry_handle {
- public:
-    ResTable_entry_handle() = default;
-
-    ResTable_entry_handle(const ResTable_entry_handle& handle) {
-      entry_ = handle.entry_;
-    }
-
-    ResTable_entry_handle(ResTable_entry_handle&& handle) noexcept {
-      entry_ = handle.entry_;
-    }
-
-    inline static ResTable_entry_handle managed(ResTable_entry* entry, void (*deleter)(void *)) {
-      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry, deleter));
-    }
-
-    inline static ResTable_entry_handle unmanaged(const ResTable_entry* entry)  {
-      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry, [](auto /*p */){}));
-    }
-
-    inline ResTable_entry_handle& operator=(const ResTable_entry_handle& handle) noexcept {
-      entry_ = handle.entry_;
-      return *this;
-    }
-
-    inline ResTable_entry_handle& operator=(ResTable_entry_handle&& handle) noexcept {
-      entry_ = handle.entry_;
-      return *this;
-    }
-
-    inline const ResTable_entry* operator*() & {
-      return entry_.get();
-    }
-
- private:
-    explicit ResTable_entry_handle(std::shared_ptr<const ResTable_entry> entry)
-        : entry_(std::move(entry)) { }
-
-    std::shared_ptr<const ResTable_entry> entry_;
-};
-
 /**
  * A package-id to package name mapping for any shared libraries used
  * in this resource table. The package-id's encoded in this resource
@@ -1717,6 +1673,10 @@ struct ResTable_overlayable_policy_header
     // The overlay must be signed with the same signature as the actor declared for the target
     // resource
     ACTOR_SIGNATURE = 0x00000080,
+
+    // The overlay must be signed with the same signature as the reference package declared
+    // in the SystemConfig
+    CONFIG_SIGNATURE = 0x00000100,
   };
 
   using PolicyBitmask = uint32_t;
@@ -1736,7 +1696,6 @@ inline ResTable_overlayable_policy_header::PolicyFlags& operator |=(
   return first;
 }
 
-#pragma pack(push, 1)
 struct Idmap_header {
   // Always 0x504D4449 ('IDMP')
   uint32_t magic;
@@ -1747,7 +1706,7 @@ struct Idmap_header {
   uint32_t overlay_crc32;
 
   uint32_t fulfilled_policies;
-  uint8_t enforce_overlayable;
+  uint32_t enforce_overlayable;
 
   uint8_t target_path[256];
   uint8_t overlay_path[256];
@@ -1761,23 +1720,31 @@ struct Idmap_header {
 struct Idmap_data_header {
   uint8_t target_package_id;
   uint8_t overlay_package_id;
+
+  // Padding to ensure 4 byte alignment for target_entry_count
+  uint16_t p0;
+
   uint32_t target_entry_count;
+  uint32_t target_inline_entry_count;
   uint32_t overlay_entry_count;
+
   uint32_t string_pool_index_offset;
-  uint32_t string_pool_length;
 };
 
 struct Idmap_target_entry {
   uint32_t target_id;
-  uint8_t type;
-  uint32_t value;
+  uint32_t overlay_id;
+};
+
+struct Idmap_target_entry_inline {
+  uint32_t target_id;
+  Res_value value;
 };
 
 struct Idmap_overlay_entry {
   uint32_t overlay_id;
   uint32_t target_id;
 };
-#pragma pack(pop)
 
 class AssetManager2;
 

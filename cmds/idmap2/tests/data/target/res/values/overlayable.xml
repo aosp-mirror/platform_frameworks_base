@@ -45,6 +45,10 @@
         <item type="string" name="policy_actor" />
     </policy>
 
+    <policy type="config_signature">
+        <item type="string" name="policy_config_signature"/>
+    </policy>
+
     <!-- Resources publicly overlayable -->
     <policy type="public">
         <item type="string" name="policy_public" />
