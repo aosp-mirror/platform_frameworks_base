@@ -87,9 +87,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_debugBuildAnyChangeDebugApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
-                    .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                    .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                    .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                     .addEnabledChangeWithId(4)
                     .addDisabledChangeWithId(5)
                     .addLoggingOnlyChangeWithId(6).build();
@@ -131,9 +131,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_debugBuildAnyChangeReleaseApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
-                    .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                    .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                    .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                     .addEnabledChangeWithId(4)
                     .addDisabledChangeWithId(5)
                     .addLoggingOnlyChangeWithId(6).build();
@@ -174,9 +174,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_betaBuildTargetSdkChangeDebugApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(betaBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                         .addDisabledChangeWithId(4).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
@@ -245,9 +245,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_betaBuildAnyChangeReleaseApp_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(betaBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                         .addEnabledChangeWithId(4)
                         .addDisabledChangeWithId(5)
                         .addLoggingOnlyChangeWithId(6).build();
@@ -288,8 +288,8 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildTargetSdkChangeDebugAppOptin_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2).build();
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
@@ -313,7 +313,7 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildTargetSdkChangeDebugAppOptout_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1).build();
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
@@ -371,9 +371,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildAnyChangeReleaseApp_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                         .addEnabledChangeWithId(4)
                         .addDisabledChangeWithId(5)
                         .addLoggingOnlyChangeWithId(6).build();
