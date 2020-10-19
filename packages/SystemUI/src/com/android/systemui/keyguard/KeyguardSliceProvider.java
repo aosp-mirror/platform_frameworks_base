@@ -316,7 +316,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
             }
             mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
             mPendingIntent = PendingIntent.getActivity(getContext(), 0,
-                    new Intent(getContext(), KeyguardSliceProvider.class), 0);
+                    new Intent(getContext(), KeyguardSliceProvider.class),
+                    PendingIntent.FLAG_IMMUTABLE);
             try {
                 //TODO(b/168778439): Remove this whole try catch. This is for debugging in dogfood.
                 mMediaManager.addCallback(this);
