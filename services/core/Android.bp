@@ -174,6 +174,13 @@ prebuilt_etc {
     src: ":services.core.json.gz",
 }
 
+filegroup {
+    name: "services.core-sources-deviceconfig-interface",
+    srcs: [
+         "java/com/android/server/utils/DeviceConfigInterface.java"
+    ],
+}
+
 // TODO: Move connectivity service sources to independent directory.
 filegroup {
     name: "connectivity-service-srcs",
