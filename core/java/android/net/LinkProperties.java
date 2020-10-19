@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.util.LinkPropertiesUtils;
-import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1667,78 +1666,6 @@ public final class LinkProperties implements Parcelable {
                 && isIdenticalCaptivePortalApiUrl(target)
                 && isIdenticalCaptivePortalData(target);
     }
-
-    /**
-     * Compares the DNS addresses in this LinkProperties with another
-     * LinkProperties, examining only DNS addresses on the base link.
-     *
-     * @param target a LinkProperties with the new list of dns addresses
-     * @return the differences between the DNS addresses.
-     * @hide
-     */
-    public @NonNull CompareResult<InetAddress> compareDnses(@Nullable LinkProperties target) {
-        /*
-         * Duplicate the InetAddresses into removed, we will be removing
-         * dns address which are common between mDnses and target
-         * leaving the addresses that are different. And dns address which
-         * are in target but not in mDnses are placed in the
-         * addedAddresses.
-         */
-        return new CompareResult<>(mDnses, target != null ? target.getDnsServers() : null);
-    }
-
-    /**
-     * Compares the validated private DNS addresses in this LinkProperties with another
-     * LinkProperties.
-     *
-     * @param target a LinkProperties with the new list of validated private dns addresses
-     * @return the differences between the DNS addresses.
-     * @hide
-     */
-    public @NonNull CompareResult<InetAddress> compareValidatedPrivateDnses(
-            @Nullable LinkProperties target) {
-        return new CompareResult<>(mValidatedPrivateDnses,
-                target != null ? target.getValidatedPrivateDnsServers() : null);
-    }
-
-    /**
-     * Compares all routes in this LinkProperties with another LinkProperties,
-     * examining both the the base link and all stacked links.
-     *
-     * @param target a LinkProperties with the new list of routes
-     * @return the differences between the routes.
-     * @hide
-     */
-    public @NonNull CompareResult<RouteInfo> compareAllRoutes(@Nullable LinkProperties target) {
-        /*
-         * Duplicate the RouteInfos into removed, we will be removing
-         * routes which are common between mRoutes and target
-         * leaving the routes that are different. And route address which
-         * are in target but not in mRoutes are placed in added.
-         */
-        return new CompareResult<>(getAllRoutes(), target != null ? target.getAllRoutes() : null);
-    }
-
-    /**
-     * Compares all interface names in this LinkProperties with another
-     * LinkProperties, examining both the the base link and all stacked links.
-     *
-     * @param target a LinkProperties with the new list of interface names
-     * @return the differences between the interface names.
-     * @hide
-     */
-    public @NonNull CompareResult<String> compareAllInterfaceNames(
-            @Nullable LinkProperties target) {
-        /*
-         * Duplicate the interface names into removed, we will be removing
-         * interface names which are common between this and target
-         * leaving the interface names that are different. And interface names which
-         * are in target but not in this are placed in added.
-         */
-        return new CompareResult<>(getAllInterfaceNames(),
-                target != null ? target.getAllInterfaceNames() : null);
-    }
-
 
     /**
      * Generate hashcode based on significant fields
