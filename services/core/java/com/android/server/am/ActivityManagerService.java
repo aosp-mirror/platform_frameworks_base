@@ -7361,7 +7361,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
 
         if (bootingSystemUser) {
-            mSystemServiceManager.startUser(t, currentUserId);
+            mSystemServiceManager.onUserStarting(t, currentUserId);
         }
 
         synchronized (this) {

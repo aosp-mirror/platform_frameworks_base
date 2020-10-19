@@ -104,6 +104,14 @@ option java_package com.android.server.am
 30076 uc_start_user_internal (userId|1|5)
 30077 uc_unlock_user (userId|1|5)
 30078 uc_finish_user_boot (userId|1|5)
-30079 uc_dispatch_user_switch (oldUserId|1|5) (newUserId|1|5)
-30080 uc_continue_user_switch (oldUserId|1|5) (newUserId|1|5)
+30079 uc_dispatch_user_switch (oldUserId|1|5),(newUserId|1|5)
+30080 uc_continue_user_switch (oldUserId|1|5),(newUserId|1|5)
 30081 uc_send_user_broadcast (userId|1|5),(IntentAction|3)
+# Tags below are used by SystemServiceManager - although it's technically part of am, these are
+# also user switch events and useful to be analyzed together with events above.
+30082 ssm_user_starting (userId|1|5)
+30083 ssm_user_switching (oldUserId|1|5),(newUserId|1|5)
+30084 ssm_user_unlocking (userId|1|5)
+30085 ssm_user_unlocked (userId|1|5)
+30086 ssm_user_stopping (userId|1|5)
+30087 ssm_user_stopped (userId|1|5)
