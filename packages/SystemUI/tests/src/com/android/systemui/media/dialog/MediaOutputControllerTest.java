@@ -34,6 +34,7 @@ import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.testing.AndroidTestingRunner;
+import android.text.TextUtils;
 
 import androidx.test.filters.SmallTest;
 
@@ -60,6 +61,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "com.test.package.name";
     private static final String TEST_DEVICE_1_ID = "test_device_1_id";
     private static final String TEST_DEVICE_2_ID = "test_device_2_id";
+    private static final String TEST_DEVICE_3_ID = "test_device_3_id";
+    private static final String TEST_DEVICE_4_ID = "test_device_4_id";
+    private static final String TEST_DEVICE_5_ID = "test_device_5_id";
     private static final String TEST_ARTIST = "test_artist";
     private static final String TEST_SONG = "test_song";
     private static final String TEST_SESSION_ID = "test_session_id";
@@ -96,7 +100,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 MediaSessionManager.class);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
                 mCachedBluetoothDeviceManager);
-        mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME,
+        mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
@@ -139,8 +143,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void start_withoutPackageName_verifyMediaControllerInit() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, mMediaSessionManager,
-                mLocalBluetoothManager, mShadeController, mStarter);
+        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
 
         mMediaOutputController.start(mCb);
 
@@ -159,8 +163,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, mMediaSessionManager,
-                mLocalBluetoothManager, mShadeController, mStarter);
+        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
         mMediaOutputController.start(mCb);
 
         mMediaOutputController.stop();
@@ -344,5 +348,79 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE);
 
         assertThat(mMediaOutputController.isZeroMode()).isFalse();
+    }
+
+    @Test
+    public void getGroupMediaDevices_differentDeviceOrder_showingSameOrder() {
+        final MediaDevice selectedMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectedMediaDevice2 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice2 = mock(MediaDevice.class);
+        final List<MediaDevice> selectedMediaDevices = new ArrayList<>();
+        final List<MediaDevice> selectableMediaDevices = new ArrayList<>();
+        when(selectedMediaDevice1.getId()).thenReturn(TEST_DEVICE_1_ID);
+        when(selectedMediaDevice2.getId()).thenReturn(TEST_DEVICE_2_ID);
+        when(selectableMediaDevice1.getId()).thenReturn(TEST_DEVICE_3_ID);
+        when(selectableMediaDevice2.getId()).thenReturn(TEST_DEVICE_4_ID);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        selectableMediaDevices.add(selectableMediaDevice2);
+        doReturn(selectedMediaDevices).when(mLocalMediaManager).getSelectedMediaDevice();
+        doReturn(selectableMediaDevices).when(mLocalMediaManager).getSelectableMediaDevice();
+        final List<MediaDevice> groupMediaDevices = mMediaOutputController.getGroupMediaDevices();
+        // Reset order
+        selectedMediaDevices.clear();
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectableMediaDevices.clear();
+        selectableMediaDevices.add(selectableMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        final List<MediaDevice> newDevices = mMediaOutputController.getGroupMediaDevices();
+
+        assertThat(newDevices.size()).isEqualTo(groupMediaDevices.size());
+        for (int i = 0; i < groupMediaDevices.size(); i++) {
+            assertThat(TextUtils.equals(groupMediaDevices.get(i).getId(),
+                    newDevices.get(i).getId())).isTrue();
+        }
+    }
+
+    @Test
+    public void getGroupMediaDevices_newDevice_verifyDeviceOrder() {
+        final MediaDevice selectedMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectedMediaDevice2 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice2 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice3 = mock(MediaDevice.class);
+        final List<MediaDevice> selectedMediaDevices = new ArrayList<>();
+        final List<MediaDevice> selectableMediaDevices = new ArrayList<>();
+        when(selectedMediaDevice1.getId()).thenReturn(TEST_DEVICE_1_ID);
+        when(selectedMediaDevice2.getId()).thenReturn(TEST_DEVICE_2_ID);
+        when(selectableMediaDevice1.getId()).thenReturn(TEST_DEVICE_3_ID);
+        when(selectableMediaDevice2.getId()).thenReturn(TEST_DEVICE_4_ID);
+        when(selectableMediaDevice3.getId()).thenReturn(TEST_DEVICE_5_ID);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        selectableMediaDevices.add(selectableMediaDevice2);
+        doReturn(selectedMediaDevices).when(mLocalMediaManager).getSelectedMediaDevice();
+        doReturn(selectableMediaDevices).when(mLocalMediaManager).getSelectableMediaDevice();
+        final List<MediaDevice> groupMediaDevices = mMediaOutputController.getGroupMediaDevices();
+        // Reset order
+        selectedMediaDevices.clear();
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectableMediaDevices.clear();
+        selectableMediaDevices.add(selectableMediaDevice3);
+        selectableMediaDevices.add(selectableMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        final List<MediaDevice> newDevices = mMediaOutputController.getGroupMediaDevices();
+
+        assertThat(newDevices.size()).isEqualTo(5);
+        for (int i = 0; i < groupMediaDevices.size(); i++) {
+            assertThat(TextUtils.equals(groupMediaDevices.get(i).getId(),
+                    newDevices.get(i).getId())).isTrue();
+        }
+        assertThat(newDevices.get(4).getId()).isEqualTo(TEST_DEVICE_5_ID);
     }
 }

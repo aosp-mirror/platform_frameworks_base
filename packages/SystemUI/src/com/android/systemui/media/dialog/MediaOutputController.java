@@ -71,6 +71,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
     private final MediaSessionManager mMediaSessionManager;
     private final ShadeController mShadeController;
     private final ActivityStarter mActivityStarter;
+    private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
+    private final boolean mAboveStatusbar;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
@@ -82,13 +84,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
 
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
-            MediaSessionManager mediaSessionManager, LocalBluetoothManager
+            boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
         mShadeController = shadeController;
         mActivityStarter = starter;
+        mAboveStatusbar = aboveStatusbar;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
     }
@@ -271,6 +274,42 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
         mMediaDevices.addAll(targetMediaDevices);
     }
 
+    List<MediaDevice> getGroupMediaDevices() {
+        final List<MediaDevice> selectedDevices = getSelectedMediaDevice();
+        final List<MediaDevice> selectableDevices = getSelectableMediaDevice();
+        if (mGroupMediaDevices.isEmpty()) {
+            mGroupMediaDevices.addAll(selectedDevices);
+            mGroupMediaDevices.addAll(selectableDevices);
+            return mGroupMediaDevices;
+        }
+        // To keep the same list order
+        final Collection<MediaDevice> sourceDevices = new ArrayList<>();
+        final Collection<MediaDevice> targetMediaDevices = new ArrayList<>();
+        sourceDevices.addAll(selectedDevices);
+        sourceDevices.addAll(selectableDevices);
+        for (MediaDevice originalDevice : mGroupMediaDevices) {
+            for (MediaDevice newDevice : sourceDevices) {
+                if (TextUtils.equals(originalDevice.getId(), newDevice.getId())) {
+                    targetMediaDevices.add(newDevice);
+                    sourceDevices.remove(newDevice);
+                    break;
+                }
+            }
+        }
+        // Add new devices at the end of list if necessary
+        if (!sourceDevices.isEmpty()) {
+            targetMediaDevices.addAll(sourceDevices);
+        }
+        mGroupMediaDevices.clear();
+        mGroupMediaDevices.addAll(targetMediaDevices);
+
+        return mGroupMediaDevices;
+    }
+
+    void resetGroupMediaDevices() {
+        mGroupMediaDevices.clear();
+    }
+
     void connectDevice(MediaDevice device) {
         ThreadUtils.postOnBackgroundThread(() -> {
             mLocalMediaManager.connectDevice(device);
@@ -307,15 +346,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
 
     List<MediaDevice> getDeselectableMediaDevice() {
         return mLocalMediaManager.getDeselectableMediaDevice();
-    }
-
-    boolean isDeviceIncluded(Collection<MediaDevice> deviceCollection, MediaDevice targetDevice) {
-        for (MediaDevice device : deviceCollection) {
-            if (TextUtils.equals(device.getId(), targetDevice.getId())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     void adjustSessionVolume(String sessionId, int volume) {
@@ -405,6 +435,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
             return true;
         };
         mActivityStarter.dismissKeyguardThenExecute(postKeyguardAction, null, true);
+    }
+
+    void launchMediaOutputDialog() {
+        mCallback.dismissDialog();
+        new MediaOutputDialog(mContext, mAboveStatusbar, this);
+    }
+
+    void launchMediaOutputGroupDialog() {
+        mCallback.dismissDialog();
+        new MediaOutputGroupDialog(mContext, mAboveStatusbar, this);
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
