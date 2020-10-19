@@ -280,7 +280,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.removeAll(before);
         // There should be only one /data/misc_ce/0/rollback/<rollbackId> created during test
         assertThat(after).hasSize(1);
-        after.forEach(dir -> assertDirectoryIsEmpty(dir));
+        assertDirectoryIsEmpty(after.get(0));
     }
 
     /**
@@ -336,31 +336,37 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + TEST_SUBDIR + TEST_FILENAME_2;
-        pushString(TEST_STRING_1, oldFilePath1);
-        pushString(TEST_STRING_2, oldFilePath2);
+        runAsRoot(() -> {
+            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+        });
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
         getDevice().reboot();
 
         // Replace files in data directory
-        getDevice().deleteFile(oldFilePath1);
-        getDevice().deleteFile(oldFilePath2);
         String newFilePath3 = apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "/" + TEST_FILENAME_3;
         String newFilePath4 =
                 apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + TEST_SUBDIR + TEST_FILENAME_4;
-        pushString(TEST_STRING_3, newFilePath3);
-        pushString(TEST_STRING_4, newFilePath4);
+        runAsRoot(() -> {
+            getDevice().deleteFile(oldFilePath1);
+            getDevice().deleteFile(oldFilePath2);
+            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+        });
 
         // Roll back the APEX
         runPhase("testRollbackApexDataDirectories_Phase2");
         getDevice().reboot();
 
         // Verify that old files have been restored and new files are gone
-        assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-        assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-        assertNull(getDevice().pullFile(newFilePath3));
-        assertNull(getDevice().pullFile(newFilePath4));
+        runAsRoot(() -> {
+            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
+            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
+            assertNull(getDevice().pullFile(newFilePath3));
+            assertNull(getDevice().pullFile(newFilePath4));
+        });
 
         // Verify snapshots are deleted after restoration
         List<String> after = getSnapshotDirectories("/data/misc/apexrollback");
@@ -368,7 +374,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.removeAll(before);
         // There should be only one /data/misc/apexrollback/<rollbackId> created during test
         assertThat(after).hasSize(1);
-        after.forEach(dir -> assertDirectoryIsEmpty(dir));
+        assertDirectoryIsEmpty(after.get(0));
     }
 
     /**
@@ -384,32 +390,38 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        pushString(TEST_STRING_1, oldFilePath1);
-        pushString(TEST_STRING_2, oldFilePath2);
+        runAsRoot(() -> {
+            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+        });
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
         getDevice().reboot();
 
         // Replace files in data directory
-        getDevice().deleteFile(oldFilePath1);
-        getDevice().deleteFile(oldFilePath2);
         String newFilePath3 =
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_3;
         String newFilePath4 =
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_4;
-        pushString(TEST_STRING_3, newFilePath3);
-        pushString(TEST_STRING_4, newFilePath4);
+        runAsRoot(() -> {
+            getDevice().deleteFile(oldFilePath1);
+            getDevice().deleteFile(oldFilePath2);
+            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+        });
 
         // Roll back the APEX
         runPhase("testRollbackApexDataDirectories_Phase2");
         getDevice().reboot();
 
         // Verify that old files have been restored and new files are gone
-        assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-        assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-        assertNull(getDevice().pullFile(newFilePath3));
-        assertNull(getDevice().pullFile(newFilePath4));
+        runAsRoot(() -> {
+            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
+            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
+            assertNull(getDevice().pullFile(newFilePath3));
+            assertNull(getDevice().pullFile(newFilePath4));
+        });
 
         // Verify snapshots are deleted after restoration
         List<String> after = getSnapshotDirectories("/data/misc_de/0/apexrollback");
@@ -417,7 +429,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.removeAll(before);
         // There should be only one /data/misc_de/0/apexrollback/<rollbackId> created during test
         assertThat(after).hasSize(1);
-        after.forEach(dir -> assertDirectoryIsEmpty(dir));
+        assertDirectoryIsEmpty(after.get(0));
     }
 
     /**
@@ -432,31 +444,37 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        pushString(TEST_STRING_1, oldFilePath1);
-        pushString(TEST_STRING_2, oldFilePath2);
+        runAsRoot(() -> {
+            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+        });
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
         getDevice().reboot();
 
         // Replace files in data directory
-        getDevice().deleteFile(oldFilePath1);
-        getDevice().deleteFile(oldFilePath2);
         String newFilePath3 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_3;
         String newFilePath4 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_4;
-        pushString(TEST_STRING_3, newFilePath3);
-        pushString(TEST_STRING_4, newFilePath4);
+        runAsRoot(() -> {
+            getDevice().deleteFile(oldFilePath1);
+            getDevice().deleteFile(oldFilePath2);
+            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+        });
 
         // Roll back the APEX
         runPhase("testRollbackApexDataDirectories_Phase2");
         getDevice().reboot();
 
         // Verify that old files have been restored and new files are gone
-        assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-        assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-        assertNull(getDevice().pullFile(newFilePath3));
-        assertNull(getDevice().pullFile(newFilePath4));
+        runAsRoot(() -> {
+            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
+            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
+            assertNull(getDevice().pullFile(newFilePath3));
+            assertNull(getDevice().pullFile(newFilePath4));
+        });
 
         // Verify snapshots are deleted after restoration
         List<String> after = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
@@ -464,7 +482,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         after.removeAll(before);
         // There should be only one /data/misc_ce/0/apexrollback/<rollbackId> created during test
         assertThat(after).hasSize(1);
-        after.forEach(dir -> assertDirectoryIsEmpty(dir));
+        assertDirectoryIsEmpty(after.get(0));
     }
 
     /**
@@ -478,30 +496,36 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Push files to apk data directory
         String oldFilePath1 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        pushString(TEST_STRING_1, oldFilePath1);
-        pushString(TEST_STRING_2, oldFilePath2);
+        runAsRoot(() -> {
+            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+        });
 
         // Install version 2 of TESTAPP_A with rollback enabled
         runPhase("testRollbackApkDataDirectories_Phase2");
         getDevice().reboot();
 
         // Replace files in data directory
-        getDevice().deleteFile(oldFilePath1);
-        getDevice().deleteFile(oldFilePath2);
         String newFilePath3 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_3;
         String newFilePath4 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_4;
-        pushString(TEST_STRING_3, newFilePath3);
-        pushString(TEST_STRING_4, newFilePath4);
+        runAsRoot(() -> {
+            getDevice().deleteFile(oldFilePath1);
+            getDevice().deleteFile(oldFilePath2);
+            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+        });
 
         // Roll back the APK
         runPhase("testRollbackApkDataDirectories_Phase3");
         getDevice().reboot();
 
         // Verify that old files have been restored and new files are gone
-        assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-        assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-        assertNull(getDevice().pullFile(newFilePath3));
-        assertNull(getDevice().pullFile(newFilePath4));
+        runAsRoot(() -> {
+            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
+            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
+            assertNull(getDevice().pullFile(newFilePath3));
+            assertNull(getDevice().pullFile(newFilePath4));
+        });
     }
 
     @Test
@@ -513,8 +537,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
-        pushString(TEST_STRING_1, oldFilePath1);
-        pushString(TEST_STRING_2, oldFilePath2);
+        runAsRoot(() -> {
+            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
+            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+        });
 
         // Install new version of the APEX with rollback enabled
         runPhase("testRollbackApexDataDirectories_Phase1");
@@ -527,9 +553,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertThat(after).hasSize(1);
         // Expire all rollbacks and check CE snapshot directories are deleted
         runPhase("testCleanUp");
-        for (String dir : after) {
-            assertNull(getDevice().getFileEntry(dir));
-        }
+        runAsRoot(() -> {
+            for (String dir : after) {
+                assertNull(getDevice().getFileEntry(dir));
+            }
+        });
     }
 
     private void pushTestApex() throws Exception {
@@ -563,26 +591,34 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     }
 
     private List<String> getSnapshotDirectories(String baseDir) throws Exception {
-        IFileEntry f = getDevice().getFileEntry(baseDir);
-        if (f == null) {
-            Log.d(TAG, "baseDir doesn't exist: " + baseDir);
-            return Collections.EMPTY_LIST;
+        try {
+            getDevice().enableAdbRoot();
+            IFileEntry f = getDevice().getFileEntry(baseDir);
+            if (f == null) {
+                Log.d(TAG, "baseDir doesn't exist: " + baseDir);
+                return Collections.EMPTY_LIST;
+            }
+            List<String> list = f.getChildren(false)
+                    .stream().filter(entry -> entry.getName().matches("\\d+(-prerestore)?"))
+                    .map(entry -> entry.getFullPath())
+                    .collect(Collectors.toList());
+            Log.d(TAG, "getSnapshotDirectories=" + list);
+            return list;
+        } finally {
+            getDevice().disableAdbRoot();
         }
-        List<String> list = f.getChildren(false)
-                .stream().filter(entry -> entry.getName().matches("\\d+(-prerestore)?"))
-                .map(entry -> entry.getFullPath())
-                .collect(Collectors.toList());
-        Log.d(TAG, "getSnapshotDirectories=" + list);
-        return list;
     }
 
-    private void assertDirectoryIsEmpty(String path) {
+    private void assertDirectoryIsEmpty(String path) throws Exception {
         try {
+            getDevice().enableAdbRoot();
             IFileEntry file = getDevice().getFileEntry(path);
             assertTrue("Not a directory: " + path, file.isDirectory());
             assertTrue("Directory not empty: " + path, file.getChildren(false).isEmpty());
         } catch (DeviceNotAvailableException e) {
             fail("Can't access directory: " + path);
+        } finally {
+            getDevice().disableAdbRoot();
         }
     }
 
@@ -621,10 +657,15 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         }
     }
 
-    private void pushString(String contents, String deviceFilePath) throws Exception {
+    @FunctionalInterface
+    private interface ExceptionalRunnable {
+        void run() throws Exception;
+    }
+
+    private void runAsRoot(ExceptionalRunnable runnable) throws Exception {
         try {
             getDevice().enableAdbRoot();
-            assertThat(getDevice().pushString(contents, deviceFilePath)).isTrue();
+            runnable.run();
         } finally {
             getDevice().disableAdbRoot();
         }
