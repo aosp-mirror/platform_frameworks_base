@@ -1849,7 +1849,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         // If developers explicitly set the important mode for it, don't change the mode.
         // Only change the mode to important when this SurfaceView isn't explicitly set and has
         // an embedded hierarchy.
-        if (!mRemoteAccessibilityController.connected()
+        if ((mRemoteAccessibilityController!= null && !mRemoteAccessibilityController.connected())
                 || mode != IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             return mode;
         }
