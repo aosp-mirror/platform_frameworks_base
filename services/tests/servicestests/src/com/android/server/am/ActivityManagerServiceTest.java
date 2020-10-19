@@ -68,7 +68,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.SparseArray;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
@@ -834,12 +833,13 @@ public class ActivityManagerServiceTest {
             // Reset the current state
             mHandler.reset();
             clearPendingUidChanges();
+            uidRecord.pendingChange.isPending = false;
 
             mAms.enqueueUidChangeLocked(uidRecord, -1, changeToDispatch);
 
             // Verify that pendingChange is updated correctly.
-            final ChangeRecord pendingChange = getPendingChange(uidRecord.uid);
-            assertNotNull(pendingChange);
+            final ChangeRecord pendingChange = uidRecord.pendingChange;
+            assertTrue(pendingChange.isPending);
             assertEquals(TEST_UID, pendingChange.uid);
             assertEquals(expectedProcState, pendingChange.procState);
             assertEquals(TEST_PROC_STATE_SEQ1, pendingChange.procStateSeq);
@@ -923,22 +923,16 @@ public class ActivityManagerServiceTest {
         mAms.mProcessList.mActiveUids.clear();
     }
 
-    private ChangeRecord getPendingChange(int uid) {
-        final SparseArray<ChangeRecord> pendingChanges =
-                mAms.mUidObserverController.getPendingUidChangesForTest();
-        return pendingChanges.get(uid);
-    }
-
     private void addPendingUidChange(ChangeRecord record) {
-        mAms.mUidObserverController.getPendingUidChangesForTest().put(record.uid, record);
+        mAms.mUidObserverController.getPendingUidChangesForTest().add(record);
     }
 
     private void addPendingUidChanges(ArrayList<ChangeRecord> changes) {
-        final SparseArray<ChangeRecord> pendingChanges =
+        final ArrayList<ChangeRecord> pendingChanges =
                 mAms.mUidObserverController.getPendingUidChangesForTest();
         for (int i = 0; i < changes.size(); ++i) {
             final ChangeRecord record = changes.get(i);
-            pendingChanges.put(record.uid, record);
+            pendingChanges.add(record);
         }
     }
 

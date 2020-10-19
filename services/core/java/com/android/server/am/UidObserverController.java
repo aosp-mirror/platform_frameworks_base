@@ -20,6 +20,8 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerProto;
 import android.app.IUidObserver;
@@ -29,7 +31,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -53,7 +54,7 @@ public class UidObserverController {
     final RemoteCallbackList<IUidObserver> mUidObservers = new RemoteCallbackList<>();
 
     @GuardedBy("mLock")
-    private final SparseArray<ChangeRecord> mPendingUidChanges = new SparseArray<>();
+    private final ArrayList<ChangeRecord> mPendingUidChanges = new ArrayList<>();
     @GuardedBy("mLock")
     private final ArrayList<ChangeRecord> mAvailUidChanges = new ArrayList<>();
 
@@ -71,27 +72,27 @@ public class UidObserverController {
     private static final boolean VALIDATE_UID_STATES = true;
     private final ActiveUids mValidateUids;
 
-    UidObserverController(Handler handler) {
+    UidObserverController(@NonNull Handler handler) {
         mHandler = handler;
         mValidateUids = new ActiveUids(null /* service */, false /* postChangesToAtm */);
     }
 
-    void register(IUidObserver observer, int which, int cutpoint, String callingPackage,
-            int callingUid) {
+    void register(@NonNull IUidObserver observer, int which, int cutpoint,
+            @NonNull String callingPackage, int callingUid) {
         synchronized (mLock) {
             mUidObservers.register(observer, new UidObserverRegistration(callingUid,
                     callingPackage, which, cutpoint));
         }
     }
 
-    void unregister(IUidObserver observer) {
+    void unregister(@NonNull IUidObserver observer) {
         synchronized (mLock) {
             mUidObservers.unregister(observer);
         }
     }
 
-    int enqueueUidChange(int uid, int change, int procState, long procStateSeq,
-            int capability, boolean ephemeral) {
+    int enqueueUidChange(@Nullable ChangeRecord currentRecord, int uid, int change, int procState,
+            long procStateSeq, int capability, boolean ephemeral) {
         synchronized (mLock) {
             if (mPendingUidChanges.size() == 0) {
                 if (DEBUG_UID_OBSERVERS) {
@@ -100,10 +101,11 @@ public class UidObserverController {
                 mHandler.post(mDispatchRunnable);
             }
 
-            ChangeRecord changeRecord = mPendingUidChanges.get(uid);
-            if (changeRecord == null) {
-                changeRecord = getOrCreateChangeRecordLocked();
-                mPendingUidChanges.put(uid, changeRecord);
+            final ChangeRecord changeRecord = currentRecord != null
+                    ? currentRecord : getOrCreateChangeRecordLocked();
+            if (!changeRecord.isPending) {
+                changeRecord.isPending = true;
+                mPendingUidChanges.add(changeRecord);
             } else {
                 change = mergeWithPendingChange(change, changeRecord.change);
             }
@@ -119,7 +121,7 @@ public class UidObserverController {
         }
     }
 
-    SparseArray<ChangeRecord> getPendingUidChangesForTest() {
+    ArrayList<ChangeRecord> getPendingUidChangesForTest() {
         return mPendingUidChanges;
     }
 
@@ -175,7 +177,10 @@ public class UidObserverController {
                 mActiveUidChanges = new ChangeRecord[numUidChanges];
             }
             for (int i = 0; i < numUidChanges; i++) {
-                mActiveUidChanges[i] = mPendingUidChanges.valueAt(i);
+                final ChangeRecord changeRecord = mPendingUidChanges.get(i);
+                mActiveUidChanges[i] = getOrCreateChangeRecordLocked();
+                changeRecord.copyTo(mActiveUidChanges[i]);
+                changeRecord.isPending = false;
             }
             mPendingUidChanges.clear();
             if (DEBUG_UID_OBSERVERS) {
@@ -216,13 +221,15 @@ public class UidObserverController {
 
         synchronized (mLock) {
             for (int j = 0; j < numUidChanges; j++) {
-                mAvailUidChanges.add(mActiveUidChanges[j]);
+                final ChangeRecord changeRecord = mActiveUidChanges[j];
+                changeRecord.isPending = false;
+                mAvailUidChanges.add(changeRecord);
             }
         }
     }
 
-    private void dispatchUidsChangedForObserver(IUidObserver observer,
-            UidObserverRegistration reg, int changesSize) {
+    private void dispatchUidsChangedForObserver(@NonNull IUidObserver observer,
+            @NonNull UidObserverRegistration reg, int changesSize) {
         if (observer == null) {
             return;
         }
@@ -318,7 +325,7 @@ public class UidObserverController {
         return mValidateUids.get(uid);
     }
 
-    void dump(PrintWriter pw, String dumpPackage) {
+    void dump(@NonNull PrintWriter pw, @Nullable String dumpPackage) {
         synchronized (mLock) {
             final int count = mUidObservers.getRegisteredCallbackCount();
             boolean printed = false;
@@ -353,7 +360,7 @@ public class UidObserverController {
         }
     }
 
-    void dumpDebug(ProtoOutputStream proto, String dumpPackage) {
+    void dumpDebug(@NonNull ProtoOutputStream proto, @Nullable String dumpPackage) {
         synchronized (mLock) {
             final int count = mUidObservers.getRegisteredCallbackCount();
             for (int i = 0; i < count; i++) {
@@ -366,23 +373,34 @@ public class UidObserverController {
         }
     }
 
-    boolean dumpValidateUids(PrintWriter pw, String dumpPackage, int dumpAppId,
-            String header, boolean needSep) {
+    boolean dumpValidateUids(@NonNull PrintWriter pw, @Nullable String dumpPackage, int dumpAppId,
+            @NonNull String header, boolean needSep) {
         return mValidateUids.dump(pw, dumpPackage, dumpAppId, header, needSep);
     }
 
-    void dumpValidateUidsProto(ProtoOutputStream proto, String dumpPackage,
+    void dumpValidateUidsProto(@NonNull ProtoOutputStream proto, @Nullable String dumpPackage,
             int dumpAppId, long fieldId) {
         mValidateUids.dumpProto(proto, dumpPackage, dumpAppId, fieldId);
     }
 
     static final class ChangeRecord {
+        public boolean isPending;
         public int uid;
         public int change;
         public int procState;
         public int capability;
         public boolean ephemeral;
         public long procStateSeq;
+
+        void copyTo(@NonNull ChangeRecord changeRecord) {
+            changeRecord.isPending = isPending;
+            changeRecord.uid = uid;
+            changeRecord.change = change;
+            changeRecord.procState = procState;
+            changeRecord.capability = capability;
+            changeRecord.ephemeral = ephemeral;
+            changeRecord.procStateSeq = procStateSeq;
+        }
     }
 
     private static final class UidObserverRegistration {
@@ -416,7 +434,7 @@ public class UidObserverController {
                 ActivityManagerProto.UID_OBSERVER_FLAG_PROCSTATE,
         };
 
-        UidObserverRegistration(int uid, String pkg, int which, int cutpoint) {
+        UidObserverRegistration(int uid, @NonNull String pkg, int which, int cutpoint) {
             this.mUid = uid;
             this.mPkg = pkg;
             this.mWhich = which;
@@ -425,7 +443,7 @@ public class UidObserverController {
                     ? new SparseIntArray() : null;
         }
 
-        void dump(PrintWriter pw, IUidObserver observer) {
+        void dump(@NonNull PrintWriter pw, @NonNull IUidObserver observer) {
             pw.print("    ");
             UserHandle.formatUid(pw, mUid);
             pw.print(" ");
@@ -460,7 +478,7 @@ public class UidObserverController {
             }
         }
 
-        void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(UidObserverRegistrationProto.UID, mUid);
             proto.write(UidObserverRegistrationProto.PACKAGE, mPkg);
