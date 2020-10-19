@@ -82,8 +82,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
     private final Context mContext;
     private final ScreenshotSmartActions mScreenshotSmartActions;
-    private final GlobalScreenshot.SaveImageInBackgroundData mParams;
-    private final GlobalScreenshot.SavedImageData mImageData;
+    private final ScreenshotController.SaveImageInBackgroundData mParams;
+    private final ScreenshotController.SavedImageData mImageData;
     private final String mImageFileName;
     private final long mImageTime;
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
@@ -92,10 +92,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final Random mRandom = new Random();
 
     SaveImageInBackgroundTask(Context context, ScreenshotSmartActions screenshotSmartActions,
-            GlobalScreenshot.SaveImageInBackgroundData data) {
+            ScreenshotController.SaveImageInBackgroundData data) {
         mContext = context;
         mScreenshotSmartActions = screenshotSmartActions;
-        mImageData = new GlobalScreenshot.SavedImageData();
+        mImageData = new ScreenshotController.SavedImageData();
 
         // Prepare all the output metadata
         mParams = data;
@@ -234,7 +234,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
      * Update the listener run when the saving task completes. Used to avoid showing UI for the
      * first screenshot when a second one is taken.
      */
-    void setActionsReadyListener(GlobalScreenshot.ActionsReadyListener listener) {
+    void setActionsReadyListener(ScreenshotController.ActionsReadyListener listener) {
         mParams.mActionsReadyListener = listener;
     }
 
@@ -287,10 +287,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // Create a share action for the notification
         PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                 new Intent(context, ActionProxyReceiver.class)
-                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, pendingIntent)
-                        .putExtra(GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP, true)
-                        .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
-                        .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
+                        .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
+                        .putExtra(ScreenshotController.EXTRA_DISALLOW_ENTER_PIP, true)
+                        .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                        .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_SEND)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
@@ -332,9 +332,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // Create a edit action
         PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                 new Intent(context, ActionProxyReceiver.class)
-                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, pendingIntent)
-                        .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
-                        .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
+                        .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
+                        .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                        .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_EDIT)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
@@ -355,9 +355,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // Create a delete action for the notification
         PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode,
                 new Intent(context, DeleteScreenshotReceiver.class)
-                        .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString())
-                        .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
-                        .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
+                        .putExtra(ScreenshotController.SCREENSHOT_URI_ID, uri.toString())
+                        .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                        .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
                                 mSmartActionsEnabled)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
@@ -395,7 +395,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
                     ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
             Intent intent = new Intent(context, SmartActionsReceiver.class)
-                    .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, action.actionIntent)
+                    .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, action.actionIntent)
                     .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             addIntentExtras(mScreenshotId, intent, actionType, mSmartActionsEnabled);
             PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
@@ -411,9 +411,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static void addIntentExtras(String screenshotId, Intent intent, String actionType,
             boolean smartActionsEnabled) {
         intent
-                .putExtra(GlobalScreenshot.EXTRA_ACTION_TYPE, actionType)
-                .putExtra(GlobalScreenshot.EXTRA_ID, screenshotId)
-                .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
+                .putExtra(ScreenshotController.EXTRA_ACTION_TYPE, actionType)
+                .putExtra(ScreenshotController.EXTRA_ID, screenshotId)
+                .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
     }
 
 

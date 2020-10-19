@@ -169,8 +169,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
             Looper.prepare();
         }
 
-        GlobalScreenshot.SaveImageInBackgroundData
-                data = new GlobalScreenshot.SaveImageInBackgroundData();
+        ScreenshotController.SaveImageInBackgroundData
+                data = new ScreenshotController.SaveImageInBackgroundData();
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
@@ -183,9 +183,9 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Intent intent = shareAction.actionIntent.getIntent();
         assertNotNull(intent);
         Bundle bundle = intent.getExtras();
-        assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_ID));
-        assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED));
-        assertEquals(GlobalScreenshot.ACTION_TYPE_SHARE, shareAction.title);
+        assertTrue(bundle.containsKey(ScreenshotController.EXTRA_ID));
+        assertTrue(bundle.containsKey(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED));
+        assertEquals(ScreenshotController.ACTION_TYPE_SHARE, shareAction.title);
         assertEquals(Intent.ACTION_SEND, intent.getAction());
     }
 
@@ -196,8 +196,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
             Looper.prepare();
         }
 
-        GlobalScreenshot.SaveImageInBackgroundData
-                data = new GlobalScreenshot.SaveImageInBackgroundData();
+        ScreenshotController.SaveImageInBackgroundData
+                data = new ScreenshotController.SaveImageInBackgroundData();
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
@@ -210,9 +210,9 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Intent intent = editAction.actionIntent.getIntent();
         assertNotNull(intent);
         Bundle bundle = intent.getExtras();
-        assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_ID));
-        assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED));
-        assertEquals(GlobalScreenshot.ACTION_TYPE_EDIT, editAction.title);
+        assertTrue(bundle.containsKey(ScreenshotController.EXTRA_ID));
+        assertTrue(bundle.containsKey(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED));
+        assertEquals(ScreenshotController.ACTION_TYPE_EDIT, editAction.title);
         assertEquals(Intent.ACTION_EDIT, intent.getAction());
     }
 
@@ -223,8 +223,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
             Looper.prepare();
         }
 
-        GlobalScreenshot.SaveImageInBackgroundData
-                data = new GlobalScreenshot.SaveImageInBackgroundData();
+        ScreenshotController.SaveImageInBackgroundData
+                data = new ScreenshotController.SaveImageInBackgroundData();
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
@@ -238,9 +238,9 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Intent intent = deleteAction.actionIntent.getIntent();
         assertNotNull(intent);
         Bundle bundle = intent.getExtras();
-        assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_ID));
-        assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED));
-        assertEquals(deleteAction.title, GlobalScreenshot.ACTION_TYPE_DELETE);
+        assertTrue(bundle.containsKey(ScreenshotController.EXTRA_ID));
+        assertTrue(bundle.containsKey(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED));
+        assertEquals(deleteAction.title, ScreenshotController.ACTION_TYPE_DELETE);
         assertNull(intent.getAction());
     }
 }

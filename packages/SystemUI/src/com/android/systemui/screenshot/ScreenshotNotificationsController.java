@@ -185,7 +185,7 @@ public class ScreenshotNotificationsController {
      * @param actionData SavedImageData struct with image URI and actions
      */
     public void showScreenshotActionsNotification(
-            GlobalScreenshot.SavedImageData actionData) {
+            ScreenshotController.SavedImageData actionData) {
         mNotificationBuilder.addAction(actionData.shareAction);
         mNotificationBuilder.addAction(actionData.editAction);
         mNotificationBuilder.addAction(actionData.deleteAction);

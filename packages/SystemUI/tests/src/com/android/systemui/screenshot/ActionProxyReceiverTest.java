@@ -16,9 +16,9 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.GlobalScreenshot.ACTION_TYPE_SHARE;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ID;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED;
+import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_SHARE;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -79,7 +79,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
         MockitoAnnotations.initMocks(this);
         mIntent = new Intent(mContext, ActionProxyReceiver.class)
-                .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, mMockPendingIntent);
+                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, mMockPendingIntent);
 
         when(mMockActivityManagerWrapper.closeSystemWindows(anyString())).thenReturn(mMockFuture);
         when(mMockFuture.get(anyLong(), any(TimeUnit.class))).thenReturn(null);
