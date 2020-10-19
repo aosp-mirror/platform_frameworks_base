@@ -146,7 +146,7 @@ public class IncrementalStatesTest {
         // Test that package is now unstartable
         assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_DATALOADER_TRANSPORT,
+        assertEquals(PackageManager.UNSTARTABLE_REASON_CONNECTION_ERROR,
                 mUnstartableReason.get());
     }
 
@@ -160,7 +160,7 @@ public class IncrementalStatesTest {
         // Test that package is now unstartable
         assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_DATALOADER_TRANSPORT,
+        assertEquals(PackageManager.UNSTARTABLE_REASON_CONNECTION_ERROR,
                 mUnstartableReason.get());
     }
 
@@ -181,7 +181,7 @@ public class IncrementalStatesTest {
         // Test that package is now unstartable
         assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_DATALOADER_STORAGE,
+        assertEquals(PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE,
                 mUnstartableReason.get());
     }
 
@@ -202,7 +202,7 @@ public class IncrementalStatesTest {
         // Test that package is now unstartable
         assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_DATALOADER_STORAGE,
+        assertEquals(PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE,
                 mUnstartableReason.get());
     }
 
