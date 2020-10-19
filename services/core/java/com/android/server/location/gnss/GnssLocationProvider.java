@@ -78,7 +78,7 @@ import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.AbstractLocationProvider;
-import com.android.server.location.gnss.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
+import com.android.server.location.gnss.GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback;
 import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
 import com.android.server.location.util.Injector;
 
@@ -97,7 +97,7 @@ import java.util.Set;
  */
 public class GnssLocationProvider extends AbstractLocationProvider implements
         InjectNtpTimeCallback,
-        GnssSatelliteBlacklistCallback {
+        GnssSatelliteBlocklistCallback {
 
     private static final String TAG = "GnssLocationProvider";
 
@@ -171,7 +171,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
     public static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
     public static final int GPS_CAPABILITY_LOW_POWER_MODE = 0x0000100;
-    public static final int GPS_CAPABILITY_SATELLITE_BLACKLIST = 0x0000200;
+    public static final int GPS_CAPABILITY_SATELLITE_BLOCKLIST = 0x0000200;
     public static final int GPS_CAPABILITY_MEASUREMENT_CORRECTIONS = 0x0000400;
     public static final int GPS_CAPABILITY_ANTENNA_INFO = 0x0000800;
 
@@ -374,7 +374,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final GnssBatchingProvider mGnssBatchingProvider;
     private final GnssGeofenceProvider mGnssGeofenceProvider;
     private final GnssCapabilitiesProvider mGnssCapabilitiesProvider;
-    private final GnssSatelliteBlacklistHelper mGnssSatelliteBlacklistHelper;
+    private final GnssSatelliteBlocklistHelper mGnssSatelliteBlocklistHelper;
 
     // Available only on GNSS HAL 2.0 implementations and later.
     private GnssVisibilityControl mGnssVisibilityControl;
@@ -494,11 +494,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     };
 
     /**
-     * Implements {@link GnssSatelliteBlacklistCallback#onUpdateSatelliteBlacklist}.
+     * Implements {@link GnssSatelliteBlocklistCallback#onUpdateSatelliteBlocklist}.
      */
     @Override
-    public void onUpdateSatelliteBlacklist(int[] constellations, int[] svids) {
-        mHandler.post(() -> mGnssConfiguration.setSatelliteBlacklist(constellations, svids));
+    public void onUpdateSatelliteBlocklist(int[] constellations, int[] svids) {
+        mHandler.post(() -> mGnssConfiguration.setSatelliteBlocklist(constellations, svids));
         mGnssMetrics.resetConstellationTypes();
     }
 
@@ -622,8 +622,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         mGnssMetrics = new GnssMetrics(mContext, mBatteryStats);
         mNtpTimeHelper = new NtpTimeHelper(mContext, mLooper, this);
-        mGnssSatelliteBlacklistHelper =
-                new GnssSatelliteBlacklistHelper(mContext,
+        mGnssSatelliteBlocklistHelper =
+                new GnssSatelliteBlocklistHelper(mContext,
                         mLooper, this);
         mGnssBatchingProvider = new GnssBatchingProvider();
         mGnssGeofenceProvider = new GnssGeofenceProvider();
@@ -655,7 +655,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 }, UserHandle.USER_ALL);
 
         sendMessage(INITIALIZE_HANDLER, 0, null);
-        mHandler.post(mGnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
+        mHandler.post(mGnssSatelliteBlocklistHelper::updateSatelliteBlocklist);
     }
 
     /**
@@ -2046,7 +2046,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (hasCapability(GPS_CAPABILITY_MEASUREMENTS)) s.append("MEASUREMENTS ");
         if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
         if (hasCapability(GPS_CAPABILITY_LOW_POWER_MODE)) s.append("LOW_POWER_MODE ");
-        if (hasCapability(GPS_CAPABILITY_SATELLITE_BLACKLIST)) s.append("SATELLITE_BLACKLIST ");
+        if (hasCapability(GPS_CAPABILITY_SATELLITE_BLOCKLIST)) s.append("SATELLITE_BLOCKLIST ");
         if (hasCapability(GPS_CAPABILITY_MEASUREMENT_CORRECTIONS)) {
             s.append("MEASUREMENT_CORRECTIONS ");
         }

@@ -3514,10 +3514,11 @@ static jboolean android_location_GnssConfiguration_set_gnss_pos_protocol_select(
     return gnssConfigurationIface->setGlonassPositioningProtocol(gnssPosProtocol);
 }
 
-static jboolean android_location_GnssConfiguration_set_satellite_blacklist(
-        JNIEnv* env, jobject, jintArray constellations, jintArray sv_ids) {
+static jboolean android_location_GnssConfiguration_set_satellite_blocklist(JNIEnv* env, jobject,
+                                                                           jintArray constellations,
+                                                                           jintArray sv_ids) {
     if (gnssConfigurationIface == nullptr) {
-        ALOGI("IGnssConfiguration interface does not support satellite blacklist.");
+        ALOGI("IGnssConfiguration interface does not support satellite blocklist.");
         return JNI_FALSE;
     }
     return gnssConfigurationIface->setBlocklist(env, constellations, sv_ids);
@@ -3800,8 +3801,8 @@ static const JNINativeMethod sConfigurationMethods[] = {
          reinterpret_cast<void*>(android_location_GnssConfiguration_set_gps_lock)},
         {"native_set_emergency_supl_pdn", "(I)Z",
          reinterpret_cast<void*>(android_location_GnssConfiguration_set_emergency_supl_pdn)},
-        {"native_set_satellite_blacklist", "([I[I)Z",
-         reinterpret_cast<void*>(android_location_GnssConfiguration_set_satellite_blacklist)},
+        {"native_set_satellite_blocklist", "([I[I)Z",
+         reinterpret_cast<void*>(android_location_GnssConfiguration_set_satellite_blocklist)},
         {"native_set_es_extension_sec", "(I)Z",
          reinterpret_cast<void*>(android_location_GnssConfiguration_set_es_extension_sec)},
 };

@@ -888,8 +888,8 @@ class SettingsProtoDumpUtil {
                 Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                 GlobalSettingsProto.Location.SETTINGS_LINK_TO_PERMISSIONS_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.GNSS_SATELLITE_BLACKLIST,
-                GlobalSettingsProto.Location.GNSS_SATELLITE_BLACKLIST);
+                Settings.Global.GNSS_SATELLITE_BLOCKLIST,
+                GlobalSettingsProto.Location.GNSS_SATELLITE_BLOCKLIST);
         dumpSetting(s, p,
                 Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                 GlobalSettingsProto.Location.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS);

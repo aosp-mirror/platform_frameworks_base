@@ -3825,7 +3825,8 @@ package android.location {
     method public boolean hasMeasurementCorrectionsReflectingPane();
     method public boolean hasMeasurements();
     method public boolean hasNavMessages();
-    method public boolean hasSatelliteBlacklist();
+    method @Deprecated public boolean hasSatelliteBlacklist();
+    method public boolean hasSatelliteBlocklist();
   }
 
   public final class GnssMeasurementCorrections implements android.os.Parcelable {

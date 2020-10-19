@@ -29,7 +29,7 @@ public class GnssCapabilitiesProvider {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final long GNSS_CAPABILITIES_TOP_HAL =
-            GnssCapabilities.LOW_POWER_MODE | GnssCapabilities.SATELLITE_BLACKLIST
+            GnssCapabilities.LOW_POWER_MODE | GnssCapabilities.SATELLITE_BLOCKLIST
                     | GnssCapabilities.GEOFENCING | GnssCapabilities.MEASUREMENTS
                     | GnssCapabilities.NAV_MESSAGES;
 
@@ -65,8 +65,8 @@ public class GnssCapabilitiesProvider {
             gnssCapabilities |= GnssCapabilities.LOW_POWER_MODE;
         }
         if (hasCapability(topHalCapabilities,
-                GnssLocationProvider.GPS_CAPABILITY_SATELLITE_BLACKLIST)) {
-            gnssCapabilities |= GnssCapabilities.SATELLITE_BLACKLIST;
+                GnssLocationProvider.GPS_CAPABILITY_SATELLITE_BLOCKLIST)) {
+            gnssCapabilities |= GnssCapabilities.SATELLITE_BLOCKLIST;
         }
         if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_GEOFENCING)) {
             gnssCapabilities |= GnssCapabilities.GEOFENCING;
