@@ -6,6 +6,7 @@ package com.android.server.compat.config {
     method public String getDescription();
     method public boolean getDisabled();
     method public int getEnableAfterTargetSdk();
+    method public int getEnableSinceTargetSdk();
     method public long getId();
     method public boolean getLoggingOnly();
     method public String getName();
@@ -13,6 +14,7 @@ package com.android.server.compat.config {
     method public void setDescription(String);
     method public void setDisabled(boolean);
     method public void setEnableAfterTargetSdk(int);
+    method public void setEnableSinceTargetSdk(int);
     method public void setId(long);
     method public void setLoggingOnly(boolean);
     method public void setName(String);
