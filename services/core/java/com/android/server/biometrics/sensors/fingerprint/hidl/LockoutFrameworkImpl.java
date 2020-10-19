@@ -135,6 +135,6 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     private PendingIntent getLockoutResetIntentForUser(int userId) {
         return PendingIntent.getBroadcast(mContext, userId,
                 new Intent(ACTION_LOCKOUT_RESET).putExtra(KEY_LOCKOUT_RESET_USER, userId),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 }
