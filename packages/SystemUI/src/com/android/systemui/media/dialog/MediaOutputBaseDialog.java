@@ -119,6 +119,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         // Init device list
         mDevicesRecyclerView.setLayoutManager(mLayoutManager);
         mDevicesRecyclerView.setAdapter(mAdapter);
+        // Init header icon
+        mHeaderIcon.setOnClickListener(v -> onHeaderIconClick());
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> {
@@ -217,5 +219,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         if (!hasFocus && isShowing()) {
             dismiss();
         }
+    }
+
+    void onHeaderIconClick() {
     }
 }

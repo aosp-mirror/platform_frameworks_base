@@ -24,8 +24,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -44,19 +45,17 @@ import com.android.systemui.R;
 public abstract class MediaOutputBaseAdapter extends
         RecyclerView.Adapter<MediaOutputBaseAdapter.MediaDeviceBaseViewHolder> {
 
-    private static final String FONT_SELECTED_TITLE = "sans-serif-medium";
-    private static final String FONT_TITLE = "sans-serif";
-
     static final int CUSTOMIZED_ITEM_PAIR_NEW = 1;
+    static final int CUSTOMIZED_ITEM_GROUP = 2;
 
     final MediaOutputController mController;
 
-    private boolean mIsDragging;
     private int mMargin;
     private boolean mIsAnimating;
 
     Context mContext;
     View mHolderView;
+    boolean mIsDragging;
 
     public MediaOutputBaseAdapter(MediaOutputController controller) {
         mController = controller;
@@ -99,27 +98,33 @@ public abstract class MediaOutputBaseAdapter extends
 
         private static final int ANIM_DURATION = 200;
 
-        final FrameLayout mFrameLayout;
+        final LinearLayout mContainerLayout;
         final TextView mTitleText;
         final TextView mTwoLineTitleText;
         final TextView mSubTitleText;
         final ImageView mTitleIcon;
-        final ImageView mEndIcon;
+        final ImageView mAddIcon;
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
         final RelativeLayout mTwoLineLayout;
+        final View mDivider;
+        final View mBottomDivider;
+        final CheckBox mCheckBox;
 
         MediaDeviceBaseViewHolder(View view) {
             super(view);
-            mFrameLayout = view.requireViewById(R.id.device_container);
+            mContainerLayout = view.requireViewById(R.id.device_container);
             mTitleText = view.requireViewById(R.id.title);
             mSubTitleText = view.requireViewById(R.id.subtitle);
             mTwoLineLayout = view.requireViewById(R.id.two_line_layout);
             mTwoLineTitleText = view.requireViewById(R.id.two_line_title);
             mTitleIcon = view.requireViewById(R.id.title_icon);
-            mEndIcon = view.requireViewById(R.id.end_icon);
             mProgressBar = view.requireViewById(R.id.volume_indeterminate_progress);
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
+            mDivider = view.requireViewById(R.id.end_divider);
+            mBottomDivider = view.requireViewById(R.id.bottom_divider);
+            mAddIcon = view.requireViewById(R.id.add_icon);
+            mCheckBox = view.requireViewById(R.id.check_box);
         }
 
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
@@ -132,11 +137,11 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         private void setMargin(boolean topMargin, boolean bottomMargin) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mFrameLayout
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mContainerLayout
                     .getLayoutParams();
             params.topMargin = topMargin ? mMargin : 0;
             params.bottomMargin = bottomMargin ? mMargin : 0;
-            mFrameLayout.setLayoutParams(params);
+            mContainerLayout.setLayoutParams(params);
         }
 
         void setSingleLineLayout(CharSequence title, boolean bFocused) {
@@ -146,13 +151,26 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleText.setTranslationY(0);
             mTitleText.setText(title);
             if (bFocused) {
-                mTitleText.setTypeface(Typeface.create(FONT_SELECTED_TITLE, Typeface.NORMAL));
+                mTitleText.setTypeface(Typeface.create(mContext.getString(
+                        com.android.internal.R.string.config_headlineFontFamilyMedium),
+                        Typeface.NORMAL));
             } else {
-                mTitleText.setTypeface(Typeface.create(FONT_TITLE, Typeface.NORMAL));
+                mTitleText.setTypeface(Typeface.create(mContext.getString(
+                        com.android.internal.R.string.config_headlineFontFamily), Typeface.NORMAL));
             }
         }
 
-        void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
+        void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
+                boolean showProgressBar, boolean showSubtitle) {
+            setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle);
+        }
+
+        void setTwoLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
+                boolean showProgressBar, boolean showSubtitle) {
+            setTwoLineLayout(null, title, bFocused, showSeekBar, showProgressBar, showSubtitle);
+        }
+
+        private void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
                 boolean showSeekBar, boolean showProgressBar, boolean showSubtitle) {
             mTitleText.setVisibility(View.GONE);
             mTwoLineLayout.setVisibility(View.VISIBLE);
@@ -168,18 +186,21 @@ public abstract class MediaOutputBaseAdapter extends
             }
 
             if (bFocused) {
-                mTwoLineTitleText.setTypeface(Typeface.create(FONT_SELECTED_TITLE,
+                mTwoLineTitleText.setTypeface(Typeface.create(mContext.getString(
+                        com.android.internal.R.string.config_headlineFontFamilyMedium),
                         Typeface.NORMAL));
             } else {
-                mTwoLineTitleText.setTypeface(Typeface.create(FONT_TITLE, Typeface.NORMAL));
+                mTwoLineTitleText.setTypeface(Typeface.create(mContext.getString(
+                        com.android.internal.R.string.config_headlineFontFamily), Typeface.NORMAL));
             }
         }
 
         void initSeekbar(MediaDevice device) {
             mSeekBar.setMax(device.getMaxVolume());
             mSeekBar.setMin(0);
-            if (mSeekBar.getProgress() != device.getCurrentVolume()) {
-                mSeekBar.setProgress(device.getCurrentVolume());
+            final int currentVolume = device.getCurrentVolume();
+            if (mSeekBar.getProgress() != currentVolume) {
+                mSeekBar.setProgress(currentVolume);
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -213,7 +234,9 @@ public abstract class MediaOutputBaseAdapter extends
             }
             mIsAnimating = true;
             // Animation for title text
-            toTitleText.setTypeface(Typeface.create(FONT_SELECTED_TITLE, Typeface.NORMAL));
+            toTitleText.setTypeface(Typeface.create(mContext.getString(
+                    com.android.internal.R.string.config_headlineFontFamilyMedium),
+                    Typeface.NORMAL));
             toTitleText.animate()
                     .setDuration(ANIM_DURATION)
                     .translationY(-delta)
@@ -234,7 +257,9 @@ public abstract class MediaOutputBaseAdapter extends
                         public void onAnimationEnd(Animator animation) {
                             final TextView fromTitleText = from.requireViewById(
                                     R.id.two_line_title);
-                            fromTitleText.setTypeface(Typeface.create(FONT_TITLE, Typeface.NORMAL));
+                            fromTitleText.setTypeface(Typeface.create(mContext.getString(
+                                    com.android.internal.R.string.config_headlineFontFamily),
+                                    Typeface.NORMAL));
                             fromTitleText.animate()
                                     .setDuration(ANIM_DURATION)
                                     .translationY(delta)
