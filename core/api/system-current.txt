@@ -5737,6 +5737,7 @@ package android.media.tv.tuner.frontend {
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder();
     method public int getAnnex();
+    method public int getBandwidth();
     method public long getInnerFec();
     method public int getModulation();
     method public int getOuterFec();
@@ -5748,6 +5749,11 @@ package android.media.tv.tuner.frontend {
     field public static final int ANNEX_B = 2; // 0x2
     field public static final int ANNEX_C = 4; // 0x4
     field public static final int ANNEX_UNDEFINED = 0; // 0x0
+    field public static final int BANDWIDTH_5MHZ = 1; // 0x1
+    field public static final int BANDWIDTH_6MHZ = 2; // 0x2
+    field public static final int BANDWIDTH_7MHZ = 4; // 0x4
+    field public static final int BANDWIDTH_8MHZ = 8; // 0x8
+    field public static final int BANDWIDTH_UNDEFINED = 0; // 0x0
     field public static final int MODULATION_AUTO = 1; // 0x1
     field public static final int MODULATION_MOD_128QAM = 16; // 0x10
     field public static final int MODULATION_MOD_16QAM = 2; // 0x2
@@ -5777,6 +5783,7 @@ package android.media.tv.tuner.frontend {
   public static class DvbcFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setBandwidth(int);
     method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setInnerFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
