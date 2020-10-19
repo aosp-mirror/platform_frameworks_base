@@ -35,8 +35,8 @@ import java.util.function.BiConsumer;
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceImplTestsBase {
 
-    private static final String OVERLAY = "com.dummy.overlay";
-    private static final String TARGET = "com.dummy.target";
+    private static final String OVERLAY = "com.test.overlay";
+    private static final String TARGET = "com.test.target";
     private static final int USER = 0;
 
     private static final String OVERLAY2 = OVERLAY + "2";

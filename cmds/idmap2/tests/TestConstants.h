@@ -19,7 +19,7 @@
 
 namespace android::idmap2::TestConstants {
 
-constexpr const auto TARGET_CRC =  0x7c2d4719;
+constexpr const auto TARGET_CRC = 0x7c2d4719;
 constexpr const auto TARGET_CRC_STRING = "7c2d4719";
 
 constexpr const auto OVERLAY_CRC = 0x5afff726;
