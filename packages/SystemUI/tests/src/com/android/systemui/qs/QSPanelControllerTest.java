@@ -61,6 +61,10 @@ public class QSPanelControllerTest extends SysuiTestCase {
     @Mock
     private QSCustomizerController mQSCustomizerController;
     @Mock
+    private QSTileRevealController.Factory mQSTileRevealControllerFactory;
+    @Mock
+    private QSTileRevealController mQSTileRevealController;
+    @Mock
     private MediaHost mMediaHost;
     @Mock
     private MetricsLogger mMetricsLogger;
@@ -78,6 +82,9 @@ public class QSPanelControllerTest extends SysuiTestCase {
     QSTileImpl mQSTile;
     @Mock
     QSTileView mQSTileView;
+    @Mock
+    PagedTileLayout mPagedTileLayout;
+
 
     private QSPanelController mController;
 
@@ -88,14 +95,16 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mQSPanel.getMediaHost()).thenReturn(mMediaHost);
         when(mQSPanel.isAttachedToWindow()).thenReturn(true);
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
+        when(mQSPanel.createRegularTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mBrightnessControllerFactory.create(any(ToggleSlider.class)))
                 .thenReturn(mBrightnessController);
+        when(mQSTileRevealControllerFactory.create(any())).thenReturn(mQSTileRevealController);
 
         mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
-                mQSTileHost, mQSCustomizerController, mDumpManager, mMetricsLogger, mUiEventLogger,
-                mBrightnessControllerFactory);
+                mQSTileHost, mQSCustomizerController, mQSTileRevealControllerFactory, mDumpManager,
+                mMetricsLogger, mUiEventLogger, mBrightnessControllerFactory);
 
         mController.init();
     }
