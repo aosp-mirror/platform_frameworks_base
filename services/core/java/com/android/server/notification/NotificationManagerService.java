@@ -3381,7 +3381,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void createConversationNotificationChannelForPackage(String pkg, int uid,
-                String triggeringKey, NotificationChannel parentChannel, String conversationId) {
+                NotificationChannel parentChannel, String conversationId) {
             enforceSystemOrSystemUI("only system can call this");
             Preconditions.checkNotNull(parentChannel);
             Preconditions.checkNotNull(conversationId);
@@ -5587,6 +5587,12 @@ public class NotificationManagerService extends SystemService {
         public NotificationChannel getNotificationChannel(String pkg, int uid, String
                 channelId) {
             return mPreferencesHelper.getNotificationChannel(pkg, uid, channelId, false);
+        }
+
+        @Override
+        public NotificationChannelGroup getNotificationChannelGroup(String pkg, int uid, String
+                channelId) {
+            return mPreferencesHelper.getGroupForChannel(pkg, uid, channelId);
         }
 
         @Override

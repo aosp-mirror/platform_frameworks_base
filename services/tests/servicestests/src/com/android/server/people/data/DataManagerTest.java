@@ -74,6 +74,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
+import android.text.format.DateUtils;
 import android.util.Range;
 
 import com.android.internal.app.ChooserActivity;
@@ -857,6 +858,30 @@ public final class DataManagerTest {
                 result.get(0).getParentNotificationChannel().getId());
         assertEquals(mStatusBarNotification.getPostTime(), result.get(0).getLastEventTimestamp());
         assertTrue(result.get(0).hasActiveNotifications());
+    }
+
+    @Test
+    public void testPruneOldRecentConversations() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        when(mNotification.getShortcutId()).thenReturn(TEST_SHORTCUT_ID);
+        listenerService.onNotificationPosted(mStatusBarNotification);
+        listenerService.onNotificationRemoved(mStatusBarNotification, null,
+                NotificationListenerService.REASON_CLICK);
+
+        mDataManager.pruneOldRecentConversations(USER_ID_PRIMARY,
+                System.currentTimeMillis() + (10 * DateUtils.DAY_IN_MILLIS) + 1);
+
+        verify(mShortcutServiceInternal).uncacheShortcuts(
+                anyInt(), any(), eq(TEST_PKG_NAME), eq(Collections.singletonList(TEST_SHORTCUT_ID)),
+                eq(USER_ID_PRIMARY), eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test
