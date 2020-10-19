@@ -198,6 +198,11 @@ public final class BasePermission {
                 == PermissionInfo.PROTECTION_DANGEROUS;
     }
 
+    public boolean isInstalled() {
+        return mPermissionInfo != null
+                && (mPermissionInfo.flags & PermissionInfo.FLAG_INSTALLED) != 0;
+    }
+
     public boolean isRemoved() {
         return mPermissionInfo != null
                 && (mPermissionInfo.flags & PermissionInfo.FLAG_REMOVED) != 0;

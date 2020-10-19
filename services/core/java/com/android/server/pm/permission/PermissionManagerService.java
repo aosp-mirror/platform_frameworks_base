@@ -2352,18 +2352,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 final PermissionInfo permissionInfo = PackageInfoUtils.generatePermissionInfo(p,
                         PackageManager.GET_META_DATA);
+                final BasePermission bp;
                 if (p.isTree()) {
-                    final BasePermission bp = BasePermission.createOrUpdate(
+                    bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
                             mSettings.getPermissionTreeLocked(p.getName()), permissionInfo, pkg,
                             mSettings.getAllPermissionTreesLocked(), chatty);
                     mSettings.putPermissionTreeLocked(p.getName(), bp);
                 } else {
-                    final BasePermission bp = BasePermission.createOrUpdate(
+                    bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
                             mSettings.getPermissionLocked(p.getName()),
                             permissionInfo, pkg, mSettings.getAllPermissionTreesLocked(), chatty);
                     mSettings.putPermissionLocked(p.getName(), bp);
+                }
+                if (bp.isInstalled()) {
+                    p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
                 }
             }
         }
