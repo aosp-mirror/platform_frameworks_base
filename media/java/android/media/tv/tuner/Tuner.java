@@ -775,7 +775,8 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>This retrieve the statuses of the frontend for given status types.
      *
-     * @param statusTypes an array of status types which the caller requests.
+     * @param statusTypes an array of status types which the caller requests. Any types that are not
+     *        in {@link FrontendInfo.getStatusCapabilities()} would be ignored.
      * @return statuses which response the caller's requests. {@code null} if the operation failed.
      */
     @Nullable
