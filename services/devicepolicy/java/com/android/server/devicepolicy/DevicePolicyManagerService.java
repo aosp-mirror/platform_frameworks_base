@@ -8666,7 +8666,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             final String componentName = agent.flattenToString();
-            if (caller.hasAdminComponent()) {
+            if (admin != null) {
                 final ActiveAdmin ap = getActiveAdminUncheckedLocked(admin, userHandle, parent);
                 if (ap == null) return null;
                 TrustAgentInfo trustAgentInfo = ap.trustAgentInfos.get(componentName);
