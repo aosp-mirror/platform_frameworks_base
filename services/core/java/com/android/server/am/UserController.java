@@ -1309,7 +1309,7 @@ class UserController implements Handler.Callback {
                 Slog.w(TAG, "No user info for user #" + userId);
                 return false;
             }
-            if (foreground && userInfo.isManagedProfile()) {
+            if (foreground && userInfo.isProfile()) {
                 Slog.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
                 return false;
             }
@@ -1614,7 +1614,7 @@ class UserController implements Handler.Callback {
             Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
             return false;
         }
-        if (targetUserInfo.isManagedProfile()) {
+        if (targetUserInfo.isProfile()) {
             Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
             return false;
         }
