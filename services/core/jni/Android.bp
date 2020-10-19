@@ -21,6 +21,7 @@ cc_library_static {
         "BroadcastRadio/TunerCallback.cpp",
         "BroadcastRadio/convert.cpp",
         "BroadcastRadio/regions.cpp",
+        "gnss/GnssConfiguration.cpp",
         "stats/PowerStatsPuller.cpp",
         "stats/SubsystemSleepStatePuller.cpp",
         "com_android_server_adb_AdbDebuggingManager.cpp",
