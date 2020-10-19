@@ -22,6 +22,8 @@
 #include <android-base/unique_fd.h>
 #include <binder/BinderService.h>
 
+#include <string>
+
 #include "android/os/BnIdmap2.h"
 
 namespace android::os {
