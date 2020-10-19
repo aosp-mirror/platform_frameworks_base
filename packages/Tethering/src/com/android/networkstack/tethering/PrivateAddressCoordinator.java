@@ -80,11 +80,6 @@ public class PrivateAddressCoordinator {
     private final SparseArray<LinkAddress> mCachedAddresses;
 
     public PrivateAddressCoordinator(Context context, TetheringConfiguration config) {
-        this(context, config, new ArrayList<>(Arrays.asList(new IpPrefix("192.168.0.0/16"))));
-    }
-
-    public PrivateAddressCoordinator(Context context, TetheringConfiguration config,
-            List<IpPrefix> prefixPools) {
         mDownstreams = new ArraySet<>();
         mUpstreamPrefixMap = new ArrayMap<>();
         mConnectivityMgr = (ConnectivityManager) context.getSystemService(
@@ -95,7 +90,11 @@ public class PrivateAddressCoordinator {
         mCachedAddresses.put(TETHERING_BLUETOOTH, new LinkAddress(LEGACY_BLUETOOTH_IFACE_ADDRESS));
         mCachedAddresses.put(TETHERING_WIFI_P2P, new LinkAddress(LEGACY_WIFI_P2P_IFACE_ADDRESS));
 
-        mTetheringPrefixes = prefixPools;
+        mTetheringPrefixes = new ArrayList<>(Arrays.asList(new IpPrefix("192.168.0.0/16")));
+        if (config.isSelectAllPrefixRangeEnabled()) {
+            mTetheringPrefixes.add(new IpPrefix("172.16.0.0/12"));
+            mTetheringPrefixes.add(new IpPrefix("10.0.0.0/8"));
+        }
     }
 
     /**

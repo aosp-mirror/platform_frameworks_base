@@ -456,11 +456,7 @@ public class TetheringTest {
         @Override
         public PrivateAddressCoordinator getPrivateAddressCoordinator(Context ctx,
                 TetheringConfiguration cfg) {
-            final ArrayList<IpPrefix> prefixPool = new ArrayList<>(Arrays.asList(
-                    new IpPrefix("192.168.0.0/16"),
-                    new IpPrefix("172.16.0.0/12"),
-                    new IpPrefix("10.0.0.0/8")));
-            mPrivateAddressCoordinator = spy(new PrivateAddressCoordinator(ctx, cfg, prefixPool));
+            mPrivateAddressCoordinator = super.getPrivateAddressCoordinator(ctx, cfg);
             return mPrivateAddressCoordinator;
         }
     }
