@@ -18,6 +18,7 @@ package com.android.systemui.bubbles.animation;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -33,6 +34,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubblePositioner;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 
 import org.junit.Before;
@@ -40,7 +42,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -67,7 +68,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
                     public int getAsInt() {
                         return mLayout.getChildCount();
                     }
-                }, Mockito.mock(Runnable.class)));
+                }, mock(Runnable.class)));
         mLayout.setActiveController(mStackController);
         addOneMoreThanBubbleLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
@@ -306,7 +307,10 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
                 FloatingContentCoordinator floatingContentCoordinator,
                 IntSupplier bubbleCountSupplier,
                 Runnable onBubbleAnimatedOutAction) {
-            super(floatingContentCoordinator, bubbleCountSupplier, onBubbleAnimatedOutAction);
+            super(floatingContentCoordinator,
+                    bubbleCountSupplier,
+                    onBubbleAnimatedOutAction,
+                    mock(BubblePositioner.class));
         }
 
         @Override

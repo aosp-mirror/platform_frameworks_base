@@ -70,7 +70,8 @@ public class TestableBubbleController extends BubbleController {
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
             Handler mainHandler,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            ShellTaskOrganizer shellTaskOrganizer,
+            BubblePositioner positioner) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 data, Runnable::run, configurationController, interruptionStateProvider,
@@ -78,7 +79,7 @@ public class TestableBubbleController extends BubbleController {
                 notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
                 dataRepository, sysUiState, notificationManager, statusBarService,
                 windowManager, windowManagerShellWrapper, launcherApps, bubbleLogger,
-                mainHandler, shellTaskOrganizer);
+                mainHandler, shellTaskOrganizer, positioner);
         setInflateSynchronously(true);
     }
 }

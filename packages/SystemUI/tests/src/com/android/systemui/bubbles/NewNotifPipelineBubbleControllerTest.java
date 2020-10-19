@@ -42,7 +42,9 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.pm.LauncherApps;
-import android.content.res.Resources;
+import android.content.res.Configuration;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
 import android.os.Handler;
@@ -170,8 +172,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     @Mock
     ColorExtractor.GradientColors mGradientColors;
     @Mock
-    private Resources mResources;
-    @Mock
     private ShadeController mShadeController;
     @Mock
     private NotificationShelfComponent mNotificationShelfComponent;
@@ -191,6 +191,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
     @Mock
     private BubbleLogger mBubbleLogger;
+    @Mock
+    private BubblePositioner mPositioner;
 
     private BubbleData mBubbleData;
 
@@ -223,7 +225,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 },
                 mLockIconController);
 
-        // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
@@ -243,6 +244,13 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
+        mBubbleData = new BubbleData(mContext, mBubbleLogger);
+
+        Rect availableRect = new Rect(0, 0, 1000, 5000);
+        when(mPositioner.getAvailableRect()).thenReturn(availableRect);
+        when(mPositioner.getOrientation()).thenReturn(Configuration.ORIENTATION_PORTRAIT);
+        when(mPositioner.getInsets()).thenReturn(Insets.of(0, 0, 0, 0));
+
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
                         mock(PowerManager.class),
@@ -254,7 +262,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         mock(Handler.class)
                 );
-        mBubbleData = new BubbleData(mContext, mBubbleLogger);
         when(mFeatureFlagsNewPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -281,7 +288,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mLauncherApps,
                 mBubbleLogger,
                 mock(Handler.class),
-                mock(ShellTaskOrganizer.class));
+                mock(ShellTaskOrganizer.class),
+                mPositioner);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
