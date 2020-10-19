@@ -10770,17 +10770,6 @@ public final class Settings {
        public static final String MODE_RINGER = "mode_ringer";
 
         /**
-         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
-         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
-         * scenarios
-         * Type: int 1 is enabled, 0 is disabled
-         *
-         * @hide
-         */
-        public static final String ENHANCED_CONNECTIVITY_ENABLED =
-                "enhanced_connectivity_enable";
-
-        /**
          * Overlay display devices setting.
          * The associated value is a specially formatted string that describes the
          * size and density of simulated secondary display devices.
@@ -12279,8 +12268,8 @@ public final class Settings {
          * List of package names that should check ANGLE rules
          * @hide
          */
-        public static final String GLOBAL_SETTINGS_ANGLE_WHITELIST =
-                "angle_whitelist";
+        public static final String GLOBAL_SETTINGS_ANGLE_ALLOWLIST =
+                "angle_allowlist";
 
         /**
          * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
@@ -12322,24 +12311,24 @@ public final class Settings {
         public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
 
         /**
-         * Apps on the blacklist that are forbidden to use Game Driver.
+         * Apps on the denylist that are forbidden to use Game Driver.
          * @hide
          */
-        public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
+        public static final String GAME_DRIVER_DENYLIST = "game_driver_denylist";
 
         /**
-         * List of blacklists, each blacklist is a blacklist for a specific version of Game Driver.
+         * List of denylists, each denylist is a denylist for a specific version of Game Driver.
          * @hide
          */
-        public static final String GAME_DRIVER_BLACKLISTS = "game_driver_blacklists";
+        public static final String GAME_DRIVER_DENYLISTS = "game_driver_denylists";
 
         /**
-         * Apps on the whitelist that are allowed to use Game Driver.
+         * Apps on the allowlist that are allowed to use Game Driver.
          * The string is a list of application package names, seperated by comma.
          * i.e. <apk1>,<apk2>,...,<apkN>
          * @hide
          */
-        public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
+        public static final String GAME_DRIVER_ALLOWLIST = "game_driver_allowlist";
 
         /**
          * List of libraries in sphal accessible by Game Driver

@@ -248,7 +248,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Eliminar notificación."</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS activado"</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Obtendo GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter activado"</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletipo activado"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Timbre en vibración"</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Timbre silenciado"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -712,11 +712,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Configuración predeterminada"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbulla"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sen son nin vibración"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Non soa nin vibra, e aparece máis abaixo na sección de conversas"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Podería soar ou vibrar en función da configuración do teléfono"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sen son nin vibración, e aparecen máis abaixo na sección de conversas"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Poderían soar ou vibrar en función da configuración do teléfono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Podería soar ou vibrar en función da configuración do teléfono. Conversas desde a burbulla da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantén a túa atención cun atallo flotante a este contido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Móstrase na parte superior da sección de conversas en forma de burbulla flotante e aparece a imaxe do perfil na pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Móstranse na parte superior da sección de conversas en forma de burbulla flotante e aparece a imaxe do perfil na pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non admite funcións de conversa"</string>
@@ -786,7 +786,7 @@
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Deter"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Seguinte"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Anterior"</string>
-    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rebobinar"</string>
+    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Retroceder"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Avance rápido"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Re Páx"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Av Páx"</string>
