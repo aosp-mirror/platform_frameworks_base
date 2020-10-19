@@ -195,7 +195,7 @@ public class BatteryStatsImpl extends BatteryStats {
     static final int MSG_REPORT_POWER_CHANGE = 2;
     static final int MSG_REPORT_CHARGING = 3;
     static final int MSG_REPORT_RESET_STATS = 4;
-    static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
+    static final long DELAY_UPDATE_WAKELOCKS = 60 * 1000;
 
     private static final double MILLISECONDS_IN_HOUR = 3600 * 1000;
     private static final long MILLISECONDS_IN_YEAR = 365 * 24 * 3600 * 1000L;
