@@ -403,9 +403,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 @Override
                 public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                     t.apply();
-                    scheduleAnimateResizePip(mPipBoundsState.getBounds(),
-                            destinationBounds, getValidSourceHintRect(mTaskInfo, destinationBounds),
-                            direction, animationDurationMs, null /* updateBoundsCallback */);
+                    // Make sure to grab the latest source hint rect as it could have been updated
+                    // right after applying the windowing mode change.
+                    final Rect sourceHintRect = getValidSourceHintRect(mPictureInPictureParams,
+                            destinationBounds);
+                    scheduleAnimateResizePip(mPipBoundsState.getBounds(), destinationBounds,
+                            sourceHintRect, direction, animationDurationMs,
+                            null /* updateBoundsCallback */);
                     mState = State.EXITING_PIP;
                 }
             });
@@ -501,7 +505,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-            final Rect sourceHintRect = getValidSourceHintRect(info, currentBounds);
+            final Rect sourceHintRect = getValidSourceHintRect(info.pictureInPictureParams,
+                    currentBounds);
             scheduleAnimateResizePip(currentBounds, destinationBounds, sourceHintRect,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
                     null /* updateBoundsCallback */);
@@ -518,10 +523,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Returns the source hint rect if it is valid (if provided and is contained by the current
      * task bounds).
      */
-    private Rect getValidSourceHintRect(ActivityManager.RunningTaskInfo info, Rect sourceBounds) {
-        final Rect sourceHintRect = info.pictureInPictureParams != null
-                && info.pictureInPictureParams.hasSourceBoundsHint()
-                ? info.pictureInPictureParams.getSourceRectHint()
+    private Rect getValidSourceHintRect(PictureInPictureParams params, Rect sourceBounds) {
+        final Rect sourceHintRect = params != null
+                && params.hasSourceBoundsHint()
+                ? params.getSourceRectHint()
                 : null;
         if (sourceHintRect != null && sourceBounds.contains(sourceHintRect)) {
             return sourceHintRect;
