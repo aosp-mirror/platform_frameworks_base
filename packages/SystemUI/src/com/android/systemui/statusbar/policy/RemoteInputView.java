@@ -18,11 +18,13 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +45,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.OnReceiveContentCallback;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -57,9 +60,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.core.view.inputmethod.InputConnectionCompat;
-import androidx.core.view.inputmethod.InputContentInfoCompat;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.statusbar.IStatusBarService;
@@ -73,7 +73,9 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -313,6 +315,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mRemoteInputs = remoteInputs;
         mRemoteInput = remoteInput;
         mEditText.setHint(mRemoteInput.getLabel());
+        mEditText.mSupportedMimeTypes = remoteInput.getAllowedDataTypes();
 
         mEntry.editedSuggestionInfo = editedSuggestionInfo;
         if (editedSuggestionInfo != null) {
@@ -571,11 +574,46 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
         UserHandle mUser;
+        private Set<String> mSupportedMimeTypes;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
             mBackground = getBackground();
             mLightBarController = Dependency.get(LightBarController.class);
+        }
+
+        @Override
+        protected void onFinishInflate() {
+            super.onFinishInflate();
+            setOnReceiveContentCallback(new OnReceiveContentCallback<View>() {
+                @Override
+                public boolean onReceiveContent(@NonNull View view, @NonNull Payload payload) {
+                    ClipData clip = payload.getClip();
+                    if (clip.getItemCount() == 0) {
+                        return false;
+                    }
+                    Uri contentUri = clip.getItemAt(0).getUri();
+                    ClipDescription description = clip.getDescription();
+                    String mimeType = null;
+                    if (description.getMimeTypeCount() > 0) {
+                        mimeType = description.getMimeType(0);
+                    }
+                    if (mimeType != null) {
+                        Intent dataIntent = mRemoteInputView
+                                .prepareRemoteInputFromData(mimeType, contentUri);
+                        mRemoteInputView.sendRemoteInput(dataIntent);
+                    }
+                    return true;
+                }
+
+                @NonNull
+                @Override
+                public Set<String> getSupportedMimeTypes(@NonNull View view) {
+                    return mSupportedMimeTypes != null
+                            ? mSupportedMimeTypes
+                            : Collections.emptySet();
+                }
+            });
         }
 
         private void defocusIfNeeded(boolean animate) {
@@ -670,36 +708,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         @Override
         public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-            // TODO: Pass RemoteInput data types to allow image insertion.
-            // String[] allowedDataTypes = mRemoteInputView.mRemoteInput.getAllowedDataTypes()
-            //     .toArray(new String[0]);
-            // EditorInfoCompat.setContentMimeTypes(outAttrs, allowedDataTypes);
-            final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
-
-            final InputConnectionCompat.OnCommitContentListener callback =
-                    new InputConnectionCompat.OnCommitContentListener() {
-                        @Override
-                        public boolean onCommitContent(
-                                InputContentInfoCompat inputContentInfoCompat, int i,
-                                Bundle bundle) {
-                            Uri contentUri = inputContentInfoCompat.getContentUri();
-                            ClipDescription description = inputContentInfoCompat.getDescription();
-                            String mimeType = null;
-                            if (description != null && description.getMimeTypeCount() > 0) {
-                                mimeType = description.getMimeType(0);
-                            }
-                            if (mimeType != null) {
-                                Intent dataIntent = mRemoteInputView.prepareRemoteInputFromData(
-                                        mimeType, contentUri);
-                                mRemoteInputView.sendRemoteInput(dataIntent);
-                            }
-                            return true;
-                        }
-                    };
-
-            InputConnection ic = inputConnection == null ? null :
-                    InputConnectionCompat.createWrapper(inputConnection, outAttrs, callback);
-
+            final InputConnection ic = super.onCreateInputConnection(outAttrs);
             Context userContext = null;
             try {
                 userContext = mContext.createPackageContextAsUser(
@@ -747,7 +756,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             } else {
                 setBackground(null);
             }
-
         }
     }
 }
