@@ -61,6 +61,28 @@
              android:visibility="invisible"
              />
     </FrameLayout>
+    <FrameLayout
+        android:id="@+id/new_lockscreen_clock_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:visibility="gone">
+        <com.android.keyguard.GradientTextClock
+            android:id="@+id/gradient_clock_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="100dp"
+            android:letterSpacing="0.02"
+            android:lineSpacingMultiplier=".8"
+            android:includeFontPadding="false"
+            android:fontFamily="sans-serif"
+            android:typeface="monospace"
+            android:format12Hour="hh\nmm"
+            android:format24Hour="HH\nmm"
+            android:elegantTextHeight="false"
+        />
+    </FrameLayout>
     <include layout="@layout/keyguard_status_area"
         android:id="@+id/keyguard_status_area"
         android:layout_width="match_parent"
