@@ -22,7 +22,6 @@ import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -1304,7 +1303,6 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
-    @TestApi
     public static @NonNull Uri setManageMode(@NonNull Uri uri) {
         Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
@@ -1316,7 +1314,6 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
-    @TestApi
     public static boolean isManageMode(@NonNull Uri uri) {
         Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.getBooleanQueryParameter(PARAM_MANAGE, false);

@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
@@ -519,7 +518,6 @@ public class RcsUceAdapter {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setUceSettingEnabled(boolean isEnabled) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();

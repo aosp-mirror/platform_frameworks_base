@@ -18,7 +18,6 @@ package android.telephony.mbms.vendor;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
@@ -39,7 +38,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@TestApi
 public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
@@ -299,7 +297,6 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     // Following two methods exist to workaround b/124210145
     /** @hide */
     @SystemApi
-    @TestApi
     @Override
     public android.os.IBinder asBinder() {
         return super.asBinder();
@@ -307,7 +304,6 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
 
     /** @hide */
     @SystemApi
-    @TestApi
     @Override
     public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply,
             int flags) throws RemoteException {

@@ -2076,7 +2076,6 @@ public final class AutofillManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void setAugmentedAutofillWhitelist(@Nullable Set<String> packages,
             @Nullable Set<ComponentName> activities) {
         if (!hasAutofillFeature()) {

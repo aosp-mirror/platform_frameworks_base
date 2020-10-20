@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -323,7 +322,6 @@ public abstract class CallScreeningService extends Service {
              * @hide
              */
             @SystemApi
-            @TestApi
             @RequiresPermission(Manifest.permission.CAPTURE_AUDIO_OUTPUT)
             public @NonNull Builder setShouldScreenCallViaAudioProcessing(
                     boolean shouldScreenCallViaAudioProcessing) {

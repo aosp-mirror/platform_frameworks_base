@@ -21,7 +21,6 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -635,7 +634,6 @@ public final class PhoneAccount implements Parcelable {
          * @hide
          */
         @SystemApi
-        @TestApi
         @RequiresPermission(MODIFY_PHONE_STATE)
         public @NonNull Builder setGroupId(@NonNull String groupId) {
             if (groupId != null) {
