@@ -20,6 +20,7 @@ import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
@@ -191,5 +192,10 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mBrightnessController.checkRestrictionAndSetEnabled();
         super.refreshAllTiles();
         mQsSecurityFooter.refreshState();
+    }
+
+    /** Start customizing the Quick Settings. */
+    public void showEdit(View view) {
+        mView.showEdit(view);
     }
 }

@@ -22,6 +22,9 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSContainerImpl;
+import com.android.systemui.qs.QSFooter;
+import com.android.systemui.qs.QSFooterView;
+import com.android.systemui.qs.QSFooterViewController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
@@ -69,5 +72,19 @@ public interface QSFragmentModule {
     @Provides
     static QuickQSPanel providesQuickQSPanel(QuickStatusBarHeader quickStatusBarHeader) {
         return quickStatusBarHeader.findViewById(R.id.quick_qs_panel);
+    }
+
+    /** */
+    @Provides
+    static QSFooterView providesQSFooterView(@RootView View view) {
+        return view.findViewById(R.id.qs_footer);
+    }
+
+    /** */
+    @Provides
+    @QSScope
+    static QSFooter providesQSFooter(QSFooterViewController qsFooterViewController) {
+        qsFooterViewController.init();
+        return qsFooterViewController;
     }
 }
