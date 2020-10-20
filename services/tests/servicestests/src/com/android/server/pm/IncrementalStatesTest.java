@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.PackageManager;
 import android.os.ConditionVariable;
 import android.os.incremental.IStorageHealthListener;
@@ -113,96 +112,30 @@ public class IncrementalStatesTest {
     }
 
     /**
-     * Test that the package is still startable when Incremental Storage is at blocked status.
+     * Test that the package becomes unstartable when health status indicate storage issues.
      */
     @Test
     public void testStartableTransition_IncrementalStorageBlocked() {
         mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_BLOCKED);
-        // Test that package is still startable
-        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
+                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_STORAGE);
+        // Test that package is now unstartable
+        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
+        assertFalse(mIncrementalStates.isStartable());
+        assertEquals(PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE,
+                mUnstartableReason.get());
     }
 
     /**
-     * Test that the package is still startable when Data Loader has unknown transportation issues.
-     */
-    @Test
-    public void testStartableTransition_DataLoaderTransportError() {
-        mIncrementalStates.onStreamStatusChanged(
-                IDataLoaderStatusListener.STREAM_TRANSPORT_ERROR);
-        // Test that package is still startable
-        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
-    }
-
-    /**
-     * Test that the package becomes unstartable when Data Loader has data integrity issues.
+     * Test that the package becomes unstartable when health status indicates transport issues.
      */
     @Test
     public void testStartableTransition_DataLoaderIntegrityError() {
-        mIncrementalStates.onStreamStatusChanged(
-                IDataLoaderStatusListener.STREAM_INTEGRITY_ERROR);
+        mIncrementalStates.onStorageHealthStatusChanged(
+                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_TRANSPORT);
         // Test that package is now unstartable
         assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isStartable());
         assertEquals(PackageManager.UNSTARTABLE_REASON_CONNECTION_ERROR,
-                mUnstartableReason.get());
-    }
-
-    /**
-     * Test that the package becomes unstartable when Data Loader has data source issues.
-     */
-    @Test
-    public void testStartableTransition_DataLoaderSourceError() {
-        mIncrementalStates.onStreamStatusChanged(
-                IDataLoaderStatusListener.STREAM_SOURCE_ERROR);
-        // Test that package is now unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_CONNECTION_ERROR,
-                mUnstartableReason.get());
-    }
-
-    /**
-     * Test that the package becomes unstartable when Data Loader hits limited storage while
-     * Incremental storage has a pending reads.
-     */
-    @Test
-    public void testStartableTransition_DataLoaderStorageErrorWhenIncrementalStoragePending()
-            throws InterruptedException {
-        mIncrementalStates.onStreamStatusChanged(
-                IDataLoaderStatusListener.STREAM_STORAGE_ERROR);
-        // Test that package is still startable
-        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
-        mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_READS_PENDING);
-        // Test that package is now unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE,
-                mUnstartableReason.get());
-    }
-
-    /**
-     * Test that the package becomes unstartable when Data Loader hits limited storage while
-     * Incremental storage is at blocked status.
-     */
-    @Test
-    public void testStartableTransition_DataLoaderStorageErrorWhenIncrementalStorageBlocked()
-            throws InterruptedException {
-        mIncrementalStates.onStreamStatusChanged(
-                IDataLoaderStatusListener.STREAM_STORAGE_ERROR);
-        // Test that package is still startable
-        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
-        mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_BLOCKED);
-        // Test that package is now unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE,
                 mUnstartableReason.get());
     }
 
@@ -227,42 +160,18 @@ public class IncrementalStatesTest {
     }
 
     /**
-     * Test that the package becomes unstartable when Data Loader has data integrity issue, and it
-     * becomes startable again when Data Loader is healthy again.
+     * Test that the package becomes unstartable when health status indicates transportation issue,
+     * and it becomes startable again when health status is ok again.
      */
     @Test
     public void testStartableTransition_DataLoaderUnhealthyBackToHealthy()
             throws InterruptedException {
-        mIncrementalStates.onStreamStatusChanged(IDataLoaderStatusListener.STREAM_INTEGRITY_ERROR);
-        // Test that package is unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-
-        mIncrementalStates.onStreamStatusChanged(IDataLoaderStatusListener.STREAM_HEALTHY);
-        // Test that package is now startable
-        assertTrue(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
-    }
-
-    /**
-     * Test that the package becomes unstartable when both Incremental Storage and Data Loader
-     * are unhealthy, and it becomes startable again when both Incremental Storage and Data Loader
-     * are healthy again.
-     */
-    @Test
-    public void testStartableTransition_DataLoaderAndIncrementalStorageUnhealthyBackToHealthy()
-            throws InterruptedException {
         mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
-        mIncrementalStates.onStreamStatusChanged(IDataLoaderStatusListener.STREAM_INTEGRITY_ERROR);
+                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_TRANSPORT);
         // Test that package is unstartable
         assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isStartable());
 
-        mIncrementalStates.onStreamStatusChanged(IDataLoaderStatusListener.STREAM_HEALTHY);
-        // Test that package is still unstartable
-        assertFalse(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
         mIncrementalStates.onStorageHealthStatusChanged(IStorageHealthListener.HEALTH_STATUS_OK);
         // Test that package is now startable
         assertTrue(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));

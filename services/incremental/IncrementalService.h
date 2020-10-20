@@ -140,7 +140,10 @@ public:
     bool registerLoadingProgressListener(StorageId storage,
                                          const StorageLoadingProgressListener& progressListener);
     bool unregisterLoadingProgressListener(StorageId storage);
-
+    bool registerStorageHealthListener(StorageId storage,
+                                       StorageHealthCheckParams&& healthCheckParams,
+                                       const StorageHealthListener& healthListener);
+    void unregisterStorageHealthListener(StorageId storage);
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
 
@@ -197,6 +200,8 @@ private:
 
         MountId id() const { return mId.load(std::memory_order_relaxed); }
         const content::pm::DataLoaderParamsParcel& params() const { return mParams; }
+        void setHealthListener(StorageHealthCheckParams&& healthCheckParams,
+                               const StorageHealthListener* healthListener);
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
@@ -251,6 +256,7 @@ private:
             BootClockTsUs kernelTsUs;
         } mHealthBase = {TimePoint::max(), kMaxBootClockTsUs};
         StorageHealthCheckParams mHealthCheckParams;
+        int mStreamStatus = content::pm::IDataLoaderStatusListener::STREAM_HEALTHY;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
