@@ -2199,6 +2199,12 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                             valid = true;
                             break;
                         }
+                        case FrontendModulation::hidl_discriminator::dtmb: {
+                            m[0] = static_cast<jint>(modulation.dtmb());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -2247,6 +2253,10 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         intBandwidth = static_cast<jint>(bandwidth.isdbt());
                         break;
                     }
+                    case FrontendBandwidth::hidl_discriminator::dtmb: {
+                        intBandwidth = static_cast<jint>(bandwidth.dtmb());
+                        break;
+                    }
                     default:
                         valid = false;
                         break;
@@ -2271,6 +2281,10 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         intInterval = static_cast<jint>(interval.isdbt());
                         break;
                     }
+                    case FrontendGuardInterval::hidl_discriminator::dtmb: {
+                        intInterval = static_cast<jint>(interval.dtmb());
+                        break;
+                    }
                     default:
                         valid = false;
                         break;
@@ -2293,6 +2307,10 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                     }
                     case FrontendTransmissionMode::hidl_discriminator::isdbt: {
                         intTransmissionMode = static_cast<jint>(transmissionMode.isdbt());
+                        break;
+                    }
+                    case FrontendTransmissionMode::hidl_discriminator::dtmb: {
+                        intTransmissionMode = static_cast<jint>(transmissionMode.dtmb());
                         break;
                     }
                     default:
