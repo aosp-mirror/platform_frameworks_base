@@ -23,6 +23,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.DeviceConfigProxyFake
@@ -65,6 +66,8 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var userTracker: UserTracker
+    @Mock
+    private lateinit var logger: PrivacyLogger
 
     private lateinit var privacyItemController: PrivacyItemController
     private lateinit var executor: FakeExecutor
@@ -77,8 +80,8 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
                 executor,
                 deviceConfigProxy,
                 userTracker,
-                dumpManager
-        )
+                logger,
+                dumpManager)
     }
 
     @Before
