@@ -1169,7 +1169,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
 
-        mDnsManager = new DnsManager(mContext, mDnsResolver, mSystemProperties);
+        mDnsManager = new DnsManager(mContext, mDnsResolver);
         registerPrivateDnsSettingsCallbacks();
     }
 
