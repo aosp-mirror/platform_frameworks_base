@@ -45,6 +45,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
@@ -341,7 +342,8 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.userManagerService) { mockUserManagerService }
             whenever(this.permissionManagerServiceInternal) { mockPermissionManagerService }
             whenever(this.settings) { mockSettings }
-            whenever(this.activityTaskManagerInternal) { mockActivityTaskManager }
+            whenever(this.getLocalService(ActivityTaskManagerInternal::class.java)) {
+                mockActivityTaskManager}
             whenever(this.appsFilter) { mockAppsFilter }
             whenever(this.context) { mockContext }
         }
