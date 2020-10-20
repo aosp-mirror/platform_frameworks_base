@@ -18,7 +18,6 @@ package android.permission;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,7 +32,6 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
-@TestApi
 @SystemApi
 public final class RuntimePermissionPresentationInfo implements Parcelable {
     private static final int FLAG_GRANTED = 1 << 0;

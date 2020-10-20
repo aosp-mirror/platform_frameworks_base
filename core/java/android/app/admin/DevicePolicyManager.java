@@ -1465,7 +1465,7 @@ public class DevicePolicyManager {
      * @see #createAdminSupportIntent(String)
      * @hide
      */
-    @TestApi @SystemApi
+    @SystemApi
     public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
 
     /**
@@ -2688,13 +2688,11 @@ public class DevicePolicyManager {
      * </ul>
      */
     @SystemApi
-    @TestApi
     public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED =
             "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
 
     /** @hide See {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED} */
     @SystemApi
-    @TestApi
     public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED =
             "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
 
@@ -6671,7 +6669,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @SuppressLint("Doclava125")
     public boolean isDeviceManaged() {
         try {
@@ -10381,7 +10378,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @SuppressLint("Doclava125")
     public @Nullable CharSequence getDeviceOwnerOrganizationName() {
         try {

@@ -22,7 +22,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -101,7 +100,6 @@ import java.util.concurrent.Executors;
  TODO(hkuang): Clarify whether supports framerate conversion.
  @hide
  */
-@TestApi
 @SystemApi
 public final class MediaTranscodeManager {
     private static final String TAG = "MediaTranscodeManager";

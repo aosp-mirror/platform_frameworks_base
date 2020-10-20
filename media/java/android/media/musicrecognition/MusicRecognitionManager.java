@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.media.MediaMetadata;
 import android.os.Bundle;
@@ -41,7 +40,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 @SystemService(Context.MUSIC_RECOGNITION_SERVICE)
 public class MusicRecognitionManager {
 

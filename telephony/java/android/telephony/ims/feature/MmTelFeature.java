@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
@@ -60,7 +59,7 @@ public class MmTelFeature extends ImsFeature {
     /**
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public MmTelFeature() {
     }
 
@@ -228,7 +227,7 @@ public class MmTelFeature extends ImsFeature {
          * @see #removeCapabilities(int)
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public MmTelCapabilities() {
             super();
         }
@@ -237,7 +236,7 @@ public class MmTelFeature extends ImsFeature {
          * @hide
          */
         @Deprecated
-        @SystemApi @TestApi
+        @SystemApi
         public MmTelCapabilities(Capabilities c) {
             mCapabilities = c.mCapabilities;
         }
@@ -248,7 +247,7 @@ public class MmTelFeature extends ImsFeature {
          *                     bitfield.
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public MmTelCapabilities(@MmTelCapability int capabilities) {
             super(capabilities);
         }
@@ -288,7 +287,7 @@ public class MmTelFeature extends ImsFeature {
          * @hide
          */
         @Override
-        @SystemApi @TestApi
+        @SystemApi
         public final void addCapabilities(@MmTelCapability int capabilities) {
             super.addCapabilities(capabilities);
         }
@@ -297,7 +296,7 @@ public class MmTelFeature extends ImsFeature {
          * @hide
          */
         @Override
-        @SystemApi @TestApi
+        @SystemApi
         public final void removeCapabilities(@MmTelCapability int capability) {
             super.removeCapabilities(capability);
         }
@@ -375,14 +374,14 @@ public class MmTelFeature extends ImsFeature {
      * outgoing call as IMS.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int PROCESS_CALL_IMS = 0;
     /**
      * To be returned by {@link #shouldProcessCall(String[])} when the telephony framework should
      * not process the outgoing call as IMS and should instead use circuit switch.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int PROCESS_CALL_CSFB = 1;
 
     /** @hide */
@@ -400,7 +399,7 @@ public class MmTelFeature extends ImsFeature {
      * This is an optional boolean flag.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String EXTRA_IS_USSD = "android.telephony.ims.feature.extra.IS_USSD";
 
     /**
@@ -413,7 +412,7 @@ public class MmTelFeature extends ImsFeature {
      * This is an optional boolean flag.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String EXTRA_IS_UNKNOWN_CALL =
             "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
 
@@ -453,7 +452,7 @@ public class MmTelFeature extends ImsFeature {
      * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     public @NonNull final MmTelCapabilities queryCapabilityStatus() {
         return new MmTelCapabilities(super.queryCapabilityStatus());
     }
@@ -468,7 +467,7 @@ public class MmTelFeature extends ImsFeature {
      * {@link #changeEnabledCapabilities}) should also show the status as disabled.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public final void notifyCapabilitiesStatusChanged(@NonNull MmTelCapabilities c) {
         if (c == null) {
             throw new IllegalArgumentException("MmTelCapabilities must be non-null!");
@@ -483,7 +482,7 @@ public class MmTelFeature extends ImsFeature {
      * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
       * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public final void notifyIncomingCall(@NonNull ImsCallSessionImplBase c,
             @NonNull Bundle extras) {
         if (c == null || extras == null) {
@@ -509,7 +508,7 @@ public class MmTelFeature extends ImsFeature {
      * @param reason The {@link ImsReasonInfo} call rejection reason.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public final void notifyRejectedCall(@NonNull ImsCallProfile callProfile,
             @NonNull ImsReasonInfo reason) {
         if (callProfile == null || reason == null) {
@@ -548,7 +547,7 @@ public class MmTelFeature extends ImsFeature {
      * @link count the new Voice Message count.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public final void notifyVoiceMessageCountUpdate(int count) {
         IImsMmTelListener listener = getListener();
         if (listener == null) {
@@ -571,7 +570,7 @@ public class MmTelFeature extends ImsFeature {
      * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     public boolean queryCapabilityConfiguration(@MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
         // Base implementation - Override to provide functionality
@@ -592,7 +591,7 @@ public class MmTelFeature extends ImsFeature {
      * * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
             @NonNull CapabilityCallbackProxy c) {
         // Base implementation, no-op
@@ -617,7 +616,7 @@ public class MmTelFeature extends ImsFeature {
      * @return a {@link ImsCallProfile} object
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @Nullable ImsCallProfile createCallProfile(int callSessionType, int callType) {
         // Base Implementation - Should be overridden
         return null;
@@ -640,7 +639,7 @@ public class MmTelFeature extends ImsFeature {
      * @param profile a call profile to make the call
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @Nullable ImsCallSessionImplBase createCallSession(@NonNull ImsCallProfile profile) {
         // Base Implementation - Should be overridden
         return null;
@@ -659,7 +658,7 @@ public class MmTelFeature extends ImsFeature {
      *        call will be placed over IMS or via CSFB.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @ProcessCallResult int shouldProcessCall(@NonNull String[] numbers) {
         return PROCESS_CALL_IMS;
     }
@@ -694,7 +693,7 @@ public class MmTelFeature extends ImsFeature {
      * configuration.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @NonNull ImsUtImplBase getUt() {
         // Base Implementation - Should be overridden
         return new ImsUtImplBase();
@@ -705,7 +704,7 @@ public class MmTelFeature extends ImsFeature {
      * calls that support it.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @NonNull ImsEcbmImplBase getEcbm() {
         // Base Implementation - Should be overridden
         return new ImsEcbmImplBase();
@@ -716,7 +715,7 @@ public class MmTelFeature extends ImsFeature {
      * package processing for multi-endpoint.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @NonNull ImsMultiEndpointImplBase getMultiEndpoint() {
         // Base Implementation - Should be overridden
         return new ImsMultiEndpointImplBase();
@@ -744,7 +743,7 @@ public class MmTelFeature extends ImsFeature {
      * }
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public void setUiTtyMode(int mode, @Nullable Message onCompleteMessage) {
         // Base Implementation - Should be overridden
     }
@@ -780,7 +779,7 @@ public class MmTelFeature extends ImsFeature {
      * Provider.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @NonNull ImsSmsImplBase getSmsImplementation() {
         return new ImsSmsImplBase();
     }
@@ -794,7 +793,7 @@ public class MmTelFeature extends ImsFeature {
      * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     public void onFeatureRemoved() {
         // Base Implementation - Should be overridden
     }
@@ -804,7 +803,7 @@ public class MmTelFeature extends ImsFeature {
      * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     public void onFeatureReady() {
         // Base Implementation - Should be overridden
     }

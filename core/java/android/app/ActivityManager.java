@@ -3608,7 +3608,7 @@ public class ActivityManager {
      * running its code, {@link RunningAppProcessInfo#IMPORTANCE_GONE} is returned.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public @RunningAppProcessInfo.Importance int getPackageImportance(String packageName) {
         try {
@@ -3628,7 +3628,7 @@ public class ActivityManager {
      * running its code, {@link RunningAppProcessInfo#IMPORTANCE_GONE} is returned.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public @RunningAppProcessInfo.Importance int getUidImportance(int uid) {
         try {
@@ -3645,7 +3645,7 @@ public class ActivityManager {
      * {@link #addOnUidImportanceListener}.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public interface OnUidImportanceListener {
         /**
          * The importance if a given uid has changed.  Will be one of the importance
@@ -3676,7 +3676,7 @@ public class ActivityManager {
      * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void addOnUidImportanceListener(OnUidImportanceListener listener,
             @RunningAppProcessInfo.Importance int importanceCutpoint) {
@@ -3705,7 +3705,7 @@ public class ActivityManager {
      * @throws IllegalArgumentException If the listener is not registered.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void removeOnUidImportanceListener(OnUidImportanceListener listener) {
         synchronized (this) {
@@ -3847,7 +3847,7 @@ public class ActivityManager {
      * @see #forceStopPackageAsUser(String, int)
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void forceStopPackage(String packageName) {
         forceStopPackageAsUser(packageName, mContext.getUserId());
@@ -4186,7 +4186,6 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean switchUser(@NonNull UserHandle user) {
         if (user == null) {
@@ -4619,7 +4618,7 @@ public class ActivityManager {
      *
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void killProcessesWhenImperceptible(@NonNull int[] pids, @NonNull String reason) {
         try {

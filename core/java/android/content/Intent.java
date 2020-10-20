@@ -28,7 +28,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
@@ -1748,7 +1747,6 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String EXTRA_ORIGINATING_UID
             = "android.intent.extra.ORIGINATING_UID";
 
@@ -1979,7 +1977,6 @@ public class Intent implements Parcelable, Cloneable {
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
-    @TestApi
     public static final String ACTION_MANAGE_DEFAULT_APP =
             "android.intent.action.MANAGE_DEFAULT_APP";
 
@@ -1994,7 +1991,6 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
 
     /**
@@ -2541,7 +2537,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ROLLBACK_COMMITTED =
             "android.intent.action.ROLLBACK_COMMITTED";
