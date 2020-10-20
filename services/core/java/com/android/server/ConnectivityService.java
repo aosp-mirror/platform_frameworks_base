@@ -2471,12 +2471,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             loge("Can't set TCP buffer sizes:" + e);
         }
 
-        Integer rwndValue = Settings.Global.getInt(mContext.getContentResolver(),
-            Settings.Global.TCP_DEFAULT_INIT_RWND,
+        final Integer rwndValue = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.TCP_DEFAULT_INIT_RWND,
                     mSystemProperties.getInt("net.tcp.default_init_rwnd", 0));
-        final String sysctlKey = "sys.sysctl.tcp_def_init_rwnd";
         if (rwndValue != 0) {
-            mSystemProperties.set(sysctlKey, rwndValue.toString());
+            mSystemProperties.setTcpInitRwnd(rwndValue);
         }
     }
 
