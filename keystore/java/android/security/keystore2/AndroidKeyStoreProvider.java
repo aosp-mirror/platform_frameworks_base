@@ -110,6 +110,23 @@ public class AndroidKeyStoreProvider extends Provider {
         putSecretKeyFactoryImpl("HmacSHA512");
     }
 
+    private static boolean sInstalled = false;
+
+    /**
+     * This function indicates whether or not this provider was installed. This is manly used
+     * as indicator for
+     * {@link android.security.keystore.AndroidKeyStoreProvider#getKeyStoreForUid(int)}
+     * to whether or not to retrieve the Keystore provider by "AndroidKeyStoreLegacy".
+     * This function can be removed once the transition to Keystore 2.0 is complete.
+     * b/171305684
+     *
+     * @return true if this provider was installed.
+     * @hide
+     */
+    public static boolean isInstalled() {
+        return sInstalled;
+    }
+
     /**
      * Installs a new instance of this provider (and the
      * {@link AndroidKeyStoreBCWorkaroundProvider}).
@@ -125,17 +142,26 @@ public class AndroidKeyStoreProvider extends Provider {
                 break;
             }
         }
+        sInstalled = true;
 
         Security.addProvider(new AndroidKeyStoreProvider());
+        Security.addProvider(
+                new android.security.keystore.AndroidKeyStoreProvider(
+                        "AndroidKeyStoreLegacy"));
         Provider workaroundProvider = new AndroidKeyStoreBCWorkaroundProvider();
+        Provider legacyWorkaroundProvider =
+                new android.security.keystore.AndroidKeyStoreBCWorkaroundProvider(
+                        "AndroidKeyStoreBCWorkaroundLegacy");
         if (bcProviderIndex != -1) {
             // Bouncy Castle provider found -- install the workaround provider above it.
             // insertProviderAt uses 1-based positions.
+            Security.insertProviderAt(legacyWorkaroundProvider, bcProviderIndex + 1);
             Security.insertProviderAt(workaroundProvider, bcProviderIndex + 1);
         } else {
             // Bouncy Castle provider not found -- install the workaround provider at lowest
             // priority.
             Security.addProvider(workaroundProvider);
+            Security.addProvider(legacyWorkaroundProvider);
         }
     }
 
