@@ -263,6 +263,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
     }
 
+    public QSPanel.QSTileLayout getTileLayout() {
+        return mView.getTileLayout();
+    }
+
     /** */
     public static final class TileRecord extends QSPanel.Record {
         public QSTile tile;
