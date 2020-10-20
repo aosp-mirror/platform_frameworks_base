@@ -18,7 +18,6 @@ package android.security.keystore;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 
 /**
  * Thrown when {@link AttestationUtils} is unable to attest the given device ids.
@@ -26,7 +25,6 @@ import android.annotation.TestApi;
  * @hide
  */
 @SystemApi
-@TestApi
 public class DeviceIdAttestationException extends Exception {
     /**
      * Constructs a new {@code DeviceIdAttestationException} with the current stack trace and the

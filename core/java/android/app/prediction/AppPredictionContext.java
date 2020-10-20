@@ -19,7 +19,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -32,7 +31,6 @@ import android.os.Parcelable;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class AppPredictionContext implements Parcelable {
 
     private final int mPredictedTargetCount;
@@ -129,7 +127,6 @@ public final class AppPredictionContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final class Builder {
 
         @NonNull
@@ -147,7 +144,6 @@ public final class AppPredictionContext implements Parcelable {
          * @hide
          */
         @SystemApi
-        @TestApi
         public Builder(@NonNull Context context) {
             mPackageName = context.getPackageName();
         }
