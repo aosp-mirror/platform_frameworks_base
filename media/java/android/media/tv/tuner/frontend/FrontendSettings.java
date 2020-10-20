@@ -302,6 +302,7 @@ public abstract class FrontendSettings {
      *
      * @return the end frequency in Hz.
      */
+    @IntRange(from = 1)
     public int getEndFrequency() {
         return mEndFrequency;
     }
@@ -341,11 +342,15 @@ public abstract class FrontendSettings {
      *
      * @param endFrequency the end frequency used during blind scan. The default value is
      * {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_SETTING_FREQUENCY}.
+     * @throws IllegalArgumentException if the {@code endFrequency} is not greater than 0.
      */
     @IntRange(from = 1)
     public void setEndFrequency(int endFrequency) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "setEndFrequency")) {
+            if (endFrequency < 1) {
+                throw new IllegalArgumentException("endFrequency must be greater than 0");
+            }
             mEndFrequency = endFrequency;
         }
     }

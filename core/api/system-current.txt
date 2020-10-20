@@ -6004,7 +6004,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public abstract class FrontendSettings {
-    method public int getEndFrequency();
+    method @IntRange(from=1) public int getEndFrequency();
     method public int getFrequency();
     method public int getFrontendSpectralInversion();
     method public abstract int getType();
