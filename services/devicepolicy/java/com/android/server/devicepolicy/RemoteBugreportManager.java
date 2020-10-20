@@ -137,8 +137,9 @@ public class RemoteBugreportManager {
             Slog.wtf(LOG_TAG, "Failed to resolve intent for remote bugreport dialog");
         }
 
+        // Simple notification clicks are immutable
         final PendingIntent pendingDialogIntent = PendingIntent.getActivityAsUser(mContext, type,
-                dialogIntent, 0, null, UserHandle.CURRENT);
+                dialogIntent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
 
         final Notification.Builder builder =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
@@ -158,12 +159,14 @@ public class RemoteBugreportManager {
                         R.string.taking_remote_bugreport_notification_title))
                     .setProgress(0, 0, true);
         } else if (type == NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED) {
+            // Simple notification action button clicks are immutable
             final PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(mContext,
                     NOTIFICATION_ID, new Intent(ACTION_BUGREPORT_SHARING_ACCEPTED),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            // Simple notification action button clicks are immutable
             final PendingIntent pendingIntentDecline = PendingIntent.getBroadcast(mContext,
                     NOTIFICATION_ID, new Intent(ACTION_BUGREPORT_SHARING_DECLINED),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(new Notification.Action.Builder(null /* icon */, mContext.getString(
                         R.string.decline_remote_bugreport_action), pendingIntentDecline).build())
                     .addAction(new Notification.Action.Builder(null /* icon */, mContext.getString(

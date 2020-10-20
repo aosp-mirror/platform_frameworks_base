@@ -230,8 +230,9 @@ public class UsbPortManager {
                     com.android.internal.R.string.config_usbContaminantActivity)));
             intent.putExtra(UsbManager.EXTRA_PORT, ParcelableUsbPort.of(currentPortInfo.mUsbPort));
 
+            // Simple notification clicks are immutable
             PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
-                                intent, 0, null, UserHandle.CURRENT);
+                                intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
 
             Notification.Builder builder = new Notification.Builder(mContext, channel)
                     .setOngoing(true)
