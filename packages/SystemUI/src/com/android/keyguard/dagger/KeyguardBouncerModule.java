@@ -24,6 +24,7 @@ import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSecurityContainer;
 import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
 import dagger.Module;

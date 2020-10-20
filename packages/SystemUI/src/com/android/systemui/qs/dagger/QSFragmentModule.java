@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.keyguard;
+package com.android.systemui.qs.dagger;
 
-import android.view.ViewGroup;
+import android.view.View;
 
-import com.android.keyguard.dagger.KeyguardBouncerScope;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.util.ViewController;
+import com.android.systemui.qs.QSFragment;
+import com.android.systemui.qs.QSPanel;
 
-import javax.inject.Inject;
-/** Controller for a {@link KeyguardBouncer}'s Root view. */
-@KeyguardBouncerScope
-public class KeyguardRootViewController extends ViewController<ViewGroup> {
-    @Inject
-    public KeyguardRootViewController(@RootView ViewGroup view) {
-        super(view);
+import dagger.Module;
+import dagger.Provides;
+
+/**
+ * Dagger Module for {@link QSFragmentComponent}.
+ */
+@Module
+public interface QSFragmentModule {
+    /** */
+    @Provides
+    @RootView
+    static View provideRootView(QSFragment qsFragment) {
+        return qsFragment.getView();
     }
 
-    public ViewGroup getView() {
-        return mView;
-    }
-
-    @Override
-    protected void onViewAttached() {
-
-    }
-
-    @Override
-    protected void onViewDetached() {
-
+    /** */
+    @Provides
+    static QSPanel provideQSPanel(@RootView View view) {
+        return view.findViewById(R.id.quick_settings_panel);
     }
 }
