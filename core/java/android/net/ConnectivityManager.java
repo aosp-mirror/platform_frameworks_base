@@ -899,6 +899,18 @@ public class ConnectivityManager {
     }
 
     /**
+     * @hide
+     * TODO: Expose for SystemServer when becomes a module.
+     */
+    public void systemReady() {
+        try {
+            mService.systemReady();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks if a given type uses the cellular data connection.
      * This should be replaced in the future by a network property.
      * @param networkType the type to check
