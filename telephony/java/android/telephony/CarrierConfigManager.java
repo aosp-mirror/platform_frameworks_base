@@ -23,7 +23,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -4554,7 +4553,6 @@ public class CarrierConfigManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    @TestApi
     public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrideValues) {
         overrideConfig(subscriptionId, overrideValues, false);
     }

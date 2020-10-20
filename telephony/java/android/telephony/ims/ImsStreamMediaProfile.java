@@ -18,7 +18,6 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,7 +29,6 @@ import android.os.Parcelable;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ImsStreamMediaProfile implements Parcelable {
     private static final String TAG = "ImsStreamMediaProfile";
 
