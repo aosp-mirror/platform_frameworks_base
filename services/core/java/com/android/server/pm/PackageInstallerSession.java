@@ -37,16 +37,11 @@ import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 
 import static com.android.internal.util.XmlUtils.readBitmapAttribute;
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readByteArrayAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.readUriAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeByteArrayAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
@@ -156,7 +151,6 @@ import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -759,6 +753,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             info.mode = params.mode;
             info.installReason = params.installReason;
+            info.installScenario = params.installScenario;
             info.sizeBytes = params.sizeBytes;
             info.appPackageName = mPackageName != null ? mPackageName : params.appPackageName;
             if (includeIcon) {

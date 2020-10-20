@@ -15198,6 +15198,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int autoRevokePermissionsMode;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
+        final int mInstallScenario;
         @Nullable MultiPackageInstallParams mParentInstallParams;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
@@ -15220,6 +15221,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.autoRevokePermissionsMode = MODE_DEFAULT;
             this.signingDetails = PackageParser.SigningDetails.UNKNOWN;
             this.installReason = PackageManager.INSTALL_REASON_UNKNOWN;
+            this.mInstallScenario = PackageManager.INSTALL_SCENARIO_DEFAULT;
             this.forceQueryableOverride = false;
             this.mDataLoaderType = DataLoaderType.NONE;
             this.requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
@@ -15233,6 +15235,7 @@ public class PackageManagerService extends IPackageManager.Stub
             move = null;
             installReason = fixUpInstallReason(
                     installSource.installerPackageName, installerUid, sessionParams.installReason);
+            mInstallScenario = sessionParams.installScenario;
             this.observer = observer;
             installFlags = sessionParams.installFlags;
             this.installSource = installSource;
@@ -15956,6 +15959,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int traceCookie;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
+        final int mInstallScenario;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
 
@@ -15971,7 +15975,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 List<String> whitelistedRestrictedPermissions,
                 int autoRevokePermissionsMode,
                 String traceMethod, int traceCookie, SigningDetails signingDetails,
-                int installReason, boolean forceQueryableOverride, int dataLoaderType) {
+                int installReason, int installScenario, boolean forceQueryableOverride,
+                int dataLoaderType) {
             this.origin = origin;
             this.move = move;
             this.installFlags = installFlags;
@@ -15988,6 +15993,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.traceCookie = traceCookie;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
+            this.mInstallScenario = installScenario;
             this.forceQueryableOverride = forceQueryableOverride;
             this.mDataLoaderType = dataLoaderType;
         }
@@ -16000,7 +16006,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.autoRevokePermissionsMode,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.forceQueryableOverride, params.mDataLoaderType);
+                    params.installReason, params.mInstallScenario, params.forceQueryableOverride,
+                    params.mDataLoaderType);
         }
 
         abstract int copyApk();
@@ -16089,8 +16096,8 @@ public class PackageManagerService extends IPackageManager.Stub
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
                     PackageParser.SigningDetails.UNKNOWN,
-                    PackageManager.INSTALL_REASON_UNKNOWN, false,
-                    DataLoaderType.NONE);
+                    PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.INSTALL_SCENARIO_DEFAULT,
+                    false, DataLoaderType.NONE);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
         }
 
