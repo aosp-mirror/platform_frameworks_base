@@ -57,7 +57,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -68,6 +67,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -114,10 +114,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final QSLogger mQSLogger;
     protected final UiEventLogger mUiEventLogger;
     protected QSTileHost mHost;
-    private final UserTracker mUserTracker;
+    private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
+            new ArrayList<>();
 
     @Nullable
-    protected QSSecurityFooter mSecurityFooter;
+    protected View mSecurityFooter;
 
     @Nullable
     protected View mFooter;
@@ -157,8 +158,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             DumpManager dumpManager,
             QSLogger qsLogger,
             @Named(QS_PANEL) MediaHost mediaHost,
-            UiEventLogger uiEventLogger,
-            UserTracker userTracker
+            UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
@@ -173,13 +173,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
         mUiEventLogger = uiEventLogger;
-        mUserTracker = userTracker;
 
         setOrientation(VERTICAL);
 
         addViewsAboveTiles();
         mMovableContentStartIndex = getChildCount();
         mRegularTileLayout = createRegularTileLayout();
+        mTileLayout = mRegularTileLayout;
 
         if (mUsingMediaPlayer) {
             mHorizontalLinearLayout = new RemeasuringLinearLayout(mContext);
@@ -205,24 +205,18 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
             initMediaHostState();
         }
-        addSecurityFooter();
         if (mRegularTileLayout instanceof PagedTileLayout) {
             mQsTileRevealController = new QSTileRevealController(mContext, this,
                     (PagedTileLayout) mRegularTileLayout);
         }
         mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), mCachedSpecs);
-        updateResources();
     }
 
     protected void onMediaVisibilityChanged(Boolean visible) {
-        switchTileLayout();
+        switchTileLayout(false);
         if (mMediaVisibilityChangedListener != null) {
             mMediaVisibilityChangedListener.accept(visible);
         }
-    }
-
-    protected void addSecurityFooter() {
-        mSecurityFooter = new QSSecurityFooter(this, mContext, mUserTracker);
     }
 
     protected void addViewsAboveTiles() {
@@ -432,9 +426,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mHost = host;
         mHost.addCallback(this);
         setTiles(mHost.getTiles());
-        if (mSecurityFooter != null) {
-            mSecurityFooter.setHostEnvironment(host);
-        }
         mCustomizePanel = customizer;
         if (mCustomizePanel != null) {
             mCustomizePanel.setHost(mHost);
@@ -477,9 +468,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         updatePageIndicator();
 
-        if (mListening) {
-            refreshAllTiles();
-        }
         if (mTileLayout != null) {
             mTileLayout.updateResources();
         }
@@ -500,19 +488,25 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
     }
 
+    void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        mOnConfigurationChangedListeners.add(listener);
+    }
+
+    void removeOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        mOnConfigurationChangedListeners.remove(listener);
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (mSecurityFooter != null) {
-            mSecurityFooter.onConfigurationChanged();
-        }
-        updateResources();
+        mOnConfigurationChangedListeners.forEach(
+                listener -> listener.onConfigurationChange(newConfig));
 
         updateBrightnessMirror();
 
         if (newConfig.orientation != mLastOrientation) {
             mLastOrientation = newConfig.orientation;
-            switchTileLayout();
+            switchTileLayout(false);
         }
     }
 
@@ -524,11 +518,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         switchTileLayout(true /* force */);
     }
 
-    boolean switchTileLayout() {
-        return switchTileLayout(false /* force */);
-    }
-
-    private boolean switchTileLayout(boolean force) {
+    boolean switchTileLayout(boolean force) {
         /** Whether or not the QuickQSPanel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (mDivider != null) {
@@ -611,20 +601,20 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         index++;
 
         if (mSecurityFooter != null) {
-            View view = mSecurityFooter.getView();
-            LinearLayout.LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            LinearLayout.LayoutParams layoutParams =
+                    (LayoutParams) mSecurityFooter.getLayoutParams();
             if (mUsingHorizontalLayout && mHeaderContainer != null) {
                 // Adding the security view to the header, that enables us to avoid scrolling
                 layoutParams.width = 0;
                 layoutParams.weight = 1.6f;
-                switchToParent(view, mHeaderContainer, 1 /* always in second place */);
+                switchToParent(mSecurityFooter, mHeaderContainer, 1 /* always in second place */);
             } else {
                 layoutParams.width = LayoutParams.WRAP_CONTENT;
                 layoutParams.weight = 0;
-                switchToParent(view, parent, index);
+                switchToParent(mSecurityFooter, parent, index);
                 index++;
             }
-            view.setLayoutParams(layoutParams);
+            mSecurityFooter.setLayoutParams(layoutParams);
         }
 
         if (mFooter != null) {
@@ -724,9 +714,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mQSLogger.logAllTilesChangeListening(listening, getDumpableTag(), mCachedSpecs);
             mTileLayout.setListening(listening);
         }
-        if (mListening) {
-            refreshAllTiles();
-        }
     }
 
     private String getTilesSpecs() {
@@ -735,22 +722,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 .collect(Collectors.joining(","));
     }
 
-    public void setListening(boolean listening, boolean expanded) {
-        setListening(listening && expanded);
-        if (mSecurityFooter != null) {
-            mSecurityFooter.setListening(listening);
-        }
-    }
-
     public void refreshAllTiles() {
         if (mBrightnessController != null) {
             mBrightnessController.checkRestrictionAndSetEnabled();
         }
         for (TileRecord r : mRecords) {
             r.tile.refreshState();
-        }
-        if (mSecurityFooter != null) {
-            mSecurityFooter.refreshState();
         }
     }
 
@@ -1004,19 +981,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     @Nullable
-    public QSSecurityFooter getSecurityFooter() {
-        return mSecurityFooter;
-    }
-
-    @Nullable
     public View getDivider() {
         return mDivider;
-    }
-
-    public void showDeviceMonitoringDialog() {
-        if (mSecurityFooter != null) {
-            mSecurityFooter.showDeviceMonitoringDialog();
-        }
     }
 
     public void setContentMargins(int startMargin, int endMargin) {
@@ -1125,6 +1091,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mBrightnessController = brightnessController;
     }
 
+    public boolean isListening() {
+        return mListening;
+    }
+
+    public void setSecurityFooter(View view) {
+        mSecurityFooter = view;
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
@@ -1205,5 +1179,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         default void setExpansion(float expansion) {}
 
         int getNumVisibleTiles();
+    }
+
+    interface OnConfigurationChangedListener {
+        void onConfigurationChange(Configuration newConfig);
     }
 }

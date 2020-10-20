@@ -92,7 +92,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Ignore("failing")
     public void addLeakCheckDependencies() {
         MockitoAnnotations.initMocks(this);
-        when(mQsComponentFactory.create(any(View.class))).thenReturn(mQsFragmentComponent);
+        when(mQsComponentFactory.create(any(QSFragment.class))).thenReturn(mQsFragmentComponent);
         when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
 
         mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);

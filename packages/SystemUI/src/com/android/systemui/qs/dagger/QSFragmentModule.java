@@ -20,9 +20,13 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickQSPanel;
+import com.android.systemui.qs.QuickStatusBarHeader;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -42,5 +46,21 @@ public interface QSFragmentModule {
     @Provides
     static QSPanel provideQSPanel(@RootView View view) {
         return view.findViewById(R.id.quick_settings_panel);
+    }
+
+    /** */
+    @Binds
+    QS bindQS(QSFragment qsFragment);
+
+    /** */
+    @Provides
+    static QuickStatusBarHeader providesQuickStatusBarHeader(@RootView View view) {
+        return view.findViewById(R.id.header);
+    }
+
+    /** */
+    @Provides
+    static QuickQSPanel providesQuickQSPanel(QuickStatusBarHeader quickStatusBarHeader) {
+        return quickStatusBarHeader.findViewById(R.id.quick_qs_panel);
     }
 }

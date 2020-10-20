@@ -354,7 +354,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
             mPrivacyChipAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
         if (expansionFraction < 1 && expansionFraction > 0.99) {
-            if (mHeaderQsPanel.switchTileLayout()) {
+            if (mHeaderQsPanel.switchTileLayout(false)) {
                 updateResources();
             }
         }
