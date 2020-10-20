@@ -495,8 +495,8 @@ message Atom {
         HdmiCecMessageReported hdmi_cec_message_reported = 310 [(module) = "framework"];
         AirplaneMode airplane_mode = 311 [(module) = "telephony"];
         ModemRestart modem_restart = 312 [(module) = "telephony"];
-        CarrierIdMismatchEvent carrier_id_mismatch_event = 313 [(module) = "telephony"];
-        CarrierIdMatchingTable carrier_id_table_update = 314 [(module) = "telephony"];
+        CarrierIdMismatchReported carrier_id_mismatch_reported = 313 [(module) = "telephony"];
+        CarrierIdTableUpdated carrier_id_table_updated = 314 [(module) = "telephony"];
         DataStallRecoveryReported data_stall_recovery_reported = 315 [(module) = "telephony"];
         MediametricsMediaParserReported mediametrics_mediaparser_reported = 316;
 
@@ -606,7 +606,7 @@ message Atom {
             10085 [(module) = "mediaprovider"];
         IncomingSms incoming_sms = 10086 [(module) = "telephony"];
         OutgoingSms outgoing_sms = 10087 [(module) = "telephony"];
-        CarrierIdMatchingTable carrier_id_table_version = 10088 [(module) = "telephony"];
+        CarrierIdTableVersion carrier_id_table_version = 10088 [(module) = "telephony"];
         DataCallSession data_call_session = 10089 [(module) = "telephony"];
         CellularServiceState cellular_service_state = 10090 [(module) = "telephony"];
         CellularDataServiceSwitch cellular_data_service_switch = 10091 [(module) = "telephony"];
@@ -10746,7 +10746,7 @@ message OutgoingSms {
 }
 
 /**
- * Push information about usage of airplane mode.
+ * Logs information about usage of airplane mode.
  *
  * Logged from:
  *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/AirplaneModeStats.java
@@ -10765,7 +10765,7 @@ message AirplaneMode {
 }
 
 /**
- * Push information about modem restarts.
+ * Logs information about modem restarts.
  *
  * Logged from:
  *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/ModemRestartStats.java
@@ -10783,7 +10783,7 @@ message ModemRestart {
 }
 
 /**
- * Push the SIM card details when the carrier ID match is not complete.
+ * Logs the SIM card details when the carrier ID match is not complete.
  *
  * The atom is pushed when a SIM card is initialized and the MCC/MNC is not present in the
  * carrier ID table, or the SIM card contains a GID1 value that is not present in the carrier ID
@@ -10792,7 +10792,7 @@ message ModemRestart {
  * Logged from:
  *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/CarrierIdMatchStats.java
  */
-message CarrierIdMismatchEvent {
+message CarrierIdMismatchReported {
     // Matched carrier ID. The value -1 is used if no match is found.
     optional int32 carrier_id = 1;
 
@@ -10811,14 +10811,23 @@ message CarrierIdMismatchEvent {
 }
 
 /**
- * Pulls/pushes the version of the carrier ID matching table.
- *
- * The atom is pushed when a new version is detected.
+ * Logs the version of the carrier ID matching table at first power up and when it is updated.
  *
  * Logged from:
  *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/CarrierIdMatchStats.java
  */
-message CarrierIdMatchingTable {
+message CarrierIdTableUpdated {
+    // Version of the CarrierId matching table.
+    optional int32 table_version = 1;
+}
+
+/**
+ * Pulls the version of the carrier ID matching table.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
+ */
+message CarrierIdTableVersion {
     // Version of the CarrierId matching table.
     optional int32 table_version = 1;
 }
