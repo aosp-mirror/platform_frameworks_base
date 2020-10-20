@@ -152,13 +152,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     }
 
     @Override
-    public void notifyShortcutTriggered() {
-        if (DEBUG_ALL) {
-            Slog.i(mLogTag, "notifyShortcutTriggered():");
-        }
-        if (!mDetectShortcutTrigger) {
-            return;
-        }
+    public void handleShortcutTriggered() {
         final Point screenSize = mTempPoint;
         getScreenSize(mTempPoint);
         toggleMagnification(screenSize.x / 2.0f, screenSize.y / 2.0f);
@@ -205,6 +199,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(mLogTag, "onTripleTap()");
         }
         toggleMagnification(up.getX(), up.getY());
+        mCallback.onTripleTapped(mDisplayId, getMode());
     }
 
     void resetToDetectState() {

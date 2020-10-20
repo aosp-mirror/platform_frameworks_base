@@ -116,6 +116,14 @@ public class MagnificationGestureHandlerTest {
         }
     }
 
+
+    @Test
+    public void notifyShortcutTriggered_callsOnShortcutTriggered() {
+        mMgh.notifyShortcutTriggered();
+
+        verify(mCallback).onShortcutTriggered(eq(DISPLAY_0), eq(mMgh.getMode()));
+    }
+
     private static class TestMagnificationGestureHandler extends MagnificationGestureHandler {
 
         boolean mIsInternalMethodCalled = false;
@@ -132,6 +140,11 @@ public class MagnificationGestureHandlerTest {
 
         @Override
         public void notifyShortcutTriggered() {
+            super.notifyShortcutTriggered();
+        }
+
+        @Override
+        public void handleShortcutTriggered() {
         }
 
         @Override

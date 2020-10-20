@@ -211,16 +211,14 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     }
 
     @Override
-    public void notifyShortcutTriggered() {
-        if (mDetectShortcutTrigger) {
-            boolean wasMagnifying = mFullScreenMagnificationController.resetIfNeeded(mDisplayId,
-                    /* animate */ true);
-            if (wasMagnifying) {
-                clearAndTransitionToStateDetecting();
-            } else {
-                mPromptController.showNotificationIfNeeded();
-                mDetectingState.toggleShortcutTriggered();
-            }
+    public void handleShortcutTriggered() {
+        boolean wasMagnifying = mFullScreenMagnificationController.resetIfNeeded(mDisplayId,
+                /* animate */ true);
+        if (wasMagnifying) {
+            clearAndTransitionToStateDetecting();
+        } else {
+            mPromptController.showNotificationIfNeeded();
+            mDetectingState.toggleShortcutTriggered();
         }
     }
 
@@ -868,6 +866,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mPromptController.showNotificationIfNeeded();
                 zoomOn(up.getX(), up.getY());
             }
+
+            mCallback.onTripleTapped(mDisplayId, getMode());
         }
 
         private boolean isMagnifying() {
