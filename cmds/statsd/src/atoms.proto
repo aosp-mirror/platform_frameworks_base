@@ -504,7 +504,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10090
+    // Next: 10092
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -607,6 +607,8 @@ message Atom {
         OutgoingSms outgoing_sms = 10087 [(module) = "telephony"];
         CarrierIdMatchingTable carrier_id_table_version = 10088 [(module) = "telephony"];
         DataCallSession data_call_session = 10089 [(module) = "telephony"];
+        CellularServiceState cellular_service_state = 10090 [(module) = "telephony"];
+        CellularDataServiceSwitch cellular_data_service_switch = 10091 [(module) = "telephony"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -10398,7 +10400,7 @@ message VoiceCallSession {
     // Number of other calls going on during call termination, for the same SIM slot.
     optional int32 concurrent_call_count_at_end = 14;
 
-    // Index of the SIM is used, 0 for single-SIM devices.
+    // Index of the SIM used, 0 for single-SIM devices.
     optional int32 sim_slot_index = 15;
 
     // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
@@ -10450,12 +10452,88 @@ message VoiceCallRatUsage {
     // Radio access technology.
     optional android.telephony.NetworkTypeEnum rat = 2;
 
-    // Total duration that voice calls spent on this carrier and RAT.
+    // Total duration that voice calls spent on this carrier and RAT, rounded to 5 minute.
     optional int64 total_duration_seconds = 3;
 
     // Total number of calls using this carrier and RAT.
     // A call is counted once even if it used the RAT multiple times.
     optional int64 call_count = 4;
+}
+
+/**
+ * Pulls amount of time spend in each cellular service state.
+ *
+ * Each pull creates multiple atoms, one for each SIM slot/carrier/RAT(including ENDC), the order of
+ * which is irrelevant to time. If multi SIM settings changes during the period, durations will be
+ * counted separately before and after the change. Airplane mode does not count towards durations.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
+ */
+message CellularServiceState {
+    // Radio access technology (RAT) for voice.
+    // NETWORK_TYPE_UNKNOWN when the device is out of service.
+    // NETWORK_TYPE_IWLAN when the device is using VoWiFi.
+    optional android.telephony.NetworkTypeEnum voice_rat = 1;
+
+    // Radio access technology (RAT) for data.
+    // NETWORK_TYPE_UNKNOWN when the device is out of service.
+    // Only cellular RATs are valid and show where the device is camped.
+    optional android.telephony.NetworkTypeEnum data_rat = 2;
+
+    // Whether the device was in roaming (domestic or international) for voice.
+    optional android.telephony.RoamingTypeEnum voice_roaming_type = 3;
+
+    // Whether the device was in roaming (domestic or international) for data.
+    optional android.telephony.RoamingTypeEnum data_roaming_type = 4;
+
+    // Whether the device is on LTE and has access to NR NSA, i.e. cell supports 5G (ENDC) and UE
+    // registration (attach/TAU) indicates ENDC is not restricted.
+    optional bool is_endc = 5;
+
+    // Index of the SIM used, 0 for single-SIM devices.
+    optional int32 sim_slot_index = 6;
+
+    // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
+    optional bool is_multi_sim = 7;
+
+    // Carrier ID of the SIM card.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 8;
+
+    // Total time spent in this service state, rounded to 5 minutes.
+    optional int32 total_time_seconds = 9;
+}
+
+/**
+ * Pulls the number of times cellular data service state switches.
+ *
+ * Each pull creates multiple atoms, one for each RAT combination, the order of which is irrelevant
+ * to time. Switches for different SIM slots, carrier IDs, or multi-SIM settings are counted
+ * separately.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
+ */
+message CellularDataServiceSwitch {
+    // Cellular RAT of the DATA domain from where the switch occurred.
+    optional android.telephony.NetworkTypeEnum rat_from = 1;
+
+    // Cellular RAT of the DATA domain to where the switch occurred.
+    optional android.telephony.NetworkTypeEnum rat_to = 2;
+
+    // Index of the SIM used, 0 for single-SIM devices.
+    optional int32 sim_slot_index = 3;
+
+    // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
+    optional bool is_multi_sim = 4;
+
+    // Carrier ID of the SIM card.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 5;
+
+    // Number of switches from rat_from to rat_to.
+    optional int32 switch_count = 6;
 }
 
 /**
@@ -10527,7 +10605,7 @@ message IncomingSms {
     // Whether the SMS was received while roaming.
     optional bool is_roaming = 9;
 
-    // Index of the SIM is used, 0 for single-SIM devices.
+    // Index of the SIM used, 0 for single-SIM devices.
     optional int32 sim_slot_index = 10;
 
     // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
@@ -10579,7 +10657,7 @@ message OutgoingSms {
     // Whether the default SMS application generated the SMS (regardless of which application).
     optional bool is_from_default_app = 7;
 
-    // Index of the SIM is used, 0 for single-SIM devices.
+    // Index of the SIM used, 0 for single-SIM devices.
     optional int32 sim_slot_index = 8;
 
     // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
