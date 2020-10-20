@@ -22,6 +22,7 @@ import static android.net.wifi.aware.WifiAwareNetworkSpecifier.NETWORK_SPECIFIER
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.net.MacAddress;
 import android.net.wifi.RttManager;
 import android.net.wifi.util.HexEncoding;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -154,6 +156,19 @@ public class WifiAwareManagerTest {
     public void testIsAttached() throws Exception {
         mDut.isDeviceAttached();
         verify(mockAwareService).isDeviceAttached();
+    }
+
+    /**
+     * Validate pass-through of isInstantCommunicationModeEnabled() and
+     * enableInstantCommunicationMode() API
+     */
+    @Test
+    public void testEnableInstantCommunicationMode() throws Exception {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+        mDut.isInstantCommunicationModeEnabled();
+        verify(mockAwareService).isInstantCommunicationModeEnabled();
+        mDut.enableInstantCommunicationMode(true);
+        verify(mockAwareService).enableInstantCommunicationMode(anyString(), eq(true));
     }
 
     /*

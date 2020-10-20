@@ -563,6 +563,7 @@ package android.net.wifi.aware {
     method public int getMaxServiceNameLength();
     method public int getMaxServiceSpecificInfoLength();
     method public int getSupportedCipherSuites();
+    method public boolean isInstantCommunicationModeSupported();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.aware.Characteristics> CREATOR;
     field public static final int WIFI_AWARE_CIPHER_SUITE_NCS_SK_128 = 1; // 0x1
@@ -661,6 +662,7 @@ package android.net.wifi.aware {
     method public android.net.wifi.aware.Characteristics getCharacteristics();
     method public boolean isAvailable();
     method public boolean isDeviceAttached();
+    method public boolean isInstantCommunicationModeEnabled();
     field public static final String ACTION_WIFI_AWARE_STATE_CHANGED = "android.net.wifi.aware.action.WIFI_AWARE_STATE_CHANGED";
     field public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0; // 0x0
     field public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1; // 0x1
