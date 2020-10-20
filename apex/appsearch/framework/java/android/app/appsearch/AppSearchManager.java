@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 // TODO(b/148046169): This class header needs a detailed example/tutorial.
 @SystemService(Context.APP_SEARCH_SERVICE)
 public class AppSearchManager {
+    private static final String DEFAULT_DATABASE = "";
     private final IAppSearchManager mService;
 
     /** @hide */
@@ -112,7 +113,7 @@ public class AppSearchManager {
         }
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.setSchema(schemaBundles, request.isForceOverride(), future);
+            mService.setSchema(DEFAULT_DATABASE, schemaBundles, request.isForceOverride(), future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -145,7 +146,7 @@ public class AppSearchManager {
         }
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.putDocuments(documentBundles, future);
+            mService.putDocuments(DEFAULT_DATABASE, documentBundles, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -172,7 +173,7 @@ public class AppSearchManager {
         List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.getDocuments(uris, future);
+            mService.getDocuments(DEFAULT_DATABASE, request.getNamespace(), uris, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -260,7 +261,8 @@ public class AppSearchManager {
         //     them in one big list.
         AndroidFuture<AppSearchResult> searchResultsFuture = new AndroidFuture<>();
         try {
-            mService.query(queryExpression, searchSpec.getBundle(), searchResultsFuture);
+            mService.query(DEFAULT_DATABASE, queryExpression,
+                    searchSpec.getBundle(), searchResultsFuture);
         } catch (RemoteException e) {
             searchResultsFuture.completeExceptionally(e);
         }
@@ -292,7 +294,7 @@ public class AppSearchManager {
         List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.delete(uris, future);
+            mService.delete(DEFAULT_DATABASE, request.getNamespace(), uris, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -300,7 +302,7 @@ public class AppSearchManager {
     }
 
     /**
-     * Deletes {@link android.app.appsearch.AppSearch.Document}s by schema type.
+     * Deletes {@link android.app.appsearch.GenericDocument}s by schema type.
      *
      * <p>You should not call this method directly; instead, use the
      * {@code AppSearch#deleteByType()} API provided by JetPack.
@@ -313,7 +315,7 @@ public class AppSearchManager {
     public AppSearchBatchResult<String, Void> deleteByTypes(@NonNull List<String> schemaTypes) {
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.deleteByTypes(schemaTypes, future);
+            mService.deleteByTypes(DEFAULT_DATABASE, schemaTypes, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -324,7 +326,7 @@ public class AppSearchManager {
     public AppSearchResult<Void> deleteAll() {
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.deleteAll(future);
+            mService.deleteAll(DEFAULT_DATABASE, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
