@@ -1269,19 +1269,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
     }
 
     /**
-     * @deprecated use {@link #dump(IndentingPrintWriter)} instead.
-     */
-    @Deprecated
-    public void dump(PrintWriter pw, String prefix) {
-        dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
-    }
-
-    /**
      * Dump the internal state to the given PrintWriter. Can be included in the dump
      * of a binder service to be output on the shell command "dumpsys".
      */
     public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
+            pw.println("Current AppStateTracker State:");
+
+            pw.increaseIndent();
             pw.println("Forced App Standby Feature enabled: " + mForcedAppStandbyEnabled);
 
             pw.print("Force all apps standby: ");
@@ -1339,6 +1334,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             pw.decreaseIndent();
 
             mStatLogger.dump(pw);
+            pw.decreaseIndent();
         }
     }
 

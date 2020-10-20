@@ -31,7 +31,6 @@ import android.util.IndentingPrintWriter;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -198,15 +197,6 @@ class Alarm {
         sb.append(sourcePackage);
         sb.append('}');
         return sb.toString();
-    }
-
-    /**
-     * @deprecated Use {{@link #dump(IndentingPrintWriter, long, SimpleDateFormat)}} instead.
-     */
-    @Deprecated
-    public void dump(PrintWriter pw, String prefix, long nowELAPSED, SimpleDateFormat sdf) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, prefix, prefix);
-        dump(ipw, nowELAPSED, sdf);
     }
 
     private static String policyIndexToString(int index) {
