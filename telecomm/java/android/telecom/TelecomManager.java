@@ -25,7 +25,6 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -693,7 +692,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int TTY_MODE_OFF = 0;
 
@@ -703,7 +701,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int TTY_MODE_FULL = 1;
 
@@ -714,7 +711,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int TTY_MODE_HCO = 2;
 
@@ -725,7 +721,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int TTY_MODE_VCO = 3;
 
@@ -736,7 +731,6 @@ public class TelecomManager {
      * TTY mode.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
             "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
@@ -759,7 +753,6 @@ public class TelecomManager {
      * plugged into the device.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final String EXTRA_CURRENT_TTY_MODE =
             "android.telecom.extra.CURRENT_TTY_MODE";
@@ -771,7 +764,6 @@ public class TelecomManager {
      * preferred TTY mode.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
             "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
@@ -790,7 +782,6 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final String EXTRA_TTY_PREFERRED_MODE =
             "android.telecom.extra.TTY_PREFERRED_MODE";
@@ -1045,7 +1036,6 @@ public class TelecomManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @TestApi
     @SystemApi
     public void setUserSelectedOutgoingPhoneAccount(@Nullable PhoneAccountHandle accountHandle) {
         try {
@@ -1219,7 +1209,6 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
     public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccounts(
             boolean includeDisabledAccounts) {
@@ -1450,7 +1439,6 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
     public @Nullable String getDefaultDialerPackage(@NonNull UserHandle userHandle) {
         try {
@@ -1674,7 +1662,6 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {
             READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
@@ -1832,7 +1819,6 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
     public @TtyMode int getCurrentTtyMode() {
         try {
@@ -2246,7 +2232,6 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @NonNull
     public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
         ITelecomService service = getTelecomService();
@@ -2399,7 +2384,6 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean isInEmergencyCall() {
         try {

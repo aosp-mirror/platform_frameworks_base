@@ -1691,7 +1691,6 @@ public class PackageInstaller {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS)
         public void setGrantedRuntimePermissions(String[] permissions) {
@@ -1763,7 +1762,7 @@ public class PackageInstaller {
          * @see SessionParams#setEnableRollback(boolean, int)
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public void setEnableRollback(boolean enable) {
             if (enable) {
                 installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
@@ -1787,7 +1786,7 @@ public class PackageInstaller {
          * @param dataPolicy the rollback data policy for this session
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public void setEnableRollback(boolean enable,
                 @PackageManager.RollbackDataPolicy int dataPolicy) {
             if (enable) {
@@ -1810,7 +1809,7 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        @SystemApi @TestApi
+        @SystemApi
         public void setRequestDowngrade(boolean requestDowngrade) {
             if (requestDowngrade) {
                 installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
@@ -1933,7 +1932,7 @@ public class PackageInstaller {
          *
          * {@hide}
          */
-        @SystemApi @TestApi
+        @SystemApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setStaged() {
             this.isStaged = true;
@@ -1944,7 +1943,7 @@ public class PackageInstaller {
          *
          * {@hide}
          */
-        @SystemApi @TestApi
+        @SystemApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setInstallAsApex() {
             installFlags |= PackageManager.INSTALL_APEX;
@@ -2430,7 +2429,6 @@ public class PackageInstaller {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         public @NonNull Set<String> getWhitelistedRestrictedPermissions() {
             if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0) {
@@ -2454,7 +2452,6 @@ public class PackageInstaller {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         public int getAutoRevokePermissionsMode() {
             return autoRevokePermissionsMode;
@@ -2575,7 +2572,7 @@ public class PackageInstaller {
          *
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         @PackageManager.RollbackDataPolicy
         public int getRollbackDataPolicy() {
             return rollbackDataPolicy;

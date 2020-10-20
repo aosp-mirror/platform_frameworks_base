@@ -1838,7 +1838,6 @@ public abstract class Context {
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
-    @TestApi
     public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
             @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -3953,7 +3952,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     @SuppressLint("ServiceName")
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
@@ -4165,7 +4163,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
@@ -4469,7 +4466,6 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final String PERMISSION_SERVICE = "permission";
 
@@ -4500,7 +4496,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String ROLLBACK_SERVICE = "rollback";
 
     /**
@@ -4974,7 +4970,7 @@ public abstract class Context {
      * @see android.os.BugreportManager
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
@@ -5118,7 +5114,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String APP_INTEGRITY_SERVICE = "app_integrity";
 
     /**
@@ -5664,7 +5659,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     @NonNull
     public Context createPackageContextAsUser(
             @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user)
@@ -5683,7 +5677,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     @NonNull
     public Context createContextAsUser(@NonNull UserHandle user, @CreatePackageOptions int flags) {
         if (Build.IS_ENG) {

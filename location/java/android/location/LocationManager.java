@@ -514,7 +514,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, @NonNull UserHandle userHandle) {
         try {
@@ -708,7 +707,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void getCurrentLocation(@NonNull LocationRequest locationRequest,
             @Nullable CancellationSignal cancellationSignal,
@@ -1129,7 +1127,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
@@ -1157,7 +1154,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
@@ -1208,7 +1204,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
