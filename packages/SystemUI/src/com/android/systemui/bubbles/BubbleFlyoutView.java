@@ -61,7 +61,8 @@ public class BubbleFlyoutView extends FrameLayout {
     /** Translation Y of fade animation. */
     private static final float FLYOUT_FADE_Y = 40f;
 
-    private static final long FLYOUT_FADE_DURATION = 200L;
+    private static final long FLYOUT_FADE_OUT_DURATION = 150L;
+    private static final long FLYOUT_FADE_IN_DURATION = 250L;
 
     private final int mFlyoutPadding;
     private final int mFlyoutSpaceFromBubble;
@@ -235,26 +236,32 @@ public class BubbleFlyoutView extends FrameLayout {
      * Fade animation for consecutive flyouts.
      */
     void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, float stackY) {
-        fade(false /* in */);
-        updateFlyoutMessage(flyoutMessage, parentWidth);
-        // Wait for TextViews to layout with updated height.
-        post(() -> {
-            mFlyoutY = stackY + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
-            fade(true /* in */);
-        });
+        final Runnable afterFadeOut = () -> {
+            updateFlyoutMessage(flyoutMessage, parentWidth);
+            // Wait for TextViews to layout with updated height.
+            post(() -> {
+                mFlyoutY = stackY + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
+                fade(true /* in */, () -> {} /* after */);
+            } /* after */ );
+        };
+        fade(false /* in */, afterFadeOut);
     }
 
-    private void fade(boolean in) {
+    /*
+     * Fade-out above or fade-in from below.
+     */
+    private void fade(boolean in, Runnable afterFade) {
         setAlpha(in ? 0f : 1f);
-        setTranslationY(in ? mFlyoutY : mFlyoutY + FLYOUT_FADE_Y);
+        setTranslationY(in ? mFlyoutY + FLYOUT_FADE_Y : mFlyoutY);
         animate()
                 .alpha(in ? 1f : 0f)
-                .setDuration(FLYOUT_FADE_DURATION)
+                .setDuration(in ? FLYOUT_FADE_IN_DURATION : FLYOUT_FADE_OUT_DURATION)
                 .setInterpolator(in ? ALPHA_IN : ALPHA_OUT);
         animate()
                 .translationY(in ? mFlyoutY : mFlyoutY - FLYOUT_FADE_Y)
-                .setDuration(FLYOUT_FADE_DURATION)
-                .setInterpolator(in ? ALPHA_IN : ALPHA_OUT);
+                .setDuration(in ? FLYOUT_FADE_IN_DURATION : FLYOUT_FADE_OUT_DURATION)
+                .setInterpolator(in ? ALPHA_IN : ALPHA_OUT)
+                .withEndAction(afterFade);
     }
 
     private void updateFlyoutMessage(Bubble.FlyoutMessage flyoutMessage, float parentWidth) {
