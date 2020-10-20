@@ -220,7 +220,7 @@ public final class UserManagerTest {
                 asHandle(currentUser));
         try {
             assertThat(mUserManager.removeUserOrSetEphemeral(user1.id)).isEqualTo(
-                    UserManagerService.REMOVE_RESULT_ERROR);
+                    UserManager.REMOVE_RESULT_ERROR);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
                     asHandle(currentUser));
@@ -234,7 +234,7 @@ public final class UserManagerTest {
     @Test
     public void testRemoveUserOrSetEphemeral_systemUserReturnsError() throws Exception {
         assertThat(mUserManager.removeUserOrSetEphemeral(UserHandle.USER_SYSTEM)).isEqualTo(
-                UserManagerService.REMOVE_RESULT_ERROR);
+                UserManager.REMOVE_RESULT_ERROR);
 
         assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
     }
@@ -244,7 +244,7 @@ public final class UserManagerTest {
     public void testRemoveUserOrSetEphemeral_invalidUserReturnsError() throws Exception {
         assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
         assertThat(mUserManager.removeUserOrSetEphemeral(Integer.MAX_VALUE)).isEqualTo(
-                UserManagerService.REMOVE_RESULT_ERROR);
+                UserManager.REMOVE_RESULT_ERROR);
     }
 
     @MediumTest
@@ -256,7 +256,7 @@ public final class UserManagerTest {
         switchUser(user1.id, null, /* ignoreHandle= */ true);
 
         assertThat(mUserManager.removeUserOrSetEphemeral(user1.id)).isEqualTo(
-                UserManagerService.REMOVE_RESULT_SET_EPHEMERAL);
+                UserManager.REMOVE_RESULT_SET_EPHEMERAL);
 
         assertThat(hasUser(user1.id)).isTrue();
         assertThat(getUser(user1.id).isEphemeral()).isTrue();
@@ -277,7 +277,7 @@ public final class UserManagerTest {
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         synchronized (mUserRemoveLock) {
             assertThat(mUserManager.removeUserOrSetEphemeral(user1.id)).isEqualTo(
-                    UserManagerService.REMOVE_RESULT_REMOVED);
+                    UserManager.REMOVE_RESULT_REMOVED);
             waitForUserRemovalLocked(user1.id);
         }
 

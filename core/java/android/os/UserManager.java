@@ -1467,6 +1467,48 @@ public class UserManager {
     public @interface UserSwitchabilityResult {}
 
     /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
+     * user has been successfully removed.
+     * @hide
+     */
+    public static final int REMOVE_RESULT_REMOVED = 0;
+
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
+     * user has had its {@link UserInfo#FLAG_EPHEMERAL} flag set to {@code true}, so that it will be
+     * removed when the user is stopped or on boot.
+     * @hide
+     */
+    public static final int REMOVE_RESULT_SET_EPHEMERAL = 1;
+
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
+     * user is already in the process of being removed.
+     * @hide
+     */
+    public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
+
+    /**
+     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that an error occurred
+     * that prevented the user from being removed or set as ephemeral.
+     * @hide
+     */
+    public static final int REMOVE_RESULT_ERROR = 3;
+
+    /**
+     * Possible response codes from {@link #removeUserOrSetEphemeral(int)}.
+     * @hide
+     */
+    @IntDef(prefix = { "REMOVE_RESULT_" }, value = {
+            REMOVE_RESULT_REMOVED,
+            REMOVE_RESULT_SET_EPHEMERAL,
+            REMOVE_RESULT_ALREADY_BEING_REMOVED,
+            REMOVE_RESULT_ERROR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RemoveResult {}
+
+    /**
      * Indicates user operation is successful.
      */
     public static final int USER_OPERATION_SUCCESS = 0;
@@ -3981,11 +4023,11 @@ public class UserManager {
      * the current user, then set the user as ephemeral so that it will be removed when it is
      * stopped.
      *
-     * @return the {@link com.android.server.pm.UserManagerService.RemoveResult} code
+     * @return the {@link RemoveResult} code
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public int removeUserOrSetEphemeral(@UserIdInt int userId) {
+    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
         try {
             return mService.removeUserOrSetEphemeral(userId);
         } catch (RemoteException re) {
