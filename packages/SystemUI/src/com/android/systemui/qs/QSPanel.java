@@ -45,7 +45,6 @@ import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
@@ -86,7 +85,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
-    private final BroadcastDispatcher mBroadcastDispatcher;
     protected final MediaHost mMediaHost;
 
     /**
@@ -157,7 +155,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             DumpManager dumpManager,
-            BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             @Named(QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger,
@@ -175,7 +172,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mContext = context;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
-        mBroadcastDispatcher = broadcastDispatcher;
         mUiEventLogger = uiEventLogger;
         mUserTracker = userTracker;
 
@@ -233,8 +229,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mBrightnessView = LayoutInflater.from(mContext).inflate(
             R.layout.quick_settings_brightness_dialog, this, false);
         addView(mBrightnessView);
-        mBrightnessController = new BrightnessController(getContext(),
-                findViewById(R.id.brightness_slider), mBroadcastDispatcher);
     }
 
     protected QSTileLayout createRegularTileLayout() {
@@ -746,20 +740,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mSecurityFooter != null) {
             mSecurityFooter.setListening(listening);
         }
-        // Set the listening as soon as the QS fragment starts listening regardless of the expansion,
-        // so it will update the current brightness before the slider is visible.
-        setBrightnessListening(listening);
-    }
-
-    public void setBrightnessListening(boolean listening) {
-        if (mBrightnessController == null) {
-            return;
-        }
-        if (listening) {
-            mBrightnessController.registerCallbacks();
-        } else {
-            mBrightnessController.unregisterCallbacks();
-        }
     }
 
     public void refreshAllTiles() {
@@ -1139,6 +1119,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
         mMediaVisibilityChangedListener = visibilityChangedListener;
+    }
+
+    public void setBrightnessController(BrightnessController brightnessController) {
+        mBrightnessController = brightnessController;
     }
 
     private class H extends Handler {
