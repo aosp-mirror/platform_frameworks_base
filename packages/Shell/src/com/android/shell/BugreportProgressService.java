@@ -792,7 +792,7 @@ public class BugreportProgressService extends Service {
         intent.setClass(context, BugreportProgressService.class);
         intent.putExtra(EXTRA_ID, info.id);
         return PendingIntent.getService(context, info.id, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
@@ -1252,7 +1252,7 @@ public class BugreportProgressService extends Service {
                 .setTicker(title)
                 .setContentText(content)
                 .setContentIntent(PendingIntent.getService(mContext, info.id, shareIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT))
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .setOnlyAlertOnce(false)
                 .setDeleteIntent(newCancelIntent(mContext, info));
 
