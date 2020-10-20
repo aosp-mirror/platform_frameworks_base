@@ -59,6 +59,7 @@ android_test {
         "mockito-target-minus-junit4",
         "net-tests-utils",
         "platform-test-annotations",
+        "service-connectivity",
         "services.core",
         "services.net",
     ],
