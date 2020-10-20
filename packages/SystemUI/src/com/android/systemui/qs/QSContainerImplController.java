@@ -16,19 +16,21 @@
 
 package com.android.systemui.qs;
 
-import com.android.systemui.R;
+import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
 
-class QSContainerImplController extends ViewController<QSContainerImpl> {
+/** */
+@QSScope
+public class QSContainerImplController extends ViewController<QSContainerImpl> {
     private final QuickStatusBarHeaderController mQuickStatusBarHeaderController;
 
-    private QSContainerImplController(QSContainerImpl view,
-            QuickStatusBarHeaderController.Builder quickStatusBarHeaderControllerBuilder) {
+    @Inject
+    QSContainerImplController(QSContainerImpl view,
+            QuickStatusBarHeaderController quickStatusBarHeaderController) {
         super(view);
-        mQuickStatusBarHeaderController = quickStatusBarHeaderControllerBuilder
-                .setQuickStatusBarHeader(mView.findViewById(R.id.header)).build();
+        mQuickStatusBarHeaderController = quickStatusBarHeaderController;
     }
 
     @Override
@@ -49,23 +51,7 @@ class QSContainerImplController extends ViewController<QSContainerImpl> {
     protected void onViewDetached() {
     }
 
-    static class Builder {
-        private final QuickStatusBarHeaderController.Builder mQuickStatusBarHeaderControllerBuilder;
-        private QSContainerImpl mView;
-
-        @Inject
-        Builder(
-                QuickStatusBarHeaderController.Builder quickStatusBarHeaderControllerBuilder) {
-            mQuickStatusBarHeaderControllerBuilder = quickStatusBarHeaderControllerBuilder;
-        }
-
-        public Builder setQSContainerImpl(QSContainerImpl view) {
-            mView = view;
-            return this;
-        }
-
-        public QSContainerImplController build() {
-            return new QSContainerImplController(mView, mQuickStatusBarHeaderControllerBuilder);
-        }
+    public QSContainerImpl getView() {
+        return mView;
     }
 }
