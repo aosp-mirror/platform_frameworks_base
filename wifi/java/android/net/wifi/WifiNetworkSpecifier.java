@@ -373,14 +373,8 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                     configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
                 } else {
                     // WPA3-Enterprise
-                    configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
-                    configuration.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-                    configuration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-                    configuration.allowedPairwiseCiphers.set(
-                            WifiConfiguration.PairwiseCipher.GCMP_256);
-                    configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-                    configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
-                    configuration.requirePmf = true;
+                    configuration.setSecurityParams(
+                            WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
                 }
                 configuration.enterpriseConfig = mWpa3EnterpriseConfig;
             } else if (mIsEnhancedOpen) { // OWE network
