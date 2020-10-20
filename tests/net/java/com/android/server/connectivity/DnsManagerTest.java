@@ -98,7 +98,6 @@ public class DnsManagerTest {
 
     @Mock Context mCtx;
     @Mock IDnsResolver mMockDnsResolver;
-    @Mock MockableSystemProperties mSystemProperties;
 
     private void assertResolverOptionsEquals(
             @NonNull ResolverOptionsParcel actual,
@@ -137,7 +136,7 @@ public class DnsManagerTest {
         mContentResolver.addProvider(Settings.AUTHORITY,
                 new FakeSettingsProvider());
         when(mCtx.getContentResolver()).thenReturn(mContentResolver);
-        mDnsManager = new DnsManager(mCtx, mMockDnsResolver, mSystemProperties);
+        mDnsManager = new DnsManager(mCtx, mMockDnsResolver);
 
         // Clear the private DNS settings
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "");
