@@ -26,12 +26,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
+import com.android.internal.R;
+
 /**
  * An expand button in a notification
  */
 @RemoteViews.RemoteView
 public class NotificationExpandButton extends ImageView {
 
+    private boolean mExpanded;
     private int mOriginalNotificationColor;
 
     public NotificationExpandButton(Context context) {
@@ -79,5 +82,29 @@ public class NotificationExpandButton extends ImageView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(Button.class.getName());
+    }
+
+    /**
+     * Update the button's drawable, content description, and color for the given expanded state.
+     */
+    @RemotableViewMethod
+    public void setExpanded(boolean expanded) {
+        mExpanded = expanded;
+        updateExpandButton();
+    }
+
+    private void updateExpandButton() {
+        int drawableId;
+        int contentDescriptionId;
+        if (mExpanded) {
+            drawableId = R.drawable.ic_collapse_notification;
+            contentDescriptionId = R.string.expand_button_content_description_expanded;
+        } else {
+            drawableId = R.drawable.ic_expand_notification;
+            contentDescriptionId = R.string.expand_button_content_description_collapsed;
+        }
+        setImageDrawable(getContext().getDrawable(drawableId));
+        setColorFilter(mOriginalNotificationColor);
+        setContentDescription(mContext.getText(contentDescriptionId));
     }
 }

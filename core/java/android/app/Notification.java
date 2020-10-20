@@ -4825,7 +4825,7 @@ public class Notification implements Parcelable
         private void resetNotificationHeader(RemoteViews contentView) {
             // Small icon doesn't need to be reset, as it's always set. Resetting would prevent
             // re-using the drawable when the notification is updated.
-            contentView.setBoolean(R.id.notification_header, "setExpanded", false);
+            contentView.setBoolean(R.id.expand_button, "setExpanded", false);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_text, View.GONE);
@@ -5569,7 +5569,7 @@ public class Notification implements Parcelable
          */
         public static void makeHeaderExpanded(RemoteViews result) {
             if (result != null) {
-                result.setBoolean(R.id.notification_header, "setExpanded", true);
+                result.setBoolean(R.id.expand_button, "setExpanded", true);
             }
         }
 

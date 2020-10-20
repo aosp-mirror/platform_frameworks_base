@@ -276,6 +276,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
+    public void setExpanded(boolean expanded) {
+        mExpandButton.setExpanded(expanded);
+    }
+
+    @Override
     public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
         if (mAudiblyAlertedIcon != null) {
             mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);

@@ -848,8 +848,8 @@ public class NotificationChildrenContainer extends ViewGroup {
     public void setChildrenExpanded(boolean childrenExpanded) {
         mChildrenExpanded = childrenExpanded;
         updateExpansionStates();
-        if (mNotificationHeader != null) {
-            mNotificationHeader.setExpanded(childrenExpanded);
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.setExpanded(childrenExpanded);
         }
         final int count = mAttachedChildren.size();
         for (int childIdx = 0; childIdx < count; childIdx++) {

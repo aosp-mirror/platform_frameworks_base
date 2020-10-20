@@ -56,7 +56,6 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mFeedbackIcon;
-    private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
     private int mHeaderTextMarginEnd;
@@ -301,27 +300,6 @@ public class NotificationHeaderView extends ViewGroup {
 
     public int getOriginalNotificationColor() {
         return mExpandButton.getOriginalNotificationColor();
-    }
-
-    @RemotableViewMethod
-    public void setExpanded(boolean expanded) {
-        mExpanded = expanded;
-        updateExpandButton();
-    }
-
-    private void updateExpandButton() {
-        int drawableId;
-        int contentDescriptionId;
-        if (mExpanded) {
-            drawableId = R.drawable.ic_collapse_notification;
-            contentDescriptionId = R.string.expand_button_content_description_expanded;
-        } else {
-            drawableId = R.drawable.ic_expand_notification;
-            contentDescriptionId = R.string.expand_button_content_description_collapsed;
-        }
-        mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(getOriginalNotificationColor());
-        mExpandButton.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
