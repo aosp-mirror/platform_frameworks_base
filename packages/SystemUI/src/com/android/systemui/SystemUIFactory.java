@@ -85,10 +85,12 @@ public class SystemUIFactory {
     @VisibleForTesting
     public void init(Context context, boolean fromTest)
             throws ExecutionException, InterruptedException {
+        final boolean initializeComponents = !fromTest
+                && android.os.Process.myUserHandle().isSystem();
         mRootComponent = buildGlobalRootComponent(context);
         // Stand up WMComponent
         mWMComponent = mRootComponent.getWMComponentBuilder().build();
-        if (!fromTest) {
+        if (initializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             mWMComponent.init();
@@ -96,7 +98,7 @@ public class SystemUIFactory {
 
         // And finally, retrieve whatever SysUI needs from WMShell and build SysUI.
         SysUIComponent.Builder builder = mRootComponent.getSysUIComponent();
-        if (!fromTest) {
+        if (initializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             builder = builder.setPip(mWMComponent.getPip())
@@ -111,7 +113,7 @@ public class SystemUIFactory {
                 .setInputConsumerController(mWMComponent.getInputConsumerController())
                 .setShellTaskOrganizer(mWMComponent.getShellTaskOrganizer())
                 .build();
-        if (!fromTest) {
+        if (initializeComponents) {
             mSysUIComponent.init();
         }
 
