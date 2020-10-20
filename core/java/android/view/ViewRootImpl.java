@@ -649,7 +649,7 @@ public final class ViewRootImpl implements ViewParent,
     private final InsetsController mInsetsController;
     private final ImeFocusController mImeFocusController;
 
-    private ScrollCaptureClient mScrollCaptureClient;
+    private ScrollCaptureConnection mScrollCaptureConnection;
 
     /**
      * @return {@link ImeFocusController} for this instance.
@@ -659,10 +659,10 @@ public final class ViewRootImpl implements ViewParent,
         return mImeFocusController;
     }
 
-    /** @return The current {@link ScrollCaptureClient} for this instance, if any is active. */
+    /** @return The current {@link ScrollCaptureConnection} for this instance, if any is active. */
     @Nullable
-    public ScrollCaptureClient getScrollCaptureClient() {
-        return mScrollCaptureClient;
+    public ScrollCaptureConnection getScrollCaptureConnection() {
+        return mScrollCaptureConnection;
     }
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
@@ -5192,7 +5192,7 @@ public final class ViewRootImpl implements ViewParent,
                     updateLocationInParentDisplay(msg.arg1, msg.arg2);
                 } break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
-                    handleScrollCaptureRequest((IScrollCaptureController) msg.obj);
+                    handleScrollCaptureRequest((IScrollCaptureCallbacks) msg.obj);
                     break;
             }
         }
@@ -8979,10 +8979,10 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Dispatches a scroll capture request to the view hierarchy on the ui thread.
      *
-     * @param controller the controller to receive replies
+     * @param callbacks for replies
      */
-    public void dispatchScrollCaptureRequest(@NonNull IScrollCaptureController controller) {
-        mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, controller).sendToTarget();
+    public void dispatchScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
+        mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, callbacks).sendToTarget();
     }
 
     /**
@@ -9007,14 +9007,14 @@ public final class ViewRootImpl implements ViewParent,
      * Handles an inbound request for scroll capture from the system. If a client is not already
      * active, a search will be dispatched through the view tree to locate scrolling content.
      * <p>
-     * Either {@link IScrollCaptureController#onClientConnected(IScrollCaptureClient, Rect,
-     * Point)} or {@link IScrollCaptureController#onClientUnavailable()} will be returned
+     * Either {@link IScrollCaptureCallbacks#onClientConnected(IScrollCaptureConnection, Rect,
+     * Point)} or {@link IScrollCaptureCallbacks#onUnavailable()} will be returned
      * depending on the results of the search.
      *
-     * @param controller the interface to the system controller
+     * @param callbacks to receive responses
      * @see ScrollCaptureTargetResolver
      */
-    private void handleScrollCaptureRequest(@NonNull IScrollCaptureController controller) {
+    private void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
         LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Window (root) level callbacks
@@ -9029,7 +9029,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // No-op path. Scroll capture not offered for this window.
         if (targetList.isEmpty()) {
-            dispatchScrollCaptureSearchResult(controller, null);
+            dispatchScrollCaptureSearchResult(callbacks, null);
             return;
         }
 
@@ -9037,12 +9037,12 @@ public final class ViewRootImpl implements ViewParent,
         // Continues with the consumer once all responses are consumed, or the timeout expires.
         ScrollCaptureTargetResolver resolver = new ScrollCaptureTargetResolver(targetList);
         resolver.start(mHandler, 1000,
-                (selected) -> dispatchScrollCaptureSearchResult(controller, selected));
+                (selected) -> dispatchScrollCaptureSearchResult(callbacks, selected));
     }
 
     /** Called by {@link #handleScrollCaptureRequest} when a result is returned */
     private void dispatchScrollCaptureSearchResult(
-            @NonNull IScrollCaptureController controller,
+            @NonNull IScrollCaptureCallbacks callbacks,
             @Nullable ScrollCaptureTarget selectedTarget) {
 
         // If timeout or no eligible targets found.
@@ -9051,31 +9051,31 @@ public final class ViewRootImpl implements ViewParent,
                 if (DEBUG_SCROLL_CAPTURE) {
                     Log.d(TAG, "scrollCaptureSearch returned no targets available.");
                 }
-                controller.onClientUnavailable();
+                callbacks.onUnavailable();
             } catch (RemoteException e) {
                 if (DEBUG_SCROLL_CAPTURE) {
-                    Log.w(TAG, "Failed to notify controller of scroll capture search result.", e);
+                    Log.w(TAG, "Failed to send scroll capture search result.", e);
                 }
             }
             return;
         }
 
         // Create a client instance and return it to the caller
-        mScrollCaptureClient = new ScrollCaptureClient(selectedTarget, controller);
+        mScrollCaptureConnection = new ScrollCaptureConnection(selectedTarget, callbacks);
         try {
             if (DEBUG_SCROLL_CAPTURE) {
-                Log.d(TAG, "scrollCaptureSearch returning client: " + getScrollCaptureClient());
+                Log.d(TAG, "scrollCaptureSearch returning client: " + getScrollCaptureConnection());
             }
-            controller.onClientConnected(
-                    mScrollCaptureClient,
+            callbacks.onConnected(
+                    mScrollCaptureConnection,
                     selectedTarget.getScrollBounds(),
                     selectedTarget.getPositionInWindow());
         } catch (RemoteException e) {
             if (DEBUG_SCROLL_CAPTURE) {
-                Log.w(TAG, "Failed to notify controller of scroll capture search result.", e);
+                Log.w(TAG, "Failed to send scroll capture search result.", e);
             }
-            mScrollCaptureClient.disconnect();
-            mScrollCaptureClient = null;
+            mScrollCaptureConnection.disconnect();
+            mScrollCaptureConnection = null;
         }
     }
 
@@ -9373,10 +9373,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void requestScrollCapture(IScrollCaptureController controller) {
+        public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchScrollCaptureRequest(controller);
+                viewAncestor.dispatchScrollCaptureRequest(callbacks);
             }
         }
     }

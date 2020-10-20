@@ -26,7 +26,7 @@ import android.view.Surface;
    *
    * {@hide}
    */
-interface IScrollCaptureClient {
+interface IScrollCaptureConnection {
 
     /**
      * Informs the client that it has been selected for scroll capture and should prepare to

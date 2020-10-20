@@ -32,7 +32,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DragEvent;
-import android.view.IScrollCaptureController;
+import android.view.IScrollCaptureCallbacks;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
@@ -373,9 +373,9 @@ public class SystemWindows {
         public void dispatchPointerCaptureChanged(boolean hasCapture) {}
 
         @Override
-        public void requestScrollCapture(IScrollCaptureController controller) {
+        public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
             try {
-                controller.onClientUnavailable();
+                callbacks.onUnavailable();
             } catch (RemoteException ex) {
                 // ignore
             }

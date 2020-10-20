@@ -57,7 +57,6 @@ import java.util.function.Consumer;
 @UiThread
 public class ScrollCaptureTargetResolver {
     private static final String TAG = "ScrollCaptureTargetRes";
-    private static final boolean DEBUG = true;
 
     private final Object mLock = new Object();
 
@@ -86,18 +85,11 @@ public class ScrollCaptureTargetResolver {
      * Binary operator which selects the best {@link ScrollCaptureTarget}.
      */
     private static ScrollCaptureTarget chooseTarget(ScrollCaptureTarget a, ScrollCaptureTarget b) {
-        Log.d(TAG, "chooseTarget: " + a + " or " + b);
-        // Nothing plus nothing is still nothing.
         if (a == null && b == null) {
-            Log.d(TAG, "chooseTarget: (both null) return " + null);
             return null;
-        }
-        // Prefer non-null.
-        if (a == null || b == null) {
+        } else if (a == null || b == null) {
             ScrollCaptureTarget c = (a == null) ? b : a;
-            Log.d(TAG, "chooseTarget: (other is null) return " + c);
             return c;
-
         }
 
         boolean emptyScrollBoundsA = nullOrEmpty(a.getScrollBounds());
@@ -155,8 +147,7 @@ public class ScrollCaptureTargetResolver {
      *
      * @param targets   a list of {@link ScrollCaptureTarget} as collected by {@link
      *                  View#dispatchScrollCaptureSearch}.
-     * @param uiHandler the UI thread handler for the view tree
-     * @see #start(long, Consumer)
+     * @see #start(Handler, long, Consumer)
      */
     public ScrollCaptureTargetResolver(Queue<ScrollCaptureTarget> targets) {
         mTargets = targets;
@@ -183,7 +174,6 @@ public class ScrollCaptureTargetResolver {
         }
         return mResult;
     }
-
 
     private void supplyResult(ScrollCaptureTarget target) {
         checkThread();
@@ -232,12 +222,11 @@ public class ScrollCaptureTargetResolver {
                 return;
             }
             mStarted = true;
-            uiHandler.post(() -> run(timeLimitMillis, resultConsumer));
+            uiHandler.post(this::run);
         }
     }
 
-
-    private void run(long timeLimitMillis, Consumer<ScrollCaptureTarget> resultConsumer) {
+    private void run() {
         checkThread();
 
         mPendingBoundsRequests = mTargets.size();
@@ -248,14 +237,10 @@ public class ScrollCaptureTargetResolver {
         mHandler.postAtTime(mTimeoutRunnable, mDeadlineMillis);
     }
 
-    private final Runnable mTimeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            checkThread();
-            supplyResult(null);
-        }
+    private final Runnable mTimeoutRunnable = () -> {
+        checkThread();
+        supplyResult(null);
     };
-
 
     /**
      * Adds a target to the list and requests {@link ScrollCaptureCallback#onScrollCaptureSearch}
@@ -274,7 +259,6 @@ public class ScrollCaptureTargetResolver {
                         // Queue and consume on the UI thread
                         ((scrollBounds) -> mHandler.post(
                                 () -> onScrollBoundsProvided(target, scrollBounds)))));
-
     }
 
     @UiThread
@@ -300,14 +284,8 @@ public class ScrollCaptureTargetResolver {
             supplyResult(target);
         }
 
-        System.err.println("mPendingBoundsRequests: " + mPendingBoundsRequests);
-        System.err.println("mDeadlineMillis: " + mDeadlineMillis);
-        System.err.println("SystemClock.elapsedRealtime(): " + SystemClock.elapsedRealtime());
-
         if (!mFinished) {
             // Reschedule the timeout.
-            System.err.println(
-                    "We think we're NOT done yet and will check back at " + mDeadlineMillis);
             mHandler.postAtTime(mTimeoutRunnable, mDeadlineMillis);
         }
     }
@@ -334,44 +312,17 @@ public class ScrollCaptureTargetResolver {
         return otherParent == view;
     }
 
-    private static int findRelation(@NonNull View a, @NonNull View b) {
-        if (a == b) {
-            return 0;
-        }
-
-        ViewParent parentA = a.getParent();
-        ViewParent parentB = b.getParent();
-
-        while (parentA != null || parentB != null) {
-            if (parentA == parentB) {
-                return 0;
-            }
-            if (parentA == b) {
-                return 1; // A is descendant of B
-            }
-            if (parentB == a) {
-                return -1; // B is descendant of A
-            }
-            if (parentA != null) {
-                parentA = parentA.getParent();
-            }
-            if (parentB != null) {
-                parentB = parentB.getParent();
-            }
-        }
-        return 0;
-    }
-
     /**
      * A safe wrapper for a consumer callbacks intended to accept a single value. It ensures
      * that the receiver of the consumer does not retain a reference to {@code target} after use nor
      * cause race conditions by invoking {@link Consumer#accept accept} more than once.
-     *
-     * @param target the target consumer
      */
     static class SingletonConsumer<T> implements Consumer<T> {
         final AtomicReference<Consumer<T>> mAtomicRef;
 
+        /**
+         * @param target the target consumer
+         **/
         SingletonConsumer(Consumer<T> target) {
             mAtomicRef = new AtomicReference<>(target);
         }
