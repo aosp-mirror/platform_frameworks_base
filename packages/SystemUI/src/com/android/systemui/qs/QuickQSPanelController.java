@@ -19,10 +19,15 @@ package com.android.systemui.qs;
 import static com.android.systemui.qs.QuickQSPanel.NUM_QUICK_TILES;
 import static com.android.systemui.qs.QuickQSPanel.parseNumTiles;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -30,13 +35,15 @@ import javax.inject.Inject;
 @QSScope
 public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
     private final Tunable mNumTiles =
-            (key, newValue) -> mView.setMaxTiles(parseNumTiles(newValue));
+            (key, newValue) -> setMaxTiles(parseNumTiles(newValue));
+
     private final TunerService mTunerService;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, TunerService tunerService, QSTileHost qsTileHost,
+            MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
-        super(view, qsTileHost, dumpManager);
+        super(view, qsTileHost, metricsLogger, uiEventLogger, dumpManager);
         mTunerService = tunerService;
     }
 
@@ -51,5 +58,26 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     protected void onViewDetached() {
         super.onViewDetached();
         mTunerService.removeTunable(mNumTiles);
+    }
+
+    public boolean isListening() {
+        return mView.isListening();
+    }
+
+    private void setMaxTiles(int parseNumTiles) {
+        mView.setMaxTiles(parseNumTiles);
+        setTiles();
+    }
+
+    @Override
+    public void setTiles() {
+        ArrayList<QSTile> quickTiles = new ArrayList<>();
+        for (QSTile tile : mHost.getTiles()) {
+            quickTiles.add(tile);
+            if (quickTiles.size() == mView.getNumQuickTiles()) {
+                break;
+            }
+        }
+        super.setTiles(quickTiles, true);
     }
 }

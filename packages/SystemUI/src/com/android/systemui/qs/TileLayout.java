@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
-import com.android.systemui.qs.QSPanel.TileRecord;
+import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 
 import java.util.ArrayList;
 

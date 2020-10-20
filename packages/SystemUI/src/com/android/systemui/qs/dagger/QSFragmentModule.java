@@ -21,6 +21,7 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
@@ -46,6 +47,12 @@ public interface QSFragmentModule {
     @Provides
     static QSPanel provideQSPanel(@RootView View view) {
         return view.findViewById(R.id.quick_settings_panel);
+    }
+
+    /** */
+    @Provides
+    static QSContainerImpl providesQSContainerImpl(@RootView View view) {
+        return view.findViewById(R.id.quick_settings_container);
     }
 
     /** */

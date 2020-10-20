@@ -14,12 +14,9 @@
 
 package com.android.systemui.qs;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -36,19 +33,15 @@ import android.widget.FrameLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.util.animation.DisappearParameters;
 import com.android.systemui.util.animation.UniqueObjectHostView;
@@ -59,9 +52,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collections;
 
 @RunWith(AndroidTestingRunner.class)
@@ -79,9 +69,9 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private QSTileImpl dndTile;
     @Mock
-    private BroadcastDispatcher mBroadcastDispatcher;
+    private QSTileImpl mNonTile;
     @Mock
-    private DumpManager mDumpManager;
+    private QSPanelControllerBase.TileRecord mDndTileRecord;
     @Mock
     private QSLogger mQSLogger;
     private ViewGroup mParentView;
@@ -93,9 +83,8 @@ public class QSPanelTest extends SysuiTestCase {
     private MediaHost mMediaHost;
     @Mock
     private ActivityStarter mActivityStarter;
-    @Mock(stubOnly = true)
-    private UserTracker mUserTracker;
     private UiEventLoggerFake mUiEventLogger;
+    private String mCachedSpecs = "";
 
     @Before
     public void setup() throws Exception {
@@ -109,12 +98,13 @@ public class QSPanelTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.USER_SERVICE, mock(UserManager.class));
         when(mMediaHost.getHostView()).thenReturn(new UniqueObjectHostView(getContext()));
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
+        mDndTileRecord.tile = dndTile;
+        mDndTileRecord.tileView = mQSTileView;
 
         mUiEventLogger = new UiEventLoggerFake();
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mQsPanel = new QSPanel(mContext, null, mDumpManager, mQSLogger, mMediaHost,
-                    mUiEventLogger);
+            mQsPanel = new QSPanel(mContext, null, mQSLogger, mMediaHost, mUiEventLogger);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
@@ -124,9 +114,8 @@ public class QSPanelTest extends SysuiTestCase {
             when(mHost.getTiles()).thenReturn(Collections.emptyList());
             when(mHost.createTileView(any(), anyBoolean())).thenReturn(mQSTileView);
 
-            mQsPanel.setHost(mHost);
             mQsPanel.setCustomizer(mCustomizer);
-            mQsPanel.addTile(dndTile, true);
+            mQsPanel.addTile(mDndTileRecord);
             mQsPanel.setCallback(mCallback);
         });
     }
@@ -134,25 +123,16 @@ public class QSPanelTest extends SysuiTestCase {
     @Test
     public void testSetExpanded_Metrics() {
         mQsPanel.setExpanded(true);
-        verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(true));
         verify(mQSLogger).logPanelExpanded(true, mQsPanel.getDumpableTag());
-        assertEquals(1, mUiEventLogger.numLogs());
-        assertEquals(QSEvent.QS_PANEL_EXPANDED.getId(), mUiEventLogger.eventId(0));
-        mUiEventLogger.getLogs().clear();
 
         mQsPanel.setExpanded(false);
-        verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(false));
         verify(mQSLogger).logPanelExpanded(false, mQsPanel.getDumpableTag());
-        assertEquals(1, mUiEventLogger.numLogs());
-        assertEquals(QSEvent.QS_PANEL_COLLAPSED.getId(), mUiEventLogger.eventId(0));
-        mUiEventLogger.getLogs().clear();
-
     }
 
     @Test
     public void testOpenDetailsWithExistingTile_NoException() {
         mTestableLooper.processAllMessages();
-        mQsPanel.openDetails("dnd");
+        mQsPanel.openDetails(dndTile);
         mTestableLooper.processAllMessages();
 
         verify(mCallback).onShowingDetail(any(), anyInt(), anyInt());
@@ -160,53 +140,19 @@ public class QSPanelTest extends SysuiTestCase {
 
     @Test
     public void setListening() {
-        when(dndTile.getTileSpec()).thenReturn("dnd");
-
-        mQsPanel.setListening(true);
+        mQsPanel.setListening(true, "dnd");
         verify(mQSLogger).logAllTilesChangeListening(true, mQsPanel.getDumpableTag(), "dnd");
 
-        mQsPanel.setListening(false);
+        mQsPanel.setListening(false, "dnd");
         verify(mQSLogger).logAllTilesChangeListening(false, mQsPanel.getDumpableTag(), "dnd");
     }
 
-/*    @Test
+    @Test
     public void testOpenDetailsWithNullParameter_NoException() {
         mTestableLooper.processAllMessages();
         mQsPanel.openDetails(null);
         mTestableLooper.processAllMessages();
 
         verify(mCallback, never()).onShowingDetail(any(), anyInt(), anyInt());
-    }*/
-
-    @Test
-    public void testOpenDetailsWithNonExistingTile_NoException() {
-        mTestableLooper.processAllMessages();
-        mQsPanel.openDetails("invalid-name");
-        mTestableLooper.processAllMessages();
-
-        verify(mCallback, never()).onShowingDetail(any(), anyInt(), anyInt());
     }
-
-    @Test
-    public void testDump() {
-        String mockTileViewString = "Mock Tile View";
-        String mockTileString = "Mock Tile";
-        doAnswer(invocation -> {
-            PrintWriter pw = invocation.getArgument(1);
-            pw.println(mockTileString);
-            return null;
-        }).when(dndTile).dump(any(FileDescriptor.class), any(PrintWriter.class),
-                any(String[].class));
-        when(mQSTileView.toString()).thenReturn(mockTileViewString);
-
-        StringWriter w = new StringWriter();
-        PrintWriter pw = new PrintWriter(w);
-        mQsPanel.dump(mock(FileDescriptor.class), pw, new String[]{});
-        String expected = "QSPanel:\n"
-                + "  Tile records:\n"
-                + "    " + mockTileString + "\n"
-                + "    " + mockTileViewString + "\n";
-        assertEquals(expected, w.getBuffer().toString());
-    }
-
 }

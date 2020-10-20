@@ -8,11 +8,16 @@ import android.util.ArraySet;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.dagger.QSScope;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+/** */
+@QSScope
 public class QSTileRevealController {
     private static final long QS_REVEAL_TILES_DELAY = 500L;
 
@@ -34,6 +39,7 @@ public class QSTileRevealController {
         }
     };
 
+    @Inject
     QSTileRevealController(Context context, QSPanel qsPanel, PagedTileLayout pagedTileLayout) {
         mContext = context;
         mQSPanel = qsPanel;

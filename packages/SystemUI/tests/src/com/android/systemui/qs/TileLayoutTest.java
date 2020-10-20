@@ -57,8 +57,8 @@ public class TileLayoutTest extends SysuiTestCase {
                 mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal) * 3;
     }
 
-    private QSPanel.TileRecord createTileRecord() {
-        QSPanel.TileRecord tileRecord = new QSPanel.TileRecord();
+    private QSPanelControllerBase.TileRecord createTileRecord() {
+        QSPanelControllerBase.TileRecord tileRecord = new QSPanelControllerBase.TileRecord();
         tileRecord.tile = mock(QSTile.class);
         tileRecord.tileView = spy(new QSTileView(mContext, new QSIconViewImpl(mContext)));
         return tileRecord;
@@ -66,14 +66,14 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testAddTile_CallsSetListeningOnTile() {
-        QSPanel.TileRecord tileRecord = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, false);
     }
 
     @Test
     public void testSetListening_CallsSetListeningOnTile() {
-        QSPanel.TileRecord tileRecord = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
         mTileLayout.setListening(true);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, true);
@@ -81,7 +81,7 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testSetListening_SameValueIsNoOp() {
-        QSPanel.TileRecord tileRecord = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
         mTileLayout.setListening(false);
         verify(tileRecord.tile, times(1)).setListening(any(), anyBoolean());
@@ -89,7 +89,7 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testSetListening_ChangesValueForAddingFutureTiles() {
-        QSPanel.TileRecord tileRecord = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.setListening(true);
         mTileLayout.addTile(tileRecord);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, true);
@@ -97,7 +97,7 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testRemoveTile_CallsSetListeningFalseOnTile() {
-        QSPanel.TileRecord tileRecord = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.setListening(true);
         mTileLayout.addTile(tileRecord);
         mTileLayout.removeTile(tileRecord);
@@ -106,8 +106,8 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testRemoveAllViews_CallsSetListeningFalseOnAllTiles() {
-        QSPanel.TileRecord tileRecord1 = createTileRecord();
-        QSPanel.TileRecord tileRecord2 = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord1 = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord2 = createTileRecord();
         mTileLayout.setListening(true);
         mTileLayout.addTile(tileRecord1);
         mTileLayout.addTile(tileRecord2);
@@ -118,7 +118,7 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testMeasureLayout_CallsLayoutOnTile() {
-        QSPanel.TileRecord tileRecord = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
         mTileLayout.measure(mLayoutSizeForOneTile, mLayoutSizeForOneTile);
         mTileLayout.layout(0, 0, mLayoutSizeForOneTile, mLayoutSizeForOneTile);
@@ -127,8 +127,8 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void testMeasureLayout_CallsLayoutOnTilesWithNeighboredBounds() {
-        QSPanel.TileRecord tileRecord1 = createTileRecord();
-        QSPanel.TileRecord tileRecord2 = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord1 = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord2 = createTileRecord();
         mTileLayout.addTile(tileRecord1);
         mTileLayout.addTile(tileRecord2);
         mTileLayout.measure(mLayoutSizeForOneTile * 2, mLayoutSizeForOneTile * 2);

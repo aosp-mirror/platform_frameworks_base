@@ -17,6 +17,7 @@
 package com.android.systemui.qs.dagger;
 
 import com.android.systemui.qs.QSAnimator;
+import com.android.systemui.qs.QSContainerImplController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.qs.QuickQSPanelController;
@@ -45,4 +46,6 @@ public interface QSFragmentComponent {
     /** Construct a {@link QSAnimator}. */
     QSAnimator getQSAnimator();
 
+    /** Construct a {@link QSContainerImplController}. */
+    QSContainerImplController getQSContainerImplController();
 }

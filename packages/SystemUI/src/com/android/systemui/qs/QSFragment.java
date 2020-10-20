@@ -35,7 +35,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.R.id;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -83,7 +82,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final InjectionInflationController mInjectionInflater;
     private final QSFragmentComponent.Factory mQsComponentFactory;
-    private final QSContainerImplController.Builder mQSContainerImplControllerBuilder;
     private final QSTileHost mHost;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -104,12 +102,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             InjectionInflationController injectionInflater, QSTileHost qsTileHost,
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
-            QSFragmentComponent.Factory qsComponentFactory,
-            QSContainerImplController.Builder qsContainerImplControllerBuilder) {
+            QSFragmentComponent.Factory qsComponentFactory) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
         mQsComponentFactory = qsComponentFactory;
-        mQSContainerImplControllerBuilder = qsContainerImplControllerBuilder;
         commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
         mStatusBarStateController = statusBarStateController;
@@ -147,12 +143,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mHeader = view.findViewById(R.id.header);
         mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = view.findViewById(R.id.qs_footer);
-        mContainer = view.findViewById(id.quick_settings_container);
 
-        mQSContainerImplController = mQSContainerImplControllerBuilder
-                .setQSContainerImpl((QSContainerImpl) view)
-                .build();
+        mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
         mQSContainerImplController.init();
+        mContainer = mQSContainerImplController.getView();
 
         mQSDetail.setQsPanel(mQSPanelController.getView(), mHeader, (View) mFooter);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
@@ -262,10 +256,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mHeader.setQSPanel(mQSPanelController.getView());
         mFooter.setQSPanel(mQSPanelController.getView());
         mQSDetail.setHost(qsh);
-
-        if (mQSAnimator != null) {
-            mQSAnimator.setHost(qsh);
-        }
     }
 
     @Override
@@ -420,8 +410,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         float panelTranslationY = translationScaleY * heightDiff;
 
         // Let the views animate their contents correctly by giving them the necessary context.
-        mHeader.setExpansion(onKeyguardAndExpanded, expansion,
-                panelTranslationY);
+        mHeader.setExpansion(onKeyguardAndExpanded, expansion, panelTranslationY);
+        if (expansion < 1 && expansion > 0.99) {
+            if (mQuickQSPanelController.switchTileLayout(false)) {
+                mHeader.updateResources();
+            }
+        }
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSPanelController.getQsTileRevealController().setExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion);
@@ -568,8 +562,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     /**
-     * The height this view wants to be. This is different from {@link #getMeasuredHeight} such that
-     * during closing the detail panel, this already returns the smaller height.
+     * The height this view wants to be. This is different from {@link View#getMeasuredHeight} such
+     * that during closing the detail panel, this already returns the smaller height.
      */
     @Override
     public int getDesiredHeight() {

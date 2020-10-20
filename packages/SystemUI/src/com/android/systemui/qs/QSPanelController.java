@@ -19,13 +19,15 @@ package com.android.systemui.qs;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 
 import android.annotation.NonNull;
-import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.BrightnessController;
@@ -59,8 +61,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, DumpManager dumpManager,
+            MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory) {
-        super(view, qstileHost, dumpManager);
+        super(view, qstileHost, metricsLogger, uiEventLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
@@ -76,10 +79,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mView.isListening()) {
             refreshAllTiles();
         }
-        mView.setBrightnessController(mBrightnessController);
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mView.setSecurityFooter(mQsSecurityFooter.getView());
-        mView.switchTileLayout(true);
+        switchTileLayout(true);
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(mView);
         }
@@ -117,11 +119,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     /** */
-    public void setExpanded(boolean qsExpanded) {
-        mView.setExpanded(qsExpanded);
-    }
-
-    /** */
     public boolean isShowingCustomize() {
         return mView.isShowingCustomize();
     }
@@ -133,7 +130,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** */
     public void setListening(boolean listening, boolean expanded) {
-        mView.setListening(listening && expanded);
+        setListening(listening && expanded);
         if (mView.isListening()) {
             refreshAllTiles();
         }
@@ -160,11 +157,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     /** */
-    public void closeDetail() {
-        mView.closeDetail();
-    }
-
-    /** */
     public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
         mBrightnessMirrorController = brightnessMirrorController;
         mView.setBrightnessMirror(brightnessMirrorController);
@@ -172,17 +164,16 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** Get the QSTileHost this panel uses. */
     public QSTileHost getHost() {
-        return mView.getHost();
+        return mHost;
     }
 
-    /** Click a tile. */
-    public void clickTile(ComponentName tile) {
-        mView.clickTile(tile);
-    }
 
     /** Open the details for a specific tile.. */
     public void openDetails(String subPanel) {
-        mView.openDetails(subPanel);
+        QSTile tile = getTile(subPanel);
+        if (tile != null) {
+            mView.openDetails(tile);
+        }
     }
 
     /** Show the device monitoring dialog. */
@@ -197,7 +188,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** Update state of all tiles. */
     public void refreshAllTiles() {
-        mView.refreshAllTiles();
+        mBrightnessController.checkRestrictionAndSetEnabled();
+        super.refreshAllTiles();
         mQsSecurityFooter.refreshState();
     }
 }
