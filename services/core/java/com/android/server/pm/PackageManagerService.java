@@ -271,8 +271,10 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
+import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageEventListener;
@@ -731,6 +733,14 @@ public class PackageManagerService extends IPackageManager.Stub
             new String[] { android.Manifest.permission.ACCESS_INSTANT_APPS };
 
     private static final String RANDOM_DIR_PREFIX = "~~";
+
+    /**
+     * Timeout configurations for incremental storage health monitor.
+     * See {@link IStorageHealthListener}
+     */
+    private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
+    private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;
+    private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     final ServiceThread mHandlerThread;
 
@@ -9696,6 +9706,18 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.disableSystemPackageLPw(parsedPackage.getPackageName(), true);
             }
         }
+        if (mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
+            if (pkgSetting != null && pkgSetting.isPackageLoading()) {
+                final StorageHealthCheckParams healthCheckParams = new StorageHealthCheckParams();
+                healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
+                healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
+                healthCheckParams.unhealthyMonitoringMs =
+                        INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+                mIncrementalManager.registerHealthListener(parsedPackage.getPath(),
+                        healthCheckParams,
+                        new IncrementalHealthListener(parsedPackage.getPackageName()));
+            }
+        }
         return scanResult.pkgSetting.pkg;
     }
 
@@ -16356,12 +16378,25 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // TODO(b/169721400): generalize Incremental States and create a Callback object
                 // that can be used for all the packages.
-                final IncrementalStatesCallback incrementalStatesCallback =
-                        new IncrementalStatesCallback(ps, userId);
                 final String codePath = ps.getPathString();
                 if (IncrementalManager.isIncrementalPath(codePath) && mIncrementalManager != null) {
-                    mIncrementalManager.registerCallback(codePath, incrementalStatesCallback);
+                    final IncrementalStatesCallback incrementalStatesCallback =
+                            new IncrementalStatesCallback(ps.name,
+                                    UserHandle.getUid(userId, ps.appId),
+                                    getInstalledUsers(ps, userId));
                     ps.setIncrementalStatesCallback(incrementalStatesCallback);
+                    mIncrementalManager.registerLoadingProgressCallback(codePath,
+                            new IncrementalProgressListener(ps.name));
+                    final IncrementalHealthListener incrementalHealthListener =
+                            new IncrementalHealthListener(ps.name);
+                    final StorageHealthCheckParams healthCheckParams =
+                            new StorageHealthCheckParams();
+                    healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
+                    healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
+                    healthCheckParams.unhealthyMonitoringMs =
+                            INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+                    mIncrementalManager.registerHealthListener(codePath,
+                            new StorageHealthCheckParams(), incrementalHealthListener);
                 }
 
                 // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
@@ -17264,45 +17299,39 @@ public class PackageManagerService extends IPackageManager.Stub
         NativeLibraryHelper.waitForNativeBinariesExtraction(incrementalStorages);
     }
 
-    private class IncrementalStatesCallback extends IPackageLoadingProgressCallback.Stub
-            implements IncrementalStates.Callback {
-        @GuardedBy("mPackageSetting")
-        private final PackageSetting mPackageSetting;
-        private final String mPackageName;
-        private final String mPathString;
-        private final int mUid;
-        private final int[] mInstalledUserIds;
-
-        IncrementalStatesCallback(PackageSetting packageSetting, int userId) {
-            mPackageSetting = packageSetting;
-            mPackageName = packageSetting.name;
-            mUid = UserHandle.getUid(userId, packageSetting.appId);
-            mPathString = packageSetting.getPathString();
-            final int[] allUserIds = resolveUserIds(userId);
-            final ArrayList<Integer> installedUserIds = new ArrayList<>();
-            for (int i = 0; i < allUserIds.length; i++) {
-                if (packageSetting.getInstalled(allUserIds[i])) {
-                    installedUserIds.add(allUserIds[i]);
-                }
-            }
-            final int numInstalledUserId = installedUserIds.size();
-            mInstalledUserIds = new int[numInstalledUserId];
-            for (int i = 0; i < numInstalledUserId; i++) {
-                mInstalledUserIds[i] = installedUserIds.get(i);
+    private int[] getInstalledUsers(PackageSetting ps, int userId) {
+        final int[] allUserIds = resolveUserIds(userId);
+        final ArrayList<Integer> installedUserIdsList = new ArrayList<>();
+        for (int i = 0; i < allUserIds.length; i++) {
+            if (ps.getInstalled(allUserIds[i])) {
+                installedUserIdsList.add(allUserIds[i]);
             }
         }
+        final int numInstalledUserId = installedUserIdsList.size();
+        final int[] installedUserIds = new int[numInstalledUserId];
+        for (int i = 0; i < numInstalledUserId; i++) {
+            installedUserIds[i] = installedUserIdsList.get(i);
+        }
+        return installedUserIds;
+    }
 
-        @Override
-        public void onPackageLoadingProgressChanged(float progress) {
-            synchronized (mPackageSetting) {
-                mPackageSetting.setLoadingProgress(progress);
-            }
+    /**
+     * Package states callback, used to listen for package state changes and send broadcasts
+     */
+    private final class IncrementalStatesCallback implements IncrementalStates.Callback {
+        private final String mPackageName;
+        private final int mUid;
+        private final int[] mInstalledUserIds;
+        IncrementalStatesCallback(String packageName, int uid, int[] installedUserIds) {
+            mPackageName = packageName;
+            mUid = uid;
+            mInstalledUserIds = installedUserIds;
         }
 
         @Override
         public void onPackageFullyLoaded() {
-            mIncrementalManager.unregisterCallback(mPathString, this);
             final SparseArray<int[]> newBroadcastAllowList;
+            final String codePath;
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.mPackages.get(mPackageName);
                 if (ps == null) {
@@ -17310,6 +17339,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
                         ps, mInstalledUserIds, mSettings.mPackages);
+                codePath = ps.getPathString();
             }
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
@@ -17318,6 +17348,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     extras, 0 /*flags*/,
                     null /*targetPackage*/, null /*finishedReceiver*/,
                     mInstalledUserIds, null /* instantUserIds */, newBroadcastAllowList);
+            // Unregister health listener as it will always be healthy from now
+            mIncrementalManager.unregisterHealthListener(codePath);
         }
 
         @Override
@@ -17365,37 +17397,48 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * This is an internal method that is used to indicate changes on the health status of the
-     * Incremental Storage used by an installed package with an associated user id. This might
-     * result in a change in the loading state of the package.
+     * Loading progress callback, used to listen for progress changes and update package setting
      */
-    public void onStorageHealthStatusChanged(String packageName, int status, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(
-                callingUid, userId, true, false,
-                "onStorageHealthStatusChanged");
-        final PackageSetting ps = getPackageSettingForUser(packageName, callingUid, userId);
-        if (ps == null) {
-            return;
+    private class IncrementalProgressListener extends IPackageLoadingProgressCallback.Stub {
+        private final String mPackageName;
+        IncrementalProgressListener(String packageName) {
+            mPackageName = packageName;
         }
-        ps.setStorageHealthStatus(status);
+
+        @Override
+        public void onPackageLoadingProgressChanged(float progress) {
+            final PackageSetting ps;
+            synchronized (mLock) {
+                ps = mSettings.mPackages.get(mPackageName);
+            }
+            if (ps == null) {
+                return;
+            }
+            ps.setLoadingProgress(progress);
+        }
     }
 
     /**
-     * This is an internal method that is used to indicate changes on the stream status of the
-     * data loader used by an installed package with an associated user id. This might
-     * result in a change in the loading state of the package.
+     * Incremental storage health status callback, used to listen for monitoring changes and update
+     * package setting.
      */
-    public void onStreamStatusChanged(String packageName, int status, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(
-                callingUid, userId, true, false,
-                "onStreamStatusChanged");
-        final PackageSetting ps = getPackageSettingForUser(packageName, callingUid, userId);
-        if (ps == null) {
-            return;
+    private class IncrementalHealthListener extends IStorageHealthListener.Stub {
+        private final String mPackageName;
+        IncrementalHealthListener(String packageName) {
+            mPackageName = packageName;
         }
-        ps.setStreamStatus(status);
+
+        @Override
+        public void onHealthStatus(int storageId, int status) throws RemoteException {
+            final PackageSetting ps;
+            synchronized (mLock) {
+                ps = mSettings.mPackages.get(mPackageName);
+            }
+            if (ps == null) {
+                return;
+            }
+            ps.setStorageHealthStatus(status);
+        }
     }
 
     @Nullable PackageSetting getPackageSettingForUser(String packageName, int callingUid,
@@ -25637,7 +25680,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Failed registering loading progress callback. Incremental is not enabled");
                 return false;
             }
-            return mIncrementalManager.registerCallback(ps.getPathString(),
+            return mIncrementalManager.registerLoadingProgressCallback(ps.getPathString(),
                     (IPackageLoadingProgressCallback) callback.getBinder());
         }
 
@@ -25656,7 +25699,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (mIncrementalManager == null) {
                 return false;
             }
-            return mIncrementalManager.unregisterCallback(ps.getPathString(),
+            return mIncrementalManager.unregisterLoadingProgressCallback(ps.getPathString(),
                     (IPackageLoadingProgressCallback) callback.getBinder());
         }
     }

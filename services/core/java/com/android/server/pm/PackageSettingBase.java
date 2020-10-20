@@ -793,13 +793,6 @@ public abstract class PackageSettingBase extends SettingBase {
         incrementalStates.onStorageHealthStatusChanged(status);
     }
 
-    /**
-     * @see IncrementalStates#onStreamStatusChanged(int)
-     */
-    public void setStreamStatus(int status) {
-        incrementalStates.onStreamStatusChanged(status);
-    }
-
     protected PackageSettingBase updateFrom(PackageSettingBase other) {
         super.copyFrom(other);
         setPath(other.getPath());
