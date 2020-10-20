@@ -21,7 +21,6 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -701,11 +700,9 @@ public class AppTransitionController {
             boolean openingAppHasWallpaper, boolean closingAppHasWallpaper) {
         // Given no app transition pass it through instead of a wallpaper transition.
         // Never convert the crashing transition.
-        // Never update the transition for the wallpaper if we are just docking from recents
         // Never convert a change transition since the top activity isn't changing and will likely
         // still be above an opening wallpaper.
         if (transit == TRANSIT_NONE || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE
-                || transit == TRANSIT_DOCK_TASK_FROM_RECENTS
                 || AppTransition.isChangeTransit(transit)) {
             return transit;
         }
