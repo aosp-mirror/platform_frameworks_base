@@ -237,7 +237,6 @@ public class DnsManager {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final IDnsResolver mDnsResolver;
-    private final MockableSystemProperties mSystemProperties;
     private final ConcurrentHashMap<Integer, PrivateDnsConfig> mPrivateDnsMap;
     // TODO: Replace the Map with SparseArrays.
     private final Map<Integer, PrivateDnsValidationStatuses> mPrivateDnsValidationMap;
@@ -249,11 +248,10 @@ public class DnsManager {
     private int mMinSamples;
     private int mMaxSamples;
 
-    public DnsManager(Context ctx, IDnsResolver dnsResolver, MockableSystemProperties sp) {
+    public DnsManager(Context ctx, IDnsResolver dnsResolver) {
         mContext = ctx;
         mContentResolver = mContext.getContentResolver();
         mDnsResolver = dnsResolver;
-        mSystemProperties = sp;
         mPrivateDnsMap = new ConcurrentHashMap<>();
         mPrivateDnsValidationMap = new HashMap<>();
         mLinkPropertiesMap = new HashMap<>();
