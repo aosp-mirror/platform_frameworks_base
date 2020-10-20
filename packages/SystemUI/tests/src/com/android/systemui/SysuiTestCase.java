@@ -72,7 +72,7 @@ public abstract class SysuiTestCase {
 
     @Before
     public void SysuiSetup() throws Exception {
-        SystemUIFactory.createFromConfig(mContext);
+        SystemUIFactory.createFromConfig(mContext, true);
         mDependency = new TestableDependency(
                 SystemUIFactory.getInstance().getSysUIComponent().createDependency());
         Dependency.setInstance(mDependency);

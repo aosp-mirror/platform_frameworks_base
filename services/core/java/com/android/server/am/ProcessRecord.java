@@ -1460,6 +1460,12 @@ class ProcessRecord implements WindowProcessListener {
             if (updateServiceConnectionActivities) {
                 mService.mServices.updateServiceConnectionActivitiesLocked(this);
             }
+            if (thread == null) {
+                // Only update lru and oom-adj if the process is alive. Because it may be called
+                // when cleaning up the last activity from handling process died, the dead process
+                // should not be added to lru list again.
+                return;
+            }
             mService.mProcessList.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
                 mService.updateOomAdjLocked(this, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);

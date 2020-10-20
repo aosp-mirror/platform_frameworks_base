@@ -21,6 +21,7 @@
             Takes precedence over the disallowed apps lists. -->
     <string-array translatable="false" name="required_apps_managed_user">
         <item>com.android.settings</item>
+        <item>com.android.systemui</item>
         <item>com.android.contacts</item>
         <item>com.android.dialer</item>
         <item>com.android.stk</item>  <!-- Required by com.android.phone by certain carriers -->

@@ -24,7 +24,6 @@ import android.graphics.RectF;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowInsets;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +34,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubblePositioner;
 import com.android.systemui.bubbles.BubbleStackView;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -58,12 +58,6 @@ public class StackAnimationController extends
         PhysicsAnimationLayout.PhysicsAnimationController {
 
     private static final String TAG = "Bubbs.StackCtrl";
-
-    /** Scale factor to use initially for new bubbles being animated in. */
-    private static final float ANIMATE_IN_STARTING_SCALE = 1.15f;
-
-    /** Translation factor (multiplied by stack offset) to use for bubbles being animated in/out. */
-    private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
     /** Values to use for animating bubbles in. */
     private static final float ANIMATE_IN_STIFFNESS = 1000f;
@@ -198,10 +192,8 @@ public class StackAnimationController extends
     private int mBubblePaddingTop;
     /** How far offscreen the stack rests. */
     private int mBubbleOffscreen;
-    /** How far down the screen the stack starts, when there is no pre-existing location. */
-    private int mStackStartingVerticalOffset;
-    /** Height of the status bar. */
-    private float mStatusBarHeight;
+    /** Contains display size, orientation, and inset information. */
+    private BubblePositioner mPositioner;
 
     /** FloatingContentCoordinator instance for resolving floating content conflicts. */
     private FloatingContentCoordinator mFloatingContentCoordinator;
@@ -266,10 +258,12 @@ public class StackAnimationController extends
     public StackAnimationController(
             FloatingContentCoordinator floatingContentCoordinator,
             IntSupplier bubbleCountSupplier,
-            Runnable onBubbleAnimatedOutAction) {
+            Runnable onBubbleAnimatedOutAction,
+            BubblePositioner positioner) {
         mFloatingContentCoordinator = floatingContentCoordinator;
         mBubbleCountSupplier = bubbleCountSupplier;
         mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
+        mPositioner = positioner;
     }
 
     /**
@@ -583,45 +577,12 @@ public class StackAnimationController extends
      * be animated or dragged beyond them.
      */
     public RectF getAllowableStackPositionRegion() {
-        final WindowInsets insets = mLayout.getRootWindowInsets();
-        final RectF allowableRegion = new RectF();
-        if (insets != null) {
-            allowableRegion.left =
-                    -mBubbleOffscreen
-                            + Math.max(
-                            insets.getSystemWindowInsetLeft(),
-                            insets.getDisplayCutout() != null
-                                    ? insets.getDisplayCutout().getSafeInsetLeft()
-                                    : 0);
-            allowableRegion.right =
-                    mLayout.getWidth()
-                            - mBubbleSize
-                            + mBubbleOffscreen
-                            - Math.max(
-                            insets.getSystemWindowInsetRight(),
-                            insets.getDisplayCutout() != null
-                                    ? insets.getDisplayCutout().getSafeInsetRight()
-                                    : 0);
-
-            allowableRegion.top =
-                    mBubblePaddingTop
-                            + Math.max(
-                            mStatusBarHeight,
-                            insets.getDisplayCutout() != null
-                                    ? insets.getDisplayCutout().getSafeInsetTop()
-                                    : 0);
-            allowableRegion.bottom =
-                    mLayout.getHeight()
-                            - mBubbleSize
-                            - mBubblePaddingTop
-                            - (mImeHeight != UNSET ? mImeHeight + mBubblePaddingTop : 0f)
-                            - Math.max(
-                            insets.getStableInsetBottom(),
-                            insets.getDisplayCutout() != null
-                                    ? insets.getDisplayCutout().getSafeInsetBottom()
-                                    : 0);
-        }
-
+        final RectF allowableRegion = new RectF(mPositioner.getAvailableRect());
+        allowableRegion.left -= mBubbleOffscreen;
+        allowableRegion.top += mBubblePaddingTop;
+        allowableRegion.right += mBubbleOffscreen - mBubbleSize;
+        allowableRegion.bottom -= mBubblePaddingTop + mBubbleSize
+                + (mImeHeight != UNSET ? mImeHeight + mBubblePaddingTop : 0f);
         return allowableRegion;
     }
 
@@ -824,22 +785,15 @@ public class StackAnimationController extends
         mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
-        mStackStartingVerticalOffset =
-                res.getDimensionPixelSize(R.dimen.bubble_stack_starting_offset_y);
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
     }
 
     /**
-     * Update effective screen width based on current orientation.
-     * @param orientation Landscape or portrait.
+     * Update resources.
      */
-    public void updateResources(int orientation) {
+    public void updateResources() {
         if (mLayout != null) {
             Resources res = mLayout.getContext().getResources();
             mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-            mStatusBarHeight = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
         }
     }
 
@@ -976,19 +930,19 @@ public class StackAnimationController extends
             return;
         }
 
-        final float xOffset =
-                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
+        final float yOffset =
+                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_Y);
 
         // Position the new bubble in the correct position, scaled down completely.
-        child.setTranslationX(mStackPosition.x + xOffset * index);
-        child.setTranslationY(mStackPosition.y);
+        child.setTranslationX(mStackPosition.x);
+        child.setTranslationY(mStackPosition.y + yOffset * index);
         child.setScaleX(0f);
         child.setScaleY(0f);
 
         // Push the subsequent views out of the way, if there are subsequent views.
         if (index + 1 < mLayout.getChildCount()) {
             animationForChildAtIndex(index + 1)
-                    .translationX(mStackPosition.x + xOffset * (index + 1))
+                    .translationY(mStackPosition.y + yOffset * (index + 1))
                     .withStiffness(SpringForce.STIFFNESS_LOW)
                     .start();
         }

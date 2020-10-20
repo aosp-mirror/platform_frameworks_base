@@ -749,25 +749,25 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE,
+                Settings.Global.ANGLE_DEBUG_PACKAGE,
                 GlobalSettingsProto.Gpu.ANGLE_DEBUG_PACKAGE);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
+                Settings.Global.ANGLE_GL_DRIVER_ALL_ANGLE,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_ALL_ANGLE);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
+                Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_PKGS);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
+                Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST,
+                Settings.Global.ANGLE_ALLOWLIST,
                 GlobalSettingsProto.Gpu.ANGLE_ALLOWLIST);
         dumpSetting(s, p,
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX,
+                Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX,
                 GlobalSettingsProto.Gpu.SHOW_ANGLE_IN_USE_DIALOG);
         dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYER_APP,

@@ -1257,20 +1257,27 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mStackSupervisor.removeHistoryRecords(this);
 
         boolean hasVisibleActivities = false;
-        if (mInactiveActivities != null && !mInactiveActivities.isEmpty()) {
+        final boolean hasInactiveActivities =
+                mInactiveActivities != null && !mInactiveActivities.isEmpty();
+        final ArrayList<ActivityRecord> activities =
+                (mHasActivities || hasInactiveActivities) ? new ArrayList<>() : mActivities;
+        if (mHasActivities) {
+            activities.addAll(mActivities);
+        }
+        if (hasInactiveActivities) {
             // Make sure that all activities in this process are handled.
-            mActivities.addAll(mInactiveActivities);
+            activities.addAll(mInactiveActivities);
         }
         if (isRemoved()) {
             // The package of the died process should be force-stopped, so make its activities as
             // finishing to prevent the process from being started again if the next top (or being
             // visible) activity also resides in the same process. This must be done before removal.
-            for (int i = mActivities.size() - 1; i >= 0; i--) {
-                mActivities.get(i).makeFinishingLocked();
+            for (int i = activities.size() - 1; i >= 0; i--) {
+                activities.get(i).makeFinishingLocked();
             }
         }
-        for (int i = mActivities.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = mActivities.get(i);
+        for (int i = activities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = activities.get(i);
             if (r.mVisibleRequested || r.isVisible()) {
                 // While an activity launches a new activity, it's possible that the old activity
                 // is already requested to be hidden (mVisibleRequested=false), but this visibility

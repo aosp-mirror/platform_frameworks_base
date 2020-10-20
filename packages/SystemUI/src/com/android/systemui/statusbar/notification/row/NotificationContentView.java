@@ -44,7 +44,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.MediaTransferManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
@@ -173,12 +172,10 @@ public class NotificationContentView extends FrameLayout {
     private boolean mIsContentExpandable;
     private boolean mRemoteInputVisible;
     private int mUnrestrictedContentHeight;
-    private MediaTransferManager mMediaTransferManager;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext());
-        mMediaTransferManager = new MediaTransferManager(getContext());
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
         mSmartReplyController = Dependency.get(SmartReplyController.class);
         initView();
@@ -1157,7 +1154,6 @@ public class NotificationContentView extends FrameLayout {
             mHeadsUpWrapper.onContentUpdated(row);
         }
         applyRemoteInputAndSmartReply(entry);
-        applyMediaTransfer(entry);
         updateLegacy();
         mForceSelectNextLayout = true;
         mPreviousExpandedRemoteInputIntent = null;
@@ -1182,22 +1178,6 @@ public class NotificationContentView extends FrameLayout {
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
             mSingleLineView = null;
-        }
-    }
-
-    private void applyMediaTransfer(final NotificationEntry entry) {
-        if (!entry.isMediaNotification()) {
-            return;
-        }
-
-        View bigContentView = mExpandedChild;
-        if (bigContentView != null && (bigContentView instanceof ViewGroup)) {
-            mMediaTransferManager.applyMediaTransferView((ViewGroup) bigContentView, entry);
-        }
-
-        View smallContentView = mContractedChild;
-        if (smallContentView != null && (smallContentView instanceof ViewGroup)) {
-            mMediaTransferManager.applyMediaTransferView((ViewGroup) smallContentView, entry);
         }
     }
 
@@ -1662,11 +1642,9 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mExpandedWrapper != null) {
             mExpandedWrapper.setRemoved();
-            mMediaTransferManager.setRemoved(mExpandedChild);
         }
         if (mContractedWrapper != null) {
             mContractedWrapper.setRemoved();
-            mMediaTransferManager.setRemoved(mContractedChild);
         }
         if (mHeadsUpWrapper != null) {
             mHeadsUpWrapper.setRemoved();

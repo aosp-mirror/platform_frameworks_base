@@ -128,6 +128,9 @@ public interface Bubbles {
     /** Set a listener to be notified of when overflow view update. */
     void setOverflowListener(BubbleData.Listener listener);
 
-    /** The task listener for events in bubble tasks. **/
+    /** The task listener for events in bubble tasks. */
     MultiWindowTaskListener getTaskManager();
+
+    /** Contains information to help position things on the screen.  */
+    BubblePositioner getPositioner();
 }

@@ -136,6 +136,7 @@ using ::android::hardware::tv::tuner::V1_1::Constant;
 using ::android::hardware::tv::tuner::V1_1::Constant64Bit;
 using ::android::hardware::tv::tuner::V1_1::FrontendAnalogAftFlag;
 using ::android::hardware::tv::tuner::V1_1::FrontendAnalogSettingsExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendBandwidth;
 using ::android::hardware::tv::tuner::V1_1::FrontendCableTimeInterleaveMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbsScanType;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbcSettingsExt1_1;
@@ -149,7 +150,13 @@ using ::android::hardware::tv::tuner::V1_1::FrontendDtmbModulation;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbSettings;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbTimeInterleaveMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbTransmissionMode;
+using ::android::hardware::tv::tuner::V1_1::FrontendGuardInterval;
+using ::android::hardware::tv::tuner::V1_1::FrontendInterleaveMode;
+using ::android::hardware::tv::tuner::V1_1::FrontendModulation;
 using ::android::hardware::tv::tuner::V1_1::FrontendSpectralInversion;
+using ::android::hardware::tv::tuner::V1_1::FrontendStatusExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendStatusTypeExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendTransmissionMode;
 
 struct fields_t {
     jfieldID tunerContext;
@@ -1862,18 +1869,49 @@ jobject JTuner::getFrontendStatus(jintArray types) {
     }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jsize size = env->GetArrayLength(types);
-    std::vector<FrontendStatusType> v(size);
-    env->GetIntArrayRegion(types, 0, size, reinterpret_cast<jint*>(&v[0]));
+    jint intTypes[size];
+    env->GetIntArrayRegion(types, 0, size, intTypes);
+    std::vector<FrontendStatusType> v;
+    std::vector<FrontendStatusTypeExt1_1> v_1_1;
+    for (int i = 0; i < size; i++) {
+        if (isV1_1ExtendedStatusType(intTypes[i])) {
+            v_1_1.push_back(static_cast<FrontendStatusTypeExt1_1>(intTypes[i]));
+        } else {
+            v.push_back(static_cast<FrontendStatusType>(intTypes[i]));
+        }
+    }
 
     Result res;
     hidl_vec<FrontendStatus> status;
-    mFe->getStatus(v,
-            [&](Result r, const hidl_vec<FrontendStatus>& s) {
-                res = r;
-                status = s;
-            });
-    if (res != Result::SUCCESS) {
-        return NULL;
+    hidl_vec<FrontendStatusExt1_1> status_1_1;
+
+    if (v.size() > 0) {
+        mFe->getStatus(v,
+                [&](Result r, const hidl_vec<FrontendStatus>& s) {
+                    res = r;
+                    status = s;
+                });
+        if (res != Result::SUCCESS) {
+            return NULL;
+        }
+    }
+
+    if (v_1_1.size() > 0) {
+        sp<::android::hardware::tv::tuner::V1_1::IFrontend> iFeSp_1_1;
+        iFeSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFrontend::castFrom(mFe);
+
+        if (iFeSp_1_1 != NULL) {
+            iFeSp_1_1->getStatusExt1_1(v_1_1,
+                [&](Result r, const hidl_vec<FrontendStatusExt1_1>& s) {
+                    res = r;
+                    status_1_1 = s;
+                });
+            if (res != Result::SUCCESS) {
+                return NULL;
+            }
+        } else {
+            ALOGW("getStatusExt1_1 is not supported with the current HAL implementation.");
+        }
     }
 
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/FrontendStatus");
@@ -2101,7 +2139,254 @@ jobject JTuner::getFrontendStatus(jintArray types) {
         }
     }
 
+    for (auto s : status_1_1) {
+        switch(s.getDiscriminator()) {
+            case FrontendStatusExt1_1::hidl_discriminator::modulations: {
+                jfieldID field = env->GetFieldID(clazz, "mModulationsExt", "[I");
+                std::vector<FrontendModulation> v = s.modulations();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                bool valid = false;
+                jint m[1];
+                for (int i = 0; i < v.size(); i++) {
+                    auto modulation = v[i];
+                    switch(modulation.getDiscriminator()) {
+                        case FrontendModulation::hidl_discriminator::dvbc: {
+                            m[0] = static_cast<jint>(modulation.dvbc());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendModulation::hidl_discriminator::dvbs: {
+                            m[0] = static_cast<jint>(modulation.dvbs());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                           break;
+                        }
+                        case FrontendModulation::hidl_discriminator::dvbt: {
+                            m[0] = static_cast<jint>(modulation.dvbt());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendModulation::hidl_discriminator::isdbs: {
+                            m[0] = static_cast<jint>(modulation.isdbs());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendModulation::hidl_discriminator::isdbs3: {
+                            m[0] = static_cast<jint>(modulation.isdbs3());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendModulation::hidl_discriminator::isdbt: {
+                            m[0] = static_cast<jint>(modulation.isdbt());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendModulation::hidl_discriminator::atsc: {
+                            m[0] = static_cast<jint>(modulation.atsc());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendModulation::hidl_discriminator::atsc3: {
+                            m[0] = static_cast<jint>(modulation.atsc3());
+                            env->SetIntArrayRegion(valObj, i, 1, m);
+                            valid = true;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                if (valid) {
+                    env->SetObjectField(statusObj, field, valObj);
+                }
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::bers: {
+                jfieldID field = env->GetFieldID(clazz, "mBers", "[I");
+                std::vector<uint32_t> v = s.bers();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::codeRates: {
+                jfieldID field = env->GetFieldID(clazz, "mCodeRates", "[I");
+                std::vector<::android::hardware::tv::tuner::V1_1::FrontendInnerFec> v
+                        = s.codeRates();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::bandwidth: {
+                jfieldID field = env->GetFieldID(clazz, "mBandwidth", "Ljava/lang/Integer;");
+                auto bandwidth = s.bandwidth();
+                jint intBandwidth;
+                bool valid = true;
+                switch(bandwidth.getDiscriminator()) {
+                    case FrontendBandwidth::hidl_discriminator::atsc3: {
+                        intBandwidth = static_cast<jint>(bandwidth.atsc3());
+                        break;
+                    }
+                    case FrontendBandwidth::hidl_discriminator::dvbt: {
+                        intBandwidth = static_cast<jint>(bandwidth.dvbt());
+                        break;
+                    }
+                    case FrontendBandwidth::hidl_discriminator::isdbt: {
+                        intBandwidth = static_cast<jint>(bandwidth.isdbt());
+                        break;
+                    }
+                    default:
+                        valid = false;
+                        break;
+                }
+                if (valid) {
+                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intBandwidth);
+                    env->SetObjectField(statusObj, field, newIntegerObj);
+                }
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::interval: {
+                jfieldID field = env->GetFieldID(clazz, "mGuardInterval", "Ljava/lang/Integer;");
+                auto interval = s.interval();
+                jint intInterval;
+                bool valid = true;
+                switch(interval.getDiscriminator()) {
+                    case FrontendGuardInterval::hidl_discriminator::dvbt: {
+                        intInterval = static_cast<jint>(interval.dvbt());
+                        break;
+                    }
+                    case FrontendGuardInterval::hidl_discriminator::isdbt: {
+                        intInterval = static_cast<jint>(interval.isdbt());
+                        break;
+                    }
+                    default:
+                        valid = false;
+                        break;
+                }
+                if (valid) {
+                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intInterval);
+                    env->SetObjectField(statusObj, field, newIntegerObj);
+                }
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::transmissionMode: {
+                jfieldID field = env->GetFieldID(clazz, "mTransmissionMode", "Ljava/lang/Integer;");
+                auto transmissionMode = s.transmissionMode();
+                jint intTransmissionMode;
+                bool valid = true;
+                switch(transmissionMode.getDiscriminator()) {
+                    case FrontendTransmissionMode::hidl_discriminator::dvbt: {
+                        intTransmissionMode = static_cast<jint>(transmissionMode.dvbt());
+                        break;
+                    }
+                    case FrontendTransmissionMode::hidl_discriminator::isdbt: {
+                        intTransmissionMode = static_cast<jint>(transmissionMode.isdbt());
+                        break;
+                    }
+                    default:
+                        valid = false;
+                        break;
+                }
+                if (valid) {
+                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intTransmissionMode);
+                    env->SetObjectField(statusObj, field, newIntegerObj);
+                }
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::uec: {
+                jfieldID field = env->GetFieldID(clazz, "mUec", "Ljava/lang/Integer;");
+                jobject newIntegerObj = env->NewObject(
+                        intClazz, initInt, static_cast<jint>(s.uec()));
+                env->SetObjectField(statusObj, field, newIntegerObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::systemId: {
+                jfieldID field = env->GetFieldID(clazz, "mSystemId", "Ljava/lang/Integer;");
+                jobject newIntegerObj = env->NewObject(
+                        intClazz, initInt, static_cast<jint>(s.systemId()));
+                env->SetObjectField(statusObj, field, newIntegerObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::interleaving: {
+                jfieldID field = env->GetFieldID(clazz, "mInterleaving", "[I");
+
+                std::vector<FrontendInterleaveMode> v = s.interleaving();
+                jintArray valObj = env->NewIntArray(v.size());
+                bool valid = false;
+                jint in[1];
+                for (int i = 0; i < v.size(); i++) {
+                    auto interleaving = v[i];
+                    switch(interleaving.getDiscriminator()) {
+                        case FrontendInterleaveMode::hidl_discriminator::atsc3: {
+                            in[0] = static_cast<jint>(interleaving.atsc3());
+                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            valid = true;
+                            break;
+                        }
+                        case FrontendInterleaveMode::hidl_discriminator::dvbc: {
+                            in[0] = static_cast<jint>(interleaving.dvbc());
+                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            valid = true;
+                           break;
+                        }
+                        case FrontendInterleaveMode::hidl_discriminator::dtmb: {
+                            in[0] = static_cast<jint>(interleaving.dtmb());
+                            env->SetIntArrayRegion(valObj, i, 1, in);
+                            valid = true;
+                           break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                if (valid) {
+                    env->SetObjectField(statusObj, field, valObj);
+                }
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::isdbtSegment: {
+                jfieldID field = env->GetFieldID(clazz, "mIsdbtSegment", "[I");
+                std::vector<uint8_t> v = s.isdbtSegment();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::tsDataRate: {
+                jfieldID field = env->GetFieldID(clazz, "mTsDataRate", "[I");
+                std::vector<uint32_t> v = s.tsDataRate();
+
+                jintArray valObj = env->NewIntArray(v.size());
+                env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
     return statusObj;
+}
+
+bool JTuner::isV1_1ExtendedStatusType(int type) {
+    return (type > static_cast<int>(FrontendStatusType::ATSC3_PLP_INFO)
+                && type <= static_cast<int>(FrontendStatusTypeExt1_1::TS_DATA_RATES));
 }
 
 jint JTuner::closeFrontend() {

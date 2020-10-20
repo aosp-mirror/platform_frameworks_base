@@ -70,7 +70,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
@@ -2088,28 +2087,18 @@ public class ExifInterface {
 
         FileInputStream in = null;
         FileOutputStream out = null;
-        File originalFile = null;
-        if (mFilename != null) {
-            originalFile = new File(mFilename);
-        }
         File tempFile = null;
         try {
-            // Move the original file to temporary file.
+            // Copy the original file to temporary file.
+            tempFile = File.createTempFile("temp", "tmp");
             if (mFilename != null) {
-                String parent = originalFile.getParent();
-                String name = originalFile.getName();
-                String tempPrefix = UUID.randomUUID().toString() + "_";
-                tempFile = new File(parent, tempPrefix + name);
-                if (!originalFile.renameTo(tempFile)) {
-                    throw new IOException("Couldn't rename to " + tempFile.getAbsolutePath());
-                }
+                in = new FileInputStream(mFilename);
             } else if (mSeekableFileDescriptor != null) {
-                tempFile = File.createTempFile("temp", "tmp");
                 Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
                 in = new FileInputStream(mSeekableFileDescriptor);
-                out = new FileOutputStream(tempFile);
-                copy(in, out);
             }
+            out = new FileOutputStream(tempFile);
+            copy(in, out);
         } catch (Exception e) {
             throw new IOException("Failed to copy original file to temp file", e);
         } finally {
@@ -2139,12 +2128,23 @@ public class ExifInterface {
                 }
             }
         } catch (Exception e) {
+            // Restore original file
+            in = new FileInputStream(tempFile);
             if (mFilename != null) {
-                if (!tempFile.renameTo(originalFile)) {
-                    throw new IOException("Couldn't restore original file: "
-                            + originalFile.getAbsolutePath());
+                out = new FileOutputStream(mFilename);
+            } else if (mSeekableFileDescriptor != null) {
+                try {
+                    Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
+                } catch (ErrnoException exception) {
+                    throw new IOException("Failed to save new file. Original file may be "
+                            + "corrupted since error occurred while trying to restore it.",
+                            exception);
                 }
+                out = new FileOutputStream(mSeekableFileDescriptor);
             }
+            copy(in, out);
+            closeQuietly(in);
+            closeQuietly(out);
             throw new IOException("Failed to save new file", e);
         } finally {
             closeQuietly(in);

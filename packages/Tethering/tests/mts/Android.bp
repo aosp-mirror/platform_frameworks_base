@@ -1,0 +1,56 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+android_test {
+    // This tests for functionality that is not required for devices that
+    // don't use Tethering mainline module.
+    name: "MtsTetheringTest",
+
+    libs: [
+        "android.test.base",
+    ],
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "androidx.test.rules",
+        // mockito-target-extended-minus-junit4 used in this lib have dependency with
+        // jni_libs libdexmakerjvmtiagent and libstaticjvmtiagent.
+        "cts-net-utils",
+        // This is needed for androidx.test.runner.AndroidJUnitRunner.
+        "ctstestrunner-axt",
+        "junit",
+        "junit-params",
+    ],
+
+    jni_libs: [
+        // For mockito extended which is pulled in from -net-utils -> net-tests-utils
+        // (mockito-target-extended-minus-junit4).
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+
+    platform_apis: true,
+
+    // Tag this module as a mts test artifact
+    test_suites: [
+        "general-tests",
+        "mts",
+    ],
+
+    // Include both the 32 and 64 bit versions
+    compile_multilib: "both",
+}

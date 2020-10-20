@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -54,7 +53,6 @@ public class NotificationHeaderView extends ViewGroup {
     private OnClickListener mExpandClickListener;
     private OnClickListener mFeedbackListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
-    private LinearLayout mTransferChip;
     private NotificationExpandButton mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
@@ -111,7 +109,6 @@ public class NotificationHeaderView extends ViewGroup {
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
         mSecondaryHeaderText = findViewById(com.android.internal.R.id.header_text_secondary);
-        mTransferChip = findViewById(com.android.internal.R.id.media_seamless);
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
@@ -143,8 +140,7 @@ public class NotificationHeaderView extends ViewGroup {
             // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mFeedbackIcon
-                    || child == mTransferChip) {
+                    || child == mFeedbackIcon) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             } else {
                 totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
@@ -208,8 +204,7 @@ public class NotificationHeaderView extends ViewGroup {
             // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mFeedbackIcon
-                    || child == mTransferChip) {
+                    || child == mFeedbackIcon) {
                 if (end == getMeasuredWidth()) {
                     layoutRight = end - mContentEndMargin;
                 } else {

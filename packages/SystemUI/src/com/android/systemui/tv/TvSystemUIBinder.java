@@ -22,7 +22,7 @@ import com.android.systemui.wmshell.TvPipModule;
 import dagger.Binds;
 import dagger.Module;
 
-@Module(includes = TvPipModule.class)
+@Module
 interface TvSystemUIBinder {
     @Binds
     GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);

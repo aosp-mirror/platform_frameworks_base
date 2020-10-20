@@ -109,11 +109,11 @@ public class GraphicsEnvironment {
     private static final int UPDATABLE_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER = 2;
     private static final int UPDATABLE_DRIVER_GLOBAL_OPT_IN_OFF = 3;
 
-    // Values for GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE
+    // Values for ANGLE_GL_DRIVER_ALL_ANGLE
     private static final int ANGLE_GL_DRIVER_ALL_ANGLE_ON = 1;
     private static final int ANGLE_GL_DRIVER_ALL_ANGLE_OFF = 0;
 
-    // Values for GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES
+    // Values for ANGLE_GL_DRIVER_SELECTION_VALUES
     private static final String ANGLE_GL_DRIVER_CHOICE_DEFAULT = "default";
     private static final String ANGLE_GL_DRIVER_CHOICE_ANGLE = "angle";
     private static final String ANGLE_GL_DRIVER_CHOICE_NATIVE = "native";
@@ -382,11 +382,11 @@ public class GraphicsEnvironment {
         final int allUseAngle;
         if (bundle != null) {
             allUseAngle =
-                    bundle.getInt(Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE);
+                    bundle.getInt(Settings.Global.ANGLE_GL_DRIVER_ALL_ANGLE);
         } else {
             ContentResolver contentResolver = context.getContentResolver();
             allUseAngle = Settings.Global.getInt(contentResolver,
-                    Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
+                    Settings.Global.ANGLE_GL_DRIVER_ALL_ANGLE,
                     ANGLE_GL_DRIVER_ALL_ANGLE_OFF);
         }
         if (allUseAngle == ANGLE_GL_DRIVER_ALL_ANGLE_ON) {
@@ -402,10 +402,10 @@ public class GraphicsEnvironment {
         final ContentResolver contentResolver = context.getContentResolver();
         final List<String> optInPackages =
                 getGlobalSettingsString(contentResolver, bundle,
-                        Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS);
+                        Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS);
         final List<String> optInValues =
                 getGlobalSettingsString(contentResolver, bundle,
-                        Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES);
+                        Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES);
 
         // Make sure we have good settings to use
         if (optInPackages.size() != optInValues.size()) {
@@ -462,11 +462,11 @@ public class GraphicsEnvironment {
 
         if (coreSettings != null) {
             debugPackage =
-                    coreSettings.getString(Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+                    coreSettings.getString(Settings.Global.ANGLE_DEBUG_PACKAGE);
         } else {
             ContentResolver contentResolver = context.getContentResolver();
             debugPackage = Settings.Global.getString(contentResolver,
-                    Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+                    Settings.Global.ANGLE_DEBUG_PACKAGE);
         }
         if (TextUtils.isEmpty(debugPackage)) {
             return "";
@@ -578,7 +578,7 @@ public class GraphicsEnvironment {
         final ContentResolver contentResolver = context.getContentResolver();
         final List<String> angleAllowlist =
                 getGlobalSettingsString(contentResolver, bundle,
-                    Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST);
+                    Settings.Global.ANGLE_ALLOWLIST);
 
         if (DEBUG) Log.v(TAG, "ANGLE allowlist: " + angleAllowlist);
 
@@ -678,7 +678,7 @@ public class GraphicsEnvironment {
         try {
             ContentResolver contentResolver = context.getContentResolver();
             final int showDialogBox = Settings.Global.getInt(contentResolver,
-                    Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX);
+                    Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX);
 
             return (showDialogBox == 1);
         } catch (Settings.SettingNotFoundException | SecurityException e) {
