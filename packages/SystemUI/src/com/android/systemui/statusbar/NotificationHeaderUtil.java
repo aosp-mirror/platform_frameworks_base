@@ -68,10 +68,8 @@ public class NotificationHeaderUtil {
         @Override
         public void apply(View parent, View view, boolean apply, boolean reset) {
             NotificationHeaderView header = (NotificationHeaderView) view;
-            ImageView icon = (ImageView) view.findViewById(
-                    com.android.internal.R.id.icon);
-            ImageView expand = (ImageView) view.findViewById(
-                    com.android.internal.R.id.expand_button);
+            ImageView icon = view.findViewById(com.android.internal.R.id.icon);
+            ImageView expand = view.findViewById(com.android.internal.R.id.expand_button);
             applyToChild(icon, apply, header.getOriginalIconColor());
             applyToChild(expand, apply, header.getOriginalNotificationColor());
         }
@@ -178,7 +176,7 @@ public class NotificationHeaderUtil {
 
     private void sanitizeHeaderViews(ExpandableNotificationRow row) {
         if (row.isSummaryWithChildren()) {
-            sanitizeHeader(row.getNotificationHeader());
+            sanitizeHeader(row.getNotificationViewWrapper().getNotificationHeader());
             return;
         }
         final NotificationContentView layout = row.getPrivateLayout();
@@ -275,7 +273,8 @@ public class NotificationHeaderUtil {
         }
 
         public void init() {
-            mParentView = mParentRow.getNotificationHeader().findViewById(mId);
+            mParentView = mParentRow.getNotificationViewWrapper().getNotificationHeader()
+                    .findViewById(mId);
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
         }
@@ -305,7 +304,7 @@ public class NotificationHeaderUtil {
         public void apply(ExpandableNotificationRow row, boolean reset) {
             boolean apply = mApply && !reset;
             if (row.isSummaryWithChildren()) {
-                applyToView(apply, reset, row.getNotificationHeader());
+                applyToView(apply, reset, row.getNotificationViewWrapper().getNotificationHeader());
                 return;
             }
             applyToView(apply, reset, row.getPrivateLayout().getContractedChild());

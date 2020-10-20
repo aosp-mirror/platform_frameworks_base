@@ -55,8 +55,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected final ViewTransformationHelper mTransformationHelper;
 
-    protected int mColor;
-
     private CachingIconView mIcon;
     private NotificationExpandButton mExpandButton;
     protected NotificationHeaderView mNotificationHeader;
@@ -119,7 +117,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mFeedbackIcon = mView.findViewById(com.android.internal.R.id.feedback);
         if (mNotificationHeader != null) {
             mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
-            mColor = mNotificationHeader.getOriginalIconColor();
         }
     }
 
@@ -293,6 +290,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public View getExpandButton() {
         return mExpandButton;
+    }
+
+    @Override
+    public CachingIconView getIcon() {
+        return mIcon;
     }
 
     @Override

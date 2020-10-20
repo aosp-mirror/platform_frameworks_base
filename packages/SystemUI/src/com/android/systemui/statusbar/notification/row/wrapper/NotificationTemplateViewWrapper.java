@@ -140,13 +140,13 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     private void resolveTemplateViews(StatusBarNotification notification) {
-        mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
+        mPicture = mView.findViewById(com.android.internal.R.id.right_icon);
         if (mPicture != null) {
             mPicture.setTag(ImageTransformState.ICON_TAG,
                     notification.getNotification().getLargeIcon());
         }
-        mTitle = (TextView) mView.findViewById(com.android.internal.R.id.title);
-        mText = (TextView) mView.findViewById(com.android.internal.R.id.text);
+        mTitle = mView.findViewById(com.android.internal.R.id.title);
+        mText = mView.findViewById(com.android.internal.R.id.text);
         final View progress = mView.findViewById(com.android.internal.R.id.progress);
         if (progress instanceof ProgressBar) {
             mProgressBar = (ProgressBar) progress;
