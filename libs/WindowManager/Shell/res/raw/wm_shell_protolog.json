@@ -1,12 +1,6 @@
 {
   "version": "1.0.0",
   "messages": {
-    "-1823823103": {
-      "message": "Add listener for types=%s listener=%s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
-    },
     "-1683614271": {
       "message": "Existing task: id=%d component=%s",
       "level": "VERBOSE",
@@ -61,6 +55,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "481673835": {
+      "message": "addListenerForTaskId taskId=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
     "564235578": {
       "message": "Fullscreen Task Vanished: #%d",
       "level": "VERBOSE",
@@ -75,6 +75,12 @@
     },
     "980952660": {
       "message": "Task root back pressed taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "1990759023": {
+      "message": "addListenerForType types=%s listener=%s",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"

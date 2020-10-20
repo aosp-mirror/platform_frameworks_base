@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -35,6 +36,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
@@ -46,6 +48,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.HandlerExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,6 +56,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -69,7 +73,7 @@ public class TaskViewTest extends SysuiTestCase {
     @Mock
     ShellTaskOrganizer mOrganizer;
     @Mock
-    MultiWindowTaskListener mTaskListener;
+    HandlerExecutor mExecutor;
 
     SurfaceSession mSession;
     SurfaceControl mLeash;
@@ -86,13 +90,18 @@ public class TaskViewTest extends SysuiTestCase {
 
         mContext = getContext();
 
-        when(mTaskListener.getTaskOrganizer()).thenReturn(mOrganizer);
         mTaskInfo = new ActivityManager.RunningTaskInfo();
         mTaskInfo.token = mToken;
         mTaskInfo.taskId = 314;
         mTaskInfo.taskDescription = mock(ActivityManager.TaskDescription.class);
 
-        mTaskView = new TaskView(mContext, mTaskListener);
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final Runnable r = invocationOnMock.getArgument(0);
+            r.run();
+            return null;
+        }).when(mExecutor).execute(any());
+
+        mTaskView = new TaskView(mContext, mOrganizer, mExecutor);
         mTaskView.setListener(mViewListener);
     }
 
@@ -105,7 +114,7 @@ public class TaskViewTest extends SysuiTestCase {
 
     @Test
     public void testSetPendingListener_throwsException() {
-        TaskView taskView = new TaskView(mContext, mTaskListener);
+        TaskView taskView = new TaskView(mContext, mOrganizer, mExecutor);
         taskView.setListener(mViewListener);
         try {
             taskView.setListener(mViewListener);
@@ -121,7 +130,7 @@ public class TaskViewTest extends SysuiTestCase {
         ActivityOptions options = ActivityOptions.makeBasic();
         mTaskView.startActivity(mock(PendingIntent.class), null, options);
 
-        verify(mTaskListener).setPendingLaunchCookieListener(any(), eq(mTaskView));
+        verify(mOrganizer).setPendingLaunchCookieListener(any(), eq(mTaskView));
         assertThat(options.getLaunchWindowingMode()).isEqualTo(WINDOWING_MODE_MULTI_WINDOW);
         assertThat(options.getTaskAlwaysOnTop()).isTrue();
     }
@@ -189,7 +198,7 @@ public class TaskViewTest extends SysuiTestCase {
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
         mTaskView.release();
 
-        verify(mTaskListener).removeListener(eq(mTaskView));
+        verify(mOrganizer).removeListener(eq(mTaskView));
         verify(mViewListener).onReleased();
     }
 

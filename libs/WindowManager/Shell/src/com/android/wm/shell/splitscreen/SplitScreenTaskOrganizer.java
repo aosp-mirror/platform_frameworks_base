@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_SPLIT_SCREEN;
+import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.graphics.Rect;
@@ -33,7 +34,11 @@ import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.ShellTaskOrganizer;
+
+import java.io.PrintWriter;
 
 class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "SplitScreenTaskOrg";
@@ -57,7 +62,7 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
                     ShellTaskOrganizer shellTaskOrganizer) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
-        mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_SPLIT_SCREEN);
+        mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_SPLIT_SCREEN);
     }
 
     void init() throws RemoteException {
@@ -228,5 +233,17 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
             // Both splits are populated by normal activities, so make sure we aren't minimized.
             mSplitScreenController.ensureNormalSplit();
         }
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        final String childPrefix = innerPrefix + "  ";
+        pw.println(prefix + this);
+    }
+
+    @Override
+    public String toString() {
+        return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_SPLIT_SCREEN);
     }
 }

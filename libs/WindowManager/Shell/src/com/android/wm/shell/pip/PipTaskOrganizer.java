@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
+import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -67,6 +68,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
+import com.android.wm.shell.pip.phone.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
@@ -280,7 +282,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitScreenOptional = splitScreenOptional;
         mTaskOrganizer = shellTaskOrganizer;
-        mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_PIP);
+        mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
         displayController.addDisplayWindowListener(this);
     }
 
@@ -1126,6 +1128,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /**
      * Dumps internal states.
      */
+    @Override
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
@@ -1141,6 +1144,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             pw.println(innerPrefix + "  binder=" + e.getKey()
                     + " winConfig=" + e.getValue().windowConfiguration);
         }
+    }
+
+    @Override
+    public String toString() {
+        return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_PIP);
     }
 
     /**
