@@ -42,10 +42,10 @@ interface ITestSession {
     void rejectAuthentication(int userId);
 
     // Simulates an acquired message from the HAL.
-    void notifyAcquired(int userId);
+    void notifyAcquired(int userId, int acquireInfo);
 
     // Simulates an error message from the HAL.
-    void notifyError(int userId);
+    void notifyError(int userId, int errorCode);
 
     // Matches the framework's cached enrollments against the HAL's enrollments. Any enrollment
     // that isn't known by both sides are deleted. This should generally be used when the test
