@@ -21,6 +21,8 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import android.annotation.Nullable;
 import android.util.Log;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController;
 
@@ -119,7 +121,7 @@ public class OverlayViewGlobalStateController {
 
         updateInternalsWhenShowingView(viewController);
         refreshUseStableInsets();
-        refreshInsetTypesToFit();
+        refreshInsetsToFit();
         refreshWindowFocus();
         refreshNavigationBarVisibility();
         refreshStatusBarVisibility();
@@ -193,7 +195,7 @@ public class OverlayViewGlobalStateController {
         mZOrderVisibleSortedMap.remove(mZOrderMap.get(viewController));
         refreshHighestZOrderWhenHidingView(viewController);
         refreshUseStableInsets();
-        refreshInsetTypesToFit();
+        refreshInsetsToFit();
         refreshWindowFocus();
         refreshNavigationBarVisibility();
         refreshStatusBarVisibility();
@@ -255,11 +257,25 @@ public class OverlayViewGlobalStateController {
                 mHighestZOrder == null ? false : mHighestZOrder.shouldUseStableInsets());
     }
 
-    private void refreshInsetTypesToFit() {
+    /**
+     * Refreshes the insets to fit (or honor) either by {@link InsetsType} or {@link InsetsSide}.
+     *
+     * By default, the insets to fit are defined by the {@link InsetsType}. But if an
+     * {@link OverlayViewController} overrides {@link OverlayViewController#getInsetSidesToFit()} to
+     * return an {@link InsetsSide}, then that takes precedence over {@link InsetsType}.
+     */
+    private void refreshInsetsToFit() {
         if (mZOrderVisibleSortedMap.isEmpty()) {
             setFitInsetsTypes(statusBars());
         } else {
-            setFitInsetsTypes(mHighestZOrder.getInsetTypesToFit());
+            if (mHighestZOrder.getInsetSidesToFit() != OverlayViewController.INVALID_INSET_SIDE) {
+                // First fit all system bar insets as setFitInsetsSide defines which sides of system
+                // bar insets to actually honor.
+                setFitInsetsTypes(WindowInsets.Type.systemBars());
+                setFitInsetsSides(mHighestZOrder.getInsetSidesToFit());
+            } else {
+                setFitInsetsTypes(mHighestZOrder.getInsetTypesToFit());
+            }
         }
     }
 
@@ -272,8 +288,14 @@ public class OverlayViewGlobalStateController {
         mSystemUIOverlayWindowController.setWindowVisible(visible);
     }
 
+    /** Sets the insets to fit based on the {@link InsetsType} */
     private void setFitInsetsTypes(@InsetsType int types) {
         mSystemUIOverlayWindowController.setFitInsetsTypes(types);
+    }
+
+    /** Sets the insets to fit based on the {@link InsetsSide} */
+    private void setFitInsetsSides(@InsetsSide int sides) {
+        mSystemUIOverlayWindowController.setFitInsetsSides(sides);
     }
 
     /**
