@@ -245,7 +245,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
 
     private boolean mInflateSynchronously;
 
-    private MultiWindowTaskListener mTaskListener;
+    private ShellTaskOrganizer mTaskOrganizer;
 
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
@@ -531,7 +531,7 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
                 });
 
         mBubbleIconFactory = new BubbleIconFactory(context);
-        mTaskListener = new MultiWindowTaskListener(mMainHandler, organizer);
+        mTaskOrganizer = organizer;
         mBubblePositioner = positioner;
 
         launcherApps.registerCallback(new LauncherApps.Callback() {
@@ -808,8 +808,8 @@ public class BubbleController implements Bubbles, ConfigurationController.Config
     }
 
     @Override
-    public MultiWindowTaskListener getTaskManager() {
-        return mTaskListener;
+    public ShellTaskOrganizer getTaskOrganizer() {
+        return mTaskOrganizer;
     }
 
     @Override
