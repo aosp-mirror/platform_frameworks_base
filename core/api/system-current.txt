@@ -5665,7 +5665,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setModulation(int);
   }
 
-  public class DtmbFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+  public final class DtmbFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
     method public int getBandwidthCapability();
     method public int getCodeRateCapability();
     method public int getGuardIntervalCapability();
@@ -5674,7 +5674,7 @@ package android.media.tv.tuner.frontend {
     method public int getTransmissionModeCapability();
   }
 
-  public class DtmbFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+  public final class DtmbFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder builder();
     method public int getBandwidth();
     method public int getCodeRate();

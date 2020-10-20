@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class DtmbFrontendSettings extends FrontendSettings {
+public final class DtmbFrontendSettings extends FrontendSettings {
 
     /** @hide */
     @IntDef(flag = true,
