@@ -80,37 +80,42 @@ class DisplayFoldController {
     }
 
     void setDeviceFolded(boolean folded) {
-        mDisplayManagerInternal.setDeviceFolded(folded);
-
         if (mFolded != null && mFolded == folded) {
             return;
         }
-        if (folded) {
-            Rect foldedArea;
-            if (!mOverrideFoldedArea.isEmpty()) {
-                foldedArea = mOverrideFoldedArea;
-            } else if (!mFoldedArea.isEmpty()) {
-                foldedArea = mFoldedArea;
-            } else {
-                return;
-            }
 
-            mDisplayManagerInternal.getNonOverrideDisplayInfo(mDisplayId, mNonOverrideDisplayInfo);
-            final int dx = (mNonOverrideDisplayInfo.logicalWidth - foldedArea.width()) / 2
-                    - foldedArea.left;
-            final int dy = (mNonOverrideDisplayInfo.logicalHeight - foldedArea.height()) / 2
-                    - foldedArea.top;
-
-            // Bypass scaling otherwise LogicalDisplay will scale contents by default.
-            mDisplayManagerInternal.setDisplayScalingDisabled(mDisplayId, true);
-            mWindowManagerInternal.setForcedDisplaySize(mDisplayId,
-                    foldedArea.width(), foldedArea.height());
-            mDisplayManagerInternal.setDisplayOffsets(mDisplayId, -dx, -dy);
+        final Rect foldedArea;
+        if (!mOverrideFoldedArea.isEmpty()) {
+            foldedArea = mOverrideFoldedArea;
+        } else if (!mFoldedArea.isEmpty()) {
+            foldedArea = mFoldedArea;
         } else {
-            mDisplayManagerInternal.setDisplayScalingDisabled(mDisplayId, false);
-            mWindowManagerInternal.clearForcedDisplaySize(mDisplayId);
-            mDisplayManagerInternal.setDisplayOffsets(mDisplayId, 0, 0);
+            foldedArea = null;
         }
+
+        // Only do display scaling/cropping if it has been configured to do so
+        if (foldedArea != null) {
+            if (folded) {
+
+                mDisplayManagerInternal.getNonOverrideDisplayInfo(
+                        mDisplayId, mNonOverrideDisplayInfo);
+                final int dx = (mNonOverrideDisplayInfo.logicalWidth - foldedArea.width()) / 2
+                        - foldedArea.left;
+                final int dy = (mNonOverrideDisplayInfo.logicalHeight - foldedArea.height()) / 2
+                        - foldedArea.top;
+
+                // Bypass scaling otherwise LogicalDisplay will scale contents by default.
+                mDisplayManagerInternal.setDisplayScalingDisabled(mDisplayId, true);
+                mWindowManagerInternal.setForcedDisplaySize(mDisplayId,
+                        foldedArea.width(), foldedArea.height());
+                mDisplayManagerInternal.setDisplayOffsets(mDisplayId, -dx, -dy);
+            } else {
+                mDisplayManagerInternal.setDisplayScalingDisabled(mDisplayId, false);
+                mWindowManagerInternal.clearForcedDisplaySize(mDisplayId);
+                mDisplayManagerInternal.setDisplayOffsets(mDisplayId, 0, 0);
+            }
+        }
+
         mDurationLogger.setDeviceFolded(folded);
         mDurationLogger.logFocusedAppWithFoldState(folded, mFocusedApp);
         mFolded = folded;

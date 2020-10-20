@@ -91,6 +91,7 @@ import android.util.SparseArray;
 import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.IDisplayFoldListener;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -103,6 +104,7 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -312,6 +314,9 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
+    // Received notifications of the display-fold action
+    private DisplayFoldListener mDisplayFoldListener;
+
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -429,6 +434,11 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+            WindowManagerPolicy policy = LocalServices.getService(WindowManagerPolicy.class);
+
+            mDisplayFoldListener = new DisplayFoldListener();
+            policy.registerDisplayFoldListener(mDisplayFoldListener);
+
             scheduleTraversalLocked(false);
         }
     }
@@ -2563,13 +2573,6 @@ public final class DisplayManagerService extends SystemService {
         public void ignoreProximitySensorUntilChanged() {
             mDisplayPowerController.ignoreProximitySensorUntilChanged();
         }
-
-        @Override
-        public void setDeviceFolded(boolean isFolded) {
-            synchronized (mSyncRoot) {
-                mLogicalDisplayMapper.setDeviceFoldedLocked(isFolded);
-            }
-        }
     }
 
     class DesiredDisplayModeSpecsObserver
@@ -2606,4 +2609,17 @@ public final class DisplayManagerService extends SystemService {
             }
         }
     }
+
+    class DisplayFoldListener extends IDisplayFoldListener.Stub {
+        @Override
+        public void onDisplayFoldChanged(int displayId, boolean folded) {
+            // TODO: multi-display - IDisplayFoldListener callback only really works for the
+            // Display.DEFAULT_DISPLAY.
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                synchronized (mSyncRoot) {
+                    mLogicalDisplayMapper.setDeviceFoldedLocked(folded);
+                }
+            }
+        }
+    };
 }

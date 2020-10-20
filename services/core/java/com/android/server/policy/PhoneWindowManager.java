@@ -471,7 +471,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     private boolean mLidControlsDisplayFold;
-    private boolean mShouldSwapDisplaysOnLidSwitch;
     int mShortPressOnPowerBehavior;
     int mLongPressOnPowerBehavior;
     int mVeryLongPressOnPowerBehavior;
@@ -1849,8 +1848,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
         mLidControlsDisplayFold = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_lidControlsDisplayFold);
-        mShouldSwapDisplaysOnLidSwitch = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_internalFoldedPhysicalDisplayIds).length == 2;
 
         mAllowTheaterModeWakeFromKey = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromKey);
@@ -5041,8 +5038,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int lidState = mDefaultDisplayPolicy.getLidState();
         if (mLidControlsDisplayFold && mDisplayFoldController != null) {
             mDisplayFoldController.requestDeviceFolded(lidState == LID_CLOSED);
-        } else if (mShouldSwapDisplaysOnLidSwitch) {
-            mDisplayManagerInternal.setDeviceFolded(lidState == LID_CLOSED);
         } else if (lidState == LID_CLOSED) {
             int lidBehavior = getLidBehavior();
             switch (lidBehavior) {
