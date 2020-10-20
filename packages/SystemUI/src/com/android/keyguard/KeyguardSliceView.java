@@ -33,9 +33,11 @@ import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.slice.SliceItem;
@@ -55,8 +57,10 @@ import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * View visible under the clock on the lock screen and AoD.
@@ -85,6 +89,8 @@ public class KeyguardSliceView extends LinearLayout {
     private float mRowTextSize;
     private float mRowWithHeaderTextSize;
     private View.OnClickListener mOnClickListener;
+
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     public KeyguardSliceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -142,6 +148,40 @@ public class KeyguardSliceView extends LinearLayout {
         }
     }
 
+    /**
+     * Updates the lockscreen mode which may change the layout of the keyguard slice view.
+     */
+    public void updateLockScreenMode(int mode) {
+        mLockScreenMode = mode;
+        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+            // add top padding to better align with top of clock
+            final int topPadding = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    20,
+                    getResources().getDisplayMetrics());
+            mTitle.setPaddingRelative(0, topPadding, 0, 0);
+            mTitle.setGravity(Gravity.START);
+            setGravity(Gravity.START);
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) getLayoutParams();
+            lp.removeRule(RelativeLayout.CENTER_HORIZONTAL);
+            setLayoutParams(lp);
+        } else {
+            final int horizontalPaddingDpValue = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    44,
+                    getResources().getDisplayMetrics()
+            );
+            mTitle.setPaddingRelative(horizontalPaddingDpValue, 0, horizontalPaddingDpValue, 0);
+            mTitle.setGravity(Gravity.CENTER_HORIZONTAL);
+            setGravity(Gravity.CENTER_HORIZONTAL);
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) getLayoutParams();
+            lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            setLayoutParams(lp);
+        }
+        mRow.setLockscreenMode(mode);
+        requestLayout();
+    }
+
     Map<View, PendingIntent> showSlice(RowContent header, List<SliceContent> subItems) {
         Trace.beginSection("KeyguardSliceView#showSlice");
         mHasHeader = header != null;
@@ -166,6 +206,8 @@ public class KeyguardSliceView extends LinearLayout {
         final int startIndex = mHasHeader ? 1 : 0; // First item is header; skip it
         mRow.setVisibility(subItemsCount > 0 ? VISIBLE : GONE);
         LinearLayout.LayoutParams layoutParams = (LayoutParams) mRow.getLayoutParams();
+        layoutParams.gravity = mLockScreenMode !=  KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL
+                ? Gravity.START :  Gravity.CENTER;
         layoutParams.topMargin = mHasHeader ? mRowWithHeaderPadding : mRowPadding;
         mRow.setLayoutParams(layoutParams);
 
@@ -282,6 +324,7 @@ public class KeyguardSliceView extends LinearLayout {
         pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mHasHeader: " + mHasHeader);
+        pw.println("  mLockScreenMode: " + mLockScreenMode);
     }
 
     @Override
@@ -291,6 +334,8 @@ public class KeyguardSliceView extends LinearLayout {
     }
 
     public static class Row extends LinearLayout {
+        private Set<KeyguardSliceTextView> mKeyguardSliceTextViewSet = new HashSet();
+        private int mLockScreenModeRow = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
         /**
          * This view is visible in AOD, which means that the device will sleep if we
@@ -361,12 +406,18 @@ public class KeyguardSliceView extends LinearLayout {
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             int childCount = getChildCount();
+
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
                 if (child instanceof KeyguardSliceTextView) {
-                    ((KeyguardSliceTextView) child).setMaxWidth(width / 3);
+                    if (mLockScreenModeRow == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+                        ((KeyguardSliceTextView) child).setMaxWidth(Integer.MAX_VALUE);
+                    } else {
+                        ((KeyguardSliceTextView) child).setMaxWidth(width / 3);
+                    }
                 }
             }
+
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
@@ -384,6 +435,42 @@ public class KeyguardSliceView extends LinearLayout {
         public boolean hasOverlappingRendering() {
             return false;
         }
+
+        @Override
+        public void addView(View view, int index) {
+            super.addView(view, index);
+
+            if (view instanceof KeyguardSliceTextView) {
+                ((KeyguardSliceTextView) view).setLockScreenMode(mLockScreenModeRow);
+                mKeyguardSliceTextViewSet.add((KeyguardSliceTextView) view);
+            }
+        }
+
+        @Override
+        public void removeView(View view) {
+            super.removeView(view);
+            if (view instanceof KeyguardSliceTextView) {
+                mKeyguardSliceTextViewSet.remove((KeyguardSliceTextView) view);
+            }
+        }
+
+        /**
+         * Updates the lockscreen mode which may change the layout of this view.
+         */
+        public void setLockscreenMode(int mode) {
+            mLockScreenModeRow = mode;
+            if (mLockScreenModeRow == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+                setOrientation(LinearLayout.VERTICAL);
+                setGravity(Gravity.START);
+            } else {
+                setOrientation(LinearLayout.HORIZONTAL);
+                setGravity(Gravity.CENTER);
+            }
+
+            for (KeyguardSliceTextView textView : mKeyguardSliceTextViewSet) {
+                textView.setLockScreenMode(mLockScreenModeRow);
+            }
+        }
     }
 
     /**
@@ -392,6 +479,7 @@ public class KeyguardSliceView extends LinearLayout {
     @VisibleForTesting
     static class KeyguardSliceTextView extends TextView implements
             ConfigurationController.ConfigurationListener {
+        private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
         @StyleRes
         private static int sStyleId = R.style.TextAppearance_Keyguard_Secondary;
@@ -432,9 +520,16 @@ public class KeyguardSliceView extends LinearLayout {
 
         private void updatePadding() {
             boolean hasText = !TextUtils.isEmpty(getText());
-            int horizontalPadding = (int) getContext().getResources()
+            int padding = (int) getContext().getResources()
                     .getDimension(R.dimen.widget_horizontal_padding) / 2;
-            setPadding(horizontalPadding, 0, horizontalPadding * (hasText ? 1 : -1), 0);
+            if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+                // orientation is vertical, so add padding to top & bottom
+                setPadding(0, padding, 0, padding * (hasText ? 1 : -1));
+            } else {
+                // oreintation is horizontal, so add padding to left & right
+                setPadding(padding, 0, padding * (hasText ? 1 : -1), 0);
+            }
+
             setCompoundDrawablePadding((int) mContext.getResources()
                     .getDimension(R.dimen.widget_icon_padding));
         }
@@ -460,6 +555,19 @@ public class KeyguardSliceView extends LinearLayout {
                     drawable.setTint(color);
                 }
             }
+        }
+
+        /**
+         * Updates the lockscreen mode which may change the layout of this view.
+         */
+        public void setLockScreenMode(int mode) {
+            mLockScreenMode = mode;
+            if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+                setGravity(Gravity.START);
+            } else {
+                setGravity(Gravity.CENTER);
+            }
+            updatePadding();
         }
     }
 }
