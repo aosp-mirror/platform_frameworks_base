@@ -508,9 +508,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final boolean HIDE_EPHEMERAL_APIS = false;
 
-    private static final boolean ENABLE_FREE_CACHE_V2 =
-            SystemProperties.getBoolean("fw.free_cache_v2", true);
-
     private static final String PRECOMPILE_LAYOUTS = "pm.precompile_layouts";
 
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -748,8 +745,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final ProcessLoggingHandler mProcessLoggingHandler;
 
-    final int mSdkVersion = Build.VERSION.SDK_INT;
+    private final boolean mEnableFreeCacheV2;
 
+    final int mSdkVersion;
     final Context mContext;
     final boolean mFactoryTest;
     final boolean mOnlyCore;
@@ -904,24 +902,8 @@ public class PackageManagerService extends IPackageManager.Stub
             T produce(Injector injector, PackageManagerService packageManager);
         }
 
-        static class LocalServicesProducer<T> implements Producer<T> {
-            private final Class<T> mProducingClass;
-            LocalServicesProducer(Class<T> clazz) {
-                this.mProducingClass = clazz;
-            }
-            public T produce(Injector injector, PackageManagerService packageManager) {
-                return LocalServices.getService(mProducingClass);
-            }
-        }
-
-        static class SystemServiceProducer<T> implements Producer<T> {
-            private final Class<T> mProducingClass;
-            SystemServiceProducer(Class<T> clazz) {
-                this.mProducingClass = clazz;
-            }
-            public T produce(Injector injector, PackageManagerService packageManager) {
-                return packageManager.mContext.getSystemService(mProducingClass);
-            }
+        interface ServiceProducer {
+            <T> T produce(Class<T> c);
         }
 
         @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -951,41 +933,43 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // ----- producers -----
         private final Singleton<ComponentResolver> mComponentResolverProducer;
-        private final Singleton<PermissionManagerServiceInternal> mPermissionManagerProducer;
+        private final Singleton<PermissionManagerServiceInternal> mPermissionManagerServiceProducer;
         private final Singleton<UserManagerService> mUserManagerProducer;
         private final Singleton<Settings> mSettingsProducer;
-        private final Singleton<ActivityTaskManagerInternal> mActivityTaskManagerProducer;
-        private final Singleton<ActivityManagerInternal> mActivityManagerInternalProducer;
-        private final Singleton<DeviceIdleInternal> mLocalDeviceIdleController;
-        private final Singleton<StorageManagerInternal> mStorageManagerInternalProducer;
-        private final Singleton<NetworkPolicyManagerInternal> mNetworkPolicyManagerProducer;
-        private final Singleton<PermissionPolicyInternal> mPermissionPolicyProducer;
-        private final Singleton<DeviceStorageMonitorInternal> mDeviceStorageMonitorProducer;
-        private final Singleton<DisplayManager> mDisplayManagerProducer;
-        private final Singleton<StorageManager> mStorageManagerProducer;
-        private final Singleton<AppOpsManager> mAppOpsManagerProducer;
         private final Singleton<AppsFilter> mAppsFilterProducer;
         private final Singleton<PlatformCompat> mPlatformCompatProducer;
+        private final Singleton<SystemConfig> mSystemConfigProducer;
+        private final Singleton<PackageDexOptimizer> mPackageDexOptimizerProducer;
+        private final Singleton<DexManager> mDexManagerProducer;
+        private final Singleton<ArtManagerService> mArtManagerServiceProducer;
+        private final Singleton<ApexManager> mApexManagerProducer;
+        private final Singleton<ViewCompiler> mViewCompilerProducer;
+        private final Singleton<IPermissionManager> mPermissionManagerProducer;
+        private final Singleton<IncrementalManager> mIncrementalManagerProducer;
+        private final SystemWrapper mSystemWrapper;
+        private final ServiceProducer mGetLocalServiceProducer;
+        private final ServiceProducer mGetSystemServiceProducer;
 
         Injector(Context context, Object lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
                 Handler backgroundHandler,
                 Producer<ComponentResolver> componentResolverProducer,
-                Producer<PermissionManagerServiceInternal> permissionManagerProducer,
+                Producer<PermissionManagerServiceInternal> permissionManagerServiceProducer,
                 Producer<UserManagerService> userManagerProducer,
                 Producer<Settings> settingsProducer,
-                Producer<ActivityTaskManagerInternal> activityTaskManagerProducer,
-                Producer<ActivityManagerInternal> activityManagerInternalProducer,
-                Producer<DeviceIdleInternal> deviceIdleControllerProducer,
-                Producer<StorageManagerInternal> storageManagerInternalProducer,
-                Producer<NetworkPolicyManagerInternal> networkPolicyManagerProducer,
-                Producer<PermissionPolicyInternal> permissionPolicyProvider,
-                Producer<DeviceStorageMonitorInternal> deviceStorageMonitorProducer,
-                Producer<DisplayManager> displayManagerProducer,
-                Producer<StorageManager> storageManagerProducer,
-                Producer<AppOpsManager> appOpsManagerProducer,
                 Producer<AppsFilter> appsFilterProducer,
-                Producer<PlatformCompat> platformCompatProducer) {
+                Producer<PlatformCompat> platformCompatProducer,
+                Producer<SystemConfig> systemConfigProducer,
+                Producer<PackageDexOptimizer> packageDexOptimizerProducer,
+                Producer<DexManager> dexManagerProducer,
+                Producer<ArtManagerService> artManagerServiceProducer,
+                Producer<ApexManager> apexManagerProducer,
+                Producer<IPermissionManager> permissionManagerProducer,
+                Producer<ViewCompiler> viewCompilerProducer,
+                Producer<IncrementalManager> incrementalManagerProducer,
+                SystemWrapper systemWrapper,
+                ServiceProducer getLocalServiceProducer,
+                ServiceProducer getSystemServiceProducer) {
             mContext = context;
             mLock = lock;
             mInstaller = installer;
@@ -994,21 +978,22 @@ public class PackageManagerService extends IPackageManager.Stub
             mBackgroundHandler = backgroundHandler;
             mBackgroundExecutor = new HandlerExecutor(backgroundHandler);
             mComponentResolverProducer = new Singleton<>(componentResolverProducer);
-            mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
+            mPermissionManagerServiceProducer = new Singleton<>(permissionManagerServiceProducer);
             mUserManagerProducer = new Singleton<>(userManagerProducer);
             mSettingsProducer = new Singleton<>(settingsProducer);
-            mActivityTaskManagerProducer = new Singleton<>(activityTaskManagerProducer);
-            mActivityManagerInternalProducer = new Singleton<>(activityManagerInternalProducer);
-            mLocalDeviceIdleController = new Singleton<>(deviceIdleControllerProducer);
-            mStorageManagerInternalProducer = new Singleton<>(storageManagerInternalProducer);
-            mNetworkPolicyManagerProducer = new Singleton<>(networkPolicyManagerProducer);
-            mPermissionPolicyProducer = new Singleton<>(permissionPolicyProvider);
-            mDeviceStorageMonitorProducer = new Singleton<>(deviceStorageMonitorProducer);
-            mDisplayManagerProducer = new Singleton<>(displayManagerProducer);
-            mStorageManagerProducer = new Singleton<>(storageManagerProducer);
-            mAppOpsManagerProducer = new Singleton<>(appOpsManagerProducer);
             mAppsFilterProducer = new Singleton<>(appsFilterProducer);
             mPlatformCompatProducer = new Singleton<>(platformCompatProducer);
+            mSystemConfigProducer = new Singleton<>(systemConfigProducer);
+            mPackageDexOptimizerProducer = new Singleton<>(packageDexOptimizerProducer);
+            mDexManagerProducer = new Singleton<>(dexManagerProducer);
+            mArtManagerServiceProducer = new Singleton<>(artManagerServiceProducer);
+            mApexManagerProducer = new Singleton<>(apexManagerProducer);
+            mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
+            mViewCompilerProducer = new Singleton<>(viewCompilerProducer);
+            mIncrementalManagerProducer = new Singleton<>(incrementalManagerProducer);
+            mSystemWrapper = systemWrapper;
+            mGetLocalServiceProducer = getLocalServiceProducer;
+            mGetSystemServiceProducer = getSystemServiceProducer;
         }
 
         /**
@@ -1048,7 +1033,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         public PermissionManagerServiceInternal getPermissionManagerServiceInternal() {
-            return mPermissionManagerProducer.get(this, mPackageManager);
+            return mPermissionManagerServiceProducer.get(this, mPackageManager);
         }
 
         public Context getContext() {
@@ -1059,46 +1044,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return mSettingsProducer.get(this, mPackageManager);
         }
 
-        public ActivityTaskManagerInternal getActivityTaskManagerInternal() {
-            return mActivityTaskManagerProducer.get(this, mPackageManager);
-        }
-
-        public ActivityManagerInternal getActivityManagerInternal() {
-            return mActivityManagerInternalProducer.get(this, mPackageManager);
-        }
-
-        public DeviceIdleInternal getLocalDeviceIdleController() {
-            return mLocalDeviceIdleController.get(this, mPackageManager);
-        }
-
-        public StorageManagerInternal getStorageManagerInternal() {
-            return mStorageManagerInternalProducer.get(this, mPackageManager);
-        }
-
-        public NetworkPolicyManagerInternal getNetworkPolicyManagerInternal() {
-            return mNetworkPolicyManagerProducer.get(this, mPackageManager);
-        }
-
-        public PermissionPolicyInternal getPermissionPolicyInternal() {
-            return mPermissionPolicyProducer.get(this, mPackageManager);
-        }
-
-        public DeviceStorageMonitorInternal getDeviceStorageMonitorInternal() {
-            return mDeviceStorageMonitorProducer.get(this, mPackageManager);
-        }
-
-        public DisplayManager getDisplayManager() {
-            return mDisplayManagerProducer.get(this, mPackageManager);
-        }
-
-        public StorageManager getStorageManager() {
-            return mStorageManagerProducer.get(this, mPackageManager);
-        }
-
-        public AppOpsManager getAppOpsManager() {
-            return mAppOpsManagerProducer.get(this, mPackageManager);
-        }
-
         public AppsFilter getAppsFilter() {
             return mAppsFilterProducer.get(this, mPackageManager);
         }
@@ -1107,12 +1052,104 @@ public class PackageManagerService extends IPackageManager.Stub
             return mPlatformCompatProducer.get(this, mPackageManager);
         }
 
+        public SystemConfig getSystemConfig() {
+            return mSystemConfigProducer.get(this, mPackageManager);
+        }
+
+        public PackageDexOptimizer getPackageDexOptimizer() {
+            return mPackageDexOptimizerProducer.get(this, mPackageManager);
+        }
+
+        public DexManager getDexManager() {
+            return mDexManagerProducer.get(this, mPackageManager);
+        }
+
+        public ArtManagerService getArtManagerService() {
+            return mArtManagerServiceProducer.get(this, mPackageManager);
+        }
+
+        public ApexManager getApexManager() {
+            return mApexManagerProducer.get(this, mPackageManager);
+        }
+
+        public ViewCompiler getViewCompiler() {
+            return mViewCompilerProducer.get(this, mPackageManager);
+        }
+
+        public IPermissionManager getPermissionManagerService() {
+            return mPermissionManagerProducer.get(this, mPackageManager);
+        }
+
         public Handler getBackgroundHandler() {
             return mBackgroundHandler;
         }
 
         public Executor getBackgroundExecutor() {
             return mBackgroundExecutor;
+        }
+
+        public <T> T getLocalService(Class<T> c) {
+            return mGetLocalServiceProducer.produce(c);
+        }
+
+        public <T> T getSystemService(Class<T> c) {
+            return mGetSystemServiceProducer.produce(c);
+        }
+
+        public SystemWrapper getSystemWrapper() {
+            return mSystemWrapper;
+        }
+
+        public IncrementalManager getIncrementalManager() {
+            return mIncrementalManagerProducer.get(this, mPackageManager);
+        }
+    }
+
+    /** Provides an abstraction to static access to system state. */
+    public interface SystemWrapper {
+        /** @see SystemProperties#get(String) */
+        String getProperty(String key);
+        /** @see SystemProperties#getInt(String, int) */
+        int getPropertyInt(String key, int defValue);
+        /** @see SystemProperties#getBoolean(String, boolean) */
+        boolean getPropertyBoolean(String key, boolean defValue);
+        /** @see SystemProperties#digestOf(String...) */
+        String digestOfProperties(@NonNull String... keys);
+        /** @see SystemProperties#set(String, String) */
+        void setProperty(String key, String value);
+        /** @see Build.VERSION#SDK_INT */
+        int getSdkInt();
+    }
+
+    private static class DefaultSystemWrapper implements SystemWrapper {
+        @Override
+        public String getProperty(String key) {
+            return SystemProperties.get(key);
+        }
+
+        @Override
+        public int getPropertyInt(String key, int defValue) {
+            return SystemProperties.getInt(key, defValue);
+        }
+
+        @Override
+        public boolean getPropertyBoolean(String key, boolean defValue) {
+            return SystemProperties.getBoolean(key, defValue);
+        }
+
+        @Override
+        public String digestOfProperties(String... keys) {
+            return SystemProperties.digestOf(keys);
+        }
+
+        @Override
+        public void setProperty(String key, String value) {
+            SystemProperties.set(key, value);
+        }
+
+        @Override
+        public int getSdkInt() {
+            return Build.VERSION.SDK_INT;
         }
     }
 
@@ -1171,6 +1208,8 @@ public class PackageManagerService extends IPackageManager.Stub
         public @Nullable String retailDemoPackage;
         public ComponentName resolveComponentName;
         public ArrayMap<String, AndroidPackage> packages;
+        public boolean enableFreeCacheV2;
+        public int sdkVersion;
     }
 
     private final AppsFilter mAppsFilter;
@@ -1364,7 +1403,7 @@ public class PackageManagerService extends IPackageManager.Stub
             options.setTemporaryAppWhitelistDuration(whitelistTimeout);
 
             DeviceIdleInternal idleController =
-                    mInjector.getLocalDeviceIdleController();
+                    mInjector.getLocalService(DeviceIdleInternal.class);
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
                     mIntentFilterVerifierComponent.getPackageName(), whitelistTimeout,
                     UserHandle.USER_SYSTEM, true, "intent filter verifier");
@@ -1437,7 +1476,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
                             if (!verified) {
                                 // Don't demote if sysconfig says 'always'
-                                SystemConfig systemConfig = SystemConfig.getInstance();
+                                SystemConfig systemConfig = mInjector.getSystemConfig();
                                 ArraySet<String> packages = systemConfig.getLinkedApps();
                                 if (!packages.contains(packageName)) {
                                     // updatedStatus is already UNDEFINED
@@ -2334,7 +2373,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Send broadcast package appeared if external for all users
                 if (res.pkg.isExternalStorage()) {
                     if (!update) {
-                        final StorageManager storage = mInjector.getStorageManager();
+                        final StorageManager storage = mInjector.getSystemService(
+                                StorageManager.class);
                         VolumeInfo volume =
                                 storage.findVolumeByUuid(
                                         res.pkg.getStorageUuid().toString());
@@ -2513,7 +2553,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ApkChecksums.Injector injector = new ApkChecksums.Injector(
                     () -> mContext,
                     () -> mInjector.getBackgroundHandler(),
-                    () -> mContext.getSystemService(IncrementalManager.class));
+                    () -> mInjector.getIncrementalManager());
             ApkChecksums.getChecksums(filesToChecksum, optional, required, trustedCerts,
                     statusReceiver, injector);
         });
@@ -2689,31 +2729,32 @@ public class PackageManagerService extends IPackageManager.Stub
         Injector injector = new Injector(
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
                 backgroundHandler,
-                (i, pm) ->
-                        new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
-                (i, pm) ->
-                PermissionManagerService.create(context, lock),
-                (i, pm) ->
-                new UserManagerService(context, pm,
+                (i, pm) -> new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
+                (i, pm) -> PermissionManagerService.create(context, lock),
+                (i, pm) -> new UserManagerService(context, pm,
                         new UserDataPreparer(installer, installLock, context, onlyCore),
                         lock),
-                (i, pm) ->
-                        new Settings(Environment.getDataDirectory(),
-                                i.getPermissionManagerServiceInternal().getPermissionSettings(),
-                                RuntimePermissionsPersistence.createInstance(),
-                                i.getPermissionManagerServiceInternal(), lock),
-                new Injector.LocalServicesProducer<>(ActivityTaskManagerInternal.class),
-                new Injector.LocalServicesProducer<>(ActivityManagerInternal.class),
-                new Injector.LocalServicesProducer<>(DeviceIdleInternal.class),
-                new Injector.LocalServicesProducer<>(StorageManagerInternal.class),
-                new Injector.LocalServicesProducer<>(NetworkPolicyManagerInternal.class),
-                new Injector.LocalServicesProducer<>(PermissionPolicyInternal.class),
-                new Injector.LocalServicesProducer<>(DeviceStorageMonitorInternal.class),
-                new Injector.SystemServiceProducer<>(DisplayManager.class),
-                new Injector.SystemServiceProducer<>(StorageManager.class),
-                new Injector.SystemServiceProducer<>(AppOpsManager.class),
+                (i, pm) -> new Settings(Environment.getDataDirectory(),
+                        i.getPermissionManagerServiceInternal().getPermissionSettings(),
+                        RuntimePermissionsPersistence.createInstance(),
+                        i.getPermissionManagerServiceInternal(), lock),
                 (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
-                (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"));
+                (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
+                (i, pm) -> SystemConfig.getInstance(),
+                (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
+                        i.getContext(), "*dexopt*"),
+                (i, pm) -> new DexManager(i.getContext(), pm, i.getPackageDexOptimizer(),
+                        i.getInstaller(), i.getInstallLock()),
+                (i, pm) -> new ArtManagerService(i.getContext(), pm, i.getInstaller(),
+                        i.getInstallLock()),
+                (i, pm) -> ApexManager.getInstance(),
+                (i, pm) -> (IPermissionManager) ServiceManager.getService("permissionmgr"),
+                (i, pm) -> new ViewCompiler(i.getInstallLock(), i.getInstaller()),
+                (i, pm) -> (IncrementalManager)
+                        pm.mContext.getSystemService(Context.INCREMENTAL_SERVICE),
+                new DefaultSystemWrapper(),
+                LocalServices::getService,
+                context::getSystemService);
 
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest);
         t.traceEnd(); // "create package manager"
@@ -2786,16 +2827,17 @@ public class PackageManagerService extends IPackageManager.Stub
      * reasons. This simply requests that the copy takes place and awaits confirmation of its
      * completion. See platform/system/extras/cppreopt/ for the implementation of the actual copy.
      */
-    private static void requestCopyPreoptedFiles() {
+    private static void requestCopyPreoptedFiles(Injector injector) {
         final int WAIT_TIME_MS = 100;
         final String CP_PREOPT_PROPERTY = "sys.cppreopt";
-        if (SystemProperties.getInt("ro.cp_system_other_odex", 0) == 1) {
-            SystemProperties.set(CP_PREOPT_PROPERTY, "requested");
+        if (injector.getSystemWrapper().getPropertyInt("ro.cp_system_other_odex", 0) == 1) {
+            injector.getSystemWrapper().setProperty(CP_PREOPT_PROPERTY, "requested");
             // We will wait for up to 100 seconds.
             final long timeStart = SystemClock.uptimeMillis();
             final long timeEnd = timeStart + 100 * 1000;
             long timeNow = timeStart;
-            while (!SystemProperties.get(CP_PREOPT_PROPERTY).equals("finished")) {
+            while (!injector.getSystemWrapper()
+                    .getProperty(CP_PREOPT_PROPERTY).equals("finished")) {
                 try {
                     Thread.sleep(WAIT_TIME_MS);
                 } catch (InterruptedException e) {
@@ -2803,7 +2845,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 timeNow = SystemClock.uptimeMillis();
                 if (timeNow > timeEnd) {
-                    SystemProperties.set(CP_PREOPT_PROPERTY, "timed-out");
+                    injector.getSystemWrapper().setProperty(CP_PREOPT_PROPERTY, "timed-out");
                     Slog.wtf(TAG, "cppreopt did not finish!");
                     break;
                 }
@@ -2935,6 +2977,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mResolveComponentName = testParams.resolveComponentName;
         mPackages.putAll(testParams.packages);
+        mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
+        mSdkVersion = testParams.sdkVersion;
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
@@ -2960,6 +3004,7 @@ public class PackageManagerService extends IPackageManager.Stub
         LockGuard.installLock(mLock, LockGuard.INDEX_PACKAGES);
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
+        mSdkVersion = injector.getSystemWrapper().getSdkInt();
 
         if (mSdkVersion <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -2970,6 +3015,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mOnlyCore = onlyCore;
         mMetrics = new DisplayMetrics();
         mInstaller = injector.getInstaller();
+        mEnableFreeCacheV2 =
+                injector.getSystemWrapper().getPropertyBoolean("fw.free_cache_v2", true);
 
         // Create sub-components that provide services / data. Order here is important.
         t.traceBegin("createSubComponents");
@@ -2981,9 +3028,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mComponentResolver = injector.getComponentResolver();
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
-        mPermissionManagerService = (IPermissionManager) ServiceManager.getService("permissionmgr");
-        mIncrementalManager =
-                (IncrementalManager) mContext.getSystemService(Context.INCREMENTAL_SERVICE);
+        mPermissionManagerService = injector.getPermissionManagerService();
+        mIncrementalManager = mInjector.getIncrementalManager();
         PlatformCompat platformCompat = mInjector.getCompatibility();
         mPackageParserCallback = new PackageParser2.Callback() {
             @Override
@@ -3019,7 +3065,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         t.traceEnd();
 
-        String separateProcesses = SystemProperties.get("debug.separate_processes");
+        String separateProcesses =
+                injector.getSystemWrapper().getProperty("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
             if ("*".equals(separateProcesses)) {
                 mDefParseFlags = PackageParser.PARSE_IGNORE_PROCESSES;
@@ -3036,25 +3083,22 @@ public class PackageManagerService extends IPackageManager.Stub
             mSeparateProcesses = null;
         }
 
-        mPackageDexOptimizer = new PackageDexOptimizer(mInstaller, mInstallLock, mContext,
-                "*dexopt*");
-        mDexManager =
-                new DexManager(mContext, this, mPackageDexOptimizer, mInstaller, mInstallLock);
-        mArtManagerService = new ArtManagerService(mContext, this, mInstaller, mInstallLock);
+        mPackageDexOptimizer = injector.getPackageDexOptimizer();
+        mDexManager = injector.getDexManager();
+        mArtManagerService = injector.getArtManagerService();
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
+        mViewCompiler = injector.getViewCompiler();
 
-        mViewCompiler = new ViewCompiler(mInstallLock, mInstaller);
-
-        getDefaultDisplayMetrics(mInjector.getDisplayManager(), mMetrics);
+        getDefaultDisplayMetrics(mInjector.getSystemService(DisplayManager.class), mMetrics);
 
         t.traceBegin("get system config");
-        SystemConfig systemConfig = SystemConfig.getInstance();
+        SystemConfig systemConfig = injector.getSystemConfig();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
         t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
-        mApexManager = ApexManager.getInstance();
+        mApexManager = injector.getApexManager();
         mAppsFilter = mInjector.getAppsFilter();
 
         final List<ScanPartition> scanPartitions = new ArrayList<>();
@@ -3132,7 +3176,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (!mOnlyCore && mFirstBoot) {
-                requestCopyPreoptedFiles();
+                requestCopyPreoptedFiles(mInjector);
             }
 
             String customResolverActivityName = Resources.getSystem().getString(
@@ -3187,7 +3231,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mCacheDir = preparePackageParserCache();
+            mCacheDir = preparePackageParserCache(injector);
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
@@ -4010,7 +4054,7 @@ public class PackageManagerService extends IPackageManager.Stub
         setUpInstantAppInstallerActivityLP(getInstantAppInstallerLPr());
     }
 
-    private static @Nullable File preparePackageParserCache() {
+    private static @Nullable File preparePackageParserCache(Injector injector) {
         if (!FORCE_PACKAGE_PARSED_CACHE_ENABLED) {
             if (!DEFAULT_PACKAGE_PARSER_CACHE_ENABLED) {
                 return null;
@@ -4021,7 +4065,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return null;
             }
 
-            if (SystemProperties.getBoolean("pm.boot.disable_package_cache", false)) {
+            if (injector.getSystemWrapper()
+                    .getPropertyBoolean("pm.boot.disable_package_cache", false)) {
                 Slog.i(TAG, "Disabling package parser cache due to system property.");
                 return null;
             }
@@ -4037,7 +4082,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // identify cached items. In particular, changing the value of certain
         // feature flags should cause us to invalidate any caches.
         final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
-                : SystemProperties.digestOf(
+                : injector.getSystemWrapper().digestOfProperties(
                         "ro.build.fingerprint",
                         StorageManager.PROP_ISOLATED_STORAGE,
                         StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT
@@ -4103,7 +4148,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public boolean isDeviceUpgrading() {
         // allow instant applications
         // The system property allows testing ota flow when upgraded to the same image.
-        return mIsUpgrade || SystemProperties.getBoolean(
+        return mIsUpgrade || mInjector.getSystemWrapper().getPropertyBoolean(
                 "persist.pm.mock-upgrade", false /* default */);
     }
 
@@ -4370,7 +4415,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.d(TAG, "Priming domain verifications in user " + userId);
         }
 
-        SystemConfig systemConfig = SystemConfig.getInstance();
+        SystemConfig systemConfig = mInjector.getSystemConfig();
         ArraySet<String> packages = systemConfig.getLinkedApps();
 
         for (String packageName : packages) {
@@ -5179,11 +5224,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * until the requested bytes are available.
      */
     public void freeStorage(String volumeUuid, long bytes, int storageFlags) throws IOException {
-        final StorageManager storage = mInjector.getStorageManager();
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File file = storage.findPathForUuid(volumeUuid);
         if (file.getUsableSpace() >= bytes) return;
 
-        if (ENABLE_FREE_CACHE_V2) {
+        if (mEnableFreeCacheV2) {
             final boolean internalVolume = Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL,
                     volumeUuid);
             final boolean aggressive = (storageFlags
@@ -5262,7 +5307,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
             throws IOException {
-        final StorageManager storage = mInjector.getStorageManager();
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File volume = storage.findPathForUuid(StorageManager.UUID_PRIVATE_INTERNAL);
 
         List<VersionedPackage> packagesToDelete = null;
@@ -5510,7 +5555,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId) {
-        if (!mInjector.getActivityTaskManagerInternal().isCallerRecents(callingUid)) {
+        if (!mInjector.getLocalService(ActivityTaskManagerInternal.class)
+                .isCallerRecents(callingUid)) {
             return false;
         }
         final long token = Binder.clearCallingIdentity();
@@ -5993,7 +6039,7 @@ public class PackageManagerService extends IPackageManager.Stub
             res.addAll(mAvailableFeatures.values());
         }
         final FeatureInfo fi = new FeatureInfo();
-        fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
+        fi.reqGlEsVersion = mInjector.getSystemWrapper().getPropertyInt("ro.opengles.version",
                 FeatureInfo.GL_ES_VERSION_UNDEFINED);
         res.add(fi);
 
@@ -9075,10 +9121,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (providerInfo != null) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
             if (userId != UserHandle.getUserId(callingUid)) {
-                final UriGrantsManagerInternal mUgmInternal =
-                        LocalServices.getService(UriGrantsManagerInternal.class);
+                final UriGrantsManagerInternal ugmInternal =
+                        mInjector.getLocalService(UriGrantsManagerInternal.class);
                 checkedGrants =
-                        mUgmInternal.checkAuthorityGrants(callingUid, providerInfo, userId, true);
+                        ugmInternal.checkAuthorityGrants(callingUid, providerInfo, userId, true);
             }
         }
         if (!checkedGrants) {
@@ -9688,7 +9734,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                             pkgName, getSettingsVersionForPackage(parsedPackage)),
                                     Collections.singletonMap(pkgName,
                                             getSharedLibLatestVersionSetting(scanResult))),
-                            mSettings.mKeySetManagerService);
+                            mSettings.mKeySetManagerService, mInjector);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
                     commitReconciledScanResultLocked(
                             reconcileResult.get(pkgName), mUserManager.getUserIds());
@@ -9979,7 +10025,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
-            if (SystemProperties.getBoolean(PRECOMPILE_LAYOUTS, false)) {
+            if (mInjector.getSystemWrapper().getPropertyBoolean(PRECOMPILE_LAYOUTS, false)) {
                 mArtManagerService.compileLayouts(pkg);
             }
 
@@ -10955,7 +11001,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private int getVendorPartitionVersion() {
-        final String version = SystemProperties.get("ro.vndk.version");
+        final String version = mInjector.getSystemWrapper().getProperty("ro.vndk.version");
         if (!version.isEmpty()) {
             try {
                 return Integer.parseInt(version);
@@ -12980,7 +13026,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + intent.toShortString(false, true, false, false)
                         + " " + intent.getExtras(), here);
             }
-            mInjector.getActivityManagerInternal().broadcastIntent(
+            mInjector.getLocalService(ActivityManagerInternal.class).broadcastIntent(
                     intent, finishedReceiver, requiredPermissions,
                     finishedReceiver != null, id,
                     broadcastAllowList == null ? null : broadcastAllowList.get(id));
@@ -14285,7 +14331,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     && mInstantAppInstallerActivity.packageName.equals(
                             mRequiredVerifierPackage)) {
                 try {
-                    mInjector.getAppOpsManager()
+                    mInjector.getSystemService(AppOpsManager.class)
                             .checkPackage(installerUid, mRequiredVerifierPackage);
                     if (DEBUG_VERIFY) {
                         Slog.i(TAG, "disable verification for instant app");
@@ -14535,7 +14581,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             throw new SecurityException("Instant applications don't have access to this method");
         }
-        mInjector.getAppOpsManager().checkPackage(Binder.getCallingUid(),
+        mInjector.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
                 callerPackageName);
         synchronized (mLock) {
             PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -14695,7 +14741,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private boolean performRollbackManagerRestore(int userId, int token, PackageInstalledInfo res,
             PostInstallData data) {
-        RollbackManagerInternal rm = LocalServices.getService(RollbackManagerInternal.class);
+        RollbackManagerInternal rm = mInjector.getLocalService(RollbackManagerInternal.class);
 
         final String packageName = res.pkg.getPackageName();
         final int[] allUsers = mUserManager.getUserIds();
@@ -15458,7 +15504,7 @@ public class PackageManagerService extends IPackageManager.Stub
             integrityVerification.setPackage("android");
 
             DeviceIdleInternal idleController =
-                    mInjector.getLocalDeviceIdleController();
+                    mInjector.getLocalService(DeviceIdleInternal.class);
             final long idleDuration = getVerificationTimeout();
 
             idleController.addPowerSaveTempWhitelistAppDirect(Process.myUid(),
@@ -15568,7 +15614,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         receivers, verificationState);
 
                 DeviceIdleInternal idleController =
-                        mInjector.getLocalDeviceIdleController();
+                        mInjector.getLocalService(DeviceIdleInternal.class);
                 final long idleDuration = getVerificationTimeout();
                 final BroadcastOptions options = BroadcastOptions.makeBasic();
                 options.setTemporaryAppWhitelistDuration(idleDuration);
@@ -16580,7 +16626,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private static Map<String, ReconciledPackage> reconcilePackagesLocked(
-            final ReconcileRequest request, KeySetManagerService ksms)
+            final ReconcileRequest request, KeySetManagerService ksms, Injector injector)
             throws ReconcileFailure {
         final Map<String, ScanResult> scannedPackages = request.scannedPackages;
 
@@ -16731,7 +16777,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 && compareSignatures(sharedUserSignatures,
                                 parsedPackage.getSigningDetails().signatures)
                                         != PackageManager.SIGNATURE_MATCH) {
-                            if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 29) {
+                            if (injector.getSystemWrapper()
+                                    .getPropertyInt("ro.product.first_api_level", 0) <= 29) {
                                 // Mismatched signatures is an error and silently skipping system
                                 // packages will likely break the device in unforeseen ways.
                                 // However, we allow the device to boot anyway because, prior to Q,
@@ -17105,7 +17152,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
                     reconciledPackages = reconcilePackagesLocked(
-                            reconcileRequest, mSettings.mKeySetManagerService);
+                            reconcileRequest, mSettings.mKeySetManagerService, mInjector);
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
                         request.installResult.setError("Reconciliation failed...", e);
@@ -17240,7 +17287,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (performDexopt) {
                 // Compile the layout resources.
-                if (SystemProperties.getBoolean(PRECOMPILE_LAYOUTS, false)) {
+                if (mInjector.getSystemWrapper().getPropertyBoolean(PRECOMPILE_LAYOUTS, false)) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "compileLayouts");
                     mViewCompiler.compileLayouts(pkg);
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -19883,7 +19930,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void resetNetworkPolicies(int userId) {
-        mInjector.getNetworkPolicyManagerInternal().resetUserState(userId);
+        mInjector.getLocalService(NetworkPolicyManagerInternal.class).resetUserState(userId);
     }
 
     /**
@@ -21149,7 +21196,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public String getOverlayConfigSignaturePackageName() {
-        return ensureSystemPackageName(SystemConfig.getInstance()
+        return ensureSystemPackageName(mInjector.getSystemConfig()
                 .getOverlayConfigSignaturePackage());
     }
 
@@ -21919,7 +21966,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mPermissionManager.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false);
 
             final PermissionPolicyInternal permissionPolicyInternal =
-                    mInjector.getPermissionPolicyInternal();
+                    mInjector.getLocalService(PermissionPolicyInternal.class);
             permissionPolicyInternal.setOnInitializedCallback(userId -> {
                 // The SDK updated case is already handled when we run during the ctor.
                 synchronized (mLock) {
@@ -21930,13 +21977,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Watch for external volumes that come and go over time
-        final StorageManager storage = mInjector.getStorageManager();
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
 
-        mInjector.getStorageManagerInternal().addExternalStoragePolicy(
+        mInjector.getLocalService(StorageManagerInternal.class).addExternalStoragePolicy(
                 new StorageManagerInternal.ExternalStorageMountPolicy() {
                     @Override
                     public int getMountMode(int uid, String packageName) {
@@ -22669,7 +22716,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ArrayUtils.isEmpty(apkList)) {
            return;
         }
-        String sku = SystemProperties.get("ro.boot.hardware.sku");
+        String sku = mInjector.getSystemWrapper().getProperty("ro.boot.hardware.sku");
         if (!TextUtils.isEmpty(sku) && ArrayUtils.contains(skuArray, sku)) {
             return;
         }
@@ -22965,7 +23012,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Reconcile app data for all started/unlocked users
-        final StorageManager sm = mInjector.getStorageManager();
+        final StorageManager sm = mInjector.getSystemService(StorageManager.class);
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         for (UserInfo user : mUserManager.getUsers(false /* includeDying */)) {
             final int flags;
@@ -23166,7 +23213,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * correct for all installed apps on all mounted volumes.
      */
     void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
-        final StorageManager storage = mInjector.getStorageManager();
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
             synchronized (mInstallLock) {
@@ -23301,7 +23348,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Installer.Batch batch = new Installer.Batch();
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
-        StorageManagerInternal smInternal = mInjector.getStorageManagerInternal();
+        StorageManagerInternal smInternal = mInjector.getLocalService(StorageManagerInternal.class);
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
@@ -23630,7 +23677,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void movePackageInternal(final String packageName, final String volumeUuid,
             final int moveId, final int callingUid, UserHandle user)
                     throws PackageManagerException {
-        final StorageManager storage = mInjector.getStorageManager();
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final PackageManager pm = mContext.getPackageManager();
 
         final String currentVolumeUuid;
@@ -23868,7 +23915,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
 
-        final StorageManager storage = mInjector.getStorageManager();;
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);;
         VolumeInfo volume = storage.findVolumeByUuid(pkg.getStorageUuid().toString());
         int packageExternalStorageType = getPackageExternalStorageType(volume, pkg.isExternalStorage());
 
@@ -23908,7 +23955,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         };
 
-        final StorageManager storage = mInjector.getStorageManager();
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         storage.setPrimaryStorageUuid(volumeUuid, callback);
         return realMoveId;
     }
@@ -24088,7 +24135,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             final DeviceStorageMonitorInternal
-                    dsm = mInjector.getDeviceStorageMonitorInternal();
+                    dsm = mInjector.getLocalService(DeviceStorageMonitorInternal.class);
             if (dsm != null) {
                 return dsm.isMemoryLow();
             } else {
@@ -25872,7 +25919,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean isAutoRevokeWhitelisted(String packageName) {
-        int mode = mInjector.getAppOpsManager().checkOpNoThrow(
+        int mode = mInjector.getSystemService(AppOpsManager.class).checkOpNoThrow(
                 AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
                 Binder.getCallingUid(), packageName);
         return mode == MODE_IGNORED;
