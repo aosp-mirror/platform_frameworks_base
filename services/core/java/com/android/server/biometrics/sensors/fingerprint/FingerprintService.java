@@ -396,6 +396,8 @@ public class FingerprintService extends SystemService {
                     for (ServiceProvider provider : mServiceProviders) {
                         for (FingerprintSensorPropertiesInternal props
                                 : provider.getSensorProperties()) {
+                            pw.println("Dumping for sensorId: " + props.sensorId
+                                    + ", provider: " + provider.getClass().getSimpleName());
                             provider.dumpInternal(props.sensorId, pw);
                         }
                     }
@@ -613,7 +615,7 @@ public class FingerprintService extends SystemService {
                 try {
                     final SensorProps[] props = fp.getSensorProps();
                     final FingerprintProvider provider =
-                            new FingerprintProvider(getContext(), props, fqName,
+                            new FingerprintProvider(getContext(), props, instance,
                                     mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
                     mServiceProviders.add(provider);
                 } catch (RemoteException e) {

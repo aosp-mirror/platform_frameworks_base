@@ -96,7 +96,6 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private static final int ENROLL_TIMEOUT_SEC = 60;
 
     private boolean mTestHalEnabled;
-    @Nullable private TestHal mTestHal;
 
     final Context mContext;
     private final IActivityTaskManager mActivityTaskManager;
@@ -399,7 +398,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     private synchronized IBiometricsFingerprint getDaemon() {
         if (mTestHalEnabled) {
-            return mTestHal;
+            return new TestHal();
         }
 
         if (mDaemon != null) {
@@ -810,7 +809,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        mTestHal = new TestHal();
-        return new TestSession(mContext, mSensorProperties.sensorId, this, mHalResultController);
+        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, this,
+                mHalResultController);
     }
 }

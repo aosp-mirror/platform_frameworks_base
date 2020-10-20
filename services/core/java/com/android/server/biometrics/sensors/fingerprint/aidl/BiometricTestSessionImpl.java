@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.hidl;
+package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import static android.Manifest.permission.TEST_BIOMETRIC;
 
@@ -26,26 +26,29 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
 import android.util.Slog;
 
+import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
- * A test session implementation for the {@link Fingerprint21} provider. See
+ * A test session implementation for {@link FingerprintProvider}. See
  * {@link android.hardware.biometrics.BiometricTestSession}.
  */
-public class TestSession extends ITestSession.Stub {
+class BiometricTestSessionImpl extends ITestSession.Stub {
 
-    private static final String TAG = "TestSession";
+    private static final String TAG = "BiometricTestSessionImpl";
 
-    private final Context mContext;
+    @NonNull private final Context mContext;
     private final int mSensorId;
-    private final Fingerprint21 mFingerprint21;
-    private final Fingerprint21.HalResultController mHalResultController;
+    @NonNull private final FingerprintProvider mProvider;
+    @NonNull private final Sensor mSensor;
+    @NonNull private final Set<Integer> mEnrollmentIds;
+    @NonNull private final Random mRandom;
 
     /**
      * Internal receiver currently only used for enroll. Results do not need to be forwarded to the
@@ -95,26 +98,29 @@ public class TestSession extends ITestSession.Stub {
         }
     };
 
-    TestSession(@NonNull Context context, int sensorId, @NonNull Fingerprint21 fingerprint21,
-            @NonNull Fingerprint21.HalResultController halResultController) {
+    BiometricTestSessionImpl(@NonNull Context context, int sensorId,
+            @NonNull FingerprintProvider provider, @NonNull Sensor sensor) {
         mContext = context;
         mSensorId = sensorId;
-        mFingerprint21 = fingerprint21;
-        mHalResultController = halResultController;
+        mProvider = provider;
+        mSensor = sensor;
+        mEnrollmentIds = new HashSet<>();
+        mRandom = new Random();
     }
 
     @Override
     public void setTestHalEnabled(boolean enabled) {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mFingerprint21.setTestHalEnabled(enabled);
+        mProvider.setTestHalEnabled(enabled);
+        mSensor.setTestHalEnabled(enabled);
     }
 
     @Override
     public void startEnroll(int userId) {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mFingerprint21.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
+        mProvider.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
                 mContext.getOpPackageName(), null /* surface */);
     }
 
@@ -122,9 +128,14 @@ public class TestSession extends ITestSession.Stub {
     public void finishEnroll(int userId) {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        final Random random = new Random();
-        mHalResultController.onEnrollResult(0 /* deviceId */,
-                random.nextInt() /* fingerId */, userId, 0);
+        int nextRandomId = mRandom.nextInt();
+        while (mEnrollmentIds.contains(nextRandomId)) {
+            nextRandomId = mRandom.nextInt();
+        }
+
+        mEnrollmentIds.add(nextRandomId);
+        mSensor.getSessionForUser(userId).mHalSessionCallback
+                .onEnrollmentProgress(nextRandomId, 0 /* remaining */);
     }
 
     @Override
@@ -139,35 +150,37 @@ public class TestSession extends ITestSession.Stub {
             return;
         }
         final int fid = fingerprints.get(0).getBiometricId();
-        final ArrayList<Byte> hat = new ArrayList<>(Collections.nCopies(69, (byte) 0));
-        mHalResultController.onAuthenticated(0 /* deviceId */, fid, userId, hat);
+        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationSucceeded(fid,
+                HardwareAuthTokenUtils.toHardwareAuthToken(new byte[69]));
     }
 
     @Override
     public void rejectAuthentication(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mHalResultController.onAuthenticated(0 /* deviceId */, 0 /* fingerId */, userId, null);
+        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFailed();
     }
 
     @Override
     public void notifyAcquired(int userId, int acquireInfo)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mHalResultController.onAcquired(0 /* deviceId */, acquireInfo, 0 /* vendorCode */);
+        mSensor.getSessionForUser(userId).mHalSessionCallback
+                .onAcquired((byte) acquireInfo, 0 /* vendorCode */);
     }
 
     @Override
     public void notifyError(int userId, int errorCode)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mHalResultController.onError(0 /* deviceId */, errorCode, 0 /* vendorCode */);
+        mSensor.getSessionForUser(userId).mHalSessionCallback.onError((byte) errorCode,
+                0 /* vendorCode */);
     }
 
     @Override
     public void cleanupInternalState(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mFingerprint21.scheduleInternalCleanup(mSensorId, userId);
+        mProvider.scheduleInternalCleanup(mSensorId, userId);
     }
 }
