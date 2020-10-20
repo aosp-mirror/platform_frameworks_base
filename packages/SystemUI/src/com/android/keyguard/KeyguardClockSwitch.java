@@ -15,6 +15,7 @@ import android.transition.TransitionValues;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -149,6 +150,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 mKeyguardStatusArea.getLayoutParams();
 
         if (mode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+            final int startEndPadding = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    12,
+                    getResources().getDisplayMetrics());
+            setPaddingRelative(startEndPadding, 0, startEndPadding, 0);
             mSmallClockFrame.setVisibility(GONE);
             mNewLockscreenClockFrame.setVisibility(VISIBLE);
             mNewLockscreenClockViewController.init();
@@ -157,6 +163,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             statusAreaLP.addRule(RelativeLayout.LEFT_OF, R.id.new_lockscreen_clock_view);
             statusAreaLP.addRule(RelativeLayout.ALIGN_PARENT_START);
         } else {
+            setPaddingRelative(0, 0, 0, 0);
             mSmallClockFrame.setVisibility(VISIBLE);
             mNewLockscreenClockFrame.setVisibility(GONE);
 
@@ -298,6 +305,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mClockPlugin != null) {
             mClockPlugin.setDarkAmount(darkAmount);
         }
+        mNewLockscreenClockViewController.setDarkAmount(darkAmount);
         updateBigClockAlpha();
     }
 
