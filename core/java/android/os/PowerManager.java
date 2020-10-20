@@ -27,7 +27,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -1565,7 +1564,6 @@ public final class PowerManager {
      * @see #isPowerSaveMode()
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.DEVICE_POWER,
             android.Manifest.permission.POWER_SAVER
@@ -1610,7 +1608,6 @@ public final class PowerManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(permission.POWER_SAVER)
     public boolean setDynamicPowerSaveHint(boolean powerSaveHint, int disableThreshold) {
         try {
@@ -1670,7 +1667,6 @@ public final class PowerManager {
      *  @hide
      */
     @SystemApi
-    @TestApi
     public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0;
 
     /**
@@ -1683,7 +1679,6 @@ public final class PowerManager {
      *  @hide
      */
     @SystemApi
-    @TestApi
     public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1;
 
     /** @hide */
@@ -1708,7 +1703,6 @@ public final class PowerManager {
      */
     @AutoPowerSaveModeTriggers
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.POWER_SAVER)
     public int getPowerSaveModeTrigger() {
         try {

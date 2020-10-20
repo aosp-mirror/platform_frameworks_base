@@ -55,7 +55,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class DeviceConfig {
     /**
      * The content:// style URL for the config table.
@@ -107,7 +106,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
@@ -141,7 +139,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
 
     /**
@@ -225,7 +222,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String NAMESPACE_ROLLBACK = "rollback";
 
     /**
@@ -233,7 +230,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
 
     /**
@@ -378,7 +375,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String NAMESPACE_PRIVACY = "privacy";
 
     /**
@@ -387,7 +383,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String NAMESPACE_BIOMETRICS = "biometrics";
 
     /**
@@ -396,7 +391,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String NAMESPACE_PERMISSIONS = "permissions";
 
     /**
@@ -442,7 +436,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static String getProperty(@NonNull String namespace, @NonNull String name) {
         // Fetch all properties for the namespace at once and cache them in the local process, so we
@@ -471,7 +464,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @NonNull
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static Properties getProperties(@NonNull String namespace, @NonNull String ... names) {
@@ -491,7 +483,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static String getString(@NonNull String namespace, @NonNull String name,
             @Nullable String defaultValue) {
@@ -510,7 +501,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static boolean getBoolean(@NonNull String namespace, @NonNull String name,
             boolean defaultValue) {
@@ -529,7 +519,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static int getInt(@NonNull String namespace, @NonNull String name, int defaultValue) {
         String value = getProperty(namespace, name);
@@ -555,7 +544,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static long getLong(@NonNull String namespace, @NonNull String name, long defaultValue) {
         String value = getProperty(namespace, name);
@@ -581,7 +569,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static float getFloat(@NonNull String namespace, @NonNull String name,
             float defaultValue) {
@@ -617,7 +604,6 @@ public final class DeviceConfig {
      * @see #resetToDefaults(int, String).
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperty(@NonNull String namespace, @NonNull String name,
             @Nullable String value, boolean makeDefault) {
@@ -641,7 +627,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperties(@NonNull Properties properties) throws BadConfigException {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
@@ -661,7 +646,6 @@ public final class DeviceConfig {
      * @see #setProperty(String, String, String, boolean)
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
@@ -683,7 +667,6 @@ public final class DeviceConfig {
      * @see #removeOnPropertiesChangedListener(OnPropertiesChangedListener)
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static void addOnPropertiesChangedListener(
             @NonNull String namespace,
@@ -718,7 +701,6 @@ public final class DeviceConfig {
      * @see #addOnPropertiesChangedListener(String, Executor, OnPropertiesChangedListener)
      */
     @SystemApi
-    @TestApi
     public static void removeOnPropertiesChangedListener(
             @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
         Preconditions.checkNotNull(onPropertiesChangedListener);
@@ -853,7 +835,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public interface OnPropertiesChangedListener {
         /**
          * Called when one or more properties have changed, providing a Properties object with all
@@ -874,7 +855,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static class BadConfigException extends Exception {}
 
     /**
@@ -883,7 +863,6 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static class Properties {
         private final String mNamespace;
         private final HashMap<String, String> mMap;

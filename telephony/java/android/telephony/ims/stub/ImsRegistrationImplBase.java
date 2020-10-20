@@ -18,7 +18,6 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.ims.ImsReasonInfo;
@@ -40,7 +39,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-@TestApi
 public class ImsRegistrationImplBase {
 
     private static final String LOG_TAG = "ImsRegistrationImplBase";
