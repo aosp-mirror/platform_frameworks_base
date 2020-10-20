@@ -304,7 +304,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         }
     };
-    private boolean mForceUnlocked;
     private boolean mKeepInParent;
     private boolean mRemoved;
     private static final Property<ExpandableNotificationRow, Float> TRANSLATE_CONTENT =
@@ -1294,16 +1293,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         onAttachedChildrenCountChanged();
     }
 
-    public void setForceUnlocked(boolean forceUnlocked) {
-        mForceUnlocked = forceUnlocked;
-        if (mIsSummaryWithChildren) {
-            List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
-            for (ExpandableNotificationRow child : notificationChildren) {
-                child.setForceUnlocked(forceUnlocked);
-            }
-        }
-    }
-
     @Override
     public void dismiss(boolean refocusOnDismiss) {
         super.dismiss(refocusOnDismiss);
@@ -2183,7 +2172,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isUserLocked() {
-        return mUserLocked && !mForceUnlocked;
+        return mUserLocked;
     }
 
     public void setUserLocked(boolean userLocked) {
