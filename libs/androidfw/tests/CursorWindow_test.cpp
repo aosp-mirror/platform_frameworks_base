@@ -166,6 +166,14 @@ TEST(CursorWindowTest, StoreBounds) {
     ASSERT_EQ(w->getFieldSlot(0, 3), nullptr);
     ASSERT_EQ(w->getFieldSlot(3, 0), nullptr);
     ASSERT_EQ(w->getFieldSlot(3, 3), nullptr);
+
+    // Can't work with invalid indexes
+    ASSERT_NE(w->putLong(-1, 0, 0xcafe), OK);
+    ASSERT_NE(w->putLong(0, -1, 0xcafe), OK);
+    ASSERT_NE(w->putLong(-1, -1, 0xcafe), OK);
+    ASSERT_EQ(w->getFieldSlot(-1, 0), nullptr);
+    ASSERT_EQ(w->getFieldSlot(0, -1), nullptr);
+    ASSERT_EQ(w->getFieldSlot(-1, -1), nullptr);
 }
 
 TEST(CursorWindowTest, Inflate) {

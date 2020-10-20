@@ -291,11 +291,11 @@ status_t CursorWindow::allocRow() {
         return INVALID_OPERATION;
     }
     size_t size = mNumColumns * kSlotSizeBytes;
-    off_t newOffset = mSlotsOffset - size;
-    if (newOffset < mAllocOffset) {
+    int32_t newOffset = mSlotsOffset - size;
+    if (newOffset < (int32_t) mAllocOffset) {
         maybeInflate();
         newOffset = mSlotsOffset - size;
-        if (newOffset < mAllocOffset) {
+        if (newOffset < (int32_t) mAllocOffset) {
             return NO_MEMORY;
         }
     }
@@ -311,7 +311,7 @@ status_t CursorWindow::freeLastRow() {
         return INVALID_OPERATION;
     }
     size_t size = mNumColumns * kSlotSizeBytes;
-    off_t newOffset = mSlotsOffset + size;
+    size_t newOffset = mSlotsOffset + size;
     if (newOffset > mSize) {
         return NO_MEMORY;
     }
@@ -326,7 +326,7 @@ status_t CursorWindow::alloc(size_t size, uint32_t* outOffset) {
         return INVALID_OPERATION;
     }
     size_t alignedSize = (size + 3) & ~3;
-    off_t newOffset = mAllocOffset + alignedSize;
+    size_t newOffset = mAllocOffset + alignedSize;
     if (newOffset > mSlotsOffset) {
         maybeInflate();
         newOffset = mAllocOffset + alignedSize;
@@ -345,7 +345,7 @@ CursorWindow::FieldSlot* CursorWindow::getFieldSlot(uint32_t row, uint32_t colum
     // see CursorWindow_bench.cpp for more details
     void *result = static_cast<uint8_t*>(mSlotsStart)
             - (((row * mNumColumns) + column) << kSlotShift);
-    if (result < mSlotsEnd || column >= mNumColumns) {
+    if (result < mSlotsEnd || result > mSlotsStart || column >= mNumColumns) {
         LOG(ERROR) << "Failed to read row " << row << ", column " << column
                 << " from a window with " << mNumRows << " rows, " << mNumColumns << " columns";
         return nullptr;
