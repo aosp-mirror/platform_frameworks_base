@@ -496,10 +496,16 @@ public abstract class KeyProperties {
      */
     public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
 
-    static abstract class SignaturePadding {
+    /**
+     * @hide
+     */
+    public abstract static class SignaturePadding {
         private SignaturePadding() {}
 
-        static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
+        /**
+         * @hide
+         */
+        public static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
             switch (padding.toUpperCase(Locale.US)) {
                 case SIGNATURE_PADDING_RSA_PKCS1:
                     return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN;
@@ -512,7 +518,7 @@ public abstract class KeyProperties {
         }
 
         @NonNull
-        static @SignaturePaddingEnum String fromKeymaster(int padding) {
+        public static @SignaturePaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN:
                     return SIGNATURE_PADDING_RSA_PKCS1;
@@ -524,7 +530,7 @@ public abstract class KeyProperties {
         }
 
         @NonNull
-        static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
+        public static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
                 return EmptyArray.INT;
             }
