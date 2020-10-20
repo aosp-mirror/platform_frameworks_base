@@ -94,6 +94,7 @@ public class TunerServiceImpl extends TunerService {
             DemoModeController demoModeController,
             BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker) {
+        super(context);
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mLeakDetector = leakDetector;

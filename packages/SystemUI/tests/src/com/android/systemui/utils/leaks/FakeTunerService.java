@@ -14,7 +14,7 @@
 
 package com.android.systemui.utils.leaks;
 
-import android.content.Context;
+import android.os.UserHandle;
 import android.testing.LeakCheck;
 
 import com.android.systemui.tuner.TunerService;
@@ -22,8 +22,10 @@ import com.android.systemui.tuner.TunerService;
 public class FakeTunerService extends TunerService {
 
     private final BaseLeakChecker<Tunable> mBaseLeakChecker;
+    private boolean mEnabled;
 
     public FakeTunerService(LeakCheck test) {
+        super(null);
         mBaseLeakChecker = new BaseLeakChecker<>(test, "tunable");
     }
 
@@ -73,5 +75,15 @@ public class FakeTunerService extends TunerService {
     @Override
     public void setValue(String setting, int value) {
 
+    }
+
+    @Override
+    public void setTunerEnabled(UserHandle user, boolean enabled) {
+        mEnabled = enabled;
+    }
+
+    @Override
+    public boolean isTunerEnabled(UserHandle user) {
+        return mEnabled;
     }
 }

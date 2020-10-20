@@ -76,7 +76,7 @@ public class QSDetail extends LinearLayout {
     private int mOpenY;
     private boolean mAnimatingOpen;
     private boolean mSwitchState;
-    private View mFooter;
+    private QSFooter mFooter;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -120,7 +120,8 @@ public class QSDetail extends LinearLayout {
         mDetailDoneButton.setOnClickListener(doneListener);
     }
 
-    public void setQsPanel(QSPanel panel, QuickStatusBarHeader header, View footer) {
+    /** */
+    public void setQsPanel(QSPanel panel, QuickStatusBarHeader header, QSFooter footer) {
         mQsPanel = panel;
         mHeader = header;
         mFooter = footer;
