@@ -17,6 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
@@ -634,7 +635,7 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of BERS status.
+     * Gets an array of extended bit error ratio status.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
@@ -650,12 +651,14 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of code rates status.
+     * Gets an array of code rates status. The {@link FrontendSettings.InnerFec} would be used to
+     * show the code rate.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
+    @FrontendSettings.InnerFec
     public int[] getCodeRates() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getCodeRates status");
@@ -714,7 +717,8 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets UEC status.
+     * Gets the Uncorrectable Error Counts of the frontend's Physical Layer Pipe (PLP) since the
+     * last tune operation.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
@@ -729,11 +733,12 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets system id status.
+     * Gets the current DVB-T2 system id status.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
+    @IntRange(from = 0, to = 0xffff)
     public int getSystemId() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getSystemId status");
@@ -744,13 +749,14 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of interleaving status. Array value should be withink {@link
+     * Gets an array of interleaving status. Array value should be within {@link
      * FrontendInterleaveMode}.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
+    @FrontendInterleaveMode
     public int[] getInterleaving() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getInterleaving status");
@@ -761,12 +767,13 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of isdbt segment status.
+     * Gets an array of the segments status in ISDB-T Specification of all the channels.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
+    @IntRange(from = 0, to = 0xff)
     public int[] getIsdbtSegment() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getIsdbtSegment status");
@@ -777,7 +784,7 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of TS data rate status.
+     * Gets an array of the Transport Stream Data Rate in BPS of the current channel.
      *
      * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
@@ -800,9 +807,9 @@ public class FrontendStatus {
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
-    public int[] getModulationsExt() {
+    public int[] getExtendedModulations() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
-                TunerVersionChecker.TUNER_VERSION_1_1, "getModulationsExt status");
+                TunerVersionChecker.TUNER_VERSION_1_1, "getExtendedModulations status");
         if (mModulationsExt == null) {
             throw new IllegalStateException();
         }
