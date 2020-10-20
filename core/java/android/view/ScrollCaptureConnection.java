@@ -19,7 +19,6 @@ package android.view;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.graphics.Point;
@@ -33,15 +32,15 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A client of the system providing Scroll Capture capability on behalf of a Window.
+ * Mediator between a selected scroll capture target view and a remote process.
  * <p>
  * An instance is created to wrap the selected {@link ScrollCaptureCallback}.
  *
  * @hide
  */
-public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
+public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
-    private static final String TAG = "ScrollCaptureClient";
+    private static final String TAG = "ScrollCaptureConnection";
     private static final int DEFAULT_TIMEOUT = 1000;
 
     private final Handler mHandler;
@@ -49,7 +48,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
     private int mTimeoutMillis = DEFAULT_TIMEOUT;
 
     protected Surface mSurface;
-    private IScrollCaptureController mController;
+    private IScrollCaptureCallbacks mCallbacks;
 
     private final Rect mScrollBounds;
     private final Point mPositionInWindow;
@@ -62,18 +61,18 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
     private DelayedAction mTimeoutAction;
 
     /**
-     * Constructs a ScrollCaptureClient.
+     * Constructs a ScrollCaptureConnection.
      *
      * @param selectedTarget  the target the client is controlling
-     * @param controller the callbacks to reply to system requests
+     * @param callbacks the callbacks to reply to system requests
      *
      * @hide
      */
-    public ScrollCaptureClient(
+    public ScrollCaptureConnection(
             @NonNull ScrollCaptureTarget selectedTarget,
-            @NonNull IScrollCaptureController controller) {
+            @NonNull IScrollCaptureCallbacks callbacks) {
         requireNonNull(selectedTarget, "<selectedTarget> must non-null");
-        requireNonNull(controller, "<controller> must non-null");
+        requireNonNull(callbacks, "<callbacks> must non-null");
         final Rect scrollBounds = requireNonNull(selectedTarget.getScrollBounds(),
                 "target.getScrollBounds() must be non-null to construct a client");
 
@@ -82,7 +81,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         mScrollBounds = new Rect(scrollBounds);
         mPositionInWindow = new Point(selectedTarget.getPositionInWindow());
 
-        mController = controller;
+        mCallbacks = callbacks;
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
 
@@ -106,14 +105,13 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         mTimeoutMillis = timeoutMillis;
     }
 
-    @Nullable
     @VisibleForTesting
     public DelayedAction getTimeoutAction() {
         return mTimeoutAction;
     }
 
     private void checkConnected() {
-        if (mSelectedTarget == null || mController == null) {
+        if (mSelectedTarget == null || mCallbacks == null) {
             throw new IllegalStateException("This client has been disconnected.");
         }
     }
@@ -124,7 +122,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         }
     }
 
-    @WorkerThread // IScrollCaptureClient
+    @WorkerThread // IScrollCaptureConnection
     @Override
     public void startCapture(Surface surface) throws RemoteException {
         checkConnected();
@@ -140,7 +138,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         if (cancelTimeout()) {
             mHandler.post(() -> {
                 try {
-                    mController.onCaptureStarted();
+                    mCallbacks.onCaptureStarted();
                 } catch (RemoteException e) {
                     doShutdown();
                 }
@@ -153,7 +151,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         endCapture();
     }
 
-    @WorkerThread // IScrollCaptureClient
+    @WorkerThread // IScrollCaptureConnection
     @Override
     public void requestImage(Rect requestRect) {
         checkConnected();
@@ -170,7 +168,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         if (cancelTimeout()) {
             mHandler.post(() -> {
                 try {
-                    mController.onCaptureBufferSent(frameNumber, finalCapturedArea);
+                    mCallbacks.onCaptureBufferSent(frameNumber, finalCapturedArea);
                 } catch (RemoteException e) {
                     doShutdown();
                 }
@@ -183,7 +181,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         endCapture();
     }
 
-    @WorkerThread // IScrollCaptureClient
+    @WorkerThread // IScrollCaptureConnection
     @Override
     public void endCapture() {
         if (isStarted()) {
@@ -196,7 +194,7 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
     }
 
     private boolean isStarted() {
-        return mController != null && mSelectedTarget != null;
+        return mCallbacks != null && mSelectedTarget != null;
     }
 
     @UiThread
@@ -214,8 +212,8 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
 
     private void doShutdown() {
         try {
-            if (mController != null) {
-                mController.onConnectionClosed();
+            if (mCallbacks != null) {
+                mCallbacks.onConnectionClosed();
             }
         } catch (RemoteException e) {
             // Ignore
@@ -235,15 +233,15 @@ public class ScrollCaptureClient extends IScrollCaptureClient.Stub {
         }
 
         mSelectedTarget = null;
-        mController = null;
+        mCallbacks = null;
     }
 
     /** @return a string representation of the state of this client */
     public String toString() {
-        return "ScrollCaptureClient{"
+        return "ScrollCaptureConnection{"
                 + ", session=" + mSession
                 + ", selectedTarget=" + mSelectedTarget
-                + ", clientCallbacks=" + mController
+                + ", clientCallbacks=" + mCallbacks
                 + "}";
     }
 
