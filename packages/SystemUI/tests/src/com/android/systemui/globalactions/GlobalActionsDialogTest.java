@@ -53,6 +53,9 @@ import android.view.WindowManagerPolicyConstants;
 import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
@@ -86,11 +89,16 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.regex.Pattern;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class GlobalActionsDialogTest extends SysuiTestCase {
+    private static final long UI_TIMEOUT_MILLIS = 5000; // 5 sec
+    private static final Pattern CANCEL_BUTTON =
+            Pattern.compile("cancel", Pattern.CASE_INSENSITIVE);
+
     private GlobalActionsDialog mGlobalActionsDialog;
 
     @Mock private GlobalActions.GlobalActionsManager mWindowManagerFuncs;
@@ -240,6 +248,13 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mGlobalActionsDialog.makeScreenshotActionForTesting();
         screenshotAction.onLongPress();
         verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_LONG_PRESS);
+
+        // Dismiss ScreenRecordDialog opened by the long press above.
+        final UiObject2 cancelButton = getUiDevice().wait(
+                Until.findObject(By.text(CANCEL_BUTTON)), UI_TIMEOUT_MILLIS);
+        if (cancelButton != null) {
+            cancelButton.click();
+        }
     }
 
     @Test

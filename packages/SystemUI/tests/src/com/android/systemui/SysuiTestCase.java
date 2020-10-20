@@ -30,6 +30,7 @@ import android.testing.TestableLooper;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -147,6 +148,10 @@ public abstract class SysuiTestCase {
 
     public SysuiTestableContext getContext() {
         return mContext;
+    }
+
+    protected UiDevice getUiDevice() {
+        return UiDevice.getInstance(mRealInstrumentation);
     }
 
     protected void runShellCommand(String command) throws IOException {
