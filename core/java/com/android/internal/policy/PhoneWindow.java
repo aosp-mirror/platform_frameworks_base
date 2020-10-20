@@ -1511,11 +1511,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (drawable != mBackgroundDrawable) {
             mBackgroundDrawable = drawable;
             if (mDecor != null) {
+                mDecor.startChanging();
                 mDecor.setWindowBackground(drawable);
                 if (mBackgroundFallbackDrawable != null) {
                     mDecor.setBackgroundFallback(drawable != null ? null :
                             mBackgroundFallbackDrawable);
                 }
+                mDecor.finishChanging();
             }
         }
     }
