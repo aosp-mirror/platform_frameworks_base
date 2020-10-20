@@ -38,7 +38,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Outline;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
@@ -48,7 +47,6 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -83,24 +81,26 @@ public class BubbleExpandedView extends LinearLayout {
     private boolean mImeVisible;
     private boolean mNeedsNewHeight;
 
-    private Point mDisplaySize;
     private int mMinHeight;
     private int mOverflowHeight;
     private int mSettingsIconHeight;
     private int mPointerWidth;
     private int mPointerHeight;
-    private ShapeDrawable mPointerDrawable;
+    private ShapeDrawable mCurrentPointer;
+    private ShapeDrawable mTopPointer;
+    private ShapeDrawable mLeftPointer;
+    private ShapeDrawable mRightPointer;
     private int mExpandedViewPadding;
     private float mCornerRadius = 0f;
 
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
-
+    // TODO(b/170891664): Don't use a flag, set the BubbleOverflow object instead
     private boolean mIsOverflow;
 
     private Bubbles mBubbles = Dependency.get(Bubbles.class);
-    private WindowManager mWindowManager;
     private BubbleStackView mStackView;
+    private BubblePositioner mPositioner;
 
     /**
      * Container for the ActivityView that has a solid, round-rect background that shows if the
@@ -224,17 +224,6 @@ public class BubbleExpandedView extends LinearLayout {
         updateDimensions();
     }
 
-    void updateDimensions() {
-        mDisplaySize = new Point();
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        // Get the real size -- this includes screen decorations (notches, statusbar, navbar).
-        mWindowManager.getDefaultDisplay().getRealSize(mDisplaySize);
-        Resources res = getResources();
-        mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
-        mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
-        mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onFinishInflate() {
@@ -245,13 +234,21 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
 
-        mPointerDrawable = new ShapeDrawable(TriangleShape.create(
+        mTopPointer = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, true /* pointUp */));
+        mLeftPointer = new ShapeDrawable(TriangleShape.createHorizontal(
+                mPointerWidth, mPointerHeight, true /* pointLeft */));
+        mRightPointer = new ShapeDrawable(TriangleShape.createHorizontal(
+                mPointerWidth, mPointerHeight, false /* pointLeft */));
+
+        mCurrentPointer = mTopPointer;
         mPointerView.setVisibility(INVISIBLE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_manage_button_height);
         mSettingsIcon = findViewById(R.id.settings_button);
+
+        mPositioner = mBubbles.getPositioner();
 
         mTaskView = new TaskView(mContext, mBubbles.getTaskManager());
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
@@ -282,8 +279,7 @@ public class BubbleExpandedView extends LinearLayout {
         applyThemeAttrs();
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
-        setPadding(mExpandedViewPadding, mExpandedViewPadding, mExpandedViewPadding,
-                mExpandedViewPadding);
+        setClipToPadding(false);
         setOnTouchListener((view, motionEvent) -> {
             if (mTaskView == null) {
                 return false;
@@ -310,6 +306,52 @@ public class BubbleExpandedView extends LinearLayout {
         // so the Manage button appears on the right.
         setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
     }
+
+    void updateDimensions() {
+        Resources res = getResources();
+        mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
+        mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
+        mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+    }
+
+    void applyThemeAttrs() {
+        final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
+                android.R.attr.dialogCornerRadius,
+                android.R.attr.colorBackgroundFloating});
+        mCornerRadius = ta.getDimensionPixelSize(0, 0);
+        mExpandedViewContainer.setBackgroundColor(ta.getColor(1, Color.WHITE));
+        ta.recycle();
+
+        if (mTaskView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
+                mContext.getResources())) {
+            mTaskView.setCornerRadius(mCornerRadius);
+        }
+        updatePointerView();
+    }
+
+    private void updatePointerView() {
+        final int mode =
+                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (mode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                mCurrentPointer.setTint(getResources().getColor(R.color.bubbles_light));
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                mCurrentPointer.setTint(getResources().getColor(R.color.bubbles_dark));
+                break;
+        }
+        LayoutParams lp = (LayoutParams) mPointerView.getLayoutParams();
+        if (mCurrentPointer == mLeftPointer || mCurrentPointer == mRightPointer) {
+            lp.width = mPointerHeight;
+            lp.height = mPointerWidth;
+        } else {
+            lp.width = mPointerWidth;
+            lp.height = mPointerHeight;
+        }
+        mPointerView.setLayoutParams(lp);
+        mPointerView.setBackground(mCurrentPointer);
+    }
+
 
     private String getBubbleKey() {
         return mBubble != null ? mBubble.getKey() : "null";
@@ -369,32 +411,6 @@ public class BubbleExpandedView extends LinearLayout {
         if (mTaskView != null) {
             mTaskView.onLocationChanged();
         }
-    }
-
-    void applyThemeAttrs() {
-        final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
-                android.R.attr.dialogCornerRadius,
-                android.R.attr.colorBackgroundFloating});
-        mCornerRadius = ta.getDimensionPixelSize(0, 0);
-        mExpandedViewContainer.setBackgroundColor(ta.getColor(1, Color.WHITE));
-        ta.recycle();
-
-        if (mTaskView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
-                mContext.getResources())) {
-            mTaskView.setCornerRadius(mCornerRadius);
-        }
-
-        final int mode =
-                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (mode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_light));
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_dark));
-                break;
-        }
-        mPointerView.setBackground(mPointerDrawable);
     }
 
     @Override
@@ -522,12 +538,12 @@ public class BubbleExpandedView extends LinearLayout {
         }
 
         if (mBubble != null || mIsOverflow) {
-            float desiredHeight = mOverflowHeight;
-            if (!mIsOverflow) {
-                desiredHeight = Math.max(mBubble.getDesiredHeight(mContext), mMinHeight);
-            }
+            float desiredHeight = mIsOverflow
+                    ? mOverflowHeight
+                    : mBubble.getDesiredHeight(mContext);
+            desiredHeight = Math.max(desiredHeight, mMinHeight);
             float height = Math.min(desiredHeight, getMaxExpandedHeight());
-            height = Math.max(height, mIsOverflow ? mOverflowHeight : mMinHeight);
+            height = Math.max(height, mMinHeight);
             FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTaskView.getLayoutParams();
             mNeedsNewHeight = lp.height != height;
             if (!mImeVisible) {
@@ -546,21 +562,17 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     private int getMaxExpandedHeight() {
-        mWindowManager.getDefaultDisplay().getRealSize(mDisplaySize);
         int expandedContainerY = mExpandedViewContainerLocation != null
-                ? mExpandedViewContainerLocation[1]
+                // Remove top insets back here because availableRect.height would account for that
+                ? mExpandedViewContainerLocation[1] - mPositioner.getInsets().top
                 : 0;
-        int bottomInset = getRootWindowInsets() != null
-                ? getRootWindowInsets().getStableInsetBottom()
-                : 0;
-
-        return mDisplaySize.y
+        return mPositioner.getAvailableRect().height()
                 - expandedContainerY
                 - getPaddingTop()
                 - getPaddingBottom()
                 - mSettingsIconHeight
                 - mPointerHeight
-                - mPointerMargin - bottomInset;
+                - mPointerMargin;
     }
 
     /**
@@ -585,12 +597,25 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Set the x position that the tip of the triangle should point to.
+     * Set the position that the tip of the triangle should point to.
      */
-    public void setPointerPosition(float x) {
-        float halfPointerWidth = mPointerWidth / 2f;
-        float pointerLeft = x - halfPointerWidth - mExpandedViewPadding;
-        mPointerView.setTranslationX(pointerLeft);
+    public void setPointerPosition(float x, float y, boolean isLandscape, boolean onLeft) {
+        // Pointer gets drawn in the padding
+        int paddingLeft = (isLandscape && onLeft) ? mPointerHeight : 0;
+        int paddingRight = (isLandscape && !onLeft) ? mPointerHeight : 0;
+        int paddingTop = isLandscape ? 0 : mExpandedViewPadding;
+        setPadding(paddingLeft, paddingTop, paddingRight, 0);
+
+        if (isLandscape) {
+            // TODO: why setY vs setTranslationY ? linearlayout?
+            mPointerView.setY(y - (mPointerWidth / 2f));
+            mPointerView.setTranslationX(onLeft ? -mPointerHeight : x - mExpandedViewPadding);
+        } else {
+            mPointerView.setTranslationY(0f);
+            mPointerView.setTranslationX(x - mExpandedViewPadding - (mPointerWidth / 2f));
+        }
+        mCurrentPointer = isLandscape ? onLeft ? mLeftPointer : mRightPointer : mTopPointer;
+        updatePointerView();
         mPointerView.setVisibility(VISIBLE);
     }
 

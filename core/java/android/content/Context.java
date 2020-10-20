@@ -382,6 +382,7 @@ public abstract class Context {
      * {@link android.Manifest.permission#START_ACTIVITIES_FROM_BACKGROUND}.
      * @hide
      */
+    @SystemApi
     public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 0x00100000;
 
     /**

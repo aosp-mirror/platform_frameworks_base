@@ -260,10 +260,12 @@ public class DvbsFrontendSettings extends FrontendSettings {
     private final int mVcmMode;
     // Dvbs scan type is only supported in Tuner 1.1 or higher.
     private final int mScanType;
+    // isDiseqcRxMessage is only supported in Tuner 1.1 or higher.
+    private final boolean mIsDiseqcRxMessage;
 
     private DvbsFrontendSettings(int frequency, int modulation, DvbsCodeRate codeRate,
             int symbolRate, int rolloff, int pilot, int inputStreamId, int standard, int vcm,
-            int scanType) {
+            int scanType, boolean isDiseqcRxMessage) {
         super(frequency);
         mModulation = modulation;
         mCodeRate = codeRate;
@@ -274,6 +276,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         mStandard = standard;
         mVcmMode = vcm;
         mScanType = scanType;
+        mIsDiseqcRxMessage = isDiseqcRxMessage;
     }
 
     /**
@@ -337,6 +340,15 @@ public class DvbsFrontendSettings extends FrontendSettings {
     public int getScanType() {
         return mScanType;
     }
+    /**
+     * To receive Diseqc Message or not. Default value is false.
+     *
+     * The setter {@link Builder#setDiseqcRxMessage(boolean)} is only supported with Tuner HAL 1.1
+     * or higher.
+     */
+    public boolean isDiseqcRxMessage() {
+        return mIsDiseqcRxMessage;
+    }
 
     /**
      * Creates a builder for {@link DvbsFrontendSettings}.
@@ -360,6 +372,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
         private int mStandard = STANDARD_AUTO;
         private int mVcmMode = VCM_MODE_UNDEFINED;
         private int mScanType = SCAN_TYPE_UNDEFINED;
+        private boolean mIsDiseqcRxMessage = false;
 
         private Builder() {
         }
@@ -390,6 +403,21 @@ public class DvbsFrontendSettings extends FrontendSettings {
             if (TunerVersionChecker.checkHigherOrEqualVersionTo(
                         TunerVersionChecker.TUNER_VERSION_1_1, "setScanType")) {
                 mScanType = scanType;
+            }
+            return this;
+        }
+
+        /**
+         * Set true to receive Diseqc Message.
+         *
+         * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         */
+        @NonNull
+        public Builder setDiseqcRxMessage(boolean isDiseqcRxMessage) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_1_1, "setDiseqcRxMessage")) {
+                mIsDiseqcRxMessage = isDiseqcRxMessage;
             }
             return this;
         }
@@ -481,7 +509,8 @@ public class DvbsFrontendSettings extends FrontendSettings {
         @NonNull
         public DvbsFrontendSettings build() {
             return new DvbsFrontendSettings(mFrequency, mModulation, mCodeRate, mSymbolRate,
-                    mRolloff, mPilot, mInputStreamId, mStandard, mVcmMode, mScanType);
+                    mRolloff, mPilot, mInputStreamId, mStandard, mVcmMode, mScanType,
+                    mIsDiseqcRxMessage);
         }
     }
 

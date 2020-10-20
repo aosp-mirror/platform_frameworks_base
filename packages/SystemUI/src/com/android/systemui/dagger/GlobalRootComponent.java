@@ -52,7 +52,7 @@ public interface GlobalRootComponent {
     WMComponent.Builder getWMComponentBuilder();
 
     /**
-     * Builder for a SysuiComponent.
+     * Builder for a SysUIComponent.
      */
     SysUIComponent.Builder getSysUIComponent();
 

@@ -18,6 +18,7 @@ package com.android.systemui.people;
 
 import android.app.Activity;
 import android.app.INotificationManager;
+import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
@@ -29,6 +30,7 @@ import android.icu.util.MeasureUnit;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -52,7 +54,6 @@ public class PeopleSpaceActivity extends Activity {
     private INotificationManager mNotificationManager;
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
-    private List<ConversationChannelWrapper> mConversations;
     private Context mContext;
 
     @Override
@@ -77,15 +78,25 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
+            boolean showAllConversations = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE) == 0;
             List<ConversationChannelWrapper> conversations =
                     mNotificationManager.getConversations(
-                            true /* priority only */).getList();
-            mConversations = conversations.stream().filter(
-                    c -> shouldKeepConversation(c)).collect(Collectors.toList());
-            for (ConversationChannelWrapper conversation : mConversations) {
+                            !showAllConversations /* priority only */).getList();
+            List<ShortcutInfo> shortcutInfos = conversations.stream().filter(
+                    c -> shouldKeepConversation(c)).map(c -> c.getShortcutInfo()).collect(
+                    Collectors.toList());
+            if (showAllConversations) {
+                List<ConversationChannel> recentConversations =
+                        mPeopleManager.getRecentConversations().getList();
+                List<ShortcutInfo> recentShortcuts = recentConversations.stream().map(
+                        c -> c.getShortcutInfo()).collect(Collectors.toList());
+                shortcutInfos.addAll(recentShortcuts);
+            }
+            for (ShortcutInfo conversation : shortcutInfos) {
                 PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext,
                         mPeopleSpaceLayout,
-                        conversation.getShortcutInfo().getId());
+                        conversation.getId());
                 setTileView(tileView, conversation);
             }
         } catch (Exception e) {
@@ -95,11 +106,10 @@ public class PeopleSpaceActivity extends Activity {
 
     /** Sets {@code tileView} with the data in {@code conversation}. */
     private void setTileView(PeopleSpaceTileView tileView,
-            ConversationChannelWrapper conversation) {
+            ShortcutInfo shortcutInfo) {
         try {
-            ShortcutInfo shortcutInfo = conversation.getShortcutInfo();
             int userId = UserHandle.getUserHandleForUid(
-                    conversation.getUid()).getIdentifier();
+                    shortcutInfo.getUserId()).getIdentifier();
 
             String pkg = shortcutInfo.getPackage();
             long lastInteraction = mPeopleManager.getLastInteraction(

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -40,10 +40,9 @@ import dagger.Provides;
  * Provides dependencies from {@link com.android.wm.shell} which could be customized among different
  * branches of SystemUI.
  */
-// TODO(b/162923491): Move most of these dependencies into WMSingleton scope.
 @Module(includes = {WMShellBaseModule.class, TvPipModule.class})
 public class TvWMShellModule {
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
             DisplayController displayController, @Main Executor mainExecutor,
@@ -52,7 +51,7 @@ public class TvWMShellModule {
                 transactionPool);
     }
 
-    @SysUISingleton
+    @WMSingleton
     @Provides
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,

@@ -19,11 +19,9 @@ package com.android.systemui.bubbles.animation;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PointF;
-import android.view.DisplayCutout;
+import android.graphics.Rect;
 import android.view.View;
-import android.view.WindowInsets;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +30,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubblePositioner;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
@@ -83,16 +82,8 @@ public class ExpandedAnimationController
     private float mBubblePaddingTop;
     /** Size of each bubble. */
     private float mBubbleSizePx;
-    /** Space between bubbles in row above expanded view. */
-    private float mSpaceBetweenBubbles;
-    /** Height of the status bar. */
-    private float mStatusBarHeight;
-    /** Size of display. */
-    private Point mDisplaySize;
     /** Max number of bubbles shown in row above expanded view. */
     private int mBubblesMaxRendered;
-    /** What the current screen orientation is. */
-    private int mScreenOrientation;
 
     private boolean mAnimatingExpand = false;
 
@@ -104,7 +95,8 @@ public class ExpandedAnimationController
     private boolean mPreparingToCollapse = false;
 
     private boolean mAnimatingCollapse = false;
-    private @Nullable Runnable mAfterExpand;
+    @Nullable
+    private Runnable mAfterExpand;
     private Runnable mAfterCollapse;
     private PointF mCollapsePoint;
 
@@ -138,9 +130,12 @@ public class ExpandedAnimationController
      */
     private Runnable mOnBubbleAnimatedOutAction;
 
-    public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
-            int orientation, Runnable onBubbleAnimatedOutAction) {
-        updateResources(orientation, displaySize);
+    private BubblePositioner mPositioner;
+
+    public ExpandedAnimationController(BubblePositioner positioner, int expandedViewPadding,
+            Runnable onBubbleAnimatedOutAction) {
+        mPositioner = positioner;
+        updateResources();
         mExpandedViewPadding = expandedViewPadding;
         mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
     }
@@ -152,7 +147,8 @@ public class ExpandedAnimationController
     private boolean mBubbleDraggedOutEnough = false;
 
     /** End action to run when the lead bubble's expansion animation completes. */
-    @Nullable private Runnable mLeadBubbleEndAction;
+    @Nullable
+    private Runnable mLeadBubbleEndAction;
 
     /**
      * Animates expanding the bubbles into a row along the top of the screen, optionally running an
@@ -200,28 +196,17 @@ public class ExpandedAnimationController
 
     /**
      * Update effective screen width based on current orientation.
-     * @param orientation Landscape or portrait.
-     * @param displaySize Updated display size.
      */
-    public void updateResources(int orientation, Point displaySize) {
-        mScreenOrientation = orientation;
-        mDisplaySize = displaySize;
+    public void updateResources() {
         if (mLayout == null) {
             return;
         }
         Resources res = mLayout.getContext().getResources();
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mStatusBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
-
-        // Includes overflow button.
-        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
-                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
-        mSpaceBetweenBubbles = totalGapWidth / mBubblesMaxRendered;
     }
 
     /**
@@ -270,9 +255,18 @@ public class ExpandedAnimationController
                 // If we're expanding, first draw a line from the bubble's current position to the
                 // top of the screen.
                 path.lineTo(bubble.getTranslationX(), expandedY);
-
                 // Then, draw a line across the screen to the bubble's resting position.
-                path.lineTo(getBubbleLeft(index), expandedY);
+                if (mPositioner.getOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+                    Rect availableRect = mPositioner.getAvailableRect();
+                    boolean onLeft = mCollapsePoint != null
+                            && mCollapsePoint.x < (availableRect.width() / 2f);
+                    float translationX = onLeft
+                            ? availableRect.left + mExpandedViewPadding
+                            : availableRect.right - mBubbleSizePx - mExpandedViewPadding;
+                    path.lineTo(translationX, getBubbleXOrYForOrientation(index));
+                } else {
+                    path.lineTo(getBubbleXOrYForOrientation(index), expandedY);
+                }
             } else {
                 final float stackedX = mCollapsePoint.x;
 
@@ -411,7 +405,8 @@ public class ExpandedAnimationController
         updateBubblePositions();
     }
 
-    @Nullable public View getDraggedOutBubble() {
+    @Nullable
+    public View getDraggedOutBubble() {
         return mMagnetizedBubbleDraggingOut == null
                 ? null
                 : mMagnetizedBubbleDraggingOut.getUnderlyingObject();
@@ -430,7 +425,7 @@ public class ExpandedAnimationController
         final int index = mLayout.indexOfChild(bubbleView);
 
         animationForChildAtIndex(index)
-                .position(getBubbleLeft(index), getExpandedY())
+                .position(getBubbleXOrYForOrientation(index), getExpandedY())
                 .withPositionStartVelocities(velX, velY)
                 .start(() -> bubbleView.setTranslationZ(0f) /* after */);
 
@@ -457,15 +452,7 @@ public class ExpandedAnimationController
 
     /** The Y value of the row of expanded bubbles. */
     public float getExpandedY() {
-        if (mLayout == null || mLayout.getRootWindowInsets() == null) {
-            return 0;
-        }
-        final WindowInsets insets = mLayout.getRootWindowInsets();
-        return mBubblePaddingTop + Math.max(
-                mStatusBarHeight,
-                insets.getDisplayCutout() != null
-                        ? insets.getDisplayCutout().getSafeInsetTop()
-                        : 0);
+        return mPositioner.getAvailableRect().top + mBubblePaddingTop;
     }
 
     /** Description of current animation controller state. */
@@ -479,7 +466,7 @@ public class ExpandedAnimationController
 
     @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
-        updateResources(mScreenOrientation, mDisplaySize);
+        updateResources();
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
         // in.
@@ -524,7 +511,7 @@ public class ExpandedAnimationController
         } else if (mAnimatingCollapse) {
             startOrUpdatePathAnimation(false /* expanding */);
         } else {
-            child.setTranslationX(getBubbleLeft(index));
+            child.setTranslationX(getBubbleXOrYForOrientation(index));
 
             // If we're preparing to collapse, don't start animations since the collapse animation
             // will take over and animate the new bubble into the correct (stacked) position.
@@ -593,76 +580,56 @@ public class ExpandedAnimationController
                 return;
             }
 
-            animationForChild(bubble)
-                    .translationX(getBubbleLeft(i))
-                    .start();
-        }
-    }
-
-    /**
-     * @param index Bubble index in row.
-     * @return Bubble left x from left edge of screen.
-     */
-    public float getBubbleLeft(int index) {
-        final float bubbleFromRowLeft = index * (mBubbleSizePx + mSpaceBetweenBubbles);
-        return getRowLeft() + bubbleFromRowLeft;
-    }
-
-    /**
-     * When expanded, the bubbles are centered in the screen. In portrait, all available space is
-     * used. In landscape we have too much space so the value is restricted. This method accounts
-     * for window decorations (nav bar, cutouts).
-     *
-     * @return the desired width to display the expanded bubbles in.
-     */
-    public float getWidthForDisplayingBubbles() {
-        final float availableWidth = getAvailableScreenWidth(true /* includeStableInsets */);
-        if (mScreenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // display size y in landscape will be the smaller dimension of the screen
-            return Math.max(mDisplaySize.y, availableWidth * CENTER_BUBBLES_LANDSCAPE_PERCENT);
-        } else {
-            return availableWidth;
-        }
-    }
-
-    /**
-     * Determines the available screen width without the cutout.
-     *
-     * @param subtractStableInsets Whether or not stable insets should also be removed from the
-     *                             returned width.
-     * @return the total screen width available accounting for cutouts and insets,
-     * iff {@param includeStableInsets} is true.
-     */
-    private float getAvailableScreenWidth(boolean subtractStableInsets) {
-        float availableSize = mDisplaySize.x;
-        WindowInsets insets = mLayout != null ? mLayout.getRootWindowInsets() : null;
-        if (insets != null) {
-            int cutoutLeft = 0;
-            int cutoutRight = 0;
-            DisplayCutout cutout = insets.getDisplayCutout();
-            if (cutout != null) {
-                cutoutLeft = cutout.getSafeInsetLeft();
-                cutoutRight = cutout.getSafeInsetRight();
+            if (mPositioner.getOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+                Rect availableRect = mPositioner.getAvailableRect();
+                boolean onLeft = mCollapsePoint != null
+                        && mCollapsePoint.x < (availableRect.width() / 2f);
+                animationForChild(bubble)
+                        .translationX(onLeft
+                                ? availableRect.left + mExpandedViewPadding
+                                : availableRect.right - mBubbleSizePx - mExpandedViewPadding)
+                        .translationY(getBubbleXOrYForOrientation(i))
+                        .start();
+            } else {
+                animationForChild(bubble)
+                        .translationX(getBubbleXOrYForOrientation(i))
+                        .translationY(getExpandedY())
+                        .start();
             }
-            final int stableLeft = subtractStableInsets ? insets.getStableInsetLeft() : 0;
-            final int stableRight = subtractStableInsets ? insets.getStableInsetRight() : 0;
-            availableSize -= Math.max(stableLeft, cutoutLeft);
-            availableSize -= Math.max(stableRight, cutoutRight);
         }
-        return availableSize;
     }
 
-    private float getRowLeft() {
+    /**
+     * When bubbles are expanded in portrait, they display at the top of the screen in a horizontal
+     * row. When in landscape, they show at the left or right side in a vertical row. This method
+     * accounts for screen orientation and will return an x or y value for the position of the
+     * bubble in the row.
+     *
+     * @param index Bubble index in row.
+     * @return the y position of the bubble if {@link Configuration#ORIENTATION_LANDSCAPE} and the
+     * x position if {@link Configuration#ORIENTATION_PORTRAIT}.
+     */
+    public float getBubbleXOrYForOrientation(int index) {
         if (mLayout == null) {
             return 0;
         }
-        float rowWidth = (mLayout.getChildCount() * mBubbleSizePx)
-                + ((mLayout.getChildCount() - 1) * mSpaceBetweenBubbles);
-
-        // This display size we're using includes the size of the insets, we want the true
-        // center of the display minus the notch here, which means we should include the
-        // stable insets (e.g. status bar, nav bar) in this calculation.
-        final float trueCenter = getAvailableScreenWidth(false /* subtractStableInsets */) / 2f;
-        return trueCenter - (rowWidth / 2f);
+        Rect availableRect = mPositioner.getAvailableRect();
+        final boolean isLandscape =
+                mPositioner.getOrientation() == Configuration.ORIENTATION_LANDSCAPE;
+        final float availableSpace = isLandscape
+                ? availableRect.height()
+                : availableRect.width();
+        final float spaceForMaxBubbles = (mExpandedViewPadding * 2)
+                + (mBubblesMaxRendered + 1) * mBubbleSizePx;
+        final float spaceBetweenBubbles =
+                (availableSpace - spaceForMaxBubbles) / mBubblesMaxRendered;
+        final float expandedStackSize = (mLayout.getChildCount() * mBubbleSizePx)
+                + ((mLayout.getChildCount() - 1) * spaceBetweenBubbles);
+        final float centerPosition = isLandscape
+                ? availableRect.centerY()
+                : availableRect.centerX();
+        final float rowStart = centerPosition - (expandedStackSize / 2f);
+        final float positionInBar = index * (mBubbleSizePx + spaceBetweenBubbles);
+        return rowStart + positionInBar;
     }
 }

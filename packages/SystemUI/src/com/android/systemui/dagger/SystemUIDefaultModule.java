@@ -62,7 +62,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.wmshell.WMShellModule;
 
 import javax.inject.Named;
 
@@ -76,8 +75,7 @@ import dagger.Provides;
  */
 @Module(includes = {
         MediaModule.class,
-        QSModule.class,
-        WMShellModule.class
+        QSModule.class
 })
 public abstract class SystemUIDefaultModule {
 

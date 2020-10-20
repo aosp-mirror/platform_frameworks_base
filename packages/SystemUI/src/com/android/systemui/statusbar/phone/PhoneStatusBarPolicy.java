@@ -671,14 +671,18 @@ public class PhoneStatusBarPolicy
 
         mIconController.setIconVisibility(mSlotCamera, showCamera);
         mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
-        if (mPrivacyItemController.getAllIndicatorsAvailable()) {
+        if (mPrivacyItemController.getAllIndicatorsAvailable()
+                || mPrivacyItemController.getLocationAvailable()) {
             mIconController.setIconVisibility(mSlotLocation, showLocation);
         }
     }
 
     @Override
     public void onLocationActiveChanged(boolean active) {
-        if (!mPrivacyItemController.getAllIndicatorsAvailable()) updateLocationFromController();
+        if (!mPrivacyItemController.getAllIndicatorsAvailable()
+                && !mPrivacyItemController.getLocationAvailable()) {
+            updateLocationFromController();
+        }
     }
 
     // Updates the status view based on the current state of location requests.

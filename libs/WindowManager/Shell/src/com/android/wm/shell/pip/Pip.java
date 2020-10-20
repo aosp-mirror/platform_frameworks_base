@@ -98,7 +98,7 @@ public interface Pip {
     /**
      * Hides the PIP menu.
      */
-    void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback);
+    default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
 
     /**
      * Returns {@code true} if PIP is shown.
@@ -226,7 +226,7 @@ public interface Pip {
     /**
      * Called when showing Pip menu.
      */
-    void showPictureInPictureMenu();
+    default void showPictureInPictureMenu() {}
 
     /**
      * Suspends resizing operation on the Pip until {@link #resumePipResizing} is called.

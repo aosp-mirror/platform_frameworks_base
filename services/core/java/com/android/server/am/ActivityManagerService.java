@@ -14872,6 +14872,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             change |= UidRecord.CHANGE_IDLE;
         }
         final int enqueuedChange = mUidObserverController.enqueueUidChange(
+                uidRec == null ? null : uidRec.pendingChange,
                 uid, change, procState, procStateSeq, capability, ephemeral);
         if (uidRec != null) {
             uidRec.lastReportedChange = enqueuedChange;

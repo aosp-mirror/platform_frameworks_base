@@ -2071,8 +2071,7 @@ public class DisplayPolicy {
         // the cutout safe zone.
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             final boolean attachedInParent = attached != null && !layoutInScreen;
-            final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
-                    || !win.getRequestedVisibility(ITYPE_STATUS_BAR);
+            final boolean requestedFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR);
             final boolean requestedHideNavigation =
                     !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
 
@@ -2374,7 +2373,7 @@ public class DisplayPolicy {
                 topIsFullscreen = topAppHidesStatusBar;
                 // The subtle difference between the window for mTopFullscreenOpaqueWindowState
                 // and mTopIsFullscreen is that mTopIsFullscreen is set only if the window
-                // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
+                // requests to hide the status bar.  Not sure if there is another way that to be the
                 // case though.
                 if (!topIsFullscreen || mDisplayContent.getDefaultTaskDisplayArea()
                         .isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
@@ -2418,10 +2417,7 @@ public class DisplayPolicy {
         if (mTopFullscreenOpaqueWindowState == null || mForceShowSystemBars) {
             return false;
         }
-        final LayoutParams attrs = mTopFullscreenOpaqueWindowState.getAttrs();
-        final int fl = attrs.flags;
-        return (fl & LayoutParams.FLAG_FULLSCREEN) != 0
-                || !mTopFullscreenOpaqueWindowState.getRequestedVisibility(ITYPE_STATUS_BAR);
+        return !mTopFullscreenOpaqueWindowState.getRequestedVisibility(ITYPE_STATUS_BAR);
     }
 
     /**

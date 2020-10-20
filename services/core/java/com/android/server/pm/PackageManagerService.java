@@ -12349,9 +12349,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     // A non-preloaded overlay package, without <overlay android:targetName>, will
                     // only be used if it is signed with the same certificate as its target OR if
                     // it is signed with the same certificate as a reference package declared
-                    // in 'config-signature' tag of SystemConfig.
-                    // If the target is already installed or 'config-signature' tag in SystemConfig
-                    // is set, check this here to augment the last line of defence which is OMS.
+                    // in 'overlay-config-signature' tag of SystemConfig.
+                    // If the target is already installed or 'overlay-config-signature' tag in
+                    // SystemConfig is set, check this here to augment the last line of defense
+                    // which is OMS.
                     if (pkg.getOverlayTargetName() == null) {
                         final PackageSetting targetPkgSetting =
                                 mSettings.getPackageLPr(pkg.getOverlayTarget());

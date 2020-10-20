@@ -19,6 +19,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -478,6 +479,25 @@ public final class PlaybackState implements Parcelable {
      */
     public @Nullable Bundle getExtras() {
         return mExtras;
+    }
+
+    /**
+     * Returns whether this is considered as an active playback state.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public boolean isActiveState() {
+        switch (mState) {
+            case PlaybackState.STATE_FAST_FORWARDING:
+            case PlaybackState.STATE_REWINDING:
+            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
+            case PlaybackState.STATE_SKIPPING_TO_NEXT:
+            case PlaybackState.STATE_BUFFERING:
+            case PlaybackState.STATE_CONNECTING:
+            case PlaybackState.STATE_PLAYING:
+                return true;
+        }
+        return false;
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<PlaybackState> CREATOR =
