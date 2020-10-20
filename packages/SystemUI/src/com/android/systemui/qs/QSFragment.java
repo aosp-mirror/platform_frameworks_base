@@ -98,6 +98,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private int mLastViewHeight;
     private float mLastHeaderTranslation;
     private QSPanelController mQSPanelController;
+    private QuickQSPanelController mQuickQSPanelController;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -126,6 +127,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         QSFragmentComponent qsFragmentComponent = mQsComponentFactory.create(this);
         mQSPanelController = qsFragmentComponent.getQSPanelController();
+        mQuickQSPanelController = qsFragmentComponent.getQuickQSPanelController();
+
+        mQSPanelController.init();
+        mQuickQSPanelController.init();
 
         mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
         mQSPanelScrollView.addOnLayoutChangeListener(
@@ -253,7 +258,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     public void setHost(QSTileHost qsh) {
-        mQSPanelController.setHost(qsh, mQSCustomizer);
+        mQSPanelController.setCustomizer(mQSCustomizer);
         mHeader.setQSPanel(mQSPanelController.getView());
         mFooter.setQSPanel(mQSPanelController.getView());
         mQSDetail.setHost(qsh);

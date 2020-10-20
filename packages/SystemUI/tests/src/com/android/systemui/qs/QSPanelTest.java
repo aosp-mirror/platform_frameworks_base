@@ -124,7 +124,8 @@ public class QSPanelTest extends SysuiTestCase {
             when(mHost.getTiles()).thenReturn(Collections.emptyList());
             when(mHost.createTileView(any(), anyBoolean())).thenReturn(mQSTileView);
 
-            mQsPanel.setHost(mHost, mCustomizer);
+            mQsPanel.setHost(mHost);
+            mQsPanel.setCustomizer(mCustomizer);
             mQsPanel.addTile(dndTile, true);
             mQsPanel.setCallback(mCallback);
         });

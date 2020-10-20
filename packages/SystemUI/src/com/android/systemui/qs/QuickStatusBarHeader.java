@@ -446,7 +446,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     public void setQSPanel(final QSPanel qsPanel) {
         //host.setHeaderView(mExpandIndicator);
         mHeaderQsPanel.setQSPanelAndHeader(qsPanel, this);
-        mHeaderQsPanel.setHost(qsPanel.getHost(), null /* No customization in header */);
 
         Rect tintArea = new Rect(0, 0, 0, 0);
         int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
