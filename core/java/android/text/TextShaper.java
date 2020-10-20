@@ -198,6 +198,10 @@ public class TextShaper {
     /**
      * Shape multi-styled text.
      *
+     * In the LTR context, the shape result will go from left to right, thus you may want to draw
+     * glyphs from left most position of the canvas. In the RTL context, the shape result will go
+     * from right to left, thus you may want to draw glyphs from right most position of the canvas.
+     *
      * @param text a styled text.
      * @param start a start index of shaping target in the text.
      * @param count a length of shaping target in the text.
@@ -215,7 +219,7 @@ public class TextShaper {
         try {
             tl.set(paint, text, start, start + count,
                     mp.getParagraphDir(),
-                    mp.getDirections(start, start + count),
+                    mp.getDirections(0, count),
                     false /* tabstop is not supported */,
                     null,
                     -1, -1 // ellipsis is not supported.
