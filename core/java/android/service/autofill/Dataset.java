@@ -21,7 +21,6 @@ import static android.view.autofill.Helper.sDebug;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -249,7 +248,6 @@ public final class Dataset implements Parcelable {
          * @hide
          */
         @SystemApi
-        @TestApi
         public Builder(@NonNull InlinePresentation inlinePresentation) {
             Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
             mInlinePresentation = inlinePresentation;
@@ -604,7 +602,6 @@ public final class Dataset implements Parcelable {
          * @hide
          */
         @SystemApi
-        @TestApi
         public @NonNull Builder setFieldInlinePresentation(@NonNull AutofillId id,
                 @Nullable AutofillValue value, @Nullable Pattern filter,
                 @NonNull InlinePresentation inlinePresentation) {

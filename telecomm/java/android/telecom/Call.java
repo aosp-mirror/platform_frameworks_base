@@ -1654,7 +1654,6 @@ public final class Call {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void enterBackgroundAudioProcessing() {
         if (mState != STATE_ACTIVE && mState != STATE_RINGING) {
             throw new IllegalStateException("Call must be active or ringing");
@@ -1675,7 +1674,6 @@ public final class Call {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void exitBackgroundAudioProcessing(boolean shouldRing) {
         if (mState != STATE_AUDIO_PROCESSING) {
             throw new IllegalStateException("Call must in the audio processing state");
