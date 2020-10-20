@@ -16,22 +16,37 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import android.security.keystore2.AndroidKeyStoreProvider;
+
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 /**
  * Implementation of {@link KeyStoreProxy} that delegates all method calls to the {@link KeyStore}.
  */
 public class KeyStoreProxyImpl implements KeyStoreProxy {
 
-    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private final KeyStore mKeyStore;
+
+    /**
+     * TODO This function redirects keystore access to the legacy keystore during a transitional
+     *      phase during which not all calling code has been adjusted to use Keystore 2.0.
+     *      This can be reverted to a constant of "AndroidKeyStore" when b/171305684 is complete.
+     *      The specific bug for this component is b/171305545.
+     */
+    static String androidKeystoreProviderName() {
+        if (AndroidKeyStoreProvider.isInstalled()) {
+            return "AndroidKeyStoreLegacy";
+        } else {
+            return "AndroidKeyStore";
+        }
+
+    }
 
     /**
      * A new instance, delegating to {@code keyStore}.
@@ -69,7 +84,7 @@ public class KeyStoreProxyImpl implements KeyStoreProxy {
      * @throws KeyStoreException if there was a problem getting or initializing the key store.
      */
     public static KeyStore getAndLoadAndroidKeyStore() throws KeyStoreException {
-        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
+        KeyStore keyStore = KeyStore.getInstance(androidKeystoreProviderName());
         try {
             keyStore.load(/*param=*/ null);
         } catch (CertificateException | IOException | NoSuchAlgorithmException e) {
