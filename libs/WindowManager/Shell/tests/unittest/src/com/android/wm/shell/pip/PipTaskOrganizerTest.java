@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.pip;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -27,12 +27,6 @@ import android.testing.TestableLooper;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.pip.PipBoundsHandler;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
-import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.PipTestCase;
-import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;

@@ -93,7 +93,7 @@ public class PipTouchHandlerTest extends PipTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mPipBoundsState = new PipBoundsState();
-        mPipBoundsHandler = new PipBoundsHandler(mContext);
+        mPipBoundsHandler = new PipBoundsHandler(mContext, mPipBoundsState);
         mPipSnapAlgorithm = mPipBoundsHandler.getSnapAlgorithm();
         mPipSnapAlgorithm = new PipSnapAlgorithm(mContext);
         mPipTouchHandler = new PipTouchHandler(mContext, mPipMenuActivityController,
