@@ -102,11 +102,11 @@ public:
     // If the metric wants to make any change to the data, like timestamps, they
     // should make a copy as this data may be shared with multiple metrics.
     virtual bool Pull(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
-                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
+                      vector<std::shared_ptr<LogEvent>>* data);
 
     // Same as above, but directly specify the allowed uids to pull from.
     virtual bool Pull(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
-                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
+                      vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear pull data cache immediately.
     int ForceClearPullerCache();
@@ -118,10 +118,9 @@ public:
 
     void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
                                   const int64_t timeoutNs, const vector<int32_t>& additiveFields,
-                                  const shared_ptr<IPullAtomCallback>& callback,
-                                  bool useUid = true);
+                                  const shared_ptr<IPullAtomCallback>& callback);
 
-    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag, bool useUids = true);
+    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
 
     std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
@@ -153,10 +152,10 @@ private:
     std::map<ConfigKey, wp<PullUidProvider>> mPullUidProviders;
 
     bool PullLocked(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
-                    vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
+                    vector<std::shared_ptr<LogEvent>>* data);
 
     bool PullLocked(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
-                    vector<std::shared_ptr<LogEvent>>* data, bool useUids);
+                    vector<std::shared_ptr<LogEvent>>* data);
 
     // locks for data receiver and StatsCompanionService changes
     std::mutex mLock;

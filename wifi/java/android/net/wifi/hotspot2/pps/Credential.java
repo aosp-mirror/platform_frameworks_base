@@ -448,6 +448,16 @@ public final class Credential implements Parcelable {
                     return new UserCredential[size];
                 }
             };
+
+        /**
+         * Get a unique identifier for UserCredential.
+         *
+         * @hide
+         * @return a Unique identifier for a UserCredential object
+         */
+        public int getUniqueId() {
+            return Objects.hash(mUsername);
+        }
     }
     private UserCredential mUserCredential = null;
     /**
@@ -1037,7 +1047,8 @@ public final class Credential implements Parcelable {
      * @return a Unique identifier for a Credential object
      */
     public int getUniqueId() {
-        return Objects.hash(mUserCredential, mCertCredential, mSimCredential, mRealm);
+        return Objects.hash(mUserCredential != null ? mUserCredential.getUniqueId() : 0,
+                mCertCredential, mSimCredential, mRealm);
     }
 
     @Override

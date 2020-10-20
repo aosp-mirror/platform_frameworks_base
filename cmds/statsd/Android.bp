@@ -216,10 +216,6 @@ cc_binary {
             //    address: true,
             //},
         },
-        debuggable: {
-            // Add a flag to enable stats log printing from statsd on debug builds.
-            cflags: ["-DVERY_VERBOSE_PRINTING"],
-        },
     },
 
     proto: {

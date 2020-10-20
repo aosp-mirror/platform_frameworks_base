@@ -1,0 +1,8 @@
+{
+  "mainline-presubmit": [
+    {
+        // Install com.google.android.wifi.apex and run FrameworksWifiApiTests.
+        "name": "FrameworksWifiApiTests[com.google.android.wifi.apex]"
+    }
+  ]
+}
