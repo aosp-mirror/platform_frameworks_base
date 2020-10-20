@@ -31,6 +31,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "-1312360667": {
+      "message": "createRootTask() displayId=%d winMode=%d listener=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
     "-880817403": {
       "message": "Task vanished taskId=%d",
       "level": "VERBOSE",

@@ -128,9 +128,22 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             final TaskAppearedInfo info = taskInfos.get(i);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Existing task: id=%d component=%s",
                     info.getTaskInfo().taskId, info.getTaskInfo().baseIntent);
-            onTaskAppeared(info.getTaskInfo(), info.getLeash());
+            onTaskAppeared(info);
         }
         return taskInfos;
+    }
+
+    public TaskAppearedInfo createRootTask(
+            int displayId, int windowingMode, TaskListener listener) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG,
+                "createRootTask() displayId=%d winMode=%d listener=%s",
+                displayId, windowingMode, listener.toString());
+        final TaskAppearedInfo info = super.createRootTask(displayId, windowingMode);
+
+        // Add the listener and send the task appeared signal
+        mTaskListeners.put(info.getTaskInfo().taskId, listener);
+        onTaskAppeared(info);
+        return info;
     }
 
     /**
@@ -216,12 +229,17 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "Task appeared taskId=%d", taskInfo.taskId);
-        mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, leash));
+        onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
+    }
+
+    private void onTaskAppeared(TaskAppearedInfo info) {
+        final int taskId = info.getTaskInfo().taskId;
+        ProtoLog.v(WM_SHELL_TASK_ORG, "Task appeared taskId=%d", taskId);
+        mTasks.put(taskId, info);
         final TaskListener listener =
-                getTaskListener(taskInfo, true /*removeLaunchCookieIfNeeded*/);
+                getTaskListener(info.getTaskInfo(), true /*removeLaunchCookieIfNeeded*/);
         if (listener != null) {
-            listener.onTaskAppeared(taskInfo, leash);
+            listener.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
     }
 

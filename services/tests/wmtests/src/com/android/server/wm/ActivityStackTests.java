@@ -70,6 +70,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.view.SurfaceControl;
+import android.window.ITaskOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -240,6 +242,24 @@ public class ActivityStackTests extends WindowTestsBase {
 
     @Test
     public void testRemoveOrganizedTask_UpdateStackReference() {
+        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
+            @Override
+            public void onTaskAppeared(
+                    ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) { }
+
+            @Override
+            public void onTaskVanished(ActivityManager.RunningTaskInfo container) { }
+
+            @Override
+            public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+            }
+
+            @Override
+            public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+            }
+        };
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
+
         final Task rootHomeTask = mDefaultTaskDisplayArea.getRootHomeTask();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
                 .setStack(rootHomeTask)
@@ -247,7 +267,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 .build();
         final Task secondaryStack = (Task) WindowContainer.fromBinder(
                 mAtm.mTaskOrganizerController.createRootTask(rootHomeTask.getDisplayId(),
-                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token.asBinder());
+                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo().token.asBinder());
 
         rootHomeTask.reparent(secondaryStack, POSITION_TOP);
         assertEquals(secondaryStack, rootHomeTask.getParent());
