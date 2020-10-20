@@ -2195,7 +2195,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 reqPolicy, /* permission= */ null);
     }
 
-    @NonNull ActiveAdmin getDeviceOwnerOfCallerLocked(final CallerIdentity caller) {
+    @NonNull ActiveAdmin getDeviceOwnerLocked(final CallerIdentity caller) {
         ensureLocked();
         ComponentName doComponent = mOwners.getDeviceOwnerComponent();
         Preconditions.checkState(doComponent != null,
@@ -2220,7 +2220,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return doAdmin;
     }
 
-    @NonNull ActiveAdmin getProfileOwnerOfCallerLocked(final CallerIdentity caller) {
+    @NonNull ActiveAdmin getProfileOwnerLocked(final CallerIdentity caller) {
         ensureLocked();
         final ComponentName poAdminComponent = mOwners.getProfileOwnerComponent(caller.getUserId());
 
@@ -2244,7 +2244,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @NonNull ActiveAdmin getOrganizationOwnedProfileOwnerLocked(final CallerIdentity caller) {
-        final ActiveAdmin profileOwner = getProfileOwnerOfCallerLocked(caller);
+        final ActiveAdmin profileOwner = getProfileOwnerLocked(caller);
 
         Preconditions.checkCallAuthorization(
                 mOwners.isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId()),
@@ -2266,10 +2266,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (poAdminComponent != null) {
-            return getProfileOwnerOfCallerLocked(caller);
+            return getProfileOwnerLocked(caller);
         }
 
-        return getDeviceOwnerOfCallerLocked(caller);
+        return getDeviceOwnerLocked(caller);
     }
 
     @NonNull ActiveAdmin getParentOfAdminIfRequired(ActiveAdmin admin, boolean parent) {
@@ -4426,7 +4426,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 String.format("UID %d is not a device or profile owner", caller.getUid()));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userHandle);
             if (admin != null) {
                 if (getTargetSdk(admin.info.getPackageName(), userHandle) < Build.VERSION_CODES.O) {
                     Slog.e(LOG_TAG, "DPC can no longer call resetPassword()");
@@ -14766,7 +14766,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOfCallerLocked(caller);
+            final ActiveAdmin admin = getProfileOwnerLocked(caller);
             final long deadline = admin.mProfileOffDeadline;
             final int result = makeSuspensionReasons(admin.mSuspendPersonalApps,
                     deadline != 0 && mInjector.systemCurrentTimeMillis() > deadline);
@@ -14799,7 +14799,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int callingUserId = caller.getUserId();
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOfCallerLocked(caller);
+            final ActiveAdmin admin = getProfileOwnerLocked(caller);
             boolean shouldSaveSettings = false;
             if (admin.mSuspendPersonalApps != suspended) {
                 admin.mSuspendPersonalApps = suspended;
@@ -15060,7 +15060,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOfCallerLocked(caller);
+            final ActiveAdmin admin = getProfileOwnerLocked(caller);
 
             // Ensure the timeout is long enough to avoid having bad user experience.
             if (timeoutMillis > 0 && timeoutMillis < MANAGED_PROFILE_MAXIMUM_TIME_OFF_THRESHOLD
@@ -15105,7 +15105,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOfCallerLocked(caller);
+            final ActiveAdmin admin = getProfileOwnerLocked(caller);
             return admin.mProfileMaximumTimeOffMillis;
         }
     }
