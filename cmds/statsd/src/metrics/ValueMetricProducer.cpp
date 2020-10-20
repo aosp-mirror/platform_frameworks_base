@@ -18,11 +18,13 @@
 #include "Log.h"
 
 #include "ValueMetricProducer.h"
-#include "../guardrail/StatsdStats.h"
-#include "../stats_log_util.h"
 
 #include <limits.h>
 #include <stdlib.h>
+
+#include "../guardrail/StatsdStats.h"
+#include "../stats_log_util.h"
+#include "metrics/parsing_utils/metrics_manager_util.h"
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -182,6 +184,48 @@ ValueMetricProducer::~ValueMetricProducer() {
     if (mIsPulled) {
         mPullerManager->UnRegisterReceiver(mPullTagId, mConfigKey, this);
     }
+}
+
+bool ValueMetricProducer::onConfigUpdatedLocked(
+        const StatsdConfig& config, const int configIndex, const int metricIndex,
+        const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+        const unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+        const sp<EventMatcherWizard>& matcherWizard,
+        const vector<sp<ConditionTracker>>& allConditionTrackers,
+        const unordered_map<int64_t, int>& conditionTrackerMap, const sp<ConditionWizard>& wizard,
+        const unordered_map<int64_t, int>& metricToActivationMap,
+        unordered_map<int, vector<int>>& trackerToMetricMap,
+        unordered_map<int, vector<int>>& conditionToMetricMap,
+        unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
+        unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
+        vector<int>& metricsWithActivation) {
+    if (!MetricProducer::onConfigUpdatedLocked(
+                config, configIndex, metricIndex, allAtomMatchingTrackers,
+                oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, matcherWizard,
+                allConditionTrackers, conditionTrackerMap, wizard, metricToActivationMap,
+                trackerToMetricMap, conditionToMetricMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation)) {
+        return false;
+    }
+
+    const ValueMetric& metric = config.value_metric(configIndex);
+    // Update appropriate indices: mWhatMatcherIndex, mConditionIndex and MetricsManager maps.
+    if (!handleMetricWithAtomMatchingTrackers(metric.what(), metricIndex, /*enforceOneAtom=*/false,
+                                              allAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                              trackerToMetricMap, mWhatMatcherIndex)) {
+        return false;
+    }
+
+    if (metric.has_condition() &&
+        !handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                    metric.links(), allConditionTrackers, mConditionTrackerIndex,
+                                    conditionToMetricMap)) {
+        return false;
+    }
+    sp<EventMatcherWizard> tmpEventWizard = mEventMatcherWizard;
+    mEventMatcherWizard = matcherWizard;
+    return true;
 }
 
 void ValueMetricProducer::onStateChanged(int64_t eventTimeNs, int32_t atomId,
