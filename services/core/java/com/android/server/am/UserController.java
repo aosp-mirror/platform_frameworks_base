@@ -952,7 +952,7 @@ class UserController implements Handler.Callback {
         mInjector.batteryStatsServiceNoteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
                 Integer.toString(userId), userId);
-        mInjector.getSystemServiceManager().stopUser(userId);
+        mInjector.getSystemServiceManager().onUserStopping(userId);
 
         Runnable finishUserStoppedAsync = () ->
                 mHandler.post(() -> finishUserStopped(uss, allowDelayedLocking));
@@ -1028,7 +1028,7 @@ class UserController implements Handler.Callback {
         }
 
         if (stopped) {
-            mInjector.systemServiceManagerCleanupUser(userId);
+            mInjector.systemServiceManagerOnUserStopped(userId);
             mInjector.stackSupervisorRemoveUser(userId);
 
             // Remove the user if it is ephemeral.
@@ -2494,8 +2494,8 @@ class UserController implements Handler.Callback {
                 logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_START_USER,
                         USER_LIFECYCLE_EVENT_STATE_BEGIN);
 
-                mInjector.getSystemServiceManager().startUser(TimingsTraceAndSlog.newAsyncLog(),
-                        msg.arg1);
+                mInjector.getSystemServiceManager().onUserStarting(
+                        TimingsTraceAndSlog.newAsyncLog(), msg.arg1);
 
                 logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_START_USER,
                         USER_LIFECYCLE_EVENT_STATE_FINISH);
@@ -2503,7 +2503,7 @@ class UserController implements Handler.Callback {
                 break;
             case USER_UNLOCK_MSG:
                 final int userId = msg.arg1;
-                mInjector.getSystemServiceManager().unlockUser(userId);
+                mInjector.getSystemServiceManager().onUserUnlocking(userId);
                 // Loads recents on a worker thread that allows disk I/O
                 FgThread.getHandler().post(() -> {
                     mInjector.loadUserRecents(userId);
@@ -2528,7 +2528,7 @@ class UserController implements Handler.Callback {
                         BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                         Integer.toString(msg.arg1), msg.arg1);
 
-                mInjector.getSystemServiceManager().switchUser(msg.arg2, msg.arg1);
+                mInjector.getSystemServiceManager().onUserSwitching(msg.arg2, msg.arg1);
                 break;
             case FOREGROUND_PROFILE_CHANGED_MSG:
                 dispatchForegroundProfileChanged(msg.arg1);
@@ -2781,8 +2781,8 @@ class UserController implements Handler.Callback {
             LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
         }
 
-        void systemServiceManagerCleanupUser(@UserIdInt int userId) {
-            mService.mSystemServiceManager.cleanupUser(userId);
+        void systemServiceManagerOnUserStopped(@UserIdInt int userId) {
+            mService.mSystemServiceManager.onUserStopped(userId);
         }
 
         protected UserManagerService getUserManager() {
