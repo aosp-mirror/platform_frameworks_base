@@ -72,7 +72,7 @@ public class TextRunShaper {
         return new PositionedGlyphs(
                 nativeShapeTextRun(text, start, count, contextStart, contextCount, isRtl,
                         paint.getNativeInstance()),
-                paint, xOffset, yOffset);
+                xOffset, yOffset);
     }
 
     /**
@@ -104,7 +104,7 @@ public class TextRunShaper {
                     nativeShapeTextRun(
                             (String) text, start, count, contextStart, contextCount, isRtl,
                             paint.getNativeInstance()),
-                    paint, xOffset, yOffset);
+                    xOffset, yOffset);
         } else {
             char[] buf = new char[contextCount];
             TextUtils.getChars(text, contextStart, contextStart + contextCount, buf, 0);
@@ -112,7 +112,7 @@ public class TextRunShaper {
                     nativeShapeTextRun(
                             buf, start - contextStart, count,
                             0, contextCount, isRtl, paint.getNativeInstance()),
-                    paint, xOffset, yOffset);
+                    xOffset, yOffset);
         }
     }
 

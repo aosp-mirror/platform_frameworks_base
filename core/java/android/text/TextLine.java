@@ -931,7 +931,8 @@ public class TextLine {
         float totalWidth = 0;
 
         final int numDecorations = decorations == null ? 0 : decorations.size();
-        if (needWidth || (c != null && (wp.bgColor != 0 || numDecorations != 0 || runIsRtl))) {
+        if (needWidth || ((c != null || consumer != null) && (wp.bgColor != 0
+                || numDecorations != 0 || runIsRtl))) {
             totalWidth = getRunAdvance(wp, start, end, contextStart, contextEnd, runIsRtl, offset);
         }
 
