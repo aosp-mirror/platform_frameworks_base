@@ -28,4 +28,6 @@
     <string name="user_add_user_message_update" msgid="7061671307004867811">"任何使用者都可以為所有其他使用者更新應用程式。"</string>
     <string name="car_loading_profile" msgid="4507385037552574474">"正在載入"</string>
     <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"正在載入使用者 (由 <xliff:g id="FROM_USER">%1$d</xliff:g> 至 <xliff:g id="TO_USER">%2$d</xliff:g>)"</string>
+    <!-- no translation found for rear_view_camera_close_button_text (8430918817320533693) -->
+    <skip />
 </resources>
