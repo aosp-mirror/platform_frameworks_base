@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -150,6 +151,8 @@ public class GestureLauncherService extends SystemService {
     private int mPowerButtonSlowConsecutiveTaps;
     private final UiEventLogger mUiEventLogger;
 
+    private boolean mHasFeatureWatch;
+
     @VisibleForTesting
     public enum GestureLauncherEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The user lifted the device just the right way to launch the camera.")
@@ -214,6 +217,9 @@ public class GestureLauncherService extends SystemService {
             mUserId = ActivityManager.getCurrentUser();
             mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
             registerContentObservers();
+
+            mHasFeatureWatch =
+                    mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
         }
     }
 
@@ -390,8 +396,7 @@ public class GestureLauncherService extends SystemService {
     /**
      * Whether to enable emergency gesture.
      */
-    @VisibleForTesting
-    static boolean isEmergencyGestureSettingEnabled(Context context, int userId) {
+    public static boolean isEmergencyGestureSettingEnabled(Context context, int userId) {
         return isEmergencyGestureEnabled(context.getResources())
                 && Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.EMERGENCY_GESTURE_ENABLED, 1, userId) != 0;
@@ -475,7 +480,10 @@ public class GestureLauncherService extends SystemService {
             if (mEmergencyGestureEnabled) {
                 // Commit to intercepting the powerkey event after the second "quick" tap to avoid
                 // lockscreen changes between launching camera and the emergency gesture flow.
-                if (mPowerButtonConsecutiveTaps > 1) {
+                // Since watch doesn't have camera gesture, only intercept power key event after
+                // emergency gesture tap count.
+                if (mPowerButtonConsecutiveTaps
+                        > (mHasFeatureWatch ? EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD : 1)) {
                     intercept = interactive;
                 }
                 if (mPowerButtonConsecutiveTaps == EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD) {
