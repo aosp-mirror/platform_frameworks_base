@@ -345,10 +345,6 @@ public class AlarmManagerService extends SystemService {
             return (i < 0) ? 0 : history.get(i);
         }
 
-        void dump(PrintWriter pw, String prefix, long nowElapsed) {
-            dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix), nowElapsed);
-        }
-
         void dump(IndentingPrintWriter pw, long nowElapsed) {
             pw.println("App Alarm history:");
             pw.increaseIndent();
@@ -596,10 +592,6 @@ public class AlarmManagerService extends SystemService {
                     properties.getLong(
                             KEY_APP_STANDBY_RESTRICTED_WINDOW,
                             DEFAULT_APP_STANDBY_RESTRICTED_WINDOW));
-        }
-
-        void dump(PrintWriter pw, String prefix) {
-            dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
         }
 
         void dump(IndentingPrintWriter pw) {
@@ -1880,7 +1872,7 @@ public class AlarmManagerService extends SystemService {
             if (args.length > 0 && "--proto".equals(args[0])) {
                 dumpProto(fd);
             } else {
-                dumpImpl(pw);
+                dumpImpl(new IndentingPrintWriter(pw, "  "));
             }
         }
 
@@ -1892,18 +1884,20 @@ public class AlarmManagerService extends SystemService {
         }
     };
 
-    void dumpImpl(PrintWriter pw) {
+    void dumpImpl(IndentingPrintWriter pw) {
         synchronized (mLock) {
             pw.println("Current Alarm Manager state:");
-            mConstants.dump(pw, "  ");
+            pw.increaseIndent();
+
+            mConstants.dump(pw);
             pw.println();
 
             if (mAppStateTracker != null) {
-                mAppStateTracker.dump(pw, "  ");
+                mAppStateTracker.dump(pw);
                 pw.println();
             }
 
-            pw.println("  App Standby Parole: " + mAppStandbyParole);
+            pw.println("App Standby Parole: " + mAppStandbyParole);
             pw.println();
 
             final long nowELAPSED = mInjector.getElapsedRealtime();
@@ -1911,7 +1905,7 @@ public class AlarmManagerService extends SystemService {
             final long nowRTC = mInjector.getCurrentTimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-            pw.print("  nowRTC=");
+            pw.print("nowRTC=");
             pw.print(nowRTC);
             pw.print("=");
             pw.print(sdf.format(new Date(nowRTC)));
@@ -1919,110 +1913,125 @@ public class AlarmManagerService extends SystemService {
             pw.print(nowELAPSED);
             pw.println();
 
-            pw.print("  mLastTimeChangeClockTime=");
+            pw.print("mLastTimeChangeClockTime=");
             pw.print(mLastTimeChangeClockTime);
             pw.print("=");
             pw.println(sdf.format(new Date(mLastTimeChangeClockTime)));
 
-            pw.print("  mLastTimeChangeRealtime=");
+            pw.print("mLastTimeChangeRealtime=");
             pw.println(mLastTimeChangeRealtime);
 
-            pw.print("  mLastTickReceived=");
+            pw.print("mLastTickReceived=");
             pw.println(sdf.format(new Date(mLastTickReceived)));
 
-            pw.print("  mLastTickSet=");
+            pw.print("mLastTickSet=");
             pw.println(sdf.format(new Date(mLastTickSet)));
 
             if (RECORD_ALARMS_IN_HISTORY) {
                 pw.println();
-                pw.println("  Recent TIME_TICK history:");
+                pw.println("Recent TIME_TICK history:");
+                pw.increaseIndent();
                 int i = mNextTickHistory;
                 do {
                     i--;
                     if (i < 0) i = TICK_HISTORY_DEPTH - 1;
                     final long time = mTickHistory[i];
-                    pw.print("    ");
                     pw.println((time > 0)
                             ? sdf.format(new Date(nowRTC - (nowELAPSED - time)))
                             : "-");
                 } while (i != mNextTickHistory);
+                pw.decreaseIndent();
             }
 
             SystemServiceManager ssm = LocalServices.getService(SystemServiceManager.class);
             if (ssm != null) {
                 pw.println();
-                pw.print("  RuntimeStarted=");
+                pw.print("RuntimeStarted=");
                 pw.print(sdf.format(
                         new Date(nowRTC - nowELAPSED + ssm.getRuntimeStartElapsedTime())));
                 if (ssm.isRuntimeRestarted()) {
                     pw.print("  (Runtime restarted)");
                 }
                 pw.println();
-                pw.print("  Runtime uptime (elapsed): ");
+
+                pw.print("Runtime uptime (elapsed): ");
                 TimeUtils.formatDuration(nowELAPSED, ssm.getRuntimeStartElapsedTime(), pw);
                 pw.println();
-                pw.print("  Runtime uptime (uptime): ");
+
+                pw.print("Runtime uptime (uptime): ");
                 TimeUtils.formatDuration(nowUPTIME, ssm.getRuntimeStartUptime(), pw);
                 pw.println();
             }
 
             pw.println();
             if (!mInteractive) {
-                pw.print("  Time since non-interactive: ");
+                pw.print("Time since non-interactive: ");
                 TimeUtils.formatDuration(nowELAPSED - mNonInteractiveStartTime, pw);
                 pw.println();
             }
-            pw.print("  Max wakeup delay: ");
+            pw.print("Max wakeup delay: ");
             TimeUtils.formatDuration(currentNonWakeupFuzzLocked(nowELAPSED), pw);
             pw.println();
-            pw.print("  Time since last dispatch: ");
+
+            pw.print("Time since last dispatch: ");
             TimeUtils.formatDuration(nowELAPSED - mLastAlarmDeliveryTime, pw);
             pw.println();
-            pw.print("  Next non-wakeup delivery time: ");
+
+            pw.print("Next non-wakeup delivery time: ");
             TimeUtils.formatDuration(mNextNonWakeupDeliveryTime, nowELAPSED, pw);
             pw.println();
 
             long nextWakeupRTC = mNextWakeup + (nowRTC - nowELAPSED);
             long nextNonWakeupRTC = mNextNonWakeup + (nowRTC - nowELAPSED);
-            pw.print("  Next non-wakeup alarm: ");
+            pw.print("Next non-wakeup alarm: ");
             TimeUtils.formatDuration(mNextNonWakeup, nowELAPSED, pw);
             pw.print(" = ");
             pw.print(mNextNonWakeup);
             pw.print(" = ");
             pw.println(sdf.format(new Date(nextNonWakeupRTC)));
-            pw.print("    set at ");
+
+            pw.increaseIndent();
+            pw.print("set at ");
             TimeUtils.formatDuration(mNextNonWakeUpSetAt, nowELAPSED, pw);
+            pw.decreaseIndent();
             pw.println();
-            pw.print("  Next wakeup alarm: ");
+
+            pw.print("Next wakeup alarm: ");
             TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
             pw.print(" = ");
             pw.print(mNextWakeup);
             pw.print(" = ");
             pw.println(sdf.format(new Date(nextWakeupRTC)));
-            pw.print("    set at ");
+
+            pw.increaseIndent();
+            pw.print("set at ");
             TimeUtils.formatDuration(mNextWakeUpSetAt, nowELAPSED, pw);
+            pw.decreaseIndent();
             pw.println();
 
-            pw.print("  Next kernel non-wakeup alarm: ");
+            pw.print("Next kernel non-wakeup alarm: ");
             TimeUtils.formatDuration(mInjector.getNextAlarm(ELAPSED_REALTIME), pw);
             pw.println();
-            pw.print("  Next kernel wakeup alarm: ");
+            pw.print("Next kernel wakeup alarm: ");
             TimeUtils.formatDuration(mInjector.getNextAlarm(ELAPSED_REALTIME_WAKEUP), pw);
             pw.println();
 
-            pw.print("  Last wakeup: ");
+            pw.print("Last wakeup: ");
             TimeUtils.formatDuration(mLastWakeup, nowELAPSED, pw);
             pw.print(" = ");
             pw.println(mLastWakeup);
-            pw.print("  Last trigger: ");
+
+            pw.print("Last trigger: ");
             TimeUtils.formatDuration(mLastTrigger, nowELAPSED, pw);
             pw.print(" = ");
             pw.println(mLastTrigger);
-            pw.print("  Num time change events: ");
+
+            pw.print("Num time change events: ");
             pw.println(mNumTimeChanged);
 
             pw.println();
-            pw.println("  Next alarm clock information: ");
+            pw.println("Next alarm clock information: ");
+            pw.increaseIndent();
             final TreeSet<Integer> users = new TreeSet<>();
             for (int i = 0; i < mNextAlarmClockForUser.size(); i++) {
                 users.add(mNextAlarmClockForUser.keyAt(i));
@@ -2034,7 +2043,7 @@ public class AlarmManagerService extends SystemService {
                 final AlarmManager.AlarmClockInfo next = mNextAlarmClockForUser.get(user);
                 final long time = next != null ? next.getTriggerTime() : 0;
                 final boolean pendingSend = mPendingSendNextAlarmClockChangedForUser.get(user);
-                pw.print("    user:");
+                pw.print("user:");
                 pw.print(user);
                 pw.print(" pendingSend:");
                 pw.print(pendingSend);
@@ -2048,26 +2057,31 @@ public class AlarmManagerService extends SystemService {
                 }
                 pw.println();
             }
+            pw.decreaseIndent();
+
             if (mAlarmStore.size() > 0) {
                 pw.println();
-                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", "  ");
-                mAlarmStore.dump(ipw, nowELAPSED, sdf);
+                mAlarmStore.dump(pw, nowELAPSED, sdf);
             }
             pw.println();
-            pw.println("  Pending user blocked background alarms: ");
+
+            pw.println("Pending user blocked background alarms: ");
+            pw.increaseIndent();
             boolean blocked = false;
             for (int i = 0; i < mPendingBackgroundAlarms.size(); i++) {
                 final ArrayList<Alarm> blockedAlarms = mPendingBackgroundAlarms.valueAt(i);
                 if (blockedAlarms != null && blockedAlarms.size() > 0) {
                     blocked = true;
-                    dumpAlarmList(pw, blockedAlarms, "    ", nowELAPSED, sdf);
+                    dumpAlarmList(pw, blockedAlarms, nowELAPSED, sdf);
                 }
             }
             if (!blocked) {
-                pw.println("    none");
+                pw.println("none");
             }
+            pw.decreaseIndent();
             pw.println();
-            pw.print("  Pending alarms per uid: [");
+
+            pw.print("Pending alarms per uid: [");
             for (int i = 0; i < mAlarmsPerUid.size(); i++) {
                 if (i > 0) {
                     pw.print(", ");
@@ -2079,75 +2093,90 @@ public class AlarmManagerService extends SystemService {
             pw.println("]");
             pw.println();
 
-            mAppWakeupHistory.dump(pw, "  ", nowELAPSED);
+            mAppWakeupHistory.dump(pw, nowELAPSED);
 
             if (mPendingIdleUntil != null || mPendingWhileIdleAlarms.size() > 0) {
                 pw.println();
-                pw.println("    Idle mode state:");
-                pw.print("      Idling until: ");
+                pw.println("Idle mode state:");
+
+                pw.increaseIndent();
+                pw.print("Idling until: ");
                 if (mPendingIdleUntil != null) {
                     pw.println(mPendingIdleUntil);
-                    mPendingIdleUntil.dump(pw, "        ", nowELAPSED, sdf);
+                    mPendingIdleUntil.dump(pw, nowELAPSED, sdf);
                 } else {
                     pw.println("null");
                 }
-                pw.println("      Pending alarms:");
-                dumpAlarmList(pw, mPendingWhileIdleAlarms, "      ", nowELAPSED, sdf);
+                pw.println("Pending alarms:");
+                dumpAlarmList(pw, mPendingWhileIdleAlarms, nowELAPSED, sdf);
+                pw.decreaseIndent();
             }
             if (mNextWakeFromIdle != null) {
                 pw.println();
-                pw.print("  Next wake from idle: ");
+                pw.print("Next wake from idle: ");
                 pw.println(mNextWakeFromIdle);
-                mNextWakeFromIdle.dump(pw, "    ", nowELAPSED, sdf);
+
+                pw.increaseIndent();
+                mNextWakeFromIdle.dump(pw, nowELAPSED, sdf);
+                pw.decreaseIndent();
             }
 
             pw.println();
-            pw.print("  Past-due non-wakeup alarms: ");
+            pw.print("Past-due non-wakeup alarms: ");
             if (mPendingNonWakeupAlarms.size() > 0) {
                 pw.println(mPendingNonWakeupAlarms.size());
-                dumpAlarmList(pw, mPendingNonWakeupAlarms, "    ", nowELAPSED, sdf);
+
+                pw.increaseIndent();
+                dumpAlarmList(pw, mPendingNonWakeupAlarms, nowELAPSED, sdf);
+                pw.decreaseIndent();
             } else {
                 pw.println("(none)");
             }
-            pw.print("    Number of delayed alarms: ");
+            pw.increaseIndent();
+            pw.print("Number of delayed alarms: ");
             pw.print(mNumDelayedAlarms);
             pw.print(", total delay time: ");
             TimeUtils.formatDuration(mTotalDelayTime, pw);
             pw.println();
-            pw.print("    Max delay time: ");
+
+            pw.print("Max delay time: ");
             TimeUtils.formatDuration(mMaxDelayTime, pw);
             pw.print(", max non-interactive time: ");
             TimeUtils.formatDuration(mNonInteractiveTime, pw);
             pw.println();
+            pw.decreaseIndent();
 
             pw.println();
-            pw.print("  Broadcast ref count: ");
+            pw.print("Broadcast ref count: ");
             pw.println(mBroadcastRefCount);
-            pw.print("  PendingIntent send count: ");
+            pw.print("PendingIntent send count: ");
             pw.println(mSendCount);
-            pw.print("  PendingIntent finish count: ");
+            pw.print("PendingIntent finish count: ");
             pw.println(mSendFinishCount);
-            pw.print("  Listener send count: ");
+            pw.print("Listener send count: ");
             pw.println(mListenerCount);
-            pw.print("  Listener finish count: ");
+            pw.print("Listener finish count: ");
             pw.println(mListenerFinishCount);
             pw.println();
 
             if (mInFlight.size() > 0) {
                 pw.println("Outstanding deliveries:");
+                pw.increaseIndent();
                 for (int i = 0; i < mInFlight.size(); i++) {
-                    pw.print("   #");
+                    pw.print("#");
                     pw.print(i);
                     pw.print(": ");
                     pw.println(mInFlight.get(i));
                 }
+                pw.decreaseIndent();
                 pw.println();
             }
 
             if (mLastAllowWhileIdleDispatch.size() > 0) {
-                pw.println("  Last allow while idle dispatch times:");
+                pw.println("Last allow while idle dispatch times:");
+                pw.increaseIndent();
                 for (int i = 0; i < mLastAllowWhileIdleDispatch.size(); i++) {
-                    pw.print("    UID ");
+                    pw.print("UID ");
                     final int uid = mLastAllowWhileIdleDispatch.keyAt(i);
                     UserHandle.formatUid(pw, uid);
                     pw.print(": ");
@@ -2163,9 +2192,10 @@ public class AlarmManagerService extends SystemService {
 
                     pw.println();
                 }
+                pw.decreaseIndent();
             }
 
-            pw.print("  mUseAllowWhileIdleShortTime: [");
+            pw.print("mUseAllowWhileIdleShortTime: [");
             for (int i = 0; i < mUseAllowWhileIdleShortTime.size(); i++) {
                 if (mUseAllowWhileIdleShortTime.valueAt(i)) {
                     UserHandle.formatUid(pw, mUseAllowWhileIdleShortTime.keyAt(i));
@@ -2175,7 +2205,7 @@ public class AlarmManagerService extends SystemService {
             pw.println("]");
             pw.println();
 
-            if (mLog.dump(pw, "  Recent problems", "    ")) {
+            if (mLog.dump(pw, "Recent problems:")) {
                 pw.println();
             }
 
@@ -2218,10 +2248,10 @@ public class AlarmManagerService extends SystemService {
                 }
             }
             if (len > 0) {
-                pw.println("  Top Alarms:");
+                pw.println("Top Alarms:");
+                pw.increaseIndent();
                 for (int i = 0; i < len; i++) {
                     FilterStats fs = topFilters[i];
-                    pw.print("    ");
                     if (fs.nesting > 0) pw.print("*ACTIVE* ");
                     TimeUtils.formatDuration(fs.aggregateTime, pw);
                     pw.print(" running, ");
@@ -2233,20 +2263,22 @@ public class AlarmManagerService extends SystemService {
                     pw.print(":");
                     pw.print(fs.mBroadcastStats.mPackageName);
                     pw.println();
-                    pw.print("      ");
+
+                    pw.increaseIndent();
                     pw.print(fs.mTag);
                     pw.println();
+                    pw.decreaseIndent();
                 }
+                pw.decreaseIndent();
             }
 
-            pw.println(" ");
-            pw.println("  Alarm Stats:");
+            pw.println();
+            pw.println("Alarm Stats:");
             final ArrayList<FilterStats> tmpFilters = new ArrayList<FilterStats>();
             for (int iu = 0; iu < mBroadcastStats.size(); iu++) {
                 ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(iu);
                 for (int ip = 0; ip < uidStats.size(); ip++) {
                     BroadcastStats bs = uidStats.valueAt(ip);
-                    pw.print("  ");
                     if (bs.nesting > 0) pw.print("*ACTIVE* ");
                     UserHandle.formatUid(pw, bs.mUid);
                     pw.print(":");
@@ -2256,14 +2288,15 @@ public class AlarmManagerService extends SystemService {
                     pw.print(" running, ");
                     pw.print(bs.numWakeup);
                     pw.println(" wakeups:");
+
                     tmpFilters.clear();
                     for (int is = 0; is < bs.filterStats.size(); is++) {
                         tmpFilters.add(bs.filterStats.valueAt(is));
                     }
                     Collections.sort(tmpFilters, comparator);
+                    pw.increaseIndent();
                     for (int i = 0; i < tmpFilters.size(); i++) {
                         FilterStats fs = tmpFilters.get(i);
-                        pw.print("    ");
                         if (fs.nesting > 0) pw.print("*ACTIVE* ");
                         TimeUtils.formatDuration(fs.aggregateTime, pw);
                         pw.print(" ");
@@ -2273,28 +2306,32 @@ public class AlarmManagerService extends SystemService {
                         pw.print(" alarms, last ");
                         TimeUtils.formatDuration(fs.lastTime, nowELAPSED, pw);
                         pw.println(":");
-                        pw.print("      ");
+
+                        pw.increaseIndent();
                         pw.print(fs.mTag);
                         pw.println();
+                        pw.decreaseIndent();
                     }
+                    pw.decreaseIndent();
                 }
             }
             pw.println();
-            mStatLogger.dump(pw, "  ");
+            mStatLogger.dump(pw);
 
             if (RECORD_DEVICE_IDLE_ALARMS) {
                 pw.println();
-                pw.println("  Allow while idle dispatches:");
+                pw.println("Allow while idle dispatches:");
+                pw.increaseIndent();
                 for (int i = 0; i < mAllowWhileIdleDispatches.size(); i++) {
                     IdleDispatchEntry ent = mAllowWhileIdleDispatches.get(i);
-                    pw.print("    ");
                     TimeUtils.formatDuration(ent.elapsedRealtime, nowELAPSED, pw);
                     pw.print(": ");
                     UserHandle.formatUid(pw, ent.uid);
                     pw.print(":");
                     pw.println(ent.pkg);
+
+                    pw.increaseIndent();
                     if (ent.op != null) {
-                        pw.print("      ");
                         pw.print(ent.op);
                         pw.print(" / ");
                         pw.print(ent.tag);
@@ -2305,7 +2342,9 @@ public class AlarmManagerService extends SystemService {
                         }
                         pw.println();
                     }
+                    pw.decreaseIndent();
                 }
+                pw.decreaseIndent();
             }
         }
     }
@@ -3042,12 +3081,6 @@ public class AlarmManagerService extends SystemService {
             mHandler.removeMessages(msg.what);
             mHandler.sendMessageAtTime(msg, when);
         }
-    }
-
-    private static final void dumpAlarmList(PrintWriter pw, ArrayList<Alarm> list,
-            String prefix, long nowELAPSED, SimpleDateFormat sdf) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, prefix, prefix);
-        dumpAlarmList(ipw, list, nowELAPSED, sdf);
     }
 
     static final void dumpAlarmList(IndentingPrintWriter ipw, ArrayList<Alarm> list,
