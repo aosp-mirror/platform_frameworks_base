@@ -1940,7 +1940,9 @@ public final class ActiveServices {
         ActivityServiceConnectionsHolder<ConnectionRecord> activity = null;
         if (token != null) {
             activity = mAm.mAtmInternal.getServiceConnectionsHolder(token);
-            if (activity == null) {
+            // TODO(b/171280916): Remove the check after we have another API get window context
+            //  token than getActivityToken.
+            if (activity == null && !mAm.mWindowManager.isWindowToken(token)) {
                 Slog.w(TAG, "Binding with unknown activity: " + token);
                 return 0;
             }
