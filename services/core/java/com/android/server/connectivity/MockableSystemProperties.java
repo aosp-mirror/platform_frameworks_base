@@ -17,6 +17,7 @@
 package com.android.server.connectivity;
 
 import android.os.SystemProperties;
+import android.sysprop.NetworkProperties;
 
 public class MockableSystemProperties {
 
@@ -31,7 +32,14 @@ public class MockableSystemProperties {
     public boolean getBoolean(String key, boolean def) {
         return SystemProperties.getBoolean(key, def);
     }
-
+    /**
+     * Set net.tcp_def_init_rwnd to the tcp initial receive window size.
+     */
+    public void setTcpInitRwnd(int value) {
+        NetworkProperties.tcp_init_rwnd(value);
+    }
+    // TODO(b/33308258): SystemProperties.set() will not be accessible if ConnectivityService
+    // becomes a mainline module. Remove it and replace the usage after removing net.dns*.
     public void set(String key, String value) {
         SystemProperties.set(key, value);
     }
