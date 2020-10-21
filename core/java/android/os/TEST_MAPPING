@@ -19,9 +19,6 @@
       ]
     },
     {
-      "name": "CtsUsbTests"
-    },
-    {
       "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests",
       "options": [
