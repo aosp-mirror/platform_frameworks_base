@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
@@ -44,7 +43,6 @@ import java.util.ArrayList;
 public class NotificationHeaderView extends ViewGroup {
     private final int mChildMinWidth;
     private final int mContentEndMargin;
-    private final int mGravity;
     private View mAppName;
     private View mHeaderText;
     private View mSecondaryHeaderText;
@@ -60,7 +58,6 @@ public class NotificationHeaderView extends ViewGroup {
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
-    private int mTotalWidth;
 
     ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -92,11 +89,6 @@ public class NotificationHeaderView extends ViewGroup {
         mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
-
-        int[] attrIds = {android.R.attr.gravity};
-        TypedArray ta = context.obtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes);
-        mGravity = ta.getInt(0, 0);
-        ta.recycle();
     }
 
     @Override
@@ -157,8 +149,6 @@ public class NotificationHeaderView extends ViewGroup {
             shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
                     0);
         }
-        totalWidth += getPaddingEnd();
-        mTotalWidth = Math.min(totalWidth, givenWidth);
         setMeasuredDimension(givenWidth, givenHeight);
     }
 
@@ -179,10 +169,6 @@ public class NotificationHeaderView extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int left = getPaddingStart();
         int end = getMeasuredWidth();
-        final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
-        if (centerAligned) {
-            left += getMeasuredWidth() / 2 - mTotalWidth / 2;
-        }
         int childCount = getChildCount();
         int ownHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
         for (int i = 0; i < childCount; i++) {
