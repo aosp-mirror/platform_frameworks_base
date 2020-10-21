@@ -205,9 +205,10 @@ public class CertificateMonitor {
             dialogIntent.setComponent(targetInfo.getComponentName());
         }
 
+        // Simple notification clicks are immutable
         PendingIntent notifyIntent = mInjector.pendingIntentGetActivityAsUser(userContext, 0,
-                dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT, null,
-                UserHandle.of(parentUserId));
+                dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.of(parentUserId));
 
         return new Notification.Builder(userContext, SystemNotificationChannels.SECURITY)
                 .setSmallIcon(smallIconId)

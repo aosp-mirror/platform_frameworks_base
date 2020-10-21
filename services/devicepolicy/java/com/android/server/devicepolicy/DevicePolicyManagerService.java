@@ -2153,9 +2153,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> {
             int affectedUserHandle = parent ? getProfileParentId(userHandle) : userHandle;
             AlarmManager am = mInjector.getAlarmManager();
+            // Broadcast alarms sent by system are immutable
             PendingIntent pi = PendingIntent.getBroadcastAsUser(context, REQUEST_EXPIRE_PASSWORD,
                     new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
-                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT,
+                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT
+                            | PendingIntent.FLAG_IMMUTABLE,
                     UserHandle.of(affectedUserHandle));
             am.cancel(pi);
             if (alarmTime != 0) {
@@ -10693,8 +10695,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slog.wtf(LOG_TAG, "Failed to resolve intent for location settings");
         }
 
+        // Simple notification clicks are immutable
         PendingIntent locationSettingsIntent = mInjector.pendingIntentGetActivityAsUser(mContext, 0,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT, null, user);
+                intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
+                user);
         Notification notification = new Notification.Builder(mContext,
                 SystemNotificationChannels.DEVICE_ADMIN)
                 .setSmallIcon(R.drawable.ic_info_outline)
@@ -13545,8 +13549,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         intent.setPackage(pm.getSystemUiServiceComponent().getPackageName());
-        final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
-                UserHandle.CURRENT);
+        // Simple notification clicks are immutable
+        final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE, UserHandle.CURRENT);
         Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                 .setSmallIcon(R.drawable.ic_info_outline)
@@ -14937,9 +14942,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final AlarmManager am = mInjector.getAlarmManager();
         final Intent intent = new Intent(ACTION_PROFILE_OFF_DEADLINE);
         intent.setPackage(mContext.getPackageName());
+        // Broadcast alarms sent by system are immutable
         final PendingIntent pi = mInjector.pendingIntentGetBroadcast(
                 mContext, REQUEST_PROFILE_OFF_DEADLINE, intent,
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT
+                        | PendingIntent.FLAG_IMMUTABLE);
 
         if (alarmTime == 0) {
             Slog.i(LOG_TAG, "Profile off deadline alarm is removed.");
@@ -15000,8 +15007,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         intent.setPackage(mContext.getPackageName());
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
 
+        // Simple notification action button clicks are immutable
         final PendingIntent pendingIntent = mInjector.pendingIntentGetBroadcast(mContext,
-                0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                0 /* requestCode */, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         final String buttonText =
                 mContext.getString(R.string.personal_apps_suspended_turn_profile_on);
