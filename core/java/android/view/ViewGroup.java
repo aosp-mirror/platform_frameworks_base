@@ -50,6 +50,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
@@ -611,7 +612,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private int mNestedScrollAxes;
 
     // Used to manage the list of transient views, added by addTransientView()
-    private List<Integer> mTransientIndices = null;
+    private IntArray mTransientIndices = null;
     private List<View> mTransientViews = null;
 
     /**
@@ -4853,7 +4854,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (mTransientIndices == null) {
-            mTransientIndices = new ArrayList<Integer>();
+            mTransientIndices = new IntArray();
             mTransientViews = new ArrayList<View>();
         }
         final int oldSize = mTransientIndices.size();

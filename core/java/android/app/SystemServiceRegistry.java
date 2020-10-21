@@ -1377,8 +1377,8 @@ public final class SystemServiceRegistry {
 
     /** Throws {@link IllegalStateException} if not during a static initialization. */
     private static void ensureInitializing(String methodName) {
-        Preconditions.checkState(sInitializing, "Internal error: " + methodName
-                + " can only be called during class initialization.");
+        Preconditions.checkState(sInitializing, "Internal error: %s"
+                + " can only be called during class initialization.", methodName);
     }
     /**
      * Creates an array which is used to cache per-Context service instances.

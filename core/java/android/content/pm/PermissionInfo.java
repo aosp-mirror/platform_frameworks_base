@@ -453,82 +453,85 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
     public static @NonNull String protectionToString(int level) {
-        String protLevel = "????";
+        final StringBuilder protLevel = new StringBuilder();
         switch (level & PROTECTION_MASK_BASE) {
             case PermissionInfo.PROTECTION_DANGEROUS:
-                protLevel = "dangerous";
+                protLevel.append("dangerous");
                 break;
             case PermissionInfo.PROTECTION_NORMAL:
-                protLevel = "normal";
+                protLevel.append("normal");
                 break;
             case PermissionInfo.PROTECTION_SIGNATURE:
-                protLevel = "signature";
+                protLevel.append("signature");
                 break;
             case PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM:
-                protLevel = "signatureOrSystem";
+                protLevel.append("signatureOrSystem");
+                break;
+            default:
+                protLevel.append("????");
                 break;
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
-            protLevel += "|privileged";
+            protLevel.append("|privileged");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
-            protLevel += "|development";
+            protLevel.append("|development");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
-            protLevel += "|appop";
+            protLevel.append("|appop");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_PRE23) != 0) {
-            protLevel += "|pre23";
+            protLevel.append("|pre23");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0) {
-            protLevel += "|installer";
+            protLevel.append("|installer");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0) {
-            protLevel += "|verifier";
+            protLevel.append("|verifier");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0) {
-            protLevel += "|preinstalled";
+            protLevel.append("|preinstalled");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_SETUP) != 0) {
-            protLevel += "|setup";
+            protLevel.append("|setup");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_INSTANT) != 0) {
-            protLevel += "|instant";
+            protLevel.append("|instant");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0) {
-            protLevel += "|runtime";
+            protLevel.append("|runtime");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_OEM) != 0) {
-            protLevel += "|oem";
+            protLevel.append("|oem");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_VENDOR_PRIVILEGED) != 0) {
-            protLevel += "|vendorPrivileged";
+            protLevel.append("|vendorPrivileged");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER) != 0) {
-            protLevel += "|textClassifier";
+            protLevel.append("|textClassifier");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0) {
-            protLevel += "|wellbeing";
+            protLevel.append("|wellbeing");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0) {
-            protLevel += "|documenter";
+            protLevel.append("|documenter");
         }
         if ((level & PROTECTION_FLAG_CONFIGURATOR) != 0) {
-            protLevel += "|configurator";
+            protLevel.append("|configurator");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_INCIDENT_REPORT_APPROVER) != 0) {
-            protLevel += "|incidentReportApprover";
+            protLevel.append("|incidentReportApprover");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0) {
-            protLevel += "|appPredictor";
+            protLevel.append("|appPredictor");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_COMPANION) != 0) {
-            protLevel += "|companion";
+            protLevel.append("|companion");
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0) {
-            protLevel += "|retailDemo";
+            protLevel.append("|retailDemo");
         }
-        return protLevel;
+        return protLevel.toString();
     }
 
     /**

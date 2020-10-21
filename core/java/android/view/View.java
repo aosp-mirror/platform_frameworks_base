@@ -6150,6 +6150,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * was set.
      */
     @NonNull
+    @SuppressWarnings("AndroidFrameworkEfficientCollections")
     public Map<Integer, Integer> getAttributeSourceResourceMap() {
         HashMap<Integer, Integer> map = new HashMap<>();
         if (!sDebugViewAttributes || mAttributeSourceResId == null) {

@@ -1051,7 +1051,7 @@ class AutomaticBrightnessController {
 
         @Override
         public String toString() {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append('[');
             for (int i = 0; i < mCount; i++) {
                 final long next = i + 1 < mCount ? getTime(i + 1) : SystemClock.uptimeMillis();

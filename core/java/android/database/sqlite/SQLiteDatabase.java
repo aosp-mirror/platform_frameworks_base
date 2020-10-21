@@ -1692,7 +1692,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                     sql.append((i > 0) ? ",?" : "?");
                 }
             } else {
-                sql.append(nullColumnHack + ") VALUES (NULL");
+                sql.append(nullColumnHack).append(") VALUES (NULL");
             }
             sql.append(')');
 
@@ -2674,7 +2674,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                         "lookasideSlotSize cannot be negative");
                 Preconditions.checkArgument(
                         (slotSize > 0 && slotCount > 0) || (slotCount == 0 && slotSize == 0),
-                        "Invalid configuration: " + slotSize + ", " + slotCount);
+                        "Invalid configuration: %d, %d", slotSize, slotCount);
 
                 mLookasideSlotSize = slotSize;
                 mLookasideSlotCount = slotCount;
