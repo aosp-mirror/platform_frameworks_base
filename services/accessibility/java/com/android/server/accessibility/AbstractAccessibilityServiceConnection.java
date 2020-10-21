@@ -150,6 +150,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private boolean mRequestTwoFingerPassthrough;
 
+    private boolean mSendMotionEvents;
+
     boolean mRequestFilterKeyEvents;
 
     boolean mRetrieveInteractiveWindows;
@@ -329,6 +331,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_REQUEST_MULTI_FINGER_GESTURES) != 0;
         mRequestTwoFingerPassthrough =
                 (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_2_FINGER_PASSTHROUGH) != 0;
+        mSendMotionEvents =
+                (info.flags & AccessibilityServiceInfo.FLAG_SEND_MOTION_EVENTS) != 0;
         mRequestFilterKeyEvents =
                 (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
         mRetrieveInteractiveWindows = (info.flags
@@ -1778,6 +1782,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     public boolean isTwoFingerPassthroughEnabled() {
         return mRequestTwoFingerPassthrough;
+    }
+
+    public boolean isSendMotionEventsEnabled() {
+        return mSendMotionEvents;
     }
 
     @Override

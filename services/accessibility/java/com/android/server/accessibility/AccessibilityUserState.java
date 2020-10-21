@@ -111,6 +111,7 @@ class AccessibilityUserState {
     private boolean mServiceHandlesDoubleTap;
     private boolean mRequestMultiFingerGestures;
     private boolean mRequestTwoFingerPassthrough;
+    private boolean mSendMotionEventsEnabled;
     private int mUserInteractiveUiTimeout;
     private int mUserNonInteractiveUiTimeout;
     private int mNonInteractiveUiTimeout = 0;
@@ -171,6 +172,7 @@ class AccessibilityUserState {
         mServiceHandlesDoubleTap = false;
         mRequestMultiFingerGestures = false;
         mRequestTwoFingerPassthrough = false;
+        mSendMotionEventsEnabled = false;
         mIsDisplayMagnificationEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
@@ -460,6 +462,7 @@ class AccessibilityUserState {
                 .append(String.valueOf(mRequestMultiFingerGestures));
         pw.append(", requestTwoFingerPassthrough=")
                 .append(String.valueOf(mRequestTwoFingerPassthrough));
+        pw.append(", sendMotionEventsEnabled").append(String.valueOf(mSendMotionEventsEnabled));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
                 mIsDisplayMagnificationEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
@@ -802,6 +805,13 @@ class AccessibilityUserState {
         mRequestTwoFingerPassthrough = enabled;
     }
 
+    public boolean isSendMotionEventsEnabled() {
+        return mSendMotionEventsEnabled;
+    }
+
+    public void setSendMotionEventsEnabled(boolean mode) {
+        mSendMotionEventsEnabled = mode;
+    }
 
     public int getUserInteractiveUiTimeoutLocked() {
         return mUserInteractiveUiTimeout;
