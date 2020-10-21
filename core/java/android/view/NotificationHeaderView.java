@@ -55,7 +55,6 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mFeedbackIcon;
-    private boolean mShowWorkBadgeAtEnd;
     private int mHeaderTextMarginEnd;
     private Drawable mBackground;
     private boolean mEntireHeaderClickable;
@@ -288,16 +287,6 @@ public class NotificationHeaderView extends ViewGroup {
         mExpandClickListener = l;
         mExpandButton.setOnClickListener(mExpandClickListener);
         updateTouchListener();
-    }
-
-    /**
-     * Sets whether or not the work badge appears at the end of the NotificationHeaderView.
-     * The expand button will always be closer to the end.
-     */
-    public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
-        if (showWorkBadgeAtEnd != mShowWorkBadgeAtEnd) {
-            mShowWorkBadgeAtEnd = showWorkBadgeAtEnd;
-        }
     }
 
     /**
