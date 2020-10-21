@@ -1376,7 +1376,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, InsetsState requestedVisibility, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
@@ -1691,11 +1690,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(activity);
             }
 
-            if (displayPolicy.getLayoutHint(win.mAttrs, token, outFrame, outContentInsets,
-                    outStableInsets, outDisplayCutout)) {
+            if (displayPolicy.getLayoutHint(win.mAttrs, token, outFrame, outDisplayCutout,
+                    outInsetsState, win.isClientLocal())) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
-            outInsetsState.set(win.getInsetsState(), win.isClientLocal());
 
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
@@ -8245,9 +8243,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean getWindowInsets(WindowManager.LayoutParams attrs,
-            int displayId, Rect outContentInsets, Rect outStableInsets,
+    public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InsetsState outInsetsState) {
+        final boolean fromLocal = Binder.getCallingPid() == myPid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -8257,13 +8255,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "could not be found!");
                 }
                 final WindowToken windowToken = dc.getWindowToken(attrs.token);
-                final InsetsStateController insetsStateController =
-                        dc.getInsetsStateController();
-                outInsetsState.set(insetsStateController.getInsetsForWindowMetrics(attrs));
-
                 return dc.getDisplayPolicy().getLayoutHint(attrs, windowToken,
-                        mTmpRect /* outFrame */, outContentInsets, outStableInsets,
-                        outDisplayCutout);
+                        mTmpRect /* outFrame */, outDisplayCutout, outInsetsState, fromLocal);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

@@ -621,6 +621,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * 1920x1080, and the actually size on the screen is 960x540, then the scale is 0.5.
      */
     private float mSizeCompatScale = 1f;
+
     /**
      * The bounds in global coordinates for activity in size compatibility mode.
      * @see ActivityRecord#hasSizeCompatBounds()
@@ -6491,6 +6492,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && !mAtmService.mForceResizableActivities;
     }
 
+    @Override
     boolean hasSizeCompatBounds() {
         return mSizeCompatBounds != null;
     }

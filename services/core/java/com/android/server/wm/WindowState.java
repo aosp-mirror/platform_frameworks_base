@@ -977,16 +977,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSession.windowAddedLocked(mAttrs.packageName);
     }
 
+    boolean inSizeCompatMode() {
+        return inSizeCompatMode(mAttrs, mActivityRecord);
+    }
+
     /**
      * @return {@code true} if the application runs in size compatibility mode.
      * @see android.content.res.CompatibilityInfo#supportsScreen
-     * @see ActivityRecord#inSizeCompatMode
+     * @see ActivityRecord#inSizeCompatMode()
      */
-    boolean inSizeCompatMode() {
-        return (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
-                || (mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
-                        // Exclude starting window because it is not displayed by the application.
-                        && mAttrs.type != TYPE_APPLICATION_STARTING);
+    static boolean inSizeCompatMode(WindowManager.LayoutParams attrs, WindowToken windowToken) {
+        return (attrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
+                || (windowToken != null && windowToken.hasSizeCompatBounds()
+                // Exclude starting window because it is not displayed by the application.
+                && attrs.type != TYPE_APPLICATION_STARTING);
     }
 
     /**
@@ -1224,14 +1228,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     Math.min(windowFrames.mStableFrame.bottom, windowFrames.mFrame.bottom));
         }
 
-        if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            final WmDisplayCutout c = windowFrames.mDisplayCutout.calculateRelativeTo(
-                    windowFrames.mDisplayFrame);
-            windowFrames.calculateDockedDividerInsets(c.getDisplayCutout().getSafeInsets());
-        } else {
-            windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
-                    getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
-        }
+        windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
+                getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
 
         windowFrames.setDisplayCutout(
                 windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
@@ -1545,7 +1543,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * modification according to the state of transient bars.
      */
     InsetsState getInsetsState() {
-        return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
+        InsetsState state = getDisplayContent().getInsetsPolicy().getInsetsForWindow(this);
+        if (inSizeCompatMode()) {
+            state = new InsetsState(state, true);
+            state.scale(mInvGlobalScale);
+        }
+        return state;
     }
 
     @Override
@@ -3607,11 +3610,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
         outFrames.displayCutout.set(mWindowFrames.mDisplayCutout.getDisplayCutout());
-
-        // TODO(b/149813814): Remove legacy insets.
-        outFrames.contentInsets.set(mWindowFrames.mLastContentInsets);
-        outFrames.visibleInsets.set(mWindowFrames.mLastVisibleInsets);
-        outFrames.stableInsets.set(mWindowFrames.mLastStableInsets);
     }
 
     void reportResized() {
@@ -5644,7 +5642,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * into the state of the control target.
      *
      * @param insetProvider the provider which should not be visible to the client.
-     * @see InsetsStateController#getInsetsForDispatch(WindowState)
+     * @see InsetsStateController#getInsetsForWindow(WindowState)
      */
     void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
         mControllableInsetProvider = insetProvider;

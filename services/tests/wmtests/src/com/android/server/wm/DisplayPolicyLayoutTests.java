@@ -157,6 +157,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayBounds.set(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight);
         mDisplayContent.mDisplayFrames = mFrames;
         mDisplayContent.setBounds(mDisplayBounds);
+        mDisplayContent.getInsetsStateController().getRawInsetsState().setDisplayFrame(
+                mDisplayBounds);
     }
 
     private DisplayFrames createDisplayFrames() {
@@ -339,7 +341,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_fitInsetsIgnoringVisibility() {
         final InsetsState state =
-                mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow);
+                mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow);
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(true);
@@ -359,7 +361,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_fitInsetsNotIgnoringVisibility() {
         final InsetsState state =
-                mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow);
+                mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow);
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(false);
@@ -520,7 +522,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow)
+        mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow)
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
@@ -544,7 +546,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow)
+        mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow)
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
@@ -774,31 +776,30 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutHint_appWindow() {
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0);
 
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
         final Rect outFrame = new Rect();
-        final Rect outContentInsets = new Rect();
-        final Rect outStableInsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
+        final InsetsState outState = new InsetsState();
 
         mDisplayPolicy.getLayoutHint(mWindow.mAttrs, null /* windowToken */, outFrame,
-                outContentInsets, outStableInsets, outDisplayCutout);
+                outDisplayCutout, outState, true /* localClient */);
 
-        assertThat(outFrame, is(mFrames.mUnrestricted));
-        assertThat(outContentInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
-        assertThat(outStableInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
+        assertThat(outFrame, is(outState.getDisplayFrame()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
+        assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
+                is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
+        assertThat(outState.getSource(ITYPE_NAVIGATION_BAR).getFrame(),
+                is(new Rect(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT)));
     }
 
     @Test
     public void layoutHint_appWindowInTask() {
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0);
 
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -809,24 +810,24 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         task.getWindowConfiguration().setBounds(taskBounds);
 
         final Rect outFrame = new Rect();
-        final Rect outContentInsets = new Rect();
-        final Rect outStableInsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
+        final InsetsState outState = new InsetsState();
 
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame,
-                outContentInsets, outStableInsets, outDisplayCutout);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outDisplayCutout,
+                outState, true /* localClient */);
 
         assertThat(outFrame, is(taskBounds));
-        assertThat(outContentInsets, is(new Rect()));
-        assertThat(outStableInsets, is(new Rect()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
+        assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
+                is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
+        assertThat(outState.getSource(ITYPE_NAVIGATION_BAR).getFrame(),
+                is(new Rect(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT)));
     }
 
     @Test
     public void layoutHint_appWindowInTask_outsideContentFrame() {
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0);
 
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -843,18 +844,19 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         task.getWindowConfiguration().setBounds(taskBounds);
 
         final Rect outFrame = new Rect();
-        final Rect outContentInsets = new Rect();
-        final Rect outStableInsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
+        final InsetsState outState = new InsetsState();
 
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outContentInsets,
-                outStableInsets, outDisplayCutout);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outDisplayCutout,
+                outState, true /* localClient */);
 
         assertThat(outFrame, is(taskBounds));
-        assertThat(outContentInsets, is(new Rect()));
-        assertThat(outStableInsets, is(new Rect()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
+        assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
+                is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
+        assertThat(outState.getSource(ITYPE_NAVIGATION_BAR).getFrame(),
+                is(new Rect(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT)));
     }
 
     /**

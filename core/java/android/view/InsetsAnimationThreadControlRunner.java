@@ -20,6 +20,7 @@ import static android.view.InsetsController.DEBUG;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 
 import android.annotation.UiThread;
+import android.content.res.CompatibilityInfo;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Trace;
@@ -102,11 +103,12 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            @AnimationType int animationType, Handler mainThreadHandler) {
+            @AnimationType int animationType, CompatibilityInfo.Translator translator,
+            Handler mainThreadHandler) {
         mMainThreadHandler = mainThreadHandler;
         mOuterCallbacks = controller;
         mControl = new InsetsAnimationControlImpl(controls, frame, state, listener,
-                types, mCallbacks, durationMs, interpolator, animationType);
+                types, mCallbacks, durationMs, interpolator, animationType, translator);
         InsetsAnimationThread.getHandler().post(() -> {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW,
                     "InsetsAsyncAnimation: " + WindowInsets.Type.toString(types), types);
