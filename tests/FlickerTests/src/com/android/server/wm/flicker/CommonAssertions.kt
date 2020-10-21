@@ -77,21 +77,43 @@ fun LayersAssertion.noUncoveredRegions(
 
 @JvmOverloads
 fun LayersAssertion.navBarLayerIsAlwaysVisible(
+    rotatesScreen: Boolean = false,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("navBarLayerIsAlwaysVisible", enabled, bugId) {
-        this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+    if (rotatesScreen) {
+        all("navBarLayerIsAlwaysVisible", enabled, bugId) {
+            this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+                    .then()
+                    .hidesLayer(NAVIGATION_BAR_WINDOW_TITLE)
+                    .then()
+                    .showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+        }
+    } else {
+        all("navBarLayerIsAlwaysVisible", enabled, bugId) {
+            this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+        }
     }
 }
 
 @JvmOverloads
 fun LayersAssertion.statusBarLayerIsAlwaysVisible(
+    rotatesScreen: Boolean = false,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("statusBarLayerIsAlwaysVisible", enabled, bugId) {
-        this.showsLayer(STATUS_BAR_WINDOW_TITLE)
+    if (rotatesScreen) {
+        all("statusBarLayerIsAlwaysVisible", enabled, bugId) {
+            this.showsLayer(STATUS_BAR_WINDOW_TITLE)
+                    .then()
+                    hidesLayer(STATUS_BAR_WINDOW_TITLE)
+                    .then()
+                    .showsLayer(STATUS_BAR_WINDOW_TITLE)
+        }
+    } else {
+        all("statusBarLayerIsAlwaysVisible", enabled, bugId) {
+            this.showsLayer(STATUS_BAR_WINDOW_TITLE)
+        }
     }
 }
 
