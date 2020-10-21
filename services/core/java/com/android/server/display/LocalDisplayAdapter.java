@@ -189,13 +189,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mDefaultModeId;
         private int mDefaultConfigGroup;
         private int mActiveModeId;
-        private boolean mActiveModeInvalid;
         private DisplayModeDirector.DesiredDisplayModeSpecs mDisplayModeSpecs =
                 new DisplayModeDirector.DesiredDisplayModeSpecs();
         private boolean mDisplayModeSpecsInvalid;
         private int mActiveConfigId;
         private int mActiveColorMode;
-        private boolean mActiveColorModeInvalid;
         private Display.HdrCapabilities mHdrCapabilities;
         private boolean mAllmSupported;
         private boolean mGameContentTypeSupported;
@@ -306,7 +304,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             // Schedule traversals to ensure that the correct state is reapplied if necessary.
             if (mActiveModeId != NO_DISPLAY_MODE_ID
                     && mActiveModeId != activeRecord.mMode.getModeId()) {
-                mActiveModeInvalid = true;
                 sendTraversalRequestLocked();
             }
 
@@ -379,7 +376,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             + " mode.");
                 }
                 mActiveModeId = mDefaultModeId;
-                mActiveModeInvalid = true;
             }
 
             // Schedule traversals so that we apply pending changes.
@@ -470,14 +466,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     Slog.w(TAG, "Active color mode no longer available, reverting"
                             + " to default mode.");
                     mActiveColorMode = Display.COLOR_MODE_DEFAULT;
-                    mActiveColorModeInvalid = true;
                 } else {
                     if (!mSupportedColorModes.isEmpty()) {
                         // This should never happen.
                         Slog.e(TAG, "Default and active color mode is no longer available!"
                                 + " Reverting to first available mode.");
                         mActiveColorMode = mSupportedColorModes.get(0);
-                        mActiveColorModeInvalid = true;
                     } else {
                         // This should really never happen.
                         Slog.e(TAG, "No color modes available!");
@@ -854,8 +848,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             mActiveConfigId = activeConfigId;
             mActiveModeId = findMatchingModeIdLocked(activeConfigId);
-            mActiveModeInvalid = mActiveModeId == NO_DISPLAY_MODE_ID;
-            if (mActiveModeInvalid) {
+            if (mActiveModeId == NO_DISPLAY_MODE_ID) {
                 Slog.w(TAG, "In unknown mode after setting allowed configs"
                         + ", activeConfigId=" + mActiveConfigId);
             }
@@ -873,7 +866,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
 
             mActiveColorMode = colorMode;
-            mActiveColorModeInvalid = false;
             getHandler().sendMessage(PooledLambda.obtainMessage(
                     LocalDisplayDevice::requestColorModeAsync, this,
                     getDisplayTokenLocked(), colorMode));

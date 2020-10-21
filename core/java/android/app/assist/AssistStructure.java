@@ -3,7 +3,6 @@ package android.app.assist;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -722,7 +721,6 @@ public class AssistStructure implements Parcelable {
         // COntent Capture.
         /** @hide */
         @SystemApi
-        @TestApi
         public ViewNode() {
         }
 

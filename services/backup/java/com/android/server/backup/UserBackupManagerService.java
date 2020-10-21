@@ -650,7 +650,7 @@ public class UserBackupManagerService {
                         context,
                         /* requestCode */ 0,
                         initIntent,
-                        /* flags */ 0,
+                        /* flags */ PendingIntent.FLAG_IMMUTABLE,
                         UserHandle.of(userId));
 
         // Set up the backup-request journaling

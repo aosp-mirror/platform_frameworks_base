@@ -22,9 +22,9 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -52,13 +52,10 @@ public class PipBoundsHandler {
     private static final String TAG = PipBoundsHandler.class.getSimpleName();
     private static final float INVALID_SNAP_FRACTION = -1f;
 
+    private final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private DisplayLayout mDisplayLayout;
-
-    private ComponentName mLastPipComponentName;
-    private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
-    private Size mReentrySize;
 
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
@@ -75,7 +72,8 @@ public class PipBoundsHandler {
     private boolean mIsShelfShowing;
     private int mShelfHeight;
 
-    public PipBoundsHandler(Context context) {
+    public PipBoundsHandler(Context context, @NonNull PipBoundsState pipBoundsState) {
+        mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = new PipSnapAlgorithm(context);
         mDisplayLayout = new DisplayLayout();
         reloadResources(context);
@@ -175,40 +173,6 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Responds to IPinnedStackListener on saving reentry snap fraction and size
-     * for a given {@link ComponentName}.
-     */
-    public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {
-        mReentrySnapFraction = getSnapFraction(bounds);
-        mReentrySize = new Size(bounds.width(), bounds.height());
-        mLastPipComponentName = componentName;
-    }
-
-    /**
-     * Responds to IPinnedStackListener on resetting reentry snap fraction and size
-     * for a given {@link ComponentName}.
-     */
-    public void onResetReentryBounds(ComponentName componentName) {
-        if (componentName.equals(mLastPipComponentName)) {
-            onResetReentryBoundsUnchecked();
-        }
-    }
-
-    private void onResetReentryBoundsUnchecked() {
-        mReentrySnapFraction = INVALID_SNAP_FRACTION;
-        mReentrySize = null;
-        mLastPipComponentName = null;
-    }
-
-    /**
-     * Returns ture if there's a valid snap fraction. This is used with {@link EXTRA_IS_FIRST_ENTRY}
-     * to see if this is the first time user has entered PIP for the component.
-     */
-    public boolean hasSaveReentryBounds() {
-        return mReentrySnapFraction != INVALID_SNAP_FRACTION;
-    }
-
-    /**
      * The {@link PipSnapAlgorithm} is couple on display bounds
      * @return {@link PipSnapAlgorithm}.
      */
@@ -250,37 +214,43 @@ public class PipBoundsHandler {
     }
 
     /**
-     * See {@link #getDestinationBounds(ComponentName, float, Rect, Size, boolean)}
+     * See {@link #getDestinationBounds(float, Rect, Size, boolean)}
      */
-    public Rect getDestinationBounds(ComponentName componentName, float aspectRatio, Rect bounds,
-            Size minimalSize) {
-        return getDestinationBounds(componentName, aspectRatio, bounds, minimalSize,
+    public Rect getDestinationBounds(float aspectRatio, Rect bounds, Size minimalSize) {
+        return getDestinationBounds(aspectRatio, bounds, minimalSize,
                 false /* useCurrentMinEdgeSize */);
     }
 
     /**
      * @return {@link Rect} of the destination PiP window bounds.
      */
-    public Rect getDestinationBounds(ComponentName componentName, float aspectRatio, Rect bounds,
+    public Rect getDestinationBounds(float aspectRatio, Rect bounds,
             Size minimalSize, boolean useCurrentMinEdgeSize) {
-        if (!componentName.equals(mLastPipComponentName)) {
-            onResetReentryBoundsUnchecked();
-            mLastPipComponentName = componentName;
-        }
+        boolean isReentryBounds = false;
         final Rect destinationBounds;
         if (bounds == null) {
-            final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
-            destinationBounds = new Rect(defaultBounds);
-            if (mReentrySnapFraction == INVALID_SNAP_FRACTION && mReentrySize == null) {
+            // Calculating initial entry bounds
+            final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
+
+            final Rect defaultBounds;
+            if (state != null) {
+                // Restore to reentry bounds.
+                defaultBounds = getDefaultBounds(state.getSnapFraction(), state.getSize());
+                isReentryBounds = true;
+            } else {
+                // Get actual default bounds.
+                defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
                 mOverrideMinimalSize = minimalSize;
             }
+
+            destinationBounds = new Rect(defaultBounds);
         } else {
+            // Just adjusting bounds (e.g. on aspect ratio changed).
             destinationBounds = new Rect(bounds);
         }
         if (isValidPictureInPictureAspectRatio(aspectRatio)) {
-            boolean useCurrentSize = bounds == null && mReentrySize != null;
             transformBoundsToAspectRatio(destinationBounds, aspectRatio, useCurrentMinEdgeSize,
-                    useCurrentSize);
+                    isReentryBounds);
         }
         mAspectRatio = aspectRatio;
         return destinationBounds;
@@ -533,9 +503,6 @@ public class PipBoundsHandler {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
-        pw.println(innerPrefix + "mReentrySnapFraction=" + mReentrySnapFraction);
-        pw.println(innerPrefix + "mReentrySize=" + mReentrySize);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
         pw.println(innerPrefix + "mDefaultAspectRatio=" + mDefaultAspectRatio);
         pw.println(innerPrefix + "mMinAspectRatio=" + mMinAspectRatio);

@@ -20,7 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import android.app.Presentation;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
@@ -127,7 +127,7 @@ public class KeyguardDisplayManager {
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
             final Presentation newPresentation = new KeyguardPresentation(mContext, display,
-                    mKeyguardStatusViewComponentFactory, LayoutInflater.from(mContext));
+                    mKeyguardStatusViewComponentFactory);
             newPresentation.setOnDismissListener(dialog -> {
                 if (newPresentation.equals(mPresentations.get(displayId))) {
                     mPresentations.remove(displayId);
@@ -245,7 +245,6 @@ public class KeyguardDisplayManager {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
         private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-        private final LayoutInflater mLayoutInflater;
         private KeyguardClockSwitchController mKeyguardClockSwitchController;
         private View mClock;
         private int mUsableWidth;
@@ -264,18 +263,16 @@ public class KeyguardDisplayManager {
         };
 
         KeyguardPresentation(Context context, Display display,
-                KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
-                LayoutInflater layoutInflater) {
-            super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
+                KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
+            super(context, display, R.style.Theme_SystemUI_KeyguardPresentation,
+                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
-            mLayoutInflater = layoutInflater;
-            getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
         }
 
         @Override
         public void cancel() {
-            // Do not allow anything to cancel KeyguardPresetation except KeyguardDisplayManager.
+            // Do not allow anything to cancel KeyguardPresentation except KeyguardDisplayManager.
         }
 
         @Override
@@ -287,14 +284,15 @@ public class KeyguardDisplayManager {
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            Point p = new Point();
-            getDisplay().getSize(p);
-            mUsableWidth = VIDEO_SAFE_REGION * p.x/100;
-            mUsableHeight = VIDEO_SAFE_REGION * p.y/100;
-            mMarginLeft = (100 - VIDEO_SAFE_REGION) * p.x / 200;
-            mMarginTop = (100 - VIDEO_SAFE_REGION) * p.y / 200;
+            final Rect bounds = getWindow().getWindowManager().getMaximumWindowMetrics()
+                    .getBounds();
+            mUsableWidth = VIDEO_SAFE_REGION * bounds.width() / 100;
+            mUsableHeight = VIDEO_SAFE_REGION * bounds.height() / 100;
+            mMarginLeft = (100 - VIDEO_SAFE_REGION) * bounds.width() / 200;
+            mMarginTop = (100 - VIDEO_SAFE_REGION) * bounds.height() / 200;
 
-            setContentView(mLayoutInflater.inflate(R.layout.keyguard_presentation, null));
+            setContentView(LayoutInflater.from(getContext())
+                    .inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen
             getWindow().getDecorView().setSystemUiVisibility(

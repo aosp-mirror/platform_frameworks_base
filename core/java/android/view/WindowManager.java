@@ -224,12 +224,6 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_ACTIVITY_RELAUNCH = 18;
 
     /**
-     * A task is being docked from recents.
-     * @hide
-     */
-    int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
-
-    /**
      * Keyguard is going away.
      * @hide
      */
@@ -302,7 +296,6 @@ public interface WindowManager extends ViewManager {
             TRANSIT_WALLPAPER_INTRA_CLOSE,
             TRANSIT_TASK_OPEN_BEHIND,
             TRANSIT_ACTIVITY_RELAUNCH,
-            TRANSIT_DOCK_TASK_FROM_RECENTS,
             TRANSIT_KEYGUARD_GOING_AWAY,
             TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
             TRANSIT_KEYGUARD_OCCLUDE,

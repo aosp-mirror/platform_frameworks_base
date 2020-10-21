@@ -21,7 +21,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
@@ -41,7 +40,6 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
-@TestApi
 public abstract class MusicRecognitionService extends Service {
 
     private static final String TAG = MusicRecognitionService.class.getSimpleName();

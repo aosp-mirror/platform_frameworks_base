@@ -353,11 +353,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
             mPrivacyChip.setExpanded(expansionFraction > 0.5);
             mPrivacyChipAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
-        if (expansionFraction < 1 && expansionFraction > 0.99) {
-            if (mHeaderQsPanel.switchTileLayout()) {
-                updateResources();
-            }
-        }
+
         mKeyguardExpansionFraction = keyguardExpansionFraction;
     }
 
@@ -446,7 +442,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     public void setQSPanel(final QSPanel qsPanel) {
         //host.setHeaderView(mExpandIndicator);
         mHeaderQsPanel.setQSPanelAndHeader(qsPanel, this);
-        mHeaderQsPanel.setHost(qsPanel.getHost(), null /* No customization in header */);
 
         Rect tintArea = new Rect(0, 0, 0, 0);
         int colorForeground = Utils.getColorAttrDefaultColor(getContext(),

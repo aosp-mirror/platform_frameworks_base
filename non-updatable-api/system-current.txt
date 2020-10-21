@@ -5150,12 +5150,45 @@ package android.media.tv.tuner.filter {
 
   public class AvSettings extends android.media.tv.tuner.filter.Settings {
     method @NonNull public static android.media.tv.tuner.filter.AvSettings.Builder builder(int, boolean);
+    method public int getAudioStreamType();
+    method public int getVideoStreamType();
     method public boolean isPassthrough();
+    field public static final int AUDIO_STREAM_TYPE_AAC = 6; // 0x6
+    field public static final int AUDIO_STREAM_TYPE_AC3 = 7; // 0x7
+    field public static final int AUDIO_STREAM_TYPE_AC4 = 9; // 0x9
+    field public static final int AUDIO_STREAM_TYPE_DRA = 15; // 0xf
+    field public static final int AUDIO_STREAM_TYPE_DTS = 10; // 0xa
+    field public static final int AUDIO_STREAM_TYPE_DTS_HD = 11; // 0xb
+    field public static final int AUDIO_STREAM_TYPE_EAC3 = 8; // 0x8
+    field public static final int AUDIO_STREAM_TYPE_MP3 = 2; // 0x2
+    field public static final int AUDIO_STREAM_TYPE_MPEG1 = 3; // 0x3
+    field public static final int AUDIO_STREAM_TYPE_MPEG2 = 4; // 0x4
+    field public static final int AUDIO_STREAM_TYPE_MPEGH = 5; // 0x5
+    field public static final int AUDIO_STREAM_TYPE_OPUS = 13; // 0xd
+    field public static final int AUDIO_STREAM_TYPE_PCM = 1; // 0x1
+    field public static final int AUDIO_STREAM_TYPE_UNDEFINED = 0; // 0x0
+    field public static final int AUDIO_STREAM_TYPE_VORBIS = 14; // 0xe
+    field public static final int AUDIO_STREAM_TYPE_WMA = 12; // 0xc
+    field public static final int VIDEO_STREAM_TYPE_AV1 = 10; // 0xa
+    field public static final int VIDEO_STREAM_TYPE_AVC = 5; // 0x5
+    field public static final int VIDEO_STREAM_TYPE_AVS = 11; // 0xb
+    field public static final int VIDEO_STREAM_TYPE_AVS2 = 12; // 0xc
+    field public static final int VIDEO_STREAM_TYPE_HEVC = 6; // 0x6
+    field public static final int VIDEO_STREAM_TYPE_MPEG1 = 2; // 0x2
+    field public static final int VIDEO_STREAM_TYPE_MPEG2 = 3; // 0x3
+    field public static final int VIDEO_STREAM_TYPE_MPEG4P2 = 4; // 0x4
+    field public static final int VIDEO_STREAM_TYPE_RESERVED = 1; // 0x1
+    field public static final int VIDEO_STREAM_TYPE_UNDEFINED = 0; // 0x0
+    field public static final int VIDEO_STREAM_TYPE_VC1 = 7; // 0x7
+    field public static final int VIDEO_STREAM_TYPE_VP8 = 8; // 0x8
+    field public static final int VIDEO_STREAM_TYPE_VP9 = 9; // 0x9
   }
 
   public static class AvSettings.Builder {
     method @NonNull public android.media.tv.tuner.filter.AvSettings build();
+    method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setAudioStreamType(int);
     method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setPassthrough(boolean);
+    method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setVideoStreamType(int);
   }
 
   public class DownloadEvent extends android.media.tv.tuner.filter.FilterEvent {
@@ -6249,7 +6282,9 @@ package android.media.tv.tuner.frontend {
     method public void onHierarchyReported(int);
     method public void onInputStreamIdsReported(@NonNull int[]);
     method public void onLocked();
+    method public default void onModulationReported(int);
     method public void onPlpIdsReported(@NonNull int[]);
+    method public default void onPriorityReported(boolean);
     method public void onProgress(@IntRange(from=0, to=100) int);
     method public void onScanStopped();
     method public void onSignalTypeReported(int);

@@ -29,8 +29,8 @@ import java.util.function.Consumer;
  * callbacks registered within the window.
  * <p>
  * A callback is assigned to a View using {@link View#setScrollCaptureCallback}, or to the window as
- * {@link Window#addScrollCaptureCallback}. The point where the callback is registered defines the
- * frame of reference for the bounds measurements used.
+ * {@link Window#registerScrollCaptureCallback}. The point where the callback is registered defines
+ * the frame of reference for the bounds measurements used.
  * <p>
  * <b>Terminology</b>
  * <dl>
@@ -39,9 +39,9 @@ import java.util.function.Consumer;
  * is assigned  directly to a window.</dd>
  *
  * <dt>Scroll Bounds</dt>
- * <dd>A rectangle which describes an area within the containing view where scrolling content may
- * be positioned. This may be the Containing View bounds itself, or any rectangle within.
- * Requested by {@link #onScrollCaptureSearch}.</dd>
+ * <dd>A rectangle which describes an area within the containing view where scrolling content
+ * appears. This may be the entire view or any rectangle within. This defines a frame of reference
+ * for requests as well as the width and maximum height of a single request.</dd>
  *
  * <dt>Scroll Delta</dt>
  * <dd>The distance the scroll position has moved since capture started. Implementations are
@@ -57,7 +57,7 @@ import java.util.function.Consumer;
  *
  * @see View#setScrollCaptureHint(int)
  * @see View#setScrollCaptureCallback(ScrollCaptureCallback)
- * @see Window#addScrollCaptureCallback(ScrollCaptureCallback)
+ * @see Window#registerScrollCaptureCallback(ScrollCaptureCallback)
  *
  * @hide
  */

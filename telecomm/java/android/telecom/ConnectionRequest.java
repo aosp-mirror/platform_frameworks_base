@@ -327,7 +327,6 @@ public final class ConnectionRequest implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @Nullable String getTelecomCallId() {
         return mTelecomCallId;
     }

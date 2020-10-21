@@ -44,6 +44,7 @@ import com.android.systemui.privacy.PrivacyChipEvent;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
+import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -64,6 +65,7 @@ import javax.inject.Inject;
 /**
  * Controller for {@link QuickStatusBarHeader}.
  */
+@QSScope
 class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader> {
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -74,7 +76,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final QSCarrierGroupController mQSCarrierGroupController;
-    private final QuickQSPanel mHeaderQsPanel;
+    private final QuickQSPanelController mHeaderQsPanelController;
     private final LifecycleRegistry mLifecycle;
     private final OngoingPrivacyChip mPrivacyChip;
     private final Clock mClockView;
@@ -203,13 +205,14 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
     };
 
-    private QuickStatusBarHeaderController(QuickStatusBarHeader view,
+    @Inject
+    QuickStatusBarHeaderController(QuickStatusBarHeader view,
             ZenModeController zenModeController, NextAlarmController nextAlarmController,
             PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
             ActivityStarter activityStarter, UiEventLogger uiEventLogger,
             QSTileHost qsTileHost, StatusBarIconController statusBarIconController,
             CommandQueue commandQueue, DemoModeController demoModeController,
-            UserTracker userTracker,
+            UserTracker userTracker, QuickQSPanelController quickQSPanelController,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
         super(view);
         mZenModeController = zenModeController;
@@ -224,6 +227,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mDemoModeController = demoModeController;
         mUserTracker = userTracker;
         mLifecycle = new LifecycleRegistry(mLifecycleOwner);
+        mHeaderQsPanelController = quickQSPanelController;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
@@ -231,7 +235,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
 
         mPrivacyChip = mView.findViewById(R.id.privacy_chip);
-        mHeaderQsPanel = mView.findViewById(R.id.quick_qs_panel);
         mNextAlarmContainer = mView.findViewById(R.id.alarm_container);
         mClockView = mView.findViewById(R.id.clock);
         mRingerContainer = mView.findViewById(R.id.ringer_container);
@@ -290,8 +293,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
         mListening = listening;
 
-        mHeaderQsPanel.setListening(listening);
-        if (mHeaderQsPanel.switchTileLayout()) {
+        mHeaderQsPanelController.setListening(listening);
+        if (mHeaderQsPanelController.isListening()) {
+            mHeaderQsPanelController.refreshAllTiles();
+        }
+
+        if (mHeaderQsPanelController.switchTileLayout(false)) {
             mView.updateResources();
         }
 
@@ -378,57 +385,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         @Override
         public void onDemoModeFinished() {
             mClockView.onDemoModeFinished();
-        }
-    }
-
-    static class Builder {
-        private final ZenModeController mZenModeController;
-        private final NextAlarmController mNextAlarmController;
-        private final PrivacyItemController mPrivacyItemController;
-        private final RingerModeTracker mRingerModeTracker;
-        private final ActivityStarter mActivityStarter;
-        private final UiEventLogger mUiEventLogger;
-        private final QSTileHost mQsTileHost;
-        private final StatusBarIconController mStatusBarIconController;
-        private final CommandQueue mCommandQueue;
-        private final DemoModeController mDemoModeController;
-        private final UserTracker mUserTracker;
-        private final QSCarrierGroupController.Builder mQSCarrierGroupControllerBuilder;
-        private QuickStatusBarHeader mView;
-
-        @Inject
-        Builder(ZenModeController zenModeController, NextAlarmController nextAlarmController,
-                PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
-                ActivityStarter activityStarter, UiEventLogger uiEventLogger, QSTileHost qsTileHost,
-                StatusBarIconController statusBarIconController, CommandQueue commandQueue,
-                DemoModeController demoModeController, UserTracker userTracker,
-                QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
-            mZenModeController = zenModeController;
-            mNextAlarmController = nextAlarmController;
-            mPrivacyItemController = privacyItemController;
-            mRingerModeTracker = ringerModeTracker;
-            mActivityStarter = activityStarter;
-            mUiEventLogger = uiEventLogger;
-            mQsTileHost = qsTileHost;
-            mStatusBarIconController = statusBarIconController;
-            mCommandQueue = commandQueue;
-            mDemoModeController = demoModeController;
-            mUserTracker = userTracker;
-            mQSCarrierGroupControllerBuilder = qsCarrierGroupControllerBuilder;
-        }
-
-        public Builder setQuickStatusBarHeader(QuickStatusBarHeader view) {
-            mView = view;
-            return this;
-        }
-
-
-        QuickStatusBarHeaderController build() {
-            return new QuickStatusBarHeaderController(mView, mZenModeController,
-                    mNextAlarmController, mPrivacyItemController, mRingerModeTracker,
-                    mActivityStarter, mUiEventLogger, mQsTileHost, mStatusBarIconController,
-                    mCommandQueue, mDemoModeController, mUserTracker,
-                    mQSCarrierGroupControllerBuilder);
         }
     }
 }

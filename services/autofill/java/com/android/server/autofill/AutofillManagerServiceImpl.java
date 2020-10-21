@@ -1055,7 +1055,7 @@ final class AutofillManagerServiceImpl
             pw.println(compatPkgs);
         }
         pw.print(prefix); pw.print("Inline Suggestions Enabled: ");
-        pw.println(isInlineSuggestionsEnabled());
+        pw.println(isInlineSuggestionsEnabledLocked());
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
         mDisabledInfoCache.dump(mUserId, prefix, pw);
@@ -1168,7 +1168,7 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    boolean isInlineSuggestionsEnabled() {
+    boolean isInlineSuggestionsEnabledLocked() {
         if (mInfo != null) {
             return mInfo.isInlineSuggestionsEnabled();
         }

@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
+import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -67,6 +68,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
+import com.android.wm.shell.pip.phone.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
@@ -280,7 +282,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitScreenOptional = splitScreenOptional;
         mTaskOrganizer = shellTaskOrganizer;
-        mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_PIP);
+        mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
         displayController.addDisplayWindowListener(this);
     }
 
@@ -329,7 +331,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             PictureInPictureParams pictureInPictureParams) {
         mShouldIgnoreEnteringPipTransition = true;
         mState = State.ENTERING_PIP;
-        return mPipBoundsHandler.getDestinationBounds(componentName,
+        mPipBoundsState.setLastPipComponentName(componentName);
+        return mPipBoundsHandler.getDestinationBounds(
                 getAspectRatioOrDefault(pictureInPictureParams),
                 null /* bounds */, getMinimalSize(activityInfo));
     }
@@ -400,9 +403,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 @Override
                 public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                     t.apply();
-                    scheduleAnimateResizePip(mPipBoundsState.getBounds(),
-                            destinationBounds, getValidSourceHintRect(mTaskInfo, destinationBounds),
-                            direction, animationDurationMs, null /* updateBoundsCallback */);
+                    // Make sure to grab the latest source hint rect as it could have been updated
+                    // right after applying the windowing mode change.
+                    final Rect sourceHintRect = getValidSourceHintRect(mPictureInPictureParams,
+                            destinationBounds);
+                    scheduleAnimateResizePip(mPipBoundsState.getBounds(), destinationBounds,
+                            sourceHintRect, direction, animationDurationMs,
+                            null /* updateBoundsCallback */);
                     mState = State.EXITING_PIP;
                 }
             });
@@ -465,6 +472,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mLeash = leash;
         mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
+        mPipBoundsState.setLastPipComponentName(mTaskInfo.topActivity);
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
         mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
@@ -491,13 +499,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                mTaskInfo.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
+                getAspectRatioOrDefault(mPictureInPictureParams),
                 null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-            final Rect sourceHintRect = getValidSourceHintRect(info, currentBounds);
+            final Rect sourceHintRect = getValidSourceHintRect(info.pictureInPictureParams,
+                    currentBounds);
             scheduleAnimateResizePip(currentBounds, destinationBounds, sourceHintRect,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
                     null /* updateBoundsCallback */);
@@ -514,10 +523,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Returns the source hint rect if it is valid (if provided and is contained by the current
      * task bounds).
      */
-    private Rect getValidSourceHintRect(ActivityManager.RunningTaskInfo info, Rect sourceBounds) {
-        final Rect sourceHintRect = info.pictureInPictureParams != null
-                && info.pictureInPictureParams.hasSourceBoundsHint()
-                ? info.pictureInPictureParams.getSourceRectHint()
+    private Rect getValidSourceHintRect(PictureInPictureParams params, Rect sourceBounds) {
+        final Rect sourceHintRect = params != null
+                && params.hasSourceBoundsHint()
+                ? params.getSourceRectHint()
                 : null;
         if (sourceHintRect != null && sourceBounds.contains(sourceHintRect)) {
             return sourceHintRect;
@@ -686,13 +695,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
+        mPipBoundsState.setLastPipComponentName(info.topActivity);
         final PictureInPictureParams newParams = info.pictureInPictureParams;
         if (newParams == null || !applyPictureInPictureParams(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
             return;
         }
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                info.topActivity, getAspectRatioOrDefault(newParams),
+                getAspectRatioOrDefault(newParams),
                 mPipBoundsState.getBounds(), getMinimalSize(info.topActivityInfo),
                 true /* userCurrentMinEdgeSize */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
@@ -709,7 +719,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void onFixedRotationFinished(int displayId) {
         if (mShouldDeferEnteringPip && mState.isInPip()) {
             final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    mTaskInfo.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
+                    getAspectRatioOrDefault(mPictureInPictureParams),
                     null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
             // schedule a regular animation to ensure all the callbacks are still being sent
             enterPipWithAlphaAnimation(destinationBounds, 0 /* durationMs */);
@@ -783,7 +793,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
-                mTaskInfo.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
+                getAspectRatioOrDefault(mPictureInPictureParams),
                 null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
         if (newDestinationBounds.equals(currentDestinationBounds)) return;
         if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
@@ -1123,6 +1133,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /**
      * Dumps internal states.
      */
+    @Override
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
@@ -1138,6 +1149,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             pw.println(innerPrefix + "  binder=" + e.getKey()
                     + " winConfig=" + e.getValue().windowConfiguration);
         }
+    }
+
+    @Override
+    public String toString() {
+        return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_PIP);
     }
 
     /**

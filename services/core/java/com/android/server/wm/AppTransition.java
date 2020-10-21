@@ -21,7 +21,6 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -92,7 +91,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -134,7 +132,6 @@ import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.AttributeCache;
 import com.android.server.wm.animation.ClipRectLRAnimation;
 import com.android.server.wm.animation.ClipRectTBAnimation;
-import com.android.server.wm.animation.CurvedTranslateAnimation;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -160,9 +157,6 @@ public class AppTransition implements Dump {
     /** Interpolator to be used for animations that respond directly to a touch */
     static final Interpolator TOUCH_RESPONSE_INTERPOLATOR =
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
-
-    private static final Interpolator THUMBNAIL_DOCK_INTERPOLATOR =
-            new PathInterpolator(0.85f, 0f, 1f, 1f);
 
     /**
      * Maximum duration for the clip reveal animation. This is used when there is a lot of movement
@@ -1127,11 +1121,8 @@ public class AppTransition implements Dump {
             scale.setInterpolator(interpolator);
             scale.setDuration(duration);
             Animation alpha = new AlphaAnimation(1f, 0f);
-            alpha.setInterpolator(mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
-                    ? THUMBNAIL_DOCK_INTERPOLATOR : mThumbnailFadeOutInterpolator);
-            alpha.setDuration(mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
-                    ? duration / 2
-                    : duration);
+            alpha.setInterpolator(mThumbnailFadeOutInterpolator);
+            alpha.setDuration(duration);
             Animation translate = createCurvedMotion(fromX, toX, fromY, toY);
             translate.setInterpolator(interpolator);
             translate.setDuration(duration);
@@ -1194,44 +1185,15 @@ public class AppTransition implements Dump {
     }
 
     private Animation createCurvedMotion(float fromX, float toX, float fromY, float toY) {
-
-        // Almost no x-change - use linear animation
-        if (Math.abs(toX - fromX) < 1f || mNextAppTransition != TRANSIT_DOCK_TASK_FROM_RECENTS) {
-            return new TranslateAnimation(fromX, toX, fromY, toY);
-        } else {
-            final Path path = createCurvedPath(fromX, toX, fromY, toY);
-            return new CurvedTranslateAnimation(path);
-        }
-    }
-
-    private Path createCurvedPath(float fromX, float toX, float fromY, float toY) {
-        final Path path = new Path();
-        path.moveTo(fromX, fromY);
-
-        if (fromY > toY) {
-            // If the object needs to go up, move it in horizontal direction first, then vertical.
-            path.cubicTo(fromX, fromY, toX, 0.9f * fromY + 0.1f * toY, toX, toY);
-        } else {
-            // If the object needs to go down, move it in vertical direction first, then horizontal.
-            path.cubicTo(fromX, fromY, fromX, 0.1f * fromY + 0.9f * toY, toX, toY);
-        }
-        return path;
+        return new TranslateAnimation(fromX, toX, fromY, toY);
     }
 
     private long getAspectScaleDuration() {
-        if (mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS) {
-            return (long) (THUMBNAIL_APP_TRANSITION_DURATION * 1.35f);
-        } else {
-            return THUMBNAIL_APP_TRANSITION_DURATION;
-        }
+        return THUMBNAIL_APP_TRANSITION_DURATION;
     }
 
     private Interpolator getAspectScaleInterpolator() {
-        if (mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS) {
-            return mFastOutSlowInInterpolator;
-        } else {
-            return TOUCH_RESPONSE_INTERPOLATOR;
-        }
+        return TOUCH_RESPONSE_INTERPOLATOR;
     }
 
     /**
@@ -1734,7 +1696,6 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
                     break;
-                case TRANSIT_DOCK_TASK_FROM_RECENTS:
                 case TRANSIT_TASK_OPEN:
                     animAttr = enter
                             ? WindowAnimation_taskOpenEnterAnimation
@@ -1805,7 +1766,6 @@ public class AppTransition implements Dump {
 
     int getAppStackClipMode() {
         return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
-                || mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
                 || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
                 || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY
                 || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER
@@ -2058,9 +2018,6 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_ACTIVITY_RELAUNCH: {
                 return "TRANSIT_ACTIVITY_RELAUNCH";
-            }
-            case TRANSIT_DOCK_TASK_FROM_RECENTS: {
-                return "TRANSIT_DOCK_TASK_FROM_RECENTS";
             }
             case TRANSIT_KEYGUARD_GOING_AWAY: {
                 return "TRANSIT_KEYGUARD_GOING_AWAY";

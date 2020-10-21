@@ -18,8 +18,7 @@ package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -30,6 +29,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.WindowContext;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -48,6 +48,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.hardware.display.DisplayManager;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Handler;
@@ -84,7 +85,6 @@ import android.widget.Toast;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.util.ArrayList;
@@ -245,12 +245,20 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     };
 
     @Inject
-    public GlobalScreenshot(
-            Context context, @Main Resources resources,
+    public GlobalScreenshot(Context context,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController screenshotNotificationsController,
             UiEventLogger uiEventLogger) {
-        mContext = context;
+
+        // Create a visual (Window) context
+        // After this, our windowToken is available from mContext.getActivityToken()
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        mDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+        Context displayContext = context.createDisplayContext(mDisplay);
+        mContext = new WindowContext(
+                displayContext, WindowManager.LayoutParams.TYPE_SCREENSHOT, null);
+        mWindowManager = mContext.getSystemService(WindowManager.class);
+
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mUiEventLogger = uiEventLogger;
@@ -274,13 +282,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
-        mWindowLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mWindowLayoutParams.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mWindowLayoutParams.setFitInsetsTypes(0 /* types */);
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mDisplay = mWindowManager.getDefaultDisplay();
         mDisplayMetrics = new DisplayMetrics();
         mDisplay.getRealMetrics(mDisplayMetrics);
 
+        final Resources resources = mContext.getResources();
         mCornerSizeX = resources.getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
         mDismissDeltaY = resources.getDimensionPixelSize(R.dimen.screenshot_dismissal_height_delta);
 
@@ -1117,9 +1125,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     private void setWindowFocusable(boolean focusable) {
         if (focusable) {
-            mWindowLayoutParams.flags &= ~FLAG_NOT_FOCUSABLE;
+            mWindowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         } else {
-            mWindowLayoutParams.flags |= FLAG_NOT_FOCUSABLE;
+            mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         }
         if (mScreenshotLayout.isAttachedToWindow()) {
             mWindowManager.updateViewLayout(mScreenshotLayout, mWindowLayoutParams);

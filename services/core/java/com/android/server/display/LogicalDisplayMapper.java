@@ -167,7 +167,31 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
     }
 
-    public void setDeviceFoldedLocked(boolean isFolded) {
+    public void dumpLocked(PrintWriter pw) {
+        pw.println("LogicalDisplayMapper:");
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.increaseIndent();
+
+        ipw.println("mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
+        ipw.println("mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
+
+        final int logicalDisplayCount = mLogicalDisplays.size();
+        ipw.println();
+        ipw.println("Logical Displays: size=" + logicalDisplayCount);
+
+
+        for (int i = 0; i < logicalDisplayCount; i++) {
+            int displayId = mLogicalDisplays.keyAt(i);
+            LogicalDisplay display = mLogicalDisplays.valueAt(i);
+            ipw.println("Display " + displayId + ":");
+            ipw.increaseIndent();
+            display.dumpLocked(ipw);
+            ipw.decreaseIndent();
+            ipw.println();
+        }
+    }
+
+    void setDeviceFoldedLocked(boolean isFolded) {
         mIsFolded = isFolded;
         if (mIsFoldedOverride != null) {
             isFolded = mIsFoldedOverride.booleanValue();
@@ -234,30 +258,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         if (DEBUG) {
             Slog.d(TAG, "Folded displays: isFolded: " + isFolded + ", defaultDisplay? "
                     + defaultDisplay.getDisplayInfoLocked());
-        }
-    }
-
-    public void dumpLocked(PrintWriter pw) {
-        pw.println("LogicalDisplayMapper:");
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-        ipw.increaseIndent();
-
-        ipw.println("mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
-        ipw.println("mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
-
-        final int logicalDisplayCount = mLogicalDisplays.size();
-        ipw.println();
-        ipw.println("Logical Displays: size=" + logicalDisplayCount);
-
-
-        for (int i = 0; i < logicalDisplayCount; i++) {
-            int displayId = mLogicalDisplays.keyAt(i);
-            LogicalDisplay display = mLogicalDisplays.valueAt(i);
-            ipw.println("Display " + displayId + ":");
-            ipw.increaseIndent();
-            display.dumpLocked(ipw);
-            ipw.decreaseIndent();
-            ipw.println();
         }
     }
 

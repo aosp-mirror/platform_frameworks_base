@@ -28,12 +28,17 @@ import com.android.systemui.qs.QSHost.Callback;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
+import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.inject.Inject;
+
+/** */
+@QSScope
 public class QSAnimator implements Callback, PageListener, Listener, OnLayoutChangeListener,
         OnAttachStateChangeListener, Tunable {
 
@@ -53,6 +58,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final ArrayList<View> mQuickQsViews = new ArrayList<>();
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanel mQsPanel;
+    private final QSPanelController mQsPanelController;
+    private final QuickQSPanelController mQuickQSPanelController;
+    private final QSSecurityFooter mSecurityFooter;
     private final QS mQs;
 
     private PagedTileLayout mPagedLayout;
@@ -78,10 +86,19 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private QSTileHost mHost;
     private boolean mShowCollapsedOnKeyguard;
 
-    public QSAnimator(QS qs, QuickQSPanel quickPanel, QSPanel panel) {
+    @Inject
+    public QSAnimator(QS qs, QuickQSPanel quickPanel, QSPanel panel,
+            QSPanelController qsPanelController, QuickQSPanelController quickQSPanelController,
+            QSTileHost qsTileHost,
+            QSSecurityFooter securityFooter) {
         mQs = qs;
         mQuickQsPanel = quickPanel;
         mQsPanel = panel;
+        mQsPanelController = qsPanelController;
+        mQuickQSPanelController = quickQSPanelController;
+        mSecurityFooter = securityFooter;
+        mHost = qsTileHost;
+        mHost.addCallback(this);
         mQsPanel.addOnAttachStateChangeListener(this);
         qs.getView().addOnLayoutChangeListener(this);
         if (mQsPanel.isAttachedToWindow()) {
@@ -134,12 +151,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 && !mShowCollapsedOnKeyguard ? View.INVISIBLE : View.VISIBLE);
     }
 
-    public void setHost(QSTileHost qsh) {
-        mHost = qsh;
-        qsh.addCallback(this);
-        updateAnimators();
-    }
-
     @Override
     public void onViewAttachedToWindow(View v) {
         Dependency.get(TunerService.class).addTunable(this, ALLOW_FANCY_ANIMATION,
@@ -148,9 +159,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onViewDetachedFromWindow(View v) {
-        if (mHost != null) {
-            mHost.removeCallback(this);
-        }
+        mHost.removeCallback(this);
         Dependency.get(TunerService.class).removeTunable(this);
     }
 
@@ -185,8 +194,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder translationXBuilder = new Builder();
         TouchAnimator.Builder translationYBuilder = new Builder();
 
-        if (mQsPanel.getHost() == null) return;
-        Collection<QSTile> tiles = mQsPanel.getHost().getTiles();
+        Collection<QSTile> tiles = mHost.getTiles();
         int count = 0;
         int[] loc1 = new int[2];
         int[] loc2 = new int[2];
@@ -206,7 +214,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         firstPageBuilder.addFloat(tileLayout, "translationY", heightDiff, 0);
 
         for (QSTile tile : tiles) {
-            QSTileView tileView = mQsPanel.getTileView(tile);
+            QSTileView tileView = mQsPanelController.getTileView(tile);
             if (tileView == null) {
                 Log.e(TAG, "tileView is null " + tile.getTileSpec());
                 continue;
@@ -217,7 +225,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // This case: less tiles to animate in small displays.
             if (count < mQuickQsPanel.getTileLayout().getNumVisibleTiles() && mAllowFancy) {
                 // Quick tiles.
-                QSTileView quickTileView = mQuickQsPanel.getTileView(tile);
+                QSTileView quickTileView = mQuickQSPanelController.getTileView(tile);
                 if (quickTileView == null) continue;
 
                 lastX = loc1[0];
@@ -302,16 +310,12 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
             // Fade in the security footer and the divider as we reach the final position
             builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
-            if (mQsPanel.getSecurityFooter() != null) {
-                builder.addFloat(mQsPanel.getSecurityFooter().getView(), "alpha", 0, 1);
-            }
+            builder.addFloat(mSecurityFooter.getView(), "alpha", 0, 1);
             if (mQsPanel.getDivider() != null) {
                 builder.addFloat(mQsPanel.getDivider(), "alpha", 0, 1);
             }
             mAllPagesDelayedAnimator = builder.build();
-            if (mQsPanel.getSecurityFooter() != null) {
-                mAllViews.add(mQsPanel.getSecurityFooter().getView());
-            }
+            mAllViews.add(mSecurityFooter.getView());
             if (mQsPanel.getDivider() != null) {
                 mAllViews.add(mQsPanel.getDivider());
             }

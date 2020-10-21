@@ -172,14 +172,26 @@ public interface BiometricConstants {
             BIOMETRIC_ERROR_NEGATIVE_BUTTON,
             BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
-            BIOMETRIC_PAUSED_REJECTED,
-            BIOMETRIC_ERROR_VENDOR_BASE})
+            BIOMETRIC_PAUSED_REJECTED})
     @Retention(RetentionPolicy.SOURCE)
     @interface Errors {}
 
     //
     // Image acquisition messages.
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({BIOMETRIC_ACQUIRED_GOOD,
+            BIOMETRIC_ACQUIRED_PARTIAL,
+            BIOMETRIC_ACQUIRED_INSUFFICIENT,
+            BIOMETRIC_ACQUIRED_IMAGER_DIRTY,
+            BIOMETRIC_ACQUIRED_TOO_SLOW,
+            BIOMETRIC_ACQUIRED_TOO_FAST,
+            BIOMETRIC_ACQUIRED_VENDOR})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Acquired {}
 
     /**
      * The image acquired was good.

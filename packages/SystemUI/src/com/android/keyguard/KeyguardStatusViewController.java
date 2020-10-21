@@ -267,6 +267,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onLockScreenModeChanged(int mode) {
             mKeyguardClockSwitchController.updateLockScreenMode(mode);
+            mKeyguardSliceViewController.updateLockScreenMode(mode);
         }
 
         @Override

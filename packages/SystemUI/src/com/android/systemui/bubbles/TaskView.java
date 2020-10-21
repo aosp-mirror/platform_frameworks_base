@@ -30,20 +30,26 @@ import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Handler;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.wm.shell.ShellTaskOrganizer;
+
 import dalvik.system.CloseGuard;
+
+import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * View that can display a task.
  */
 // TODO: Place in com.android.wm.shell vs. com.android.wm.shell.bubbles on shell migration.
 public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
-        MultiWindowTaskListener.Listener {
+        ShellTaskOrganizer.TaskListener {
 
     public interface Listener {
         /** Called when the container is ready for launching activities. */
@@ -67,7 +73,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     private final CloseGuard mGuard = CloseGuard.get();
 
-    private final MultiWindowTaskListener mMultiWindowTaskListener;
+    private final ShellTaskOrganizer mTaskOrganizer;
 
     private ActivityManager.RunningTaskInfo mTaskInfo;
     private WindowContainerToken mTaskToken;
@@ -76,14 +82,16 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private boolean mSurfaceCreated;
     private boolean mIsInitialized;
     private Listener mListener;
+    private final Executor mExecutor;
 
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
 
-    public TaskView(Context context, MultiWindowTaskListener taskListener) {
+    public TaskView(Context context, ShellTaskOrganizer organizer, Executor executor) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
 
-        mMultiWindowTaskListener = taskListener;
+        mExecutor = executor;
+        mTaskOrganizer = organizer;
         setUseAlpha();
         getHolder().addCallback(this);
         mGuard.open("release");
@@ -142,7 +150,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     private void prepareActivityOptions(ActivityOptions options) {
         final Binder launchCookie = new Binder();
-        mMultiWindowTaskListener.setPendingLaunchCookieListener(launchCookie, this);
+        mTaskOrganizer.setPendingLaunchCookieListener(launchCookie, this);
         options.setLaunchCookie(launchCookie);
         options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         options.setTaskAlwaysOnTop(true);
@@ -165,7 +173,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mTaskToken, mTmpRect);
         // TODO(b/151449487): Enable synchronization
-        mMultiWindowTaskListener.getTaskOrganizer().applyTransaction(wct);
+        mTaskOrganizer.applyTransaction(wct);
     }
 
     /**
@@ -189,7 +197,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     private void performRelease() {
         getHolder().removeCallback(this);
-        mMultiWindowTaskListener.removeListener(this);
+        mTaskOrganizer.removeListener(this);
         resetTaskInfo();
         mGuard.close();
         if (mListener != null && mIsInitialized) {
@@ -207,7 +215,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private void updateTaskVisibility() {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, !mSurfaceCreated /* hidden */);
-        mMultiWindowTaskListener.getTaskOrganizer().applyTransaction(wct);
+        mTaskOrganizer.applyTransaction(wct);
         // TODO(b/151449487): Only call callback once we enable synchronization
         if (mListener != null) {
             mListener.onTaskVisibilityChanged(mTaskInfo.taskId, mSurfaceCreated);
@@ -217,33 +225,37 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl leash) {
-        mTaskInfo = taskInfo;
-        mTaskToken = taskInfo.token;
-        mTaskLeash = leash;
+        mExecutor.execute(() -> {
+            mTaskInfo = taskInfo;
+            mTaskToken = taskInfo.token;
+            mTaskLeash = leash;
 
-        if (mSurfaceCreated) {
-            // Surface is ready, so just reparent the task to this surface control
-            mTransaction.reparent(mTaskLeash, getSurfaceControl())
-                    .show(mTaskLeash)
-                    .apply();
-        } else {
-            // The surface has already been destroyed before the task has appeared, so go ahead and
-            // hide the task entirely
-            updateTaskVisibility();
-        }
+            if (mSurfaceCreated) {
+                // Surface is ready, so just reparent the task to this surface control
+                mTransaction.reparent(mTaskLeash, getSurfaceControl())
+                        .show(mTaskLeash)
+                        .apply();
+            } else {
+                // The surface has already been destroyed before the task has appeared,
+                // so go ahead and hide the task entirely
+                updateTaskVisibility();
+            }
 
-        // TODO: Synchronize show with the resize
-        onLocationChanged();
-        setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+            // TODO: Synchronize show with the resize
+            onLocationChanged();
+            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
 
-        if (mListener != null) {
-            mListener.onTaskCreated(taskInfo.taskId, taskInfo.baseActivity);
-        }
+            if (mListener != null) {
+                mListener.onTaskCreated(taskInfo.taskId, taskInfo.baseActivity);
+            }
+        });
     }
 
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mTaskToken != null && mTaskToken.equals(taskInfo.token)) {
+        mExecutor.execute(() -> {
+            if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
+
             if (mListener != null) {
                 mListener.onTaskRemovalStarted(taskInfo.taskId);
             }
@@ -251,22 +263,37 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
             // Unparent the task when this surface is destroyed
             mTransaction.reparent(mTaskLeash, null).apply();
             resetTaskInfo();
-        }
+        });
     }
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mTaskInfo.taskDescription = taskInfo.taskDescription;
-        setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+        mExecutor.execute(() -> {
+            mTaskInfo.taskDescription = taskInfo.taskDescription;
+            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+        });
     }
 
     @Override
     public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mTaskToken != null && mTaskToken.equals(taskInfo.token)) {
+        mExecutor.execute(() -> {
+            if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
             if (mListener != null) {
                 mListener.onBackPressedOnTaskRoot(taskInfo.taskId);
             }
-        }
+        });
+    }
+
+    @Override
+    public void dump(@androidx.annotation.NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        final String childPrefix = innerPrefix + "  ";
+        pw.println(prefix + this);
+    }
+
+    @Override
+    public String toString() {
+        return "TaskView" + ":" + (mTaskInfo != null ? mTaskInfo.taskId : "null");
     }
 
     @Override

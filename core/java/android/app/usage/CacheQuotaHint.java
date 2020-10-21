@@ -19,7 +19,6 @@ package android.app.usage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,7 +32,6 @@ import java.util.Objects;
  * allows apps to understand how much cache to use.
  * {@hide}
  */
-@TestApi
 @SystemApi
 public final class CacheQuotaHint implements Parcelable {
     public static final long QUOTA_NOT_SET = -1;

@@ -2729,13 +2729,13 @@ class PackageManagerShellCommand extends ShellCommand {
         Slog.i(TAG, "Removing " + userId + " or set as ephemeral if in use.");
         int result = um.removeUserOrSetEphemeral(userId);
         switch (result) {
-            case UserManagerService.REMOVE_RESULT_REMOVED:
+            case UserManager.REMOVE_RESULT_REMOVED:
                 getOutPrintWriter().printf("Success: user %d removed\n", userId);
                 return 0;
-            case UserManagerService.REMOVE_RESULT_SET_EPHEMERAL:
+            case UserManager.REMOVE_RESULT_SET_EPHEMERAL:
                 getOutPrintWriter().printf("Success: user %d set as ephemeral\n", userId);
                 return 0;
-            case UserManagerService.REMOVE_RESULT_ALREADY_BEING_REMOVED:
+            case UserManager.REMOVE_RESULT_ALREADY_BEING_REMOVED:
                 getOutPrintWriter().printf("Success: user %d is already being removed\n", userId);
                 return 0;
             default:

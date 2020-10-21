@@ -74,6 +74,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock PipTouchHandler mPipTouchHandler;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
+    @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock ProtoTracer mProtoTracer;
     @Mock PackageManager mMockPackageManager;
 
@@ -85,7 +86,7 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
                 mInputConsumerController, mKeyguardUpdateMonitor, mTaskStackChangeListeners,
                 mNavigationModeController, mScreenLifecycle, mSysUiState, Optional.of(mPip),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded), mProtoTracer);
+                Optional.of(mSplitScreen), Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
     }

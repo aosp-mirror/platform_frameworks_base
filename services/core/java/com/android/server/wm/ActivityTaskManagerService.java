@@ -5572,7 +5572,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void updateTopApp(ActivityRecord topResumedActivity) {
-        final ActivityRecord top = topResumedActivity != null ? topResumedActivity
+        // If system is sleeping, use the given record (it should be null) because there won't be
+        // the next resumed activity. Otherwise the process of pausing activity will keep with top
+        // state even the activity has paused and stopped.
+        final ActivityRecord top = mSleeping || topResumedActivity != null ? topResumedActivity
                 // If there is no resumed activity, it will choose the pausing activity.
                 : mRootWindowContainer.getTopResumedActivity();
         mTopApp = top != null ? top.app : null;

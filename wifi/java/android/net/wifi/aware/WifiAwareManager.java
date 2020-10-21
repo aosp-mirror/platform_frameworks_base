@@ -22,12 +22,14 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.wifi.util.HexEncoding;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -208,8 +210,47 @@ public class WifiAwareManager {
      *         or not (false).
      */
     public boolean isDeviceAttached() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
         try {
             return mService.isDeviceAttached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable the Wifi Aware Instant communication mode. If the device doesn't support this feature
+     * calling this API will result no action.
+     * @see Characteristics#isInstantCommunicationModeSupported()
+     * @param enable true for enable, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    public void enableInstantCommunicationMode(boolean enable) {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            mService.enableInstantCommunicationMode(mContext.getOpPackageName(), enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the current status of the Wifi Aware instant communication mode.
+     * If the device doesn't support this feature, return will always be false.
+     * @see Characteristics#isInstantCommunicationModeSupported()
+     * @return true if it is enabled, false otherwise.
+     */
+    public boolean isInstantCommunicationModeEnabled() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return mService.isInstantCommunicationModeEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

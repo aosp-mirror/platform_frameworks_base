@@ -379,6 +379,7 @@ public class Binder implements IBinder {
      *
      * @see #clearCallingIdentity
      */
+    @CriticalNative
     public static final native void restoreCallingIdentity(long token);
 
     /**

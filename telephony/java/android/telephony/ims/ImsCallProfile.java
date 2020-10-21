@@ -48,7 +48,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ImsCallProfile implements Parcelable {
     private static final String TAG = "ImsCallProfile";
 

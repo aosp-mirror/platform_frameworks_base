@@ -1048,6 +1048,20 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    private void onModulationReported(int modulation) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onModulationReported(modulation));
+        }
+    }
+
+    private void onPriorityReported(boolean isHighPriority) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onPriorityReported(isHighPriority));
+        }
+    }
+
     /**
      * Opens a filter object based on the given types and buffer size.
      *

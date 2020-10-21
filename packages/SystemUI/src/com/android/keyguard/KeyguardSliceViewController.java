@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.ViewController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -55,10 +56,10 @@ import javax.inject.Inject;
 
 /** Controller for a {@link KeyguardSliceView}. */
 @KeyguardStatusViewScope
-public class KeyguardSliceViewController implements Dumpable {
+public class KeyguardSliceViewController extends ViewController<KeyguardSliceView> implements
+        Dumpable {
     private static final String TAG = "KeyguardSliceViewCtrl";
 
-    private final KeyguardSliceView mView;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
@@ -68,41 +69,7 @@ public class KeyguardSliceViewController implements Dumpable {
     private Uri mKeyguardSliceUri;
     private Slice mSlice;
     private Map<View, PendingIntent> mClickActions;
-
-    private final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
-            new View.OnAttachStateChangeListener() {
-
-                @Override
-                public void onViewAttachedToWindow(View v) {
-
-                    Display display = mView.getDisplay();
-                    if (display != null) {
-                        mDisplayId = display.getDisplayId();
-                    }
-                    mTunerService.addTunable(mTunable, Settings.Secure.KEYGUARD_SLICE_URI);
-                    // Make sure we always have the most current slice
-                    if (mDisplayId == DEFAULT_DISPLAY && mLiveData != null) {
-                        mLiveData.observeForever(mObserver);
-                    }
-                    mConfigurationController.addCallback(mConfigurationListener);
-                    mDumpManager.registerDumpable(
-                            TAG + "@" + Integer.toHexString(
-                                    KeyguardSliceViewController.this.hashCode()),
-                            KeyguardSliceViewController.this);
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-
-                    // TODO(b/117344873) Remove below work around after this issue be fixed.
-                    if (mDisplayId == DEFAULT_DISPLAY) {
-                        mLiveData.removeObserver(mObserver);
-                    }
-                    mTunerService.removeTunable(mTunable);
-                    mConfigurationController.removeCallback(mConfigurationListener);
-                    mDumpManager.unregisterDumpable(TAG);
-                }
-            };
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     TunerService.Tunable mTunable = (key, newValue) -> setupUri(newValue);
 
@@ -133,24 +100,57 @@ public class KeyguardSliceViewController implements Dumpable {
     };
 
     @Inject
-    public KeyguardSliceViewController(KeyguardSliceView keyguardSliceView,
+    public KeyguardSliceViewController(
+            KeyguardSliceView keyguardSliceView,
             ActivityStarter activityStarter,
-            ConfigurationController configurationController, TunerService tunerService,
+            ConfigurationController configurationController,
+            TunerService tunerService,
             DumpManager dumpManager) {
-        mView = keyguardSliceView;
+        super(keyguardSliceView);
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
         mTunerService = tunerService;
         mDumpManager = dumpManager;
     }
 
-    /** Initialize the controller. */
-    public void init() {
-        if (mView.isAttachedToWindow()) {
-            mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
+    @Override
+    protected void onViewAttached() {
+        Display display = mView.getDisplay();
+        if (display != null) {
+            mDisplayId = display.getDisplayId();
         }
-        mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mView.setOnClickListener(mOnClickListener);
+        mTunerService.addTunable(mTunable, Settings.Secure.KEYGUARD_SLICE_URI);
+        // Make sure we always have the most current slice
+        if (mDisplayId == DEFAULT_DISPLAY && mLiveData != null) {
+            mLiveData.observeForever(mObserver);
+        }
+        mConfigurationController.addCallback(mConfigurationListener);
+        mDumpManager.registerDumpable(
+                TAG + "@" + Integer.toHexString(
+                        KeyguardSliceViewController.this.hashCode()),
+                KeyguardSliceViewController.this);
+        mView.updateLockScreenMode(mLockScreenMode);
+    }
+
+    @Override
+    protected void onViewDetached() {
+        // TODO(b/117344873) Remove below work around after this issue be fixed.
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            mLiveData.removeObserver(mObserver);
+        }
+        mTunerService.removeTunable(mTunable);
+        mConfigurationController.removeCallback(mConfigurationListener);
+        mDumpManager.unregisterDumpable(
+                TAG + "@" + Integer.toHexString(
+                        KeyguardSliceViewController.this.hashCode()));
+    }
+
+    /**
+     * Updates the lockscreen mode which may change the layout of the keyguard slice view.
+     */
+    public void updateLockScreenMode(int mode) {
+        mLockScreenMode = mode;
+        mView.updateLockScreenMode(mLockScreenMode);
     }
 
     /**
@@ -224,10 +224,10 @@ public class KeyguardSliceViewController implements Dumpable {
         Trace.endSection();
     }
 
-
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
         pw.println("  mClickActions: " + mClickActions);
+        pw.println("  mLockScreenMode: " + mLockScreenMode);
     }
 }

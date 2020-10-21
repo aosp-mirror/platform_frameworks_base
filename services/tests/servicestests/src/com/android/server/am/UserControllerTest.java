@@ -153,7 +153,7 @@ public class UserControllerTest {
             doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
             doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
             doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
-            doNothing().when(mInjector).systemServiceManagerCleanupUser(anyInt());
+            doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());

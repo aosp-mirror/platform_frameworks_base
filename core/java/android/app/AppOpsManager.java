@@ -461,7 +461,6 @@ public class AppOpsManager {
      * state the more important the UID is for the user.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int UID_STATE_PERSISTENT = 100;
 
@@ -470,7 +469,6 @@ public class AppOpsManager {
      * state the more important the UID is for the user.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int UID_STATE_TOP = 200;
 
@@ -482,7 +480,6 @@ public class AppOpsManager {
      * @hide
      * @deprecated
      */
-    @TestApi
     @SystemApi
     @Deprecated
     public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300;
@@ -492,7 +489,6 @@ public class AppOpsManager {
      * state the more important the UID is for the user.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int UID_STATE_FOREGROUND_SERVICE = 400;
 
@@ -501,7 +497,6 @@ public class AppOpsManager {
      * state the more important the UID is for the user.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int UID_STATE_FOREGROUND = 500;
 
@@ -517,7 +512,6 @@ public class AppOpsManager {
      * state the more important the UID is for the user.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int UID_STATE_BACKGROUND = 600;
 
@@ -526,7 +520,6 @@ public class AppOpsManager {
      * state the more important the UID is for the user.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int UID_STATE_CACHED = 700;
 
@@ -604,7 +597,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int OP_FLAG_SELF = 0x1;
 
@@ -615,7 +607,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int OP_FLAG_TRUSTED_PROXY = 0x2;
 
@@ -626,7 +617,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int OP_FLAG_UNTRUSTED_PROXY = 0x4;
 
@@ -637,7 +627,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int OP_FLAG_TRUSTED_PROXIED = 0x8;
 
@@ -648,7 +637,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int OP_FLAG_UNTRUSTED_PROXIED = 0x10;
 
@@ -660,7 +648,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int OP_FLAGS_ALL =
             OP_FLAG_SELF
@@ -1185,7 +1172,7 @@ public class AppOpsManager {
     public static final String OPSTR_GET_USAGE_STATS
             = "android:get_usage_stats";
     /** Activate a VPN connection without user intervention. @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_ACTIVATE_VPN
             = "android:activate_vpn";
     /** Allows an application to read the user's contacts data. */
@@ -1267,7 +1254,7 @@ public class AppOpsManager {
     public static final String OPSTR_WRITE_SETTINGS
             = "android:write_settings";
     /** @hide Get device accounts. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
     public static final String OPSTR_READ_PHONE_NUMBERS
@@ -1276,7 +1263,7 @@ public class AppOpsManager {
     public static final String OPSTR_PICTURE_IN_PICTURE
             = "android:picture_in_picture";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_INSTANT_APP_START_FOREGROUND
             = "android:instant_app_start_foreground";
     /** Answer incoming phone calls */
@@ -1286,129 +1273,129 @@ public class AppOpsManager {
      * Accept call handover
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_ACCEPT_HANDOVER
             = "android:accept_handover";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_GPS = "android:gps";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_VIBRATE = "android:vibrate";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WIFI_SCAN = "android:wifi_scan";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_POST_NOTIFICATION = "android:post_notification";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_SMS = "android:write_sms";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST =
             "android:receive_emergency_broadcast";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_PLAY_AUDIO = "android:play_audio";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_CLIPBOARD = "android:write_clipboard";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_TAKE_MEDIA_BUTTONS = "android:take_media_buttons";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_TAKE_AUDIO_FOCUS = "android:take_audio_focus";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_MASTER_VOLUME = "android:audio_master_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_VOICE_VOLUME = "android:audio_voice_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_RING_VOLUME = "android:audio_ring_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_MEDIA_VOLUME = "android:audio_media_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_ALARM_VOLUME = "android:audio_alarm_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_NOTIFICATION_VOLUME =
             "android:audio_notification_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_BLUETOOTH_VOLUME = "android:audio_bluetooth_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WAKE_LOCK = "android:wake_lock";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_TOAST_WINDOW = "android:toast_window";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_ASSIST_STRUCTURE = "android:assist_structure";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_TURN_SCREEN_ON = "android:turn_screen_on";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_RUN_IN_BACKGROUND = "android:run_in_background";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_AUDIO_ACCESSIBILITY_VOLUME =
             "android:audio_accessibility_volume";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_REQUEST_DELETE_PACKAGES = "android:request_delete_packages";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE =
             "android:bind_accessibility_service";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     /** @hide */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_START_FOREGROUND = "android:start_foreground";
     /** @hide */
     public static final String OPSTR_BLUETOOTH_SCAN = "android:bluetooth_scan";
@@ -1424,25 +1411,25 @@ public class AppOpsManager {
             "android:sms_financial_transactions";
 
     /** @hide Read media of audio type. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     /** @hide Write media of audio type. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_MEDIA_AUDIO = "android:write_media_audio";
     /** @hide Read media of video type. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     /** @hide Write media of video type. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_MEDIA_VIDEO = "android:write_media_video";
     /** @hide Read media of image type. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     /** @hide Write media of image type. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
     /** @hide Has a legacy (non-isolated) view of storage. */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
     /** @hide Read location metadata from media */
     public static final String OPSTR_ACCESS_MEDIA_LOCATION = "android:access_media_location";
@@ -1456,7 +1443,6 @@ public class AppOpsManager {
     public static final String OPSTR_QUERY_ALL_PACKAGES = "android:query_all_packages";
     /** @hide Access all external storage */
     @SystemApi
-    @TestApi
     public static final String OPSTR_MANAGE_EXTERNAL_STORAGE =
             "android:manage_external_storage";
 
@@ -2683,7 +2669,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static int opToDefaultMode(@NonNull String appOp) {
         return opToDefaultMode(strOpToOp(appOp));
@@ -2775,7 +2760,6 @@ public class AppOpsManager {
      * Class holding all of the operation information associated with an app.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final class PackageOps implements Parcelable {
         private final String mPackageName;
@@ -2854,7 +2838,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     // @DataClass(genHiddenConstructor = true, genHiddenCopyConstructor = true)
     // genHiddenCopyConstructor does not work for @hide @SystemApi classes
@@ -3222,7 +3205,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @Immutable
     // @DataClass(genHiddenConstructor = true) codegen verifier is broken
@@ -3796,7 +3778,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @Immutable
     @SystemApi
     // @DataClass(genHiddenConstructor = true) codegen verifier is broken
@@ -4474,7 +4455,6 @@ public class AppOpsManager {
      * @hide
      */
     @Immutable
-    @TestApi
     @SystemApi
     public static final class HistoricalOpsRequest {
         private final int mUid;
@@ -4505,7 +4485,6 @@ public class AppOpsManager {
          *
          * @hide
          */
-        @TestApi
         @SystemApi
         public static final class Builder {
             private int mUid = Process.INVALID_UID;
@@ -4643,7 +4622,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final class HistoricalOps implements Parcelable {
         private long mBeginTimeMillis;
@@ -5079,7 +5057,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final class HistoricalUidOps implements Parcelable {
         private final int mUid;
@@ -5333,7 +5310,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final class HistoricalPackageOps implements Parcelable {
         private final @NonNull String mPackageName;
@@ -5664,7 +5640,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     /* codegen verifier cannot deal with nested class parameters
     @DataClass(genHiddenConstructor = true,
@@ -5975,7 +5950,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final class HistoricalOp implements Parcelable {
         private final int mOp;
@@ -6612,7 +6586,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public @NonNull List<AppOpsManager.PackageOps> getOpsForPackage(int uid,
@@ -6647,7 +6620,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public void getHistoricalOps(@NonNull HistoricalOpsRequest request,
@@ -6756,7 +6728,6 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
         try {
@@ -6810,7 +6781,6 @@ public class AppOpsManager {
      * be changed.
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
@@ -8773,7 +8743,6 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
     public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
         try {
@@ -8788,7 +8757,6 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static String[] getOpStrs() {
         return Arrays.copyOf(sOpToString, sOpToString.length);
     }

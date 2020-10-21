@@ -430,6 +430,30 @@ java_library {
     },
 }
 
+java_library {
+    name: "statsdprotonano",
+    sdk_version: "9",
+    proto: {
+        type: "nano",
+        output_params: ["store_unknown_fields=true"],
+        include_dirs: ["external/protobuf/src"],
+    },
+    srcs: [
+        "src/atoms.proto",
+        "src/shell/shell_config.proto",
+        "src/shell/shell_data.proto",
+        "src/stats_log.proto",
+        "src/statsd_config.proto",
+    ],
+    static_libs: [
+        "platformprotosnano",
+    ],
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        javacflags: ["-XepDisableAllChecks"],
+    },
+}
+
 // Filegroup for statsd config proto definition.
 filegroup {
     name: "statsd-config-proto-def",

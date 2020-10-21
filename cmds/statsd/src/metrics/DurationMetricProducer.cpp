@@ -17,13 +17,16 @@
 #define DEBUG false
 
 #include "Log.h"
+
 #include "DurationMetricProducer.h"
-#include "guardrail/StatsdStats.h"
-#include "stats_util.h"
-#include "stats_log_util.h"
 
 #include <limits.h>
 #include <stdlib.h>
+
+#include "guardrail/StatsdStats.h"
+#include "metrics/parsing_utils/metrics_manager_util.h"
+#include "stats_log_util.h"
+#include "stats_util.h"
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -64,8 +67,8 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
 DurationMetricProducer::DurationMetricProducer(
         const ConfigKey& key, const DurationMetric& metric, const int conditionIndex,
-        const vector<ConditionState>& initialConditionCache, const size_t startIndex,
-        const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
+        const vector<ConditionState>& initialConditionCache, const int startIndex,
+        const int stopIndex, const int stopAllIndex, const bool nesting,
         const sp<ConditionWizard>& wizard, const uint64_t protoHash,
         const FieldMatcher& internalDimensions, const int64_t timeBaseNs, const int64_t startTimeNs,
         const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
@@ -141,6 +144,84 @@ DurationMetricProducer::DurationMetricProducer(
 
 DurationMetricProducer::~DurationMetricProducer() {
     VLOG("~DurationMetric() called");
+}
+
+bool DurationMetricProducer::onConfigUpdatedLocked(
+        const StatsdConfig& config, const int configIndex, const int metricIndex,
+        const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+        const unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+        const sp<EventMatcherWizard>& matcherWizard,
+        const vector<sp<ConditionTracker>>& allConditionTrackers,
+        const unordered_map<int64_t, int>& conditionTrackerMap, const sp<ConditionWizard>& wizard,
+        const unordered_map<int64_t, int>& metricToActivationMap,
+        unordered_map<int, vector<int>>& trackerToMetricMap,
+        unordered_map<int, vector<int>>& conditionToMetricMap,
+        unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
+        unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
+        vector<int>& metricsWithActivation) {
+    if (!MetricProducer::onConfigUpdatedLocked(
+                config, configIndex, metricIndex, allAtomMatchingTrackers,
+                oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, matcherWizard,
+                allConditionTrackers, conditionTrackerMap, wizard, metricToActivationMap,
+                trackerToMetricMap, conditionToMetricMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation)) {
+        return false;
+    }
+
+    const DurationMetric& metric = config.duration_metric(configIndex);
+    const auto& what_it = conditionTrackerMap.find(metric.what());
+    if (what_it == conditionTrackerMap.end()) {
+        ALOGE("DurationMetric's \"what\" is not present in the config");
+        return false;
+    }
+
+    const Predicate& durationWhat = config.predicate(what_it->second);
+    if (durationWhat.contents_case() != Predicate::ContentsCase::kSimplePredicate) {
+        ALOGE("DurationMetric's \"what\" must be a simple condition");
+        return false;
+    }
+
+    const SimplePredicate& simplePredicate = durationWhat.simple_predicate();
+
+    // Update indices: mStartIndex, mStopIndex, mStopAllIndex, mConditionIndex and MetricsManager
+    // maps.
+    if (!handleMetricWithAtomMatchingTrackers(simplePredicate.start(), metricIndex,
+                                              metric.has_dimensions_in_what(),
+                                              allAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                              trackerToMetricMap, mStartIndex)) {
+        ALOGE("Duration metrics must specify a valid start event matcher");
+        return false;
+    }
+
+    if (simplePredicate.has_stop() &&
+        !handleMetricWithAtomMatchingTrackers(simplePredicate.stop(), metricIndex,
+                                              metric.has_dimensions_in_what(),
+                                              allAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                              trackerToMetricMap, mStopIndex)) {
+        return false;
+    }
+
+    if (simplePredicate.has_stop_all() &&
+        !handleMetricWithAtomMatchingTrackers(simplePredicate.stop_all(), metricIndex,
+                                              metric.has_dimensions_in_what(),
+                                              allAtomMatchingTrackers, newAtomMatchingTrackerMap,
+                                              trackerToMetricMap, mStopAllIndex)) {
+        return false;
+    }
+
+    if (metric.has_condition() &&
+        !handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                    metric.links(), allConditionTrackers, mConditionTrackerIndex,
+                                    conditionToMetricMap)) {
+        return false;
+    }
+
+    for (const auto& it : mCurrentSlicedDurationTrackerMap) {
+        it.second->onConfigUpdated(wizard, mConditionTrackerIndex);
+    }
+
+    return true;
 }
 
 sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(
@@ -550,7 +631,7 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
     }
 
     // Handles Stopall events.
-    if (matcherIndex == mStopAllIndex) {
+    if ((int)matcherIndex == mStopAllIndex) {
         for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
             whatIt.second->noteStopAll(event.GetElapsedTimestampNs());
         }
@@ -598,7 +679,7 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
     }
 
     // Handles Stop events.
-    if (matcherIndex == mStopIndex) {
+    if ((int)matcherIndex == mStopIndex) {
         if (mUseWhatDimensionAsInternalDimension) {
             auto whatIt = mCurrentSlicedDurationTrackerMap.find(dimensionInWhat);
             if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {

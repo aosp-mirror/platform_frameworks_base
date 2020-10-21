@@ -545,4 +545,31 @@ public final class IncrementalStorage {
             return false;
         }
     }
+
+    /**
+     * Register to listen to the status changes of the storage health.
+     * @param healthCheckParams Params to specify status change timeouts.
+     * @param listener To report health status change from Incremental Service to the caller.
+     */
+    public boolean registerStorageHealthListener(StorageHealthCheckParams healthCheckParams,
+            IStorageHealthListener listener) {
+        try {
+            return mService.registerStorageHealthListener(mId, healthCheckParams, listener);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
+    /**
+     * Stops listening to the status changes of the storage health.
+     */
+    public void unregisterStorageHealthListener() {
+        try {
+            mService.unregisterStorageHealthListener(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return;
+        }
+    }
 }

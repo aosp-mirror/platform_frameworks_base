@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -469,7 +468,6 @@ public abstract class Vibrator {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     public boolean isVibrating() {
         return false;
@@ -483,7 +481,6 @@ public abstract class Vibrator {
     * @hide
     */
     @SystemApi
-    @TestApi
     public interface OnVibratorStateChangedListener  {
         /**
          * Called when the vibrator state has changed.
@@ -502,7 +499,6 @@ public abstract class Vibrator {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
     }
@@ -516,7 +512,6 @@ public abstract class Vibrator {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     public void addVibratorStateListener(
             @NonNull @CallbackExecutor Executor executor,
@@ -531,7 +526,6 @@ public abstract class Vibrator {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
     }
