@@ -19,6 +19,10 @@ package com.android.wm.shell.pip.tv;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.Intent.ACTION_MEDIA_RESOURCE_GRANTED;
+
+import static com.android.wm.shell.pip.tv.PipNotification.ACTION_CLOSE;
+import static com.android.wm.shell.pip.tv.PipNotification.ACTION_MENU;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -140,17 +144,26 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_MEDIA_RESOURCE_GRANTED.equals(action)) {
-                String[] packageNames = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
-                int resourceType = intent.getIntExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE,
-                        INVALID_RESOURCE_TYPE);
-                if (packageNames != null && packageNames.length > 0
-                        && resourceType == Intent.EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC) {
-                    handleMediaResourceGranted(packageNames);
-                }
+            if (DEBUG) {
+                Log.d(TAG, "mBroadcastReceiver, action: " + intent.getAction());
             }
-
+            switch (intent.getAction()) {
+                case ACTION_MENU:
+                    showPictureInPictureMenu();
+                    break;
+                case ACTION_CLOSE:
+                    closePip();
+                    break;
+                case ACTION_MEDIA_RESOURCE_GRANTED:
+                    String[] packageNames = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                    int resourceType = intent.getIntExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE,
+                            INVALID_RESOURCE_TYPE);
+                    if (packageNames != null && packageNames.length > 0
+                            && resourceType == Intent.EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC) {
+                        handleMediaResourceGranted(packageNames);
+                    }
+                    break;
+            }
         }
     };
     private final MediaSessionManager.OnActiveSessionsChangedListener mActiveMediaSessionListener =
@@ -233,8 +246,11 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             mPipTaskOrganizer = pipTaskOrganizer;
             mPipTaskOrganizer.registerPipTransitionCallback(this);
             mActivityTaskManager = ActivityTaskManager.getService();
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
+
+            final IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ACTION_CLOSE);
+            intentFilter.addAction(ACTION_MENU);
+            intentFilter.addAction(ACTION_MEDIA_RESOURCE_GRANTED);
             mContext.registerReceiver(mBroadcastReceiver, intentFilter, UserHandle.USER_ALL);
 
             // Initialize the last orientation and apply the current configuration
@@ -249,10 +265,10 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to register pinned stack listener", e);
             }
-        }
 
-        // TODO(b/169395392) Refactor PipMenuActivity to PipMenuView
-        PipMenuActivity.setPipController(this);
+            // TODO(b/169395392) Refactor PipMenuActivity to PipMenuView
+            PipMenuActivity.setPipController(this);
+        }
     }
 
     private void loadConfigurationsAndApply(Configuration newConfig) {
@@ -564,6 +580,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         } catch (RemoteException e) {
             Log.e(TAG, "getRootTaskInfo failed", e);
         }
+        if (DEBUG) Log.d(TAG, "getPinnedTaskInfo(), taskInfo=" + taskInfo);
         return taskInfo;
     }
 
