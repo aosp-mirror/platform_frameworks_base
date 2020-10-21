@@ -376,6 +376,20 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 0x0002000;
 
+    /**
+     * This flag requests that when when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled, a
+     * service will receive the motion events for each successfully-detected gesture. The service
+     * will also receive an AccessibilityGestureEvent of type GESTURE_INVALID for each cancelled
+     * gesture along with its motion events. A service will receive a gesture of type
+     * GESTURE_PASSTHROUGH and accompanying motion events for every passthrough gesture that does
+     * not start gesture detection. This information can be used to collect instances of improper
+     * gesture detection behavior and relay that information to framework developers. If {@link
+     * #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled this flag has no effect.
+     *
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
+     */
+    public static final int FLAG_SEND_MOTION_EVENTS = 0x0004000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -1276,6 +1290,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_MULTI_FINGER_GESTURES";
             case FLAG_REQUEST_2_FINGER_PASSTHROUGH:
                 return "FLAG_REQUEST_2_FINGER_PASSTHROUGH";
+            case FLAG_SEND_MOTION_EVENTS:
+                return "FLAG_SEND_MOTION_EVENTS";
             case FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
                 return "FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case FLAG_REPORT_VIEW_IDS:

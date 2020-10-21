@@ -235,6 +235,29 @@ import java.util.function.Consumer;
 public abstract class AccessibilityService extends Service {
 
     /**
+     * The user has performed a touch-exploration gesture on the touch screen without ever
+     * triggering gesture detection. This gesture is only dispatched when {@link
+     * AccessibilityServiceInfo#FLAG_SEND_MOTION_EVENTS} is set.
+     *
+     * @hide
+     */
+    public static final int GESTURE_TOUCH_EXPLORATION = -2;
+
+    /**
+     * The user has performed a passthrough gesture on the touch screen without ever triggering
+     * gesture detection. This gesture is only dispatched when {@link
+     * AccessibilityServiceInfo#FLAG_SEND_MOTION_EVENTS} is set.
+     * @hide
+     */
+    public static final int GESTURE_PASSTHROUGH = -1;
+
+    /**
+     * The user has performed an unrecognized gesture on the touch screen. This gesture is only
+     * dispatched when {@link AccessibilityServiceInfo#FLAG_SEND_MOTION_EVENTS} is set.
+     */
+    public static final int GESTURE_UNKNOWN = 0;
+
+    /**
      * The user has performed a swipe up gesture on the touch screen.
      */
     public static final int GESTURE_SWIPE_UP = 1;
