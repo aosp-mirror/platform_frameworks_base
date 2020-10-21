@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.dagger;
 
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -31,6 +32,8 @@ import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
 
+import javax.inject.Named;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -40,6 +43,8 @@ import dagger.Provides;
  */
 @Module
 public interface QSFragmentModule {
+    String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
+
     /** */
     @Provides
     @RootView
@@ -94,5 +99,13 @@ public interface QSFragmentModule {
     @QSScope
     static QSCustomizer providesQSCutomizer(@RootView View view) {
         return view.findViewById(R.id.qs_customize);
+    }
+
+    /** */
+    @Provides
+    @QSScope
+    @Named(QS_SECURITY_FOOTER_VIEW)
+    static View providesQSSecurityFooterView(LayoutInflater layoutInflater, QSPanel qsPanel) {
+        return layoutInflater.inflate(R.layout.quick_settings_footer, qsPanel, false);
     }
 }

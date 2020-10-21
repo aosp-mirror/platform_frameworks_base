@@ -261,7 +261,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     public void setHost(QSTileHost qsh) {
-        mHeader.setQSPanel(mQSPanelController.getView());
         mQSDetail.setHost(qsh);
     }
 

@@ -51,7 +51,6 @@ public class QuickQSPanel extends QSPanel {
 
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
-    protected QSPanel mFullPanel;
 
 
     @Inject
@@ -116,10 +115,6 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected String getDumpableTag() {
         return TAG;
-    }
-
-    public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
-        mFullPanel = fullPanel;
     }
 
     @Override
