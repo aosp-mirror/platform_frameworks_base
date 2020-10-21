@@ -905,7 +905,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Избирач на корисник"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Статус"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Камера"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Контроли на медиуми"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Контроли за аудио/видео содржини"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Прередувањето виџети започна."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Прередувањето виџети заврши."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Виџетот <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> е избришан."</string>
@@ -1351,7 +1351,7 @@
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Допрете за поставување"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Можеби ќе треба да го преформатирате уредот. Допрете за отстранување."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За пренесување фотографии и медиуми"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За пренесување фотографии и аудио/видео содржини"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблем со <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Допрете за да го поправите ова"</string>
@@ -1392,8 +1392,8 @@
     <string name="ext_media_status_formatting" msgid="774148701503179906">"Се форматира..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"Не е внесено"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"Не се пронајдени соодветни активности."</string>
-    <string name="permlab_route_media_output" msgid="8048124531439513118">"насочување излез за медиуми"</string>
-    <string name="permdesc_route_media_output" msgid="1759683269387729675">"Овозможува апликацијата да насочува излез за медиуми кон други надворешни уреди."</string>
+    <string name="permlab_route_media_output" msgid="8048124531439513118">"насочување излез за аудио/видео"</string>
+    <string name="permdesc_route_media_output" msgid="1759683269387729675">"Овозможува апликацијата да насочува излез за аудио/видео содржини кон други надворешни уреди."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"читање сесии на инсталирање"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Дозволува апликација да чита сесии на инсталирање. Тоа овозможува апликацијата да гледа детали за активни инсталации на пакет."</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"барање пакети за инсталирање"</string>
@@ -1654,8 +1654,6 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција на бои"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (6722364385073799185) -->
-    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е вклучена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е исклучена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Притиснете ги и задржете ги двете копчиња за јачина на звукот во траење од три секунди за да користите <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
