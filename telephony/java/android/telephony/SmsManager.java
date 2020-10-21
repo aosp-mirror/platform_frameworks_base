@@ -1718,6 +1718,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
