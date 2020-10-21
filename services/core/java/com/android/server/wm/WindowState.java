@@ -30,13 +30,15 @@ import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
-import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
@@ -798,11 +800,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean isImplicitlyExcludingAllSystemGestures() {
-        final int immersiveStickyFlags =
-                SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        final boolean immersiveSticky =
-                (mSystemUiVisibility & immersiveStickyFlags) == immersiveStickyFlags;
-        return immersiveSticky && mWmService.mConstants.mSystemGestureExcludedByPreQStickyImmersive
+        final boolean stickyHideNav =
+                mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                        && !getRequestedVisibility(ITYPE_NAVIGATION_BAR);
+        return stickyHideNav && mWmService.mConstants.mSystemGestureExcludedByPreQStickyImmersive
                 && mActivityRecord != null && mActivityRecord.mTargetSdk < Build.VERSION_CODES.Q;
     }
 
@@ -1121,12 +1122,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (isImeTarget) {
                 if (inFreeformWindowingMode()) {
                     // Push the freeform window up to make room for the IME. However, don't push
-                    // it up past the top of the screen.
-                    final int bottomOverlap = windowFrames.mContainingFrame.bottom
-                            - windowFrames.mVisibleFrame.bottom;
+                    // it up past the bottom of the top bar.
+                    final InsetsState state = dc.getInsetsStateController().getRawInsetsState();
+                    final Rect visibleFrame = mTmpRect;
+                    visibleFrame.set(state.getDisplayFrame());
+                    visibleFrame.inset(state.calculateInsets(visibleFrame,
+                            systemBars() | ime() | displayCutout(), false /* ignoreVisibility */));
+                    final int bottomOverlap =
+                            windowFrames.mContainingFrame.bottom - visibleFrame.bottom;
                     if (bottomOverlap > 0) {
                         final int distanceToTop = Math.max(windowFrames.mContainingFrame.top
-                                - windowFrames.mContentFrame.top, 0);
+                                - visibleFrame.top, 0);
                         int offs = Math.min(bottomOverlap, distanceToTop);
                         windowFrames.mContainingFrame.offset(0, -offs);
                         mInsetFrame.offset(0, -offs);
@@ -1145,7 +1151,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // if it wasn't set already. No need to intersect it with the (visible)
                 // "content frame" since it is allowed to be outside the visible desktop.
                 if (windowFrames.mContainingFrame.isEmpty()) {
-                    windowFrames.mContainingFrame.set(windowFrames.mContentFrame);
+                    windowFrames.mContainingFrame.set(windowFrames.mDisplayFrame);
                 }
             }
 
@@ -1180,51 +1186,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         applyGravityAndUpdateFrame(windowFrames, layoutContainingFrame, layoutDisplayFrame);
 
-        // Make sure the content and visible frames are inside of the
-        // final window frame.
-        if (windowsAreFloating && !windowFrames.mFrame.isEmpty()) {
-            final int visBottom = windowFrames.mVisibleFrame.bottom;
-            final int contentBottom = windowFrames.mContentFrame.bottom;
-            windowFrames.mContentFrame.set(windowFrames.mFrame);
-            windowFrames.mVisibleFrame.set(windowFrames.mContentFrame);
-            windowFrames.mStableFrame.set(windowFrames.mContentFrame);
-            if (isImeTarget && inFreeformWindowingMode()) {
-                // After displacing a freeform window to make room for the ime, any part of
-                // the window still covered by IME should be inset.
-                if (contentBottom + layoutYDiff < windowFrames.mContentFrame.bottom) {
-                    windowFrames.mContentFrame.bottom = contentBottom + layoutYDiff;
-                }
-                if (visBottom + layoutYDiff < windowFrames.mVisibleFrame.bottom) {
-                    windowFrames.mVisibleFrame.bottom = visBottom + layoutYDiff;
-                }
-            }
-        } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            windowFrames.mContentFrame.set(windowFrames.mFrame);
+        if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)) {
                 mMovedByResize = true;
             }
-        } else {
-            windowFrames.mContentFrame.set(
-                    Math.max(windowFrames.mContentFrame.left, windowFrames.mFrame.left),
-                    Math.max(windowFrames.mContentFrame.top, windowFrames.mFrame.top),
-                    Math.min(windowFrames.mContentFrame.right, windowFrames.mFrame.right),
-                    Math.min(windowFrames.mContentFrame.bottom, windowFrames.mFrame.bottom));
-
-            windowFrames.mVisibleFrame.set(
-                    Math.max(windowFrames.mVisibleFrame.left, windowFrames.mFrame.left),
-                    Math.max(windowFrames.mVisibleFrame.top, windowFrames.mFrame.top),
-                    Math.min(windowFrames.mVisibleFrame.right, windowFrames.mFrame.right),
-                    Math.min(windowFrames.mVisibleFrame.bottom, windowFrames.mFrame.bottom));
-
-            windowFrames.mStableFrame.set(
-                    Math.max(windowFrames.mStableFrame.left, windowFrames.mFrame.left),
-                    Math.max(windowFrames.mStableFrame.top, windowFrames.mFrame.top),
-                    Math.min(windowFrames.mStableFrame.right, windowFrames.mFrame.right),
-                    Math.min(windowFrames.mStableFrame.bottom, windowFrames.mFrame.bottom));
         }
-
-        windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
-                getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
 
         windowFrames.setDisplayCutout(
                 windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
@@ -1234,11 +1200,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         windowFrames.mCompatFrame.set(windowFrames.mFrame);
         if (inSizeCompatMode()) {
-            // If there is a size compatibility scale being applied to the
-            // window, we need to apply this to its insets so that they are
-            // reported to the app in its coordinate space.
-            windowFrames.scaleInsets(mInvGlobalScale);
-
             // Also the scaled frame that we report to the app needs to be
             // adjusted to be in its coordinate space.
             windowFrames.mCompatFrame.scale(mInvGlobalScale);
@@ -1270,7 +1231,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             + mRequestedWidth + ", mRequestedheight="
                             + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
                             + "): frame=" + windowFrames.mFrame.toShortString()
-                            + " " + windowFrames.getInsetsInfo()
                             + " " + mAttrs.getTitle());
         }
     }
@@ -1303,33 +1263,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWindowFrames.mDisplayFrame;
     }
 
-    /**
-     * Retrieves the frame of the content area that this window was last laid out in. This is the
-     * area in which the content of the window should be placed. It will be smaller than the display
-     * frame to account for screen decorations such as a status bar or soft keyboard.
-     */
-    Rect getContentFrame() {
-        return mWindowFrames.mContentFrame;
-    }
-
-    /**
-     * Retrieves the frame of the visible area that this window was last laid out in. This is the
-     * area of the screen in which the window will actually be fully visible. It will be smaller
-     * than the content frame to account for transient UI elements blocking it such as an input
-     * method's candidates UI.
-     */
-    Rect getVisibleFrame() {
-        return mWindowFrames.mVisibleFrame;
-    }
-
-    Rect getStableFrame() {
-        return mWindowFrames.mStableFrame;
-    }
-
-    Rect getDecorFrame() {
-        return mWindowFrames.mDecorFrame;
-    }
-
     Rect getParentFrame() {
         return mWindowFrames.mParentFrame;
     }
@@ -1340,10 +1273,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WmDisplayCutout getWmDisplayCutout() {
         return mWindowFrames.mDisplayCutout;
-    }
-
-    void getCompatFrame(Rect outFrame) {
-        outFrame.set(mWindowFrames.mCompatFrame);
     }
 
     void getCompatFrameSize(Rect outFrame) {
@@ -1433,7 +1362,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 return;
             }
 
-            updateLastInsetValues();
+            onResizeHandled();
             mWmService.makeWindowFreezingScreenIfNeededLocked(this);
 
             // If the orientation is changing, or we're starting or ending a drag resizing action,
@@ -1534,14 +1463,39 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Returns the insets state for the client. Its sources may be the copies with visibility
+     * Returns the insets state for the window. Its sources may be the copies with visibility
      * modification according to the state of transient bars.
      */
     InsetsState getInsetsState() {
-        InsetsState state = getDisplayContent().getInsetsPolicy().getInsetsForWindow(this);
+        return getDisplayContent().getInsetsPolicy().getInsetsForWindow(this);
+    }
+
+    /**
+     * Returns the insets state for the client and scales the frames if the client is in the size
+     * compatible mode.
+     */
+    InsetsState getCompatInsetsState() {
+        InsetsState state = getInsetsState();
         if (inSizeCompatMode()) {
             state = new InsetsState(state, true);
             state.scale(mInvGlobalScale);
+        }
+        return state;
+    }
+
+    /**
+     * Returns the insets state for the window and applies the requested visibility.
+     */
+    InsetsState getInsetsStateWithVisibilityOverride() {
+        final InsetsState state = new InsetsState(getInsetsState());
+        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
+            final boolean requestedVisible = getRequestedVisibility(type);
+            InsetsSource source = state.peekSource(type);
+            if (source != null && source.isVisible() != requestedVisible) {
+                source = new InsetsSource(source);
+                source.setVisible(requestedVisible);
+                state.addSource(source);
+            }
         }
         return state;
     }
@@ -1625,17 +1579,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
-        bounds.set(mWindowFrames.mVisibleFrame);
+        bounds.set(mWindowFrames.mFrame);
+        bounds.inset(getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
+                bounds, mAttrs.softInputMode));
         if (intersectWithStackBounds) {
             bounds.intersect(mTmpRect);
-        }
-
-        if (bounds.isEmpty()) {
-            bounds.set(mWindowFrames.mFrame);
-            if (intersectWithStackBounds) {
-                bounds.intersect(mTmpRect);
-            }
-            return;
         }
     }
 
@@ -1958,7 +1906,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mWinAnimator.mDrawState = DRAW_PENDING;
         // Force add to {@link WindowManagerService#mResizingWindows}.
-        resetLastContentInsets();
+        forceReportingResized();
         outWaitingForDrawn.add(this);
     }
 
@@ -3423,8 +3371,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // bottom right.
             if (win.getFrame().left <= win.getDisplayFrame().left
                     && win.getFrame().top <= win.getDisplayFrame().top
-                    && win.getFrame().right >= win.getStableFrame().right
-                    && win.getFrame().bottom >= win.getStableFrame().bottom) {
+                    && win.getFrame().right >= win.getDisplayFrame().right
+                    && win.getFrame().bottom >= win.getDisplayFrame().bottom) {
                 // Is a fullscreen window, like the clock alarm. Show to everyone.
                 return true;
             }
@@ -3623,7 +3571,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // that may cause WINDOW_FREEZE_TIMEOUT because resizing the client keeps failing.
         mReportOrientationChanged = false;
         mDragResizingChangeReported = true;
-        mWindowFrames.resetInsetsChanged();
+        mWindowFrames.clearReportResizeHints();
 
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
         final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING || useBLASTSync() || !mRedrawForSyncReported;
@@ -3692,7 +3640,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void notifyInsetsChanged() {
         ProtoLog.d(WM_DEBUG_IME, "notifyInsetsChanged for %s ", this);
         try {
-            mClient.insetsChanged(getInsetsState());
+            mClient.insetsChanged(getCompatInsetsState());
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change w=" + this, e);
         }
@@ -3707,7 +3655,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
         try {
-            mClient.insetsControlChanged(getInsetsState(),
+            mClient.insetsControlChanged(getCompatInsetsState(),
                     stateController.getControlsForDispatch(this));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change to w=" + this, e);
@@ -4917,24 +4865,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    private boolean skipDecorCrop() {
-        // The decor frame is used to specify the region not covered by the system
-        // decorations (nav bar, status bar). In case this is empty, for example with
-        // FLAG_TRANSLUCENT_NAVIGATION, we don't need to do any cropping.
-        if (mWindowFrames.mDecorFrame.isEmpty()) {
-            return true;
-        }
-
-        // But if we have a frame, and are an application window, then we must be cropped.
-        if (mActivityRecord != null) {
-            return false;
-        }
-
-        // For non application windows, we may be allowed to extend over the decor bars
-        // depending on our type and permissions assosciated with our token.
-        return mToken.canLayerAboveSystemBars();
-    }
-
     /**
      * Expand the given rectangle by this windows surface insets. This
      * takes you from the 'window size' to the 'surface size'.
@@ -5062,10 +4992,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Updates the last inset values to the current ones.
+     * Clears factors that would cause report-resize.
      */
-    void updateLastInsetValues() {
-        mWindowFrames.updateLastInsetValues();
+    void onResizeHandled() {
+        mWindowFrames.onResizeHandled();
     }
 
     @Override
@@ -5550,48 +5480,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mFrameNumber = frameNumber;
     }
 
-    public void getMaxVisibleBounds(Rect out) {
-        if (out.isEmpty()) {
-            out.set(mWindowFrames.mVisibleFrame);
-            return;
-        }
-
-        if (mWindowFrames.mVisibleFrame.left < out.left) {
-            out.left = mWindowFrames.mVisibleFrame.left;
-        }
-        if (mWindowFrames.mVisibleFrame.top < out.top) {
-            out.top = mWindowFrames.mVisibleFrame.top;
-        }
-        if (mWindowFrames.mVisibleFrame.right > out.right) {
-            out.right = mWindowFrames.mVisibleFrame.right;
-        }
-        if (mWindowFrames.mVisibleFrame.bottom > out.bottom) {
-            out.bottom = mWindowFrames.mVisibleFrame.bottom;
-        }
-    }
-
-    void getContentInsets(Rect outContentInsets) {
-        outContentInsets.set(mWindowFrames.mContentInsets);
-    }
-
-    Rect getContentInsets() {
-        return mWindowFrames.mContentInsets;
-    }
-
-    void getStableInsets(Rect outStableInsets) {
-        outStableInsets.set(mWindowFrames.mStableInsets);
-    }
-
-    Rect getStableInsets() {
-        return mWindowFrames.mStableInsets;
-    }
-
-    void resetLastContentInsets() {
-        mWindowFrames.resetLastContentInsets();
-    }
-
-    Rect getVisibleInsets() {
-        return mWindowFrames.mVisibleInsets;
+    void forceReportingResized() {
+        mWindowFrames.forceReportingResized();
     }
 
     /** Returns the {@link WindowFrames} associated with this {@link WindowState}. */
@@ -5719,10 +5609,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outFrame.set(getContainingFrame());
         }
         outSurfaceInsets.set(getAttrs().surfaceInsets);
-        // TODO(b/72757033): These are insets relative to the window frame, but we're really
-        // interested in the insets relative to the frame we chose in the if-blocks above.
-        getContentInsets(outInsets);
-        getStableInsets(outStableInsets);
+        final InsetsState state = getInsetsStateWithVisibilityOverride();
+        outInsets.set(state.calculateInsets(outFrame, systemBars(),
+                false /* ignoreVisibility */));
+        outStableInsets.set(state.calculateInsets(outFrame, systemBars(),
+                true /* ignoreVisibility */));
     }
 
     /**

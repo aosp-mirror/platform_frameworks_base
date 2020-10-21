@@ -53,6 +53,7 @@ import android.view.InputWindowHandle;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets.Type;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -534,7 +535,10 @@ public class RecentsAnimationController implements DeathRecipient {
                             : null;
             final Rect contentInsets;
             if (mTargetActivityRecord != null && mTargetActivityRecord.findMainWindow() != null) {
-                contentInsets = mTargetActivityRecord.findMainWindow().getContentInsets();
+                contentInsets = mTargetActivityRecord.findMainWindow()
+                        .getInsetsStateWithVisibilityOverride()
+                        .calculateInsets(mTargetActivityRecord.getBounds(), Type.systemBars(),
+                                false /* ignoreVisibility */);
             } else {
                 // If the window for the activity had not yet been created, use the display insets.
                 mService.getStableInsets(mDisplayId, mTmpRect);
@@ -969,8 +973,8 @@ public class RecentsAnimationController implements DeathRecipient {
             if (mainWindow == null) {
                 return null;
             }
-            final Rect insets = new Rect();
-            mainWindow.getContentInsets(insets);
+            final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
+                    mBounds, Type.systemBars(), false /* ignoreVisibility */);
             InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
             final int mode = topApp.getActivityType() == mTargetActivityType
                     ? MODE_OPENING

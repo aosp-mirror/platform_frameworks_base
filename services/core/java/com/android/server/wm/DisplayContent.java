@@ -51,6 +51,9 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -756,7 +759,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 if (!w.getFrame().isEmpty()) {
                     w.updateLastFrames();
                 }
-                w.updateLastInsetValues();
+                w.onResizeHandled();
                 w.updateLocationInParentDisplayIfNeeded();
             }
 
@@ -2562,7 +2565,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void getStableRect(Rect out) {
-        out.set(mDisplayFrames.mStable);
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        out.set(state.getDisplayFrame());
+        out.inset(state.calculateInsets(out, systemBars(), true /* ignoreVisibility */));
     }
 
     /**
@@ -2690,12 +2695,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // If the task is freeformed, enlarge the area to account for outside
                 // touch area for resize.
                 mTmpRect.inset(-delta, -delta);
-                // Intersect with display content rect. If we have system decor (status bar/
+                // Intersect with display content frame. If we have system decor (status bar/
                 // navigation bar), we want to exclude that from the tap detection.
                 // Otherwise, if the app is partially placed under some system button (eg.
                 // Recents, Home), pressing that button would cause a full series of
                 // unwanted transfer focus/resume/pause, before we could go home.
-                mTmpRect.intersect(mDisplayFrames.mContent);
+                mTmpRect.inset(getInsetsStateController().getRawInsetsState().calculateInsets(
+                        mTmpRect, systemBars() | ime(), false /* ignoreVisibility */));
             }
             mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
         }
@@ -2783,8 +2789,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisible()
                 && imeWin.isDisplayed();
-        final int imeHeight = mDisplayFrames.getInputMethodWindowVisibleHeight();
+        final int imeHeight = getInputMethodWindowVisibleHeight();
         mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
+    }
+
+    int getInputMethodWindowVisibleHeight() {
+        final InsetsState state = getInsetsStateController().getRawInsetsState();
+        final InsetsSource imeSource = state.peekSource(ITYPE_IME);
+        if (imeSource == null || !imeSource.isVisible()) {
+            return 0;
+        }
+        final Rect imeFrame = imeSource.getVisibleFrame() != null
+                ? imeSource.getVisibleFrame() : imeSource.getFrame();
+        final Rect dockFrame = mTmpRect;
+        dockFrame.set(state.getDisplayFrame());
+        dockFrame.inset(state.calculateInsets(dockFrame, systemBars() | displayCutout(),
+                false /* ignoreVisibility */));
+        return dockFrame.bottom - imeFrame.top;
     }
 
     void prepareFreezingTaskBounds() {

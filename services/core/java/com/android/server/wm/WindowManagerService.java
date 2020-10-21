@@ -1916,7 +1916,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
-        Rect frame = replacedWindow.getVisibleFrame();
+        final Rect frame = new Rect(replacedWindow.getFrame());
+        frame.inset(replacedWindow.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
+                frame, replacedWindow.mAttrs.softInputMode));
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
@@ -2460,12 +2462,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setLastReportedMergedConfiguration(mergedConfiguration);
 
-            // Update the last inset values here because the values are sent back to the client.
-            // The last inset values represent the last client state
-            win.updateLastInsetValues();
+            // Set resize-handled here because the values are sent back to the client.
+            win.onResizeHandled();
 
             win.fillClientWindowFrames(outFrames);
-            outInsetsState.set(win.getInsetsState(), win.isClientLocal());
+            outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth
@@ -7564,7 +7565,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public int getInputMethodWindowVisibleHeight(int displayId) {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                return dc.mDisplayFrames.getInputMethodWindowVisibleHeight();
+                return dc.getInputMethodWindowVisibleHeight();
             }
         }
 

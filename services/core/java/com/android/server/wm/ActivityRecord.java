@@ -288,6 +288,7 @@ import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
@@ -4228,7 +4229,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                                 // Force add to mResizingWindows, so that we are guaranteed to get
                                 // another reportDrawn callback.
-                                w.resetLastContentInsets();
+                                w.forceReportingResized();
                             }
                         }, true /* traverseTopToBottom */);
                     }
@@ -6192,9 +6193,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // destination of the thumbnail header animation. If this is a full screen
         // window scenario, we use the whole display as the target.
         WindowState win = findMainWindow();
-        final Rect appRect = win != null ? win.getContentFrame() :
-                new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
-        final Rect insets = win != null ? win.getContentInsets() : null;
+        Rect insets;
+        Rect appRect;
+        if (win != null) {
+            insets = win.getInsetsStateWithVisibilityOverride().calculateInsets(
+                    win.getFrame(), Type.systemBars(), false /* ignoreVisibility */);
+            appRect = new Rect(win.getFrame());
+            appRect.inset(insets);
+        } else {
+            insets = null;
+            appRect = new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
+        }
         final Configuration displayConfig = mDisplayContent.getConfiguration();
         return getDisplayContent().mAppTransition.createThumbnailAspectScaleAnimationLocked(
                 appRect, insets, thumbnailHeader, task, displayConfig.uiMode,
@@ -7918,8 +7927,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task == null || mainWindow == null) {
             return null;
         }
-        final Rect insets = new Rect();
-        mainWindow.getContentInsets(insets);
+        final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
+                task.getBounds(), Type.systemBars(), false /* ignoreVisibility */);
         InsetUtils.addInsets(insets, getLetterboxInsets());
 
         return new RemoteAnimationTarget(task.mTaskId, record.getMode(),

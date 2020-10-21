@@ -16,10 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.DisplayFramesProto.CURRENT;
-import static com.android.server.wm.DisplayFramesProto.DOCK;
-import static com.android.server.wm.DisplayFramesProto.STABLE_BOUNDS;
-
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -42,51 +38,6 @@ public class DisplayFrames {
      * be hidden but not extending into the overscan area.
      */
     public final Rect mUnrestricted = new Rect();
-
-    /**
-     * The current size of the screen; these may be different than (0,0)-(dw,dh) if the status bar
-     * can't be hidden; in that case it effectively carves out that area of the display from all
-     * other windows.
-     */
-    public final Rect mRestricted = new Rect();
-
-    /**
-     * During layout, the current screen borders accounting for any currently visible system UI
-     * elements.
-     */
-    public final Rect mSystem = new Rect();
-
-    /** For applications requesting stable content insets, these are them. */
-    public final Rect mStable = new Rect();
-
-    /**
-     * For applications requesting stable content insets but have also set the fullscreen window
-     * flag, these are the stable dimensions without the status bar.
-     */
-    public final Rect mStableFullscreen = new Rect();
-
-    /**
-     * During layout, the current screen borders with all outer decoration (status bar, input method
-     * dock) accounted for.
-     */
-    public final Rect mCurrent = new Rect();
-
-    /**
-     * During layout, the frame in which content should be displayed to the user, accounting for all
-     * screen decoration except for any space they deem as available for other content. This is
-     * usually the same as mCurrent*, but may be larger if the screen decor has supplied content
-     * insets.
-     */
-    public final Rect mContent = new Rect();
-
-    /**
-     * During layout, the frame in which voice content should be displayed to the user, accounting
-     * for all screen decoration except for any space they deem as available for other content.
-     */
-    public final Rect mVoiceContent = new Rect();
-
-    /** During layout, the current screen borders along which input method windows are placed. */
-    public final Rect mDock = new Rect();
 
     /** The display cutout used for layout (after rotation) */
     @NonNull public WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
@@ -118,15 +69,6 @@ public class DisplayFrames {
 
     public void onBeginLayout() {
         mUnrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
-        mRestricted.set(mUnrestricted);
-        mSystem.set(mUnrestricted);
-        mDock.set(mUnrestricted);
-        mContent.set(mUnrestricted);
-        mVoiceContent.set(mUnrestricted);
-        mStable.set(mUnrestricted);
-        mStableFullscreen.set(mUnrestricted);
-        mCurrent.set(mUnrestricted);
-
         mDisplayCutout = mDisplayInfoCutout;
         mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
                 Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -147,15 +89,8 @@ public class DisplayFrames {
         }
     }
 
-    public int getInputMethodWindowVisibleHeight() {
-        return mDock.bottom - mCurrent.bottom;
-    }
-
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mStable.dumpDebug(proto, STABLE_BOUNDS);
-        mDock.dumpDebug(proto, DOCK);
-        mCurrent.dumpDebug(proto, CURRENT);
         proto.end(token);
     }
 
@@ -163,14 +98,6 @@ public class DisplayFrames {
         pw.println(prefix + "DisplayFrames w=" + mDisplayWidth + " h=" + mDisplayHeight
                 + " r=" + mRotation);
         final String myPrefix = prefix + "  ";
-        dumpFrame(mStable, "mStable", myPrefix, pw);
-        dumpFrame(mStableFullscreen, "mStableFullscreen", myPrefix, pw);
-        dumpFrame(mDock, "mDock", myPrefix, pw);
-        dumpFrame(mCurrent, "mCurrent", myPrefix, pw);
-        dumpFrame(mSystem, "mSystem", myPrefix, pw);
-        dumpFrame(mContent, "mContent", myPrefix, pw);
-        dumpFrame(mVoiceContent, "mVoiceContent", myPrefix, pw);
-        dumpFrame(mRestricted, "mRestricted", myPrefix, pw);
         dumpFrame(mUnrestricted, "mUnrestricted", myPrefix, pw);
         pw.println(myPrefix + "mDisplayCutout=" + mDisplayCutout);
     }
