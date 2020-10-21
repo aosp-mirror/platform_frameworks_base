@@ -23,6 +23,7 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
+#include <android/hidl/manager/1.2/IServiceManager.h>
 #include <binder/IServiceManager.h>
 #include <hidl/HidlTransportSupport.h>
 #include <incremental_service.h>
@@ -64,6 +65,7 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     using ::android::frameworks::stats::V1_0::IStats;
     using ::android::frameworks::stats::V1_0::implementation::StatsHal;
     using ::android::hardware::configureRpcThreadpool;
+    using ::android::hidl::manager::V1_0::IServiceManager;
 
     status_t err;
 
@@ -77,8 +79,15 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     ALOGE_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
 
     sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
-    err = schedulingService->registerAsService();
-    ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
+    if (IServiceManager::Transport::HWBINDER ==
+        hardware::defaultServiceManager1_2()->getTransport(ISchedulingPolicyService::descriptor,
+                                                           "default")) {
+        err = schedulingService->registerAsService("default");
+        LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d",
+                            ISchedulingPolicyService::descriptor, err);
+    } else {
+        ALOGW("%s is deprecated. Skipping registration.", ISchedulingPolicyService::descriptor);
+    }
 
     sp<IStats> statsHal = new StatsHal();
     err = statsHal->registerAsService();
