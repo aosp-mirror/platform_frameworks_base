@@ -5018,7 +5018,7 @@ public final class Settings {
         final int count = mPackages.size();
         for (int i = 0; i < count; i++) {
             final PackageSetting ps = mPackages.valueAt(i);
-            ps.dumpDebug(proto, PackageServiceDumpProto.PACKAGES, users);
+            ps.dumpDebug(proto, PackageServiceDumpProto.PACKAGES, users, mPermissionDataProvider);
         }
     }
 
