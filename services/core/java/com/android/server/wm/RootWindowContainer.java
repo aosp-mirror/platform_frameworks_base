@@ -863,6 +863,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.openSurfaceTransaction();
         try {
             applySurfaceChangesTransaction();
+            mWmService.mSyncEngine.onSurfacePlacement();
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {

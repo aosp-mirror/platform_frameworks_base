@@ -667,6 +667,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // Whether to enable BLASTSyncEngine Transaction passing.
     final boolean mUseBLASTSync = false;
 
+    final BLASTSyncEngine mSyncEngine;
+
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
@@ -1190,6 +1192,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mUseBLAST = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
                     WM_USE_BLAST_ADAPTER_FLAG, false);
+
+        mSyncEngine = new BLASTSyncEngine(this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
