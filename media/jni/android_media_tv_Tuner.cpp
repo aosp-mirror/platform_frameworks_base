@@ -1057,8 +1057,16 @@ Return<void> FrontendCallback::onScanMessageExt1_1(FrontendScanMessageTypeExt1_1
             bool isHighPriority = message.isHighPriority();
             env->CallVoidMethod(
                     mObject,
-                    env->GetMethodID(clazz, "onPriorityReported", "([B)V"),
+                    env->GetMethodID(clazz, "onPriorityReported", "(B)V"),
                     isHighPriority);
+            break;
+        }
+        case FrontendScanMessageTypeExt1_1::DVBC_ANNEX: {
+            jint dvbcAnnex = (jint) message.annex();
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onDvbcAnnexReported", "(I)V"),
+                    dvbcAnnex);
             break;
         }
         default:
