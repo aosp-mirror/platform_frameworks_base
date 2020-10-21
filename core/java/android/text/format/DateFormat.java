@@ -29,6 +29,7 @@ import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
+import android.text.TextUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -697,7 +698,7 @@ public class DateFormat {
     }
 
     private static String zeroPad(int inValue, int inMinDigits) {
-        return String.format(Locale.getDefault(), "%0" + inMinDigits + "d", inValue);
+        return TextUtils.formatSimple("%0" + inMinDigits + "d", inValue);
     }
 
     /**
