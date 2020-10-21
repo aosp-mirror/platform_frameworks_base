@@ -1305,9 +1305,9 @@
     <string name="wifi_connect_alert_title" msgid="2377999802455909057">"Benarkan sambungan?"</string>
     <string name="wifi_connect_alert_message" msgid="169228218944976720">"Aplikasi %1$s ingin menyambung ke Rangkaian Wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7577787709633050605">"Satu aplikasi"</string>
-    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Langsung"</string>
-    <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"Mulakan Wi-Fi Langsung. Hal ini akan mematikan pengendalian klien/liputan Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"Tidak dapat memulakan Wi-Fi Langsung."</string>
+    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"Mulakan Wi-Fi Direct. Hal ini akan mematikan pengendalian klien/liputan Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"Tidak dapat memulakan Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"Wi-Fi Direct dihidupkan"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="5571179544720861510">"Ketik untuk mendapatkan tetapan"</string>
     <string name="accept" msgid="5447154347815825107">"Terima"</string>

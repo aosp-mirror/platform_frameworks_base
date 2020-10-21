@@ -74,7 +74,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (telefondan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (mediadan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (telefon yoki mediadan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Faol, batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Faol, batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Faol, L: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
@@ -127,8 +127,8 @@
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Chap eshitish apparati ulanmoqda…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"O‘ng eshitish apparati ulanmoqda…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Chap eshitish apparati – batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"O‘ng eshitish apparati – batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Chap eshitish apparati, batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"O‘ng eshitish apparati, batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi: bitta ustun"</string>
@@ -146,12 +146,12 @@
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth modem"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Modem"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Modem rejimi"</string>
-    <string name="managed_user_title" msgid="449081789742645723">"Barcha ishchi ilovalar"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"Barcha ishga oid ilovalar"</string>
     <string name="user_guest" msgid="6939192779649870792">"Mehmon"</string>
     <string name="unknown" msgid="3544487229740637809">"Noma’lum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Foydalanuvchi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar o‘rnatilmagan"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar belgilanmagan"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Nutq sintezi sozlamalari"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Nutq sintezi"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nutq tezligi"</string>

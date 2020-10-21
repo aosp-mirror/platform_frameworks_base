@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Ya Kibinafsi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
+    <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Weka chaguo kwa ajili ya maendeleo ya programu"</string>
@@ -403,7 +403,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Kifaa kinakaribia kuzimika (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="2164502803652200439">"Imebaki <xliff:g id="TIME">%1$s</xliff:g> chaji ijae"</string>
-    <string name="power_charging_duration" msgid="3831988737429146807">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hadi ijae chaji"</string>
+    <string name="power_charging_duration" msgid="3831988737429146807">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ijae chaji"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
     <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"inachaji"</string>
@@ -441,7 +441,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Haijasajiliwa"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Hapatikani"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Hamna"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">Imeunganisha vifaa %1$d</item>

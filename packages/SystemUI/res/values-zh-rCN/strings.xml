@@ -148,7 +148,7 @@
     <string name="accessibility_data_two_bars" msgid="4576231688545173059">"数据信号强度为两格。"</string>
     <string name="accessibility_data_three_bars" msgid="3036562180893930325">"数据信号强度为三格。"</string>
     <string name="accessibility_data_signal_full" msgid="283507058258113551">"数据信号满格。"</string>
-    <string name="accessibility_wifi_name" msgid="4863440268606851734">"已连接到<xliff:g id="WIFI">%s</xliff:g>。"</string>
+    <string name="accessibility_wifi_name" msgid="4863440268606851734">"已连接到“<xliff:g id="WIFI">%s</xliff:g>”。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已连接到<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"已连接到 <xliff:g id="CAST">%s</xliff:g>。"</string>
     <string name="accessibility_no_wimax" msgid="2014864207473859228">"无 WiMAX 信号。"</string>
@@ -307,7 +307,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"蓝牙：关闭"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"没有可用的配对设备"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"电池电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> 的电量"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音频"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳机"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"输入"</string>
@@ -371,7 +371,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限为<xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g>警告"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"工作资料"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜间模式"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"护眼模式"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"在日落时开启"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"在日出时关闭"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"在<xliff:g id="TIME">%s</xliff:g> 开启"</string>
@@ -405,7 +405,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"请重新调整手机位置以便更快速地充电"</string>
-    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"请重新调整手机位置以便进行无线充电"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"请调整手机位置以便进行无线充电"</string>
     <string name="do_disclosure_generic" msgid="2388094207542706440">"此设备由您所属单位管理"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"此设备是由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>托管"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑动图标即可拨打电话"</string>
@@ -535,7 +535,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"声音设置"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"展开"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"收起"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动字幕媒体"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动生成媒体字幕"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"关闭字幕提示"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕重叠显示"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"启用"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"无标题"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"点按即可重启此应用并进入全屏模式。"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"打开<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>气泡的相关设置"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"要允许来自<xliff:g id="APP_NAME">%1$s</xliff:g>的气泡吗？"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>对话泡的设置"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"要允许<xliff:g id="APP_NAME">%1$s</xliff:g>显示对话泡吗？"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"管理"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"拒绝"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"允许"</string>

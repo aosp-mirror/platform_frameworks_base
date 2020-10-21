@@ -30,7 +30,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ချွတ်ယွင်းချက်အစီရင်ခံစာကို ဖန်သားပြင်ဓာတ်ပုံမှတ်တမ်းမပါဘဲ မျှဝေရန် တို့ပါ သို့မဟုတ် ဖန်သားပြင်ဓာတ်ပုံမှတ်တမ်းတင်ခြင်း ပြီးဆုံးသည်အထိ စောင့်ပါ"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"ချွတ်ယွင်းချက်အစီရင်ခံစာများတွင် သင့်အတွက် အရေးကြီးသည့် ဒေတာများ (အက်ပ်အသုံးပြုမှုနှင့် တည်နေရာအချက်အလက် ကဲ့သို့) ပါဝင်သည့် စနစ်၏မှတ်တမ်းဖိုင်မျိုးစုံပါဝင်ပါသည်။ ချွတ်ယွင်းချက်အစီရင်ခံစာများကို သင်ယုံကြည်စိတ်ချရသည့်လူများ၊ အက်ပ်များနှင့်သာ မျှဝေပါ။"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"နောက်ထပ်မပြပါနှင့်"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"ချို့ယွင်းမှု အစီရင်ခံစာများ"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"ချွတ်ယွင်းမှု အစီရင်ခံစာများ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို ဖတ်၍မရပါ"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ဇစ်ဖိုင်သို့ ချွတ်ယွင်းချက် အစီရင်ခံစာအသေးစိတ် အချက်အလက်များကို ထည့်၍မရပါ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"အမည်မဲ့"</string>

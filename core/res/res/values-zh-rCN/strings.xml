@@ -92,7 +92,7 @@
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"紧急回拨模式"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"移动数据状态"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"短信"</string>
-    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"语音邮件"</string>
+    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"语音信息"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"WLAN 通话"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM 卡状态"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"高优先顺序 SIM 卡状态"</string>
@@ -284,7 +284,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"获取此设备的位置信息"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"要允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”获取此设备的位置信息吗？"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"只有当您使用该应用时，该应用才有权访问位置信息"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"要&lt;b&gt;一律允许&lt;/b&gt;允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问此设备的位置信息吗？"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"要&lt;b&gt;一律&lt;/b&gt;允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;使用此设备的位置信息吗？"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"目前只有当您使用该应用时，该应用才能访问位置信息"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"访问您的日历"</string>
@@ -832,7 +832,7 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM卡缺失或无法读取。请插入SIM卡。"</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM卡无法使用。"</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"您的SIM卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张SIM卡。"</string>
-    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一曲"</string>
+    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一首"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"下一曲"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"暂停"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"播放"</string>
@@ -946,7 +946,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
-    <string name="permlab_addVoicemail" msgid="4770245808840814471">"添加语音邮件"</string>
+    <string name="permlab_addVoicemail" msgid="4770245808840814471">"添加语音信息"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"允许应用在您的语音信箱中留言。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"修改“浏览器”地理位置的权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"允许应用修改“浏览器”的地理位置权限。恶意应用可能借此向任意网站发送位置信息。"</string>

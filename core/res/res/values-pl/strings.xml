@@ -230,8 +230,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcje telefonu"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Blokada ekranu"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Wyłącz"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Alarmowy"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Zgłoszenie błędu"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Nagły przypadek"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Zgłoś błąd"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Zakończ sesję"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Zrzut ekranu"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Zgłoś błąd"</string>
@@ -1176,10 +1176,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Otwórz w aplikacji"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otwórz w aplikacji %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Otwórz"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otwieraj linki w"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otwieraj linki w aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Udziel uprawnień"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Edytuj w aplikacji %1$s"</string>
@@ -1871,8 +1871,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny, \nwyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny,\n wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n· włącza tryb ciemny \n· wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n· włącza tryb ciemny\n· wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
@@ -1981,7 +1981,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikacja niedostępna"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacja <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie jest teraz dostępna. Zarządza tym aplikacja <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Więcej informacji"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil służbowy?"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil do pracy?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacje do pracy, powiadomienia, dane i inne funkcje profilu do pracy zostaną włączone"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Włącz"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacja jest na starszą wersję Androida i może nie działać prawidłowo. Sprawdź dostępność aktualizacji lub skontaktuj się z programistą."</string>

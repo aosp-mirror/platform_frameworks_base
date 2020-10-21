@@ -1645,7 +1645,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Spustit prohlížeč?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Přijmout hovor?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Vždy"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Nastavit na Otevírat vždy"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Otevírat vždy"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Pouze jednou"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Nastavení"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s pracovní profily nepodporuje."</string>

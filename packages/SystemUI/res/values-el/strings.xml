@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Ειδοποιήσεις"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"Έγινε σύνδεση μέσω Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Ρύθμιση μεθόδων εισαγωγής"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Φυσικό πληκτρολόγιο"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Κανονικό πληκτρολόγιο"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στο αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Να ανοίγει η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
@@ -191,7 +191,7 @@
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Τα δεδομένα κινητής τηλεφωνίας απενεργοποιήθηκαν"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Δεν ρυθμίστηκε ώστε να χρησιμοποιεί δεδομένα"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Ανενεργά"</string>
-    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Πρόσδεση Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Σύνδεση με Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Λειτουργία πτήσης."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ενεργό."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Δεν υπάρχει κάρτα SIM."</string>

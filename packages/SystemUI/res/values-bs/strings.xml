@@ -55,12 +55,12 @@
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
     <string name="always_use_device" msgid="210535878779644679">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem uređaja spojenog na USB nije dozvoljeno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka koristeći USB. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem USB-a nije dozvoljeno"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka putem USB-a. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB priključak je onemogućen"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"USB priključak je onemogućen kako bi se vaš uređaj zaštitio od tečnosti i nečistoća i neće detektirati priključene uređaje.\n\nDobit ćete obavještenje kada ponovo bude sigurno koristiti USB priključak."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB priključak je omogućen za prepoznavanje punjača i pribora"</string>
@@ -538,7 +538,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Postavke zvuka"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Proširi"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Suzi"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatski titluj medije"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatski titlovi za medije"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Savjet u titlu"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Preklapanje titlova"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"omogući"</string>
@@ -575,9 +575,7 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Isključi zvuk"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Na telefonu je uključena vibracija"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"Zvuk na telefonu je isključen"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for volume_stream_content_description_unmute (7729576371406792977) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Dodirnite da uključite zvukove."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Dodirnite za postavljanje vibracije. Zvukovi usluga pristupačnosti mogu biti isključeni."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Dodirnite da isključite zvuk. Zvukovi usluga pristupačnosti mogu biti isključeni."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Dodirnite da postavite vibraciju."</string>
@@ -656,14 +654,14 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimiziraj"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Nečujno"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Ostani u nečujnom načinu rada"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Upozorenja"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Zvučni"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Nastavi upozoravati"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Isključi obavještenja"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Nastaviti prikazivanje obavještenja iz ove aplikacije?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Nečujno"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"Upozorenja"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"Zvučni"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaže vam da se koncentrirate bez zvuka ili vibracije."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Privlači vašu pažnju pomoću zvuka ili vibracije."</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Privlači vam pažnju pomoću zvuka ili vibracije."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovdje nije moguće konfigurirati ovu grupu obavještenja"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obavještenje preko proksi servera"</string>
@@ -904,7 +902,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ili internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

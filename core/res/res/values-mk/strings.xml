@@ -230,7 +230,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај за грешка"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Завршете ја сесијата"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Слика од екранот"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Извештај за грешка"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Извештај за грешки"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
@@ -1136,10 +1136,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Отвори со"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Отвори со %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Отвори"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Отворајте врски на <xliff:g id="HOST">%1$s</xliff:g> со"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Отворајте врски со"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Отворајте врски со <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Отворајте врски на <xliff:g id="HOST">%1$s</xliff:g> со <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Отворајте линкови на <xliff:g id="HOST">%1$s</xliff:g> со"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Отворајте линкови со"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Отворајте линкови со <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Отворајте линкови на <xliff:g id="HOST">%1$s</xliff:g> со <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Дозволи пристап"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Измени со"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Измени со %1$s"</string>
@@ -1360,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Поврзаниот уред се полни преку USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Вклучен е пренос на датотеки преку USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Вклучен е PTP преку USB"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Вклучено е врзување преку USB"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Вклучен е интернет преку USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Вклучен е MIDI преку USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Поврзан е USB-додаток"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Допрете за повеќе опции."</string>
@@ -1520,8 +1520,8 @@
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Врати ги избришаните"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Не прави ништо засега"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Изберете сметка"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"Додај сметка"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Додај сметка"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"Додајте сметка"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Додајте сметка"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Зголеми"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Намали"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> допри и задржи."</string>
@@ -1556,9 +1556,7 @@
     <string name="action_bar_home_description" msgid="1501655419158631974">"Движи се кон дома"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Движи се нагоре"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Повеќе опции"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for action_bar_home_description_format (5087107531331621803) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Внатрешно заедничко место за складирање"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"СД картичка"</string>
@@ -1601,7 +1599,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Стартувај прелистувач?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Прифати повик?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Секогаш"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Поставете на секогаш отворај"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Секојпат"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Само еднаш"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Поставки"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s не поддржува работен профил"</string>
@@ -1641,7 +1639,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Употреби ја својата шема"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внеси PIN на SIM картичка"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"Внеси PIN"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"Впишете PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Внеси посакуван PIN код"</string>
@@ -1789,7 +1787,7 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"Услугате <xliff:g id="NAME">%s</xliff:g> е инсталирана"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Допри да се овозможи"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Внесете PIN на админстратор"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Внеси PIN"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Впишете PIN"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Неточно"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Тековен PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"Нов PIN"</string>
@@ -1824,9 +1822,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува темна тема\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува темна тема\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Вклучете Штедач на интернет?"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува „Темна тема“;\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1905,7 +1903,7 @@
     <string name="importance_from_person" msgid="4235804979664465383">"Ова е важно заради луѓето кои се вклучени."</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Веќе постои корисник со оваа сметка.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Додај јазик"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Додајте јазик"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Претпочитувања за регион"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Внеси име на јазик"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Предложени"</string>

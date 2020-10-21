@@ -110,8 +110,8 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ਇਨਪੁਟ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ਸੁਣਨ ਦੇ ਸਾਧਨਾਂ ਲਈ ਵਰਤੋ"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ਪੇਅਰ ਕਰੋ"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ਪੇਅਰ ਕਰੋ"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ਜੋੜਾਬੱਧ ਕਰੋ"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ਜੋੜਾਬੱਧ ਕਰੋ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ਰੱਦ ਕਰੋ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ਜੋੜਾਬੱਧ ਕਰਨਾ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਪੇਅਰ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
@@ -151,7 +151,7 @@
     <string name="unknown" msgid="3544487229740637809">"ਅਗਿਆਤ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ਵਰਤੋਂਕਾਰ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"ਕੁਝ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਕੀਤੇ"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"ਕੋਈ ਡਿਫੌਲਟਸ ਸੈਟ ਨਹੀਂ ਕੀਤੇ"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"ਕੋਈ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਸੈਟਿੰਗਾਂ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ਬੋਲਣ ਦੀ ਗਤੀ"</string>
@@ -193,7 +193,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ਪ੍ਰੋਫਾਈਲ ਚੁਣੋ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ਨਿੱਜੀ"</string>
-    <string name="category_work" msgid="4014193632325996115">"ਦਫ਼ਤਰ"</string>
+    <string name="category_work" msgid="4014193632325996115">"ਕਾਰਜ-ਸਥਾਨ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ਐਪ ਵਿਕਾਸ ਲਈ ਚੋਣਾਂ ਸੈੱਟ ਕਰੋ"</string>

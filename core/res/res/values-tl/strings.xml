@@ -1467,7 +1467,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"I-sync"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Pagiging Accessible"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Accessibility"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Notification listener"</string>
@@ -1673,8 +1673,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Alisin"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Pagiging Accessible?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume sa loob ng 3 segundo.\n\n Kasalukuyang feature ng pagiging naa-access:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Maaari mong baguhin ang feature sa Mga Setting &gt; Pagiging Accessible."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume sa loob ng 3 segundo.\n\n Kasalukuyang feature ng pagiging naa-access:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Maaari mong baguhin ang feature sa Mga Setting &gt; Accessibility."</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"I-off ang Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
@@ -1682,10 +1682,10 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Na-on ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Na-off ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pindutin nang matagal ang parehong volume key sa loob ng tatlong segundo para magamit ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Pumili ng serbisyong gagamitin kapag na-tap mo ang button ng pagiging accessible:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Pumili ng serbisyong gagamitin sa galaw ng pagiging accessible (pag-swipe pataas mula sa ibaba ng screen gamit ang dalawang daliri):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Pumili ng serbisyong gagamitin sa galaw ng pagiging accessible (pag-swipe pataas mula sa ibaba ng screen gamit ang tatlong daliri):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Para magpalipat-lipat sa mga serbisyo, pindutin nang matagal ang button ng pagiging accessible."</string>
+    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Pumili ng serbisyong gagamitin kapag na-tap mo ang button ng accessibility:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Pumili ng serbisyong gagamitin sa galaw ng accessibility (pag-swipe pataas mula sa ibaba ng screen gamit ang dalawang daliri):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Pumili ng serbisyong gagamitin sa galaw ng accessibility (pag-swipe pataas mula sa ibaba ng screen gamit ang tatlong daliri):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Para magpalipat-lipat sa mga serbisyo, pindutin nang matagal ang button ng accessibility."</string>
     <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Para magpalipat-lipat sa mga serbisyo, mag-swipe pataas gamit ang dalawang daliri at i-hold."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Para magpalipat-lipat sa mga serbisyo, mag-swipe pataas gamit ang tatlong daliri at i-hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Pag-magnify"</string>

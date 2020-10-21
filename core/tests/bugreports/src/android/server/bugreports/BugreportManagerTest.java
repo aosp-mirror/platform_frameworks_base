@@ -58,6 +58,8 @@ public class BugreportManagerTest {
     private Handler mHandler;
     private Executor mExecutor;
     private BugreportManager mBrm;
+    private File mBugreportFile;
+    private File mScreenshotFile;
     private ParcelFileDescriptor mBugreportFd;
     private ParcelFileDescriptor mScreenshotFd;
 
@@ -73,8 +75,10 @@ public class BugreportManagerTest {
         };
 
         mBrm = getBugreportManager();
-        mBugreportFd = parcelFd("bugreport_" + name.getMethodName(), ".zip");
-        mScreenshotFd = parcelFd("screenshot_" + name.getMethodName(), ".png");
+        mBugreportFile = createTempFile("bugreport_" + name.getMethodName(), ".zip");
+        mScreenshotFile = createTempFile("screenshot_" + name.getMethodName(), ".png");
+        mBugreportFd = parcelFd(mBugreportFile);
+        mScreenshotFd = parcelFd(mScreenshotFile);
 
         getPermissions();
     }
@@ -121,6 +125,21 @@ public class BugreportManagerTest {
     }
 
     @Test
+    public void normalFlow_full() throws Exception {
+        BugreportCallbackImpl callback = new BugreportCallbackImpl();
+        mBrm.startBugreport(mBugreportFd, mScreenshotFd, full(), mExecutor, callback);
+
+        waitTillDoneOrTimeout(callback);
+        assertThat(callback.isDone()).isTrue();
+        assertThat(callback.getErrorCode()).isEqualTo(
+                BugreportCallback.BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT);
+        // bugreport and screenshot files should be empty when user consent timed out.
+        assertThat(mBugreportFile.length()).isEqualTo(0);
+        assertThat(mScreenshotFile.length()).isEqualTo(0);
+        assertFdsAreClosed(mBugreportFd, mScreenshotFd);
+    }
+
+    @Test
     public void simultaneousBugreportsNotAllowed() throws Exception {
         // Start bugreport #1
         BugreportCallbackImpl callback = new BugreportCallbackImpl();
@@ -129,9 +148,10 @@ public class BugreportManagerTest {
         // Before #1 is done, try to start #2.
         assertThat(callback.isDone()).isFalse();
         BugreportCallbackImpl callback2 = new BugreportCallbackImpl();
-        ParcelFileDescriptor bugreportFd2 = parcelFd("bugreport_2_" + name.getMethodName(), ".zip");
-        ParcelFileDescriptor screenshotFd2 =
-                parcelFd("screenshot_2_" + name.getMethodName(), ".png");
+        File bugreportFile2 = createTempFile("bugreport_2_" + name.getMethodName(), ".zip");
+        File screenshotFile2 = createTempFile("screenshot_2_" + name.getMethodName(), ".png");
+        ParcelFileDescriptor bugreportFd2 = parcelFd(bugreportFile2);
+        ParcelFileDescriptor screenshotFd2 = parcelFd(screenshotFile2);
         mBrm.startBugreport(bugreportFd2, screenshotFd2, wifi(), mExecutor, callback2);
         Thread.sleep(500 /* .5s */);
 
@@ -271,12 +291,16 @@ public class BugreportManagerTest {
         return bm;
     }
 
-    private static ParcelFileDescriptor parcelFd(String prefix, String extension) throws Exception {
-        File f = File.createTempFile(prefix, extension);
+    private static File createTempFile(String prefix, String extension) throws Exception {
+        final File f = File.createTempFile(prefix, extension);
         f.setReadable(true, true);
         f.setWritable(true, true);
+        f.deleteOnExit();
+        return f;
+    }
 
-        return ParcelFileDescriptor.open(f,
+    private static ParcelFileDescriptor parcelFd(File file) throws Exception {
+        return ParcelFileDescriptor.open(file,
                 ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_APPEND);
     }
 
@@ -341,5 +365,14 @@ public class BugreportManagerTest {
      */
     private static BugreportParams interactive() {
         return new BugreportParams(BugreportParams.BUGREPORT_MODE_INTERACTIVE);
+    }
+
+    /*
+     * Returns a {@link BugreportParams} for full bugreport that includes a screenshot.
+     *
+     * <p> This can take on the order of minutes to finish
+     */
+    private static BugreportParams full() {
+        return new BugreportParams(BugreportParams.BUGREPORT_MODE_FULL);
     }
 }

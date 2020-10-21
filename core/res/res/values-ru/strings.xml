@@ -63,7 +63,7 @@
     <string name="ColpMmi" msgid="4736462893284419302">"Идентификатор подключенной линии"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Ограничение идентификатора подключенной линии"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Переадресация вызовов"</string>
-    <string name="CwMmi" msgid="3164609577675404761">"Параллельный вызов"</string>
+    <string name="CwMmi" msgid="3164609577675404761">"Ожидание вызова"</string>
     <string name="BaMmi" msgid="7205614070543372167">"Запрет вызовов"</string>
     <string name="PwdMmi" msgid="3360991257288638281">"Смена пароля"</string>
     <string name="PinMmi" msgid="7133542099618330959">"Смена PIN"</string>
@@ -291,7 +291,7 @@
     <string name="permgrouprequest_location" msgid="5261379525646615507">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о местоположении устройства?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Доступ к местоположению будет открыт, только пока вы пользуетесь приложением."</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Разрешить приложению \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" постоянный доступ к местоположению устройства?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Сейчас у приложения есть доступ к местоположению только во время его использования."</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Сейчас у приложения есть доступ к местоположению только во время использования этого приложения."</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"доступ к календарю"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к календарю?"</string>
@@ -1009,7 +1009,7 @@
     <string name="weeks" msgid="3516247214269821391">"нед."</string>
     <string name="year" msgid="5182610307741238982">"г."</string>
     <string name="years" msgid="5797714729103773425">"г."</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"сейчас"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"Сейчас"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> мин.</item>
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> мин.</item>
@@ -1873,7 +1873,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\nвключается тёмная тема;\nотключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\").\n\n"<annotation id="url">"Подробнее…"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\nвключается тёмная тема;\nотключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\")."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача данных для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включить"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

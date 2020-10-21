@@ -535,7 +535,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"صوتی ترتیبات"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"سکیڑیں"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر کیپشن میڈیا"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر میڈیا پر کیپشن لگائیں"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"کیپشنز کی تجویز بند کریں"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"کیپشنز کا اوورلے"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کریں"</string>
@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"اسکرین پن کردہ ہے"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے اور مجموعی جائزہ بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کے لیے سوائپ کریں اور پکڑ کر رکھیں۔"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کے لیے اوپر سوائپ کریں اور پکڑ کر رکھیں۔"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے مجموعی جائزہ بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"ہوم\" بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"مجموعی جائزہ\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>

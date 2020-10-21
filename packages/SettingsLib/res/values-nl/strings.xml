@@ -205,7 +205,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Foutopsporingsmodus bij USB-verbinding"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Autorisatie USB-foutopsporing intrekken"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snelle link naar bugrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Een knop in het voedingsmenu weergeven om een bugrapport te maken"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Een knop in het aan/uit-menu weergeven om een bugrapport te maken"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Scherm gaat nooit uit tijdens het opladen"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Snoop-logbestand voor Bluetooth-HCI inschakelen"</string>

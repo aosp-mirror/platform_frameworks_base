@@ -1224,7 +1224,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> üçün senpşotu paylaşa bilərsiniz. Diqqətli olun: bu snepşotda yazdıqlarınızdan ibarət olan mühüm şəxsi məlumat ola bilər. Əməliyyat həmin məlumata daxil ola bilər."</string>
     <string name="sendText" msgid="493003724401350724">"Mətn üçün əməliyyat seçin"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Zəngin səs gücü"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Media həcmi"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Media səsi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth vasitəsilə oynadılır"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Səssiz zəng"</string>
     <string name="volume_call" msgid="7625321655265747433">"Daxili zəng səsi"</string>
@@ -1235,7 +1235,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth həcmi"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Zəng səsi gücü"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Zəng həcmi"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Media həcmi"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Media səsi"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Bildiriş səsi"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Defolt rinqton"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Defolt (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1822,8 +1822,8 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət bunları edir:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri söndürür və ya məhdudlaşdırır"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq dataya daxil ola bilər, ancaq bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1927,7 +1927,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Faylları görmək üçün basın"</string>
     <string name="pin_target" msgid="8036028973110156895">"Pin kod"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Çıxarın"</string>
-    <string name="app_info" msgid="6113278084877079851">"Tətbiq məlumatı"</string>
+    <string name="app_info" msgid="6113278084877079851">"Tətbiq infosu"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo başlayır…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Cihaz sıfırlanır…"</string>

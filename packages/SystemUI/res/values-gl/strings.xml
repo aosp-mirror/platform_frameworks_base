@@ -68,7 +68,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Máis información"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estirar ata ocupar todo"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Crear captura"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Facer captura"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Gardouse a captura de pantalla"</string>
@@ -338,7 +338,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wifi activada"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Non hai redes wifi dispoñibles"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Activando…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Emisión da pantalla"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Emitir pantalla"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Emitindo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sen nome"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Listo para emitir"</string>
@@ -386,7 +386,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Pasar o dedo cara arriba para cambiar de aplicación"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra cara á dereita para cambiar de aplicacións rapidamente"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activar/desactivar Visión xeral"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Cargada"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Cargado"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Cargando"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> para completar a carga"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Non está cargando"</string>
@@ -827,7 +827,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Abrir configuración rápida."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Pechar a configuración rápida."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Alarma definida."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Iniciaches sesión como <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Sesión iniciada como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Non hai conexión a Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Abrir detalles."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Opcións non-dispoñibles polo seguinte motivo: <xliff:g id="REASON">%s</xliff:g>"</string>

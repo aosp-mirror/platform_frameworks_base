@@ -167,7 +167,7 @@ class ImageGLWallpaper {
     private void setupTexture(Bitmap bitmap) {
         final int[] tids = new int[1];
 
-        if (bitmap == null) {
+        if (bitmap == null || bitmap.isRecycled()) {
             Log.w(TAG, "setupTexture: invalid bitmap");
             return;
         }
@@ -179,16 +179,20 @@ class ImageGLWallpaper {
             return;
         }
 
-        // Bind a named texture to a target.
-        glBindTexture(GL_TEXTURE_2D, tids[0]);
-        // Load the bitmap data and copy it over into the texture object that is currently bound.
-        GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
-        // Use bilinear texture filtering when minification.
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        // Use bilinear texture filtering when magnification.
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        mTextureId = tids[0];
+        try {
+            // Bind a named texture to a target.
+            glBindTexture(GL_TEXTURE_2D, tids[0]);
+            // Load the bitmap data and copy it over into the texture object
+            // that is currently bound.
+            GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
+            // Use bilinear texture filtering when minification.
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            // Use bilinear texture filtering when magnification.
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            mTextureId = tids[0];
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Failed uploading texture: " + e.getLocalizedMessage());
+        }
     }
 
     void useTexture() {

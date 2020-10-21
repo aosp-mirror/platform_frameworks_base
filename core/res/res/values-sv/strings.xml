@@ -535,7 +535,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Ofullständigt fingeravtryck. Försök igen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingeravtryckssensorn är smutsig. Rengör den och försök igen."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1463,7 +1463,7 @@
     <string name="deny" msgid="6632259981847676572">"Neka"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Begärd behörighet"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Begärd behörighet\nför kontot <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din arbetsprofil"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din jobbprofil"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Du använder den här appen i din jobbprofil"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Indatametod"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synkronisera"</string>
@@ -1602,7 +1602,7 @@
     <string name="activity_resolver_set_always" msgid="4142825808921411476">"Ställ in på att alltid öppnas"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Bara en gång"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Inställningar"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s har inte stöd för arbetsprofil"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s har inte stöd för jobbprofil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Surfplatta"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Mobil"</string>
@@ -1821,10 +1821,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"I syfte att förlänga batteritiden sker följande i batterisparläget:\n·mörkt tema aktiveras\n·aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”, inaktiveras eller begränsas\n\n"<annotation id="url">"Läs mer"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"I syfte att förlänga batteritiden sker följande i batterisparläget:\n·mörkt tema aktiveras\n·aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”, inaktiveras eller begränsas"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterisparläget förlänger batteritiden genom att:\n·aktivera mörkt tema\n·inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batterisparläget förlänger batteritiden genom att:\n·aktivera mörkt tema\n·inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktivera Databesparing?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

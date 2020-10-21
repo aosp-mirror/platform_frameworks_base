@@ -544,7 +544,7 @@
     <string name="screen_pinning_title" msgid="7357611095909618178">"স্ক্রিন পিন করা হয়েছে"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"ফিরে যান\" এবং \"হোম\" বোতামদুটি ট্যাপ করে ধরে রাখুন।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"হোম\" বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"এই স্ক্রিনটি আনপিন করতে \"ফিরে যান\" এবং \"এক নজরে\" বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
@@ -892,12 +892,12 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"বিরক্ত করবে না বিকল্পটি একটি অ্যাপ <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"বিরক্ত করবে না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম বা অ্যাপের দ্বারা চালু করা হয়েছে।"</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> পর্যন্ত"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"রাখুন"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"বদলে দিন"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"পটভূমিতে অ্যাপ চালু আছে"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ব্যাটারি এবং ডেটার ব্যবহারের বিশদ বিবরণের জন্য ট্যাপ করুন"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"মোবাইল ডেটা বন্ধ করবেন?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপনি <xliff:g id="CARRIER">%s</xliff:g>-এর মাধ্যমে ডেটা অথবা ইন্টারনেট অ্যাক্সেস করতে পারবেন না। শুধুমাত্র ওয়াই-ফাইয়ের মাধ্যমেই ইন্টারনেট অ্যাক্সেস করা যাবে।"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপনি \'<xliff:g id="CARRIER">%s</xliff:g>\'-এর মাধ্যমে ডেটা অথবা ইন্টারনেট অ্যাক্সেস করতে পারবেন না। শুধুমাত্র ওয়াই-ফাইয়ের মাধ্যমেই ইন্টারনেট অ্যাক্সেস করা যাবে।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"আপনার পরিষেবা প্রদানকারী"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"একটি অ্যাপ কোনও অনুমোদনের অনুরোধকে ঢেকে দিচ্ছে, তাই সেটিংস থেকে আপনার প্রতিক্রিয়া যাচাই করা যাচ্ছে না।"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> অ্যাপটিকে <xliff:g id="APP_2">%2$s</xliff:g> এর অংশ দেখানোর অনুমতি দেবেন?"</string>
@@ -928,7 +928,7 @@
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> খুলুন"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপের বাবল চালু করবেন?"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"ম্যানেজ করা"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"ম্যানেজ করুন"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"খারিজ করুন"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"অনুমতি দিন"</string>
     <string name="ask_me_later_bubbles" msgid="2666199914636253557">"আমাকে পরে জিজ্ঞাসা করুন"</string>

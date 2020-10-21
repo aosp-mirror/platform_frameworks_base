@@ -205,7 +205,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Fejlretningstilstand, når USB er tilsluttet"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Tilbagekald tilladelser for USB-fejlretning"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genvej til fejlrapportering"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knap til oprettelse af fejlrapporter i afbrydermenuen"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knap til oprettelse af fejlrapporter i menuen for afbryderknappen"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Lås ikke"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skærmen går ikke i dvale under opladning"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktivér Bluetooth HCI spionlog"</string>

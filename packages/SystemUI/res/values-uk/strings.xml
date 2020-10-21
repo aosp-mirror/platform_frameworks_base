@@ -375,7 +375,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Обмеження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Застереження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Робочий профіль"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний режим"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -556,7 +556,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Щоб відкріпити цей екран, натисніть і утримуйте кнопки \"Назад\" та \"Огляд\""</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Щоб відкріпити цей екран, натисніть і утримуйте кнопки \"Назад\" та \"Головний екран\""</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Щоб відкріпити цей екран, проведіть пальцем вгору й утримуйте"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"Зрозуміло"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ні, дякую"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Екран закріплено"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"Екран відкріплено"</string>
@@ -620,7 +620,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Це цікаво, але будьте обачні"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner пропонує нові способи налаштувати та персоналізувати інтерфейс користувача Android. Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
-    <string name="got_it" msgid="477119182261892069">"Зрозуміло"</string>
+    <string name="got_it" msgid="477119182261892069">"OK"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Вітаємо! System UI Tuner установлено в додатку Налаштування"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Видалити з додатка Налаштування"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Видалити інструмент System UI Tuner із додатка Налаштування та припинити користуватися всіма його функціями?"</string>
@@ -906,7 +906,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замінити"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Додатки, які працюють у фоновому режимі"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Вимкнути мобільне передавання даних?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Вимкнути мобільний Інтернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Ви не матимете доступу до даних чи Інтернету через оператора <xliff:g id="CARRIER">%s</xliff:g>. Інтернет буде доступний лише через Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ваш оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
@@ -936,9 +936,9 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без назви"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Натисніть, щоб перезапустити додаток і перейти в повноекранний режим."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Відкрити додаток <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Налаштування спливаючих підказок від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Дозволити спливаючі підказки від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Керувати"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Налаштування спливаючих чатів від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Дозволити спливаючі чати від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"Налаштувати"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Заборонити"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Дозволити"</string>
     <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Запитати пізніше"</string>

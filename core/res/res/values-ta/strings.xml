@@ -681,7 +681,7 @@
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"சாதன குளோபல் ப்ராக்ஸியை அமை"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"கொள்கை இயக்கப்பட்டிருக்கும்போது பயன்படுத்த வேண்டிய சாதன குளோபல் ப்ராக்ஸியை அமைக்கவும். சாதன உரிமையாளரால் மட்டுமே குளோபல் ப்ராக்ஸியை அமைக்க முடியும்."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"திரைப் பூட்டு கடவுச்சொல் காலாவதி நேரத்தை அமை"</string>
-    <string name="policydesc_expirePassword" msgid="9136524319325960675">"எந்த இடைவெளியில் திரைப் பூட்டின் கடவுச்சொல், பின் அல்லது வடிவம் மாற்றப்பட வேண்டும் என்பதை மாற்றும்."</string>
+    <string name="policydesc_expirePassword" msgid="9136524319325960675">"எந்த இடைவெளியில் திரைப் பூட்டின் கடவுச்சொல், பின் அல்லது பேட்டர்ன் மாற்றப்பட வேண்டும் என்பதை மாற்றும்."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"சேமிப்பிட முறைமையாக்கலை அமை"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"சேமித்த ஆப்ஸ் டேட்டாவை முறைமையாக்கப்பட வேண்டும் என்பதைக் கோரலாம்."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"கேமராக்களை முடக்கு"</string>
@@ -871,11 +871,11 @@
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"தடைநீக்கு"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"ஒலியை இயக்கு"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"ஒலியை முடக்கு"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"வடிவம் தொடங்கியது"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"வடிவம் அழிக்கப்பட்டது"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"பேட்டர்ன் தொடங்கியது"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"பேட்டர்ன் அழிக்கப்பட்டது"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6746676335293144163">"கலம் சேர்க்கப்பட்டது"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"கலம் <xliff:g id="CELL_INDEX">%1$s</xliff:g> சேர்க்கப்பட்டது"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"வடிவம் நிறைவடைந்தது"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"பேட்டர்ன் நிறைவடைந்தது"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"வடிவப் பகுதி."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. விட்ஜெட் %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"விட்ஜெட்டைச் சேர்க்கவும்."</string>
@@ -892,7 +892,7 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"விட்ஜெட் <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> நீக்கப்பட்டது."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"திறப்பதற்கான பகுதியை விவரிக்கவும்."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ஸ்லைடு மூலம் திறத்தல்."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"வடிவம் மூலம் திறத்தல்."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"பேட்டர்ன் மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"முகம் காட்டித் திறத்தல்."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pin மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"சிம்மைத் திறக்கும் பின்."</string>
@@ -1630,7 +1630,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", பாதுகாப்பானது"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"வடிவத்தை மறந்துவிட்டீர்களா"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"தவறான வடிவம்"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"தவறான பேட்டர்ன்"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"தவறான கடவுச்சொல்"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"தவறான பின்"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -1677,7 +1677,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ஷார்ட்கட் இயக்கத்தில் இருந்தால், இரண்டு ஒலியளவு பொத்தான்களையும் 3 வினாடிகள் அழுத்தி, அணுகல்தன்மை அம்சத்தை இயக்கலாம்.\n\n தற்போதைய அணுகல்தன்மை அம்சம்:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n அமைப்புகள் &gt; அணுகல்தன்மை என்பதற்குச் சென்று, அம்சத்தை மாற்றலாம்."</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"வண்ணத்தை நேர் எதிராக மாற்றுதல்"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"கலர் இன்வெர்ஷன்"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"வண்ணத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>

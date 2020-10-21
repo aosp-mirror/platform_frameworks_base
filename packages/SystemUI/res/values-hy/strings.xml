@@ -149,8 +149,8 @@
     <string name="accessibility_data_three_bars" msgid="3036562180893930325">"Տվյալների երեք գիծ:"</string>
     <string name="accessibility_data_signal_full" msgid="283507058258113551">"Տվյալների ազդանշանը լրիվ է:"</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"Միացված է <xliff:g id="WIFI">%s</xliff:g>-ին:"</string>
-    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Կապակցված է <xliff:g id="BLUETOOTH">%s</xliff:g>-ին:"</string>
-    <string name="accessibility_cast_name" msgid="7344437925388773685">"Կապակցված է <xliff:g id="CAST">%s</xliff:g>-ին:"</string>
+    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Միացված է <xliff:g id="BLUETOOTH">%s</xliff:g>-ին:"</string>
+    <string name="accessibility_cast_name" msgid="7344437925388773685">"Միացված է <xliff:g id="CAST">%s</xliff:g>-ին:"</string>
     <string name="accessibility_no_wimax" msgid="2014864207473859228">"WiMAX չկա:"</string>
     <string name="accessibility_wimax_one_bar" msgid="2996915709342221412">"WiMAX-ի մեկ գիծ:"</string>
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"WiMAX-ի երկու գիծ:"</string>
@@ -350,7 +350,7 @@
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Գունաշտկման ռեժիմ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Հավելյալ կարգավորումներ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Պատրաստ է"</string>
-    <string name="quick_settings_connected" msgid="3873605509184830379">"Կապակցված է"</string>
+    <string name="quick_settings_connected" msgid="3873605509184830379">"Միացված է"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Միացված է, մարտկոցի լիցք՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Միանում է..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Մոդեմի ռեժիմ"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Ֆոնային ռեժիմում աշխատող հավելվածներ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Անջատե՞լ բջջային ինտերնետը"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> օպերատորի բջջային ինտերնետը հասանելի չի լինի: Համացանցից կարող եք օգտվել միայն Wi-Fi-ի միջոցով:"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> օպերատորի բջջային ինտերնետը հասանելի չի լինի: Համացանցից կկարողանաք  օգտվել միայն Wi-Fi-ի միջոցով:"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Ձեր"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Քանի որ ներածումն արգելափակված է ինչ-որ հավելվածի կողմից, Կարգավորումները չեն կարող հաստատել ձեր պատասխանը:"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Թույլատրե՞լ <xliff:g id="APP_0">%1$s</xliff:g> հավելվածին ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>

@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> tarmog‘iga ulanilmoqda…"</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> bilan aloqa o‘rnatilyapti…"</item>
     <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> IP manzil beryapti…"</item>
-    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> tarmog‘iga ulanildi"</item>
+    <item msgid="1043944043827424501">"Bunga ulangan: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Muzlatildi"</item>
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> tarmog‘idan uzilmoqda…"</item>
     <item msgid="699832486578171722">"Uzildi"</item>

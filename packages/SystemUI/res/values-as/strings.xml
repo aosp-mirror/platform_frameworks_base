@@ -892,7 +892,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"অসুবিধা নিদিব-ক কোনো এপ্ (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম বা এপে অন কৰিলে।"</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> পৰ্যন্ত"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"ৰাখক"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"সলনি কৰক"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"নেপথ্যত চলি থকা এপসমূহ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"বেটাৰি আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে বিশদভাৱে জানিবলৈ টিপক"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনো শিৰোনাম নাই"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"এপ্‌টো ৰিষ্টাৰ্ট কৰক আৰু পূৰ্ণ স্ক্ৰীণ ব্যৱহাৰ কৰক।"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> খোলক"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবলৰ ছেটিংসমূহ"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবলসমূহক অনুমতি দিয়ক?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ bubblesৰ ছেটিংসমূহ"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ bubblesক অনুমতি দিয়ক?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"পৰিচালনা কৰক"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"অস্বীকাৰ কৰক"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"অনুমতি দিয়ক"</string>

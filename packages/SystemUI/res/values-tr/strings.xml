@@ -117,7 +117,7 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"sesli yardımı aç"</string>
     <string name="camera_label" msgid="8253821920931143699">"kamerayı aç"</string>
     <string name="cancel" msgid="1089011503403416730">"İptal"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onaylayın"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onayla"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Tekrar dene"</string>
     <string name="biometric_dialog_empty_space_description" msgid="4990792758502834602">"Boş alan, yetkilendirmeyi iptal etmek için dokunun"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Lütfen tekrar deneyin"</string>
@@ -882,7 +882,7 @@
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Uygulama yüklenmeden açıldı. Daha fazla bilgi için dokunun."</string>
     <string name="app_info" msgid="5153758994129963243">"Uygulama bilgisi"</string>
     <string name="go_to_web" msgid="636673528981366511">"Tarayıcıya git"</string>
-    <string name="mobile_data" msgid="4564407557775397216">"Mobil veriler"</string>
+    <string name="mobile_data" msgid="4564407557775397216">"Mobil veri"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>, <xliff:g id="CARRIER_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Kablosuz bağlantı kapalı"</string>

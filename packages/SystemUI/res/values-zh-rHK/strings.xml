@@ -426,7 +426,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"切換使用者，目前使用者是<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"目前的使用者是 <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"顯示個人檔案"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"新增使用者"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"加入使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
     <string name="guest_nickname" msgid="1863770639799615889">"訪客"</string>
     <string name="guest_new_guest" msgid="962155336259570156">"新增訪客"</string>
@@ -542,11 +542,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"螢幕已固定"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"畫面將會繼續顯示，直至您取消固定為止。按住 [返回] 按鈕和主按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"畫面將會繼續顯示，直至您取消固定為止。向上滑動並按住即可取消固定。"</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住「返回」和「概覽」按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住「返回」按鈕和主按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。向上滑動後按住即可取消固定。"</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住「概覽」按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"應用程式將會固定在螢幕上顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"如要取消固定此畫面，請按住 [返回] 按鈕和 [概覽] 按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"如要取消固定此畫面，請按住 [返回] 按鈕和主按鈕"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"如要取消固定此畫面，請向上滑動然後按住"</string>
@@ -658,7 +658,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"靜音"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"發出提醒"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"助您保持專注，不會發出聲音或震動。"</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"發出聲音或震動來吸引您的注意。"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"發出聲音或震動來吸引您注意。"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"無法在此設定這組通知"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"正在背景中執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"輕按即可查看電池和數據用量詳情"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要關閉流動數據嗎？"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」存取流動數據或互聯網。必須連接 Wi-Fi 才能使用互聯網。"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您無法透過「<xliff:g id="CARRIER">%s</xliff:g>」使用流動數據或互聯網。如要使用互聯網，您必須連接 Wi-Fi。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"您的流動網絡供應商"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由於某個應用程式已阻擋權限要求畫面，因此「設定」應用程式無法驗證您的回應。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊嗎？"</string>

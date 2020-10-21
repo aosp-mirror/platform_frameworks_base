@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"ສ່ວນຕິດຕໍ່ຜູ່ໃຊ້ຂອງລະບົບ"</string>
+    <string name="app_label" msgid="4811759950673118541">"ສ່ວນຕິດຕໍ່ຜູ້ໃຊ້ຂອງລະບົບ"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ລຶບ"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"ດຳເນີນຢູ່"</string>
@@ -55,7 +55,7 @@
     <string name="label_view" msgid="6815442985276363364">"ເບິ່ງ"</string>
     <string name="always_use_device" msgid="210535878779644679">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ທຸກເທື່ອທີ່ເຊື່ອມຕໍ່ <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ທຸກເທື່ອທີ່ເຊື່ອມຕໍ່ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"ອະນຸຍາດການດີບັ໊ກຜ່ານ USB?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"ອະນຸຍາດການດີບັກຜ່ານ USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"ລາຍນິ້ມື RSA ຂອງຄອມພິວເຕີແມ່ນ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"ອະນຸຍາດຈາກຄອມພິວເຕີນີ້ຕະຫຼອດ"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ອະນຸຍາດ"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"ບໍ່ມີຊື່"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ແຕະເພື່ອຣີສະຕາດແອັບນີ້ ແລະ ໃຊ້ແບບເຕັມຈໍ."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"ເປີດ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ການຕັ້ງຄ່າສຳລັບ bubble <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"ອະນຸຍາດໃຫ້ມີ bubbles ຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ການຕັ້ງຄ່າສຳລັບຟອງ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"ອະນຸຍາດໃຫ້ມີຟອງຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ຈັດການ"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"ປະຕິເສດ"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"ອະນຸຍາດ"</string>

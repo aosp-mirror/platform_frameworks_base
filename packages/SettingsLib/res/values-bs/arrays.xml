@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"Povezivanje na mrežu <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="3028983857109369308">"Autentifikacija s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="4287401332778341890">"Dobivanje IP adrese iz mreže <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="1043944043827424501">"Povezano na mrežu <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1043944043827424501">"Povezano s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Suspendirano"</item>
     <item msgid="1175040558087735707">"Prekidanje veze s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"Isključen"</item>

@@ -83,7 +83,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Escriu un PIN que tingui entre 4 i 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"El codi PUK ha de tenir 8 números o més."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Torna a introduir el codi PUK correcte. Si ho intentes diverses vegades, es desactivarà la SIM permanentment."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Els codis PIN no coincideixen"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Els PIN no coincideixen"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Has intentat dibuixar el patró massa vegades"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Has escrit el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Has escrit la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>

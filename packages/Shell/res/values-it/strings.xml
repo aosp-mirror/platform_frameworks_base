@@ -21,7 +21,7 @@
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Generazione segnalazione di bug <xliff:g id="ID">#%d</xliff:g> in corso"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Segnalazione di bug <xliff:g id="ID">#%d</xliff:g> acquisita"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Aggiunta di dettagli alla segnalazione di bug"</string>
-    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Attendi..."</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Attendi…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"La segnalazione di bug comparirà a breve sul telefono"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Seleziona per condividere la segnalazione di bug"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tocca per condividere la segnalazione di bug"</string>
