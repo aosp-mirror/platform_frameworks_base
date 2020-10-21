@@ -31,6 +31,22 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public final class RangingMeasurement {
+    private final UwbAddress mRemoteDeviceAddress;
+    private final @Status int mStatus;
+    private final long mElapsedRealtimeNanos;
+    private final DistanceMeasurement mDistanceMeasurement;
+    private final AngleOfArrivalMeasurement mAngleOfArrivalMeasurement;
+
+    private RangingMeasurement(@NonNull UwbAddress remoteDeviceAddress, @Status int status,
+            long elapsedRealtimeNanos, @Nullable DistanceMeasurement distanceMeasurement,
+            @Nullable AngleOfArrivalMeasurement angleOfArrivalMeasurement) {
+        mRemoteDeviceAddress = remoteDeviceAddress;
+        mStatus = status;
+        mElapsedRealtimeNanos = elapsedRealtimeNanos;
+        mDistanceMeasurement = distanceMeasurement;
+        mAngleOfArrivalMeasurement = angleOfArrivalMeasurement;
+    }
+
     /**
      * Get the remote device's {@link UwbAddress}
      *
@@ -38,7 +54,7 @@ public final class RangingMeasurement {
      */
     @NonNull
     public UwbAddress getRemoteDeviceAddress() {
-        throw new UnsupportedOperationException();
+        return mRemoteDeviceAddress;
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -75,7 +91,7 @@ public final class RangingMeasurement {
      */
     @Status
     public int getStatus() {
-        throw new UnsupportedOperationException();
+        return mStatus;
     }
 
     /**
@@ -86,7 +102,7 @@ public final class RangingMeasurement {
      */
     @SuppressLint("MethodNameUnits")
     public long getElapsedRealtimeNanos() {
-        throw new UnsupportedOperationException();
+        return mElapsedRealtimeNanos;
     }
 
     /**
@@ -97,7 +113,7 @@ public final class RangingMeasurement {
      */
     @Nullable
     public DistanceMeasurement getDistance() {
-        throw new UnsupportedOperationException();
+        return mDistanceMeasurement;
     }
 
     /**
@@ -108,6 +124,106 @@ public final class RangingMeasurement {
      */
     @Nullable
     public AngleOfArrivalMeasurement getAngleOfArrival() {
-        throw new UnsupportedOperationException();
+        return mAngleOfArrivalMeasurement;
+    }
+
+    /**
+     * Builder for a {@link RangingMeasurement} object.
+     */
+    public static final class Builder {
+        private UwbAddress mRemoteDeviceAddress = null;
+        private @Status int mStatus = RANGING_STATUS_FAILURE_UNKNOWN_ERROR;
+        private long mElapsedRealtimeNanos = -1L;
+        private DistanceMeasurement mDistanceMeasurement = null;
+        private AngleOfArrivalMeasurement mAngleOfArrivalMeasurement = null;
+
+        /**
+         * Set the remote device address that this measurement is for
+         *
+         * @param remoteDeviceAddress remote device's address
+         */
+        public Builder setRemoteDeviceAddress(@NonNull UwbAddress remoteDeviceAddress) {
+            mRemoteDeviceAddress = remoteDeviceAddress;
+            return this;
+        }
+
+        /**
+         * Set the status of ranging measurement
+         *
+         * @param status the status of the ranging measurement
+         */
+        public Builder setStatus(@Status int status) {
+            mStatus = status;
+            return this;
+        }
+
+        /**
+         * Set the elapsed realtime in nanoseconds when the ranging measurement occurred
+         *
+         * @param elapsedRealtimeNanos time the ranging measurement occurred
+         */
+        public Builder setElapsedRealtimeNanos(long elapsedRealtimeNanos) {
+            if (elapsedRealtimeNanos < 0) {
+                throw new IllegalArgumentException("elapsedRealtimeNanos must be >= 0");
+            }
+            mElapsedRealtimeNanos = elapsedRealtimeNanos;
+            return this;
+        }
+
+        /**
+         * Set the {@link DistanceMeasurement}
+         *
+         * @param distanceMeasurement the distance measurement for this ranging measurement
+         */
+        public Builder setDistanceMeasurement(@NonNull DistanceMeasurement distanceMeasurement) {
+            mDistanceMeasurement = distanceMeasurement;
+            return this;
+        }
+
+        /**
+         * Set the {@link AngleOfArrivalMeasurement}
+         *
+         * @param angleOfArrivalMeasurement the angle of arrival measurement for this ranging
+         *                                  measurement
+         */
+        public Builder setAngleOfArrivalMeasurement(
+                @NonNull AngleOfArrivalMeasurement angleOfArrivalMeasurement) {
+            mAngleOfArrivalMeasurement = angleOfArrivalMeasurement;
+            return this;
+        }
+
+        /**
+         * Build the {@link RangingMeasurement} object
+         *
+         * @throws IllegalStateException if a distance or angle of arrival measurement is provided
+         *                               but the measurement was not successful, if the
+         *                               elapsedRealtimeNanos of the measurement is invalid, or
+         *                               if no remote device address is set
+         */
+        public RangingMeasurement build() {
+            if (mStatus != RANGING_STATUS_SUCCESS) {
+                if (mDistanceMeasurement != null) {
+                    throw new IllegalStateException(
+                            "Distance Measurement must be null if ranging is not successful");
+                }
+
+                if (mAngleOfArrivalMeasurement != null) {
+                    throw new IllegalStateException(
+                            "Angle of Arrival must be null if ranging is not successful");
+                }
+            }
+
+            if (mRemoteDeviceAddress == null) {
+                throw new IllegalStateException("No remote device address was set");
+            }
+
+            if (mElapsedRealtimeNanos < 0) {
+                throw new IllegalStateException(
+                        "elapsedRealtimeNanos must be >=0: " + mElapsedRealtimeNanos);
+            }
+
+            return new RangingMeasurement(mRemoteDeviceAddress, mStatus, mElapsedRealtimeNanos,
+                    mDistanceMeasurement, mAngleOfArrivalMeasurement);
+        }
     }
 }

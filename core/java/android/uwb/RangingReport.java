@@ -18,6 +18,7 @@ package android.uwb;
 
 import android.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +27,12 @@ import java.util.List;
  * @hide
  */
 public final class RangingReport {
+    private final List<RangingMeasurement> mRangingMeasurements;
+
+    private RangingReport(@NonNull List<RangingMeasurement> rangingMeasurements) {
+        mRangingMeasurements = rangingMeasurements;
+    }
+
     /**
      * Get a {@link List} of {@link RangingMeasurement} objects in the last measurement interval
      * <p>The underlying UWB adapter may choose to do multiple measurements in each ranging
@@ -38,7 +45,57 @@ public final class RangingReport {
      */
     @NonNull
     public List<RangingMeasurement> getMeasurements() {
-        throw new UnsupportedOperationException();
+        return mRangingMeasurements;
+    }
+
+    /**
+     * Builder for {@link RangingReport} object
+     */
+    public static final class Builder {
+        List<RangingMeasurement> mMeasurements = new ArrayList<>();
+
+        /**
+         * Add a single {@link RangingMeasurement}
+         *
+         * @param rangingMeasurement a ranging measurement
+         */
+        public Builder addMeasurement(@NonNull RangingMeasurement rangingMeasurement) {
+            mMeasurements.add(rangingMeasurement);
+            return this;
+        }
+
+        /**
+         * Add a {@link List} of {@link RangingMeasurement}s
+         *
+         * @param rangingMeasurements {@link List} of {@link RangingMeasurement}s to add
+         */
+        public Builder addMeasurements(@NonNull List<RangingMeasurement> rangingMeasurements) {
+            mMeasurements.addAll(rangingMeasurements);
+            return this;
+        }
+
+        /**
+         * Build the {@link RangingReport} object
+         *
+         * @throws IllegalStateException if measurements are not in monotonically increasing order
+         */
+        public RangingReport build() {
+            // Verify that all measurement timestamps are monotonically increasing
+            RangingMeasurement prevMeasurement = null;
+            for (int curIndex = 0; curIndex < mMeasurements.size(); curIndex++) {
+                RangingMeasurement curMeasurement = mMeasurements.get(curIndex);
+                if (prevMeasurement != null
+                        && (prevMeasurement.getElapsedRealtimeNanos()
+                                > curMeasurement.getElapsedRealtimeNanos())) {
+                    throw new IllegalStateException(
+                            "Timestamp (" + curMeasurement.getElapsedRealtimeNanos()
+                            + ") at index " + curIndex + " is less than previous timestamp ("
+                            + prevMeasurement.getElapsedRealtimeNanos() + ")");
+                }
+                prevMeasurement = curMeasurement;
+            }
+            return new RangingReport(mMeasurements);
+        }
     }
 }
 
