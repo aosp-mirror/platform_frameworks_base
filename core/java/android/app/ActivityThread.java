@@ -85,6 +85,7 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.inputmethodservice.InputMethodService;
@@ -5623,10 +5624,13 @@ public final class ActivityThread extends ClientTransactionHandler {
             // If the new config is the same as the config this Activity is already running with and
             // the override config also didn't change, then don't bother calling
             // onConfigurationChanged.
+            // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
+            // ResourcesImpl constructions.
             final int diff = activity.mCurrentConfig.diffPublicOnly(newConfig);
-            if (diff == 0 && !movedToDifferentDisplay
-                    && mResourcesManager.isSameResourcesOverrideConfig(activityToken,
-                    amOverrideConfig)) {
+
+            if (diff == 0 && !shouldUpdateWindowMetricsBounds(activity.mCurrentConfig, newConfig)
+                    && !movedToDifferentDisplay && mResourcesManager.isSameResourcesOverrideConfig(
+                            activityToken, amOverrideConfig)) {
                 // Nothing significant, don't proceed with updating and reporting.
                 return null;
             } else if ((~activity.mActivityInfo.getRealConfigChanged() & diff) == 0) {
@@ -5676,6 +5680,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         return configToReport;
+    }
+
+    // TODO(b/173090263): Remove this method after the improvement of AssetManager and ResourcesImpl
+    // constructions.
+    /**
+     * Returns {@code true} if the metrics reported by {@link android.view.WindowMetrics} APIs
+     * should be updated.
+     *
+     * @see WindowManager#getCurrentWindowMetrics()
+     * @see WindowManager#getMaximumWindowMetrics()
+     */
+    private static boolean shouldUpdateWindowMetricsBounds(@NonNull Configuration currentConfig,
+            @NonNull Configuration newConfig) {
+        final Rect currentBounds = currentConfig.windowConfiguration.getBounds();
+        final Rect newBounds = newConfig.windowConfiguration.getBounds();
+
+        final Rect currentMaxBounds = currentConfig.windowConfiguration.getMaxBounds();
+        final Rect newMaxBounds = newConfig.windowConfiguration.getMaxBounds();
+
+        return !currentBounds.equals(newBounds) || !currentMaxBounds.equals(newMaxBounds);
     }
 
     public final void applyConfigurationToResources(Configuration config) {
@@ -5912,7 +5936,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     /**
      * Sets the supplied {@code overrideConfig} as pending for the {@code activityToken}. Calling
      * this method prevents any calls to
-     * {@link #handleActivityConfigurationChanged(IBinder, Configuration, int, boolean)} from
+     * {@link #handleActivityConfigurationChanged(ActivityClientRecord, Configuration, int)} from
      * processing any configurations older than {@code overrideConfig}.
      */
     @Override
@@ -5934,8 +5958,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /**
      * Handle new activity configuration and/or move to a different display. This method is a noop
-     * if {@link #updatePendingActivityConfiguration(IBinder, Configuration)} has been called with
-     * a newer config than {@code overrideConfig}.
+     * if {@link #updatePendingActivityConfiguration(ActivityClientRecord, Configuration)} has been
+     * called with a newer config than {@code overrideConfig}.
      *
      * @param r Target activity record.
      * @param overrideConfig Activity override config.
@@ -6000,7 +6024,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /**
      * Checks if the display id of activity is different from the given one. Note that
-     * {@link #INVALID_DISPLAY} means no difference.
+     * {@link Display#INVALID_DISPLAY} means no difference.
      */
     private static boolean isDifferentDisplay(@NonNull Activity activity, int displayId) {
         return displayId != INVALID_DISPLAY && displayId != activity.getDisplayId();
