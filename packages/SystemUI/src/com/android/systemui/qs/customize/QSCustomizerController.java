@@ -125,7 +125,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         RecyclerView recyclerView = mView.getRecyclerView();
         recyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(recyclerView);
-        GridLayoutManager layout = new GridLayoutManager(getContext(), 3) {
+        GridLayoutManager layout = new GridLayoutManager(getContext(), TileAdapter.NUM_COLUMNS) {
             @Override
             public void onInitializeAccessibilityNodeInfoForItem(RecyclerView.Recycler recycler,
                     RecyclerView.State state, View host, AccessibilityNodeInfoCompat info) {

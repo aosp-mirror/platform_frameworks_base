@@ -16,52 +16,53 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.qs.QuickQSPanel.NUM_QUICK_TILES;
-import static com.android.systemui.qs.QuickQSPanel.parseNumTiles;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
 /** Controller for {@link QuickQSPanel}. */
 @QSScope
 public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
-    private final Tunable mNumTiles =
-            (key, newValue) -> setMaxTiles(parseNumTiles(newValue));
 
-    private final TunerService mTunerService;
+    private List<QSTile> mAllTiles = new ArrayList<>();
+
+    private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
+            newConfig -> {
+                int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+                if (newMaxTiles != mView.getNumQuickTiles()) {
+                    setMaxTiles(newMaxTiles);
+                }
+            };
 
     @Inject
-    QuickQSPanelController(QuickQSPanel view, TunerService tunerService, QSTileHost qsTileHost,
+    QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
         super(view, qsTileHost, qsCustomizerController, qsTileRevealControllerFactory,
                 metricsLogger, uiEventLogger, dumpManager);
-        mTunerService = tunerService;
     }
 
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        mTunerService.addTunable(mNumTiles, NUM_QUICK_TILES);
-
+        mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
     }
 
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
-        mTunerService.removeTunable(mNumTiles);
+        mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
     }
 
     public boolean isListening() {
@@ -75,14 +76,14 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     @Override
     public void setTiles() {
-        ArrayList<QSTile> quickTiles = new ArrayList<>();
+        mAllTiles.clear();
         for (QSTile tile : mHost.getTiles()) {
-            quickTiles.add(tile);
-            if (quickTiles.size() == mView.getNumQuickTiles()) {
+            mAllTiles.add(tile);
+            if (mAllTiles.size() == QuickQSPanel.DEFAULT_MAX_TILES) {
                 break;
             }
         }
-        super.setTiles(quickTiles, true);
+        super.setTiles(mAllTiles.subList(0, mView.getNumQuickTiles()), true);
     }
 
     public int getNumQuickTiles() {

@@ -200,8 +200,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         int count = 0;
         int[] loc1 = new int[2];
         int[] loc2 = new int[2];
-        int lastXDiff = 0;
-        int lastX = 0;
 
         clearAnimationState();
         mAllViews.clear();
@@ -231,12 +229,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 QSTileView quickTileView = mQuickQSPanelController.getTileView(tile);
                 if (quickTileView == null) continue;
 
-                lastX = loc1[0];
                 getRelativePosition(loc1, quickTileView.getIcon().getIconView(), view);
                 getRelativePosition(loc2, tileIcon, view);
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
-                lastXDiff = loc1[0] - lastX;
+
 
                 if (count < tileLayout.getNumVisibleTiles()) {
                     // Move the quick tile right from its location to the new one.
@@ -267,19 +264,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 mAllViews.add(tileView.getIcon());
                 mAllViews.add(quickTileView);
             } else if (mFullRows && isIconInAnimatedRow(count)) {
-                // TODO: Refactor some of this, it shares a lot with the above block.
-                // Move the last tile position over by the last difference between quick tiles.
-                // This makes the extra icons seems as if they are coming from positions in the
-                // quick panel.
-                loc1[0] += lastXDiff;
-                getRelativePosition(loc2, tileIcon, view);
-                final int xDiff = loc2[0] - loc1[0];
-                final int yDiff = loc2[1] - loc1[1];
 
-                firstPageBuilder.addFloat(tileView, "translationY", heightDiff, 0);
-                translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
-                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
-                translationYBuilder.addFloat(tileIcon, "translationY", -yDiff, 0);
+                firstPageBuilder.addFloat(tileView, "translationY", -heightDiff, 0);
 
                 mAllViews.add(tileIcon);
             } else {
