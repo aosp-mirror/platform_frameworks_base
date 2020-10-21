@@ -859,6 +859,7 @@ class WindowStateAnimator {
 
         if (displayed) {
             w.mToken.hasVisible = true;
+            mSurfaceController.setBackgroundBlurRadius(w.mAttrs.backgroundBlurRadius);
         }
     }
 
