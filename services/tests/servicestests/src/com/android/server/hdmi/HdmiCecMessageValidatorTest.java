@@ -23,6 +23,7 @@ import static com.android.server.hdmi.HdmiCecMessageValidator.OK;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -42,12 +43,14 @@ import org.junit.runners.JUnit4;
 public class HdmiCecMessageValidatorTest {
 
     private HdmiCecMessageValidator mHdmiCecMessageValidator;
+    private TestLooper mTestLooper = new TestLooper();
 
     @Before
     public void setUp() throws Exception {
         HdmiControlService mHdmiControlService = new HdmiControlService(
                 InstrumentationRegistry.getTargetContext());
 
+        mHdmiControlService.setIoLooper(mTestLooper.getLooper());
         mHdmiCecMessageValidator = new HdmiCecMessageValidator(mHdmiControlService);
     }
 
