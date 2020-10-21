@@ -29,6 +29,7 @@ import android.view.SurfaceControl;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Interface for ActivityTaskManager/WindowManager to delegate control of tasks.
@@ -37,15 +38,19 @@ import java.util.List;
 @TestApi
 public class TaskOrganizer extends WindowOrganizer {
 
-    private ITaskOrganizerController mTaskOrganizerController;
+    private final ITaskOrganizerController mTaskOrganizerController;
+    // Callbacks WM Core are posted on this executor if it isn't null, otherwise direct calls are
+    // made on the incoming binder call.
+    private final Executor mExecutor;
 
     public TaskOrganizer() {
-        this(null);
+        this(null /*taskOrganizerController*/, null /*executor*/);
     }
 
     /** @hide */
     @VisibleForTesting
-    public TaskOrganizer(ITaskOrganizerController taskOrganizerController) {
+    public TaskOrganizer(ITaskOrganizerController taskOrganizerController, Executor executor) {
+        mExecutor = executor != null ? executor : command -> command.run();
         mTaskOrganizerController = taskOrganizerController != null
                 ? taskOrganizerController : getController();
     }
@@ -183,22 +188,22 @@ public class TaskOrganizer extends WindowOrganizer {
 
         @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-            TaskOrganizer.this.onTaskAppeared(taskInfo, leash);
+            mExecutor.execute(() -> TaskOrganizer.this.onTaskAppeared(taskInfo, leash));
         }
 
         @Override
         public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-            TaskOrganizer.this.onTaskVanished(taskInfo);
+            mExecutor.execute(() -> TaskOrganizer.this.onTaskVanished(taskInfo));
         }
 
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-            TaskOrganizer.this.onTaskInfoChanged(info);
+            mExecutor.execute(() -> TaskOrganizer.this.onTaskInfoChanged(info));
         }
 
         @Override
         public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo info) {
-            TaskOrganizer.this.onBackPressedOnTaskRoot(info);
+            mExecutor.execute(() -> TaskOrganizer.this.onBackPressedOnTaskRoot(info));
         }
     };
 
