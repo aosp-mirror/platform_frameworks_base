@@ -822,6 +822,25 @@ public class TextUtilsTest {
     }
 
     @Test
+    public void testFormatSimple_Width() {
+        assertEquals("42", formatSimple("%1d", 42));
+        assertEquals("42", formatSimple("%2d", 42));
+        assertEquals(" 42", formatSimple("%3d", 42));
+        assertEquals("  42", formatSimple("%4d", 42));
+        assertEquals("  42  42", formatSimple("%4d%4d", 42, 42));
+        assertEquals(" -42", formatSimple("%4d", -42));
+        assertEquals("        42", formatSimple("%10d", 42));
+
+        assertEquals("42", formatSimple("%01d", 42));
+        assertEquals("42", formatSimple("%02d", 42));
+        assertEquals("042", formatSimple("%03d", 42));
+        assertEquals("0042", formatSimple("%04d", 42));
+        assertEquals("00420042", formatSimple("%04d%04d", 42, 42));
+        assertEquals("-042", formatSimple("%04d", -42));
+        assertEquals("0000000042", formatSimple("%010d", 42));
+    }
+
+    @Test
     public void testFormatSimple_Empty() {
         assertEquals("", formatSimple(""));
     }
@@ -830,6 +849,13 @@ public class TextUtilsTest {
     public void testFormatSimple_Typical() {
         assertEquals("String foobar and %% number -42 together",
                 formatSimple("String %s%s and %%%% number %d%d together", "foo", "bar", -4, 2));
+    }
+
+    @Test
+    public void testFormatSimple_Advanced() {
+        assertEquals("crtcl=0x002a:intrsv=Y:grnk=0x0018:gsmry=A:example:rnk=0x0000",
+                formatSimple("crtcl=0x%04x:intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
+                        42, 'Y', 24, 'A', "example", 0));
     }
 
     @Test

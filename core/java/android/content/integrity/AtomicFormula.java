@@ -129,7 +129,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
     private final @Key int mKey;
 
     public AtomicFormula(@Key int key) {
-        checkArgument(isValidKey(key), String.format("Unknown key: %d", key));
+        checkArgument(isValidKey(key), "Unknown key: %d", key);
         mKey = key;
     }
 
@@ -149,8 +149,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
             super(key);
             checkArgument(
                     key == VERSION_CODE,
-                    String.format(
-                            "Key %s cannot be used with LongAtomicFormula", keyToString(key)));
+                    "Key %s cannot be used with LongAtomicFormula", keyToString(key));
             mValue = null;
             mOperator = null;
         }
@@ -168,10 +167,9 @@ public abstract class AtomicFormula extends IntegrityFormula {
             super(key);
             checkArgument(
                     key == VERSION_CODE,
-                    String.format(
-                            "Key %s cannot be used with LongAtomicFormula", keyToString(key)));
+                    "Key %s cannot be used with LongAtomicFormula", keyToString(key));
             checkArgument(
-                    isValidOperator(operator), String.format("Unknown operator: %d", operator));
+                    isValidOperator(operator), "Unknown operator: %d", operator);
             mOperator = operator;
             mValue = value;
         }
@@ -317,8 +315,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             || key == INSTALLER_CERTIFICATE
                             || key == INSTALLER_NAME
                             || key == STAMP_CERTIFICATE_HASH,
-                    String.format(
-                            "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
+                    "Key %s cannot be used with StringAtomicFormula", keyToString(key));
             mValue = null;
             mIsHashedValue = null;
         }
@@ -339,8 +336,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             || key == INSTALLER_CERTIFICATE
                             || key == INSTALLER_NAME
                             || key == STAMP_CERTIFICATE_HASH,
-                    String.format(
-                            "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
+                    "Key %s cannot be used with StringAtomicFormula", keyToString(key));
             mValue = value;
             mIsHashedValue = isHashed;
         }
@@ -365,8 +361,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             || key == INSTALLER_CERTIFICATE
                             || key == INSTALLER_NAME
                             || key == STAMP_CERTIFICATE_HASH,
-                    String.format(
-                            "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
+                    "Key %s cannot be used with StringAtomicFormula", keyToString(key));
             mValue = hashValue(key, value);
             mIsHashedValue =
                     (key == APP_CERTIFICATE

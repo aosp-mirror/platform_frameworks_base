@@ -768,7 +768,7 @@ public class Typeface {
         public @NonNull CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
             Preconditions.checkNotNull(family);
             Preconditions.checkArgument(mFamilies.size() < getMaxCustomFallbackCount(),
-                    "Custom fallback limit exceeded(" + getMaxCustomFallbackCount() + ")");
+                    "Custom fallback limit exceeded(%d)", getMaxCustomFallbackCount());
             mFamilies.add(family);
             return this;
         }

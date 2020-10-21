@@ -2095,6 +2095,9 @@ public class TextUtils {
      * <li>{@code %s} for {@code String}
      * <li>{@code %x} for hex representation of {@code int} or {@code long}
      * <li>{@code %%} for literal {@code %}
+     * <li>{@code %04d} style grammar to specify the argument width, such as
+     * {@code %04d} to prefix an {@code int} with zeros or {@code %10b} to
+     * prefix a {@code boolean} with spaces
      * </ul>
      *
      * @throws IllegalArgumentException if the format string or arguments don't
@@ -2106,8 +2109,23 @@ public class TextUtils {
         int j = 0;
         for (int i = 0; i < sb.length(); ) {
             if (sb.charAt(i) == '%') {
+                char code = sb.charAt(i + 1);
+
+                // Decode any argument width request
+                char prefixChar = '\0';
+                int prefixLen = 0;
+                int consume = 2;
+                while ('0' <= code && code <= '9') {
+                    if (prefixChar == '\0') {
+                        prefixChar = (code == '0') ? '0' : ' ';
+                    }
+                    prefixLen *= 10;
+                    prefixLen += Character.digit(code, 10);
+                    consume += 1;
+                    code = sb.charAt(i + consume - 1);
+                }
+
                 final String repl;
-                final char code = sb.charAt(i + 1);
                 switch (code) {
                     case 'b': {
                         if (j == args.length) {
@@ -2155,8 +2173,15 @@ public class TextUtils {
                         throw new IllegalArgumentException("Unsupported format code " + code);
                     }
                 }
-                sb.replace(i, i + 2, repl);
-                i += repl.length();
+
+                sb.replace(i, i + consume, repl);
+
+                // Apply any argument width request
+                final int prefixInsert = (prefixChar == '0' && repl.charAt(0) == '-') ? 1 : 0;
+                for (int k = repl.length(); k < prefixLen; k++) {
+                    sb.insert(i + prefixInsert, prefixChar);
+                }
+                i += Math.max(repl.length(), prefixLen);
             } else {
                 i++;
             }

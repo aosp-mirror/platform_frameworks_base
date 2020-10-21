@@ -24,13 +24,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class ParcelablePerformanceCheckerTest {
+public class EfficientParcelableCheckerTest {
     private CompilationTestHelper compilationHelper;
 
     @Before
     public void setUp() {
         compilationHelper = CompilationTestHelper.newInstance(
-                ParcelablePerformanceChecker.class, getClass());
+                EfficientParcelableChecker.class, getClass());
     }
 
     @Test

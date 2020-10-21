@@ -1999,7 +1999,7 @@ public final class PowerManager {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkArgument(!mListenerMap.containsKey(listener),
-                "Listener already registered: " + listener);
+                "Listener already registered: %s", listener);
         IThermalStatusListener internalListener = new IThermalStatusListener.Stub() {
             @Override
             public void onStatusChange(int status) {
