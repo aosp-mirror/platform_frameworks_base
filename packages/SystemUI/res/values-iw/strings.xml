@@ -86,8 +86,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"יש לנסות שוב לבצע צילום מסך"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"לא היה מספיק מקום לשמור את צילום המסך"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
-    <!-- no translation found for screenshot_edit (3510496440489019191) -->
-    <skip />
+    <string name="screenshot_edit" msgid="3510496440489019191">"עריכת צילום מסך"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"סגירת צילום מסך"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"תצוגה מקדימה של צילום מסך"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"מקליט המסך"</string>
@@ -1077,8 +1076,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"בטעינת המלצות"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"מדיה"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"הסתרת הסשן הנוכחי."</string>
-    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
-    <skip />
+    <string name="controls_media_active_session" msgid="1984383994625845642">"לא ניתן להסתיר את הסשן הנוכחי."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"סגירה"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"המשך"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"הגדרות"</string>
