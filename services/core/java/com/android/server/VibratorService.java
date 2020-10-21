@@ -29,11 +29,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.IVibrator;
-import android.hardware.vibrator.V1_0.EffectStrength;
-import android.media.AudioManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.ExternalVibration;
@@ -56,14 +53,10 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
-import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
-import android.util.DebugUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -74,6 +67,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.vibrator.VibrationScaler;
+import com.android.server.vibrator.VibrationSettings;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -97,22 +92,6 @@ public class VibratorService extends IVibratorService.Stub
 
     private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = { 0, 30, 100, 30 };
 
-    // Scale levels. Each level, except MUTE, is defined as the delta between the current setting
-    // and the default intensity for that type of vibration (i.e. current - default).
-    private static final int SCALE_MUTE = IExternalVibratorService.SCALE_MUTE; // -100
-    private static final int SCALE_VERY_LOW = IExternalVibratorService.SCALE_VERY_LOW; // -2
-    private static final int SCALE_LOW = IExternalVibratorService.SCALE_LOW; // -1
-    private static final int SCALE_NONE = IExternalVibratorService.SCALE_NONE; // 0
-    private static final int SCALE_HIGH = IExternalVibratorService.SCALE_HIGH; // 1
-    private static final int SCALE_VERY_HIGH = IExternalVibratorService.SCALE_VERY_HIGH; // 2
-
-    // Scale factors for each level.
-    private static final float SCALE_FACTOR_VERY_LOW = 0.6f;
-    private static final float SCALE_FACTOR_LOW = 0.8f;
-    private static final float SCALE_FACTOR_NONE = 1f;
-    private static final float SCALE_FACTOR_HIGH = 1.2f;
-    private static final float SCALE_FACTOR_VERY_HIGH = 1.4f;
-
     // Default vibration attributes. Used when vibration is requested without attributes
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
@@ -120,11 +99,6 @@ public class VibratorService extends IVibratorService.Stub
     // Used to generate globally unique vibration ids.
     private final AtomicInteger mNextVibrationId = new AtomicInteger(1); // 0 = no callback
 
-    // A mapping from the intensity adjustment to the scaling to apply, where the intensity
-    // adjustment is defined as the delta between the default intensity level and the user selected
-    // intensity level. It's important that we apply the scaling on the delta between the two so
-    // that the default intensity level applies no scaling to application provided effects.
-    private final SparseArray<ScaleLevel> mScaleLevels;
     private final LinkedList<VibrationInfo> mPreviousRingVibrations;
     private final LinkedList<VibrationInfo> mPreviousNotificationVibrations;
     private final LinkedList<VibrationInfo> mPreviousAlarmVibrations;
@@ -149,8 +123,8 @@ public class VibratorService extends IVibratorService.Stub
     private final String mSystemUiPackage;
     private PowerManagerInternal mPowerManagerInternal;
     private InputManager mIm;
-    private Vibrator mVibrator;
-    private SettingsObserver mSettingObserver;
+    private VibrationSettings mVibrationSettings;
+    private VibrationScaler mVibrationScaler;
 
     private final NativeWrapper mNativeWrapper;
     private volatile VibrateWaveformThread mThread;
@@ -172,9 +146,6 @@ public class VibratorService extends IVibratorService.Stub
     @GuardedBy("mLock")
     private final RemoteCallbackList<IVibratorStateListener> mVibratorStateListeners =
             new RemoteCallbackList<>();
-    private int mHapticFeedbackIntensity;
-    private int mNotificationIntensity;
-    private int mRingIntensity;
     private SparseArray<Vibration> mAlwaysOnEffects = new SparseArray<>();
 
     static native long vibratorInit(OnCompleteListener listener);
@@ -343,7 +314,7 @@ public class VibratorService extends IVibratorService.Stub
 
         private ExternalVibrationHolder(ExternalVibration externalVibration) {
             this.externalVibration = externalVibration;
-            this.scale = SCALE_NONE;
+            this.scale = IExternalVibratorService.SCALE_NONE;
             mStartTimeDebug = System.currentTimeMillis();
             mStatus = VibrationInfo.Status.RUNNING;
         }
@@ -518,20 +489,6 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
-    /** Represents the scale that must be applied to a vibration effect intensity. */
-    private static final class ScaleLevel {
-        public final float factor;
-
-        ScaleLevel(float factor) {
-            this.factor = factor;
-        }
-
-        @Override
-        public String toString() {
-            return "ScaleLevel{factor=" + factor + "}";
-        }
-    }
-
     VibratorService(Context context) {
         this(context, new Injector());
     }
@@ -599,13 +556,6 @@ public class VibratorService extends IVibratorService.Stub
         mFallbackEffects.put(VibrationEffect.EFFECT_TEXTURE_TICK,
                 VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
 
-        mScaleLevels = new SparseArray<>();
-        mScaleLevels.put(SCALE_VERY_LOW, new ScaleLevel(SCALE_FACTOR_VERY_LOW));
-        mScaleLevels.put(SCALE_LOW, new ScaleLevel(SCALE_FACTOR_LOW));
-        mScaleLevels.put(SCALE_NONE, new ScaleLevel(SCALE_FACTOR_NONE));
-        mScaleLevels.put(SCALE_HIGH, new ScaleLevel(SCALE_FACTOR_HIGH));
-        mScaleLevels.put(SCALE_VERY_HIGH, new ScaleLevel(SCALE_FACTOR_VERY_HIGH));
-
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
     }
 
@@ -628,8 +578,8 @@ public class VibratorService extends IVibratorService.Stub
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorService#systemReady");
         try {
             mIm = mContext.getSystemService(InputManager.class);
-            mVibrator = mContext.getSystemService(Vibrator.class);
-            mSettingObserver = new SettingsObserver(mH);
+            mVibrationSettings = new VibrationSettings(mContext, mH);
+            mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
 
             mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
             mPowerManagerInternal.registerLowPowerModeObserver(
@@ -645,25 +595,7 @@ public class VibratorService extends IVibratorService.Stub
                         }
             });
 
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES),
-                    true, mSettingObserver, UserHandle.USER_ALL);
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_INTENSITY),
-                    true, mSettingObserver, UserHandle.USER_ALL);
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY),
-                    true, mSettingObserver, UserHandle.USER_ALL);
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY),
-                    true, mSettingObserver, UserHandle.USER_ALL);
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
-                    true, mSettingObserver, UserHandle.USER_ALL);
+            mVibrationSettings.addListener(this::updateVibrators);
 
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -683,17 +615,6 @@ public class VibratorService extends IVibratorService.Stub
             updateVibrators();
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
-        }
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        public SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean SelfChange) {
-            updateVibrators();
         }
     }
 
@@ -1118,11 +1039,10 @@ public class VibratorService extends IVibratorService.Stub
     private void startVibrationLocked(final Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
-            final int intensity = getCurrentIntensityLocked(vib.attrs.getUsage());
-            if (!shouldVibrate(vib, intensity)) {
+            if (!shouldVibrate(vib)) {
                 return;
             }
-            applyVibrationIntensityScalingLocked(vib, intensity);
+            applyVibrationIntensityScalingLocked(vib);
             startVibrationInnerLocked(vib);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -1171,73 +1091,12 @@ public class VibratorService extends IVibratorService.Stub
                 || usage == VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
     }
 
-    private int getCurrentIntensityLocked(int usageHint) {
-        if (isRingtone(usageHint)) {
-            return mRingIntensity;
-        } else if (isNotification(usageHint)) {
-            return mNotificationIntensity;
-        } else if (isHapticFeedback(usageHint)) {
-            return mHapticFeedbackIntensity;
-        } else if (isAlarm(usageHint)) {
-            return Vibrator.VIBRATION_INTENSITY_HIGH;
-        } else {
-            return Vibrator.VIBRATION_INTENSITY_MEDIUM;
-        }
-    }
-
-    private int getDefaultIntensity(int usageHint) {
-        if (isRingtone(usageHint)) {
-            return mVibrator.getDefaultRingVibrationIntensity();
-        } else if (isNotification(usageHint)) {
-            return mVibrator.getDefaultNotificationVibrationIntensity();
-        } else if (isHapticFeedback(usageHint)) {
-            return mVibrator.getDefaultHapticFeedbackIntensity();
-        } else if (isAlarm(usageHint)) {
-            return Vibrator.VIBRATION_INTENSITY_HIGH;
-        } else {
-            return Vibrator.VIBRATION_INTENSITY_MEDIUM;
-        }
-    }
-
-    /**
-     * Scale the vibration effect by the intensity as appropriate based its intent.
-     */
-    private void applyVibrationIntensityScalingLocked(Vibration vib, int intensity) {
-        if (vib.effect instanceof VibrationEffect.Prebaked) {
-            // Prebaked effects are always just a direct translation from intensity to
-            // EffectStrength.
-            VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
-            prebaked.setEffectStrength(intensityToEffectStrength(intensity));
-            return;
-        }
-
-        final int defaultIntensity = getDefaultIntensity(vib.attrs.getUsage());
-        final ScaleLevel scale = mScaleLevels.get(intensity - defaultIntensity);
-        if (scale == null) {
-            // We should have scaling levels for all cases, so not being able to scale because of a
-            // missing level is unexpected.
-            Slog.e(TAG, "No configured scaling level!"
-                    + " (current=" + intensity + ", default= " + defaultIntensity + ")");
-            return;
-        }
-
-        vib.originalEffect = vib.effect;
-        vib.effect = vib.effect.resolve(mDefaultVibrationAmplitude).scale(scale.factor);
-        vib.scale = scale.factor;
-    }
-
-    private boolean shouldVibrateForRingtone() {
-        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
-        int ringerMode = audioManager.getRingerModeInternal();
-        // "Also vibrate for calls" Setting in Sound
-        if (Settings.System.getInt(
-                mContext.getContentResolver(), Settings.System.VIBRATE_WHEN_RINGING, 0) != 0) {
-            return ringerMode != AudioManager.RINGER_MODE_SILENT;
-        } else if (Settings.Global.getInt(
-                    mContext.getContentResolver(), Settings.Global.APPLY_RAMPING_RINGER, 0) != 0) {
-            return ringerMode != AudioManager.RINGER_MODE_SILENT;
-        } else {
-            return ringerMode == AudioManager.RINGER_MODE_VIBRATE;
+    /** Scale the vibration effect by the intensity as appropriate based its intent. */
+    private void applyVibrationIntensityScalingLocked(Vibration vib) {
+        VibrationEffect scaled = mVibrationScaler.scale(vib.effect, vib.attrs.getUsage());
+        if (!scaled.equals(vib.effect)) {
+            vib.originalEffect = vib.effect;
+            vib.effect = scaled;
         }
     }
 
@@ -1262,18 +1121,19 @@ public class VibratorService extends IVibratorService.Stub
         return mode;
     }
 
-    private boolean shouldVibrate(Vibration vib, int intensity) {
+    private boolean shouldVibrate(Vibration vib) {
         if (!shouldVibrateForPowerModeLocked(vib)) {
             endVibrationLocked(vib, VibrationInfo.Status.IGNORED_FOR_POWER);
             return false;
         }
 
+        int intensity = mVibrationSettings.getCurrentIntensity(vib.attrs.getUsage());
         if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
             endVibrationLocked(vib, VibrationInfo.Status.IGNORED_FOR_SETTINGS);
             return false;
         }
 
-        if (vib.isRingtone() && !shouldVibrateForRingtone()) {
+        if (vib.isRingtone() && !mVibrationSettings.shouldVibrateForRingtone()) {
             if (DEBUG) {
                 Slog.e(TAG, "Vibrate ignored, not vibrating for ringtones");
             }
@@ -1335,7 +1195,6 @@ public class VibratorService extends IVibratorService.Stub
         synchronized (mLock) {
             boolean devicesUpdated = updateInputDeviceVibratorsLocked();
             boolean lowPowerModeUpdated = updateLowPowerModeLocked();
-            updateVibrationIntensityLocked();
 
             if (devicesUpdated || lowPowerModeUpdated) {
                 // If the state changes out from under us then just reset.
@@ -1348,13 +1207,7 @@ public class VibratorService extends IVibratorService.Stub
 
     private boolean updateInputDeviceVibratorsLocked() {
         boolean changed = false;
-        boolean vibrateInputDevices = false;
-        try {
-            vibrateInputDevices = Settings.System.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.System.VIBRATE_INPUT_DEVICES, UserHandle.USER_CURRENT) > 0;
-        } catch (SettingNotFoundException snfe) {
-        }
+        boolean vibrateInputDevices = mVibrationSettings.shouldVibrateInputDevices();
         if (vibrateInputDevices != mVibrateInputDevicesSetting) {
             changed = true;
             mVibrateInputDevicesSetting = vibrateInputDevices;
@@ -1397,26 +1250,13 @@ public class VibratorService extends IVibratorService.Stub
         return false;
     }
 
-    private void updateVibrationIntensityLocked() {
-        mHapticFeedbackIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_INTENSITY,
-                mVibrator.getDefaultHapticFeedbackIntensity(), UserHandle.USER_CURRENT);
-        mNotificationIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
-                mVibrator.getDefaultNotificationVibrationIntensity(), UserHandle.USER_CURRENT);
-        mRingIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.RING_VIBRATION_INTENSITY,
-                mVibrator.getDefaultRingVibrationIntensity(), UserHandle.USER_CURRENT);
-    }
-
     private void updateAlwaysOnLocked(int id, Vibration vib) {
-        final int intensity = getCurrentIntensityLocked(vib.attrs.getUsage());
-        if (!shouldVibrate(vib, intensity)) {
+        if (!shouldVibrate(vib)) {
             mNativeWrapper.vibratorAlwaysOnDisable(id);
         } else {
-            final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
-            final int strength = intensityToEffectStrength(intensity);
-            mNativeWrapper.vibratorAlwaysOnEnable(id, prebaked.getId(), strength);
+            VibrationEffect.Prebaked scaled = mVibrationScaler.scale(vib.effect,
+                    vib.attrs.getUsage());
+            mNativeWrapper.vibratorAlwaysOnEnable(id, scaled.getId(), scaled.getEffectStrength());
         }
     }
 
@@ -1459,8 +1299,8 @@ public class VibratorService extends IVibratorService.Stub
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOn");
         try {
             synchronized (mInputDeviceVibrators) {
-                final VibrationEffect.OneShot oneShot =
-                        (VibrationEffect.OneShot) vib.effect.resolve(mDefaultVibrationAmplitude);
+                final VibrationEffect.OneShot oneShot = vib.effect.resolve(
+                        mDefaultVibrationAmplitude);
                 if (DEBUG) {
                     Slog.d(TAG, "Turning vibrator on for " + oneShot.getDuration() + " ms"
                             + " with amplitude " + oneShot.getAmplitude() + ".");
@@ -1547,9 +1387,8 @@ public class VibratorService extends IVibratorService.Stub
                     vib.opPkg, vib.reason + " (fallback)");
             // Set current vibration before starting it, so callback will work.
             mCurrentVibration = fallbackVib;
-            final int intensity = getCurrentIntensityLocked(fallbackVib.attrs.getUsage());
             linkVibration(fallbackVib);
-            applyVibrationIntensityScalingLocked(fallbackVib, intensity);
+            applyVibrationIntensityScalingLocked(fallbackVib);
             startVibrationInnerLocked(fallbackVib);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -1592,25 +1431,6 @@ public class VibratorService extends IVibratorService.Stub
 
     private VibrationEffect getFallbackEffect(int effectId) {
         return mFallbackEffects.get(effectId);
-    }
-
-    /**
-     * Return the current desired effect strength.
-     *
-     * If the returned value is &lt; 0 then the vibration shouldn't be played at all.
-     */
-    private static int intensityToEffectStrength(int intensity) {
-        switch (intensity) {
-            case Vibrator.VIBRATION_INTENSITY_LOW:
-                return EffectStrength.LIGHT;
-            case Vibrator.VIBRATION_INTENSITY_MEDIUM:
-                return EffectStrength.MEDIUM;
-            case Vibrator.VIBRATION_INTENSITY_HIGH:
-                return EffectStrength.STRONG;
-            default:
-                Slog.w(TAG, "Got unexpected vibration intensity: " + intensity);
-                return EffectStrength.STRONG;
-        }
     }
 
     private static boolean isNotification(int usageHint) {
@@ -1690,14 +1510,7 @@ public class VibratorService extends IVibratorService.Stub
             pw.println("  mVibratorStateListeners Count="
                     + mVibratorStateListeners.getRegisteredCallbackCount());
             pw.println("  mLowPowerMode=" + mLowPowerMode);
-            pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
-            pw.println("  mHapticFeedbackDefaultIntensity="
-                    + mVibrator.getDefaultHapticFeedbackIntensity());
-            pw.println("  mNotificationIntensity=" + mNotificationIntensity);
-            pw.println("  mNotificationDefaultIntensity="
-                    + mVibrator.getDefaultNotificationVibrationIntensity());
-            pw.println("  mRingIntensity=" + mRingIntensity);
-            pw.println("  mRingDefaultIntensity=" + mVibrator.getDefaultRingVibrationIntensity());
+            pw.println("  mVibrationSettings=" + mVibrationSettings);
             pw.println("  mSupportedEffects=" + mSupportedEffects);
             pw.println("  mSupportedPrimitives=" + mSupportedPrimitives);
             pw.println();
@@ -1746,15 +1559,17 @@ public class VibratorService extends IVibratorService.Stub
                     mVibratorUnderExternalControl);
             proto.write(VibratorServiceDumpProto.LOW_POWER_MODE, mLowPowerMode);
             proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
-                    mHapticFeedbackIntensity);
+                    mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_TOUCH));
             proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_DEFAULT_INTENSITY,
-                    mVibrator.getDefaultHapticFeedbackIntensity());
-            proto.write(VibratorServiceDumpProto.NOTIFICATION_INTENSITY, mNotificationIntensity);
+                    mVibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_TOUCH));
+            proto.write(VibratorServiceDumpProto.NOTIFICATION_INTENSITY,
+                    mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_NOTIFICATION));
             proto.write(VibratorServiceDumpProto.NOTIFICATION_DEFAULT_INTENSITY,
-                    mVibrator.getDefaultNotificationVibrationIntensity());
-            proto.write(VibratorServiceDumpProto.RING_INTENSITY, mRingIntensity);
+                    mVibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_NOTIFICATION));
+            proto.write(VibratorServiceDumpProto.RING_INTENSITY,
+                    mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE));
             proto.write(VibratorServiceDumpProto.RING_DEFAULT_INTENSITY,
-                    mVibrator.getDefaultRingVibrationIntensity());
+                    mVibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE));
 
             for (VibrationInfo info : mPreviousRingVibrations) {
                 info.dumpProto(proto, VibratorServiceDumpProto.PREVIOUS_RING_VIBRATIONS);
@@ -2080,7 +1895,7 @@ public class VibratorService extends IVibratorService.Stub
         @Override
         public int onExternalVibrationStart(ExternalVibration vib) {
             if (!hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
-                return SCALE_MUTE;
+                return IExternalVibratorService.SCALE_MUTE;
             }
             if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
                     vib.getUid(), -1 /*owningUid*/, true /*exported*/)
@@ -2088,7 +1903,7 @@ public class VibratorService extends IVibratorService.Stub
                 Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
                         + " tried to play externally controlled vibration"
                         + " without VIBRATE permission, ignoring.");
-                return SCALE_MUTE;
+                return IExternalVibratorService.SCALE_MUTE;
             }
 
             int mode = getAppOpMode(vib.getUid(), vib.getPackage(), vib.getVibrationAttributes());
@@ -2101,10 +1916,9 @@ public class VibratorService extends IVibratorService.Stub
                 } else {
                     endVibrationLocked(vibHolder, VibrationInfo.Status.IGNORED_APP_OPS);
                 }
-                return SCALE_MUTE;
+                return IExternalVibratorService.SCALE_MUTE;
             }
 
-            final int scaleLevel;
             synchronized (mLock) {
                 if (mCurrentExternalVibration != null
                         && mCurrentExternalVibration.externalVibration.equals(vib)) {
@@ -2131,23 +1945,12 @@ public class VibratorService extends IVibratorService.Stub
                 mCurrentExternalVibration = new ExternalVibrationHolder(vib);
                 mCurrentExternalDeathRecipient = new ExternalVibrationDeathRecipient();
                 vib.linkToDeath(mCurrentExternalDeathRecipient);
+                mCurrentExternalVibration.scale = mVibrationScaler.getExternalVibrationScale(
+                        vib.getVibrationAttributes().getUsage());
                 if (DEBUG) {
                     Slog.e(TAG, "Playing external vibration: " + vib);
                 }
-                int usage = vib.getVibrationAttributes().getUsage();
-                int defaultIntensity = getDefaultIntensity(usage);
-                int currentIntensity = getCurrentIntensityLocked(usage);
-                scaleLevel = currentIntensity - defaultIntensity;
-            }
-            if (scaleLevel >= SCALE_VERY_LOW && scaleLevel <= SCALE_VERY_HIGH) {
-                mCurrentExternalVibration.scale = scaleLevel;
-                return scaleLevel;
-            } else {
-                // Presumably we want to play this but something about our scaling has gone
-                // wrong, so just play with no scaling.
-                Slog.w(TAG, "Error in scaling calculations, ended up with invalid scale level "
-                        + scaleLevel + " for vibration " + vib);
-                return SCALE_NONE;
+                return mCurrentExternalVibration.scale;
             }
         }
 
@@ -2232,21 +2035,12 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         private boolean checkDoNotDisturb(CommonOptions opts) {
-            try {
-                final int zenMode = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.ZEN_MODE);
-                if (zenMode != Settings.Global.ZEN_MODE_OFF && !opts.force) {
-                    try (PrintWriter pw = getOutPrintWriter();) {
-                        pw.print("Ignoring because device is on DND mode ");
-                        pw.println(DebugUtils.flagsToString(Settings.Global.class, "ZEN_MODE_",
-                                zenMode));
-                        return true;
-                    }
+            if (mVibrationSettings.isInZenMode() && !opts.force) {
+                try (PrintWriter pw = getOutPrintWriter();) {
+                    pw.print("Ignoring because device is on DND mode ");
+                    return true;
                 }
-            } catch (SettingNotFoundException e) {
-                // ignore
             }
-
             return false;
         }
 
