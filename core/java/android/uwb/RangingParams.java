@@ -24,7 +24,11 @@ import android.util.Duration;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * An object used when requesting to open a new {@link RangingSession}.
@@ -33,11 +37,33 @@ import java.util.List;
  *  @hide
  */
 public final class RangingParams {
-    /**
-     * Standard builder interface as the class is not modifiable
-     */
-    public static class Builder {
-        // TODO implement
+    private final boolean mIsInitiator;
+    private final boolean mIsController;
+    private final Duration mSamplePeriod;
+    private final UwbAddress mLocalDeviceAddress;
+    private final List<UwbAddress> mRemoteDeviceAddresses;
+    private final int mChannelNumber;
+    private final int mTransmitPreambleCodeIndex;
+    private final int mReceivePreambleCodeIndex;
+    private final int mStsPhyPacketType;
+    private final PersistableBundle mSpecificationParameters;
+
+    private RangingParams(boolean isInitiator, boolean isController,
+            @NonNull Duration samplingPeriod, @NonNull UwbAddress localDeviceAddress,
+            @NonNull List<UwbAddress> remoteDeviceAddresses, int channelNumber,
+            int transmitPreambleCodeIndex, int receivePreambleCodeIndex,
+            @StsPhyPacketType int stsPhyPacketType,
+            @NonNull PersistableBundle specificationParameters) {
+        mIsInitiator = isInitiator;
+        mIsController = isController;
+        mSamplePeriod = samplingPeriod;
+        mLocalDeviceAddress = localDeviceAddress;
+        mRemoteDeviceAddresses = remoteDeviceAddresses;
+        mChannelNumber = channelNumber;
+        mTransmitPreambleCodeIndex = transmitPreambleCodeIndex;
+        mReceivePreambleCodeIndex = receivePreambleCodeIndex;
+        mStsPhyPacketType = stsPhyPacketType;
+        mSpecificationParameters = specificationParameters;
     }
 
     /**
@@ -46,7 +72,7 @@ public final class RangingParams {
      * @return true if the device is the initiator
      */
     public boolean isInitiator() {
-        throw new UnsupportedOperationException();
+        return mIsInitiator;
     }
 
     /**
@@ -55,7 +81,7 @@ public final class RangingParams {
      * @return true if the device is the controller
      */
     public boolean isController() {
-        throw new UnsupportedOperationException();
+        return mIsController;
     }
 
     /**
@@ -65,7 +91,7 @@ public final class RangingParams {
      */
     @NonNull
     public Duration getSamplingPeriod() {
-        throw new UnsupportedOperationException();
+        return mSamplePeriod;
     }
 
     /**
@@ -78,7 +104,7 @@ public final class RangingParams {
      */
     @NonNull
     public UwbAddress getLocalDeviceAddress() {
-        throw new UnsupportedOperationException();
+        return mLocalDeviceAddress;
     }
 
     /**
@@ -88,7 +114,7 @@ public final class RangingParams {
      */
     @NonNull
     public List<UwbAddress> getRemoteDeviceAddresses() {
-        throw new UnsupportedOperationException();
+        return mRemoteDeviceAddresses;
     }
 
     /**
@@ -99,7 +125,7 @@ public final class RangingParams {
      * @return the channel to use
      */
     public int getChannelNumber() {
-        throw new UnsupportedOperationException();
+        return mChannelNumber;
     }
 
     /**
@@ -110,7 +136,7 @@ public final class RangingParams {
      * @return the preamble index to use for transmitting
      */
     public int getTxPreambleIndex() {
-        throw new UnsupportedOperationException();
+        return mTransmitPreambleCodeIndex;
     }
 
     /**
@@ -121,7 +147,7 @@ public final class RangingParams {
      * @return the preamble index to use for receiving
      */
     public int getRxPreambleIndex() {
-        throw new UnsupportedOperationException();
+        return mReceivePreambleCodeIndex;
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -159,7 +185,7 @@ public final class RangingParams {
      */
     @StsPhyPacketType
     public int getStsPhyPacketType() {
-        throw new UnsupportedOperationException();
+        return mStsPhyPacketType;
     }
 
     /**
@@ -167,9 +193,189 @@ public final class RangingParams {
      *
      * <p>Android reserves the '^android.*' namespace
      *
-     * @return a {@link PersistableBundle} of protocol specific parameters
+     * @return a {@link PersistableBundle} copy of protocol specific parameters
      */
     public @Nullable PersistableBundle getSpecificationParameters() {
-        throw new UnsupportedOperationException();
+        return new PersistableBundle(mSpecificationParameters);
+    }
+
+    /**
+     * Builder class for {@link RangingParams}.
+     */
+    public static final class Builder {
+        private boolean mIsInitiator = false;
+        private boolean mIsController = false;
+        private Duration mSamplePeriod = null;
+        private UwbAddress mLocalDeviceAddress = null;
+        private List<UwbAddress> mRemoteDeviceAddresses = new ArrayList<>();
+        private int mChannelNumber = 0;
+        private int mTransmitPreambleCodeIndex = 0;
+        private int mReceivePreambleCodeIndex = 0;
+        private int mStsPhyPacketType = STS_PHY_PACKET_TYPE_SP0;
+        private PersistableBundle mSpecificationParameters = new PersistableBundle();
+
+        /**
+         * Set whether the device is the initiator or responder as defined by IEEE 802.15.4z
+         *
+         * @param isInitiator whether the device is the initiator (true) or responder (false)
+         */
+        public Builder setIsInitiator(boolean isInitiator) {
+            mIsInitiator = isInitiator;
+            return this;
+        }
+
+        /**
+         * Set whether the local device is the controller or controlee as defined by IEEE 802.15.4z
+         *
+         * @param isController whether the device is the controller (true) or controlee (false)
+         */
+        public Builder setIsController(boolean isController) {
+            mIsController = isController;
+            return this;
+        }
+
+        /**
+         * Set the time between ranging samples
+         *
+         * @param samplePeriod the time between ranging samples
+         */
+        public Builder setSamplePeriod(@NonNull Duration samplePeriod) {
+            mSamplePeriod = samplePeriod;
+            return this;
+        }
+
+        /**
+         * Set the local device address
+         *
+         * @param localDeviceAddress the local device's address for the {@link RangingSession}
+         */
+        public Builder setLocalDeviceAddress(@NonNull UwbAddress localDeviceAddress) {
+            mLocalDeviceAddress = localDeviceAddress;
+            return this;
+        }
+
+        /**
+         * Add a remote device's address to the ranging session
+         *
+         * @param remoteDeviceAddress a remote device's address for the {@link RangingSession}
+         * @throws IllegalArgumentException if {@code remoteDeviceAddress} is already present.
+         */
+        public Builder addRemoteDeviceAddress(@NonNull UwbAddress remoteDeviceAddress) {
+            if (mRemoteDeviceAddresses.contains(remoteDeviceAddress)) {
+                throw new IllegalArgumentException(
+                        "Remote device address already added: " + remoteDeviceAddress.toString());
+            }
+            mRemoteDeviceAddresses.add(remoteDeviceAddress);
+            return this;
+        }
+
+        /**
+         * Set the IEEE 802.15.4z channel to use for the {@link RangingSession}
+         * <p>Valid values are in the range [-1, 15]
+         *
+         * @param channelNumber the channel to use for the {@link RangingSession}
+         * @throws IllegalArgumentException if {@code channelNumber} is invalid.
+         */
+        public Builder setChannelNumber(int channelNumber) {
+            if (channelNumber < -1 || channelNumber > 15) {
+                throw new IllegalArgumentException("Invalid channel number");
+            }
+            mChannelNumber = channelNumber;
+            return this;
+        }
+
+        private static final Set<Integer> VALID_TX_PREAMBLE_CODES = new HashSet<Integer>(
+                Arrays.asList(0, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32));
+
+        /**
+         * Set the IEEE 802.15.4z preamble code index to use when transmitting
+         *
+         * <p>Valid values are in the ranges: [0], [13-16], [21-32]
+         *
+         * @param transmitPreambleCodeIndex preamble code index to use for transmitting
+         * @throws IllegalArgumentException if {@code transmitPreambleCodeIndex} is invalid.
+         */
+        public Builder setTransmitPreambleCodeIndex(int transmitPreambleCodeIndex) {
+            if (!VALID_TX_PREAMBLE_CODES.contains(transmitPreambleCodeIndex)) {
+                throw new IllegalArgumentException(
+                        "Invalid transmit preamble: " + transmitPreambleCodeIndex);
+            }
+            mTransmitPreambleCodeIndex = transmitPreambleCodeIndex;
+            return this;
+        }
+
+        private static final Set<Integer> VALID_RX_PREAMBLE_CODES = new HashSet<Integer>(
+                Arrays.asList(0, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32));
+
+        /**
+         * Set the IEEE 802.15.4z preamble code index to use when receiving
+         *
+         * Valid values are in the ranges: [0], [16-32]
+         *
+         * @param receivePreambleCodeIndex preamble code index to use for receiving
+         * @throws IllegalArgumentException if {@code receivePreambleCodeIndex} is invalid.
+         */
+        public Builder setReceivePreambleCodeIndex(int receivePreambleCodeIndex) {
+            if (!VALID_RX_PREAMBLE_CODES.contains(receivePreambleCodeIndex)) {
+                throw new IllegalArgumentException(
+                        "Invalid receive preamble: " + receivePreambleCodeIndex);
+            }
+            mReceivePreambleCodeIndex = receivePreambleCodeIndex;
+            return this;
+        }
+
+        /**
+         * Set the IEEE 802.15.4z PHY packet type when STS is used
+         *
+         * @param stsPhyPacketType PHY packet type when STS is used
+         * @throws IllegalArgumentException if {@code stsPhyPacketType} is invalid.
+         */
+        public Builder setStsPhPacketType(@StsPhyPacketType int stsPhyPacketType) {
+            if (stsPhyPacketType != STS_PHY_PACKET_TYPE_SP0
+                    && stsPhyPacketType != STS_PHY_PACKET_TYPE_SP1
+                    && stsPhyPacketType != STS_PHY_PACKET_TYPE_SP2
+                    && stsPhyPacketType != STS_PHY_PACKET_TYPE_SP3) {
+                throw new IllegalArgumentException("unknown StsPhyPacketType: " + stsPhyPacketType);
+            }
+
+            mStsPhyPacketType = stsPhyPacketType;
+            return this;
+        }
+
+        /**
+         * Set the specification parameters
+         *
+         * <p>Creates a copy of the parameters
+         *
+         * @param parameters specification parameters built from support library
+         */
+        public Builder setSpecificationParameters(@NonNull PersistableBundle parameters) {
+            mSpecificationParameters = new PersistableBundle(parameters);
+            return this;
+        }
+
+        /**
+         * Build the {@link RangingParams} object.
+         *
+         * @throws IllegalStateException if required parameters are missing
+         */
+        public RangingParams build() {
+            if (mSamplePeriod == null) {
+                throw new IllegalStateException("No sample period provided");
+            }
+
+            if (mLocalDeviceAddress == null) {
+                throw new IllegalStateException("Local device address not provided");
+            }
+
+            if (mRemoteDeviceAddresses.size() == 0) {
+                throw new IllegalStateException("No remote device address(es) provided");
+            }
+
+            return new RangingParams(mIsInitiator, mIsController, mSamplePeriod,
+                    mLocalDeviceAddress, mRemoteDeviceAddresses, mChannelNumber,
+                    mTransmitPreambleCodeIndex, mReceivePreambleCodeIndex, mStsPhyPacketType,
+                    mSpecificationParameters);
+        }
     }
 }
