@@ -90,13 +90,11 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 16;
         private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
         private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
-        private static final int ON_SINGLE_TASK_DISPLAY_DRAWN = 19;
-        private static final int ON_TASK_DISPLAY_CHANGED = 20;
-        private static final int ON_TASK_LIST_UPDATED = 21;
-        private static final int ON_SINGLE_TASK_DISPLAY_EMPTY = 22;
-        private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 23;
-        private static final int ON_TASK_DESCRIPTION_CHANGED = 24;
-        private static final int ON_ACTIVITY_ROTATION = 25;
+        private static final int ON_TASK_DISPLAY_CHANGED = 19;
+        private static final int ON_TASK_LIST_UPDATED = 20;
+        private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 21;
+        private static final int ON_TASK_DESCRIPTION_CHANGED = 22;
+        private static final int ON_ACTIVITY_ROTATION = 23;
 
         /**
          * List of {@link TaskStackChangeListener} registered from {@link #addListener}.
@@ -257,18 +255,6 @@ public class TaskStackChangeListeners extends TaskStackListener {
         }
 
         @Override
-        public void onSingleTaskDisplayDrawn(int displayId) {
-            mHandler.obtainMessage(ON_SINGLE_TASK_DISPLAY_DRAWN, displayId,
-                    0 /* unused */).sendToTarget();
-        }
-
-        @Override
-        public void onSingleTaskDisplayEmpty(int displayId) {
-            mHandler.obtainMessage(ON_SINGLE_TASK_DISPLAY_EMPTY, displayId,
-                    0 /* unused */).sendToTarget();
-        }
-
-        @Override
         public void onTaskDisplayChanged(int taskId, int newDisplayId) {
             mHandler.obtainMessage(ON_TASK_DISPLAY_CHANGED, taskId, newDisplayId).sendToTarget();
         }
@@ -416,18 +402,6 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onBackPressedOnTaskRoot(
                                     (RunningTaskInfo) msg.obj);
-                        }
-                        break;
-                    }
-                    case ON_SINGLE_TASK_DISPLAY_DRAWN: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onSingleTaskDisplayDrawn(msg.arg1);
-                        }
-                        break;
-                    }
-                    case ON_SINGLE_TASK_DISPLAY_EMPTY: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onSingleTaskDisplayEmpty(msg.arg1);
                         }
                         break;
                     }

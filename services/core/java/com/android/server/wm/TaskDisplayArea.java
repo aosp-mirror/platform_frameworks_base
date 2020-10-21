@@ -311,9 +311,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     @Override
     void addChild(Task task, int position) {
         if (DEBUG_STACK) Slog.d(TAG_WM, "Set task=" + task + " on taskDisplayArea=" + this);
-        if (mDisplayContent.mSingleTaskInstance && getStackCount() == 1) {
-            throw new IllegalStateException("addChild: Can only have one task on display=" + this);
-        }
 
         addStackReferenceIfNeeded(task);
         position = findPositionForStack(position, task, true /* adding */);
@@ -1020,14 +1017,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      */
     Task createStack(int windowingMode, int activityType, boolean onTop, ActivityInfo info,
             Intent intent, boolean createdByOrganizer) {
-        if (mDisplayContent.mSingleTaskInstance && getStackCount() > 0) {
-            // Create stack on default display instead since this display can only contain 1 stack.
-            // TODO: Kinda a hack, but better that having the decision at each call point. Hoping
-            // this goes away once ActivityView is no longer using virtual displays.
-            return mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
-                    windowingMode, activityType, onTop, info, intent, createdByOrganizer);
-        }
-
         if (activityType == ACTIVITY_TYPE_UNDEFINED && !createdByOrganizer) {
             // Can't have an undefined stack type yet...so re-map to standard. Anyone that wants
             // anything else should be passing it in anyways...except for the task organizer.

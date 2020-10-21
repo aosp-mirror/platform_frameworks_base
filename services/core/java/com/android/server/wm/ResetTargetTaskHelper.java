@@ -231,11 +231,6 @@ class ResetTargetTaskHelper {
 
         final ActivityTaskManagerService atmService = mTargetStack.mAtmService;
         TaskDisplayArea taskDisplayArea = mTargetStack.getDisplayArea();
-        final boolean singleTaskInstanceDisplay =
-                taskDisplayArea.mDisplayContent.isSingleTaskInstance();
-        if (singleTaskInstanceDisplay) {
-            taskDisplayArea = atmService.mRootWindowContainer.getDefaultTaskDisplayArea();
-        }
 
         final int windowingMode = mTargetStack.getWindowingMode();
         final int activityType = mTargetStack.getActivityType();
