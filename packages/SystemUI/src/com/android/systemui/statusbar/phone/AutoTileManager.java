@@ -53,6 +53,7 @@ public class AutoTileManager implements UserAwareController {
     public static final String WORK = "work";
     public static final String NIGHT = "night";
     public static final String CAST = "cast";
+    public static final String BRIGHTNESS = "reduce_brightness";
     static final String SETTING_SEPARATOR = ":";
 
     private UserHandle mCurrentUser;
@@ -123,6 +124,9 @@ public class AutoTileManager implements UserAwareController {
         if (!mAutoTracker.isAdded(CAST)) {
             mCastController.addCallback(mCastCallback);
         }
+
+        // TODO(b/170970675): Set a listener/controller and callback for Reduce Bright Colors
+        // state changes. Call into ColorDisplayService to get availability/config status
 
         int settingsN = mAutoAddSettingList.size();
         for (int i = 0; i < settingsN; i++) {
