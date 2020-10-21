@@ -14,7 +14,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 
 import static junit.framework.Assert.assertEquals;
@@ -43,7 +42,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,12 +62,6 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
         NotificationEntry entry = new NotificationEntryBuilder().build();
         when(mRow.getEntry()).thenReturn(entry);
-    }
-
-    @After
-    public void tearDown() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
     }
 
     @Test

@@ -1643,19 +1643,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     /** Sets the last time the notification being displayed audibly alerted the user. */
     public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
-        if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            long timeSinceAlertedAudibly = System.currentTimeMillis() - lastAudiblyAlertedMs;
-            boolean alertedRecently =
-                    timeSinceAlertedAudibly < RECENTLY_ALERTED_THRESHOLD_MS;
+        long timeSinceAlertedAudibly = System.currentTimeMillis() - lastAudiblyAlertedMs;
+        boolean alertedRecently = timeSinceAlertedAudibly < RECENTLY_ALERTED_THRESHOLD_MS;
 
-            applyAudiblyAlertedRecently(alertedRecently);
+        applyAudiblyAlertedRecently(alertedRecently);
 
-            removeCallbacks(mExpireRecentlyAlertedFlag);
-            if (alertedRecently) {
-                long timeUntilNoLongerRecent =
-                        RECENTLY_ALERTED_THRESHOLD_MS - timeSinceAlertedAudibly;
-                postDelayed(mExpireRecentlyAlertedFlag, timeUntilNoLongerRecent);
-            }
+        removeCallbacks(mExpireRecentlyAlertedFlag);
+        if (alertedRecently) {
+            long timeUntilNoLongerRecent = RECENTLY_ALERTED_THRESHOLD_MS - timeSinceAlertedAudibly;
+            postDelayed(mExpireRecentlyAlertedFlag, timeUntilNoLongerRecent);
         }
     }
 
