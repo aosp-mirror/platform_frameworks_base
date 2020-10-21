@@ -27,7 +27,7 @@ fun LayersAssertion.imeLayerBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeLayerBecomesVisible", enabled, bugId) {
+    all("imeLayerBecomesVisible", bugId, enabled) {
         this.hidesLayer(IME_WINDOW_TITLE)
                 .then()
                 .showsLayer(IME_WINDOW_TITLE)
@@ -38,7 +38,7 @@ fun LayersAssertion.imeLayerBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeLayerBecomesInvisible", enabled, bugId) {
+    all("imeLayerBecomesInvisible", bugId, enabled) {
         this.showsLayer(IME_WINDOW_TITLE)
                 .then()
                 .hidesLayer(IME_WINDOW_TITLE)
@@ -50,7 +50,7 @@ fun LayersAssertion.imeAppLayerIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeAppLayerIsAlwaysVisible", enabled, bugId) {
+    all("imeAppLayerIsAlwaysVisible", bugId, enabled) {
         this.showsLayer(testApp.getPackage())
     }
 }
@@ -60,7 +60,7 @@ fun WmAssertion.imeAppWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeAppWindowIsAlwaysVisible", enabled, bugId) {
+    all("imeAppWindowIsAlwaysVisible", bugId, enabled) {
         this.showsAppWindowOnTop(testApp.getPackage())
     }
 }
@@ -69,7 +69,7 @@ fun WmAssertion.imeWindowBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeWindowBecomesInvisible", enabled, bugId) {
+    all("imeWindowBecomesInvisible", bugId, enabled) {
         this.showsNonAppWindow(IME_WINDOW_TITLE)
                 .then()
                 .hidesNonAppWindow(IME_WINDOW_TITLE)
@@ -81,7 +81,7 @@ fun WmAssertion.imeAppWindowBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeAppWindowBecomesInvisible", enabled, bugId) {
+    all("imeAppWindowBecomesInvisible", bugId, enabled) {
         this.showsAppWindowOnTop(testApp.getPackage())
                 .then()
                 .appWindowNotOnTop(testApp.getPackage())
@@ -93,7 +93,7 @@ fun LayersAssertion.imeAppLayerBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("imeAppLayerBecomesInvisible", enabled, bugId) {
+    all("imeAppLayerBecomesInvisible", bugId, enabled) {
         this.skipUntilFirstAssertion()
                 .showsLayer(testApp.getPackage())
                 .then()
