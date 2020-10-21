@@ -1,7 +1,10 @@
 aidl_interface {
     name: "audio_common-aidl",
     unstable: true,
+    host_supported: true,
+    vendor_available: true,
     local_include_dir: "aidl",
+    double_loadable: true,
     srcs: [
         "aidl/android/media/audio/common/AudioChannelMask.aidl",
         "aidl/android/media/audio/common/AudioConfig.aidl",
