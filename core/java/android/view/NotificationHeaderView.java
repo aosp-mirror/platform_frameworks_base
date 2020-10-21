@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -42,7 +41,6 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends ViewGroup {
-    public static final int NO_COLOR = Notification.COLOR_INVALID;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private final int mGravity;
@@ -56,7 +54,6 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mFeedbackIcon;
-    private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
     private int mHeaderTextMarginEnd;
@@ -293,35 +290,6 @@ public class NotificationHeaderView extends ViewGroup {
         mExpandClickListener = l;
         mExpandButton.setOnClickListener(mExpandClickListener);
         updateTouchListener();
-    }
-
-    public int getOriginalIconColor() {
-        return mIcon.getOriginalIconColor();
-    }
-
-    public int getOriginalNotificationColor() {
-        return mExpandButton.getOriginalNotificationColor();
-    }
-
-    @RemotableViewMethod
-    public void setExpanded(boolean expanded) {
-        mExpanded = expanded;
-        updateExpandButton();
-    }
-
-    private void updateExpandButton() {
-        int drawableId;
-        int contentDescriptionId;
-        if (mExpanded) {
-            drawableId = R.drawable.ic_collapse_notification;
-            contentDescriptionId = R.string.expand_button_content_description_expanded;
-        } else {
-            drawableId = R.drawable.ic_expand_notification;
-            contentDescriptionId = R.string.expand_button_content_description_collapsed;
-        }
-        mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(getOriginalNotificationColor());
-        mExpandButton.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
