@@ -20,7 +20,11 @@ android_test {
         "android.test.runner",
         "android.test.base",
     ],
-    static_libs: ["androidx.test.rules", "truth-prebuilt"],
+    static_libs: [
+        "androidx.test.rules",
+        "androidx.test.uiautomator_uiautomator",
+        "truth-prebuilt",
+    ],
     test_suites: ["general-tests"],
     sdk_version: "test_current",
     platform_apis: true,
