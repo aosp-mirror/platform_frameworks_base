@@ -2843,7 +2843,7 @@ public class TelephonyManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static @NonNull @NetworkType int[] getAllNetworkTypes() {
-        return NETWORK_TYPES;
+        return NETWORK_TYPES.clone();
     }
 
     /**
