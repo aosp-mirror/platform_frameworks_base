@@ -16,12 +16,12 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.GlobalScreenshot.ACTION_TYPE_EDIT;
-import static com.android.systemui.screenshot.GlobalScreenshot.ACTION_TYPE_SHARE;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ID;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED;
+import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_EDIT;
+import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_SHARE;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_DISALLOW_ENTER_PIP;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import android.app.ActivityOptions;

@@ -16,9 +16,9 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_TYPE;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ID;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_TYPE;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
 
 import android.app.ActivityOptions;
 import android.app.PendingIntent;

@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout
+<com.android.systemui.screenshot.ScreenshotView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/global_screenshot_frame"
     android:layout_width="match_parent"
@@ -62,4 +62,4 @@
             android:layout_margin="@dimen/screenshot_dismiss_button_margin"
             android:src="@drawable/screenshot_cancel"/>
     </FrameLayout>
-</FrameLayout>
+</com.android.systemui.screenshot.ScreenshotView>
