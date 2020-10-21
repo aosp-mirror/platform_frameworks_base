@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"လက်ရှိ စက်ရှင်ကို ဖျောက်ထားမည်။"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"လက်ရှိစက်ရှင်ကို ဝှက်၍မရနိုင်ပါ။"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ပယ်ရန်"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ဆက်လုပ်ရန်"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>

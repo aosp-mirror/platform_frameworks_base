@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Скриване на текущата сесия."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Текущата сесия не може да бъде скрита."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Отхвърляне"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Възобновяване"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
