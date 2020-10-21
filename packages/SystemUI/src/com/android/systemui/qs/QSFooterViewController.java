@@ -26,8 +26,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -35,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -55,11 +54,15 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final UserTracker mUserTracker;
     private final QSPanelController mQsPanelController;
+    private final QSDetailDisplayer mQsDetailDisplayer;
+    private final QuickQSPanelController mQuickQSPanelController;
     private final TunerService mTunerService;
     private final MetricsLogger mMetricsLogger;
     private final SettingsButton mSettingsButton;
     private final TextView mBuildText;
     private final View mEdit;
+    private final MultiUserSwitch mMultiUserSwitch;
+    private final PageIndicator mPageIndicator;
 
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             new UserInfoController.OnUserInfoChangedListener() {
@@ -119,8 +122,9 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     QSFooterViewController(QSFooterView view, UserManager userManager,
             UserInfoController userInfoController, ActivityStarter activityStarter,
             DeviceProvisionedController deviceProvisionedController, UserTracker userTracker,
-            QSPanelController qsPanelController, TunerService tunerService,
-            MetricsLogger metricsLogger) {
+            QSPanelController qsPanelController, QSDetailDisplayer qsDetailDisplayer,
+            QuickQSPanelController quickQSPanelController,
+            TunerService tunerService, MetricsLogger metricsLogger) {
         super(view);
         mUserManager = userManager;
         mUserInfoController = userInfoController;
@@ -128,17 +132,24 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mDeviceProvisionedController = deviceProvisionedController;
         mUserTracker = userTracker;
         mQsPanelController = qsPanelController;
+        mQsDetailDisplayer = qsDetailDisplayer;
+        mQuickQSPanelController = quickQSPanelController;
         mTunerService = tunerService;
         mMetricsLogger = metricsLogger;
 
         mSettingsButton = mView.findViewById(R.id.settings_button);
         mBuildText = mView.findViewById(R.id.build);
         mEdit = mView.findViewById(android.R.id.edit);
+        mMultiUserSwitch = mView.findViewById(R.id.multi_user_switch);
+        mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
     }
-
 
     @Override
     protected void onViewAttached() {
+        mView.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                        mView.updateAnimator(
+                                right - left, mQuickQSPanelController.getNumQuickTiles()));
         mSettingsButton.setOnClickListener(mSettingsOnClickListener);
         mBuildText.setOnLongClickListener(view -> {
             CharSequence buildText = mBuildText.getText();
@@ -158,18 +169,14 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                 mActivityStarter.postQSRunnableDismissingKeyguard(() ->
                         mQsPanelController.showEdit(view)));
 
+        mMultiUserSwitch.setQSDetailDisplayer(mQsDetailDisplayer);
+        mQsPanelController.setFooterPageIndicator(mPageIndicator);
         mView.updateEverything(isTunerEnabled());
     }
 
     @Override
     protected void onViewDetached() {
         setListening(false);
-    }
-
-
-    @Override
-    public void setQSPanel(@Nullable QSPanel panel) {
-        mView.setQSPanel(panel);
     }
 
     @Override
@@ -217,11 +224,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     public void setExpandClickListener(View.OnClickListener onClickListener) {
         mView.setExpandClickListener(onClickListener);
-    }
-
-    @Override
-    public void setQQSPanel(@Nullable QuickQSPanel panel) {
-        mView.setQQSPanel(panel);
     }
 
     @Override

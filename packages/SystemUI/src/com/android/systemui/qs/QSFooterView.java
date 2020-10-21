@@ -59,7 +59,6 @@ public class QSFooterView extends FrameLayout {
     private boolean mShouldShowBuildText;
 
     private boolean mQsDisabled;
-    private QuickQSPanel mQuickQsPanel;
 
     private boolean mExpanded;
 
@@ -115,8 +114,6 @@ public class QSFooterView extends FrameLayout {
 
         updateResources();
 
-        addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight,
-                oldBottom) -> updateAnimator(right - left));
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         setBuildText();
     }
@@ -139,9 +136,7 @@ public class QSFooterView extends FrameLayout {
         }
     }
 
-    private void updateAnimator(int width) {
-        int numTiles = mQuickQsPanel != null ? mQuickQsPanel.getNumQuickTiles()
-                : QuickQSPanel.getDefaultMaxTiles();
+    void updateAnimator(int width, int numTiles) {
         int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
                 - mContext.getResources().getDimensionPixelSize(dimen.qs_quick_tile_padding);
         int remaining = (width - numTiles * size) / (numTiles - 1);
@@ -288,19 +283,6 @@ public class QSFooterView extends FrameLayout {
     private boolean showUserSwitcher() {
         return mExpanded && mMultiUserSwitch.isMultiUserEnabled();
     }
-
-    /** */
-    public void setQSPanel(final QSPanel qsPanel) {
-        if (qsPanel != null) {
-            mMultiUserSwitch.setQsPanel(qsPanel);
-            qsPanel.setFooterPageIndicator(mPageIndicator);
-        }
-    }
-
-    public void setQQSPanel(@Nullable QuickQSPanel panel) {
-        mQuickQsPanel = panel;
-    }
-
 
     void onUserInfoChanged(Drawable picture, boolean isGuestUser) {
         if (picture != null && isGuestUser && !(picture instanceof UserIconDrawable)) {

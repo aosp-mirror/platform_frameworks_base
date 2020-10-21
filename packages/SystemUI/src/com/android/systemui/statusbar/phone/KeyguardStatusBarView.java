@@ -45,7 +45,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -369,8 +369,9 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    public void setQSPanel(QSPanel qsp) {
-        mMultiUserSwitch.setQsPanel(qsp);
+    /** */
+    public void setQSDetailDisplayer(QSDetailDisplayer detailDisplayer) {
+        mMultiUserSwitch.setQSDetailDisplayer(detailDisplayer);
     }
 
     @Override
