@@ -44,6 +44,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -98,7 +99,8 @@ public class DozeSensors {
     DozeSensors(Context context, AsyncSensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
             Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog,
-            ProximitySensor proximitySensor, SecureSettings secureSettings) {
+            ProximitySensor proximitySensor, SecureSettings secureSettings,
+            AuthController authController) {
         mContext = context;
         mSensorManager = sensorManager;
         mConfig = config;
@@ -152,9 +154,9 @@ public class DozeSensors {
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.udfpsLongPressSensorType()),
-                        Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
-                        false /* settingDef */,
-                        true /* configured */,
+                        "doze_pulse_on_auth",
+                        true /* settingDef */,
+                        authController.hasUdfpsEnrolled() /* configured */,
                         DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
