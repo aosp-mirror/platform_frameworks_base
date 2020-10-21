@@ -197,7 +197,6 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -1213,7 +1212,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mSurfaceFactory = surfaceFactory;
         mTransaction = mTransactionFactory.get();
 
-        mDisplayWindowSettings = new DisplayWindowSettings(this);
+        final DisplayWindowSettingsProvider settingsProvider = new DisplayWindowSettingsProvider();
+        mDisplayWindowSettings = new DisplayWindowSettings(this, settingsProvider);
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
