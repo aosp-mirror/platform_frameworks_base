@@ -229,6 +229,9 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {}
 
+    /** Set the expanded state on the view wrapper */
+    public void setExpanded(boolean expanded) {}
+
     /**
      * @return the notification header if it exists
      */
