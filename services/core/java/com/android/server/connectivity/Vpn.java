@@ -38,6 +38,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -1976,28 +1977,33 @@ public class Vpn {
          * @see Settings.Secure#putStringForUser
          */
         public void settingsSecurePutStringForUser(String key, String value, int userId) {
-            Settings.Secure.putStringForUser(mContext.getContentResolver(), key, value, userId);
+            Settings.Secure.putString(getContentResolverAsUser(userId), key, value);
         }
 
         /**
          * @see Settings.Secure#putIntForUser
          */
         public void settingsSecurePutIntForUser(String key, int value, int userId) {
-            Settings.Secure.putIntForUser(mContext.getContentResolver(), key, value, userId);
+            Settings.Secure.putInt(getContentResolverAsUser(userId), key, value);
         }
 
         /**
          * @see Settings.Secure#getStringForUser
          */
         public String settingsSecureGetStringForUser(String key, int userId) {
-            return Settings.Secure.getStringForUser(mContext.getContentResolver(), key, userId);
+            return Settings.Secure.getString(getContentResolverAsUser(userId), key);
         }
 
         /**
          * @see Settings.Secure#getIntForUser
          */
         public int settingsSecureGetIntForUser(String key, int def, int userId) {
-            return Settings.Secure.getIntForUser(mContext.getContentResolver(), key, def, userId);
+            return Settings.Secure.getInt(getContentResolverAsUser(userId), key, def);
+        }
+
+        private ContentResolver getContentResolverAsUser(int userId) {
+            return mContext.createContextAsUser(
+                    UserHandle.of(userId), 0 /* flags */).getContentResolver();
         }
 
         public boolean isCallerSystem() {
