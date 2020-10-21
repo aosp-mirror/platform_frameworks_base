@@ -736,7 +736,7 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     /**
-     * Tests that tasks on singleTaskDisplay are not visible and not trimmed/removed.
+     * Tests that tasks on always on top multi-window tasks are not visible and not trimmed/removed.
      */
     @Test
     public void testVisibleTasks_alwaysOnTop() {

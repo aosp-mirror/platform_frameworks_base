@@ -67,7 +67,6 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
@@ -3204,10 +3203,6 @@ class Task extends WindowContainer<WindowContainer> {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
 
-        if (mDisplayContent != null && mDisplayContent.isSingleTaskInstance()) {
-            mAtmService.notifySingleTaskDisplayEmpty(mDisplayContent.mDisplayId);
-        }
-
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
 
@@ -5196,11 +5191,6 @@ class Task extends WindowContainer<WindowContainer> {
                 !PRESERVE_WINDOWS);
     }
 
-    /** @return true if the stack can only contain one task */
-    boolean isSingleTaskInstance() {
-        return mDisplayContent != null && mDisplayContent.isSingleTaskInstance();
-    }
-
     final boolean isHomeOrRecentsStack() {
         return isActivityTypeHome() || isActivityTypeRecents();
     }
@@ -6354,13 +6344,6 @@ class Task extends WindowContainer<WindowContainer> {
                 if (newTask) {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
-                    } else if (dc.isSingleTaskInstance()) {
-                        // If a new task is being launched in a single task display, we don't need
-                        // to play normal animation, but need to trigger a callback when an app
-                        // transition is actually handled. So ignore already prepared activity, and
-                        // override it.
-                        transit = TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
-                        keepCurTransition = false;
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
                         // supporting picture-in-picture while pausing only if the starting activity
@@ -6781,15 +6764,6 @@ class Task extends WindowContainer<WindowContainer> {
             // nothing to do!
             if (noAnimation) {
                 ActivityOptions.abort(options);
-            } else if (isSingleTaskInstance()) {
-                // When a task is moved front on the display which can only contain one task, start
-                // a special transition.
-                // {@link AppTransitionController#handleAppTransitionReady} later picks up the
-                // transition, and schedules
-                // {@link ITaskStackListener#onSingleTaskDisplayDrawn} callback which is triggered
-                // after contents are drawn on the display.
-                updateTransitLocked(TRANSIT_SHOW_SINGLE_TASK_DISPLAY, options,
-                        true /* forceOverride */);
             } else {
                 updateTransitLocked(TRANSIT_TASK_TO_FRONT, options, false /* forceOverride */);
             }
@@ -6837,9 +6811,6 @@ class Task extends WindowContainer<WindowContainer> {
                     mStackSupervisor.mNoAnimActivities.add(r);
                 }
                 ActivityOptions.abort(options);
-            } else if (isSingleTaskInstance()) {
-                updateTransitLocked(TRANSIT_SHOW_SINGLE_TASK_DISPLAY, options,
-                        true /* forceOverride */);
             } else {
                 updateTransitLocked(TRANSIT_TASK_TO_FRONT, options, false /* forceOverride */);
             }
@@ -7205,10 +7176,6 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void addChild(WindowContainer child, final boolean toTop, boolean showForAllUsers) {
-        if (isSingleTaskInstance() && hasChild()) {
-            throw new IllegalStateException("Can only have one child on stack=" + this);
-        }
-
         Task task = child.asTask();
         try {
 

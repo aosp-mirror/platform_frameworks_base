@@ -54,14 +54,12 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED_MSG = 19;
     private static final int NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG = 20;
     private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
-    private static final int NOTIFY_SINGLE_TASK_DISPLAY_DRAWN = 22;
-    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 23;
-    private static final int NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG = 24;
-    private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 25;
-    private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 26;
-    private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 27;
-    private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 28;
-    private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 29;
+    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 22;
+    private static final int NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG = 23;
+    private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 24;
+    private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 25;
+    private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 26;
+    private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 27;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -154,14 +152,6 @@ class TaskChangeNotificationController {
 
     private final TaskStackConsumer mOnSizeCompatModeActivityChanged = (l, m) -> {
         l.onSizeCompatModeActivityChanged(m.arg1, (IBinder) m.obj);
-    };
-
-    private final TaskStackConsumer mNotifySingleTaskDisplayDrawn = (l, m) -> {
-        l.onSingleTaskDisplayDrawn(m.arg1);
-    };
-
-    private final TaskStackConsumer mNotifySingleTaskDisplayEmpty = (l, m) -> {
-        l.onSingleTaskDisplayEmpty(m.arg1);
     };
 
     private final TaskStackConsumer mNotifyTaskDisplayChanged = (l, m) -> {
@@ -260,12 +250,6 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_BACK_PRESSED_ON_TASK_ROOT:
                     forAllRemoteListeners(mNotifyBackPressedOnTaskRoot, msg);
-                    break;
-                case NOTIFY_SINGLE_TASK_DISPLAY_DRAWN:
-                    forAllRemoteListeners(mNotifySingleTaskDisplayDrawn, msg);
-                    break;
-                case NOTIFY_SINGLE_TASK_DISPLAY_EMPTY:
-                    forAllRemoteListeners(mNotifySingleTaskDisplayEmpty, msg);
                     break;
                 case NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskDisplayChanged, msg);
@@ -516,27 +500,6 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_BACK_PRESSED_ON_TASK_ROOT,
                 taskInfo);
         forAllLocalListeners(mNotifyBackPressedOnTaskRoot, msg);
-        msg.sendToTarget();
-    }
-
-    /**
-     * Notify listeners that contents are drawn for the first time on a single task display.
-     */
-    void notifySingleTaskDisplayDrawn(int displayId) {
-        final Message msg = mHandler.obtainMessage(NOTIFY_SINGLE_TASK_DISPLAY_DRAWN,
-                displayId, 0 /* unused */);
-        forAllLocalListeners(mNotifySingleTaskDisplayDrawn, msg);
-        msg.sendToTarget();
-    }
-
-    /**
-     * Notify listeners that the last task is removed from a single task display.
-     */
-    void notifySingleTaskDisplayEmpty(int displayId) {
-        final Message msg = mHandler.obtainMessage(
-                NOTIFY_SINGLE_TASK_DISPLAY_EMPTY,
-                displayId, 0 /* unused */);
-        forAllLocalListeners(mNotifySingleTaskDisplayEmpty, msg);
         msg.sendToTarget();
     }
 

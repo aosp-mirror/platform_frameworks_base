@@ -406,19 +406,6 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Makes the display with the given id a single task instance display. I.e the display can only
-     * contain one task.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void setDisplayToSingleTaskInstance(int displayId) {
-        try {
-            getService().setDisplayToSingleTaskInstance(displayId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Requests that an activity should enter picture-in-picture mode if possible.
      * @hide
      */

@@ -29,7 +29,6 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPE
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
@@ -2039,9 +2038,6 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_CRASHING_ACTIVITY_CLOSE: {
                 return "TRANSIT_CRASHING_ACTIVITY_CLOSE";
-            }
-            case TRANSIT_SHOW_SINGLE_TASK_DISPLAY: {
-                return "TRANSIT_SHOW_SINGLE_TASK_DISPLAY";
             }
             default: {
                 return "<UNKNOWN: " + transition + ">";
