@@ -743,6 +743,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
             if (mState.isInPip() && fromRotation) {
+                // Update bounds state to final destination first. It's important to do this
+                // before finishing & cancelling the transition animation so that the MotionHelper
+                // bounds are synchronized to the destination bounds when the animation ends.
+                mPipBoundsState.setBounds(destinationBoundsOut);
                 // If we are rotating while there is a current animation, immediately cancel the
                 // animation (remove the listeners so we don't trigger the normal finish resize
                 // call that should only happen on the update thread)
@@ -756,7 +760,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     sendOnPipTransitionCancelled(direction);
                     sendOnPipTransitionFinished(direction);
                 }
-                mPipBoundsState.setBounds(destinationBoundsOut);
 
                 // Create a reset surface transaction for the new bounds and update the window
                 // container transaction
