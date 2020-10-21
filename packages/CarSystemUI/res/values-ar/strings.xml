@@ -28,4 +28,6 @@
     <string name="user_add_user_message_update" msgid="7061671307004867811">"يمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="car_loading_profile" msgid="4507385037552574474">"جارٍ التحميل"</string>
     <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"جارٍ تحميل الملف الشخصي الجديد للمستخدم (من <xliff:g id="FROM_USER">%1$d</xliff:g> إلى <xliff:g id="TO_USER">%2$d</xliff:g>)"</string>
+    <!-- no translation found for rear_view_camera_close_button_text (8430918817320533693) -->
+    <skip />
 </resources>

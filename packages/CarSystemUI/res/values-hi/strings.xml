@@ -28,4 +28,6 @@
     <string name="user_add_user_message_update" msgid="7061671307004867811">"कोई भी उपयोगकर्ता, बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="car_loading_profile" msgid="4507385037552574474">"लोड हो रही है"</string>
     <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"उपयोगकर्ता को लोड किया जा रहा है (<xliff:g id="FROM_USER">%1$d</xliff:g> से <xliff:g id="TO_USER">%2$d</xliff:g> पर)"</string>
+    <!-- no translation found for rear_view_camera_close_button_text (8430918817320533693) -->
+    <skip />
 </resources>
