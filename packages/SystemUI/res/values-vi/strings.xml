@@ -86,8 +86,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Hãy thử chụp lại màn hình"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Không thể lưu ảnh chụp màn hình do giới hạn dung lượng bộ nhớ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ứng dụng hoặc tổ chức của bạn không cho phép chụp ảnh màn hình"</string>
-    <!-- no translation found for screenshot_edit (3510496440489019191) -->
-    <skip />
+    <string name="screenshot_edit" msgid="3510496440489019191">"Chỉnh sửa ảnh chụp màn hình"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Đóng ảnh chụp màn hình"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Xem trước ảnh chụp màn hình"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Trình ghi màn hình"</string>
@@ -1065,8 +1064,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Đang tải các đề xuất"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Nội dung nghe nhìn"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ẩn phiên hiện tại."</string>
-    <!-- no translation found for controls_media_active_session (1984383994625845642) -->
-    <skip />
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Bạn không thể ẩn phiên hiện tại."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Đóng"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tiếp tục"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cài đặt"</string>
