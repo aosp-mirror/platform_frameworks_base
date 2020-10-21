@@ -22,7 +22,6 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.Manifest;
 import android.annotation.ColorRes;
 import android.annotation.DrawableRes;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -132,8 +131,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -247,43 +244,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
-
-    /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user has been successfully removed.
-     */
-    public static final int REMOVE_RESULT_REMOVED = 0;
-
-    /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user has had its {@link UserInfo#FLAG_EPHEMERAL} flag set to {@code true}, so that it will be
-     * removed when the user is stopped or on boot.
-     */
-    public static final int REMOVE_RESULT_SET_EPHEMERAL = 1;
-
-    /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user is already in the process of being removed.
-     */
-    public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
-
-    /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that an error occurred
-     * that prevented the user from being removed or set as ephemeral.
-     */
-    public static final int REMOVE_RESULT_ERROR = 3;
-
-    /**
-     * Possible response codes from {@link #removeUserOrSetEphemeral(int)}.
-     */
-    @IntDef(prefix = { "REMOVE_RESULT_" }, value = {
-            REMOVE_RESULT_REMOVED,
-            REMOVE_RESULT_SET_EPHEMERAL,
-            REMOVE_RESULT_ALREADY_BEING_REMOVED,
-            REMOVE_RESULT_ERROR,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface RemoveResult {}
 
     // Tron counters
     private static final String TRON_GUEST_CREATED = "users_guest_created";
@@ -4031,17 +3991,17 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
+    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
         Slog.i(LOG_TAG, "removeUserOrSetEphemeral u" + userId);
         checkManageUsersPermission("Only the system can remove users");
         final String restriction = getUserRemovalRestriction(userId);
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
             Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
-            return REMOVE_RESULT_ERROR;
+            return UserManager.REMOVE_RESULT_ERROR;
         }
         if (userId == UserHandle.USER_SYSTEM) {
             Slog.e(LOG_TAG, "System user cannot be removed.");
-            return REMOVE_RESULT_ERROR;
+            return UserManager.REMOVE_RESULT_ERROR;
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4053,12 +4013,12 @@ public class UserManagerService extends IUserManager.Stub {
                     if (userData == null) {
                         Slog.e(LOG_TAG,
                                 "Cannot remove user " + userId + ", invalid user id provided.");
-                        return REMOVE_RESULT_ERROR;
+                        return UserManager.REMOVE_RESULT_ERROR;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
                         Slog.e(LOG_TAG, "User " + userId + " is already scheduled for removal.");
-                        return REMOVE_RESULT_ALREADY_BEING_REMOVED;
+                        return UserManager.REMOVE_RESULT_ALREADY_BEING_REMOVED;
                     }
                 }
 
@@ -4067,7 +4027,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (currentUser != userId) {
                     // Attempt to remove the user. This will fail if the user is the current user
                     if (removeUser(userId)) {
-                        return REMOVE_RESULT_REMOVED;
+                        return UserManager.REMOVE_RESULT_REMOVED;
                     }
 
                     Slog.w(LOG_TAG, "Unable to immediately remove non-current user: " + userId
@@ -4081,7 +4041,7 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
                 writeUserLP(userData);
 
-                return REMOVE_RESULT_SET_EPHEMERAL;
+                return UserManager.REMOVE_RESULT_SET_EPHEMERAL;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

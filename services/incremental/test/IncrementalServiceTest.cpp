@@ -177,6 +177,18 @@ public:
         }
         return binder::Status::ok();
     }
+    binder::Status storageError(int32_t id) {
+        if (mListener) {
+            mListener->reportStreamHealth(id, IDataLoaderStatusListener::STREAM_STORAGE_ERROR);
+        }
+        return binder::Status::ok();
+    }
+    binder::Status transportError(int32_t id) {
+        if (mListener) {
+            mListener->reportStreamHealth(id, IDataLoaderStatusListener::STREAM_INTEGRITY_ERROR);
+        }
+        return binder::Status::ok();
+    }
     int32_t setStorageParams(bool enableReadLogs) {
         int32_t result = -1;
         EXPECT_NE(mServiceConnector.get(), nullptr);
@@ -1221,4 +1233,83 @@ TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerFailsToGetProg
     EXPECT_CALL(*listenerMock, onStorageLoadingProgressChanged(_, _)).Times(0);
     mIncrementalService->registerLoadingProgressListener(storageId, listener);
 }
+
+TEST_F(IncrementalServiceTest, testRegisterStorageHealthListenerSuccess) {
+    mIncFs->openMountSuccess();
+    sp<NiceMock<MockStorageHealthListener>> listener{new NiceMock<MockStorageHealthListener>};
+    sp<NiceMock<MockStorageHealthListener>> newListener{new NiceMock<MockStorageHealthListener>};
+    NiceMock<MockStorageHealthListener>* newListenerMock = newListener.get();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, StorageHealthCheckParams{}, listener);
+    ASSERT_GE(storageId, 0);
+    StorageHealthCheckParams newParams;
+    newParams.blockedTimeoutMs = 10000;
+    newParams.unhealthyTimeoutMs = 20000;
+    newParams.unhealthyMonitoringMs = 30000;
+    ASSERT_TRUE(mIncrementalService->registerStorageHealthListener(storageId, std::move(newParams),
+                                                                   newListener));
+
+    using MS = std::chrono::milliseconds;
+    using MCS = std::chrono::microseconds;
+
+    const auto blockedTimeout = MS(newParams.blockedTimeoutMs);
+    const auto unhealthyTimeout = MS(newParams.unhealthyTimeoutMs);
+
+    const uint64_t kFirstTimestampUs = 1000000000ll;
+    const uint64_t kBlockedTimestampUs =
+            kFirstTimestampUs - std::chrono::duration_cast<MCS>(blockedTimeout).count();
+    const uint64_t kUnhealthyTimestampUs =
+            kFirstTimestampUs - std::chrono::duration_cast<MCS>(unhealthyTimeout).count();
+
+    // test that old listener was not called
+    EXPECT_CALL(*listener.get(),
+                onHealthStatus(_, IStorageHealthListener::HEALTH_STATUS_READS_PENDING))
+            .Times(0);
+    EXPECT_CALL(*newListenerMock,
+                onHealthStatus(_, IStorageHealthListener::HEALTH_STATUS_READS_PENDING))
+            .Times(1);
+    EXPECT_CALL(*newListenerMock, onHealthStatus(_, IStorageHealthListener::HEALTH_STATUS_BLOCKED))
+            .Times(1);
+    EXPECT_CALL(*newListenerMock,
+                onHealthStatus(_, IStorageHealthListener::HEALTH_STATUS_UNHEALTHY_STORAGE))
+            .Times(1);
+    EXPECT_CALL(*newListenerMock,
+                onHealthStatus(_, IStorageHealthListener::HEALTH_STATUS_UNHEALTHY_TRANSPORT))
+            .Times(1);
+    mIncFs->waitForPendingReadsSuccess(kFirstTimestampUs);
+    mLooper->mCallback(-1, -1, mLooper->mCallbackData);
+
+    ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_READS_PENDING, newListener->mStatus);
+    ASSERT_EQ(storageId, newListener->mStorageId);
+
+    auto timedCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // test when health status is blocked with transport error
+    mDataLoader->transportError(storageId);
+    mIncFs->waitForPendingReadsSuccess(kBlockedTimestampUs);
+    timedCallback();
+    ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_BLOCKED, newListener->mStatus);
+    timedCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // test when health status is blocked with storage error
+    mDataLoader->storageError(storageId);
+    mIncFs->waitForPendingReadsSuccess(kBlockedTimestampUs);
+    timedCallback();
+    ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_UNHEALTHY_STORAGE, newListener->mStatus);
+    timedCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // test when health status is unhealthy with transport error
+    mDataLoader->transportError(storageId);
+    mIncFs->waitForPendingReadsSuccess(kUnhealthyTimestampUs);
+    timedCallback();
+    ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_UNHEALTHY_TRANSPORT, newListener->mStatus);
+    mTimedQueue->clearJob(storageId);
+}
+
 } // namespace android::os::incremental

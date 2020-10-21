@@ -28,6 +28,7 @@ interface IAppSearchManager {
     /**
      * Sets the schema.
      *
+     * @param databaseName  The databaseName this document resides in.
      * @param schemaBundles List of AppSearchSchema bundles.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
@@ -35,6 +36,7 @@ interface IAppSearchManager {
      *     The results of the call.
      */
     void setSchema(
+        in String databaseName,
         in List<Bundle> schemaBundles,
         boolean forceOverride,
         in AndroidFuture<AppSearchResult> callback);
@@ -42,6 +44,7 @@ interface IAppSearchManager {
     /**
      * Inserts documents into the index.
      *
+     * @param databaseName  The name of the database where this document lives.
      * @param documentBundes List of GenericDocument bundles.
      * @param callback
      *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
@@ -51,11 +54,15 @@ interface IAppSearchManager {
      *     where the keys are document URIs, and the values are {@code null}.
      */
     void putDocuments(
-        in List<Bundle> documentBundles, in AndroidFuture<AppSearchBatchResult> callback);
+        in String databaseName,
+        in List<Bundle> documentBundles,
+        in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Retrieves documents from the index.
      *
+     * @param databaseName  The databaseName this document resides in.
+     * @param namespace    The namespace this document resides in.
      * @param uris The URIs of the documents to retrieve
      * @param callback
      *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Bundle}&gt;&gt;.
@@ -64,16 +71,22 @@ interface IAppSearchManager {
      *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Bundle}&gt;
      *     where the keys are document URIs, and the values are Document bundles.
      */
-    void getDocuments(in List<String> uris, in AndroidFuture<AppSearchBatchResult> callback);
+    void getDocuments(
+        in String databaseName,
+        in String namespace,
+        in List<String> uris,
+        in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Searches a document based on a given specifications.
      *
+     * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link SearchResults}&gt;&gt;
      */
     void query(
+        in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
         in AndroidFuture<AppSearchResult> callback);
@@ -81,6 +94,8 @@ interface IAppSearchManager {
     /**
      * Deletes documents by URI.
      *
+     * @param databaseName The databaseName the document is in.
+     * @param namespace    Namespace of the document to remove.
      * @param uris The URIs of the documents to delete
      * @param callback
      *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
@@ -90,11 +105,16 @@ interface IAppSearchManager {
      *     where the keys are document URIs. If a document doesn't exist, it will be reported as a
      *     failure where the {@code throwable} is {@code null}.
      */
-    void delete(in List<String> uris, in AndroidFuture<AppSearchBatchResult> callback);
+    void delete(
+        in String databaseName,
+        in String namespace,
+        in List<String> uris,
+        in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Deletes documents by schema type.
      *
+     * @param databaseName The databaseName the document is in.
      * @param schemaTypes The schema types of the documents to delete
      * @param callback
      *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
@@ -105,13 +125,16 @@ interface IAppSearchManager {
      *     failure where the {@code throwable} is {@code null}.
      */
     void deleteByTypes(
-        in List<String> schemaTypes, in AndroidFuture<AppSearchBatchResult> callback);
+        in String databaseName,
+        in List<String> schemaTypes,
+        in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Deletes all documents belonging to the calling app.
      *
+     * @param databaseName The databaseName to remove all documents from.
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt;&gt;.
      *     Will be completed with the result of the call.
      */
-    void deleteAll(in AndroidFuture<AppSearchResult> callback);
+    void deleteAll(in String databaseName, in AndroidFuture<AppSearchResult> callback);
 }

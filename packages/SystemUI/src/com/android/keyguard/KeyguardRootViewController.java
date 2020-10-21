@@ -19,7 +19,7 @@ package com.android.keyguard;
 import android.view.ViewGroup;
 
 import com.android.keyguard.dagger.KeyguardBouncerScope;
-import com.android.keyguard.dagger.RootView;
+import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.util.ViewController;
 

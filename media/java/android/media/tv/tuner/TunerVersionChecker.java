@@ -31,7 +31,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@TestApi
 @SystemApi
 public final class TunerVersionChecker {
     private static final String TAG = "TunerVersionChecker";

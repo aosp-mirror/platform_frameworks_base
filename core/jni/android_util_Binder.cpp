@@ -960,17 +960,8 @@ static jlong android_os_Binder_clearCallingIdentity()
     return IPCThreadState::self()->clearCallingIdentity();
 }
 
-static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz, jlong token)
+static void android_os_Binder_restoreCallingIdentity(jlong token)
 {
-    // XXX temporary validation check to debug crashes.
-    int uid = (int)(token>>32);
-    if (uid > 0 && uid < 999) {
-        // In Android currently there are no uids in this range.
-        char buf[128];
-        sprintf(buf, "Restoring bad calling ident: 0x%" PRIx64, token);
-        jniThrowException(env, "java/lang/IllegalStateException", buf);
-        return;
-    }
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
@@ -1064,6 +1055,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "isHandlingTransaction", "()Z", (void*)android_os_Binder_isHandlingTransaction },
     // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
+    // @CriticalNative
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
     // @CriticalNative
     { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },

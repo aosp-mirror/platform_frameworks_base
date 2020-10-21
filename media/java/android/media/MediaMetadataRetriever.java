@@ -30,7 +30,10 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 
 import java.io.FileDescriptor;
@@ -48,7 +51,6 @@ import java.util.Map;
  * frame and meta data from an input media file.
  */
 public class MediaMetadataRetriever implements AutoCloseable {
-
     // borrowed from ExoPlayer
     private static final String[] STANDARD_GENRES = new String[] {
             // These are the official ID3v1 genres.
@@ -296,7 +298,19 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * non-negative.
      * @throws IllegalArgumentException if the arguments are invalid
      */
-    public native void setDataSource(FileDescriptor fd, long offset, long length)
+    public void setDataSource(FileDescriptor fd, long offset, long length)
+            throws IllegalArgumentException  {
+        boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_retriever_optimize",
+                false);
+        FileDescriptor modernFd = optimize ? FileUtils.convertToModernFd(fd) : null;
+        if (modernFd == null) {
+            _setDataSource(fd, offset, length);
+        } else {
+            _setDataSource(modernFd, offset, length);
+        }
+    }
+
+    private native void _setDataSource(FileDescriptor fd, long offset, long length)
             throws IllegalArgumentException;
 
     /**
@@ -340,7 +354,12 @@ public class MediaMetadataRetriever implements AutoCloseable {
         try {
             ContentResolver resolver = context.getContentResolver();
             try {
-                fd = resolver.openAssetFileDescriptor(uri, "r");
+                boolean optimize =
+                        SystemProperties.getBoolean("fuse.sys.transcode_retriever_optimize", false);
+                Bundle opts = new Bundle();
+                opts.putBoolean("android.provider.extra.ACCEPT_ORIGINAL_MEDIA_FORMAT", true);
+                fd = optimize ? resolver.openTypedAssetFileDescriptor(uri, "*/*", opts)
+                        : resolver.openAssetFileDescriptor(uri, "r");
             } catch(FileNotFoundException e) {
                 throw new IllegalArgumentException("could not access " + uri);
             }

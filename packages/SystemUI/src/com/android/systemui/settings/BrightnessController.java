@@ -50,6 +50,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
     private static final int SLIDER_ANIMATION_DURATION = 3000;
@@ -475,4 +477,20 @@ public class BrightnessController implements ToggleSlider.Listener {
         mSliderAnimator.start();
     }
 
+    /** Factory for creating a {@link BrightnessController}. */
+    public static class Factory {
+        private final Context mContext;
+        private final BroadcastDispatcher mBroadcastDispatcher;
+
+        @Inject
+        public Factory(Context context, BroadcastDispatcher broadcastDispatcher) {
+            mContext = context;
+            mBroadcastDispatcher = broadcastDispatcher;
+        }
+
+        /** Create a {@link BrightnessController} */
+        public BrightnessController create(ToggleSlider toggleSlider) {
+            return new BrightnessController(mContext, toggleSlider, mBroadcastDispatcher);
+        }
+    }
 }

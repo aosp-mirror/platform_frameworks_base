@@ -47,11 +47,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 /**
- * Tests of {@link ScrollCaptureClient}.
+ * Tests of {@link ScrollCaptureConnection}.
  */
 @SuppressWarnings("UnnecessaryLocalVariable")
 @RunWith(AndroidJUnit4.class)
-public class ScrollCaptureClientTest {
+public class ScrollCaptureConnectionTest {
 
     private final Point mPositionInWindow = new Point(1, 2);
     private final Rect mLocalVisibleRect = new Rect(2, 3, 4, 5);
@@ -63,7 +63,7 @@ public class ScrollCaptureClientTest {
     @Mock
     private Surface mSurface;
     @Mock
-    private IScrollCaptureController mClientCallbacks;
+    private IScrollCaptureCallbacks mConnectionCallbacks;
     @Mock
     private View mMockView1;
     @Mock
@@ -86,8 +86,8 @@ public class ScrollCaptureClientTest {
     @Test
     public void testDelayedAction() {
         Runnable action = Mockito.mock(Runnable.class);
-        ScrollCaptureClient.DelayedAction delayed =
-                new ScrollCaptureClient.DelayedAction(mHandler, 100, action);
+        ScrollCaptureConnection.DelayedAction delayed =
+                new ScrollCaptureConnection.DelayedAction(mHandler, 100, action);
         try {
             Thread.sleep(200);
         } catch (InterruptedException ex) {
@@ -103,8 +103,8 @@ public class ScrollCaptureClientTest {
     @Test
     public void testDelayedAction_cancel() {
         Runnable action = Mockito.mock(Runnable.class);
-        ScrollCaptureClient.DelayedAction delayed =
-                new ScrollCaptureClient.DelayedAction(mHandler, 100, action);
+        ScrollCaptureConnection.DelayedAction delayed =
+                new ScrollCaptureConnection.DelayedAction(mHandler, 100, action);
         try {
             Thread.sleep(50);
         } catch (InterruptedException ex) {
@@ -125,8 +125,8 @@ public class ScrollCaptureClientTest {
     @Test
     public void testDelayedAction_timeoutNow() {
         Runnable action = Mockito.mock(Runnable.class);
-        ScrollCaptureClient.DelayedAction delayed =
-                new ScrollCaptureClient.DelayedAction(mHandler, 100, action);
+        ScrollCaptureConnection.DelayedAction delayed =
+                new ScrollCaptureConnection.DelayedAction(mHandler, 100, action);
         try {
             Thread.sleep(50);
         } catch (InterruptedException ex) {
@@ -141,7 +141,7 @@ public class ScrollCaptureClientTest {
     /** Test creating a client with valid info */
     @Test
     public void testConstruction() {
-        new ScrollCaptureClient(mTarget1, mClientCallbacks);
+        new ScrollCaptureConnection(mTarget1, mConnectionCallbacks);
     }
 
     /** Test creating a client fails if arguments are not valid. */
@@ -149,7 +149,7 @@ public class ScrollCaptureClientTest {
     public void testConstruction_requiresScrollBounds() {
         try {
             mTarget1.setScrollBounds(null);
-            new ScrollCaptureClient(mTarget1, mClientCallbacks);
+            new ScrollCaptureConnection(mTarget1, mConnectionCallbacks);
             fail("An exception was expected.");
         } catch (RuntimeException ex) {
             // Ignore, expected.
@@ -174,48 +174,51 @@ public class ScrollCaptureClientTest {
         };
     }
 
-    /** @see ScrollCaptureClient#startCapture(Surface) */
+    /** @see ScrollCaptureConnection#startCapture(Surface) */
     @Test
     public void testStartCapture() throws Exception {
-        final ScrollCaptureClient client = new ScrollCaptureClient(mTarget1, mClientCallbacks);
+        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
+                mConnectionCallbacks);
 
         // Have the session start accepted immediately
         doAnswer(runRunnable(1)).when(mCallback1)
                 .onScrollCaptureStart(any(ScrollCaptureSession.class), any(Runnable.class));
-        client.startCapture(mSurface);
+        connection.startCapture(mSurface);
         getInstrumentation().waitForIdleSync();
 
         verify(mCallback1, times(1))
                 .onScrollCaptureStart(any(ScrollCaptureSession.class), any(Runnable.class));
-        verify(mClientCallbacks, times(1)).onCaptureStarted();
-        verifyNoMoreInteractions(mClientCallbacks);
+        verify(mConnectionCallbacks, times(1)).onCaptureStarted();
+        verifyNoMoreInteractions(mConnectionCallbacks);
     }
 
     @Test
     public void testStartCaptureTimeout() throws Exception {
-        final ScrollCaptureClient client = new ScrollCaptureClient(mTarget1, mClientCallbacks);
-        client.startCapture(mSurface);
+        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
+                mConnectionCallbacks);
+        connection.startCapture(mSurface);
 
         // Force timeout to fire
-        client.getTimeoutAction().timeoutNow();
+        connection.getTimeoutAction().timeoutNow();
 
         getInstrumentation().waitForIdleSync();
         verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
     }
 
-    private void startClient(ScrollCaptureClient client) throws Exception {
+    private void startCapture(ScrollCaptureConnection connection) throws Exception {
         doAnswer(runRunnable(1)).when(mCallback1)
                 .onScrollCaptureStart(any(ScrollCaptureSession.class), any(Runnable.class));
-        client.startCapture(mSurface);
+        connection.startCapture(mSurface);
         getInstrumentation().waitForIdleSync();
-        reset(mCallback1, mClientCallbacks);
+        reset(mCallback1, mConnectionCallbacks);
     }
 
-    /** @see ScrollCaptureClient#requestImage(Rect) */
+    /** @see ScrollCaptureConnection#requestImage(Rect) */
     @Test
     public void testRequestImage() throws Exception {
-        final ScrollCaptureClient client = new ScrollCaptureClient(mTarget1, mClientCallbacks);
-        startClient(client);
+        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
+                mConnectionCallbacks);
+        startCapture(connection);
 
         // Stub the callback to complete the request immediately
         doAnswer(reportBufferSent(/* sessionArg */ 0, /* frameNum */ 1L, new Rect(1, 2, 3, 4)))
@@ -223,7 +226,7 @@ public class ScrollCaptureClientTest {
                 .onScrollCaptureImageRequest(any(ScrollCaptureSession.class), any(Rect.class));
 
         // Make the inbound binder call
-        client.requestImage(new Rect(1, 2, 3, 4));
+        connection.requestImage(new Rect(1, 2, 3, 4));
 
         // Wait for handler thread dispatch
         getInstrumentation().waitForIdleSync();
@@ -232,18 +235,20 @@ public class ScrollCaptureClientTest {
 
         // Wait for binder thread dispatch
         getInstrumentation().waitForIdleSync();
-        verify(mClientCallbacks, times(1)).onCaptureBufferSent(eq(1L), eq(new Rect(1, 2, 3, 4)));
+        verify(mConnectionCallbacks, times(1))
+                .onCaptureBufferSent(eq(1L), eq(new Rect(1, 2, 3, 4)));
 
-        verifyNoMoreInteractions(mCallback1, mClientCallbacks);
+        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
     }
 
     @Test
     public void testRequestImageTimeout() throws Exception {
-        final ScrollCaptureClient client = new ScrollCaptureClient(mTarget1, mClientCallbacks);
-        startClient(client);
+        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
+                mConnectionCallbacks);
+        startCapture(connection);
 
         // Make the inbound binder call
-        client.requestImage(new Rect(1, 2, 3, 4));
+        connection.requestImage(new Rect(1, 2, 3, 4));
 
         // Wait for handler thread dispatch
         getInstrumentation().waitForIdleSync();
@@ -251,20 +256,21 @@ public class ScrollCaptureClientTest {
                 any(ScrollCaptureSession.class), eq(new Rect(1, 2, 3, 4)));
 
         // Force timeout to fire
-        client.getTimeoutAction().timeoutNow();
+        connection.getTimeoutAction().timeoutNow();
         getInstrumentation().waitForIdleSync();
 
         // (callback not stubbed, does nothing)
         // Timeout triggers request to end capture
         verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
-        verifyNoMoreInteractions(mCallback1, mClientCallbacks);
+        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
     }
 
-    /** @see ScrollCaptureClient#endCapture() */
+    /** @see ScrollCaptureConnection#endCapture() */
     @Test
     public void testEndCapture() throws Exception {
-        final ScrollCaptureClient client = new ScrollCaptureClient(mTarget1, mClientCallbacks);
-        startClient(client);
+        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
+                mConnectionCallbacks);
+        startCapture(connection);
 
         // Stub the callback to complete the request immediately
         doAnswer(runRunnable(0))
@@ -272,7 +278,7 @@ public class ScrollCaptureClientTest {
                 .onScrollCaptureEnd(any(Runnable.class));
 
         // Make the inbound binder call
-        client.endCapture();
+        connection.endCapture();
 
         // Wait for handler thread dispatch
         getInstrumentation().waitForIdleSync();
@@ -280,30 +286,31 @@ public class ScrollCaptureClientTest {
 
         // Wait for binder thread dispatch
         getInstrumentation().waitForIdleSync();
-        verify(mClientCallbacks, times(1)).onConnectionClosed();
+        verify(mConnectionCallbacks, times(1)).onConnectionClosed();
 
-        verifyNoMoreInteractions(mCallback1, mClientCallbacks);
+        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
     }
 
     @Test
     public void testEndCaptureTimeout() throws Exception {
-        final ScrollCaptureClient client = new ScrollCaptureClient(mTarget1, mClientCallbacks);
-        startClient(client);
+        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
+                mConnectionCallbacks);
+        startCapture(connection);
 
         // Make the inbound binder call
-        client.endCapture();
+        connection.endCapture();
 
         // Wait for handler thread dispatch
         getInstrumentation().waitForIdleSync();
         verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
 
         // Force timeout to fire
-        client.getTimeoutAction().timeoutNow();
+        connection.getTimeoutAction().timeoutNow();
 
         // Wait for binder thread dispatch
         getInstrumentation().waitForIdleSync();
-        verify(mClientCallbacks, times(1)).onConnectionClosed();
+        verify(mConnectionCallbacks, times(1)).onConnectionClosed();
 
-        verifyNoMoreInteractions(mCallback1, mClientCallbacks);
+        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
     }
 }

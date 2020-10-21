@@ -229,7 +229,6 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
-    @TestApi
     public static final String ACTION_TETHER_PROVISIONING_UI =
             "android.settings.TETHER_PROVISIONING_UI";
 
@@ -1053,7 +1052,6 @@ public final class Settings {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_OVERLAY_PERMISSION =
@@ -2017,7 +2015,6 @@ public final class Settings {
      * @hide
      */
     @SystemApi
-    @TestApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS
             = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
@@ -2100,7 +2097,6 @@ public final class Settings {
      * @hide
      */
     @SystemApi
-    @TestApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE =
             "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
@@ -5580,7 +5576,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public static void resetToDefaults(@NonNull ContentResolver resolver,
                 @Nullable String tag) {
@@ -6051,7 +6046,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION =
                 "autofill_field_classification";
 
@@ -6085,7 +6079,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
                 "autofill_user_data_max_user_data_size";
 
@@ -6096,7 +6089,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
                 "autofill_user_data_max_field_classification_size";
 
@@ -6107,7 +6099,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT =
                 "autofill_user_data_max_category_count";
 
@@ -6117,7 +6108,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
                 "autofill_user_data_max_value_length";
 
@@ -6127,7 +6117,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
                 "autofill_user_data_min_value_length";
 
@@ -6177,7 +6166,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
@@ -6553,7 +6541,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
 
@@ -7841,7 +7828,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
         /**
@@ -8274,7 +8260,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
                 "lock_screen_show_notifications";
 
@@ -8961,7 +8946,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS =
                 "location_access_check_interval_millis";
 
@@ -8970,7 +8954,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
                 "location_access_check_delay_millis";
 
@@ -10391,7 +10374,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
 
         /**
@@ -13369,7 +13351,6 @@ public final class Settings {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
                 "autofill_compat_mode_allowed_packages";
 

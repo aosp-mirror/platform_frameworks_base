@@ -16,7 +16,7 @@
 -->
 
 <!-- Extends FrameLayout -->
-<com.android.systemui.qs.QSFooterImpl
+<com.android.systemui.qs.QSFooterView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
@@ -130,4 +130,4 @@
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
-</com.android.systemui.qs.QSFooterImpl>
+</com.android.systemui.qs.QSFooterView>

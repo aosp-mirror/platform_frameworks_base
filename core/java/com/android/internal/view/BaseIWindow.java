@@ -24,7 +24,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.MergedConfiguration;
 import android.view.DragEvent;
-import android.view.IScrollCaptureController;
+import android.view.IScrollCaptureCallbacks;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
@@ -162,9 +162,9 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void requestScrollCapture(IScrollCaptureController controller) {
+    public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
         try {
-            controller.onClientUnavailable();
+            callbacks.onUnavailable();
         } catch (RemoteException ex) {
             // ignore
         }

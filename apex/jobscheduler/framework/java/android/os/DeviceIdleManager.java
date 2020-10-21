@@ -29,7 +29,6 @@ import android.content.Context;
  *
  * @hide
  */
-@TestApi
 @SystemApi
 @SystemService(Context.DEVICE_IDLE_CONTROLLER)
 public class DeviceIdleManager {

@@ -22,7 +22,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.MergedConfiguration;
 import android.view.DragEvent;
-import android.view.IScrollCaptureController;
+import android.view.IScrollCaptureCallbacks;
 import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -107,7 +107,7 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void requestScrollCapture(IScrollCaptureController controller) throws RemoteException {
+    public void requestScrollCapture(IScrollCaptureCallbacks callbacks) throws RemoteException {
     }
 
     @Override

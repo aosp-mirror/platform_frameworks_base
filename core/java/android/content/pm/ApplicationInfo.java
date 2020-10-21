@@ -1141,7 +1141,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public int targetSandboxVersion;
 
     /**

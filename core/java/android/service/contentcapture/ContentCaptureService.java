@@ -26,7 +26,6 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -74,7 +73,6 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-@TestApi
 public abstract class ContentCaptureService extends Service {
 
     private static final String TAG = ContentCaptureService.class.getSimpleName();
@@ -344,7 +342,6 @@ public abstract class ContentCaptureService extends Service {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void onDataShareRequest(@NonNull DataShareRequest request,
             @NonNull DataShareCallback callback) {
         if (sVerbose) Log.v(TAG, "onDataShareRequest()");

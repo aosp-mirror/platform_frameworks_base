@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 public abstract class TunerService {
 
     public static final String ACTION_CLEAR = "com.android.systemui.action.CLEAR_TUNER";
+    private final Context mContext;
 
     public abstract void clearAll();
     public abstract void destroy();
@@ -50,6 +51,10 @@ public abstract class TunerService {
         void onTuningChanged(String key, String newValue);
     }
 
+    public TunerService(Context context) {
+        mContext = context;
+    }
+
     private static Context userContext(Context context, UserHandle user) {
         try {
             return context.createPackageContextAsUser(context.getPackageName(), 0, user);
@@ -58,12 +63,22 @@ public abstract class TunerService {
         }
     }
 
+    /** Enables or disables the tuner for the supplied user. */
+    public void setTunerEnabled(UserHandle user, boolean enabled) {
+        setTunerEnabled(mContext, user, enabled);
+    }
+
     public static final void setTunerEnabled(Context context, UserHandle user, boolean enabled) {
         userContext(context, user).getPackageManager().setComponentEnabledSetting(
                 new ComponentName(context, TunerActivity.class),
                 enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
+    }
+
+    /** Returns true if the tuner is enabled for the supplied user. */
+    public boolean isTunerEnabled(UserHandle user) {
+        return isTunerEnabled(mContext, user);
     }
 
     public static final boolean isTunerEnabled(Context context, UserHandle user) {
@@ -79,6 +94,11 @@ public abstract class TunerService {
                 Dependency.get(TunerService.class).clearAll();
             }
         }
+    }
+
+    /** */
+    public void showResetRequest(UserHandle user, final Runnable onDisabled) {
+        showResetRequest(mContext, user, onDisabled);
     }
 
     public static final void showResetRequest(final Context context, UserHandle user,

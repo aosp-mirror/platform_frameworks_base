@@ -127,12 +127,12 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
-        public void notifyAcquired(int userId)  {
+        public void notifyAcquired(int userId, int acquireInfo)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 
         @Override
-        public void notifyError(int userId)  {
+        public void notifyError(int userId, int errorCode)  {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
         }
 

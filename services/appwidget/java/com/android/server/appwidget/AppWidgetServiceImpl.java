@@ -664,8 +664,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (targetWidget != null && targetWidget != widget) continue;
                 PendingIntent intent = null;
                 if (onClickIntent != null) {
+                    // Rare informational activity click is okay being
+                    // immutable; the tradeoff is more security in exchange for
+                    // losing bounds-based window animations
                     intent = PendingIntent.getActivity(mContext, widget.appWidgetId,
-                            onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            onClickIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 }
                 RemoteViews views = createMaskedWidgetRemoteViews(iconBitmap, showBadge, intent);
                 if (widget.replaceWithMaskedViewsLocked(views)) {
@@ -2409,8 +2413,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             intent.setComponent(provider.info.provider);
             final long token = Binder.clearCallingIdentity();
             try {
+                // Broadcast alarms sent by system are immutable
                 provider.broadcast = PendingIntent.getBroadcastAsUser(mContext, 1, intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT, provider.info.getProfile());
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        provider.info.getProfile());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

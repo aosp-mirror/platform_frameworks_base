@@ -67,7 +67,6 @@ import java.util.UUID;
  *
  * @hide
  */
-@TestApi
 @SystemApi
 public class SoundTrigger {
     private static final String TAG = "SoundTrigger";

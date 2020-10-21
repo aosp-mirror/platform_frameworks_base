@@ -144,4 +144,14 @@ interface IIncrementalService {
      * Stop listening for the loading progress change for a storage.
      */
     boolean unregisterLoadingProgressListener(int storageId);
+
+    /**
+     * Register storage health status listener.
+     */
+    boolean registerStorageHealthListener(int storageId, in StorageHealthCheckParams params, in IStorageHealthListener listener);
+
+    /**
+     * Register storage health status listener.
+     */
+    void unregisterStorageHealthListener(int storageId);
 }

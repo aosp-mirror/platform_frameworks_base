@@ -23,6 +23,7 @@ import androidx.annotation.MainThread;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.wm.shell.ShellTaskOrganizer;
 
 import java.util.List;
 
@@ -128,8 +129,8 @@ public interface Bubbles {
     /** Set a listener to be notified of when overflow view update. */
     void setOverflowListener(BubbleData.Listener listener);
 
-    /** The task listener for events in bubble tasks. */
-    MultiWindowTaskListener getTaskManager();
+    /** The task listener for events in bubble tasks. **/
+    ShellTaskOrganizer getTaskOrganizer();
 
     /** Contains information to help position things on the screen.  */
     BubblePositioner getPositioner();

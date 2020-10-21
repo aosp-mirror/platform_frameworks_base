@@ -91,6 +91,14 @@ enum NetworkTypeEnum {
     NETWORK_TYPE_NR = 20;
 }
 
+// Roaming type enums, see android.telephony.ServiceState.RoamingType for definitions.
+enum RoamingTypeEnum {
+    ROAMING_TYPE_NOT_ROAMING = 0;
+    ROAMING_TYPE_ROAMING = 1;
+    ROAMING_TYPE_ROAMING_DOMESTIC = 2;
+    ROAMING_TYPE_ROAMING_INTERNATIONAL = 3;
+}
+
 // Signal strength levels, primarily used by android/telephony/SignalStrength.java.
 enum SignalStrengthEnum {
     SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;

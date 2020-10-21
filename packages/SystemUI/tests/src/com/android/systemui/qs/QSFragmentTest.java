@@ -16,7 +16,9 @@ package com.android.systemui.qs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -42,6 +44,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
@@ -61,6 +64,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
@@ -71,6 +76,12 @@ import java.util.Optional;
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;
+    @Mock
+    private QSFragmentComponent.Factory mQsComponentFactory;
+    @Mock
+    private QSFragmentComponent mQsFragmentComponent;
+    @Mock
+    private QSPanelController mQSPanelController;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -80,6 +91,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Before
     @Ignore("failing")
     public void addLeakCheckDependencies() {
+        MockitoAnnotations.initMocks(this);
+        when(mQsComponentFactory.create(any(QSFragment.class))).thenReturn(mQsFragmentComponent);
+        when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
+
         mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
                 new LayoutInflaterBuilder(mContext)
@@ -152,6 +167,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,
-                mock(QSContainerImplController.Builder.class));
+                mQsComponentFactory);
     }
 }

@@ -20,7 +20,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
@@ -53,7 +52,6 @@ import java.util.Map;
  * {@hide}
  */
 @SystemApi
-@TestApi
 public abstract class AutofillFieldClassificationService extends Service {
 
     private static final String TAG = "AutofillFieldClassificationService";
@@ -121,7 +119,6 @@ public abstract class AutofillFieldClassificationService extends Service {
 
     /** @hide */
     @SystemApi
-    @TestApi
     public AutofillFieldClassificationService() {
     }
 

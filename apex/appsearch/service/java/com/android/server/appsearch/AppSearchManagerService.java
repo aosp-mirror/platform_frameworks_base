@@ -53,6 +53,7 @@ import java.util.List;
  */
 public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
+    private static final char CALLING_NAME_DATABASE_DELIMITER = '$';
 
     public AppSearchManagerService(Context context) {
         super(context);
@@ -66,6 +67,7 @@ public class AppSearchManagerService extends SystemService {
     private class Stub extends IAppSearchManager.Stub {
         @Override
         public void setSchema(
+                @NonNull String databaseName,
                 @NonNull List<Bundle> schemaBundles,
                 boolean forceOverride,
                 @NonNull AndroidFuture<AppSearchResult> callback) {
@@ -82,7 +84,7 @@ public class AppSearchManagerService extends SystemService {
                     schemaProtoBuilder.addTypes(schemaTypeProto);
                 }
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 impl.setSchema(databaseName, schemaProtoBuilder.build(), forceOverride);
                 callback.complete(AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {
@@ -94,6 +96,7 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void putDocuments(
+                @NonNull String databaseName,
                 @NonNull List<Bundle> documentBundles,
                 @NonNull AndroidFuture<AppSearchBatchResult> callback) {
             Preconditions.checkNotNull(documentBundles);
@@ -103,7 +106,7 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < documentBundles.size(); i++) {
@@ -125,7 +128,7 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void getDocuments(
+        public void getDocuments(@NonNull String databaseName, @NonNull String namespace,
                 @NonNull List<String> uris, @NonNull AndroidFuture<AppSearchBatchResult> callback) {
             Preconditions.checkNotNull(uris);
             Preconditions.checkNotNull(callback);
@@ -134,14 +137,14 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
                         DocumentProto documentProto = impl.getDocument(
-                                databaseName, GenericDocument.DEFAULT_NAMESPACE, uri);
+                                databaseName, namespace, uri);
                         if (documentProto == null) {
                             resultBuilder.setFailure(
                                     uri, AppSearchResult.RESULT_NOT_FOUND, /*errorMessage=*/ null);
@@ -165,6 +168,7 @@ public class AppSearchManagerService extends SystemService {
         // TODO(sidchhabra): Do this in a threadpool.
         @Override
         public void query(
+                @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
                 @NonNull AndroidFuture<AppSearchResult> callback) {
@@ -181,7 +185,7 @@ public class AppSearchManagerService extends SystemService {
                 searchSpecProto = searchSpecProto.toBuilder()
                         .setQuery(queryExpression).build();
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 // TODO(adorokhine): handle pagination
                 SearchResultProto searchResultProto = impl.query(
                         databaseName,
@@ -201,7 +205,8 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void delete(List<String> uris, AndroidFuture<AppSearchBatchResult> callback) {
+        public void delete(@NonNull String databaseName, @NonNull String namespace,
+                List<String> uris, AndroidFuture<AppSearchBatchResult> callback) {
             Preconditions.checkNotNull(uris);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
@@ -209,13 +214,13 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        impl.remove(databaseName, GenericDocument.DEFAULT_NAMESPACE, uri);
+                        impl.remove(databaseName, namespace, uri);
                         resultBuilder.setSuccess(uri, /*result= */null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
@@ -230,7 +235,7 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void deleteByTypes(
+        public void deleteByTypes(@NonNull String databaseName,
                 List<String> schemaTypes, AndroidFuture<AppSearchBatchResult> callback) {
             Preconditions.checkNotNull(schemaTypes);
             Preconditions.checkNotNull(callback);
@@ -239,7 +244,7 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < schemaTypes.size(); i++) {
@@ -260,14 +265,15 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void deleteAll(@NonNull AndroidFuture<AppSearchResult> callback) {
+        public void deleteAll(@NonNull String databaseName,
+                @NonNull AndroidFuture<AppSearchResult> callback) {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                String databaseName = makeDatabaseName(callingUid);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 impl.removeAll(databaseName);
                 callback.complete(AppSearchResult.newSuccessfulResult(null));
             } catch (Throwable t) {
@@ -278,13 +284,13 @@ public class AppSearchManagerService extends SystemService {
         }
 
         /**
-         * Returns a unique database name for the given uid.
+         * Rewrites the database name by adding a prefix of unique name for the given uid.
          *
          * <p>The current implementation returns the package name of the app with this uid in a
          * format like {@code com.example.package} or {@code com.example.sharedname:5678}.
          */
         @NonNull
-        private String makeDatabaseName(int callingUid) {
+        private String rewriteDatabaseNameWithUid(String databaseName, int callingUid) {
             // For regular apps, this call will return the package name. If callingUid is an
             // android:sharedUserId, this value may be another type of name and have a :uid suffix.
             String callingUidName = getContext().getPackageManager().getNameForUid(callingUid);
@@ -293,7 +299,7 @@ public class AppSearchManagerService extends SystemService {
                 throw new IllegalStateException(
                         "Failed to look up package name for uid " + callingUid);
             }
-            return callingUidName;
+            return callingUidName + CALLING_NAME_DATABASE_DELIMITER + databaseName;
         }
 
         private <ValueType> AppSearchResult<ValueType> throwableToFailedResult(

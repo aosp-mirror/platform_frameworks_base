@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_SPLIT_SCREEN;
+import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.graphics.Rect;
@@ -32,8 +33,13 @@ import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.TaskAppearedInfo;
+
+import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+
+import java.io.PrintWriter;
 
 class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "SplitScreenTaskOrg";
@@ -57,16 +63,21 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
                     ShellTaskOrganizer shellTaskOrganizer) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
-        mTaskOrganizer.addListener(this, TASK_LISTENER_TYPE_SPLIT_SCREEN);
+        mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_SPLIT_SCREEN);
     }
 
     void init() throws RemoteException {
         synchronized (this) {
             try {
-                mPrimary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                        WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-                mSecondary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                final TaskAppearedInfo primary = mTaskOrganizer.createRootTask(
+                        Display.DEFAULT_DISPLAY, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, this);
+                final TaskAppearedInfo secondary = mTaskOrganizer.createRootTask(
+                        Display.DEFAULT_DISPLAY, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, this);
+                mPrimary = primary.getTaskInfo();
+                mPrimarySurface = primary.getLeash();
+                mSecondary = secondary.getTaskInfo();
+                mSecondarySurface = secondary.getLeash();
+                enableSplitScreenSupportIfNeeded();
             } catch (Exception e) {
                 // teardown to prevent callbacks
                 mTaskOrganizer.removeListener(this);
@@ -87,43 +98,29 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
         mSplitScreenController.mTransactionPool.release(t);
     }
 
-    @Override
-    public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
-        synchronized (this) {
-            if (mPrimary == null || mSecondary == null) {
-                Log.w(TAG, "Received onTaskAppeared before creating root tasks " + taskInfo);
-                return;
-            }
+    private void enableSplitScreenSupportIfNeeded() {
+        if (mSplitScreenSupported || mPrimarySurface == null || mSecondarySurface == null) return;
 
-            if (taskInfo.token.equals(mPrimary.token)) {
-                mPrimarySurface = leash;
-            } else if (taskInfo.token.equals(mSecondary.token)) {
-                mSecondarySurface = leash;
-            }
+        mSplitScreenSupported = true;
 
-            if (!mSplitScreenSupported && mPrimarySurface != null && mSecondarySurface != null) {
-                mSplitScreenSupported = true;
-
-                // Initialize dim surfaces:
-                mPrimaryDim = new SurfaceControl.Builder(mSurfaceSession)
-                        .setParent(mPrimarySurface).setColorLayer()
-                        .setName("Primary Divider Dim")
-                        .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
-                        .build();
-                mSecondaryDim = new SurfaceControl.Builder(mSurfaceSession)
-                        .setParent(mSecondarySurface).setColorLayer()
-                        .setName("Secondary Divider Dim")
-                        .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
-                        .build();
-                SurfaceControl.Transaction t = getTransaction();
-                t.setLayer(mPrimaryDim, Integer.MAX_VALUE);
-                t.setColor(mPrimaryDim, new float[]{0f, 0f, 0f});
-                t.setLayer(mSecondaryDim, Integer.MAX_VALUE);
-                t.setColor(mSecondaryDim, new float[]{0f, 0f, 0f});
-                t.apply();
-                releaseTransaction(t);
-            }
-        }
+        // Initialize dim surfaces:
+        mPrimaryDim = new SurfaceControl.Builder(mSurfaceSession)
+                .setParent(mPrimarySurface).setColorLayer()
+                .setName("Primary Divider Dim")
+                .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
+                .build();
+        mSecondaryDim = new SurfaceControl.Builder(mSurfaceSession)
+                .setParent(mSecondarySurface).setColorLayer()
+                .setName("Secondary Divider Dim")
+                .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
+                .build();
+        SurfaceControl.Transaction t = getTransaction();
+        t.setLayer(mPrimaryDim, Integer.MAX_VALUE);
+        t.setColor(mPrimaryDim, new float[]{0f, 0f, 0f});
+        t.setLayer(mSecondaryDim, Integer.MAX_VALUE);
+        t.setColor(mSecondaryDim, new float[]{0f, 0f, 0f});
+        t.apply();
+        releaseTransaction(t);
     }
 
     @Override
@@ -228,5 +225,17 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
             // Both splits are populated by normal activities, so make sure we aren't minimized.
             mSplitScreenController.ensureNormalSplit();
         }
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        final String childPrefix = innerPrefix + "  ";
+        pw.println(prefix + this);
+    }
+
+    @Override
+    public String toString() {
+        return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_SPLIT_SCREEN);
     }
 }

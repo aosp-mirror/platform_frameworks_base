@@ -370,7 +370,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             return;
         }
 
-        int tintColor = getNotificationHeader().getOriginalIconColor();
+        int tintColor = getOriginalIconColor();
         mSeekBarElapsedTime.setTextColor(tintColor);
         mSeekBarTotalTime.setTextColor(tintColor);
         mSeekBarTotalTime.setShadowLayer(1.5f, 1.5f, 1.5f, mBackgroundColor);

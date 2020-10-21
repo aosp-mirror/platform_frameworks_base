@@ -58,6 +58,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
+import com.android.wm.shell.common.HandlerExecutor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -136,6 +137,7 @@ public class BubbleExpandedView extends LinearLayout {
                 }
                 try {
                     if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
+                        options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, null /* sourceBounds */);
                     } else {
@@ -250,7 +252,8 @@ public class BubbleExpandedView extends LinearLayout {
 
         mPositioner = mBubbles.getPositioner();
 
-        mTaskView = new TaskView(mContext, mBubbles.getTaskManager());
+        mTaskView = new TaskView(mContext, mBubbles.getTaskOrganizer(),
+                new HandlerExecutor(getHandler()));
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 

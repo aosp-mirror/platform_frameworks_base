@@ -25,8 +25,8 @@ import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.util.Log;
 import android.view.Display;
-import android.view.IScrollCaptureClient;
-import android.view.IScrollCaptureController;
+import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureConnection;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -65,19 +65,20 @@ public class ScrollCaptureTest extends SysuiTestCase {
         final CountDownLatch latch = new CountDownLatch(1);
         try {
             wms.requestScrollCapture(Display.DEFAULT_DISPLAY, null, -1,
-                    new IScrollCaptureController.Stub() {
+                    new IScrollCaptureCallbacks.Stub() {
                         @Override
-                        public void onClientConnected(
-                                IScrollCaptureClient client, Rect scrollBounds,
+                        public void onConnected(
+                                IScrollCaptureConnection connection, Rect scrollBounds,
                                 Point positionInWindow) {
                             Log.d(TAG,
-                                    "client connected: " + client + "[scrollBounds= " + scrollBounds
-                                            + ", positionInWindow=" + positionInWindow + "]");
+                                    "client connected: " + connection + "[scrollBounds= "
+                                            + scrollBounds + ", "
+                                            + "positionInWindow=" + positionInWindow + "]");
                             latch.countDown();
                         }
 
                         @Override
-                        public void onClientUnavailable() {
+                        public void onUnavailable() {
                         }
 
                         @Override

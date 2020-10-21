@@ -23,7 +23,6 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -37,7 +36,6 @@ import android.os.Parcelable;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class RecognitionRequest implements Parcelable {
     @NonNull private final AudioAttributes mAudioAttributes;
     @NonNull private final AudioFormat mAudioFormat;
@@ -82,7 +80,6 @@ public final class RecognitionRequest implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final class Builder {
         private AudioFormat mAudioFormat = new AudioFormat.Builder()
                 .setSampleRate(16000)

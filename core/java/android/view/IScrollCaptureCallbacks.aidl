@@ -20,32 +20,31 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Surface;
 
-import android.view.IScrollCaptureClient;
+import android.view.IScrollCaptureConnection;
 
 /**
- * Interface to a controller passed to the {@link IScrollCaptureClient} which provides the client an
- * asynchronous callback channel for responses.
+ * Asynchronous callback channel for responses to scroll capture requests.
  *
  * {@hide}
  */
-interface IScrollCaptureController {
+interface IScrollCaptureCallbacks {
     /**
-     * Scroll capture is available, and a client connect has been returned.
+     * Scroll capture is available, and a connection has been provided.
      *
-     * @param client interface to a ScrollCaptureCallback in the window process
+     * @param connection a connection to a window process and scrollable content
      * @param scrollAreaInWindow the location of scrolling in global (window) coordinate space
      */
-    oneway void onClientConnected(in IScrollCaptureClient client, in Rect scrollBounds,
+    oneway void onConnected(in IScrollCaptureConnection connection, in Rect scrollBounds,
             in Point positionInWindow);
 
     /**
-     * Nothing in the window can be scrolled, scroll capture not offered.
+     * The window does not support scroll capture.
      */
-    oneway void onClientUnavailable();
+    oneway void onUnavailable();
 
     /**
-     * Notifies the system that the client has confirmed the request and is ready to begin providing
-     * image requests.
+     * Called when the remote end has confirmed the request and is ready to begin providing image
+     * requests.
      */
     oneway void onCaptureStarted();
 
