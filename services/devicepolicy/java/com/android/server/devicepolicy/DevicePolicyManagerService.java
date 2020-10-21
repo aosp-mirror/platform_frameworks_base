@@ -3379,7 +3379,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     updatePasswordQualityCacheForUserGroup(userId);
                     saveSettingsLocked(userId);
                 }
-                maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+                logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
             });
         }
         DevicePolicyEventLogger
@@ -3593,7 +3593,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LENGTH)
@@ -3871,7 +3871,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_UPPER_CASE)
@@ -3901,7 +3901,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LOWER_CASE)
@@ -3933,7 +3933,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LETTERS)
@@ -3965,7 +3965,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_NUMERIC)
@@ -3997,7 +3997,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_SYMBOLS)
@@ -4030,7 +4030,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
+            logPasswordQualitySetIfSecurityLogEnabled(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_NON_LETTER)
@@ -14222,8 +14222,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         parametersFile.delete();
     }
 
-    private void maybeLogPasswordComplexitySet(ComponentName who, int userId, boolean parent,
-            PasswordPolicy passwordPolicy) {
+    private void logPasswordQualitySetIfSecurityLogEnabled(ComponentName who, int userId,
+            boolean parent, PasswordPolicy passwordPolicy) {
         if (SecurityLog.isLoggingEnabled()) {
             final int affectedUserId = parent ? getProfileParentId(userId) : userId;
             SecurityLog.writeEvent(SecurityLog.TAG_PASSWORD_COMPLEXITY_SET, who.getPackageName(),
