@@ -265,4 +265,13 @@ public final class ContentProviderConnection extends Binder {
             return mUnstableCount;
         }
     }
+
+    /**
+     * Returns the total number of stable and unstable references.
+     */
+    int totalRefCount() {
+        synchronized (mLock) {
+            return mStableCount + mUnstableCount;
+        }
+    }
 }
