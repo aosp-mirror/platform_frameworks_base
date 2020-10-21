@@ -383,22 +383,26 @@ public class AppSearchManager {
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         // TODO(b/146386470): Transmit the result documents as a RemoteStream instead of sending
         //     them in one big list.
-        AndroidFuture<AppSearchResult> searchResultsFuture = new AndroidFuture<>();
+        AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.query(DEFAULT_DATABASE_NAME, queryExpression,
-                    searchSpec.getBundle(), searchResultsFuture);
+            mService.query(DEFAULT_DATABASE_NAME, queryExpression, searchSpec.getBundle(),
+                    new IAppSearchResultCallback.Stub() {
+                        public void onResult(AppSearchResult result) {
+                            future.complete(result);
+                        }
+                    });
+            AppSearchResult<Bundle> bundleResult = getFutureOrThrow(future);
+            if (!bundleResult.isSuccess()) {
+                return AppSearchResult.newFailedResult(bundleResult.getResultCode(),
+                        bundleResult.getErrorMessage());
+            }
+            SearchResultPage searchResultPage = new SearchResultPage(bundleResult.getResultValue());
+            return AppSearchResult.newSuccessfulResult(searchResultPage.getResults());
         } catch (RemoteException e) {
-            searchResultsFuture.completeExceptionally(e);
+            throw e.rethrowFromSystemServer();
+        } catch (Throwable t) {
+            return AppSearchResult.throwableToFailedResult(t);
         }
-
-        // Translate the Bundle into a searchResultPage.
-        AppSearchResult<Bundle> bundleResult = getFutureOrThrow(searchResultsFuture);
-        if (!bundleResult.isSuccess()) {
-            return AppSearchResult.newFailedResult(bundleResult.getResultCode(),
-                    bundleResult.getErrorMessage());
-        }
-        SearchResultPage searchResultPage = new SearchResultPage(bundleResult.getResultValue());
-        return AppSearchResult.newSuccessfulResult(searchResultPage.getResults());
     }
 
     /**

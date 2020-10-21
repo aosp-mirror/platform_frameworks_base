@@ -36,7 +36,6 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
@@ -158,17 +157,15 @@ public class AppSearchManagerService extends SystemService {
         }
 
         // TODO(sidchhabra): Do this in a threadpool.
-        // TODO(b/162450968) handle pagination after getNextPage and SearchResults is ready.
         @Override
         public void query(
                 @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
-                @NonNull AndroidFuture<AppSearchResult> callback) {
+                @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
-            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -179,10 +176,45 @@ public class AppSearchManagerService extends SystemService {
                         databaseName,
                         queryExpression,
                         new SearchSpec(searchSpecBundle));
-                callback.complete(
+                invokeCallbackOnResult(callback,
                         AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
             } catch (Throwable t) {
-                callback.complete(throwableToFailedResult(t));
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void getNextPage(long nextPageToken,
+                @NonNull IAppSearchResultCallback callback) {
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            // TODO(b/162450968) check nextPageToken is being advanced by the same uid as originally
+            // opened it
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                SearchResultPage searchResultPage = impl.getNextPage(nextPageToken);
+                invokeCallbackOnResult(callback,
+                        AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void invalidateNextPageToken(long nextPageToken) {
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                impl.invalidateNextPageToken(nextPageToken);
+            } catch (Throwable t) {
+                Log.d(TAG, "Unable to invalidate the query page token", t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
