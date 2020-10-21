@@ -313,6 +313,8 @@ public class ConnectivityServiceTest {
     private static final long TIMESTAMP = 1234L;
 
     private static final int NET_ID = 110;
+    // Set a non-zero value to verify the flow to set tcp init rwnd value.
+    private static final int TEST_TCP_INIT_RWND = 60;
 
     private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
@@ -355,6 +357,7 @@ public class ConnectivityServiceTest {
     @Mock LocationManager mLocationManager;
     @Mock AppOpsManager mAppOpsManager;
     @Mock TelephonyManager mTelephonyManager;
+    @Mock MockableSystemProperties mSystemProperties;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -1257,15 +1260,15 @@ public class ConnectivityServiceTest {
     }
 
     private ConnectivityService.Dependencies makeDependencies() {
-        final MockableSystemProperties systemProperties = spy(new MockableSystemProperties());
-        when(systemProperties.getInt("net.tcp.default_init_rwnd", 0)).thenReturn(0);
-        when(systemProperties.getBoolean("ro.radio.noril", false)).thenReturn(false);
-
+        doReturn(TEST_TCP_INIT_RWND).when(mSystemProperties)
+                .getInt("net.tcp.default_init_rwnd", 0);
+        doReturn(false).when(mSystemProperties).getBoolean("ro.radio.noril", false);
+        doNothing().when(mSystemProperties).setTcpInitRwnd(anyInt());
         final ConnectivityService.Dependencies deps = mock(ConnectivityService.Dependencies.class);
         doReturn(mCsHandlerThread).when(deps).makeHandlerThread();
         doReturn(new TestNetIdManager()).when(deps).makeNetIdManager();
         doReturn(mNetworkStack).when(deps).getNetworkStack();
-        doReturn(systemProperties).when(deps).getSystemProperties();
+        doReturn(mSystemProperties).when(deps).getSystemProperties();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
         doReturn(mMetricsService).when(deps).getMetricsLogger();
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
@@ -6146,7 +6149,7 @@ public class ConnectivityServiceTest {
 
         // Switching default network updates TCP buffer sizes.
         verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
-
+        verify(mSystemProperties, times(1)).setTcpInitRwnd(eq(TEST_TCP_INIT_RWND));
         // Add an IPv4 address. Expect prefix discovery to be stopped. Netd doesn't tell us that
         // the NAT64 prefix was removed because one was never discovered.
         cellLp.addLinkAddress(myIpv4);
@@ -6583,14 +6586,14 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
         networkCallback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
-
+        verify(mSystemProperties, times(1)).setTcpInitRwnd(eq(TEST_TCP_INIT_RWND));
         // Change link Properties should have updated tcp buffer size.
         LinkProperties lp = new LinkProperties();
         lp.setTcpBufferSizes(testTcpBufferSizes);
         mCellNetworkAgent.sendLinkProperties(lp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verifyTcpBufferSizeChange(testTcpBufferSizes);
-
+        verify(mSystemProperties, times(2)).setTcpInitRwnd(eq(TEST_TCP_INIT_RWND));
         // Clean up.
         mCellNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
