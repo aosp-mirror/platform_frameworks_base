@@ -150,7 +150,7 @@ class TestDisplayContent extends DisplayContent {
             newDisplay.onRequestedOverrideConfigurationChanged(c);
             if (!mCanRotate) {
                 final DisplayRotation displayRotation = newDisplay.getDisplayRotation();
-                doReturn(false).when(displayRotation).respectAppRequestedOrientation();
+                doReturn(true).when(displayRotation).isFixedToUserRotation();
             }
             // Please add stubbing before this line. Services will start using this display in other
             // threads immediately after adding it to hierarchy. Calling doAnswer() type of stubbing

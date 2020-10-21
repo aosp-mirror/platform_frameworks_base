@@ -2905,6 +2905,11 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
+        if (refActivity != null && refActivity.hasCompatDisplayInsets()) {
+            // App prefers to keep its original size.
+            return;
+        }
+
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
         final float aspect = ((float) parentHeight) / parentWidth;
@@ -3792,6 +3797,10 @@ class Task extends WindowContainer<WindowContainer> {
                 || activityType == ACTIVITY_TYPE_HOME
                 || activityType == ACTIVITY_TYPE_RECENTS
                 || activityType == ACTIVITY_TYPE_ASSISTANT;
+    }
+
+    boolean isTaskLetterboxed() {
+        return getWindowingMode() == WINDOWING_MODE_FULLSCREEN && !matchParentBounds();
     }
 
     @Override

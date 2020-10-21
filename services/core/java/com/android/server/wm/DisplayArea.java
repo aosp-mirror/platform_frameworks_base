@@ -145,6 +145,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return super.getOrientation(candidate);
     }
 
+    @Override
+    boolean handlesOrientationChangeFromDescendant() {
+        return !mIgnoreOrientationRequest && super.handlesOrientationChangeFromDescendant();
+    }
+
     /**
      * Sets whether this {@link DisplayArea} should ignore fixed-orientation request from apps and
      * windows below it.
