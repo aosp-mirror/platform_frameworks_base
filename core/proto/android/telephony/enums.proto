@@ -224,13 +224,13 @@ enum SmsSendResultEnum {
 // Data profile of the data call. From
 // frameworks/base/telephony/java/com/android/internal/telephony/RILConstants.java
 enum DataProfileEnum {
-    DATA_PROFILE_INVALID = -1;
     DATA_PROFILE_DEFAULT = 0;
     DATA_PROFILE_TETHERED = 1;
     DATA_PROFILE_IMS = 2;
     DATA_PROFILE_FOTA = 3;
     DATA_PROFILE_CBS = 4;
     DATA_PROFILE_OEM_BASE = 1000;
+    DATA_PROFILE_INVALID = -1;
 }
 
 // Reason of data call deactivation. From
