@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在加载推荐内容"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒体"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"隐藏当前会话。"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"无法隐藏当前会话。"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"关闭"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"继续播放"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"设置"</string>
