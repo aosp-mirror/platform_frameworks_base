@@ -76,7 +76,7 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
 
     sp<ISensorManager> sensorService = new SensorManager(vm);
     err = sensorService->registerAsService();
-    ALOGE_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
+    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
 
     sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
     if (IServiceManager::Transport::HWBINDER ==
@@ -91,7 +91,7 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
 
     sp<IStats> statsHal = new StatsHal();
     err = statsHal->registerAsService();
-    ALOGE_IF(err != OK, "Cannot register %s: %d", IStats::descriptor, err);
+    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", IStats::descriptor, err);
 }
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
