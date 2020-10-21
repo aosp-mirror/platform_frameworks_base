@@ -10736,6 +10736,10 @@ message CarrierIdMismatchEvent {
 
     // SPN value of the SIM card.
     optional string spn = 4;
+
+    // First record of the PNN in the SIM card. This field is populated only if the SPN is missing
+    // or empty.
+    optional string pnn = 5;
 }
 
 /**
