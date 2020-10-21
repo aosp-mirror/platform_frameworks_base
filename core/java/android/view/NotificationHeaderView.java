@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -42,7 +41,6 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends ViewGroup {
-    public static final int NO_COLOR = Notification.COLOR_INVALID;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private final int mGravity;
@@ -292,14 +290,6 @@ public class NotificationHeaderView extends ViewGroup {
         mExpandClickListener = l;
         mExpandButton.setOnClickListener(mExpandClickListener);
         updateTouchListener();
-    }
-
-    public int getOriginalIconColor() {
-        return mIcon.getOriginalIconColor();
-    }
-
-    public int getOriginalNotificationColor() {
-        return mExpandButton.getOriginalNotificationColor();
     }
 
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {

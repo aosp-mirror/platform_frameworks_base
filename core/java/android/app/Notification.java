@@ -82,7 +82,6 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
-import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.contentcapture.ContentCaptureContext;
@@ -5862,24 +5861,16 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Apply any necessariy colors to the small icon
+         * Apply any necessary colors to the small icon
          */
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView,
                 StandardTemplateParams p) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
-            int color;
-            if (isColorized(p)) {
-                color = getPrimaryTextColor(p);
-            } else {
-                color = resolveContrastColor(p);
-            }
-            if (colorable) {
-                contentView.setDrawableTint(R.id.icon, false, color,
-                        PorterDuff.Mode.SRC_ATOP);
-
-            }
+            int color = isColorized(p) ? getPrimaryTextColor(p) : resolveContrastColor(p);
+            contentView.setInt(R.id.icon, "setBackgroundColor",
+                    resolveBackgroundColor(p));
             contentView.setInt(R.id.icon, "setOriginalIconColor",
-                    colorable ? color : NotificationHeaderView.NO_COLOR);
+                    colorable ? color : COLOR_INVALID);
         }
 
         /**
@@ -5892,8 +5883,8 @@ public class Notification implements Parcelable
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
                 // resolve color will fall back to the default when legacy
-                contentView.setDrawableTint(R.id.icon, false, resolveContrastColor(p),
-                        PorterDuff.Mode.SRC_ATOP);
+                int color = resolveContrastColor(p);
+                contentView.setInt(R.id.icon, "setOriginalIconColor", color);
             }
         }
 

@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import static com.android.internal.widget.ColoredIconHelper.applyGrayTint;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
@@ -68,6 +70,14 @@ public class NotificationExpandButton extends ImageView {
 
     public int getOriginalNotificationColor() {
         return mOriginalNotificationColor;
+    }
+
+    /**
+     * Set the button's color filter: to gray if true, otherwise colored.
+     * If this button has no original color, this has no effect.
+     */
+    public void setGrayedOut(boolean shouldApply) {
+        applyGrayTint(mContext, getDrawable(), shouldApply, mOriginalNotificationColor);
     }
 
     private void extendRectToMinTouchSize(Rect rect) {
