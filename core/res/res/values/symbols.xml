@@ -2850,6 +2850,7 @@
   <java-symbol type="id" name="header_text_secondary" />
   <java-symbol type="id" name="expand_button" />
   <java-symbol type="id" name="notification_header" />
+  <java-symbol type="id" name="notification_top_line" />
   <java-symbol type="id" name="time_divider" />
   <java-symbol type="id" name="header_text_divider" />
   <java-symbol type="id" name="header_text_secondary_divider" />
