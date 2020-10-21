@@ -540,8 +540,8 @@ filegroup {
     path: "core/java",
 }
 
-java_library {
-    name: "framework-minus-apex",
+java_defaults {
+    name: "framework-minus-apex-defaults",
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
@@ -557,7 +557,6 @@ java_library {
         "--core-library",
         "--multi-dex",
     ],
-    installable: true,
     jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
@@ -590,6 +589,12 @@ java_library {
         "mediatranscoding_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
     ],
+}
+
+java_library {
+    name: "framework-minus-apex",
+    defaults: ["framework-minus-apex-defaults"],
+    installable: true,
     // For backwards compatibility.
     stem: "framework",
     apex_available: ["//apex_available:platform"],
@@ -608,6 +613,12 @@ java_library {
             "-Xep:AndroidFrameworkUid:ERROR",
         ],
     },
+}
+
+java_library {
+    name: "framework-minus-apex-intdefs",
+    defaults: ["framework-minus-apex-defaults"],
+    plugins: ["intdef-annotation-processor"],
 }
 
 // This "framework" module is NOT installed to the device. It's
