@@ -77,8 +77,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
+import android.hardware.face.FaceManager.GetFeatureCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.health.V2_0.IHealth;
 import android.net.ConnectivityManager;
@@ -3327,18 +3329,39 @@ public class StatsPullAtomService extends SystemService {
         try {
             List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             int numUsers = users.size();
+            FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+
             for (int userNum = 0; userNum < numUsers; userNum++) {
                 int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                if (faceManager != null) {
+                    // Store the current setting from the Face HAL, and upon next upload the value
+                    // reported will be correct (given the user did not modify it).
+                    faceManager.getFeature(userId, BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
+                            new GetFeatureCallback() {
+                                @Override
+                                public void onCompleted(boolean success, int feature,
+                                        boolean value) {
+                                    if (feature == FaceManager.FEATURE_REQUIRE_ATTENTION
+                                            && success) {
+                                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                                Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
+                                                value ? 1 : 0, userId);
+                                    }
+                                }
+                            }
+                    );
+                }
 
                 int unlockKeyguardEnabled = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
                           Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1, userId);
                 int unlockDismissesKeyguard = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
-                          Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD, 0, userId);
+                          Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD, 1, userId);
                 int unlockAttentionRequired = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
-                          Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1, userId);
+                          Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 0, userId);
                 int unlockAppEnabled = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
                           Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1, userId);
