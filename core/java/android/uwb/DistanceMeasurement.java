@@ -27,13 +27,23 @@ import android.annotation.FloatRange;
  * @hide
  */
 public final class DistanceMeasurement {
+    private final double mMeters;
+    private final double mErrorMeters;
+    private final double mConfidenceLevel;
+
+    private DistanceMeasurement(double meters, double errorMeters, double confidenceLevel) {
+        mMeters = meters;
+        mErrorMeters = errorMeters;
+        mConfidenceLevel = confidenceLevel;
+    }
+
     /**
      * Distance measurement in meters
      *
      * @return distance in meters
      */
     public double getMeters() {
-        throw new UnsupportedOperationException();
+        return mMeters;
     }
 
     /**
@@ -43,7 +53,7 @@ public final class DistanceMeasurement {
      * @return error of distance measurement in meters
      */
     public double getErrorMeters() {
-        throw new UnsupportedOperationException();
+        return mErrorMeters;
     }
 
     /**
@@ -56,6 +66,80 @@ public final class DistanceMeasurement {
      */
     @FloatRange(from = 0.0, to = 1.0)
     public double getConfidenceLevel() {
-        throw new UnsupportedOperationException();
+        return mConfidenceLevel;
+    }
+
+    /**
+     * Builder to get a {@link DistanceMeasurement} object.
+     */
+    public static final class Builder {
+        private double mMeters = Double.NaN;
+        private double mErrorMeters = Double.NaN;
+        private double mConfidenceLevel = Double.NaN;
+
+        /**
+         * Set the distance measurement in meters
+         *
+         * @param meters distance in meters
+         * @throws IllegalArgumentException if meters is NaN
+         */
+        public Builder setMeters(double meters) {
+            if (Double.isNaN(meters)) {
+                throw new IllegalArgumentException("meters cannot be NaN");
+            }
+            mMeters = meters;
+            return this;
+        }
+
+        /**
+         * Set the distance error in meters
+         *
+         * @param errorMeters distance error in meters
+         * @throws IllegalArgumentException if error is negative or NaN
+         */
+        public Builder setErrorMeters(double errorMeters) {
+            if (Double.isNaN(errorMeters) || errorMeters < 0.0) {
+                throw new IllegalArgumentException(
+                        "errorMeters must be >= 0.0 and not NaN: " + errorMeters);
+            }
+            mErrorMeters = errorMeters;
+            return this;
+        }
+
+        /**
+         * Set the confidence level
+         *
+         * @param confidenceLevel the confidence level in the distance measurement
+         * @throws IllegalArgumentException if confidence level is not in the range of [0.0, 1.0]
+         */
+        public Builder setConfidenceLevel(double confidenceLevel) {
+            if (confidenceLevel < 0.0 || confidenceLevel > 1.0) {
+                throw new IllegalArgumentException(
+                        "confidenceLevel must be in the range [0.0, 1.0]: " + confidenceLevel);
+            }
+            mConfidenceLevel = confidenceLevel;
+            return this;
+        }
+
+        /**
+         * Builds the {@link DistanceMeasurement} object
+         *
+         * @throws IllegalStateException if meters, error, or confidence are not set
+         */
+        public DistanceMeasurement build() {
+            if (Double.isNaN(mMeters)) {
+                throw new IllegalStateException("Meters cannot be NaN");
+            }
+
+            if (Double.isNaN(mErrorMeters)) {
+                throw new IllegalStateException("Error meters cannot be NaN");
+            }
+
+            if (Double.isNaN(mConfidenceLevel)) {
+                throw new IllegalStateException("Confidence level cannot be NaN");
+            }
+
+            return new DistanceMeasurement(mMeters, mErrorMeters, mConfidenceLevel);
+        }
     }
 }
