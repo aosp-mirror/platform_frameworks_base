@@ -7595,6 +7595,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 eventType, r, processName, null, null, null, null, null, null, crashInfo);
 
         mAppErrors.crashApplication(r, crashInfo);
+        // Notify package manager service to possibly update package state
+        if (r != null && r.info != null && r.info.packageName != null) {
+            mPackageManagerInt.notifyPackageCrashOrAnr(r.info.packageName);
+        }
     }
 
     public void handleApplicationStrictModeViolation(

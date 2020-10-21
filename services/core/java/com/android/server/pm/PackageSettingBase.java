@@ -772,6 +772,14 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     /**
+     * Called to indicate that the running app has crashed or ANR'd. This might change the startable
+     * state of the package, depending on whether the package is fully loaded.
+     */
+    public void setStatesOnCrashOrAnr() {
+        incrementalStates.onCrashOrAnr();
+    }
+
+    /**
      * Called to set the callback to listen for startable state changes.
      */
     public void setIncrementalStatesCallback(IncrementalStates.Callback callback) {

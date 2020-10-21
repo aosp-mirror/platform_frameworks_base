@@ -119,6 +119,33 @@ public final class IncrementalStates {
         }
     }
 
+    /**
+     * Change the startable state if the app has crashed or ANR'd during loading.
+     * If the app is not loading (i.e., fully loaded), this event doesn't change startable state.
+     */
+    public void onCrashOrAnr() {
+        if (DEBUG) {
+            Slog.i(TAG, "received package crash or ANR event");
+        }
+        final boolean startableStateChanged;
+        synchronized (mLock) {
+            if (mStartableState.isStartable() && mLoadingState.isLoading()) {
+                // Changing from startable -> unstartable only if app is still loading.
+                mStartableState.adoptNewStartableStateLocked(false);
+                startableStateChanged = true;
+            } else {
+                // If the app is fully loaded, the crash or ANR is caused by the app itself, so
+                // we do not change the startable state.
+                startableStateChanged = false;
+            }
+        }
+        if (startableStateChanged) {
+            mHandler.post(PooledLambda.obtainRunnable(
+                    IncrementalStates::reportStartableState,
+                    IncrementalStates.this).recycleOnUse());
+        }
+    }
+
     private void reportStartableState() {
         final Callback callback;
         final boolean startable;

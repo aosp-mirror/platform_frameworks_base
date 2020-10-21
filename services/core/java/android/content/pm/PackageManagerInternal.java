@@ -1119,4 +1119,8 @@ public abstract class PackageManagerInternal {
     public abstract IncrementalStatesInfo getIncrementalStatesInfo(String packageName,
             int filterCallingUid, int userId);
 
+    /**
+     * Notifies that a package has crashed or ANR'd.
+     */
+    public abstract void notifyPackageCrashOrAnr(String packageName);
 }
