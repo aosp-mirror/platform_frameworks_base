@@ -33,6 +33,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.CompatibilityInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
@@ -176,6 +177,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          */
         @Nullable
         IBinder getWindowToken();
+
+        /**
+         * @return Translator associated with the host, if it has one.
+         */
+        @Nullable
+        default CompatibilityInfo.Translator getTranslator() {
+            return null;
+        }
     }
 
     private static final String TAG = "InsetsController";
@@ -994,10 +1003,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final InsetsAnimationControlRunner runner = useInsetsAnimationThread
                 ? new InsetsAnimationThreadControlRunner(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType, mHost.getHandler())
+                        animationType, mHost.getTranslator(), mHost.getHandler())
                 : new InsetsAnimationControlImpl(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType);
+                        animationType, mHost.getTranslator());
         mRunningAnimations.add(new RunningAnimation(runner, animationType));
         if (DEBUG) Log.d(TAG, "Animation added to runner. useInsetsAnimationThread: "
                 + useInsetsAnimationThread);

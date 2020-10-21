@@ -262,14 +262,11 @@ public final class WindowManagerImpl implements WindowManager {
 
     private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs, Rect bounds) {
         try {
-            final Rect systemWindowInsets = new Rect();
-            final Rect stableInsets = new Rect();
             final DisplayCutout.ParcelableWrapper displayCutout =
                     new DisplayCutout.ParcelableWrapper();
             final InsetsState insetsState = new InsetsState();
             final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(attrs, mContext.getDisplayId(), systemWindowInsets,
-                    stableInsets, displayCutout, insetsState);
+                    .getWindowInsets(attrs, mContext.getDisplayId(), displayCutout, insetsState);
             final Configuration config = mContext.getResources().getConfiguration();
             final boolean isScreenRound = config.isScreenRound();
             final int windowingMode = config.windowConfiguration.getWindowingMode();

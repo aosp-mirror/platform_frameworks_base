@@ -28,6 +28,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -330,15 +331,7 @@ public class CompatibilityInfo implements Parcelable {
         }
 
         /**
-         * Translate the screen rect to the application frame.
-         */
-        @UnsupportedAppUsage
-        public void translateRectInScreenToAppWinFrame(Rect rect) {
-            rect.scale(applicationInvertedScale);
-        }
-
-        /**
-         * Translate the region in window to screen. 
+         * Translate the region in window to screen.
          */
         @UnsupportedAppUsage
         public void translateRegionInWindowToScreen(Region transparentRegion) {
@@ -388,7 +381,14 @@ public class CompatibilityInfo implements Parcelable {
         public void translateWindowLayout(WindowManager.LayoutParams params) {
             params.scale(applicationScale);
         }
-        
+
+        /**
+         * Translate a length in application's window to screen.
+         */
+        public float translateLengthInAppWindowToScreen(float length) {
+            return length * applicationScale;
+        }
+
         /**
          * Translate a Rect in application's window to screen.
          */
@@ -396,13 +396,20 @@ public class CompatibilityInfo implements Parcelable {
         public void translateRectInAppWindowToScreen(Rect rect) {
             rect.scale(applicationScale);
         }
- 
+
         /**
          * Translate a Rect in screen coordinates into the app window's coordinates.
          */
         @UnsupportedAppUsage
         public void translateRectInScreenToAppWindow(Rect rect) {
             rect.scale(applicationInvertedScale);
+        }
+
+        /**
+         * Translate an InsetsState in screen coordinates into the app window's coordinates.
+         */
+        public void translateInsetsStateInScreenToAppWindow(InsetsState state) {
+            state.scale(applicationInvertedScale);
         }
 
         /**

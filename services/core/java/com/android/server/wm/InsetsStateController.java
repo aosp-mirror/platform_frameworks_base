@@ -97,14 +97,16 @@ class InsetsStateController {
     }
 
     /**
-     * When dispatching window state to the client, we'll need to exclude the source that represents
-     * the window that is being dispatched. We also need to exclude certain types of insets source
-     * for client within specific windowing modes.
+     * Gets the insets state from the perspective of the target. When performing layout of the
+     * target or dispatching insets to the target, we need to exclude sources which should not be
+     * visible to the target. e.g., the source which represents the target window itself, and the
+     * IME source when the target is above IME. We also need to exclude certain types of insets
+     * source for client within specific windowing modes.
      *
-     * @param target The client we dispatch the state to.
+     * @param target The window associate with the perspective.
      * @return The state stripped of the necessary information.
      */
-    InsetsState getInsetsForDispatch(@NonNull WindowState target) {
+    InsetsState getInsetsForWindow(@NonNull WindowState target) {
         final InsetsState rotatedState = target.mToken.getFixedRotationTransformInsetsState();
         if (rotatedState != null) {
             return rotatedState;
@@ -112,17 +114,23 @@ class InsetsStateController {
         final InsetsSourceProvider provider = target.getControllableInsetProvider();
         final @InternalInsetsType int type = provider != null
                 ? provider.getSource().getType() : ITYPE_INVALID;
-        return getInsetsForDispatchInner(type, target.getWindowingMode(), target.isAlwaysOnTop(),
+        return getInsetsForTarget(type, target.getWindowingMode(), target.isAlwaysOnTop(),
                 isAboveIme(target));
     }
 
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
         final @InternalInsetsType int type = getInsetsTypeForLayoutParams(attrs);
         final WindowToken token = mDisplayContent.getWindowToken(attrs.token);
+        if (token != null) {
+            final InsetsState rotatedState = token.getFixedRotationTransformInsetsState();
+            if (rotatedState != null) {
+                return rotatedState;
+            }
+        }
         final @WindowingMode int windowingMode = token != null
                 ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        return getInsetsForDispatchInner(type, windowingMode, alwaysOnTop, isAboveIme(token));
+        return getInsetsForTarget(type, windowingMode, alwaysOnTop, isAboveIme(token));
     }
 
     private boolean isAboveIme(WindowContainer target) {
@@ -165,8 +173,11 @@ class InsetsStateController {
         return ITYPE_INVALID;
     }
 
-    /** @see #getInsetsForDispatch */
-    private InsetsState getInsetsForDispatchInner(@InternalInsetsType int type,
+    /**
+     * @see #getInsetsForWindow
+     * @see #getInsetsForWindowMetrics
+     */
+    private InsetsState getInsetsForTarget(@InternalInsetsType int type,
             @WindowingMode int windowingMode, boolean isAlwaysOnTop, boolean aboveIme) {
         InsetsState state = mState;
 
@@ -270,7 +281,6 @@ class InsetsStateController {
      * Called when a layout pass has occurred.
      */
     void onPostLayout() {
-        mState.setDisplayFrame(mDisplayContent.getBounds());
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             mProviders.valueAt(i).onPostLayout();
         }

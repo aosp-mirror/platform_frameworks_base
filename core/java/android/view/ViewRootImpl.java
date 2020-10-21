@@ -562,6 +562,9 @@ public final class ViewRootImpl implements ViewParent,
             = new ViewTreeObserver.InternalInsetsInfo();
 
     private WindowInsets mLastWindowInsets;
+    private final Rect mSystemInsetsCache = new Rect();
+    private final Rect mVisibleInsetsCache = new Rect();
+    private final Rect mStableInsetsCache = new Rect();
 
     // Insets types hidden by legacy window flags or system UI flags.
     private @InsetsType int mTypesHiddenByFlags = 0;
@@ -1025,9 +1028,12 @@ public final class ViewRootImpl implements ViewParent,
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
                             mInsetsController.getRequestedVisibility(), mTmpFrames.frame,
-                            mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
                             mAttachInfo.mDisplayCutout, inputChannel,
                             mTempInsets, mTempControls);
+                    if (mTranslator != null) {
+                        mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
+                        mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
+                    }
                     setFrame(mTmpFrames.frame);
                 } catch (RemoteException e) {
                     mAdded = false;
@@ -1044,9 +1050,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
-                if (mTranslator != null) {
-                    mTranslator.translateRectInScreenToAppWindow(mAttachInfo.mContentInsets);
-                }
                 mPendingDisplayCutout.set(mAttachInfo.mDisplayCutout);
                 mAttachInfo.mAlwaysConsumeSystemBars =
                         (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS) != 0;
@@ -2313,12 +2316,10 @@ public final class ViewRootImpl implements ViewParent,
                     (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));
 
-            Rect visibleInsets = mInsetsController.calculateVisibleInsets(
-                    mWindowAttributes.softInputMode);
-
-            mAttachInfo.mVisibleInsets.set(visibleInsets);
-            mAttachInfo.mContentInsets.set(mLastWindowInsets.getSystemWindowInsets().toRect());
-            mAttachInfo.mStableInsets.set(mLastWindowInsets.getStableInsets().toRect());
+            mSystemInsetsCache.set(mLastWindowInsets.getSystemWindowInsets().toRect());
+            mStableInsetsCache.set(mLastWindowInsets.getStableInsets().toRect());
+            mVisibleInsetsCache.set(mInsetsController.calculateVisibleInsets(
+                    mWindowAttributes.softInputMode));
         }
         return mLastWindowInsets;
     }
@@ -2826,8 +2827,7 @@ public final class ViewRootImpl implements ViewParent,
                                         && mWinFrame.height() == mPendingBackDropFrame.height();
                         // TODO: Need cutout?
                         startDragResizing(mPendingBackDropFrame, !backdropSizeMatchesFrame,
-                                mLastWindowInsets.getSystemWindowInsets().toRect(),
-                                mLastWindowInsets.getStableInsets().toRect(), mResizeMode);
+                                mSystemInsetsCache, mStableInsetsCache, mResizeMode);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -3234,9 +3234,6 @@ public final class ViewRootImpl implements ViewParent,
         final boolean windowMoved = mAttachInfo.mWindowLeft != frame.left
                 || mAttachInfo.mWindowTop != frame.top;
         if (windowMoved) {
-            if (mTranslator != null) {
-                mTranslator.translateRectInScreenToAppWinFrame(frame);
-            }
             mAttachInfo.mWindowLeft = frame.left;
             mAttachInfo.mWindowTop = frame.top;
         }
@@ -4450,8 +4447,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
-        final Rect ci = getWindowInsets(false).getSystemWindowInsetsAsRect();
-        final Rect vi = mAttachInfo.mVisibleInsets;
+        final Rect ci = mSystemInsetsCache;
+        final Rect vi = mVisibleInsetsCache;
         int scrollY = 0;
         boolean handled = false;
 
@@ -7516,7 +7513,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mTranslator != null) {
-            mTranslator.translateRectInScreenToAppWinFrame(mTmpFrames.frame);
+            mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
+            mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
         }
         setFrame(mTmpFrames.frame);
         mInsetsController.onStateChanged(mTempInsets);
@@ -7535,6 +7533,22 @@ public final class ViewRootImpl implements ViewParent,
      */
     void getDisplayFrame(Rect outFrame) {
         outFrame.set(mTmpFrames.displayFrame);
+    }
+
+    /**
+     * Gets the current display size in which the window is being laid out, accounting for screen
+     * decorations around it.
+     */
+    void getWindowVisibleDisplayFrame(Rect outFrame) {
+        outFrame.set(mTmpFrames.displayFrame);
+        // XXX This is really broken, and probably all needs to be done
+        // in the window manager, and we need to know more about whether
+        // we want the area behind or in front of the IME.
+        final Rect insets = mVisibleInsetsCache;
+        outFrame.left += insets.left;
+        outFrame.top += insets.top;
+        outFrame.right -= insets.right;
+        outFrame.bottom -= insets.bottom;
     }
 
     /**
@@ -7856,13 +7870,8 @@ public final class ViewRootImpl implements ViewParent,
             MergedConfiguration mergedConfiguration, boolean forceLayout,
             boolean alwaysConsumeSystemBars, int displayId) {
         final Rect frame = frames.frame;
-        final Rect contentInsets = frames.contentInsets;
-        final Rect visibleInsets = frames.visibleInsets;
-        final Rect stableInsets = frames.stableInsets;
         final Rect backDropFrame = frames.backdropFrame;
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
-                + " contentInsets=" + contentInsets.toShortString()
-                + " visibleInsets=" + visibleInsets.toShortString()
                 + " reportDraw=" + reportDraw
                 + " backDropFrame=" + backDropFrame);
 
@@ -7873,7 +7882,7 @@ public final class ViewRootImpl implements ViewParent,
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
                     mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame, fullscreen,
-                            visibleInsets, stableInsets);
+                            mVisibleInsetsCache, mStableInsetsCache);
                 }
             }
         }
@@ -7881,8 +7890,6 @@ public final class ViewRootImpl implements ViewParent,
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(frame);
-            mTranslator.translateRectInScreenToAppWindow(contentInsets);
-            mTranslator.translateRectInScreenToAppWindow(visibleInsets);
         }
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
@@ -7900,6 +7907,9 @@ public final class ViewRootImpl implements ViewParent,
         if (Binder.getCallingPid() == android.os.Process.myPid()) {
             insetsState = new InsetsState(insetsState, true /* copySource */);
         }
+        if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+        }
         mHandler.obtainMessage(MSG_INSETS_CHANGED, insetsState).sendToTarget();
     }
 
@@ -7912,6 +7922,9 @@ public final class ViewRootImpl implements ViewParent,
                     activeControls[i] = new InsetsSourceControl(activeControls[i]);
                 }
             }
+        }
+        if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = insetsState;
