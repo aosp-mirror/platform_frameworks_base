@@ -9,4 +9,5 @@ android_test {
             "android-support-test",
             "ub-uiautomator",
         ],
+    test_suites: ["device-tests"],
 }
