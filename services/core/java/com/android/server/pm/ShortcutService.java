@@ -3907,10 +3907,11 @@ public class ShortcutService extends IShortcutService.Stub {
         final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
-            return mContext.getPackageManager().getResourcesForApplicationAsUser(
-                    packageName, userId);
+            return mContext.createContextAsUser(UserHandle.of(userId), /* flags */ 0)
+                    .getPackageManager().getResourcesForApplication(packageName);
         } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Resources for package " + packageName + " not found");
+            Slog.e(TAG, "Resources of package " + packageName + " for user " + userId
+                    + " not found");
             return null;
         } finally {
             injectRestoreCallingIdentity(token);

@@ -177,6 +177,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            when(mMockPackageManager.getUserId()).thenReturn(user.getIdentifier());
+            return this;
+        }
+
+        @Override
         public void unregisterReceiver(BroadcastReceiver receiver) {
             // ignore.
         }
@@ -939,7 +945,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             assertEquals(Process.SYSTEM_UID, mInjectedCallingUid);
 
             final String packageName = (String) pmInvocation.getArguments()[0];
-            final int userId = (Integer) pmInvocation.getArguments()[1];
+            final int userId =  mMockPackageManager.getUserId();
 
             final Resources res = mock(Resources.class);
 
@@ -971,7 +977,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 return Integer.parseInt(entryName.substring(1)) + ressIdOffset;
             }).when(res).getIdentifier(anyStringOrNull(), anyStringOrNull(), anyStringOrNull());
             return res;
-        }).when(mMockPackageManager).getResourcesForApplicationAsUser(anyString(), anyInt());
+        }).when(mMockPackageManager).getResourcesForApplication(anyString());
     }
 
     protected static UserInfo withProfileGroupId(UserInfo in, int groupId) {
