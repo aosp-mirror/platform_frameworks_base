@@ -207,9 +207,6 @@ public class TouchState {
             case AccessibilityEvent.TYPE_GESTURE_DETECTION_START:
                 startGestureDetecting();
                 break;
-            case AccessibilityEvent.TYPE_GESTURE_DETECTION_END:
-                startTouchInteracting();
-                break;
             default:
                 break;
         }
