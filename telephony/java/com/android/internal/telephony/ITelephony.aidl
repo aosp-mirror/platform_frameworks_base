@@ -2233,6 +2233,10 @@ interface ITelephony {
      */
     String getMmsUAProfUrl(int subId);
 
+    void setMobileDataPolicyEnabledStatus(int subscriptionId, int policy, boolean enabled);
+
+    boolean isMobileDataPolicyEnabled(int subscriptionId, int policy);
+
     /**
      * Set allowing mobile data during voice call.
      */
