@@ -18,29 +18,20 @@ package com.android.systemui.people;
 
 import android.app.Activity;
 import android.app.INotificationManager;
-import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
-import android.icu.text.MeasureFormat;
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.service.notification.ConversationChannelWrapper;
 import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * Shows the user their tiles for their priority People (go/live-status).
@@ -78,21 +69,9 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            boolean showAllConversations = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE) == 0;
-            List<ConversationChannelWrapper> conversations =
-                    mNotificationManager.getConversations(
-                            !showAllConversations /* priority only */).getList();
-            List<ShortcutInfo> shortcutInfos = conversations.stream().filter(
-                    c -> shouldKeepConversation(c)).map(c -> c.getShortcutInfo()).collect(
-                    Collectors.toList());
-            if (showAllConversations) {
-                List<ConversationChannel> recentConversations =
-                        mPeopleManager.getRecentConversations().getList();
-                List<ShortcutInfo> recentShortcuts = recentConversations.stream().map(
-                        c -> c.getShortcutInfo()).collect(Collectors.toList());
-                shortcutInfos.addAll(recentShortcuts);
-            }
+            List<ShortcutInfo> shortcutInfos =
+                    PeopleSpaceUtils.getShortcutInfos(
+                            mContext, mNotificationManager, mPeopleManager);
             for (ShortcutInfo conversation : shortcutInfos) {
                 PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext,
                         mPeopleSpaceLayout,
@@ -117,7 +96,7 @@ public class PeopleSpaceActivity extends Activity {
                     shortcutInfo.getId());
             String status = lastInteraction != 0l ? mContext.getString(
                     R.string.last_interaction_status,
-                    getLastInteractionString(
+                    PeopleSpaceUtils.getLastInteractionString(
                             lastInteraction)) : mContext.getString(R.string.basic_status);
             tileView.setStatus(status);
 
@@ -128,46 +107,6 @@ public class PeopleSpaceActivity extends Activity {
         } catch (Exception e) {
             Log.e(sTAG, "Couldn't retrieve shortcut information", e);
         }
-    }
-
-    /** Returns a readable representation of {@code lastInteraction}. */
-    private String getLastInteractionString(long lastInteraction) {
-        long now = System.currentTimeMillis();
-        Duration durationSinceLastInteraction = Duration.ofMillis(
-                now - lastInteraction);
-        MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
-                MeasureFormat.FormatWidth.WIDE);
-        if (durationSinceLastInteraction.toDays() >= 1) {
-            return
-                    formatter
-                            .formatMeasures(new Measure(durationSinceLastInteraction.toDays(),
-                                    MeasureUnit.DAY));
-        } else if (durationSinceLastInteraction.toHours() >= 1) {
-            return formatter.formatMeasures(new Measure(durationSinceLastInteraction.toHours(),
-                    MeasureUnit.HOUR));
-        } else if (durationSinceLastInteraction.toMinutes() >= 1) {
-            return formatter.formatMeasures(new Measure(durationSinceLastInteraction.toMinutes(),
-                    MeasureUnit.MINUTE));
-        } else {
-            return formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toMillis() / 1000,
-                            MeasureUnit.SECOND));
-        }
-    }
-
-    /**
-     * Returns whether the {@code conversation} should be kept for display in the People Space.
-     *
-     * <p>A valid {@code conversation} must:
-     *     <ul>
-     *         <li>Have a non-null {@link ShortcutInfo}
-     *         <li>Have an associated label in the {@link ShortcutInfo}
-     *     </ul>
-     * </li>
-     */
-    private boolean shouldKeepConversation(ConversationChannelWrapper conversation) {
-        ShortcutInfo shortcutInfo = conversation.getShortcutInfo();
-        return shortcutInfo != null && shortcutInfo.getLabel().length() != 0;
     }
 
     @Override

@@ -60,6 +60,7 @@ import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
 import android.util.Slog;
+import android.util.SparseLongArray;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1525,7 +1526,9 @@ public final class StrictMode {
         // Map from violation stacktrace hashcode -> uptimeMillis of
         // last violation.  No locking needed, as this is only
         // accessed by the same thread.
+        /** Temporarily retained; appears to be missing UnsupportedAppUsage annotation */
         private ArrayMap<Integer, Long> mLastViolationTime;
+        private SparseLongArray mRealLastViolationTime;
 
         public AndroidBlockGuardPolicy(@ThreadPolicyMask int threadPolicyMask) {
             mThreadPolicyMask = threadPolicyMask;
@@ -1759,17 +1762,17 @@ public final class StrictMode {
             long lastViolationTime = 0;
             long now = SystemClock.uptimeMillis();
             if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
-                if (mLastViolationTime != null) {
-                    Long vtime = mLastViolationTime.get(crashFingerprint);
+                if (mRealLastViolationTime != null) {
+                    Long vtime = mRealLastViolationTime.get(crashFingerprint);
                     if (vtime != null) {
                         lastViolationTime = vtime;
                     }
-                    clampViolationTimeMap(mLastViolationTime, Math.max(MIN_LOG_INTERVAL_MS,
+                    clampViolationTimeMap(mRealLastViolationTime, Math.max(MIN_LOG_INTERVAL_MS,
                                 Math.max(MIN_DIALOG_INTERVAL_MS, MIN_DROPBOX_INTERVAL_MS)));
                 } else {
-                    mLastViolationTime = new ArrayMap<>(1);
+                    mRealLastViolationTime = new SparseLongArray(1);
                 }
-                mLastViolationTime.put(crashFingerprint, now);
+                mRealLastViolationTime.put(crashFingerprint, now);
             }
             long timeSinceLastViolationMillis =
                     lastViolationTime == 0 ? Long.MAX_VALUE : (now - lastViolationTime);
@@ -2165,16 +2168,17 @@ public final class StrictMode {
         }
 
         final int uid = android.os.Process.myUid();
-        String msg = "Detected cleartext network traffic from UID " + uid;
+        final StringBuilder msg = new StringBuilder("Detected cleartext network traffic from UID ")
+                .append(uid);
         if (rawAddr != null) {
             try {
-                msg += " to " + InetAddress.getByAddress(rawAddr);
+                msg.append(" to ").append(InetAddress.getByAddress(rawAddr));
             } catch (UnknownHostException ignored) {
             }
         }
-        msg += HexDump.dumpHexString(firstPacket).trim() + " ";
+        msg.append(HexDump.dumpHexString(firstPacket).trim()).append(' ');
         final boolean forceDeath = (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
-        onVmPolicyViolation(new CleartextNetworkViolation(msg), forceDeath);
+        onVmPolicyViolation(new CleartextNetworkViolation(msg.toString()), forceDeath);
     }
 
     /** @hide */
@@ -2231,18 +2235,19 @@ public final class StrictMode {
     // Map from VM violation fingerprint to uptime millis.
     @UnsupportedAppUsage
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<>();
+    private static final SparseLongArray sRealLastVmViolationTime = new SparseLongArray();
 
     /**
      * Clamp the given map by removing elements with timestamp older than the given retainSince.
      */
-    private static void clampViolationTimeMap(final @NonNull Map<Integer, Long> violationTime,
+    private static void clampViolationTimeMap(final @NonNull SparseLongArray violationTime,
             final long retainSince) {
-        final Iterator<Map.Entry<Integer, Long>> iterator = violationTime.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Integer, Long> e = iterator.next();
-            if (e.getValue() < retainSince) {
+        for (int i = 0; i < violationTime.size(); ) {
+            if (violationTime.valueAt(i) < retainSince) {
                 // Remove stale entries
-                iterator.remove();
+                violationTime.removeAt(i);
+            } else {
+                i++;
             }
         }
         // Ideally we'd cap the total size of the map, though it'll involve quickselect of topK,
@@ -2273,15 +2278,15 @@ public final class StrictMode {
         long lastViolationTime;
         long timeSinceLastViolationMillis = Long.MAX_VALUE;
         if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
-            synchronized (sLastVmViolationTime) {
-                if (sLastVmViolationTime.containsKey(fingerprint)) {
-                    lastViolationTime = sLastVmViolationTime.get(fingerprint);
+            synchronized (sRealLastVmViolationTime) {
+                if (sRealLastVmViolationTime.indexOfKey(fingerprint) >= 0) {
+                    lastViolationTime = sRealLastVmViolationTime.get(fingerprint);
                     timeSinceLastViolationMillis = now - lastViolationTime;
                 }
                 if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
-                    sLastVmViolationTime.put(fingerprint, now);
+                    sRealLastVmViolationTime.put(fingerprint, now);
                 }
-                clampViolationTimeMap(sLastVmViolationTime,
+                clampViolationTimeMap(sRealLastVmViolationTime,
                         now - Math.max(MIN_VM_INTERVAL_MS, MIN_LOG_INTERVAL_MS));
             }
         }

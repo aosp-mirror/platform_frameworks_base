@@ -70,7 +70,7 @@ public class QSDetailTest extends SysuiTestCase {
             mQsDetail = (QSDetail) LayoutInflater.from(mContext).inflate(R.layout.qs_detail, null);
             mQsPanel = mock(QSPanel.class);
             mQuickHeader = mock(QuickStatusBarHeader.class);
-            mQsDetail.setQsPanel(mQsPanel, mQuickHeader, mock(View.class));
+            mQsDetail.setQsPanel(mQsPanel, mQuickHeader, mock(QSFooter.class));
 
             mMockDetailAdapter = mock(DetailAdapter.class);
             when(mMockDetailAdapter.createDetailView(any(), any(), any()))

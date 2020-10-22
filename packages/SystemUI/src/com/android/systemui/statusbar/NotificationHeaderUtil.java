@@ -17,18 +17,16 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
-import android.content.res.Configuration;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
-import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.ConversationLayout;
+import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentView;
 
@@ -67,32 +65,14 @@ public class NotificationHeaderUtil {
     private final static ResultApplicator mGreyApplicator = new ResultApplicator() {
         @Override
         public void apply(View parent, View view, boolean apply, boolean reset) {
-            NotificationHeaderView header = (NotificationHeaderView) view;
-            ImageView icon = (ImageView) view.findViewById(
-                    com.android.internal.R.id.icon);
-            ImageView expand = (ImageView) view.findViewById(
-                    com.android.internal.R.id.expand_button);
-            applyToChild(icon, apply, header.getOriginalIconColor());
-            applyToChild(expand, apply, header.getOriginalNotificationColor());
-        }
-
-        private void applyToChild(View view, boolean shouldApply, int originalColor) {
-            if (originalColor != NotificationHeaderView.NO_COLOR) {
-                ImageView imageView = (ImageView) view;
-                imageView.getDrawable().mutate();
-                if (shouldApply) {
-                    // lets gray it out
-                    Configuration config = view.getContext().getResources().getConfiguration();
-                    boolean inNightMode = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                            == Configuration.UI_MODE_NIGHT_YES;
-                    int grey = ContrastColorUtil.resolveColor(view.getContext(),
-                            Notification.COLOR_DEFAULT, inNightMode);
-                    imageView.getDrawable().setColorFilter(grey, PorterDuff.Mode.SRC_ATOP);
-                } else {
-                    // lets reset it
-                    imageView.getDrawable().setColorFilter(originalColor,
-                            PorterDuff.Mode.SRC_ATOP);
-                }
+            CachingIconView icon = view.findViewById(com.android.internal.R.id.icon);
+            if (icon != null) {
+                icon.setGrayedOut(apply);
+            }
+            NotificationExpandButton expand =
+                    view.findViewById(com.android.internal.R.id.expand_button);
+            if (expand != null) {
+                expand.setGrayedOut(apply);
             }
         }
     };
@@ -178,7 +158,7 @@ public class NotificationHeaderUtil {
 
     private void sanitizeHeaderViews(ExpandableNotificationRow row) {
         if (row.isSummaryWithChildren()) {
-            sanitizeHeader(row.getNotificationHeader());
+            sanitizeHeader(row.getNotificationViewWrapper().getNotificationHeader());
             return;
         }
         final NotificationContentView layout = row.getPrivateLayout();
@@ -275,7 +255,8 @@ public class NotificationHeaderUtil {
         }
 
         public void init() {
-            mParentView = mParentRow.getNotificationHeader().findViewById(mId);
+            mParentView = mParentRow.getNotificationViewWrapper().getNotificationHeader()
+                    .findViewById(mId);
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
         }
@@ -305,7 +286,7 @@ public class NotificationHeaderUtil {
         public void apply(ExpandableNotificationRow row, boolean reset) {
             boolean apply = mApply && !reset;
             if (row.isSummaryWithChildren()) {
-                applyToView(apply, reset, row.getNotificationHeader());
+                applyToView(apply, reset, row.getNotificationViewWrapper().getNotificationHeader());
                 return;
             }
             applyToView(apply, reset, row.getPrivateLayout().getContractedChild());

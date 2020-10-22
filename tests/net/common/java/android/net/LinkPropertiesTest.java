@@ -52,7 +52,6 @@ import org.junit.runner.RunWith;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -952,28 +951,6 @@ public class LinkPropertiesTest {
         assertTrue(rmnet3.getAllRoutes().isEmpty());
         rmnet3.ensureDirectlyConnectedRoutes();
         assertEqualRoutes(Collections.singletonList(directRoute3), rmnet3.getAllRoutes());
-
-    }
-
-    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
-    public void testCompareResult() {
-        // Either adding or removing items
-        compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
-                Arrays.asList(2, 3, 4), new ArrayList<>());
-        compareResult(Arrays.asList(1, 2), Arrays.asList(3, 2, 1, 4),
-                new ArrayList<>(), Arrays.asList(3, 4));
-
-
-        // adding and removing items at the same time
-        compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(2, 3, 4, 5),
-                Arrays.asList(1), Arrays.asList(5));
-        compareResult(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6),
-                Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6));
-
-        // null cases
-        compareResult(Arrays.asList(1, 2, 3), null, Arrays.asList(1, 2, 3), new ArrayList<>());
-        compareResult(null, Arrays.asList(3, 2, 1), new ArrayList<>(), Arrays.asList(1, 2, 3));
-        compareResult(null, null, new ArrayList<>(), new ArrayList<>());
     }
 
     private void assertEqualRoutes(Collection<RouteInfo> expected, Collection<RouteInfo> actual) {
@@ -983,13 +960,6 @@ public class LinkPropertiesTest {
         assertEquals(actual.size(), actualSet.size());
 
         assertEquals(expectedSet, actualSet);
-    }
-
-    private <T> void compareResult(List<T> oldItems, List<T> newItems, List<T> expectRemoved,
-            List<T> expectAdded) {
-        CompareResult<T> result = new CompareResult<>(oldItems, newItems);
-        assertEquals(new ArraySet<>(expectAdded), new ArraySet<>(result.added));
-        assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
 
     private static LinkProperties makeLinkPropertiesForParceling() {

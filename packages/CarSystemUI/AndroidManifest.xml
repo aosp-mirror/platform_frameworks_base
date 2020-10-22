@@ -23,6 +23,8 @@
     <uses-permission android:name="android.car.permission.CAR_POWER" />
     <!-- This permission is required to get the trusted device list of a user. -->
     <uses-permission android:name="android.car.permission.CAR_ENROLL_TRUST"/>
+    <!-- This permission is required to monitor gear state. -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
     <!-- This permission is required to get bluetooth broadcast. -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <!-- These permissions are required to implement icons based on role holders. -->

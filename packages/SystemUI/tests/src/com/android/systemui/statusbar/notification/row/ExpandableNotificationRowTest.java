@@ -96,8 +96,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setSensitive(true, true);
         mGroupRow.setHideSensitive(true, false, 0, 0);
         mGroupRow.setHideSensitive(false, true, 0, 0);
-        assertTrue(mGroupRow.getChildrenContainer().getVisibleHeader().getVisibility()
-                == View.VISIBLE);
+        assertEquals(View.VISIBLE, mGroupRow.getChildrenContainer().getVisibleWrapper()
+                .getNotificationHeader().getVisibility());
     }
 
     @Test

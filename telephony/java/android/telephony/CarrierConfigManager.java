@@ -3832,11 +3832,26 @@ public class CarrierConfigManager {
         public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT =
                 KEY_PREFIX + "wifi_off_deferring_time_millis_int";
 
+        /**
+         * A boolean flag specifying whether or not this carrier requires one IMS registration for
+         * all IMS services (MMTEL and RCS).
+         * <p>
+         * If set to {@code true}, the IMS Service must use one IMS registration for all IMS
+         * services. If set to {@code false}, IMS services may use separate IMS registrations for
+         * MMTEL and RCS.
+         * <p>
+         * The default value for this configuration is {@code false}.
+         * @see android.telephony.ims.SipDelegateManager
+         */
+        public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL =
+                KEY_PREFIX + "ims_single_registration_required_bool";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
+            defaults.putBoolean(KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL, false);
             return defaults;
         }
     }

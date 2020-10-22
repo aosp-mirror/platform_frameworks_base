@@ -463,7 +463,7 @@ public class HdmiDeviceInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         switch (mHdmiDeviceType) {
             case HDMI_DEVICE_TYPE_CEC:
                 s.append("CEC: ");

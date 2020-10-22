@@ -16,10 +16,10 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.GlobalScreenshot.ACTION_TYPE_DELETE;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ID;
-import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED;
-import static com.android.systemui.screenshot.GlobalScreenshot.SCREENSHOT_URI_ID;
+import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_DELETE;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED;
+import static com.android.systemui.screenshot.ScreenshotController.SCREENSHOT_URI_ID;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;

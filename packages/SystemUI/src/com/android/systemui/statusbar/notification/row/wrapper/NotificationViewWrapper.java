@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +37,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.internal.widget.ConversationLayout;
+import com.android.internal.widget.CachingIconView;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -67,8 +66,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
             } else if ("messaging".equals(v.getTag())) {
                 return new NotificationMessagingTemplateViewWrapper(ctx, v, row);
             } else if ("conversation".equals(v.getTag())) {
-                return new NotificationConversationTemplateViewWrapper(ctx, (ConversationLayout) v,
-                        row);
+                return new NotificationConversationTemplateViewWrapper(ctx, v, row);
             }
             Class<? extends Notification.Style> style =
                     row.getEntry().getSbn().getNotification().getNotificationStyle();
@@ -231,6 +229,9 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {}
 
+    /** Set the expanded state on the view wrapper */
+    public void setExpanded(boolean expanded) {}
+
     /**
      * @return the notification header if it exists
      */
@@ -241,7 +242,16 @@ public abstract class NotificationViewWrapper implements TransformableView {
     /**
      * @return the expand button if it exists
      */
-    public @Nullable View getExpandButton() {
+    @Nullable
+    public View getExpandButton() {
+        return null;
+    }
+
+    /**
+     * @return the icon if it exists
+     */
+    @Nullable
+    public CachingIconView getIcon() {
         return null;
     }
 

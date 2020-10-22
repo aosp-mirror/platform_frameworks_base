@@ -46,18 +46,16 @@ import java.util.List;
 interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in InsetsState requestedVisibility,
-            out Rect outFrame, out Rect outContentInsets, out Rect outStableInsets,
+            out Rect outFrame, out DisplayCutout.ParcelableWrapper displayCutout,
+            out InputChannel outInputChannel, out InsetsState insetsState,
+            out InsetsSourceControl[] activeControls);
+    int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
+            in int viewVisibility, in int layerStackId, in int userId,
+            in InsetsState requestedVisibility, out Rect outFrame,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls);
-    int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
-                in int viewVisibility, in int layerStackId, in int userId,
-                in InsetsState requestedVisibility,
-                out Rect outFrame, out Rect outContentInsets, out Rect outStableInsets,
-                out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
-                out InsetsState insetsState, out InsetsSourceControl[] activeControls);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets, out InsetsState insetsState);
+            in int viewVisibility, in int layerStackId, out InsetsState insetsState);
     @UnsupportedAppUsage
     void remove(IWindow window);
 

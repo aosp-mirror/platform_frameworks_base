@@ -1018,6 +1018,10 @@ public class NotificationContentView extends FrameLayout {
                 mSingleLineView };
     }
 
+    public NotificationViewWrapper getVisibleWrapper() {
+        return getVisibleWrapper(mVisibleType);
+    }
+
     public NotificationViewWrapper getVisibleWrapper(int visibleType) {
         switch (visibleType) {
             case VISIBLE_TYPE_EXPANDED:
@@ -1541,18 +1545,20 @@ public class NotificationContentView extends FrameLayout {
         mIsContentExpandable = expandable;
     }
 
-    public NotificationHeaderView getNotificationHeader() {
-        NotificationHeaderView header = null;
-        if (mContractedChild != null) {
-            header = mContractedWrapper.getNotificationHeader();
+    /**
+     * @return a view wrapper for one of the inflated states of the notification.
+     */
+    public NotificationViewWrapper getNotificationViewWrapper() {
+        if (mContractedChild != null && mContractedWrapper != null) {
+            return mContractedWrapper;
         }
-        if (header == null && mExpandedChild != null) {
-            header = mExpandedWrapper.getNotificationHeader();
+        if (mExpandedChild != null && mExpandedWrapper != null) {
+            return mExpandedWrapper;
         }
-        if (header == null && mHeadsUpChild != null) {
-            header = mHeadsUpWrapper.getNotificationHeader();
+        if (mHeadsUpChild != null && mHeadsUpWrapper != null) {
+            return mHeadsUpWrapper;
         }
-        return header;
+        return null;
     }
 
     public void showFeedbackIcon(boolean show) {
@@ -1578,11 +1584,6 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.setRecentlyAudiblyAlerted(audiblyAlerted);
         }
-    }
-
-    public NotificationHeaderView getVisibleNotificationHeader() {
-        NotificationViewWrapper wrapper = getVisibleWrapper(mVisibleType);
-        return wrapper == null ? null : wrapper.getNotificationHeader();
     }
 
     public void setContainingNotification(ExpandableNotificationRow containingNotification) {

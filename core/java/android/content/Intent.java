@@ -7447,6 +7447,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /** @hide */
     @UnsupportedAppUsage
+    @SuppressWarnings("AndroidFrameworkEfficientCollections")
     public static Intent parseCommandArgs(ShellCommand cmd, CommandOptionHandler optionHandler)
             throws URISyntaxException {
         Intent intent = new Intent();

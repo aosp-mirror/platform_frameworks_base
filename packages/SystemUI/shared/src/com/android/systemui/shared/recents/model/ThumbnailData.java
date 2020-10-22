@@ -61,18 +61,28 @@ public class ThumbnailData {
         snapshotId = 0;
     }
 
-    public ThumbnailData(TaskSnapshot snapshot) {
+    private static Bitmap makeThumbnail(TaskSnapshot snapshot) {
         final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-        if (buffer == null || (buffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
+        Bitmap thumbnail = null;
+        try {
+            if (buffer != null) {
+                thumbnail = Bitmap.wrapHardwareBuffer(buffer, snapshot.getColorSpace());
+            }
+        } catch (IllegalArgumentException ex) {
             // TODO(b/157562905): Workaround for a crash when we get a snapshot without this state
             Log.e("ThumbnailData", "Unexpected snapshot without USAGE_GPU_SAMPLED_IMAGE: "
-                    + buffer);
+                    + buffer, ex);
+        }
+        if (thumbnail == null) {
             Point taskSize = snapshot.getTaskSize();
             thumbnail = Bitmap.createBitmap(taskSize.x, taskSize.y, ARGB_8888);
             thumbnail.eraseColor(Color.BLACK);
-        } else {
-            thumbnail = Bitmap.wrapHardwareBuffer(buffer, snapshot.getColorSpace());
         }
+        return thumbnail;
+    }
+
+    public ThumbnailData(TaskSnapshot snapshot) {
+        thumbnail = makeThumbnail(snapshot);
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         rotation = snapshot.getRotation();

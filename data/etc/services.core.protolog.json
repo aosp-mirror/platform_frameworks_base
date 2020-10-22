@@ -121,6 +121,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1973119651": {
+      "message": "SyncGroup %d: Adding to group: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "-1963461591": {
       "message": "Removing %s from %s",
       "level": "VERBOSE",
@@ -157,14 +163,20 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1918702467": {
+      "message": "onSyncFinishedDrawing %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
+    },
     "-1915280162": {
       "message": "Attempted to add wallpaper window with bad token %s.  Aborting.",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1910833551": {
-      "message": "SyncSet{%x:%d} Start for %s",
+    "-1905191109": {
+      "message": "SyncGroup %d: Finished!",
       "level": "VERBOSE",
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
@@ -607,12 +619,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1387080937": {
-      "message": "SyncSet{%x:%d} Child ready, now ready=%b and waiting on %d transactions",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
     "-1376035390": {
       "message": "No task found",
       "level": "DEBUG",
@@ -642,12 +648,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-1340783230": {
-      "message": "SyncSet{%x:%d} Added %s. now waiting on %d transactions",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "-1340540100": {
       "message": "Creating SnapshotStartingData",
@@ -1177,12 +1177,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DragState.java"
     },
-    "-678300709": {
-      "message": "SyncSet{%x:%d} Trying to add %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
     "-677449371": {
       "message": "moveTaskToRootTask: moving task=%d to rootTaskId=%d toTop=%b",
       "level": "DEBUG",
@@ -1405,12 +1399,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
-    "-444624452": {
-      "message": "REPARENT from: %s to: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
     "-443173857": {
       "message": "Moving pending starting from %s to %s",
       "level": "VERBOSE",
@@ -1519,12 +1507,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "-324085783": {
-      "message": "SURFACE CROP %s: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
     "-322743468": {
       "message": "setInputMethodInputTarget %s",
       "level": "INFO",
@@ -1602,6 +1584,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
+    },
+    "-230587670": {
+      "message": "SyncGroup %d:  Unfinished container: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "-198463978": {
       "message": "updateRotationUnchecked: alwaysSendConfiguration=%b forceRelayout=%b",
@@ -1710,12 +1698,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
-    },
-    "-29233992": {
-      "message": "SURFACE CLEAR CROP: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "-21399771": {
       "message": "activity %s already destroying, skipping request with reason:%s",
@@ -2107,6 +2089,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "371173718": {
+      "message": "finishSync cancel=%b for %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
+    },
     "371641947": {
       "message": "Window Manager Crash %s",
       "level": "WTF",
@@ -2251,6 +2239,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "550717438": {
+      "message": "SyncGroup %d: Started for listener: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "556758086": {
       "message": "Applying new update lock state '%s' for %s",
       "level": "DEBUG",
@@ -2286,12 +2280,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
-    },
-    "590184240": {
-      "message": "- NOT adding to sync: visible=%b hasListener=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
     "594260577": {
       "message": "createWallpaperAnimations()",
@@ -2617,6 +2605,18 @@
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
+    "959486822": {
+      "message": "setSyncGroup #%d on %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
+    },
+    "966569777": {
+      "message": "SyncGroup %d: onSurfacePlacement checking %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "969323241": {
       "message": "Sending new config to %s, config: %s",
       "level": "VERBOSE",
@@ -2640,12 +2640,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
-    },
-    "1000601037": {
-      "message": "SyncSet{%x:%d} Set ready",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "1001509841": {
       "message": "Auto-PIP allowed, entering PIP mode directly: %s",
@@ -2676,6 +2670,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1035154109": {
+      "message": "SURFACE backgroundBlur=%o: %s",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "1040675582": {
       "message": "Can't report activity configuration update - client not running, activityRecord=%s",
@@ -2808,12 +2808,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/WindowToken.java"
-    },
-    "1220075598": {
-      "message": "SURFACE SIZE %dx%d: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "1224184681": {
       "message": "No longer Stopped: %s",
@@ -3181,6 +3175,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1689989893": {
+      "message": "SyncGroup %d: Set ready",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "1696210756": {
       "message": "Launch on display check: allow launch on public display",
       "level": "DEBUG",
@@ -3408,12 +3408,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "2001924866": {
-      "message": "SyncSet{%x:%d} Finished. Reporting %d containers to %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "2016061474": {
       "message": "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d Callers=%s",

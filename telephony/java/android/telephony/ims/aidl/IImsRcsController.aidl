@@ -53,6 +53,9 @@ interface IImsRcsController {
     void registerUcePublishStateCallback(int subId, IRcsUcePublishStateCallback c);
     void unregisterUcePublishStateCallback(int subId, IRcsUcePublishStateCallback c);
 
+    // SipDelegateManager
+    boolean isSipDelegateSupported(int subId);
+
     // Internal commands that should not be made public
     void registerRcsFeatureCallback(int slotId, in IImsServiceFeatureCallback callback);
     void unregisterImsFeatureCallback(in IImsServiceFeatureCallback callback);

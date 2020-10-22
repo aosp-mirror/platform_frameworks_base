@@ -63,12 +63,10 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
 
     // For Virtual Displays
     private int mDisplayDensityDpi;
-    private final boolean mSingleTaskInstance;
     private final boolean mUsePublicVirtualDisplay;
     private final boolean mUseTrustedDisplay;
     private VirtualDisplay mVirtualDisplay;
     private Insets mForwardedInsets;
-    private DisplayMetrics mTmpDisplayMetrics;
     private TaskStackListener mTaskStackListener;
 
     /**
@@ -76,14 +74,10 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      *
      * @param context the context
      * @param host the host for this embedded task
-     * @param singleTaskInstance whether to apply a single-task constraint to this container,
-     *                           only applicable if virtual displays are used
      */
     public VirtualDisplayTaskEmbedder(Context context, VirtualDisplayTaskEmbedder.Host host,
-            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
-            boolean useTrustedDisplay) {
+            boolean usePublicVirtualDisplay, boolean useTrustedDisplay) {
         super(context, host);
-        mSingleTaskInstance = singleTaskInstance;
         mUsePublicVirtualDisplay = usePublicVirtualDisplay;
         mUseTrustedDisplay = useTrustedDisplay;
     }
@@ -128,10 +122,6 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
             WindowManagerGlobal.getWindowSession().reparentDisplayContent(
                     mHost.getWindow(), mSurfaceControl, displayId);
             wm.dontOverrideDisplayInfo(displayId);
-            if (mSingleTaskInstance) {
-                mContext.getSystemService(ActivityTaskManager.class)
-                        .setDisplayToSingleTaskInstance(displayId);
-            }
             setForwardedInsets(mForwardedInsets);
 
             mTaskStackListener = new TaskStackListenerImpl();

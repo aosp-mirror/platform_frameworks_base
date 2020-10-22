@@ -651,12 +651,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteWakupAlarm(final String name, final int uid, final WorkSource workSource,
             final String tag) {
         enforceCallingPermission();
+        final WorkSource localWs = workSource != null ? new WorkSource(workSource) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWakupAlarmLocked(name, uid, workSource, tag,
+                    mStats.noteWakupAlarmLocked(name, uid, localWs, tag,
                             elapsedRealtime, uptime);
                 }
             });
@@ -665,12 +666,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteAlarmStart(final String name, final WorkSource workSource, final int uid) {
         enforceCallingPermission();
+        final WorkSource localWs = workSource != null ? new WorkSource(workSource) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteAlarmStartLocked(name, workSource, uid, elapsedRealtime, uptime);
+                    mStats.noteAlarmStartLocked(name, localWs, uid, elapsedRealtime, uptime);
                 }
             });
         }
@@ -678,12 +680,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteAlarmFinish(final String name, final WorkSource workSource, final int uid) {
         enforceCallingPermission();
+        final WorkSource localWs = workSource != null ? new WorkSource(workSource) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteAlarmFinishLocked(name, workSource, uid, elapsedRealtime, uptime);
+                    mStats.noteAlarmFinishLocked(name, localWs, uid, elapsedRealtime, uptime);
                 }
             });
         }
@@ -722,12 +725,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteStartWakelockFromSource(final WorkSource ws, final int pid, final String name,
             final String historyName, final int type, final boolean unimportantForLogging) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteStartWakeFromSourceLocked(ws, pid, name, historyName,
+                    mStats.noteStartWakeFromSourceLocked(localWs, pid, name, historyName,
                             type, unimportantForLogging, elapsedRealtime, uptime);
                 }
             });
@@ -739,13 +743,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final String newName, final String newHistoryName, final int newType,
             final boolean newUnimportantForLogging) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
+        final WorkSource localNewWs = newWs != null ? new WorkSource(newWs) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteChangeWakelockFromSourceLocked(ws, pid, name, historyName, type,
-                            newWs, newPid, newName, newHistoryName, newType,
+                    mStats.noteChangeWakelockFromSourceLocked(localWs, pid, name, historyName, type,
+                            localNewWs, newPid, newName, newHistoryName, newType,
                             newUnimportantForLogging, elapsedRealtime, uptime);
                 }
             });
@@ -755,12 +761,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteStopWakelockFromSource(final WorkSource ws, final int pid, final String name,
             final String historyName, final int type) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteStopWakeFromSourceLocked(ws, pid, name, historyName, type,
+                    mStats.noteStopWakeFromSourceLocked(localWs, pid, name, historyName, type,
                             elapsedRealtime, uptime);
                 }
             });
@@ -787,12 +794,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteLongPartialWakelockStartFromSource(final String name, final String historyName,
             final WorkSource workSource) {
         enforceCallingPermission();
+        final WorkSource localWs = workSource != null ? new WorkSource(workSource) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteLongPartialWakelockStartFromSource(name, historyName, workSource,
+                    mStats.noteLongPartialWakelockStartFromSource(name, historyName, localWs,
                             elapsedRealtime, uptime);
                 }
             });
@@ -819,12 +827,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteLongPartialWakelockFinishFromSource(final String name, final String historyName,
             final WorkSource workSource) {
         enforceCallingPermission();
+        final WorkSource localWs = workSource != null ? new WorkSource(workSource) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteLongPartialWakelockFinishFromSource(name, historyName, workSource,
+                    mStats.noteLongPartialWakelockFinishFromSource(name, historyName, localWs,
                             elapsedRealtime, uptime);
                 }
             });
@@ -890,12 +899,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void noteGpsChanged(final WorkSource oldWs, final WorkSource newWs) {
         enforceCallingPermission();
+        final WorkSource localOldWs = oldWs != null ? new WorkSource(oldWs) : null;
+        final WorkSource localNewWs = newWs != null ? new WorkSource(newWs) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteGpsChangedLocked(oldWs, newWs, elapsedRealtime, uptime);
+                    mStats.noteGpsChangedLocked(localOldWs, localNewWs, elapsedRealtime, uptime);
                 }
             });
         }
@@ -1322,12 +1333,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiRunning(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiRunningLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteWifiRunningLocked(localWs, elapsedRealtime, uptime);
                 }
                 // TODO: Log WIFI_RUNNING_STATE_CHANGED in a better spot to include Hotspot too.
                 FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
@@ -1338,12 +1350,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiRunningChanged(final WorkSource oldWs, final WorkSource newWs) {
         enforceCallingPermission();
+        final WorkSource localOldWs = oldWs != null ? new WorkSource(oldWs) : null;
+        final WorkSource localNewWs = newWs != null ? new WorkSource(newWs) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiRunningChangedLocked(oldWs, newWs, elapsedRealtime, uptime);
+                    mStats.noteWifiRunningChangedLocked(
+                            localOldWs, localNewWs, elapsedRealtime, uptime);
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
                         newWs, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
@@ -1355,12 +1370,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiStopped(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : ws;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiStoppedLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteWifiStoppedLocked(localWs, elapsedRealtime, uptime);
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
                         ws, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
@@ -1487,12 +1503,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteFullWifiLockAcquiredFromSource(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteFullWifiLockAcquiredFromSourceLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteFullWifiLockAcquiredFromSourceLocked(
+                            localWs, elapsedRealtime, uptime);
                 }
             });
         }
@@ -1500,12 +1518,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteFullWifiLockReleasedFromSource(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteFullWifiLockReleasedFromSourceLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteFullWifiLockReleasedFromSourceLocked(
+                            localWs, elapsedRealtime, uptime);
                 }
             });
         }
@@ -1513,12 +1533,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiScanStartedFromSource(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiScanStartedFromSourceLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteWifiScanStartedFromSourceLocked(localWs, elapsedRealtime, uptime);
                 }
             });
         }
@@ -1526,12 +1547,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiScanStoppedFromSource(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiScanStoppedFromSourceLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteWifiScanStoppedFromSourceLocked(localWs, elapsedRealtime, uptime);
                 }
             });
         }
@@ -1539,12 +1561,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiBatchedScanStartedFromSource(final WorkSource ws, final int csph) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiBatchedScanStartedFromSourceLocked(ws, csph,
+                    mStats.noteWifiBatchedScanStartedFromSourceLocked(localWs, csph,
                             elapsedRealtime, uptime);
                 }
             });
@@ -1553,12 +1576,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteWifiBatchedScanStoppedFromSource(final WorkSource ws) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteWifiBatchedScanStoppedFromSourceLocked(ws, elapsedRealtime, uptime);
+                    mStats.noteWifiBatchedScanStoppedFromSourceLocked(
+                            localWs, elapsedRealtime, uptime);
                 }
             });
         }
@@ -1635,12 +1660,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void noteBleScanStarted(final WorkSource ws, final boolean isUnoptimized) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteBluetoothScanStartedFromSourceLocked(ws, isUnoptimized,
+                    mStats.noteBluetoothScanStartedFromSourceLocked(localWs, isUnoptimized,
                             elapsedRealtime, uptime);
                 }
             });
@@ -1650,12 +1676,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void noteBleScanStopped(final WorkSource ws, final boolean isUnoptimized) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteBluetoothScanStoppedFromSourceLocked(ws, isUnoptimized,
+                    mStats.noteBluetoothScanStoppedFromSourceLocked(localWs, isUnoptimized,
                             uptime, elapsedRealtime);
                 }
             });
@@ -1679,12 +1706,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void noteBleScanResults(final WorkSource ws, final int numNewResults) {
         enforceCallingPermission();
+        final WorkSource localWs = ws != null ? new WorkSource(ws) : null;
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteBluetoothScanResultsFromSourceLocked(ws, numNewResults,
+                    mStats.noteBluetoothScanResultsFromSourceLocked(localWs, numNewResults,
                             elapsedRealtime, uptime);
                 }
             });

@@ -136,7 +136,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void requestPictureInPictureMode(@NonNull android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeTask(int, android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setDisplayToSingleTaskInstance(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void startSystemLockTaskMode(int);
@@ -152,7 +151,7 @@ package android.app {
   public class ActivityView extends android.view.ViewGroup {
     ctor public ActivityView(android.content.Context);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
-    ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean, boolean);
+    ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean);
     method public int getVirtualDisplayId();
     method public void onLayout(boolean, int, int, int, int);
     method public void onLocationChanged();
@@ -172,7 +171,6 @@ package android.app {
     method @NonNull public android.app.ActivityView.Builder setAttributeSet(@Nullable android.util.AttributeSet);
     method @NonNull public android.app.ActivityView.Builder setDefaultStyle(int);
     method @NonNull public android.app.ActivityView.Builder setDisableSurfaceViewBackgroundLayer(boolean);
-    method @NonNull public android.app.ActivityView.Builder setSingleInstance(boolean);
     method @NonNull public android.app.ActivityView.Builder setUsePublicVirtualDisplay(boolean);
     method @NonNull public android.app.ActivityView.Builder setUseTrustedDisplay(boolean);
   }
@@ -1843,7 +1841,6 @@ package android.util {
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
     field public static final String PERSIST_PREFIX = "persist.sys.fflag.override.";
     field public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
-    field public static final String SEAMLESS_TRANSFER = "settings_seamless_transfer";
     field public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
   }
 
@@ -2375,7 +2372,7 @@ package android.window {
 
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.app.ActivityManager.RunningTaskInfo createRootTask(int, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.window.TaskAppearedInfo createRootTask(int, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.window.WindowContainerToken getImeTarget(int);

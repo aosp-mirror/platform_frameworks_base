@@ -84,7 +84,7 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
      */
     public CompoundFormula(@Connector int connector, List<IntegrityFormula> formulas) {
         checkArgument(
-                isValidConnector(connector), String.format("Unknown connector: %d", connector));
+                isValidConnector(connector), "Unknown connector: %d", connector);
         validateFormulas(connector, formulas);
         this.mConnector = connector;
         this.mFormulas = Collections.unmodifiableList(formulas);
@@ -93,7 +93,7 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
     CompoundFormula(Parcel in) {
         mConnector = in.readInt();
         int length = in.readInt();
-        checkArgument(length >= 0, "Must have non-negative length. Got " + length);
+        checkArgument(length >= 0, "Must have non-negative length. Got %d", length);
         mFormulas = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
             mFormulas.add(IntegrityFormula.readFromParcel(in));
@@ -196,16 +196,14 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
             case OR:
                 checkArgument(
                         formulas.size() >= 2,
-                        String.format(
-                                "Connector %s must have at least 2 formulas",
-                                connectorToString(connector)));
+                        "Connector %s must have at least 2 formulas",
+                        connectorToString(connector));
                 break;
             case NOT:
                 checkArgument(
                         formulas.size() == 1,
-                        String.format(
-                                "Connector %s must have 1 formula only",
-                                connectorToString(connector)));
+                        "Connector %s must have 1 formula only",
+                        connectorToString(connector));
                 break;
         }
     }

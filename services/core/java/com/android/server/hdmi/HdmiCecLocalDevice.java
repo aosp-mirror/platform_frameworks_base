@@ -127,7 +127,7 @@ abstract class HdmiCecLocalDevice {
 
         @Override
         public String toString() {
-            StringBuffer s = new StringBuffer();
+            StringBuilder s = new StringBuilder();
             String logicalAddressString =
                     (logicalAddress == Constants.ADDR_INVALID)
                             ? "invalid"

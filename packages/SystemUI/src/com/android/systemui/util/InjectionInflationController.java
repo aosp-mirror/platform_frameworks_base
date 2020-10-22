@@ -24,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -90,11 +89,6 @@ public class InjectionInflationController {
                     @BindsInstance @Named(VIEW_CONTEXT) Context context,
                     @BindsInstance AttributeSet attributeSet);
         }
-
-        /**
-         * Creates the QSFooterImpl.
-         */
-        QSFooterImpl createQsFooter();
 
         /**
          * Creates the NotificationStackScrollLayout.

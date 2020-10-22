@@ -6150,6 +6150,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * was set.
      */
     @NonNull
+    @SuppressWarnings("AndroidFrameworkEfficientCollections")
     public Map<Integer, Integer> getAttributeSourceResourceMap() {
         HashMap<Integer, Integer> map = new HashMap<>();
         if (!sDebugViewAttributes || mAttributeSourceResId == null) {
@@ -14861,15 +14862,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void getWindowVisibleDisplayFrame(Rect outRect) {
         if (mAttachInfo != null) {
-            mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
-            // XXX This is really broken, and probably all needs to be done
-            // in the window manager, and we need to know more about whether
-            // we want the area behind or in front of the IME.
-            final Rect insets = mAttachInfo.mVisibleInsets;
-            outRect.left += insets.left;
-            outRect.top += insets.top;
-            outRect.right -= insets.right;
-            outRect.bottom -= insets.bottom;
+            mAttachInfo.mViewRootImpl.getWindowVisibleDisplayFrame(outRect);
             return;
         }
         // The view is not attached to a display so we don't have a context.

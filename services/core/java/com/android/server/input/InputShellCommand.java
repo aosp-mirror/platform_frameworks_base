@@ -215,7 +215,7 @@ public class InputShellCommand extends ShellCommand {
      * @param text is a string of characters you want to input to the device.
      */
     private void sendText(int source, final String text, int displayId) {
-        final StringBuffer buff = new StringBuffer(text);
+        final StringBuilder buff = new StringBuilder(text);
         boolean escapeFlag = false;
         for (int i = 0; i < buff.length(); i++) {
             if (escapeFlag) {

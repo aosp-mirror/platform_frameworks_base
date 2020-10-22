@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -27,7 +26,6 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -43,7 +41,6 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends ViewGroup {
-    public static final int NO_COLOR = Notification.COLOR_INVALID;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private final int mGravity;
@@ -57,7 +54,6 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mFeedbackIcon;
-    private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
     private int mHeaderTextMarginEnd;
@@ -296,35 +292,6 @@ public class NotificationHeaderView extends ViewGroup {
         updateTouchListener();
     }
 
-    public int getOriginalIconColor() {
-        return mIcon.getOriginalIconColor();
-    }
-
-    public int getOriginalNotificationColor() {
-        return mExpandButton.getOriginalNotificationColor();
-    }
-
-    @RemotableViewMethod
-    public void setExpanded(boolean expanded) {
-        mExpanded = expanded;
-        updateExpandButton();
-    }
-
-    private void updateExpandButton() {
-        int drawableId;
-        int contentDescriptionId;
-        if (mExpanded) {
-            drawableId = R.drawable.ic_collapse_notification;
-            contentDescriptionId = R.string.expand_button_content_description_expanded;
-        } else {
-            drawableId = R.drawable.ic_expand_notification;
-            contentDescriptionId = R.string.expand_button_content_description_collapsed;
-        }
-        mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(getOriginalNotificationColor());
-        mExpandButton.setContentDescription(mContext.getText(contentDescriptionId));
-    }
-
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
         if (showWorkBadgeAtEnd != mShowWorkBadgeAtEnd) {
             setClipToPadding(!showWorkBadgeAtEnd);
@@ -342,14 +309,6 @@ public class NotificationHeaderView extends ViewGroup {
             setClipToPadding(!showExpandButtonAtEnd);
             mShowExpandButtonAtEnd = showExpandButtonAtEnd;
         }
-    }
-
-    public View getWorkProfileIcon() {
-        return mProfileBadge;
-    }
-
-    public CachingIconView getIcon() {
-        return mIcon;
     }
 
     /**
@@ -488,10 +447,6 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
         return this;
-    }
-
-    public ImageView getExpandButton() {
-        return mExpandButton;
     }
 
     @Override

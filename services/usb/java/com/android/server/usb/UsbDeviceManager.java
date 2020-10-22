@@ -1206,8 +1206,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         Intent intent = Intent.makeRestartActivityTask(
                                 new ComponentName("com.android.settings",
                                         "com.android.settings.Settings$UsbDetailsActivity"));
+                        // Simple notification clicks are immutable
                         pi = PendingIntent.getActivityAsUser(mContext, 0,
-                                intent, 0, null, UserHandle.CURRENT);
+                                intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
                         channel = SystemNotificationChannels.USB;
                     } else {
                         final Intent intent = new Intent();
@@ -1217,7 +1218,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                 "help_url_audio_accessory_not_supported");
 
                         if (mContext.getPackageManager().resolveActivity(intent, 0) != null) {
-                            pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+                            // Simple notification clicks are immutable
+                            pi = PendingIntent.getActivity(mContext, 0, intent,
+                                    PendingIntent.FLAG_IMMUTABLE);
                         } else {
                             pi = null;
                         }

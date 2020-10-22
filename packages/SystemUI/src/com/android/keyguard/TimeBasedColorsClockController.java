@@ -16,6 +16,11 @@
 
 package com.android.keyguard;
 
+import android.util.MathUtils;
+
+import com.android.internal.graphics.ColorUtils;
+import com.android.settingslib.Utils;
+import com.android.systemui.R;
 import com.android.systemui.util.ViewController;
 
 import java.util.Calendar;
@@ -27,6 +32,13 @@ import java.util.GregorianCalendar;
 public class TimeBasedColorsClockController extends ViewController<GradientTextClock> {
     private final int[] mGradientColors = new int[3];
     private final float[] mPositions = new float[3];
+
+    /**
+     * 0 = fully awake
+     * between 0 and 1 = transitioning between awake and doze
+     * 1 = fully in doze
+     */
+    private float mDarkAmount = 0f;
 
     public TimeBasedColorsClockController(GradientTextClock view) {
         super(view);
@@ -46,14 +58,29 @@ public class TimeBasedColorsClockController extends ViewController<GradientTextC
      * Updates the time for this view. Also updates any color changes.
      */
     public void refreshTime(long timeInMillis) {
-        Calendar now = new GregorianCalendar();
-        now.setTimeInMillis(timeInMillis);
-        updateColors(now);
-        updatePositions(now);
+        updateColors(timeInMillis);
+        updatePositions(timeInMillis);
         mView.refreshTime();
     }
 
-    private int getTimeIndex(Calendar now) {
+    /**
+     * Set the amount (ratio) that the device has transitioned to doze.
+     *
+     * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
+     */
+    public void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
+
+        // TODO: (b/170228350) currently this relayouts throughout the animation;
+        //  eventually this should use new Text APIs to animate the variable font weight
+        refreshTime(System.currentTimeMillis());
+
+        int weight = (int) MathUtils.lerp(200, 400, 1f - darkAmount);
+        mView.setFontVariationSettings("'wght' " + weight);
+    }
+
+    private int getTimeIndex(long timeInMillis) {
+        Calendar now = getCalendar(timeInMillis);
         int hour = now.get(Calendar.HOUR_OF_DAY); // 0 - 23
         if (hour < mTimes[0]) {
             return mTimes.length - 1;
@@ -68,16 +95,22 @@ public class TimeBasedColorsClockController extends ViewController<GradientTextC
         return mTimes.length - 1;
     }
 
-    private void updateColors(Calendar now) {
-        final int index = getTimeIndex(now);
+    private void updateColors(long timeInMillis) {
+        final int index = getTimeIndex(timeInMillis);
+        final int wallpaperTextColor =
+                Utils.getColorAttrDefaultColor(mView.getContext(), R.attr.wallpaperTextColor);
         for (int i = 0; i < mGradientColors.length; i++) {
-            mGradientColors[i] = COLORS[index][i];
+            // wallpaperTextColor on LS when mDarkAmount = 0f
+            // full color on AOD when mDarkAmount = 1f
+            mGradientColors[i] =
+                    ColorUtils.blendARGB(wallpaperTextColor, COLORS[index][i], mDarkAmount);
         }
         mView.setGradientColors(mGradientColors);
     }
 
-    private void updatePositions(Calendar now) {
-        final int index = getTimeIndex(now);
+    private void updatePositions(long timeInMillis) {
+        Calendar now = getCalendar(timeInMillis);
+        final int index = getTimeIndex(timeInMillis);
 
         final Calendar startTime = new GregorianCalendar();
         startTime.setTimeInMillis(now.getTimeInMillis());
@@ -106,6 +139,12 @@ public class TimeBasedColorsClockController extends ViewController<GradientTextC
             mPositions[i] = POSITIONS[index][i] - (.3f * percentageWithinGradient);
         }
         mView.setColorPositions(mPositions);
+    }
+
+    private Calendar getCalendar(long timeInMillis) {
+        Calendar now = new GregorianCalendar();
+        now.setTimeInMillis(timeInMillis);
+        return now;
     }
 
     private static final int[] SUNRISE = new int[] {0xFF6F75AA, 0xFFAFF0FF, 0xFFFFDEBF};

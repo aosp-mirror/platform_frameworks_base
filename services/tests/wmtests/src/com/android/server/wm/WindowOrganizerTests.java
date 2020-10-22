@@ -37,13 +37,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -479,16 +479,33 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testCreateDeleteRootTasks() {
+        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
+            @Override
+            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
+
+            @Override
+            public void onTaskVanished(RunningTaskInfo container) { }
+
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) {
+            }
+
+            @Override
+            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
+            }
+        };
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
+
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 Display.DEFAULT_DISPLAY,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).getTaskInfo();
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 info1.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
 
         RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 Display.DEFAULT_DISPLAY,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                 info2.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info2.topActivityType);
@@ -522,7 +539,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
 
         final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
@@ -580,7 +597,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
         lastReportedTiles.clear();
         called[0] = false;
 
@@ -641,9 +658,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).getTaskInfo();
         RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
 
         final int initialRootTaskCount = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
                 mDisplayContent.mDisplayId, null /* activityTypes */).size();
@@ -724,154 +741,35 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTrivialBLASTCallback() throws RemoteException {
+    public void testBLASTCallbackWithActivityChildren() {
         final Task stackController1 = createStack();
         final Task task = createTask(stackController1);
-        final ITaskOrganizer organizer = registerMockOrganizer();
-
-        spyOn(task);
-        doReturn(true).when(task).isVisible();
-
-        BLASTSyncEngine bse = new BLASTSyncEngine();
-
-        BLASTSyncEngine.TransactionReadyListener transactionListener =
-                mock(BLASTSyncEngine.TransactionReadyListener.class);
-
-        int id = bse.startSyncSet(transactionListener);
-        bse.addToSyncSet(id, task);
-        bse.setReady(id);
-        // Since this task has no windows the sync is trivial and completes immediately.
-        verify(transactionListener)
-            .onTransactionReady(anyInt(), any());
-    }
-
-    @Test
-    public void testOverlappingBLASTCallback() throws RemoteException {
-        final Task stackController1 = createStack();
-        final Task task = createTask(stackController1);
-        final ITaskOrganizer organizer = registerMockOrganizer();
-
-        spyOn(task);
-        doReturn(true).when(task).isVisible();
-        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
-        makeWindowVisible(w);
-
-        BLASTSyncEngine bse = new BLASTSyncEngine();
-
-        BLASTSyncEngine.TransactionReadyListener transactionListener =
-                mock(BLASTSyncEngine.TransactionReadyListener.class);
-
-        int id = bse.startSyncSet(transactionListener);
-        assertEquals(true, bse.addToSyncSet(id, task));
-        bse.setReady(id);
-
-        int id2 = bse.startSyncSet(transactionListener);
-        // We should be rejected from the second sync since we are already
-        // in one.
-        assertEquals(false, bse.addToSyncSet(id2, task));
-        w.immediatelyNotifyBlastSync();
-        assertEquals(true, bse.addToSyncSet(id2, task));
-        bse.setReady(id2);
-    }
-
-    @Test
-    public void testBLASTCallbackWithWindow() {
-        final Task stackController1 = createStack();
-        final Task task = createTask(stackController1);
-        final ITaskOrganizer organizer = registerMockOrganizer();
-        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
-        makeWindowVisible(w);
-
-        BLASTSyncEngine bse = new BLASTSyncEngine();
-
-        BLASTSyncEngine.TransactionReadyListener transactionListener =
-                mock(BLASTSyncEngine.TransactionReadyListener.class);
-
-        int id = bse.startSyncSet(transactionListener);
-        bse.addToSyncSet(id, task);
-        bse.setReady(id);
-        // Since we have a window we have to wait for it to draw to finish sync.
-        verify(transactionListener, never())
-            .onTransactionReady(anyInt(), any());
-        w.immediatelyNotifyBlastSync();
-        verify(transactionListener)
-            .onTransactionReady(anyInt(), any());
-    }
-
-    @Test
-    public void testBLASTCallbackNoDoubleAdd() {
-        final Task stackController1 = createStack();
-        final Task task = createTask(stackController1);
-        final ITaskOrganizer organizer = registerMockOrganizer();
-        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
-        makeWindowVisible(w);
-
-        BLASTSyncEngine bse = new BLASTSyncEngine();
-
-        BLASTSyncEngine.TransactionReadyListener transactionListener =
-                mock(BLASTSyncEngine.TransactionReadyListener.class);
-
-        int id = bse.startSyncSet(transactionListener);
-        assertTrue(bse.addToSyncSet(id, w));
-        assertFalse(bse.addToSyncSet(id, w));
-
-        // Clean-up
-        bse.setReady(id);
-    }
-
-
-    @Test
-    public void testBLASTCallbackWithInvisibleWindow() {
-        final Task stackController1 = createStack();
-        final Task task = createTask(stackController1);
-        final ITaskOrganizer organizer = registerMockOrganizer();
         final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
 
-        BLASTSyncEngine bse = new BLASTSyncEngine();
-
-        BLASTSyncEngine.TransactionReadyListener transactionListener =
-                mock(BLASTSyncEngine.TransactionReadyListener.class);
-
-        int id = bse.startSyncSet(transactionListener);
-        bse.addToSyncSet(id, task);
-        bse.setReady(id);
-
-        // Since the window was invisible, the Task had no visible leaves and the sync should
-        // complete as soon as we call setReady.
-        verify(transactionListener)
-            .onTransactionReady(anyInt(), any());
-    }
-
-    @Test
-    public void testBLASTCallbackWithChildWindow() {
-        final Task stackController1 = createStack();
-        final Task task = createTask(stackController1);
-        final ITaskOrganizer organizer = registerMockOrganizer();
-        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
-        final WindowState child = createWindow(w, TYPE_APPLICATION, "Other Window");
-
+        w.mActivityRecord.mVisibleRequested = true;
         w.mActivityRecord.setVisible(true);
-        makeWindowVisible(w, child);
 
-        BLASTSyncEngine bse = new BLASTSyncEngine();
+        BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
                 mock(BLASTSyncEngine.TransactionReadyListener.class);
 
         int id = bse.startSyncSet(transactionListener);
-        assertEquals(true, bse.addToSyncSet(id, task));
+        bse.addToSyncSet(id, task);
         bse.setReady(id);
-        w.immediatelyNotifyBlastSync();
+        bse.onSurfacePlacement();
 
+        // Even though w is invisible (and thus activity isn't waiting on it), activity will
+        // continue to wait until it has at-least 1 visible window.
         // Since we have a child window we still shouldn't be done.
-        verify(transactionListener, never())
-            .onTransactionReady(anyInt(), any());
-        reset(transactionListener);
+        verify(transactionListener, never()).onTransactionReady(anyInt(), any());
 
-        child.immediatelyNotifyBlastSync();
-        // Ah finally! Done
-        verify(transactionListener)
-                .onTransactionReady(anyInt(), any());
+        makeWindowVisible(w);
+        bse.onSurfacePlacement();
+        w.immediatelyNotifyBlastSync();
+        bse.onSurfacePlacement();
+
+        verify(transactionListener).onTransactionReady(anyInt(), any());
     }
 
     class StubOrganizer extends ITaskOrganizer.Stub {
@@ -1028,8 +926,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testBLASTCallbackWithMultipleWindows() throws Exception {
-        final ITaskOrganizer organizer = registerMockOrganizer();
+    public void testBLASTCallbackWithWindows() throws Exception {
         final Task stackController = createStack();
         final Task task = createTask(stackController);
         final WindowState w1 = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window 1");
@@ -1048,13 +945,20 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(mockCallback, never()).onTransactionReady(anyInt(), any());
         assertTrue(w1.useBLASTSync());
         assertTrue(w2.useBLASTSync());
-        w1.immediatelyNotifyBlastSync();
 
+        // Make second (bottom) ready. If we started with the top, since activities fillsParent
+        // by default, the sync would be considered finished.
+        w2.immediatelyNotifyBlastSync();
+        mWm.mSyncEngine.onSurfacePlacement();
+        verify(mockCallback, never()).onTransactionReady(anyInt(), any());
+
+        assertEquals(SYNC_STATE_READY, w2.mSyncState);
         // Even though one Window finished drawing, both windows should still be using blast sync
         assertTrue(w1.useBLASTSync());
         assertTrue(w2.useBLASTSync());
 
-        w2.immediatelyNotifyBlastSync();
+        w1.immediatelyNotifyBlastSync();
+        mWm.mSyncEngine.onSurfacePlacement();
         verify(mockCallback).onTransactionReady(anyInt(), any());
         assertFalse(w1.useBLASTSync());
         assertFalse(w2.useBLASTSync());
