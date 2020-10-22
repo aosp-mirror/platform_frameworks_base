@@ -242,6 +242,18 @@ public class ContextHubService extends IContextHubService.Stub {
                         }
                     }, UserHandle.USER_ALL);
         }
+
+        if (mContextHubWrapper.supportsAirplaneModeSettingNotifications()) {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
+                    true /* notifyForDescendants */,
+                    new ContentObserver(null /* handler */) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            sendAirplaneModeSettingUpdate();
+                        }
+                    }, UserHandle.USER_ALL);
+        }
     }
 
     /**
@@ -614,6 +626,7 @@ public class ContextHubService extends IContextHubService.Stub {
         if (eventType == AsyncEventType.RESTARTED) {
             sendLocationSettingUpdate();
             sendWifiSettingUpdate(true /* forceUpdate */);
+            sendAirplaneModeSettingUpdate();
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -958,6 +971,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     /**
      * Obtains the latest WiFi availability setting value and notifies the Context Hub.
+     *
      * @param forceUpdate True to force send update to the Context Hub, otherwise only send the
      *                    update when the WiFi availability changes.
      */
@@ -970,6 +984,17 @@ public class ContextHubService extends IContextHubService.Stub {
                 mContextHubWrapper.onWifiSettingChanged(enabled);
             }
         }
+    }
+
+    /**
+     * Obtains the latest airplane mode setting value and notifies the Context Hub.
+     */
+    private void sendAirplaneModeSettingUpdate() {
+        boolean enabled =
+                (Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.AIRPLANE_MODE_ON, 0)
+                        == 1);
+        mContextHubWrapper.onAirplaneModeSettingChanged(enabled);
     }
 
     private String getCallingPackageName() {
