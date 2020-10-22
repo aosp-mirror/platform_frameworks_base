@@ -244,6 +244,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         if (mContextHubWrapper.supportsAirplaneModeSettingNotifications()) {
+            sendAirplaneModeSettingUpdate();
             mContext.getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
                     true /* notifyForDescendants */,
