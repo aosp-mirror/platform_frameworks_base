@@ -16,6 +16,7 @@
 
 package com.android.systemui.people.widget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -31,6 +32,8 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
     private static final String TAG = "PeopleSpaceWidgetPvd";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
+    public static final String EXTRA_SHORTCUT_INFO = "extra_shortcut_info";
+
     /** Called when widget updates. */
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
@@ -44,6 +47,19 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
             Intent intent = new Intent(context, PeopleSpaceWidgetService.class);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             views.setRemoteAdapter(R.id.widget_list_view, intent);
+
+            Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
+            activityIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            | Intent.FLAG_ACTIVITY_NO_HISTORY
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context,
+                    appWidgetId,
+                    activityIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+            views.setPendingIntentTemplate(R.id.widget_list_view, pendingIntent);
 
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_list_view);

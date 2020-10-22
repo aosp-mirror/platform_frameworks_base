@@ -586,6 +586,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".people.widget.LaunchConversationActivity" />
+
         <!-- People Space Widget -->
         <receiver
             android:name=".people.widget.PeopleSpaceWidgetProvider"
