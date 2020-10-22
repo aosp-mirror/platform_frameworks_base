@@ -924,18 +924,21 @@ public class PhoneStateListener {
     /**
      * Callback invoked when the current emergency number list has changed on the registered
      * subscription.
-     * Note, the registration subId comes from {@link TelephonyManager} object which registers
-     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     *
+     * Note, the registered subscription is associated with {@link TelephonyManager} object
+     * on which {@link TelephonyManager#listen(PhoneStateListener, int)} was called.
      * If this TelephonyManager object was created with
      * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
-     * subId. Otherwise, this callback applies to
+     * given subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * @param emergencyNumberList Map including the key as the active subscription ID
-     *                           (Note: if there is no active subscription, the key is
-     *                           {@link SubscriptionManager#getDefaultSubscriptionId})
-     *                           and the value as the list of {@link EmergencyNumber};
-     *                           null if this information is not available.
+     * @param emergencyNumberList Map associating all active subscriptions on the device with the
+     *                            list of emergency numbers originating from that subscription.
+     *                            If there are no active subscriptions, the map will contain a
+     *                            single entry with
+     *                            {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} as
+     *                            the key and a list of emergency numbers as the value. If no
+     *                            emergency number information is available, the value will be null.
      */
     public void onEmergencyNumberListChanged(
             @NonNull Map<Integer, List<EmergencyNumber>> emergencyNumberList) {
