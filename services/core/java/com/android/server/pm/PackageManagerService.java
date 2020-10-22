@@ -22417,11 +22417,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
                 ipw.println("Known Packages:");
                 ipw.increaseIndent();
-                for (int i = 0; i < LAST_KNOWN_PACKAGE; i++) {
+                for (int i = 0; i <= LAST_KNOWN_PACKAGE; i++) {
                     final String knownPackage = mPmInternal.knownPackageToString(i);
-                    if ("Unknown".equals(knownPackage)) {
-                        continue;
-                    }
                     ipw.print(knownPackage);
                     ipw.println(":");
                     final String[] pkgNames = mPmInternal.getKnownPackageNames(i,
