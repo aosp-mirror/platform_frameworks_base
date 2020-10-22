@@ -11009,12 +11009,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     MotionEvent.actionToString(event.getActionMasked()),
                     event.getX(), event.getY());
         }
-        if (!isFromPrimePointer(event, false)) {
-            return true;
-        }
-
         final int action = event.getActionMasked();
         if (mEditor != null) {
+            if (!isFromPrimePointer(event, false)) {
+                return true;
+            }
+
             mEditor.onTouchEvent(event);
 
             if (mEditor.mInsertionPointCursorController != null
