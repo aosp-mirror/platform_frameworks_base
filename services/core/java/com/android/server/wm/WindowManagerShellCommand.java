@@ -111,6 +111,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runGetIgnoreOrientationRequest(pw);
                 case "dump-visible-window-views":
                     return runDumpVisibleWindowViews(pw);
+                case "reset":
+                    return runReset(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -507,6 +509,34 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runReset(PrintWriter pw) throws RemoteException {
+        int displayId = getDisplayId(getNextArg());
+
+        // size
+        mInterface.clearForcedDisplaySize(displayId);
+
+        // density
+        mInterface.clearForcedDisplayDensityForUser(displayId, UserHandle.USER_CURRENT);
+
+        // folded-area
+        mInternal.setOverrideFoldedArea(new Rect());
+
+        // scaling
+        mInterface.setForcedDisplayScalingMode(displayId, DisplayContent.FORCE_SCALING_MODE_AUTO);
+
+        // user-rotation
+        mInternal.thawDisplayRotation(displayId);
+
+        // fixed-to-user-rotation
+        mInterface.setFixedToUserRotation(displayId, IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT);
+
+        // set-ignore-orientation-request
+        mInterface.setIgnoreOrientationRequest(displayId, false /* ignoreOrientationRequest */);
+
+        pw.println("Reset all settings for displayId=" + displayId);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -533,6 +563,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
         pw.println("    If app requested orientation should be ignored.");
+        pw.println("  reset [-d DISPLAY_ID]");
+        pw.println("    Reset all override settings.");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");
