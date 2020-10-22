@@ -5072,7 +5072,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 }
             }
 
-            kept = mAtmService.ensureConfigAndVisibilityAfterUpdate(starting, changes);
+            if (!deferResume) {
+                kept = mAtmService.ensureConfigAndVisibilityAfterUpdate(starting, changes);
+            }
         } finally {
             mAtmService.continueWindowLayout();
         }
