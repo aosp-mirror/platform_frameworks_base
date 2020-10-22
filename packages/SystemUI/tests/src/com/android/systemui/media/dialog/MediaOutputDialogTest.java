@@ -65,7 +65,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
+        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = new MediaOutputDialog(mContext, false, mMediaOutputController);
