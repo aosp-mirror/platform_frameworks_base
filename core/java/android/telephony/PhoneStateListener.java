@@ -948,10 +948,6 @@ public class PhoneStateListener {
      * This method will be called when an emergency call is placed on any subscription (including
      * the no-SIM case), regardless of which subscription this listener was registered on.
      *
-     * This method is deprecated. Both this method and the new
-     * {@link #onOutgoingEmergencyCall(EmergencyNumber, int)} will be called when an outgoing
-     * emergency call is placed.
-     *
      * @param placedEmergencyNumber The {@link EmergencyNumber} the emergency call was placed to.
      *
      * @deprecated Use {@link #onOutgoingEmergencyCall(EmergencyNumber, int)}.
@@ -969,22 +965,24 @@ public class PhoneStateListener {
      * This method will be called when an emergency call is placed on any subscription (including
      * the no-SIM case), regardless of which subscription this listener was registered on.
      *
-     * Both this method and the deprecated {@link #onOutgoingEmergencyCall(EmergencyNumber)} will be
-     * called when an outgoing emergency call is placed. You should only implement one of these
-     * methods.
+     * The default implementation of this method calls
+     * {@link #onOutgoingEmergencyCall(EmergencyNumber)} for backwards compatibility purposes. Do
+     * not call {@code super(...)} from within your implementation unless you want
+     * {@link #onOutgoingEmergencyCall(EmergencyNumber)} to be called as well.
      *
      * @param placedEmergencyNumber The {@link EmergencyNumber} the emergency call was placed to.
      * @param subscriptionId The subscription ID used to place the emergency call. If the
      *                       emergency call was placed without a valid subscription (e.g. when there
      *                       are no SIM cards in the device), this will be equal to
      *                       {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
-     *
      * @hide
      */
     @SystemApi
     @TestApi
     public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
             int subscriptionId) {
+        // Default implementation for backwards compatibility
+        onOutgoingEmergencyCall(placedEmergencyNumber);
     }
 
     /**
@@ -1368,10 +1366,6 @@ public class PhoneStateListener {
                 int subscriptionId) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
-
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(
-                            () -> psl.onOutgoingEmergencyCall(placedEmergencyNumber)));
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
