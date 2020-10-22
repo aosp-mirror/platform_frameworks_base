@@ -35,16 +35,12 @@ package android.telephony {
     method public int getTimeoutSeconds();
     method public boolean isEnabled();
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallForwardingInfo> CREATOR;
-    field public static final int ERROR_FDN_CHECK_FAILURE = 2; // 0x2
-    field public static final int ERROR_NOT_SUPPORTED = 3; // 0x3
-    field public static final int ERROR_UNKNOWN = 1; // 0x1
     field public static final int REASON_ALL = 4; // 0x4
     field public static final int REASON_ALL_CONDITIONAL = 5; // 0x5
     field public static final int REASON_BUSY = 1; // 0x1
     field public static final int REASON_NOT_REACHABLE = 3; // 0x3
     field public static final int REASON_NO_REPLY = 2; // 0x2
     field public static final int REASON_UNCONDITIONAL = 0; // 0x0
-    field public static final int SUCCESS = 0; // 0x0
   }
 
   public final class CallQuality implements android.os.Parcelable {
@@ -742,7 +738,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallForwarding(@NonNull android.telephony.CallForwardingInfo, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingStatus(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
@@ -843,6 +839,10 @@ package android.telephony {
   public static interface TelephonyManager.CallForwardingInfoCallback {
     method public void onCallForwardingInfoAvailable(@NonNull android.telephony.CallForwardingInfo);
     method public void onError(int);
+    field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 2; // 0x2
+    field public static final int RESULT_ERROR_NOT_SUPPORTED = 3; // 0x3
+    field public static final int RESULT_ERROR_UNKNOWN = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {
