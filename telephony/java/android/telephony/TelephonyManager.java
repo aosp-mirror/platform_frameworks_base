@@ -12607,7 +12607,7 @@ public class TelephonyManager {
      *  1) User data is turned on, or
      *  2) APN is un-metered for this subscription, or
      *  3) APN type is whitelisted. E.g. MMS is whitelisted if
-     *  {@link #setAlwaysAllowMmsData(boolean)} is turned on.
+     *  {@link #MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED} is enabled.
      *
      * @param apnType Value indicating the apn type. Apn types are defined in {@link ApnSetting}.
      * @return whether data is enabled for a apn type.
@@ -13025,86 +13025,6 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
-        }
-        return false;
-    }
-
-    /**
-     *
-     * @param allow {@code true} if allowing using data during voice call, {@code false} if
-     * disallowed.
-     *
-     * @return {@code true} if operation is successful. otherwise {@code false}.
-     *
-     * @throws SecurityException if the caller doesn't have the permission.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setDataAllowedDuringVoiceCall(boolean allow) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.setDataAllowedDuringVoiceCall(getSubId(), allow);
-            }
-        } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check whether data is allowed during voice call. This is used for allowing data on the
-     * non-default data SIM. When a voice call is placed on the non-default data SIM on DSDS
-     * devices, users will not be able to use mobile data. By calling this API, data will be
-     * temporarily enabled on the non-default data SIM during the life cycle of the voice call.
-     *
-     * @return {@code true} if data is allowed during voice call.
-     *
-     * @throws SecurityException if the caller doesn't have the permission.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isDataAllowedInVoiceCall() {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.isDataAllowedInVoiceCall(getSubId());
-            }
-        } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Set whether the specific sim card always allows MMS connection. If true, MMS network
-     * request will be accepted by telephony even if user turns "mobile data" off
-     * on this specific sim card.
-     *
-     * @param alwaysAllow whether Mms data is always allowed.
-     * @return whether operation is successful.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setAlwaysAllowMmsData(boolean alwaysAllow) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.setAlwaysAllowMmsData(getSubId(), alwaysAllow);
-            }
-        } catch (RemoteException ex) {
             if (!isSystemProcess()) {
                 ex.rethrowAsRuntimeException();
             }
