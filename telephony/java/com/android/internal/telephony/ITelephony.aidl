@@ -2233,21 +2233,9 @@ interface ITelephony {
      */
     String getMmsUAProfUrl(int subId);
 
-    /**
-     * Set allowing mobile data during voice call.
-     */
-    boolean setDataAllowedDuringVoiceCall(int subId, boolean allow);
+    void setMobileDataPolicyEnabledStatus(int subscriptionId, int policy, boolean enabled);
 
-    /**
-     * Check whether data is allowed during voice call. Note this is for dual sim device that
-     * data might be disabled on non-default data subscription but explicitly turned on by settings.
-     */
-    boolean isDataAllowedInVoiceCall(int subId);
-
-    /**
-     * Set whether a subscription always allows MMS connection.
-     */
-    boolean setAlwaysAllowMmsData(int subId, boolean allow);
+    boolean isMobileDataPolicyEnabled(int subscriptionId, int policy);
 
     /**
      * Command line command to enable or disable handling of CEP data for test purposes.
