@@ -5788,8 +5788,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
         Objects.requireNonNull(admin, "ComponentName is null");
 
-        final CallerIdentity caller = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+        final CallerIdentity caller = getNonPrivilegedOrAdminCallerIdentity(admin);
+        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                && (isDeviceOwner(caller) || isProfileOwner(caller)))
                 || hasCallingPermission(PERMISSION_MAINLINE_NETWORK_STACK));
 
         return mInjector.binderWithCleanCallingIdentity(
