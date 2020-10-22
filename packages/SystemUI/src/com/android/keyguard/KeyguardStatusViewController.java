@@ -70,8 +70,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     @Override
-    public void init() {
-        super.init();
+    public void initInternal() {
         mKeyguardClockSwitchController.init();
     }
 

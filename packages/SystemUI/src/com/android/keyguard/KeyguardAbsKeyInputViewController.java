@@ -81,8 +81,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     abstract void resetState();
 
     @Override
-    public void init() {
-        super.init();
+    public void initInternal() {
         mMessageAreaController.init();
     }
 

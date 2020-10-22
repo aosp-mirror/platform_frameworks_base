@@ -92,8 +92,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Attach the controller to the view it relates to.
      */
     @Override
-    public void init() {
-        super.init();
+    public void initInternal() {
         mKeyguardSliceViewController.init();
     }
 
