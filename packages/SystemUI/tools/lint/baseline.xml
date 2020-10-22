@@ -2909,17 +2909,6 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.dimen.notification_header_height` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;notification_header_height&quot;>53dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/values/dimens.xml"
-            line="473"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
         message="The resource `R.dimen.speed_bump_height` appears to be unused"
         errorLine1="    &lt;dimen name=&quot;speed_bump_height&quot;>16dp&lt;/dimen>"
         errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~">

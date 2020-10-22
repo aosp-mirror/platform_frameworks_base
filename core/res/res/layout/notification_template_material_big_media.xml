@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2014 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,22 +24,28 @@
     android:tag="bigMediaNarrow"
     >
     <!-- The size will actually be determined at runtime -->
-    <ImageView android:id="@+id/right_icon"
+    <ImageView
+        android:id="@+id/right_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_gravity="top|end"
         android:scaleType="centerCrop"
-    />
-    <include layout="@layout/notification_template_header"
+        />
+
+    <include
+        layout="@layout/notification_template_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/media_notification_header_height"
-        android:layout_gravity="start"/>
+        android:layout_gravity="start"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/notification_media_content"
         >
+
         <LinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
@@ -52,38 +57,49 @@
             android:minHeight="@dimen/notification_min_content_height"
             android:orientation="vertical"
             >
+
             <include layout="@layout/notification_template_part_line1" />
+
             <include layout="@layout/notification_template_text" />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/media_actions"
             android:orientation="horizontal"
             android:layoutDirection="ltr"
-            style="@style/NotificationMediaActionContainer" >
+            style="@style/NotificationMediaActionContainer"
+            >
+
             <include
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action0"
-            />
+                />
+
             <include
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action1"
-            />
+                />
+
             <include
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action2"
-            />
+                />
+
             <include
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action3"
-            />
+                />
+
             <include
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action4"
-            />
+                />
         </LinearLayout>
-        <ViewStub android:id="@+id/notification_media_seekbar_container"
+
+        <ViewStub
+            android:id="@+id/notification_media_seekbar_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-        />
+            />
     </LinearLayout>
 </com.android.internal.widget.MediaNotificationView>

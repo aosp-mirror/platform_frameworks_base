@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2014 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,25 +19,102 @@
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:tag="base" >
-    <include layout="@layout/notification_template_header" />
-    <LinearLayout
-        android:id="@+id/notification_main_column"
+    android:minHeight="@dimen/notification_headerless_min_height"
+    android:tag="base"
+    >
+
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/notification_icon_circle_size"
+        android:layout_height="@dimen/notification_icon_circle_size"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:background="@drawable/notification_icon_circle"
+        android:padding="@dimen/notification_icon_circle_padding"
+        />
+
+    <com.android.internal.widget.RemeasuringLinearLayout
+        android:id="@+id/notification_standard_view_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_marginStart="@dimen/notification_content_margin_start"
-        android:layout_marginEnd="@dimen/notification_content_margin_end"
-        android:layout_marginTop="@dimen/notification_content_margin_top"
-        android:layout_marginBottom="@dimen/notification_content_margin"
-        android:orientation="vertical" >
-        <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_text" />
-        <include
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="@dimen/notification_headerless_margin_vertical"
+        android:layout_marginTop="@dimen/notification_headerless_margin_vertical"
+        android:orientation="vertical"
+        >
+
+        <!-- extends ViewGroup -->
+        <NotificationTopLineView
+            android:id="@+id/notification_top_line"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/notification_headerless_line_height"
+            android:layout_marginEnd="@dimen/notification_heading_margin_end"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:clipChildren="false"
+            android:theme="@style/Theme.DeviceDefault.Notification"
+            >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:fadingEdge="horizontal"
+                android:singleLine="true"
+                android:textAlignment="viewStart"
+                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
+                />
+
+            <include layout="@layout/notification_top_line_views" />
+
+        </NotificationTopLineView>
+
+        <com.android.internal.widget.RemeasuringLinearLayout
+            android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_progress_bar_height"
-            android:layout_marginTop="@dimen/notification_progress_margin_top"
-            layout="@layout/notification_template_progress" />
-    </LinearLayout>
-    <include layout="@layout/notification_template_right_icon" />
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/notification_heading_margin_end"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:orientation="vertical"
+            >
+
+            <include
+                layout="@layout/notification_template_text"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/notification_headerless_line_height"
+                android:layout_marginTop="0dp"
+                />
+
+            <include
+                layout="@layout/notification_template_progress"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/notification_headerless_line_height"
+                />
+
+        </com.android.internal.widget.RemeasuringLinearLayout>
+    </com.android.internal.widget.RemeasuringLinearLayout>
+
+    <ImageView
+        android:id="@+id/right_icon"
+        android:layout_width="@dimen/notification_right_icon_size"
+        android:layout_height="@dimen/notification_right_icon_size"
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="@dimen/notification_header_expand_icon_size"
+        android:background="@drawable/notification_large_icon_outline"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        />
+
+    <com.android.internal.widget.NotificationExpandButton
+        android:id="@+id/expand_button"
+        android:layout_width="@dimen/notification_header_expand_icon_size"
+        android:layout_height="@dimen/notification_header_expand_icon_size"
+        android:layout_gravity="center_vertical|end"
+        android:background="@null"
+        android:contentDescription="@string/expand_button_content_description_collapsed"
+        android:paddingTop="@dimen/notification_expand_button_padding_top"
+        android:scaleType="center"
+        android:visibility="gone"
+        />
+
 </FrameLayout>

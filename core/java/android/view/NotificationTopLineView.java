@@ -40,7 +40,8 @@ public class NotificationTopLineView extends ViewGroup {
     private final int mGravityY;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
-    private View mAppName;
+    @Nullable private View mAppName;
+    @Nullable private View mTitle;
     private View mHeaderText;
     private View mSecondaryHeaderText;
     private OnClickListener mFeedbackListener;
@@ -92,6 +93,7 @@ public class NotificationTopLineView extends ViewGroup {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mAppName = findViewById(R.id.app_name_text);
+        mTitle = findViewById(R.id.title);
         mHeaderText = findViewById(R.id.header_text);
         mSecondaryHeaderText = findViewById(R.id.header_text_secondary);
         mProfileBadge = findViewById(R.id.profile_badge);
@@ -144,9 +146,17 @@ public class NotificationTopLineView extends ViewGroup {
         int endMargin = Math.max(mHeaderTextMarginEnd, iconWidth);
         if (totalWidth > givenWidth - endMargin) {
             int overFlow = totalWidth - givenWidth + endMargin;
-            // We are overflowing, lets shrink the app name first
-            overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
-                    mChildMinWidth);
+            if (mAppName != null) {
+                // We are overflowing, lets shrink the app name first
+                overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
+                        mChildMinWidth);
+            }
+
+            if (mTitle != null) {
+                // still overflowing, we shrink the title text
+                overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mTitle,
+                        mChildMinWidth);
+            }
 
             // still overflowing, we shrink the header text
             overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mHeaderText, 0);
@@ -296,6 +306,13 @@ public class NotificationTopLineView extends ViewGroup {
      */
     public int getHeaderTextMarginEnd() {
         return mHeaderTextMarginEnd;
+    }
+
+    /**
+     * Set padding at the start of the view.
+     */
+    public void setPaddingStart(int paddingStart) {
+        setPaddingRelative(paddingStart, getPaddingTop(), getPaddingEnd(), getPaddingBottom());
     }
 
     private class HeaderTouchListener implements OnTouchListener {

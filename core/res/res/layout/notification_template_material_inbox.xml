@@ -129,4 +129,5 @@
         <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />
+    <include layout="@layout/notification_template_reply_icon" />
 </FrameLayout>

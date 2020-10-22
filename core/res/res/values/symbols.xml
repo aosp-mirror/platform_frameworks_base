@@ -218,6 +218,7 @@
   <java-symbol type="id" name="inbox_text6" />
   <java-symbol type="id" name="status_bar_latest_event_content" />
   <java-symbol type="id" name="notification_main_column" />
+  <java-symbol type="id" name="notification_standard_view_column" />
   <java-symbol type="id" name="sms_short_code_confirm_message" />
   <java-symbol type="id" name="sms_short_code_detail_layout" />
   <java-symbol type="id" name="sms_short_code_detail_message" />
@@ -2871,14 +2872,13 @@
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
   <java-symbol type="dimen" name="notification_content_margin_start" />
   <java-symbol type="dimen" name="notification_content_margin_end" />
+  <java-symbol type="dimen" name="notification_heading_margin_end" />
   <java-symbol type="dimen" name="notification_reply_inset" />
   <java-symbol type="dimen" name="notification_content_margin_top" />
   <java-symbol type="dimen" name="notification_content_margin" />
   <java-symbol type="dimen" name="notification_header_background_height" />
-  <java-symbol type="dimen" name="notification_header_height" />
   <java-symbol type="dimen" name="notification_header_expand_icon_size" />
   <java-symbol type="dimen" name="notification_expand_button_padding_top" />
-  <java-symbol type="dimen" name="notification_header_icon_margin_end" />
   <java-symbol type="dimen" name="notification_header_icon_size" />
   <java-symbol type="dimen" name="notification_header_app_name_margin_start" />
   <java-symbol type="dimen" name="notification_header_separating_margin" />
@@ -3379,6 +3379,7 @@
   <java-symbol type="dimen" name="notification_media_image_max_width"/>
   <java-symbol type="dimen" name="notification_media_image_max_height"/>
   <java-symbol type="dimen" name="notification_right_icon_size"/>
+  <java-symbol type="dimen" name="notification_reply_icon_size"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
 
@@ -3399,8 +3400,6 @@
   <java-symbol type="bool" name="config_allowEscrowTokenForTrustAgent"/>
   <java-symbol type="string" name="config_defaultTrustAgent" />
 
-  <!-- Time picker -->
-  <java-symbol type="id" name="right_icon_container"/>
   <java-symbol type="id" name="reply_icon_action"/>
   <java-symbol type="id" name="toggle_mode"/>
   <java-symbol type="id" name="input_mode"/>
@@ -3935,8 +3934,9 @@
   <java-symbol type="dimen" name="importance_ring_anim_max_stroke_width" />
   <java-symbol type="dimen" name="importance_ring_size" />
   <java-symbol type="dimen" name="conversation_icon_size_badged" />
+  <java-symbol type="dimen" name="conversation_icon_circle_start" />
+  <java-symbol type="dimen" name="notification_icon_circle_start" />
 
-  <java-symbol type="id" name="header_icon_container" />
   <java-symbol type="attr" name="notificationHeaderTextAppearance" />
   <java-symbol type="string" name="conversation_single_line_name_display" />
   <java-symbol type="string" name="conversation_single_line_image_placeholder" />

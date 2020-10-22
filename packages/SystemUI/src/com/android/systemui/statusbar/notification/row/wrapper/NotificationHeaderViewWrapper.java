@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -63,8 +62,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private TextView mAppNameText;
     private ImageView mWorkProfileImage;
     private View mAudiblyAlertedIcon;
-    private FrameLayout mIconContainer;
     private View mFeedbackIcon;
+    private View mRightIcon;
 
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
@@ -103,11 +102,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     protected void resolveHeaderViews() {
-        mIconContainer = mView.findViewById(com.android.internal.R.id.header_icon_container);
         mIcon = mView.findViewById(com.android.internal.R.id.icon);
         mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
         mAppNameText = mView.findViewById(com.android.internal.R.id.app_name_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
+        mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
         mNotificationTopLine = mView.findViewById(com.android.internal.R.id.notification_top_line);
@@ -145,6 +144,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         updateCropToPaddingForImageViews();
         Notification notification = row.getEntry().getSbn().getNotification();
         mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
+        if (mRightIcon != null) {
+            mRightIcon.setClipToOutline(true);
+        }
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
@@ -165,19 +167,16 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             layoutParams.setMarginStart(0);
         }
-        if (mIconContainer != null) {
-            MarginLayoutParams layoutParams = (MarginLayoutParams) mIconContainer.getLayoutParams();
-            layoutParams.width =
-                    mIconContainer.getContext().getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.conversation_content_start);
-            final int marginStart =
-                    mIconContainer.getContext().getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.notification_content_margin_start);
-            layoutParams.setMarginStart(marginStart * -1);
+        if (mNotificationTopLine != null) {
+            int paddingStart = mNotificationTopLine.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.conversation_content_start);
+            mNotificationTopLine.setPaddingStart(paddingStart);
         }
         if (mIcon != null) {
             MarginLayoutParams layoutParams = (MarginLayoutParams) mIcon.getLayoutParams();
-            layoutParams.setMarginEnd(0);
+            int marginStart = mIcon.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.conversation_icon_circle_start);
+            layoutParams.setMarginStart(marginStart);
         }
     }
 
@@ -189,20 +188,20 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                     com.android.internal.R.style.TextAppearance_DeviceDefault_Notification_Info);
             mAppNameText.setTextAppearance(textAppearance);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
-            final int marginStart = mAppNameText.getContext().getResources().getDimensionPixelSize(
+            final int marginStart = mAppNameText.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_header_app_name_margin_start);
             layoutParams.setMarginStart(marginStart);
         }
-        if (mIconContainer != null) {
-            MarginLayoutParams layoutParams = (MarginLayoutParams) mIconContainer.getLayoutParams();
-            layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            layoutParams.setMarginStart(0);
+        if (mNotificationTopLine != null) {
+            int paddingStart = mNotificationTopLine.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_content_margin_start);
+            mNotificationTopLine.setPaddingStart(paddingStart);
         }
         if (mIcon != null) {
             MarginLayoutParams layoutParams = (MarginLayoutParams) mIcon.getLayoutParams();
-            final int marginEnd = mIcon.getContext().getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_header_icon_margin_end);
-            layoutParams.setMarginEnd(marginEnd);
+            int marginStart = mIcon.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_icon_circle_start);
+            layoutParams.setMarginStart(marginStart);
         }
     }
 
