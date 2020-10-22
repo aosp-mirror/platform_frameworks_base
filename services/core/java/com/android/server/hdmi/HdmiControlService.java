@@ -95,10 +95,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -2317,6 +2319,19 @@ public class HdmiControlService extends SystemService {
             pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
             pw.println("mSystemAudioActivated: " + isSystemAudioActivated());
             pw.println("mHdmiCecVolumeControlEnabled: " + mHdmiCecVolumeControlEnabled);
+            pw.decreaseIndent();
+
+            // CEC settings
+            pw.println("CEC settings:");
+            pw.increaseIndent();
+            HdmiCecConfig hdmiCecConfig = HdmiControlService.this.getHdmiCecConfig();
+            List<String> allSettings = hdmiCecConfig.getAllSettings();
+            Set<String> userSettings = new HashSet<>(hdmiCecConfig.getUserSettings());
+            for (String setting : allSettings) {
+                pw.println(setting + ": " + hdmiCecConfig.getValue(getContext(), setting)
+                        + " (default: " + hdmiCecConfig.getDefaultValue(setting) + ")"
+                        + (userSettings.contains(setting) ? " [modifiable]" : ""));
+            }
             pw.decreaseIndent();
 
             pw.println("mMhlController: ");
