@@ -26,8 +26,8 @@ import android.view.View.OnAttachStateChangeListener;
  *
  * Implementations should handle setup and teardown related activities inside of
  * {@link #onViewAttached()} and {@link  #onViewDetached()}. Be sure to call {@link #init()} on
- * any child controllers that this uses. This can be done in {@link init()} if the controllers
- * are injected, or right after creation time of the child controller.
+ * any child controllers that this uses. This can be done in {@link #initInternal()} if the
+ * controllers are injected, or right after creation time of the child controller.
  *
  * Tip: View "attachment" happens top down - parents are notified that they are attached before
  * any children. That means that if you call a method on a child controller in
@@ -62,11 +62,18 @@ public abstract class ViewController<T extends View> {
         mView = view;
     }
 
-    /** Call immediately after constructing Controller in order to handle view lifecycle events. */
+    /**
+     * Call immediately after constructing Controller in order to handle view lifecycle events.
+     *
+     * Generally speaking, you don't want to override this method. Instead, override
+     * {@link #initInternal()} as a way to have an run-once idempotent method that you can use for
+     * setup of your ViewController.
+     */
     public void init() {
         if (mInited) {
             return;
         }
+        initInternal();
         mInited = true;
 
         if (mView != null) {
@@ -76,6 +83,14 @@ public abstract class ViewController<T extends View> {
             mView.addOnAttachStateChangeListener(mOnAttachStateListener);
         }
     }
+
+    /**
+     * Run once when {@link #init()} is called.
+     *
+     * Override this to perform idempotent, one-time setup that your controller needs. It will
+     * be called before {@link #onViewAttached()}.
+     */
+    protected void initInternal() {}
 
     protected Context getContext() {
         return mView.getContext();
