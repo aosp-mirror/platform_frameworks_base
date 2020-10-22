@@ -12938,10 +12938,101 @@ public class TelephonyManager {
     }
 
     /**
-     * Set allowing mobile data during voice call. This is used for allowing data on the non-default
-     * data SIM. When a voice call is placed on the non-default data SIM on DSDS devices, users will
-     * not be able to use mobile data. By calling this API, data will be temporarily enabled on the
-     * non-default data SIM during the life cycle of the voice call.
+     * Controls whether mobile data  on the non-default SIM is allowed during a voice call.
+     *
+     * This is used for allowing data on the non-default data SIM when a voice call is placed on
+     * the non-default data SIM on DSDS devices. If this policy is disabled, users will not be able
+     * to use mobile data via the non-default data SIM during the call, which may mean no mobile
+     * data at all since some modem implementations disallow mobile data via the default data SIM
+     * during voice calls.
+     * If this policy is enabled, data will be temporarily enabled on the non-default data SIM
+     * during any voice calls.
+     *
+     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabledStatus}.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL = 1;
+
+    /**
+     * Controls whether MMS messages bypass the user-specified "mobile data" toggle.
+     *
+     * When enabled, requests for connections to the MMS APN will be accepted by telephony even if
+     * the user has turned "mobile data" off on this specific sim card. {@link #isDataEnabledForApn}
+     * will also return true for {@link ApnSetting#TYPE_MMS}.
+     * When disabled, the MMS APN will be governed by the same rules as all other APNs.
+     *
+     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabledStatus}.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "MOBILE_DATA_POLICY_" }, value = {
+            MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL,
+            MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MobileDataPolicy { }
+
+    /**
+     * Enables or disables a piece of mobile data policy.
+     *
+     * Enables or disables the mobile data policy specified in {@code policy}. See the detailed
+     * description of each policy constant for what they do.
+     *
+     * @param policy The data policy to enable.
+     * @param enabled Whether to enable or disable the policy.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setMobileDataPolicyEnabledStatus(@MobileDataPolicy int policy, boolean enabled) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setMobileDataPolicyEnabledStatus(getSubId(), policy, enabled);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+    }
+
+    /**
+     * Fetches the status of a piece of mobile data policy.
+     *
+     * @param policy The data policy that you want the status for.
+     * @return {@code true} if enabled, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isMobileDataPolicyEnabled(@MobileDataPolicy int policy) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isMobileDataPolicyEnabled(getSubId(), policy);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
      *
      * @param allow {@code true} if allowing using data during voice call, {@code false} if
      * disallowed.
