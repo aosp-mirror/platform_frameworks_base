@@ -43,10 +43,10 @@ import com.sun.source.tree.Tree;
  */
 @AutoService(BugChecker.class)
 @BugPattern(
-    name = "AndroidFrameworkParcelablePerformance",
+    name = "AndroidFrameworkEfficientParcelable",
     summary = "Verifies Parcelable performance best-practices",
     severity = WARNING)
-public final class ParcelablePerformanceChecker extends BugChecker
+public final class EfficientParcelableChecker extends BugChecker
         implements MethodInvocationTreeMatcher {
     private static final Matcher<Tree> INSIDE_WRITE_TO_PARCEL = allOf(
             enclosingClass(isSubtypeOf("android.os.Parcelable")),

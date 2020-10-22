@@ -1378,14 +1378,6 @@ class RecentTasks {
                 break;
         }
 
-        // Tasks managed by/associated with an ActivityView should be excluded from recents.
-        // singleTaskInstance is set on the VirtualDisplay managed by ActivityView
-        // TODO(b/126185105): Find a different signal to use besides isSingleTaskInstance
-        final Task rootTask = task.getRootTask();
-        if (rootTask != null && rootTask.isSingleTaskInstance()) {
-            return false;
-        }
-
         // If we're in lock task mode, ignore the root task
         if (task == mService.getLockTaskController().getRootTask()) {
             return false;

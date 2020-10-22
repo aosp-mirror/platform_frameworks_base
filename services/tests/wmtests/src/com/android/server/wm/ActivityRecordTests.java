@@ -1525,7 +1525,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any() /* window */,  any() /* attrs */,
                     anyInt() /* viewVisibility */, anyInt() /* displayId */,
                     any() /* requestedVisibility */, any() /* outFrame */,
-                    any() /* outContentInsets */, any() /* outStableInsets */,
                     any() /* outDisplayCutout */, any() /* outInputChannel */,
                     any() /* outInsetsState */, any() /* outActiveControls */);
             TaskSnapshotSurface.create(mAtm.mWindowManager, mActivity, snapshot);

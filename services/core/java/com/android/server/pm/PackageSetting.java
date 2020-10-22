@@ -28,11 +28,13 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -300,7 +302,8 @@ public class PackageSetting extends PackageSettingBase {
         return mimeGroups != null ? mimeGroups.get(mimeGroup) : null;
     }
 
-    public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users,
+            LegacyPermissionDataProvider dataProvider) {
         final long packageToken = proto.start(fieldId);
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
         proto.write(PackageProto.UID, appId);
@@ -337,7 +340,31 @@ public class PackageSetting extends PackageSettingBase {
         proto.write(PackageProto.StatesProto.IS_STARTABLE, incrementalStates.isStartable());
         proto.write(PackageProto.StatesProto.IS_LOADING, incrementalStates.isLoading());
         writeUsersInfoToProto(proto, PackageProto.USERS);
+        writePackageUserPermissionsProto(proto, PackageProto.USER_PERMISSIONS, users, dataProvider);
         proto.end(packageToken);
+    }
+
+    /**
+     * TODO (b/170263003) refactor to dump to permissiongr proto
+     * Dumps the permissions that are granted to users for this package.
+     */
+    void writePackageUserPermissionsProto(ProtoOutputStream proto, long fieldId,
+            List<UserInfo> users, LegacyPermissionDataProvider dataProvider) {
+        Collection<LegacyPermissionState.PermissionState> runtimePermissionStates;
+        for (UserInfo user : users) {
+            final long permissionsToken = proto.start(PackageProto.USER_PERMISSIONS);
+            proto.write(PackageProto.UserPermissionsProto.ID, user.id);
+
+            runtimePermissionStates = dataProvider.getLegacyPermissionState(appId)
+                    .getRuntimePermissionStates(user.id);
+            for (LegacyPermissionState.PermissionState permission : runtimePermissionStates) {
+                if (permission.isGranted()) {
+                    proto.write(PackageProto.UserPermissionsProto.GRANTED_PERMISSIONS,
+                            permission.getName());
+                }
+            }
+            proto.end(permissionsToken);
+        }
     }
 
     /** Updates all fields in the current setting from another. */

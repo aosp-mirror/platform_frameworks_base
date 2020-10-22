@@ -66,4 +66,6 @@
 
     <color name="car_user_switching_dialog_background_color">@android:color/black</color>
     <color name="car_user_switching_dialog_loading_text_color">@*android:color/car_body1</color>
+
+    <color name="rear_view_camera_button_background">@*android:color/car_card_dark</color>
 </resources>

@@ -170,9 +170,8 @@ public final class PositionedGlyphs {
      * @hide
      *
      * @param layoutPtr the address of native layout object.
-     * @param paint a paint object
      */
-    public PositionedGlyphs(long layoutPtr, @NonNull Paint paint, float xOffset, float yOffset) {
+    public PositionedGlyphs(long layoutPtr, float xOffset, float yOffset) {
         mLayoutPtr = layoutPtr;
         int glyphCount = nGetGlyphCount(layoutPtr);
         mFonts = new ArrayList<>(glyphCount);

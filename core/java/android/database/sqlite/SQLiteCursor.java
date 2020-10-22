@@ -147,7 +147,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         clearOrCreateWindow(getDatabase().getPath());
         try {
             Preconditions.checkArgumentNonnegative(requiredPos,
-                    "requiredPos cannot be negative, but was " + requiredPos);
+                    "requiredPos cannot be negative");
 
             if (mCount == NO_COUNT) {
                 mCount = mQuery.fillWindow(mWindow, requiredPos, requiredPos, true);

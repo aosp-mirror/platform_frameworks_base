@@ -35,7 +35,7 @@ import java.util.Collections;
  */
 public class PipMenuActivity extends Activity implements PipController.Listener {
     private static final String TAG = "PipMenuActivity";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = PipController.DEBUG;
 
     static final String EXTRA_CUSTOM_ACTIONS = "custom_actions";
 
@@ -51,7 +51,7 @@ public class PipMenuActivity extends Activity implements PipController.Listener 
         if (DEBUG) Log.d(TAG, "onCreate()");
 
         super.onCreate(bundle);
-        if (sPipController == null || sPipController.isPipShown()) {
+        if (sPipController == null) {
             finish();
         }
         setContentView(R.layout.tv_pip_menu);

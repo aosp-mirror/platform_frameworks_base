@@ -26,7 +26,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -39,7 +39,7 @@ public class NotificationMessagingUtil {
 
     private static final String DEFAULT_SMS_APP_SETTING = Settings.Secure.SMS_DEFAULT_APPLICATION;
     private final Context mContext;
-    private ArrayMap<Integer, String> mDefaultSmsApp = new ArrayMap<>();
+    private SparseArray<String> mDefaultSmsApp = new SparseArray<>();
 
     public NotificationMessagingUtil(Context context) {
         mContext = context;

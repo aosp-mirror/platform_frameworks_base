@@ -1623,6 +1623,16 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
+    public void setBackgroundBlurRadius(int blur) {
+        checkNotReleased();
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setBackgroundBlurRadius(this, blur);
+        }
+    }
+
+    /**
+     * @hide
+     */
     public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {

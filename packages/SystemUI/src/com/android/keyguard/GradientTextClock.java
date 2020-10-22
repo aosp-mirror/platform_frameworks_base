@@ -61,7 +61,6 @@ public class GradientTextClock extends TextClock {
 
     @Override
     public void refreshTime() {
-        updatePaint();
         super.refreshTime();
     }
 
@@ -77,6 +76,7 @@ public class GradientTextClock extends TextClock {
 
     public void setGradientColors(int[] colors) {
         mGradientColors = colors;
+        updatePaint();
     }
 
     public void setColorPositions(float[] positions) {

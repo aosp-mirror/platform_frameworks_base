@@ -20,10 +20,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -32,9 +30,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
-import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.wm.shell.R;
@@ -49,8 +45,8 @@ public class PipNotification {
     private static final String NOTIFICATION_TAG = PipNotification.class.getSimpleName();
     private static final boolean DEBUG = PipController.DEBUG;
 
-    private static final String ACTION_MENU = "PipNotification.menu";
-    private static final String ACTION_CLOSE = "PipNotification.close";
+    static final String ACTION_MENU = "PipNotification.menu";
+    static final String ACTION_CLOSE = "PipNotification.close";
 
     public static final String NOTIFICATION_CHANNEL_TVPIP = "TPP";
 
@@ -147,23 +143,6 @@ public class PipNotification {
                 }
             };
 
-    private final BroadcastReceiver mEventReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG) {
-                Log.d(TAG, "Received " + intent.getAction() + " from the notification UI");
-            }
-            switch (intent.getAction()) {
-                case ACTION_MENU:
-                    mPipController.showPictureInPictureMenu();
-                    break;
-                case ACTION_CLOSE:
-                    mPipController.closePip();
-                    break;
-            }
-        }
-    };
-
     public PipNotification(Context context, PipController pipController) {
         mPackageManager = context.getPackageManager();
 
@@ -181,11 +160,6 @@ public class PipNotification {
         mPipController = pipController;
         pipController.addListener(mPipListener);
         pipController.addMediaListener(mPipMediaListener);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ACTION_MENU);
-        intentFilter.addAction(ACTION_CLOSE);
-        context.registerReceiver(mEventReceiver, intentFilter, UserHandle.USER_ALL);
 
         onConfigurationChanged(context);
     }

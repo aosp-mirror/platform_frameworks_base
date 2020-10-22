@@ -621,6 +621,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * 1920x1080, and the actually size on the screen is 960x540, then the scale is 0.5.
      */
     private float mSizeCompatScale = 1f;
+
     /**
      * The bounds in global coordinates for activity in size compatibility mode.
      * @see ActivityRecord#hasSizeCompatBounds()
@@ -4761,15 +4762,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     supportsEnterPipOnTaskSwitch = false;
                     break;
                 case RESUMED:
-                    // Do nothing if currently in the process of resuming the activity. Otherwise,
-                    // starting to pause it since it is not visible.
-                    if (task.mInResumeTopActivity
-                            && task.topRunningActivity(true /* focusableOnly */) == this) {
+                    // If the app is capable of entering PIP, we should try pausing it now
+                    // so it can PIP correctly.
+                    if (deferHidingClient) {
+                        getRootTask().startPausingLocked(
+                                mStackSupervisor.mUserLeaving /* userLeaving */,
+                                false /* uiSleeping */, null /* resuming */, "makeInvisible");
                         break;
                     }
-                    getRootTask().startPausingLocked(mStackSupervisor.mUserLeaving,
-                            false /* uiSleeping */, null /* resuming */, "makeInvisible");
-                    // fall through
                 case INITIALIZING:
                 case PAUSING:
                 case PAUSED:
@@ -6492,6 +6492,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && !mAtmService.mForceResizableActivities;
     }
 
+    @Override
     boolean hasSizeCompatBounds() {
         return mSizeCompatBounds != null;
     }
@@ -7876,5 +7877,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void setPictureInPictureParams(PictureInPictureParams p) {
         pictureInPictureArgs.copyOnlySet(p);
         getTask().getRootTask().onPictureInPictureParamsChanged();
+    }
+
+    @Override
+    boolean isSyncFinished() {
+        if (!super.isSyncFinished()) return false;
+        if (!isVisibleRequested()) return true;
+        // If visibleRequested, wait for at-least one visible child.
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).isVisibleRequested()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

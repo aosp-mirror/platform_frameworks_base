@@ -28,6 +28,7 @@ import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.util.IntArray;
@@ -202,10 +203,22 @@ class InsetsPolicy {
     }
 
     /**
-     * @see InsetsStateController#getInsetsForDispatch
+     * @see InsetsStateController#getInsetsForWindow
      */
-    InsetsState getInsetsForDispatch(WindowState target) {
-        final InsetsState originalState = mStateController.getInsetsForDispatch(target);
+    InsetsState getInsetsForWindow(WindowState target) {
+        final InsetsState originalState = mStateController.getInsetsForWindow(target);
+        return adjustVisibilityForTransientTypes(originalState);
+    }
+
+    /**
+     * @see InsetsStateController#getInsetsForWindowMetrics
+     */
+    InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
+        final InsetsState originalState = mStateController.getInsetsForWindowMetrics(attrs);
+        return adjustVisibilityForTransientTypes(originalState);
+    }
+
+    private InsetsState adjustVisibilityForTransientTypes(InsetsState originalState) {
         InsetsState state = originalState;
         for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
             final @InternalInsetsType int type = mShowingTransientTypes.get(i);
@@ -481,7 +494,7 @@ class InsetsPolicy {
                         mFocusedWin.getDisplayContent().getBounds(), mFocusedWin.getInsetsState(),
                         mListener, typesReady, this, mListener.getDurationMs(),
                         InsetsController.SYSTEM_BARS_INTERPOLATOR,
-                        show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE);
+                        show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE, null /* translator */);
                 SurfaceAnimationThread.getHandler().post(
                         () -> mListener.onReady(mAnimationControl, typesReady));
             }

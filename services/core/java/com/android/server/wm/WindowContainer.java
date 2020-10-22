@@ -58,6 +58,7 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
@@ -96,7 +97,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -109,8 +109,7 @@ import java.util.function.Predicate;
  * changes are made to this class.
  */
 class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<E>
-        implements Comparable<WindowContainer>, Animatable, SurfaceFreezer.Freezable,
-                   BLASTSyncEngine.TransactionReadyListener {
+        implements Comparable<WindowContainer>, Animatable, SurfaceFreezer.Freezable {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
 
@@ -290,16 +289,35 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     RemoteToken mRemoteToken = null;
 
-    BLASTSyncEngine mBLASTSyncEngine = new BLASTSyncEngine();
-    SurfaceControl.Transaction mBLASTSyncTransaction;
-    boolean mUsingBLASTSyncTransaction = false;
-    BLASTSyncEngine.TransactionReadyListener mWaitingListener;
-    int mWaitingSyncId;
+    /** This isn't participating in a sync. */
+    public static final int SYNC_STATE_NONE = 0;
+
+    /** This is currently waiting for itself to finish drawing. */
+    public static final int SYNC_STATE_WAITING_FOR_DRAW = 1;
+
+    /** This container is ready, but it might still have unfinished children. */
+    public static final int SYNC_STATE_READY = 2;
+
+    @IntDef(prefix = { "SYNC_STATE_" }, value = {
+            SYNC_STATE_NONE,
+            SYNC_STATE_WAITING_FOR_DRAW,
+            SYNC_STATE_READY,
+    })
+    @interface SyncState {}
+
+    /**
+     * If non-null, references the sync-group directly waiting on this container. Otherwise, this
+     * container is only being waited-on by its parents (if in a sync-group). This has implications
+     * on how this container is handled during parent changes.
+     */
+    BLASTSyncEngine.SyncGroup mSyncGroup = null;
+    final SurfaceControl.Transaction mSyncTransaction;
+    @SyncState int mSyncState = SYNC_STATE_NONE;
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mPendingTransaction = wms.mTransactionFactory.get();
-        mBLASTSyncTransaction = wms.mTransactionFactory.get();
+        mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
         mSurfaceFreezer = new SurfaceFreezer(this, wms);
     }
@@ -357,6 +375,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Send onParentChanged notification here is we disabled sending it in setParent for
         // reparenting case.
         onParentChanged(newParent, oldParent);
+        onSyncReparent(oldParent, newParent);
     }
 
     final protected void setParent(WindowContainer<WindowContainer> parent) {
@@ -372,6 +391,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 onDisplayChanged(mParent.mDisplayContent);
             }
             onParentChanged(mParent, oldParent);
+            onSyncReparent(oldParent, mParent);
         }
     }
 
@@ -612,6 +632,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             scheduleAnimation();
         }
 
+        // This must happen after updating the surface so that sync transactions can be handled
+        // properly.
         if (mParent != null) {
             mParent.removeChild(this);
         }
@@ -2247,8 +2269,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@link #getPendingTransaction()}
      */
     public Transaction getSyncTransaction() {
-        if (mUsingBLASTSyncTransaction) {
-            return mBLASTSyncTransaction;
+        if (mSyncState != SYNC_STATE_NONE) {
+            return mSyncTransaction;
         }
 
         return getPendingTransaction();
@@ -2895,69 +2917,140 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    @Override
-    public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
-        if (mWaitingListener == null) {
-            return;
-        }
-
-        windowContainersReady.add(this);
-        mWaitingListener.onTransactionReady(mWaitingSyncId, windowContainersReady);
-
-        mWaitingListener = null;
-        mWaitingSyncId = -1;
-    }
-
     /**
-     * Returns true if any of the children elected to participate in the Sync
+     * Call this when this container finishes drawing content.
+     *
+     * @return {@code true} if consumed (this container is part of a sync group).
      */
-    boolean addChildrenToSyncSet(int localId) {
-        boolean willSync = false;
-
-        for (int i = 0; i < mChildren.size(); i++) {
-            final WindowContainer child = mChildren.get(i);
-            willSync |= mBLASTSyncEngine.addToSyncSet(localId, child);
-        }
-        return willSync;
-    }
-
-    boolean setPendingListener(BLASTSyncEngine.TransactionReadyListener waitingListener,
-        int waitingId) {
-        // If we are invisible, no need to sync, likewise if we are already engaged in a sync,
-        // we can't support overlapping syncs on a single container yet.
-        if (!isVisible() || mWaitingListener != null) {
-            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "- NOT adding to sync: visible=%b "
-                            + "hasListener=%b", isVisible(), mWaitingListener != null);
-            return false;
-        }
-        mUsingBLASTSyncTransaction = true;
-
-        // Make sure to set these before we call setReady in case the sync was a no-op
-        mWaitingSyncId = waitingId;
-        mWaitingListener = waitingListener;
+    boolean onSyncFinishedDrawing() {
+        if (mSyncState == SYNC_STATE_NONE) return false;
+        mSyncState = SYNC_STATE_READY;
+        mWmService.mWindowPlacerLocked.requestTraversal();
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "onSyncFinishedDrawing %s", this);
         return true;
     }
 
-    boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
-            int waitingId) {
-        boolean willSync = setPendingListener(waitingListener, waitingId);
-        if (!willSync) {
+    void setSyncGroup(@NonNull BLASTSyncEngine.SyncGroup group) {
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "setSyncGroup #%d on %s", group.mSyncId, this);
+        if (group != null) {
+            if (mSyncGroup != null && mSyncGroup != group) {
+                throw new IllegalStateException("Can't sync on 2 engines simultaneously");
+            }
+        }
+        mSyncGroup = group;
+    }
+
+    /**
+     * Prepares this container for participation in a sync-group. This includes preparing all its
+     * children.
+     *
+     * @return {@code true} if something changed (eg. this wasn't already in the sync group).
+     */
+    boolean prepareSync() {
+        if (mSyncState != SYNC_STATE_NONE) {
+            // Already part of sync
             return false;
         }
-
-        int localId = mBLASTSyncEngine.startSyncSet(this);
-        willSync |= addChildrenToSyncSet(localId);
-        mBLASTSyncEngine.setReady(localId);
-
-        return willSync;
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final WindowContainer child = getChildAt(i);
+            child.prepareSync();
+        }
+        mSyncState = SYNC_STATE_READY;
+        return true;
     }
 
     boolean useBLASTSync() {
-        return mUsingBLASTSyncTransaction;
+        return mSyncState != SYNC_STATE_NONE;
     }
 
-    void mergeBlastSyncTransaction(Transaction t) {
-        t.merge(mBLASTSyncTransaction);
-        mUsingBLASTSyncTransaction = false;
+    /**
+     * Recursively finishes/cleans-up sync state of this subtree and collects all the sync
+     * transactions into `outMergedTransaction`.
+     * @param outMergedTransaction A transaction to merge all the recorded sync operations into.
+     * @param cancel If true, this is being finished because it is leaving the sync group rather
+     *               than due to the sync group completing.
+     */
+    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+        if (mSyncState == SYNC_STATE_NONE) return;
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "finishSync cancel=%b for %s", cancel, this);
+        outMergedTransaction.merge(mSyncTransaction);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).finishSync(outMergedTransaction, cancel);
+        }
+        mSyncState = SYNC_STATE_NONE;
+        if (cancel && mSyncGroup != null) mSyncGroup.onCancelSync(this);
+        mSyncGroup = null;
+    }
+
+    /**
+     * Checks if the subtree rooted at this container is finished syncing (everything is ready or
+     * not visible). NOTE, this is not const: it will cancel/prepare itself depending on its state
+     * in the hierarchy.
+     *
+     * @return {@code true} if this subtree is finished waiting for sync participants.
+     */
+    boolean isSyncFinished() {
+        if (!isVisibleRequested()) {
+            return true;
+        }
+        if (mSyncState == SYNC_STATE_NONE) {
+            prepareSync();
+        }
+        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW) {
+            return false;
+        }
+        // READY
+        // Loop from top-down.
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            final boolean childFinished = child.isSyncFinished();
+            if (childFinished && child.isVisibleRequested() && child.fillsParent()) {
+                // Any lower children will be covered-up, so we can consider this finished.
+                return true;
+            }
+            if (!childFinished) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called during reparent to handle sync state when the hierarchy changes.
+     * If this is in a sync group and gets reparented out, it will cancel syncing.
+     * If this is not in a sync group and gets parented into one, it will prepare itself.
+     * If its moving around within a sync-group, it needs to restart its syncing since a
+     * hierarchy change implies a configuration change.
+     */
+    private void onSyncReparent(WindowContainer oldParent, WindowContainer newParent) {
+        if (newParent == null || newParent.mSyncState == SYNC_STATE_NONE) {
+            if (mSyncState == SYNC_STATE_NONE) {
+                return;
+            }
+            if (newParent == null) {
+                // This is getting removed.
+                if (oldParent.mSyncState != SYNC_STATE_NONE) {
+                    // In order to keep the transaction in sync, merge it into the parent.
+                    finishSync(oldParent.mSyncTransaction, true /* cancel */);
+                } else if (mSyncGroup != null) {
+                    // This is watched directly by the sync-group, so merge this transaction into
+                    // into the sync-group so it isn't lost
+                    finishSync(mSyncGroup.getOrphanTransaction(), true /* cancel */);
+                } else {
+                    throw new IllegalStateException("This container is in sync mode without a sync"
+                            + " group: " + this);
+                }
+                return;
+            } else if (mSyncGroup == null) {
+                // This is being reparented out of the sync-group. To prevent ordering issues on
+                // this container, immediately apply/cancel sync on it.
+                finishSync(getPendingTransaction(), true /* cancel */);
+                return;
+            }
+            // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
+        }
+        // This container's situation has changed so we need to restart its sync.
+        mSyncState = SYNC_STATE_NONE;
+        prepareSync();
     }
 }

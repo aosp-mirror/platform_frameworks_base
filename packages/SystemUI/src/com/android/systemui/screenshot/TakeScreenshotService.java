@@ -52,7 +52,7 @@ import javax.inject.Inject;
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
 
-    private final GlobalScreenshot mScreenshot;
+    private final ScreenshotController mScreenshot;
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
 
@@ -61,7 +61,7 @@ public class TakeScreenshotService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
-                mScreenshot.dismissScreenshot("close system dialogs", false);
+                mScreenshot.dismissScreenshot(false);
             }
         }
     };
@@ -125,7 +125,7 @@ public class TakeScreenshotService extends Service {
     };
 
     @Inject
-    public TakeScreenshotService(GlobalScreenshot globalScreenshot, UserManager userManager,
+    public TakeScreenshotService(ScreenshotController globalScreenshot, UserManager userManager,
             UiEventLogger uiEventLogger) {
         mScreenshot = globalScreenshot;
         mUserManager = userManager;
@@ -144,7 +144,9 @@ public class TakeScreenshotService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        if (mScreenshot != null) mScreenshot.stopScreenshot();
+        if (mScreenshot != null && !mScreenshot.isDismissing()) {
+            mScreenshot.dismissScreenshot(true);
+        }
         unregisterReceiver(mBroadcastReceiver);
         return true;
     }

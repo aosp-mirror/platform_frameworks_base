@@ -242,40 +242,6 @@ public class TaskStackChangedListenerTest {
         assertTrue(activity.mOnDetachedFromWindowCalled);
     }
 
-    @Test
-    public void testTaskOnSingleTaskDisplayDrawn() throws Exception {
-        final Instrumentation instrumentation = getInstrumentation();
-
-        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
-        final CountDownLatch singleTaskDisplayDrawnLatch = new CountDownLatch(1);
-        registerTaskStackChangedListener(new TaskStackListener() {
-            @Override
-            public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
-                singleTaskDisplayDrawnLatch.countDown();
-            }
-        });
-        final ActivityViewTestActivity activity =
-                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
-        final ActivityView activityView = activity.getActivityView();
-        activityView.setCallback(new ActivityView.StateCallback() {
-            @Override
-            public void onActivityViewReady(ActivityView view) {
-                activityViewReadyLatch.countDown();
-            }
-
-            @Override
-            public void onActivityViewDestroyed(ActivityView view) {
-            }
-        });
-        waitForCallback(activityViewReadyLatch);
-
-        final Context context = instrumentation.getContext();
-        Intent intent = new Intent(context, ActivityInActivityView.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        SystemUtil.runWithShellPermissionIdentity(() -> activityView.startActivity(intent));
-        waitForCallback(singleTaskDisplayDrawnLatch);
-    }
-
     public static class ActivityLaunchesNewActivityInActivityView extends TestActivity {
         private boolean mActivityBLaunched = false;
 
@@ -288,61 +254,6 @@ public class TaskStackChangedListenerTest {
             mActivityBLaunched = true;
             startActivity(new Intent(this, ActivityB.class));
         }
-    }
-
-    @Test
-    public void testSingleTaskDisplayEmpty() throws Exception {
-        final Instrumentation instrumentation = getInstrumentation();
-
-        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
-        final CountDownLatch activityViewDestroyedLatch = new CountDownLatch(1);
-        final CountDownLatch singleTaskDisplayDrawnLatch = new CountDownLatch(1);
-        final CountDownLatch singleTaskDisplayEmptyLatch = new CountDownLatch(1);
-
-        registerTaskStackChangedListener(new TaskStackListener() {
-            @Override
-            public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
-                singleTaskDisplayDrawnLatch.countDown();
-            }
-            @Override
-            public void onSingleTaskDisplayEmpty(int displayId)
-                    throws RemoteException {
-                singleTaskDisplayEmptyLatch.countDown();
-            }
-        });
-        final ActivityViewTestActivity activity =
-                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
-        final ActivityView activityView = activity.getActivityView();
-        activityView.setCallback(new ActivityView.StateCallback() {
-            @Override
-            public void onActivityViewReady(ActivityView view) {
-                activityViewReadyLatch.countDown();
-            }
-
-            @Override
-            public void onActivityViewDestroyed(ActivityView view) {
-                activityViewDestroyedLatch.countDown();
-            }
-        });
-        waitForCallback(activityViewReadyLatch);
-
-        // 1. start ActivityLaunchesNewActivityInActivityView in an ActivityView
-        // 2. ActivityLaunchesNewActivityInActivityView launches ActivityB
-        // 3. ActivityB finishes self.
-        // 4. Verify ITaskStackListener#onSingleTaskDisplayEmpty is not called yet.
-        final Context context = instrumentation.getContext();
-        Intent intent = new Intent(context, ActivityLaunchesNewActivityInActivityView.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        SystemUtil.runWithShellPermissionIdentity(() -> activityView.startActivity(intent));
-        waitForCallback(singleTaskDisplayDrawnLatch);
-        UiDevice.getInstance(getInstrumentation()).waitForIdle();
-        assertEquals(1, singleTaskDisplayEmptyLatch.getCount());
-
-        // 5. Release the container, and ActivityLaunchesNewActivityInActivityView finishes.
-        // 6. Verify ITaskStackListener#onSingleTaskDisplayEmpty is called.
-        activityView.release();
-        waitForCallback(activityViewDestroyedLatch);
-        waitForCallback(singleTaskDisplayEmptyLatch);
     }
 
     @Test
@@ -603,7 +514,7 @@ public class TaskStackChangedListenerTest {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mActivityView = new ActivityView.Builder(this).setSingleInstance(true).build();
+            mActivityView = new ActivityView.Builder(this).build();
             setContentView(mActivityView);
 
             ViewGroup.LayoutParams layoutParams = mActivityView.getLayoutParams();

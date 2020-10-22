@@ -85,8 +85,7 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     }
 
     public ActivityView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0 /* defStyle */, false /* singleTaskInstance */,
-                false /* usePublicVirtualDisplay */,
+        this(context, attrs, 0 /* defStyle */, false /* usePublicVirtualDisplay */,
                 false /* disableSurfaceViewBackgroundLayer */, false /* useTrustedDisplay */);
     }
 
@@ -97,22 +96,21 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
      */
     public ActivityView(
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
-            boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
-        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay,
-                false /* disableSurfaceViewBackgroundLayer */,
-                false /* useTrustedDisplay */);
+            boolean usePublicVirtualDisplay) {
+        this(context, attrs, defStyle, usePublicVirtualDisplay,
+                false /* disableSurfaceViewBackgroundLayer */, false /* useTrustedDisplay */);
     }
 
     private ActivityView(
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
-            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
-            boolean disableSurfaceViewBackgroundLayer, boolean useTrustedDisplay) {
+            boolean usePublicVirtualDisplay, boolean disableSurfaceViewBackgroundLayer,
+            boolean useTrustedDisplay) {
         super(context, attrs, defStyle);
         if (useTaskOrganizer()) {
             mTaskEmbedder = new TaskOrganizerTaskEmbedder(context, this);
         } else {
-            mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance,
-                    usePublicVirtualDisplay, useTrustedDisplay);
+            mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, usePublicVirtualDisplay,
+                    useTrustedDisplay);
         }
         mSurfaceView = new SurfaceView(context, null, 0, 0, disableSurfaceViewBackgroundLayer);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha
@@ -641,7 +639,6 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
         private final Context mContext;
         private AttributeSet mAttrs;
         private int mDefStyle;
-        private boolean mSingleInstance;
         private boolean mUsePublicVirtualDisplay;
         private boolean mDisableSurfaceViewBackgroundLayer;
         private boolean mUseTrustedDisplay;
@@ -650,7 +647,6 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             mContext = context;
             mAttrs = null;
             mDefStyle = 0;
-            mSingleInstance = false;
             mUsePublicVirtualDisplay = false;
             mDisableSurfaceViewBackgroundLayer = false;
             mUseTrustedDisplay = false;
@@ -673,13 +669,6 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
         @NonNull
         public Builder setDefaultStyle(int defaultStyle) {
             mDefStyle = defaultStyle;
-            return this;
-        }
-
-        /** Sets to {@code true} to make the {@link ActivityView} single instance. */
-        @NonNull
-        public Builder setSingleInstance(boolean singleInstance) {
-            mSingleInstance = singleInstance;
             return this;
         }
 
@@ -722,7 +711,7 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
         /** Creates an {@link ActivityView} */
         @NonNull
         public ActivityView build() {
-            return new ActivityView(mContext, mAttrs, mDefStyle, mSingleInstance,
+            return new ActivityView(mContext, mAttrs, mDefStyle,
                     mUsePublicVirtualDisplay, mDisableSurfaceViewBackgroundLayer,
                     mUseTrustedDisplay);
         }

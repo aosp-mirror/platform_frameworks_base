@@ -427,6 +427,25 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    /**
+     * Scales the frame and the visible frame (if there is one) of each source.
+     *
+     * @param scale the scale to be applied
+     */
+    public void scale(float scale) {
+        mDisplayFrame.scale(scale);
+        for (int i = 0; i < SIZE; i++) {
+            final InsetsSource source = mSources[i];
+            if (source != null) {
+                source.getFrame().scale(scale);
+                final Rect visibleFrame = source.getVisibleFrame();
+                if (visibleFrame != null) {
+                    visibleFrame.scale(scale);
+                }
+            }
+        }
+    }
+
     public void set(InsetsState other) {
         set(other, false /* copySources */);
     }

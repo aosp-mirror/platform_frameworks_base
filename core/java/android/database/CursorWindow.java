@@ -792,10 +792,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             if (pid == myPid) {
                 buff.append("this proc=");
             } else {
-                buff.append("pid " + pid + "=");
+                buff.append("pid ").append(pid).append('=');
             }
             int num = pidCounts.get(pid);
-            buff.append(num + ")");
+            buff.append(num).append(')');
             total += num;
         }
         // limit the returned string size to 1000

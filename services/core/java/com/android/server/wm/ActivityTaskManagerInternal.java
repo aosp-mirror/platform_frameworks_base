@@ -173,13 +173,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean hasResumedActivity(int uid);
 
     /**
-     * Notify listeners that contents are drawn for the first time on a single task display.
-     *
-     * @param displayId An ID of the display on which contents are drawn.
-     */
-    public abstract void notifySingleTaskDisplayDrawn(int displayId);
-
-    /**
      * Start activity {@code intents} as if {@code packageName/featureId} on user {@code userId} did
      * it.
      *

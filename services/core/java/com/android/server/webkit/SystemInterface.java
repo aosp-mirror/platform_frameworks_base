@@ -41,9 +41,6 @@ public interface SystemInterface {
     public void updateUserSetting(Context context, String newProviderName);
     public void killPackageDependents(String packageName);
 
-    public boolean isFallbackLogicEnabled();
-    public void enableFallbackLogic(boolean enable);
-
     public void enablePackageForAllUsers(Context context, String packageName, boolean enable);
 
     public boolean systemIsDebuggable();

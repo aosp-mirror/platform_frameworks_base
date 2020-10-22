@@ -2159,21 +2159,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             }
 
             final DisplayContent preferredDisplay = preferredTaskDisplayArea.mDisplayContent;
-
-            final boolean singleTaskInstance = preferredDisplay != null
-                    && preferredDisplay.isSingleTaskInstance();
-
             if (preferredDisplay != task.getDisplayContent()) {
-                // Suppress the warning toast if the preferredDisplay was set to singleTask.
-                // The singleTaskInstance displays will only contain one task and any attempt to
-                // launch new task will re-route to the default display.
-                if (singleTaskInstance) {
-                    mService.getTaskChangeNotificationController()
-                            .notifyActivityLaunchOnSecondaryDisplayRerouted(task.getTaskInfo(),
-                                    preferredDisplay.mDisplayId);
-                    return;
-                }
-
                 Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplay.mDisplayId);
                 // Display a warning toast that we failed to put a task on a secondary display.
                 mService.getTaskChangeNotificationController()

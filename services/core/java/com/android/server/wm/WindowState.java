@@ -251,10 +251,8 @@ import com.android.server.wm.utils.WmDisplayCutout;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -658,15 +656,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private static final StringBuilder sTmpSB = new StringBuilder();
 
     /**
-     * Whether the next surfacePlacement call should notify that the blast sync is ready.
-     * This is set to true when {@link #finishDrawing(Transaction)} is called so
-     * {@link #onTransactionReady(int, Set)} is called after the next surfacePlacement. This allows
-     * Transactions to get flushed into the syncTransaction before notifying {@link BLASTSyncEngine}
-     * that this WindowState is ready.
-     */
-    private boolean mNotifyBlastOnSurfacePlacement;
-
-    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -705,15 +694,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * default. The variable is cached, so we do not send too many updates to SF.
      */
     int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
-
-    /**
-     * BLASTSyncEngine ID corresponding to a sync-set for all
-     * our children. We add our children to this set in Sync,
-     * but we save it and don't mark it as ready until finishDrawing
-     * this way we have a two way latch between all our children finishing
-     * and drawing ourselves.
-     */
-    private int mLocalSyncId = -1;
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
@@ -977,16 +957,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSession.windowAddedLocked(mAttrs.packageName);
     }
 
+    boolean inSizeCompatMode() {
+        return inSizeCompatMode(mAttrs, mActivityRecord);
+    }
+
     /**
      * @return {@code true} if the application runs in size compatibility mode.
      * @see android.content.res.CompatibilityInfo#supportsScreen
-     * @see ActivityRecord#inSizeCompatMode
+     * @see ActivityRecord#inSizeCompatMode()
      */
-    boolean inSizeCompatMode() {
-        return (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
-                || (mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
-                        // Exclude starting window because it is not displayed by the application.
-                        && mAttrs.type != TYPE_APPLICATION_STARTING);
+    static boolean inSizeCompatMode(WindowManager.LayoutParams attrs, WindowToken windowToken) {
+        return (attrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
+                || (windowToken != null && windowToken.hasSizeCompatBounds()
+                // Exclude starting window because it is not displayed by the application.
+                && attrs.type != TYPE_APPLICATION_STARTING);
     }
 
     /**
@@ -1224,14 +1208,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     Math.min(windowFrames.mStableFrame.bottom, windowFrames.mFrame.bottom));
         }
 
-        if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            final WmDisplayCutout c = windowFrames.mDisplayCutout.calculateRelativeTo(
-                    windowFrames.mDisplayFrame);
-            windowFrames.calculateDockedDividerInsets(c.getDisplayCutout().getSafeInsets());
-        } else {
-            windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
-                    getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
-        }
+        windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
+                getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
 
         windowFrames.setDisplayCutout(
                 windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
@@ -1545,7 +1523,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * modification according to the state of transient bars.
      */
     InsetsState getInsetsState() {
-        return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
+        InsetsState state = getDisplayContent().getInsetsPolicy().getInsetsForWindow(this);
+        if (inSizeCompatMode()) {
+            state = new InsetsState(state, true);
+            state.scale(mInvGlobalScale);
+        }
+        return state;
     }
 
     @Override
@@ -2228,7 +2211,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void removeIfPossible() {
         super.removeIfPossible();
         removeIfPossible(false /*keepVisibleDeadWindow*/);
-        immediatelyNotifyBlastSync();
     }
 
     private void removeIfPossible(boolean keepVisibleDeadWindow) {
@@ -3607,11 +3589,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
         outFrames.displayCutout.set(mWindowFrames.mDisplayCutout.getDisplayCutout());
-
-        // TODO(b/149813814): Remove legacy insets.
-        outFrames.contentInsets.set(mWindowFrames.mLastContentInsets);
-        outFrames.visibleInsets.set(mWindowFrames.mLastVisibleInsets);
-        outFrames.stableInsets.set(mWindowFrames.mLastStableInsets);
     }
 
     void reportResized() {
@@ -5330,7 +5307,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateFrameRateSelectionPriorityIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(SurfaceControl.getGlobalTransaction(), true);
-        notifyBlastSyncTransaction();
         super.prepareSurfaces();
     }
 
@@ -5644,7 +5620,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * into the state of the control target.
      *
      * @param insetProvider the provider which should not be visible to the client.
-     * @see InsetsStateController#getInsetsForDispatch(WindowState)
+     * @see InsetsStateController#getInsetsForWindow(WindowState)
      */
     void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
         mControllableInsetProvider = insetProvider;
@@ -5761,13 +5737,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setViewVisibility(int viewVisibility) {
         mViewVisibility = viewVisibility;
-        // The viewVisibility is set to GONE with a client request to relayout. If this occurs and
-        // there's a blast sync transaction waiting, finishDrawing will never be called since the
-        // client will not render when visibility is GONE. Therefore, call finishDrawing here to
-        // prevent system server from blocking on a window that will not draw.
-        if (viewVisibility == View.GONE && mUsingBLASTSyncTransaction) {
-            immediatelyNotifyBlastSync();
-        }
     }
 
     SurfaceControl getClientViewRootSurface() {
@@ -5775,86 +5744,57 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
-            int waitingId) {
-        // If the window is goneForLayout, relayout won't be called so we'd just wait forever.
-        if (isGoneForLayout()) {
+    boolean prepareSync() {
+        if (!super.prepareSync()) {
             return false;
         }
-        boolean willSync = setPendingListener(waitingListener, waitingId);
-        if (!willSync) {
-            return false;
-        }
-        requestRedrawForSync();
-
-        mLocalSyncId = mBLASTSyncEngine.startSyncSet(this);
-        addChildrenToSyncSet(mLocalSyncId);
-
         // In the WindowContainer implementation we immediately mark ready
         // since a generic WindowContainer only needs to wait for its
         // children to finish and is immediately ready from its own
         // perspective but at the WindowState level we need to wait for ourselves
-        // to draw even if the children draw first our don't need to sync, so we omit
-        // the set ready call until later in finishDrawing()
+        // to draw even if the children draw first our don't need to sync, so we start
+        // in WAITING state rather than READY.
+        mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
+        requestRedrawForSync();
+
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
             BLAST_TIMEOUT_DURATION);
-
         return true;
     }
 
     boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
-        if (!mUsingBLASTSyncTransaction) {
+        if (!onSyncFinishedDrawing()) {
             return mWinAnimator.finishDrawingLocked(postDrawTransaction);
         }
 
         if (postDrawTransaction != null) {
-            mBLASTSyncTransaction.merge(postDrawTransaction);
+            mSyncTransaction.merge(postDrawTransaction);
         }
 
-        mNotifyBlastOnSurfacePlacement = true;
         mWinAnimator.finishDrawingLocked(null);
         // We always want to force a traversal after a finish draw for blast sync.
         return true;
     }
 
-    private void notifyBlastSyncTransaction() {
+    void immediatelyNotifyBlastSync() {
+        finishDrawing(null);
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
-
-        if (!mNotifyBlastOnSurfacePlacement || mWaitingListener == null) {
-            mNotifyBlastOnSurfacePlacement = false;
-            return;
-        }
+        if (!useBLASTSync()) return;
 
         final Task task = getTask();
         if (task != null) {
             final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
             if (t != null) {
-                mBLASTSyncTransaction.merge(t);
+                mSyncTransaction.merge(t);
             }
             task.setMainWindowSizeChangeTransaction(null);
         }
-
-        // If localSyncId is >0 then we are syncing with children and will
-        // invoke transaction ready from our own #transactionReady callback
-        // we just need to signal our side of the sync (setReady). But if we
-        // have no sync operation at this level transactionReady will never
-        // be invoked and we need to invoke it ourself.
-        if (mLocalSyncId >= 0) {
-            mBLASTSyncEngine.setReady(mLocalSyncId);
-            return;
-        }
-
-        mWaitingListener.onTransactionReady(mWaitingSyncId,  Collections.singleton(this));
-
-        mWaitingSyncId = 0;
-        mWaitingListener = null;
-        mNotifyBlastOnSurfacePlacement = false;
     }
 
-    void immediatelyNotifyBlastSync() {
-        finishDrawing(null);
-        notifyBlastSyncTransaction();
+    @Override
+    boolean fillsParent() {
+        return mAttrs.type == TYPE_APPLICATION_STARTING;
     }
 
     /**
