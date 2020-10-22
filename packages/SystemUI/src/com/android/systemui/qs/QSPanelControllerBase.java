@@ -39,6 +39,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 /**
  * Controller for QSPanel views.
  *
@@ -48,7 +51,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         implements Dumpable{
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
-    private final MediaHost mMediaHost;
+    protected final MediaHost mMediaHost;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
     private final DumpManager mDumpManager;
@@ -72,6 +75,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 }
             };
 
+    private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
+        mView.onMediaVisibilityChanged(visible);
+        switchTileLayout(false);
+        return null;
+    };
+
     protected QSPanelControllerBase(T view, QSTileHost host,
             QSCustomizerController qsCustomizerController, MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
@@ -91,14 +100,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mQsTileRevealController.setExpansion(mRevealExpansion);
         }
 
+        mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
+        mView.onMediaVisibilityChanged(mMediaHost.getVisible());
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.addCallback(mQSHostCallback);
-        mMediaHost.addVisibilityChangeListener(aBoolean -> {
-            switchTileLayout(false);
-            return null;
-        });
         setTiles();
         switchTileLayout(true);
+
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
     }
 
@@ -106,6 +114,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected void onViewDetached() {
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.removeCallback(mQSHostCallback);
+
+        mMediaHost.removeVisibilityChangeListener(mMediaHostVisibilityListener);
 
         for (TileRecord record : mRecords) {
             record.tile.removeCallbacks();

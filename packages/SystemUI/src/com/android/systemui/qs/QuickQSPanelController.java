@@ -22,6 +22,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -55,6 +56,14 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             DumpManager dumpManager) {
         super(view, qsTileHost, qsCustomizerController, mediaHost, metricsLogger, uiEventLogger,
                 dumpManager);
+    }
+
+    @Override
+    protected void onInit() {
+        super.onInit();
+        mMediaHost.setExpansion(0.0f);
+        mMediaHost.setShowsOnlyActiveMedia(true);
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
     }
 
     @Override

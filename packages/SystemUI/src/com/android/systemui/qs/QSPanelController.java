@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -99,6 +100,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Override
     public void onInit() {
         super.onInit();
+        mMediaHost.setExpansion(1);
+        mMediaHost.setShowsOnlyActiveMedia(false);
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
         mBrightnessSlider.init();
     }
@@ -106,6 +110,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
+
+        mView.updateMediaDisappearParameters();
+
         mTunerService.addTunable(mView, QS_SHOW_BRIGHTNESS);
         mView.updateResources();
         if (mView.isListening()) {
