@@ -175,7 +175,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 AccessibilityEvent.TYPE_TOUCH_INTERACTION_END,
                 mDetermineUserIntentTimeout);
         if (detector == null) {
-            mGestureDetector = new GestureManifold(context, this, mState);
+            mGestureDetector = new GestureManifold(context, this, mState, mHandler);
         } else {
             mGestureDetector = detector;
         }
@@ -353,7 +353,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
     public boolean onGestureStarted() {
         // We have to perform gesture detection, so
         // clear the current state and try to detect.
-        mState.startGestureDetecting();
         mSendHoverEnterAndMoveDelayed.cancel();
         mSendHoverExitDelayed.cancel();
         mExitGestureDetectionModeDelayed.post();
@@ -1107,7 +1106,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     private boolean shouldPerformGestureDetection(MotionEvent event) {
-        if (mState.isDelegating()) {
+        if (mState.isDelegating() || mState.isDragging()) {
             return false;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -1200,6 +1199,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
         }
 
         public void run() {
+            if (mReceivedPointerTracker.getReceivedPointerDownCount() > 1) {
+                // Multi-finger touch exploration doesn't make sense.
+                Slog.e(
+                        LOG_TAG,
+                        "Attempted touch exploration with "
+                                + mReceivedPointerTracker.getReceivedPointerDownCount()
+                                + " pointers down.");
+                return;
+            }
             // Send an accessibility event to announce the touch exploration start.
             mDispatcher.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
