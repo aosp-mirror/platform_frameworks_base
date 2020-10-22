@@ -17,11 +17,10 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import com.android.wm.shell.flicker.NonRotationTestBase
-import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_COMPONENT_NAME
 import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_LABEL
-import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_SECONDARY_COMPONENT_NAME
 import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_SECONDARY_LABEL
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import com.android.wm.shell.flicker.testapp.Components
 
 abstract class SplitScreenTestBase(
     rotationName: String,
@@ -29,8 +28,8 @@ abstract class SplitScreenTestBase(
 ) : NonRotationTestBase(rotationName, rotation) {
     protected val splitScreenApp = SplitScreenHelper(instrumentation,
             TEST_APP_SPLITSCREEN_PRIMARY_LABEL,
-            TEST_APP_SPLITSCREEN_PRIMARY_COMPONENT_NAME)
+            Components.SplitScreenActivity())
     protected val secondaryApp = SplitScreenHelper(instrumentation,
             TEST_APP_SPLITSCREEN_SECONDARY_LABEL,
-            TEST_APP_SPLITSCREEN_SECONDARY_COMPONENT_NAME)
+            Components.SplitScreenSecondaryActivity())
 }

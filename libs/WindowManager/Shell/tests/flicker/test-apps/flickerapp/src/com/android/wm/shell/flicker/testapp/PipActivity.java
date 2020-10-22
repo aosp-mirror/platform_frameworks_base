@@ -24,6 +24,11 @@ import static android.media.session.PlaybackState.STATE_PAUSED;
 import static android.media.session.PlaybackState.STATE_PLAYING;
 import static android.media.session.PlaybackState.STATE_STOPPED;
 
+import static com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP;
+import static com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_SET_REQUESTED_ORIENTATION;
+import static com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP;
+import static com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_PIP_ORIENTATION;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
@@ -32,12 +37,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Rational;
 import android.view.View;
 import android.view.Window;
@@ -50,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PipActivity extends Activity {
+    private static final String TAG = PipActivity.class.getSimpleName();
     /**
      * A media session title for when the session is in {@link STATE_PLAYING}.
      * TvPipNotificationTests check whether the actual notification title matches this string.
@@ -88,27 +94,43 @@ public class PipActivity extends Activity {
 
     private final List<RemoteAction> mSwitchOffActions = new ArrayList<>();
     private final List<RemoteAction> mSwitchOnActions = new ArrayList<>();
-    private final BroadcastReceiver mCustomActionReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case ACTION_SWITCH_ON:
-                    mPipParamsBuilder.setActions(mSwitchOnActions);
-                    break;
-                case ACTION_SWITCH_OFF:
-                    mPipParamsBuilder.setActions(mSwitchOffActions);
-                    break;
-                case ACTION_CLEAR:
-                    mPipParamsBuilder.setActions(Collections.emptyList());
-                    break;
-                case ACTION_NO_OP:
-                default:
-                    return;
+            if (isInPictureInPictureMode()) {
+                switch (intent.getAction()) {
+                    case ACTION_SWITCH_ON:
+                        mPipParamsBuilder.setActions(mSwitchOnActions);
+                        break;
+                    case ACTION_SWITCH_OFF:
+                        mPipParamsBuilder.setActions(mSwitchOffActions);
+                        break;
+                    case ACTION_CLEAR:
+                        mPipParamsBuilder.setActions(Collections.emptyList());
+                        break;
+                    case ACTION_NO_OP:
+                        return;
+                    default:
+                        Log.w(TAG, "Unhandled action=" + intent.getAction());
+                        return;
+                }
+                setPictureInPictureParams(mPipParamsBuilder.build());
+            } else {
+                switch (intent.getAction()) {
+                    case ACTION_ENTER_PIP:
+                        enterPip(null);
+                        break;
+                    case ACTION_SET_REQUESTED_ORIENTATION:
+                        setRequestedOrientation(Integer.parseInt(intent.getStringExtra(
+                                EXTRA_PIP_ORIENTATION)));
+                        break;
+                    default:
+                        Log.w(TAG, "Unhandled action=" + intent.getAction());
+                        return;
+                }
             }
-            setPictureInPictureParams(mPipParamsBuilder.build());
         }
     };
-    private boolean mIsReceiverRegistered = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -160,34 +182,23 @@ public class PipActivity extends Activity {
         final RemoteAction clearAllAction = buildRemoteAction(icon, PIP_ACTION_CLEAR, ACTION_CLEAR);
         mSwitchOffActions.addAll(Arrays.asList(switchOnAction, clearAllAction));
         mSwitchOnActions.addAll(Arrays.asList(noOpAction, switchOffAction, clearAllAction));
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_NO_OP);
+        filter.addAction(ACTION_SWITCH_ON);
+        filter.addAction(ACTION_SWITCH_OFF);
+        filter.addAction(ACTION_CLEAR);
+        filter.addAction(ACTION_SET_REQUESTED_ORIENTATION);
+        filter.addAction(ACTION_ENTER_PIP);
+        registerReceiver(mBroadcastReceiver, filter);
+
+        handleIntentExtra(getIntent());
     }
 
     @Override
     protected void onDestroy() {
-        if (mIsReceiverRegistered) {
-            unregisterReceiver(mCustomActionReceiver);
-            mIsReceiverRegistered = false;
-        }
+        unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
-    }
-
-    @Override
-    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
-            Configuration newConfig) {
-        if (isInPictureInPictureMode && !mIsReceiverRegistered) {
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction(ACTION_NO_OP);
-            filter.addAction(ACTION_SWITCH_ON);
-            filter.addAction(ACTION_SWITCH_OFF);
-            filter.addAction(ACTION_CLEAR);
-            registerReceiver(mCustomActionReceiver, filter);
-
-            mIsReceiverRegistered = true;
-        } else if (!isInPictureInPictureMode && mIsReceiverRegistered) {
-            unregisterReceiver(mCustomActionReceiver);
-
-            mIsReceiverRegistered = false;
-        }
     }
 
     private RemoteAction buildRemoteAction(Icon icon, String label, String action) {
@@ -253,5 +264,18 @@ public class PipActivity extends Activity {
         mMediaSession.setPlaybackState(mPlaybackState);
         mMediaSession.setMetadata(mMediaMetadataBuilder.build());
         mMediaSession.setActive(newState != STATE_STOPPED);
+    }
+
+    private void handleIntentExtra(Intent intent) {
+        // Set the fixed orientation if requested
+        if (intent.hasExtra(EXTRA_PIP_ORIENTATION)) {
+            final int ori = Integer.parseInt(getIntent().getStringExtra(EXTRA_PIP_ORIENTATION));
+            setRequestedOrientation(ori);
+        }
+        // Enter picture in picture with the given aspect ratio if provided
+        if (intent.hasExtra(EXTRA_ENTER_PIP)) {
+            mPipParamsBuilder.setActions(mSwitchOnActions);
+            enterPip(null);
+        }
     }
 }

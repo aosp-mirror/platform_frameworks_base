@@ -26,8 +26,8 @@ import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_COMPONENT_NAME
 import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_LABEL
+import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 
@@ -36,7 +36,7 @@ class PipAppHelper(
 ) : BaseAppHelper(
         instrumentation,
         TEST_APP_PIP_ACTIVITY_LABEL,
-        TEST_APP_PIP_ACTIVITY_COMPONENT_NAME
+        Components.PipActivity()
 ) {
     private val mediaSessionManager: MediaSessionManager
         get() = context.getSystemService(MediaSessionManager::class.java)

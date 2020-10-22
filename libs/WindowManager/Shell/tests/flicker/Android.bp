@@ -33,6 +33,7 @@ android_test {
         "wm-flicker-common-assertions",
         "wm-flicker-common-app-helpers",
         "platform-test-annotations",
+        "wmshell-flicker-test-components",
     ],
 }
 
@@ -54,5 +55,6 @@ android_test {
         "wm-flicker-common-assertions",
         "wm-flicker-common-app-helpers",
         "platform-test-annotations",
+        "wmshell-flicker-test-components",
     ],
 }
