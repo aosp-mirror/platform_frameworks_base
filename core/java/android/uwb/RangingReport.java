@@ -17,11 +17,13 @@
 package android.uwb;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class contains the UWB ranging data
@@ -48,6 +50,31 @@ public final class RangingReport implements Parcelable {
     @NonNull
     public List<RangingMeasurement> getMeasurements() {
         return mRangingMeasurements;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof RangingReport) {
+            RangingReport other = (RangingReport) obj;
+            return mRangingMeasurements.equals(other.getMeasurements());
+        }
+
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRangingMeasurements);
     }
 
     @Override
