@@ -29,7 +29,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
-import android.hardware.input.InputManager;
 import android.hardware.vibrator.IVibrator;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -60,13 +59,13 @@ import android.os.WorkSource;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.vibrator.InputDeviceDelegate;
 import com.android.server.vibrator.VibrationScaler;
 import com.android.server.vibrator.VibrationSettings;
 
@@ -82,15 +81,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class VibratorService extends IVibratorService.Stub
-        implements InputManager.InputDeviceListener {
+/** System implementation of {@link IVibratorService}. */
+public class VibratorService extends IVibratorService.Stub {
     private static final String TAG = "VibratorService";
     private static final SimpleDateFormat DEBUG_DATE_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     private static final boolean DEBUG = false;
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
 
-    private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = { 0, 30, 100, 30 };
+    private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = {0, 30, 100, 30};
 
     // Default vibration attributes. Used when vibration is requested without attributes
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
@@ -122,18 +121,12 @@ public class VibratorService extends IVibratorService.Stub
     private final IBatteryStats mBatteryStatsService;
     private final String mSystemUiPackage;
     private PowerManagerInternal mPowerManagerInternal;
-    private InputManager mIm;
     private VibrationSettings mVibrationSettings;
     private VibrationScaler mVibrationScaler;
+    private InputDeviceDelegate mInputDeviceDelegate;
 
     private final NativeWrapper mNativeWrapper;
     private volatile VibrateWaveformThread mThread;
-
-    // mInputDeviceVibrators lock should be acquired after mLock, if both are
-    // to be acquired
-    private final ArrayList<Vibrator> mInputDeviceVibrators = new ArrayList<>();
-    private boolean mVibrateInputDevicesSetting; // guarded by mInputDeviceVibrators
-    private boolean mInputDeviceListenerRegistered; // guarded by mInputDeviceVibrators
 
     @GuardedBy("mLock")
     private Vibration mCurrentVibration;
@@ -343,6 +336,7 @@ public class VibratorService extends IVibratorService.Stub
         public enum Status {
             RUNNING,
             FINISHED,
+            FORWARDED_TO_INPUT_DEVICES,
             CANCELLED,
             ERROR_APP_OPS,
             IGNORED,
@@ -577,9 +571,9 @@ public class VibratorService extends IVibratorService.Stub
     public void systemReady() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorService#systemReady");
         try {
-            mIm = mContext.getSystemService(InputManager.class);
             mVibrationSettings = new VibrationSettings(mContext, mH);
             mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
+            mInputDeviceDelegate = new InputDeviceDelegate(mContext, mH);
 
             mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
             mPowerManagerInternal.registerLowPowerModeObserver(
@@ -707,12 +701,8 @@ public class VibratorService extends IVibratorService.Stub
 
     @Override // Binder call
     public boolean hasAmplitudeControl() {
-        synchronized (mInputDeviceVibrators) {
-            // Input device vibrators don't support amplitude controls yet, but are still used over
-            // the system vibrator when connected.
-            return hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)
-                    && mInputDeviceVibrators.isEmpty();
-        }
+        // Input device vibrators always support amplitude controls.
+        return mInputDeviceDelegate.isAvailable() || hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL);
     }
 
     @Override // Binder call
@@ -1059,10 +1049,8 @@ public class VibratorService extends IVibratorService.Stub
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
                 doVibratorOn(vib);
             } else if (vib.effect instanceof VibrationEffect.Waveform) {
-                // mThread better be null here. doCancelVibrate should always be
-                // called before startNextVibrationLocked or startVibrationLocked.
-                mThread = new VibrateWaveformThread(vib);
-                mThread.start();
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+                doVibratorWaveformEffectLocked(vib);
             } else if (vib.effect instanceof VibrationEffect.Prebaked) {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
                 doVibratorPrebakedEffectLocked(vib);
@@ -1193,7 +1181,8 @@ public class VibratorService extends IVibratorService.Stub
 
     private void updateVibrators() {
         synchronized (mLock) {
-            boolean devicesUpdated = updateInputDeviceVibratorsLocked();
+            boolean devicesUpdated = mInputDeviceDelegate.updateInputDeviceVibrators(
+                    mVibrationSettings.shouldVibrateInputDevices());
             boolean lowPowerModeUpdated = updateLowPowerModeLocked();
 
             if (devicesUpdated || lowPowerModeUpdated) {
@@ -1203,41 +1192,6 @@ public class VibratorService extends IVibratorService.Stub
 
             updateAlwaysOnLocked();
         }
-    }
-
-    private boolean updateInputDeviceVibratorsLocked() {
-        boolean changed = false;
-        boolean vibrateInputDevices = mVibrationSettings.shouldVibrateInputDevices();
-        if (vibrateInputDevices != mVibrateInputDevicesSetting) {
-            changed = true;
-            mVibrateInputDevicesSetting = vibrateInputDevices;
-        }
-
-        if (mVibrateInputDevicesSetting) {
-            if (!mInputDeviceListenerRegistered) {
-                mInputDeviceListenerRegistered = true;
-                mIm.registerInputDeviceListener(this, mH);
-            }
-        } else {
-            if (mInputDeviceListenerRegistered) {
-                mInputDeviceListenerRegistered = false;
-                mIm.unregisterInputDeviceListener(this);
-            }
-        }
-
-        mInputDeviceVibrators.clear();
-        if (mVibrateInputDevicesSetting) {
-            int[] ids = mIm.getInputDeviceIds();
-            for (int i = 0; i < ids.length; i++) {
-                InputDevice device = mIm.getInputDevice(ids[i]);
-                Vibrator vibrator = device.getVibrator();
-                if (vibrator.hasVibrator()) {
-                    mInputDeviceVibrators.add(vibrator);
-                }
-            }
-            return true;
-        }
-        return changed;
     }
 
     private boolean updateLowPowerModeLocked() {
@@ -1268,57 +1222,36 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
-    @Override
-    public void onInputDeviceAdded(int deviceId) {
-        updateVibrators();
-    }
-
-    @Override
-    public void onInputDeviceChanged(int deviceId) {
-        updateVibrators();
-    }
-
-    @Override
-    public void onInputDeviceRemoved(int deviceId) {
-        updateVibrators();
-    }
-
     private boolean doVibratorExists() {
         // For now, we choose to ignore the presence of input devices that have vibrators
         // when reporting whether the device has a vibrator.  Applications often use this
         // information to decide whether to enable certain features so they expect the
         // result of hasVibrator() to be constant.  For now, just report whether
         // the device has a built-in vibrator.
-        //synchronized (mInputDeviceVibrators) {
-        //    return !mInputDeviceVibrators.isEmpty() || vibratorExists();
-        //}
         return mNativeWrapper.vibratorExists();
     }
 
     private void doVibratorOn(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOn");
         try {
-            synchronized (mInputDeviceVibrators) {
-                final VibrationEffect.OneShot oneShot = vib.effect.resolve(
-                        mDefaultVibrationAmplitude);
-                if (DEBUG) {
-                    Slog.d(TAG, "Turning vibrator on for " + oneShot.getDuration() + " ms"
-                            + " with amplitude " + oneShot.getAmplitude() + ".");
-                }
+            final VibrationEffect.OneShot oneShot = vib.effect.resolve(mDefaultVibrationAmplitude);
+            if (DEBUG) {
+                Slog.d(TAG, "Turning vibrator on for " + oneShot.getDuration() + " ms"
+                        + " with amplitude " + oneShot.getAmplitude() + ".");
+            }
+            boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
+                    vib.uid, vib.opPkg, oneShot, vib.reason, vib.attrs);
+            if (inputDevicesAvailable) {
+                // The set current vibration is no longer being played by this service, so drop it.
+                mCurrentVibration = null;
+                endVibrationLocked(vib, VibrationInfo.Status.FORWARDED_TO_INPUT_DEVICES);
+            } else {
                 noteVibratorOnLocked(vib.uid, oneShot.getDuration());
-                final int vibratorCount = mInputDeviceVibrators.size();
-                if (vibratorCount != 0) {
-                    for (int i = 0; i < vibratorCount; i++) {
-                        mInputDeviceVibrators.get(i).vibrate(vib.uid, vib.opPkg, oneShot,
-                                vib.reason, vib.attrs);
-                    }
-                } else {
-                    // Note: ordering is important here! Many haptic drivers will reset their
-                    // amplitude when enabled, so we always have to enable first, then set the
-                    // amplitude.
-                    mNativeWrapper.vibratorOn(oneShot.getDuration(), vib.id);
-                    doVibratorSetAmplitude(oneShot.getAmplitude());
-                }
+                // Note: ordering is important here! Many haptic drivers will reset their
+                // amplitude when enabled, so we always have to enable first, then set the
+                // amplitude.
+                mNativeWrapper.vibratorOn(oneShot.getDuration(), vib.id);
+                doVibratorSetAmplitude(oneShot.getAmplitude());
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -1334,19 +1267,34 @@ public class VibratorService extends IVibratorService.Stub
     private void doVibratorOff() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOff");
         try {
-            synchronized (mInputDeviceVibrators) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Turning vibrator off.");
-                }
-                noteVibratorOffLocked();
-                final int vibratorCount = mInputDeviceVibrators.size();
-                if (vibratorCount != 0) {
-                    for (int i = 0; i < vibratorCount; i++) {
-                        mInputDeviceVibrators.get(i).cancel();
-                    }
-                } else {
-                    mNativeWrapper.vibratorOff();
-                }
+            if (DEBUG) {
+                Slog.d(TAG, "Turning vibrator off.");
+            }
+            noteVibratorOffLocked();
+            boolean inputDevicesAvailable = mInputDeviceDelegate.cancelVibrateIfAvailable();
+            if (!inputDevicesAvailable) {
+                mNativeWrapper.vibratorOff();
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void doVibratorWaveformEffectLocked(Vibration vib) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorWaveformEffectLocked");
+        try {
+            boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
+                    vib.uid, vib.opPkg, vib.effect, vib.reason, vib.attrs);
+            if (inputDevicesAvailable) {
+                // The set current vibration is no longer being played by this service, so drop it.
+                mCurrentVibration = null;
+                endVibrationLocked(vib, VibrationInfo.Status.FORWARDED_TO_INPUT_DEVICES);
+            } else {
+                // mThread better be null here. doCancelVibrate should always be
+                // called before startNextVibrationLocked or startVibrationLocked.
+                mThread = new VibrateWaveformThread(vib);
+                mThread.start();
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -1358,12 +1306,9 @@ public class VibratorService extends IVibratorService.Stub
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorPrebakedEffectLocked");
         try {
             final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
-            final boolean usingInputDeviceVibrators;
-            synchronized (mInputDeviceVibrators) {
-                usingInputDeviceVibrators = !mInputDeviceVibrators.isEmpty();
-            }
-            // Input devices don't support prebaked effect, so skip trying it with them.
-            if (!usingInputDeviceVibrators) {
+            // Input devices don't support prebaked effect, so skip trying it with them and allow
+            // fallback to be attempted.
+            if (!mInputDeviceDelegate.isAvailable()) {
                 long duration = mNativeWrapper.vibratorPerformEffect(
                         prebaked.getId(), prebaked.getEffectStrength(), vib.id);
                 if (duration > 0) {
@@ -1401,15 +1346,17 @@ public class VibratorService extends IVibratorService.Stub
 
         try {
             final VibrationEffect.Composed composed = (VibrationEffect.Composed) vib.effect;
-            final boolean usingInputDeviceVibrators;
-            synchronized (mInputDeviceVibrators) {
-                usingInputDeviceVibrators = !mInputDeviceVibrators.isEmpty();
-            }
-            // Input devices don't support composed effect, so skip trying it with them.
-            if (usingInputDeviceVibrators || !hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-                endVibrationLocked(vib, VibrationInfo.Status.IGNORED_UNSUPPORTED);
+            boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
+                    vib.uid, vib.opPkg, composed, vib.reason, vib.attrs);
+            if (inputDevicesAvailable) {
+                // The set current vibration is no longer being played by this service, so drop it.
+                mCurrentVibration = null;
+                endVibrationLocked(vib, VibrationInfo.Status.FORWARDED_TO_INPUT_DEVICES);
+                return;
+            } else if (!hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
                 // The set current vibration is not actually playing, so drop it.
                 mCurrentVibration = null;
+                endVibrationLocked(vib, VibrationInfo.Status.IGNORED_UNSUPPORTED);
                 return;
             }
 
