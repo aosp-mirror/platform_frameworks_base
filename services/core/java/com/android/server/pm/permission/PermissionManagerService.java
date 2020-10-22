@@ -2988,7 +2988,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (String permission : ps.getGrantedPermissions()) {
             if (!pkg.getImplicitPermissions().contains(permission)) {
                 BasePermission bp = mSettings.getPermissionLocked(permission);
-                if (bp.isRuntime()) {
+                if (bp != null && bp.isRuntime()) {
                     int flags = ps.getPermissionFlags(permission);
 
                     if ((flags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
