@@ -16,11 +16,20 @@
 
 package com.android.server.pm;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+
 import android.content.IIntentReceiver;
+import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.google.android.collect.Lists;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -29,6 +38,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
 
 // runtest -c com.android.server.pm.PackageManagerServiceTest frameworks-services
 // bit FrameworksServicesTests:com.android.server.pm.PackageManagerServiceTest
@@ -132,5 +147,52 @@ public class PackageManagerServiceTest {
                 Assert.assertEquals(i == 5, scanFlag == PackageManagerService.SCAN_AS_SYSTEM_EXT);
             }
         }
+    }
+
+    @Test
+    public void testKnownPackageToString_shouldNotGetUnknown() {
+        final List<String> packageNames = new ArrayList<>();
+        for (int i = 0; i <= PackageManagerInternal.LAST_KNOWN_PACKAGE; i++) {
+            packageNames.add(PackageManagerInternal.knownPackageToString(i));
+        }
+        assertWithMessage(
+                "The Ids of KnownPackage should be continuous and the string representation "
+                        + "should not be unknown.").that(
+                packageNames).containsNoneIn(Lists.newArrayList("Unknown"));
+    }
+
+    @Test
+    public void testKnownPackage_lastKnownPackageIsTheLast() throws Exception {
+        final List<Integer> knownPackageIds = getKnownPackageIdsList();
+        assertWithMessage(
+                "The last KnownPackage Id should be assigned to PackageManagerInternal"
+                        + ".LAST_KNOWN_PACKAGE.").that(
+                knownPackageIds.get(knownPackageIds.size() - 1)).isEqualTo(
+                PackageManagerInternal.LAST_KNOWN_PACKAGE);
+    }
+
+    @Test
+    public void testKnownPackage_IdsShouldBeUniqueAndContinuous() throws Exception {
+        final List<Integer> knownPackageIds = getKnownPackageIdsList();
+        for (int i = 0, size = knownPackageIds.size(); i < size - 1; i++) {
+            assertWithMessage(
+                    "The KnownPackage Ids should be unique and continuous. KnownPackageIds = "
+                            + Arrays.toString(knownPackageIds.toArray())).that(
+                    knownPackageIds.get(i) + 1).isEqualTo(knownPackageIds.get(i + 1));
+        }
+    }
+
+    private List<Integer> getKnownPackageIdsList() throws IllegalAccessException {
+        final ArrayList<Integer> knownPackageIds = new ArrayList<>();
+        final Field[] allFields = PackageManagerInternal.class.getDeclaredFields();
+        for (Field field : allFields) {
+            final int modifier = field.getModifiers();
+            if (isPublic(modifier) && isStatic(modifier) && isFinal(modifier)
+                    && Pattern.matches("PACKAGE(_[A-Z]+)+", field.getName())) {
+                knownPackageIds.add(field.getInt(null));
+            }
+        }
+        Collections.sort(knownPackageIds);
+        return knownPackageIds;
     }
 }
