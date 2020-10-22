@@ -1628,6 +1628,10 @@ package android.telephony {
     method public static void setMinMatchForTest(int);
   }
 
+  public class PhoneStateListener {
+    method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+  }
+
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     ctor @Deprecated public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int);
   }

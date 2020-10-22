@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
@@ -935,7 +936,6 @@ public class PhoneStateListener {
      *                           {@link SubscriptionManager#getDefaultSubscriptionId})
      *                           and the value as the list of {@link EmergencyNumber};
      *                           null if this information is not available.
-     * @hide
      */
     public void onEmergencyNumberListChanged(
             @NonNull Map<Integer, List<EmergencyNumber>> emergencyNumberList) {
@@ -945,13 +945,46 @@ public class PhoneStateListener {
     /**
      * Callback invoked when an outgoing call is placed to an emergency number.
      *
-     * @param placedEmergencyNumber the emergency number {@link EmergencyNumber} the call is placed
-     *                              to.
+     * This method will be called when an emergency call is placed on any subscription (including
+     * the no-SIM case), regardless of which subscription this listener was registered on.
+     *
+     * This method is deprecated. Both this method and the new
+     * {@link #onOutgoingEmergencyCall(EmergencyNumber, int)} will be called when an outgoing
+     * emergency call is placed.
+     *
+     * @param placedEmergencyNumber The {@link EmergencyNumber} the emergency call was placed to.
+     *
+     * @deprecated Use {@link #onOutgoingEmergencyCall(EmergencyNumber, int)}.
      * @hide
      */
     @SystemApi
+    @Deprecated
     public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
         // default implementation empty
+    }
+
+    /**
+     * Callback invoked when an outgoing call is placed to an emergency number.
+     *
+     * This method will be called when an emergency call is placed on any subscription (including
+     * the no-SIM case), regardless of which subscription this listener was registered on.
+     *
+     * Both this method and the deprecated {@link #onOutgoingEmergencyCall(EmergencyNumber)} will be
+     * called when an outgoing emergency call is placed. You should only implement one of these
+     * methods.
+     *
+     * @param placedEmergencyNumber The {@link EmergencyNumber} the emergency call was placed to.
+     * @param subscriptionId The subscription ID used to place the emergency call. If the
+     *                       emergency call was placed without a valid subscription (e.g. when there
+     *                       are no SIM cards in the device), this will be equal to
+     *                       {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
+            int subscriptionId) {
     }
 
     /**
@@ -1331,13 +1364,19 @@ public class PhoneStateListener {
                             () -> psl.onEmergencyNumberListChanged(emergencyNumberList)));
         }
 
-        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
+        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
+                int subscriptionId) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
                             () -> psl.onOutgoingEmergencyCall(placedEmergencyNumber)));
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onOutgoingEmergencyCall(placedEmergencyNumber,
+                                    subscriptionId)));
         }
 
         public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
