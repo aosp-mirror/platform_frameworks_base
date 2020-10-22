@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"미디어"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"현재 세션을 숨깁니다."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"현재 세션은 숨길 수 없습니다."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"닫기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"설정"</string>

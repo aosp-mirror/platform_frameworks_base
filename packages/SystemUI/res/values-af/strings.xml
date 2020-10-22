@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Laai tans aanbevelings"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Versteek die huidige sessie."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Huidige sessie kan nie versteek word nie."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Maak toe"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Hervat"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Instellings"</string>

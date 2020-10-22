@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"பரிந்துரைகளை ஏற்றுகிறது"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"மீடியா"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"இந்த அமர்வை மறையுங்கள்."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"தற்போதைய அமர்வை மறைக்க முடியாது."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"மூடுக"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"அமைப்புகள்"</string>

@@ -113,10 +113,10 @@
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रेकॉर्डिंग हटवताना एरर आली"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"परवानग्या मिळवता आल्या नाहीत"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन रेकॉर्डिंग सुरू करताना एरर आली"</string>
-    <string name="usb_preference_title" msgid="1439924437558480718">"USB फाईल स्थानांतरण पर्याय"</string>
+    <string name="usb_preference_title" msgid="1439924437558480718">"USB फाइल स्थानांतरण पर्याय"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"मीडिया प्लेअर म्हणून माउंट करा (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"कॅमेरा म्हणून माउंट करा (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac साठी Android फाईल स्थानांतर अ‍ॅप इंस्टॉल करा"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac साठी Android फाइल स्थानांतर अ‍ॅप इंस्टॉल करा"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"मागे"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"होम"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"मेनू"</string>
@@ -288,7 +288,7 @@
     <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"स्थान अहवाल बंद केला."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"स्थान अहवाल सुरू केला."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> साठी अलार्म सेट केला."</string>
-    <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"पॅनेल बंद करा."</string>
+    <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"पॅनल बंद करा."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"अधिक वेळ."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"कमी वेळ."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="7606563260714825190">"फ्लॅशलाइट बंद."</string>
@@ -624,10 +624,10 @@
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"फोन व्हायब्रेटवर आहे"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"फोन म्यूट केला"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा म्यूट केल्या जाऊ शकतात."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा म्यूट केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. नि:शब्द करण्यासाठी टॅप करा."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. म्यूट करण्यासाठी टॅप करा."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करा"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"म्यूट काढून टाका"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"व्हायब्रेट करा"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"सध्याचे सेशन लपवा."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"सध्याचे सेशन लपवता येणार नाही."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"डिसमिस करा"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग्ज"</string>
