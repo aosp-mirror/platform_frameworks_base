@@ -20,6 +20,7 @@ import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -29,6 +30,8 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.util.ViewController;
 
 import java.util.Locale;
@@ -47,6 +50,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final SysuiColorExtractor mColorExtractor;
     private final ClockManager mClockManager;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
+    private final NotificationIconAreaController mNotificationIconAreaController;
+
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
@@ -79,13 +85,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             @Main Resources resources,
             StatusBarStateController statusBarStateController,
             SysuiColorExtractor colorExtractor, ClockManager clockManager,
-            KeyguardSliceViewController keyguardSliceViewController) {
+            KeyguardSliceViewController keyguardSliceViewController,
+            NotificationIconAreaController notificationIconAreaController) {
         super(keyguardClockSwitch);
         mResources = resources;
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
         mClockManager = clockManager;
         mKeyguardSliceViewController = keyguardSliceViewController;
+        mNotificationIconAreaController = notificationIconAreaController;
     }
 
     /**
@@ -105,6 +113,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mStatusBarStateController.addCallback(mStateListener);
         mColorExtractor.addOnColorsChangedListener(mColorsListener);
         mView.updateColors(getGradientColors());
+        updateAodIcons();
     }
 
     @Override
@@ -174,7 +183,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Update lockscreen mode that may change clock display.
      */
     void updateLockScreenMode(int mode) {
-        mView.updateLockScreenMode(mode);
+        mLockScreenMode = mode;
+        mView.updateLockScreenMode(mLockScreenMode);
+        updateAodIcons();
     }
 
     void updateTimeZone(TimeZone timeZone) {
@@ -185,6 +196,19 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         Patterns.update(mResources);
         mView.setFormat12Hour(Patterns.sClockView12);
         mView.setFormat24Hour(Patterns.sClockView24);
+    }
+
+    private void updateAodIcons() {
+        NotificationIconContainer nic = (NotificationIconContainer)
+                mView.findViewById(
+                        com.android.systemui.R.id.left_aligned_notification_icon_container);
+
+        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+            // alt icon area is set in KeyguardClockSwitchController
+            mNotificationIconAreaController.setupAodIcons(nic, mLockScreenMode);
+        } else {
+            nic.setVisibility(View.GONE);
+        }
     }
 
     private void setClockPlugin(ClockPlugin plugin) {
