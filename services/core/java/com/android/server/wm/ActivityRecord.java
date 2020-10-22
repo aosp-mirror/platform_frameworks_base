@@ -179,6 +179,7 @@ import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
@@ -4217,7 +4218,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Note that we ignore display frozen since we want the opening / closing transition type
         // can be updated correctly even display frozen, and it's safe since in applyAnimation will
         // still check DC#okToAnimate again if the transition animation is fine to apply.
-        if (okToAnimate(true /* ignoreFrozen */) && appTransition.isTransitionSet()) {
+        final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
+        if (okToAnimate(true /* ignoreFrozen */) && (appTransition.isTransitionSet()
+                || (recentsAnimating && !isActivityTypeHome()))) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
@@ -6086,7 +6089,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
+        final boolean show = isVisible() || isAnimating(PARENTS,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
