@@ -1223,8 +1223,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             SystemProperties.set(key, value);
         }
 
+        // TODO (b/137101239): clean up split system user codes
         boolean userManagerIsSplitSystemUser() {
             return UserManager.isSplitSystemUser();
+        }
+
+        boolean userManagerIsHeadlessSystemUserMode() {
+            return UserManager.isHeadlessSystemUserMode();
         }
 
         String getDevicePolicyFilePathForSystemUser() {
@@ -7215,7 +7220,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || (caller.hasPackage()
                 && isCallerDelegate(caller, DELEGATION_KEEP_UNINSTALLED_PACKAGES)));
 
-        // TODO In split system user mode, allow apps on user 0 to query the list
         synchronized (getLockObject()) {
             return getKeepUninstalledPackagesLocked();
         }
@@ -11960,6 +11964,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE:
                 case DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE:
                     return checkDeviceOwnerProvisioningPreCondition(callingUserId);
+                // TODO (b/137101239): clean up split system user codes
+                //  ACTION_PROVISION_MANAGED_USER and ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE
+                //  only supported on split-user systems.
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_USER:
                     return checkManagedUserProvisioningPreCondition(callingUserId);
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE:
@@ -11982,24 +11989,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mOwners.hasProfileOwner(deviceOwnerUserId)) {
             return CODE_USER_HAS_PROFILE_OWNER;
         }
-        if (!mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
+        // System user is always running in headless system user mode.
+        if (!mInjector.userManagerIsHeadlessSystemUserMode()
+                && !mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
             return CODE_USER_NOT_RUNNING;
         }
         if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
             return CODE_HAS_PAIRED;
         }
+        // TODO (b/137101239): clean up split system user codes
         if (isAdb) {
-            // if shell command runs after user setup completed check device status. Otherwise, OK.
+            // If shell command runs after user setup completed check device status. Otherwise, OK.
             if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                if (!mInjector.userManagerIsSplitSystemUser()) {
-                    if (mUserManager.getUserCount() > 1) {
-                        return CODE_NONSYSTEM_USER_EXISTS;
-                    }
-                    if (hasIncompatibleAccountsOrNonAdb) {
-                        return CODE_ACCOUNTS_NOT_EMPTY;
-                    }
-                } else {
-                    // STOPSHIP Do proper check in split user mode
+                // In non-headless system user mode, DO can be setup only if
+                // there's no non-system user
+                if (!mInjector.userManagerIsHeadlessSystemUserMode()
+                        && !mInjector.userManagerIsSplitSystemUser()
+                        && mUserManager.getUserCount() > 1) {
+                    return CODE_NONSYSTEM_USER_EXISTS;
+                }
+                if (hasIncompatibleAccountsOrNonAdb) {
+                    return CODE_ACCOUNTS_NOT_EMPTY;
                 }
             }
             return CODE_OK;
@@ -12009,19 +12019,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
                     return CODE_NOT_SYSTEM_USER;
                 }
-                // In non-split user mode, only provision DO before setup wizard completes
+                // Only provision DO before setup wizard completes
+                // TODO (b/171423186): implement deferred DO setup for headless system user mode
                 if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                     return CODE_USER_SETUP_COMPLETED;
                 }
-            } else {
+            }  else {
                 // STOPSHIP Do proper check in split user mode
             }
             return CODE_OK;
         }
     }
 
-    private int checkDeviceOwnerProvisioningPreCondition(@UserIdInt int deviceOwnerUserId) {
+    private int checkDeviceOwnerProvisioningPreCondition(@UserIdInt int callingUserId) {
         synchronized (getLockObject()) {
+            final int deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
+                    ? UserHandle.USER_SYSTEM
+                    : callingUserId;
+            Slog.i(LOG_TAG,
+                    String.format("Calling user %d, device owner will be set on user %d",
+                            callingUserId, deviceOwnerUserId));
             // hasIncompatibleAccountsOrNonAdb doesn't matter since the caller is not adb.
             return checkDeviceOwnerProvisioningPreConditionLocked(/* owner unknown */ null,
                     deviceOwnerUserId, /* isAdb= */ false,
@@ -12029,6 +12046,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    // TODO (b/137101239): clean up split system user codes
     private int checkManagedProfileProvisioningPreCondition(String packageName,
             @UserIdInt int callingUserId) {
         if (!hasFeatureManagedUsers()) {
@@ -12117,6 +12135,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return null;
     }
 
+    // TODO (b/137101239): clean up split system user codes
     private int checkManagedUserProvisioningPreCondition(int callingUserId) {
         if (!hasFeatureManagedUsers()) {
             return CODE_MANAGED_USERS_NOT_SUPPORTED;
@@ -12138,6 +12157,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return CODE_OK;
     }
 
+    // TODO (b/137101239): clean up split system user codes
     private int checkManagedShareableDeviceProvisioningPreCondition(int callingUserId) {
         if (!mInjector.userManagerIsSplitSystemUser()) {
             // ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE only supported on split-user systems.
@@ -12710,9 +12730,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
         if (userId == UserHandle.USER_SYSTEM) {
-            // The system user is always affiliated in a DO device, even if the DO is set on a
-            // different user. This could be the case if the DO is set in the primary user
-            // of a split user device.
+            // The system user is always affiliated in a DO device,
+            // even if in headless system user mode.
             return true;
         }
 
