@@ -19209,7 +19209,7 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putInt(Intent.EXTRA_UID, removedUid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, dataRemoved);
             extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
-            extras.putBoolean(Intent.EXTRA_REMOVED_BY_SYSTEM, removedBySystem);
+            extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
             if (isUpdate || isRemovedPackageSystemUpdate) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
