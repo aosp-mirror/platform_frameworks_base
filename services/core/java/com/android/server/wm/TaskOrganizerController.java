@@ -389,10 +389,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
-        // Don't send onTaskAppeared signal for task created by organizer since we will return it in
-        // the creation call.
-        if (task.mCreatedByOrganizer) return;
-
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.addTask(task);
     }
@@ -405,7 +401,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public TaskAppearedInfo createRootTask(int displayId, int windowingMode) {
+    public RunningTaskInfo createRootTask(int displayId, int windowingMode) {
         enforceStackPermission("createRootTask()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -422,11 +418,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                         true /* createdByOrganizer */);
                 RunningTaskInfo out = task.getTaskInfo();
                 mLastSentTaskInfos.put(task, out);
-                final TaskOrganizerState state =
-                        mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder());
-                final SurfaceControl outSurfaceControl = state.addTaskWithoutCallback(task,
-                        "TaskOrganizerController.createRootTask");
-                return new TaskAppearedInfo(task.getTaskInfo(), outSurfaceControl);
+                return out;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
