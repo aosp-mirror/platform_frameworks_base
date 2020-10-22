@@ -24,6 +24,9 @@ import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +54,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Top level container/controller for the BiometricPrompt UI.
@@ -76,6 +80,8 @@ public class AuthContainerView extends LinearLayout
 
     final Config mConfig;
     final int mEffectiveUserId;
+    @Nullable private final List<FingerprintSensorPropertiesInternal> mFpProps;
+    @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
     private final Handler mHandler;
     private final Injector mInjector;
     private final IBinder mWindowToken = new Binder();
@@ -111,7 +117,8 @@ public class AuthContainerView extends LinearLayout
         boolean mRequireConfirmation;
         int mUserId;
         String mOpPackageName;
-        @BiometricAuthenticator.Modality int mModalityMask;
+        int[] mSensorIds;
+        boolean mCredentialAllowed;
         boolean mSkipIntro;
         long mOperationId;
     }
@@ -159,9 +166,12 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public AuthContainerView build(@BiometricAuthenticator.Modality int modalityMask) {
-            mConfig.mModalityMask = modalityMask;
-            return new AuthContainerView(mConfig, new Injector());
+        public AuthContainerView build(int[] sensorIds, boolean credentialAllowed,
+                @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
+                @Nullable List<FaceSensorPropertiesInternal> faceProps) {
+            mConfig.mSensorIds = sensorIds;
+            mConfig.mCredentialAllowed = credentialAllowed;
+            return new AuthContainerView(mConfig, new Injector(), fpProps, faceProps);
         }
     }
 
@@ -242,11 +252,15 @@ public class AuthContainerView extends LinearLayout
     }
 
     @VisibleForTesting
-    AuthContainerView(Config config, Injector injector) {
+    AuthContainerView(Config config, Injector injector,
+            @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
+            @Nullable List<FaceSensorPropertiesInternal> faceProps) {
         super(config.mContext);
 
         mConfig = config;
         mInjector = injector;
+        mFpProps = fpProps;
+        mFaceProps = faceProps;
 
         mEffectiveUserId = mInjector.getUserManager(mContext)
                 .getCredentialOwnerProfile(mConfig.mUserId);
@@ -269,24 +283,29 @@ public class AuthContainerView extends LinearLayout
 
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
-            final @BiometricAuthenticator.Modality int biometricModality =
-                    config.mModalityMask & ~BiometricAuthenticator.TYPE_CREDENTIAL;
-
-            switch (biometricModality) {
-                case BiometricAuthenticator.TYPE_FINGERPRINT:
+            if (config.mSensorIds.length == 1) {
+                final int singleSensorAuthId = config.mSensorIds[0];
+                if (Utils.containsSensorId(mFpProps, singleSensorAuthId)) {
                     mBiometricView = (AuthBiometricFingerprintView)
                             factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
-                    break;
-                case BiometricAuthenticator.TYPE_FACE:
+                } else if (Utils.containsSensorId(mFaceProps, singleSensorAuthId)) {
                     mBiometricView = (AuthBiometricFaceView)
                             factory.inflate(R.layout.auth_biometric_face_view, null, false);
-                    break;
-                default:
-                    Log.e(TAG, "Unsupported biometric modality: " + biometricModality);
+                } else {
+                    // Unknown sensorId
+                    Log.e(TAG, "Unknown sensorId: " + singleSensorAuthId);
                     mBiometricView = null;
                     mBackgroundView = null;
                     mBiometricScrollView = null;
                     return;
+                }
+            } else {
+                // The UI currently only supports authentication with a single sensor.
+                Log.e(TAG, "Unsupported sensor array, length: " + config.mSensorIds.length);
+                mBiometricView = null;
+                mBackgroundView = null;
+                mBiometricScrollView = null;
+                return;
             }
         }
 
