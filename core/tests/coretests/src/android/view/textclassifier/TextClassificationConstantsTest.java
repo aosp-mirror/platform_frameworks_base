@@ -16,7 +16,7 @@
 
 package android.view.textclassifier;
 
-import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.provider.DeviceConfig;
 
@@ -26,73 +26,63 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.function.Consumer;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationConstantsTest {
-    private static final float EPSILON = 0.0001f;
 
     @Test
-    public void testLoadFromDeviceConfig_booleanValue() throws Exception {
-        // Saves config original value.
-        final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.LOCAL_TEXT_CLASSIFIER_ENABLED);
-
-        final TextClassificationConstants constants = new TextClassificationConstants();
-        try {
-            // Sets and checks different value.
-            setDeviceConfig(TextClassificationConstants.LOCAL_TEXT_CLASSIFIER_ENABLED, "false");
-            assertWithMessage(TextClassificationConstants.LOCAL_TEXT_CLASSIFIER_ENABLED)
-                    .that(constants.isLocalTextClassifierEnabled()).isFalse();
-        } finally {
-            // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.LOCAL_TEXT_CLASSIFIER_ENABLED,
-                    originalValue);
-        }
+    public void booleanSettings() {
+        assertSettings(
+                TextClassificationConstants.LOCAL_TEXT_CLASSIFIER_ENABLED,
+                "false",
+                settings -> assertThat(settings.isLocalTextClassifierEnabled()).isFalse());
     }
 
     @Test
-    public void testLoadFromDeviceConfig_IntValue() throws Exception {
-        // Saves config original value.
-        final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH);
-
-        final TextClassificationConstants constants = new TextClassificationConstants();
-        try {
-            // Sets and checks different value.
-            setDeviceConfig(TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH, "8");
-            assertWithMessage(TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH)
-                    .that(constants.getGenerateLinksMaxTextLength()).isEqualTo(8);
-        } finally {
-            // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH,
-                    originalValue);
-        }
+    public void intSettings() {
+        assertSettings(
+                TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH,
+                "128",
+                settings -> assertThat(settings.getGenerateLinksMaxTextLength()).isEqualTo(128));
     }
 
     @Test
-    public void testLoadFromDeviceConfig_StringValue() throws Exception {
-        // Saves config original value.
-        final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE);
+    public void stringSettings() {
+        assertSettings(
+                TextClassificationConstants.TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
+                "com.example.textclassifier",
+                settings -> assertThat(
+                        settings.getTextClassifierServicePackageOverride())
+                        .isEqualTo("com.example.textclassifier"));
+    }
 
-        final TextClassificationConstants constants = new TextClassificationConstants();
+    @Test
+    public void longSettings() {
+        assertSettings(
+                TextClassificationConstants.SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND,
+                "1",
+                settings -> assertThat(
+                        settings.getSystemTextClassifierApiTimeoutInSecond())
+                        .isEqualTo(1));
+    }
+
+    private static void assertSettings(
+            String key, String value, Consumer<TextClassificationConstants> settingsConsumer) {
+        final String originalValue =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, key);
+        TextClassificationConstants settings = new TextClassificationConstants();
         try {
-            // Sets and checks different value.
-            final String testTextClassifier = "com.example.textclassifier";
-            setDeviceConfig(TextClassificationConstants.TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
-                    testTextClassifier);
-            assertWithMessage(TextClassificationConstants.TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE)
-                    .that(constants.getTextClassifierServicePackageOverride()).isEqualTo(
-                    testTextClassifier);
+            setDeviceConfig(key, value);
+            settingsConsumer.accept(settings);
         } finally {
-            // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
-                    originalValue);
+            setDeviceConfig(key, originalValue);
         }
     }
 
-    private void setDeviceConfig(String key, String value) {
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, key,
-                value, /* makeDefault */ false);
+    private static void setDeviceConfig(String key, String value) {
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER, key, value, /* makeDefault */ false);
     }
 }
