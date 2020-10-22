@@ -1662,10 +1662,14 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isMobileDataPolicyEnabled(int);
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
     method public void setCarrierTestOverride(String, String, String, String, String, String, String, String, String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMobileDataPolicyEnabledStatus(int, boolean);
+    field public static final int MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL = 1; // 0x1
+    field public static final int MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED = 2; // 0x2
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
 
