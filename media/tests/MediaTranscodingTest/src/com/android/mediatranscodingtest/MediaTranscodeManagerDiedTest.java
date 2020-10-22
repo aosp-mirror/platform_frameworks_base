@@ -20,8 +20,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
-import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
+import android.media.MediaTranscodeManager.TranscodingSession;
 import android.media.MediaTranscodingException;
 import android.net.Uri;
 import android.os.Bundle;
@@ -125,7 +125,7 @@ public class MediaTranscodeManagerDiedTest
     }
 
     private MediaTranscodeManager getManager() {
-        for (int count = 1;  count <= CONNECT_SERVICE_RETRY_COUNT; count++) {
+        for (int count = 1; count <= CONNECT_SERVICE_RETRY_COUNT; count++) {
             Log.d(TAG, "Trying to connect to service. Try count: " + count);
             MediaTranscodeManager manager = mContext.getSystemService(MediaTranscodeManager.class);
             if (manager != null) {
@@ -198,7 +198,7 @@ public class MediaTranscodeManagerDiedTest
         }
 
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
-        Semaphore jobStartedSemaphore = new Semaphore(0);
+        Semaphore sessionStartedSemaphore = new Semaphore(0);
 
         // Transcode a 15 seconds video, so that the transcoding is not finished when we kill the
         // service.
@@ -219,47 +219,52 @@ public class MediaTranscodeManagerDiedTest
 
         Log.i(TAG, "transcoding to " + createMediaFormat());
 
-        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
-                transcodingJob -> {
-                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
+        TranscodingSession session = mMediaTranscodeManager.enqueueRequest(request,
+                listenerExecutor,
+                TranscodingSession -> {
+                    Log.d(TAG,
+                            "Transcoding completed with result: " + TranscodingSession.getResult());
                     transcodeCompleteSemaphore.release();
                 });
-        assertNotNull(job);
+        assertNotNull(session);
 
         AtomicInteger progressUpdateCount = new AtomicInteger(0);
 
         // Set progress update executor and use the same executor as result listener.
-        job.setOnProgressUpdateListener(listenerExecutor,
-                new TranscodingJob.OnProgressUpdateListener() {
+        session.setOnProgressUpdateListener(listenerExecutor,
+                new TranscodingSession.OnProgressUpdateListener() {
                     @Override
-                    public void onProgressUpdate(TranscodingJob job, int newProgress) {
+                    public void onProgressUpdate(TranscodingSession session, int newProgress) {
                         if (newProgress > 0) {
-                            jobStartedSemaphore.release();
+                            sessionStartedSemaphore.release();
                         }
                     }
                 });
 
-        // Wait for progress update so the job is in running state.
-        jobStartedSemaphore.tryAcquire(TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        assertTrue("Job is not running", job.getStatus() == TranscodingJob.STATUS_RUNNING);
+        // Wait for progress update so the session is in running state.
+        sessionStartedSemaphore.tryAcquire(TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertTrue("session is not running",
+                session.getStatus() == TranscodingSession.STATUS_RUNNING);
 
-        // Kills the service and expects receiving failure of the job.
+        // Kills the service and expects receiving failure of the session.
         executeShellCommand("pkill -f media.transcoding");
 
         Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode result.");
         boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
                 TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        assertTrue("Invalid job status", job.getStatus() == TranscodingJob.STATUS_FINISHED);
-        assertTrue("Invalid job result", job.getResult()== TranscodingJob.RESULT_ERROR);
+        assertTrue("Invalid session status",
+                session.getStatus() == TranscodingSession.STATUS_FINISHED);
+        assertTrue("Invalid session result",
+                session.getResult() == TranscodingSession.RESULT_ERROR);
 
 
-        boolean retryJob = false;
+        boolean retrysession = false;
         // Wait till service is available again.
-        Log.d(TAG, "Retry the failed transcoding job");
-        while (!retryJob) {
+        Log.d(TAG, "Retry the failed transcoding session");
+        while (!retrysession) {
             try {
-                job.retry();
-                // Break out when job retry succeeds.
+                session.retry();
+                // Break out when session retry succeeds.
                 break;
             } catch (MediaTranscodingException.ServiceNotAvailableException ex) {
                 // Sleep for 10 milliseconds to wait.
@@ -269,9 +274,11 @@ public class MediaTranscodeManagerDiedTest
 
         finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
                 TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        // Check the make sure job is successfully finished after retry.
-        assertTrue("Invalid job status", job.getStatus() == TranscodingJob.STATUS_FINISHED);
-        assertTrue("Invalid job result", job.getResult() == TranscodingJob.RESULT_SUCCESS);
+        // Check the make sure session is successfully finished after retry.
+        assertTrue("Invalid session status",
+                session.getStatus() == TranscodingSession.STATUS_FINISHED);
+        assertTrue("Invalid session result",
+                session.getResult() == TranscodingSession.RESULT_SUCCESS);
     }
 }
 
