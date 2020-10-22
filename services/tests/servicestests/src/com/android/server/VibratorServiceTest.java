@@ -52,6 +52,8 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -76,7 +78,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Tests for {@link VibratorService}.
@@ -444,6 +450,42 @@ public class VibratorServiceTest {
     }
 
     @Test
+    public void vibrate_withWaveform_totalVibrationTimeRespected() throws Exception {
+        int totalDuration = 10_000; // 10s
+        int stepDuration = 25; // 25ms
+
+        // 25% of the first waveform step will be spent on the native on() call.
+        mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        doAnswer(invocation -> {
+            Thread.currentThread().sleep(stepDuration / 4);
+            return null;
+        }).when(mNativeWrapperMock).vibratorOn(anyLong(), anyLong());
+        // 25% of each waveform step will be spent on the native setAmplitude() call..
+        doAnswer(invocation -> {
+            Thread.currentThread().sleep(stepDuration / 4);
+            return null;
+        }).when(mNativeWrapperMock).vibratorSetAmplitude(anyInt());
+
+        VibratorService service = createService();
+
+        int stepCount = totalDuration / stepDuration;
+        long[] timings = new long[stepCount];
+        int[] amplitudes = new int[stepCount];
+        Arrays.fill(timings, stepDuration);
+        Arrays.fill(amplitudes, VibrationEffect.DEFAULT_AMPLITUDE);
+        VibrationEffect effect = VibrationEffect.createWaveform(timings, amplitudes, -1);
+
+        int perceivedDuration = vibrateAndMeasure(service, effect, /* timeoutSecs= */ 15);
+        int delay = Math.abs(perceivedDuration - totalDuration);
+
+        // Allow some delay for thread scheduling and callback triggering.
+        int maxDelay = (int) (0.05 * totalDuration); // < 5% of total duration
+        assertTrue("Waveform with perceived delay of " + delay + "ms,"
+                        + " expected less than " + maxDelay + "ms",
+                delay < maxDelay);
+    }
+
+    @Test
     public void vibrate_withOneShotAndNativeCallbackTriggered_finishesVibration() {
         VibratorService service = createService();
         doAnswer(invocation -> {
@@ -699,14 +741,39 @@ public class VibratorServiceTest {
         vibrate(service, effect, ALARM_ATTRS);
     }
 
-    private void vibrate(VibratorService service, VibrationEffect effect, AudioAttributes attrs) {
-        VibrationAttributes attributes = new VibrationAttributes.Builder(attrs, effect).build();
-        vibrate(service, effect, attributes);
-    }
-
     private void vibrate(VibratorService service, VibrationEffect effect,
             VibrationAttributes attributes) {
         service.vibrate(UID, PACKAGE_NAME, effect, attributes, "some reason", service);
+    }
+
+    private int vibrateAndMeasure(
+            VibratorService service, VibrationEffect effect, long timeoutSecs) throws Exception {
+        AtomicLong startTime = new AtomicLong(0);
+        AtomicLong endTime = new AtomicLong(0);
+        CountDownLatch startedCount = new CountDownLatch(1);
+        CountDownLatch finishedCount = new CountDownLatch(1);
+        service.registerVibratorStateListener(new IVibratorStateListener() {
+            @Override
+            public void onVibrating(boolean vibrating) throws RemoteException {
+                if (vibrating) {
+                    startTime.set(SystemClock.uptimeMillis());
+                    startedCount.countDown();
+                } else if (startedCount.getCount() == 0) {
+                    endTime.set(SystemClock.uptimeMillis());
+                    finishedCount.countDown();
+                }
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return mVibratorStateListenerBinderMock;
+            }
+        });
+
+        vibrate(service, effect);
+
+        assertTrue(finishedCount.await(timeoutSecs, TimeUnit.SECONDS));
+        return (int) (endTime.get() - startTime.get());
     }
 
     private void mockVibratorCapabilities(int capabilities) {
