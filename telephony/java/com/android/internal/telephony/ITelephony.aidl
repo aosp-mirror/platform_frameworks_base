@@ -2238,22 +2238,6 @@ interface ITelephony {
     boolean isMobileDataPolicyEnabled(int subscriptionId, int policy);
 
     /**
-     * Set allowing mobile data during voice call.
-     */
-    boolean setDataAllowedDuringVoiceCall(int subId, boolean allow);
-
-    /**
-     * Check whether data is allowed during voice call. Note this is for dual sim device that
-     * data might be disabled on non-default data subscription but explicitly turned on by settings.
-     */
-    boolean isDataAllowedInVoiceCall(int subId);
-
-    /**
-     * Set whether a subscription always allows MMS connection.
-     */
-    boolean setAlwaysAllowMmsData(int subId, boolean allow);
-
-    /**
      * Command line command to enable or disable handling of CEP data for test purposes.
      */
     oneway void setCepEnabled(boolean isCepEnabled);
