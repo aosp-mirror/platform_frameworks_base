@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuatkan cadangan"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Sembunyikan sesi semasa."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Sesi semasa tidak boleh disembunyikan."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Tolak"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Sambung semula"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Tetapan"</string>
