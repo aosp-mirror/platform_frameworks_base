@@ -424,36 +424,37 @@ public final class HdmiControlManager {
      *
      * @hide
      */
-    public static final String SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
+    public static final String CEC_SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
     /**
      * Name of a setting deciding on the Standby message behaviour on sleep.
      *
      * @hide
      */
-    public static final String SETTING_NAME_SEND_STANDBY_ON_SLEEP = "send_standby_on_sleep";
+    public static final String CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP = "send_standby_on_sleep";
     /**
      * Name of a setting deciding on power state action when losing Active Source.
      *
      * @hide
      */
-    public static final String SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
+    public static final String CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
             "power_state_change_on_active_source_lost";
     /**
      * Name of a setting deciding whether System Audio Muting is allowed.
      *
      * @hide
      */
-    public static final String SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING = "system_audio_mode_muting";
+    public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING =
+            "system_audio_mode_muting";
     /**
      * @hide
      */
     @StringDef({
-        SETTING_NAME_HDMI_CEC_ENABLED,
-        SETTING_NAME_SEND_STANDBY_ON_SLEEP,
-        SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
-        SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+        CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+        CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+        CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+        CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
     })
-    public @interface SettingName {}
+    public @interface CecSettingName {}
 
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
@@ -1301,14 +1302,15 @@ public final class HdmiControlManager {
      * @hide
      */
     @NonNull
+    @CecSettingName
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public List<String> getAvailableCecSettings() {
+    public List<String> getUserCecSettings() {
         if (mService == null) {
             Log.e(TAG, "HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            return mService.getAvailableCecSettings();
+            return mService.getUserCecSettings();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1326,7 +1328,7 @@ public final class HdmiControlManager {
      */
     @NonNull
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public List<String> getAllowedCecSettingValues(@NonNull String name) {
+    public List<String> getAllowedCecSettingValues(@NonNull @CecSettingName String name) {
         if (mService == null) {
             Log.e(TAG, "HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
@@ -1354,7 +1356,7 @@ public final class HdmiControlManager {
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            mService.setCecSettingValue(SETTING_NAME_HDMI_CEC_ENABLED, value);
+            mService.setCecSettingValue(CEC_SETTING_NAME_HDMI_CEC_ENABLED, value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1377,7 +1379,7 @@ public final class HdmiControlManager {
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            return mService.getCecSettingValue(SETTING_NAME_HDMI_CEC_ENABLED);
+            return mService.getCecSettingValue(CEC_SETTING_NAME_HDMI_CEC_ENABLED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1399,7 +1401,7 @@ public final class HdmiControlManager {
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            mService.setCecSettingValue(SETTING_NAME_SEND_STANDBY_ON_SLEEP, value);
+            mService.setCecSettingValue(CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP, value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1422,7 +1424,7 @@ public final class HdmiControlManager {
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            return mService.getCecSettingValue(SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+            return mService.getCecSettingValue(CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1446,7 +1448,7 @@ public final class HdmiControlManager {
         }
         try {
             mService.setCecSettingValue(
-                    SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST, value);
+                    CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST, value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1470,7 +1472,7 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingValue(
-                    SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST);
+                    CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1492,7 +1494,7 @@ public final class HdmiControlManager {
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            mService.setCecSettingValue(SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING, value);
+            mService.setCecSettingValue(CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING, value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1515,7 +1517,7 @@ public final class HdmiControlManager {
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            return mService.getCecSettingValue(SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
+            return mService.getCecSettingValue(CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

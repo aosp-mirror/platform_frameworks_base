@@ -296,8 +296,8 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
-        public List<String> getAvailableCecSettings() {
-            return HdmiControlServiceWrapper.this.getAvailableCecSettings();
+        public List<String> getUserCecSettings() {
+            return HdmiControlServiceWrapper.this.getUserCecSettings();
         }
 
         @Override
@@ -489,7 +489,7 @@ public final class HdmiControlServiceWrapper {
             IHdmiCecVolumeControlFeatureListener listener) {}
 
     /** @hide */
-    public List<String> getAvailableCecSettings() {
+    public List<String> getUserCecSettings() {
         return new ArrayList<>();
     }
 

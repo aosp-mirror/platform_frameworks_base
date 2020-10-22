@@ -87,7 +87,7 @@ interface IHdmiControlService {
     boolean isHdmiCecVolumeControlEnabled();
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
-    List<String> getAvailableCecSettings();
+    List<String> getUserCecSettings();
     List<String> getAllowedCecSettingValues(String name);
     String getCecSettingValue(String name);
     void setCecSettingValue(String name, String value);
