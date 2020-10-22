@@ -3049,6 +3049,7 @@
     <public name="windowLayoutAffinity" />
     <!-- @hide -->
     <public name="windowBackgroundBlurRadius"/>
+    <public name="requireDeviceScreenOn" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
