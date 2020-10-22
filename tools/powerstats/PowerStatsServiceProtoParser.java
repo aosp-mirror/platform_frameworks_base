@@ -25,50 +25,95 @@ import java.io.IOException;
  * is output to STDOUT in csv format.
  */
 public class PowerStatsServiceProtoParser {
-    private static void printRailInfo(PowerStatsServiceProto proto) {
+    private static void printEnergyMeterInfo(PowerStatsServiceMeterProto proto) {
         String csvHeader = new String();
-        for (int i = 0; i < proto.getRailInfoCount(); i++) {
-            RailInfoProto railInfo = proto.getRailInfo(i);
-            csvHeader += "Index" + ","
-                + "Timestamp" + ","
-                + railInfo.getRailName() + "/" + railInfo.getSubsysName() + ",";
+        for (int i = 0; i < proto.getChannelInfoCount(); i++) {
+            ChannelInfoProto energyMeterInfo = proto.getChannelInfo(i);
+            csvHeader += "Index,Timestamp," + energyMeterInfo.getChannelId()
+                + "/" + energyMeterInfo.getChannelName() + ",";
         }
         System.out.println(csvHeader);
     }
 
-    private static void printEnergyData(PowerStatsServiceProto proto) {
-        int railInfoCount = proto.getRailInfoCount();
+    private static void printEnergyMeasurements(PowerStatsServiceMeterProto proto) {
+        int energyMeterInfoCount = proto.getChannelInfoCount();
 
-        if (railInfoCount > 0) {
-            int energyDataCount = proto.getEnergyDataCount();
-            int energyDataSetCount = energyDataCount / railInfoCount;
+        if (energyMeterInfoCount > 0) {
+            int energyMeasurementCount = proto.getEnergyMeasurementCount();
+            int energyMeasurementSetCount = energyMeasurementCount / energyMeterInfoCount;
 
-            for (int i = 0; i < energyDataSetCount; i++) {
+            for (int i = 0; i < energyMeasurementSetCount; i++) {
                 String csvRow = new String();
-                for (int j = 0; j < railInfoCount; j++) {
-                    EnergyDataProto energyData = proto.getEnergyData(i * railInfoCount + j);
-                    csvRow += energyData.getIndex() + ","
-                        + energyData.getTimestampMs() + ","
-                        + energyData.getEnergyUws() + ",";
+                for (int j = 0; j < energyMeterInfoCount; j++) {
+                    EnergyMeasurementProto energyMeasurement =
+                            proto.getEnergyMeasurement(i * energyMeterInfoCount + j);
+                    csvRow += energyMeasurement.getChannelId() + ","
+                        + energyMeasurement.getTimestampMs() + ","
+                        + energyMeasurement.getEnergyUws() + ",";
                 }
                 System.out.println(csvRow);
             }
         } else {
-            System.out.println("Error:  railInfoCount is zero");
+            System.out.println("Error:  energyMeterInfoCount is zero");
+        }
+    }
+
+    private static void printEnergyConsumerId(PowerStatsServiceModelProto proto) {
+        String csvHeader = new String();
+        for (int i = 0; i < proto.getEnergyConsumerIdCount(); i++) {
+            EnergyConsumerIdProto energyConsumerId = proto.getEnergyConsumerId(i);
+            csvHeader += "Index,Timestamp," + energyConsumerId.getEnergyConsumerId() + ",";
+        }
+        System.out.println(csvHeader);
+    }
+
+    private static void printEnergyConsumerResults(PowerStatsServiceModelProto proto) {
+        int energyConsumerIdCount = proto.getEnergyConsumerIdCount();
+
+        if (energyConsumerIdCount > 0) {
+            int energyConsumerResultCount = proto.getEnergyConsumerResultCount();
+            int energyConsumerResultSetCount = energyConsumerResultCount / energyConsumerIdCount;
+
+            for (int i = 0; i < energyConsumerResultSetCount; i++) {
+                String csvRow = new String();
+                for (int j = 0; j < energyConsumerIdCount; j++) {
+                    EnergyConsumerResultProto energyConsumerResult =
+                            proto.getEnergyConsumerResult(i * energyConsumerIdCount + j);
+                    csvRow += energyConsumerResult.getEnergyConsumerId() + ","
+                        + energyConsumerResult.getTimestampMs() + ","
+                        + energyConsumerResult.getEnergyUws() + ",";
+                }
+                System.out.println(csvRow);
+            }
+        } else {
+            System.out.println("Error:  energyConsumerIdCount is zero");
         }
     }
 
     private static void generateCsvFile(String pathToIncidentReport) {
         try {
-            IncidentReportProto irProto =
-                    IncidentReportProto.parseFrom(new FileInputStream(pathToIncidentReport));
+            // Print power meter data.
+            IncidentReportMeterProto irMeterProto =
+                    IncidentReportMeterProto.parseFrom(new FileInputStream(pathToIncidentReport));
 
-            if (irProto.hasIncidentReport()) {
-                PowerStatsServiceProto pssProto = irProto.getIncidentReport();
-                printRailInfo(pssProto);
-                printEnergyData(pssProto);
+            if (irMeterProto.hasIncidentReport()) {
+                PowerStatsServiceMeterProto pssMeterProto = irMeterProto.getIncidentReport();
+                printEnergyMeterInfo(pssMeterProto);
+                printEnergyMeasurements(pssMeterProto);
             } else {
-                System.out.println("Incident report not found.  Exiting.");
+                System.out.println("Meter incident report not found.  Exiting.");
+            }
+
+            // Print power model data.
+            IncidentReportModelProto irModelProto =
+                    IncidentReportModelProto.parseFrom(new FileInputStream(pathToIncidentReport));
+
+            if (irModelProto.hasIncidentReport()) {
+                PowerStatsServiceModelProto pssModelProto = irModelProto.getIncidentReport();
+                printEnergyConsumerId(pssModelProto);
+                printEnergyConsumerResults(pssModelProto);
+            } else {
+                System.out.println("Model incident report not found.  Exiting.");
             }
         } catch (IOException e) {
             System.out.println("Unable to open incident report file: " + pathToIncidentReport);
