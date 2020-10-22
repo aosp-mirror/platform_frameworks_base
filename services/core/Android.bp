@@ -117,6 +117,7 @@ java_library_static {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.rebootescrow-java",
         "android.hardware.soundtrigger-V2.3-java",
+        "android.hardware.power.stats-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
         "dnsresolver_aidl_interface-java",
