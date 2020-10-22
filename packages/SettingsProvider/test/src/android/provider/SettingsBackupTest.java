@@ -526,7 +526,6 @@ public class SettingsBackupTest {
                     Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
-                    Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
                     Settings.Global.WEBVIEW_MULTIPROCESS,
                     Settings.Global.WEBVIEW_PROVIDER,
                     Settings.Global.WFC_IMS_ENABLED,
