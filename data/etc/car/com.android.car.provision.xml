@@ -16,6 +16,8 @@
   -->
 <permissions>
     <privapp-permissions package="com.android.car.provision">
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.QUERY_ALL_PACKAGES"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.WRITE_SETTINGS"/>
     </privapp-permissions>
