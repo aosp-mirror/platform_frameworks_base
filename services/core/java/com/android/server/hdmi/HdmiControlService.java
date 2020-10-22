@@ -187,6 +187,9 @@ public class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mHdmiCecVolumeControlEnabled;
 
+    // Make sure HdmiCecConfig is instantiated and the XMLs are read.
+    private final HdmiCecConfig mHdmiCecConfig = new HdmiCecConfig();
+
     /**
      * Interface to report send result.
      */
@@ -2329,6 +2332,50 @@ public class HdmiControlService extends SystemService {
                 pw.decreaseIndent();
             }
         }
+
+        @Override
+        public List<String> getAvailableCecSettings() {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getAvailableSettings();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public List<String> getAllowedCecSettingValues(String name) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getAllowedValues(name);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public String getCecSettingValue(String name) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getValue(getContext(), name);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setCecSettingValue(String name, String value) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                HdmiControlService.this.getHdmiCecConfig().setValue(getContext(), name, value);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     // Get the source address to send out commands to devices connected to the current device
@@ -3388,5 +3435,9 @@ public class HdmiControlService extends SystemService {
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRA_PARAM1, extra);
         getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                 HdmiControlService.PERMISSION);
+    }
+
+    HdmiCecConfig getHdmiCecConfig() {
+        return mHdmiCecConfig;
     }
 }

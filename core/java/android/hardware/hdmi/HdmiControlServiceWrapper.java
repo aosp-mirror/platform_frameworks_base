@@ -20,6 +20,7 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -293,6 +294,26 @@ public final class HdmiControlServiceWrapper {
                 IHdmiCecVolumeControlFeatureListener listener) {
             HdmiControlServiceWrapper.this.removeHdmiCecVolumeControlFeatureListener(listener);
         }
+
+        @Override
+        public List<String> getAvailableCecSettings() {
+            return HdmiControlServiceWrapper.this.getAvailableCecSettings();
+        }
+
+        @Override
+        public List<String> getAllowedCecSettingValues(String name) {
+            return HdmiControlServiceWrapper.this.getAllowedCecSettingValues(name);
+        }
+
+        @Override
+        public String getCecSettingValue(String name) {
+            return HdmiControlServiceWrapper.this.getCecSettingValue(name);
+        }
+
+        @Override
+        public void setCecSettingValue(String name, String value) {
+            HdmiControlServiceWrapper.this.setCecSettingValue(name, value);
+        }
     };
 
     @BinderThread
@@ -466,4 +487,22 @@ public final class HdmiControlServiceWrapper {
     /** @hide */
     public void removeHdmiCecVolumeControlFeatureListener(
             IHdmiCecVolumeControlFeatureListener listener) {}
+
+    /** @hide */
+    public List<String> getAvailableCecSettings() {
+        return new ArrayList<>();
+    }
+
+    /** @hide */
+    public List<String> getAllowedCecSettingValues(String name) {
+        return new ArrayList<>();
+    }
+
+    /** @hide */
+    public String getCecSettingValue(String name) {
+        return "";
+    }
+
+    /** @hide */
+    public void setCecSettingValue(String name, String value) {}
 }

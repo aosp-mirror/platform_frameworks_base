@@ -319,6 +319,29 @@ public final class HdmiControlManager {
     /** The HdmiControlService will be disabled to standby. */
     public static final int CONTROL_STATE_CHANGED_REASON_STANDBY = 3;
 
+    // -- Whether the HDMI CEC is enabled or disabled.
+    /**
+     * HDMI CEC enabled.
+     *
+     * @hide
+     */
+    public static final String HDMI_CEC_CONTROL_ENABLED = "1";
+    /**
+     * HDMI CEC disabled.
+     *
+     * @hide
+     */
+    public static final String HDMI_CEC_CONTROL_DISABLED = "0";
+    /**
+     * @hide
+     */
+    @StringDef({
+            HDMI_CEC_CONTROL_ENABLED,
+            HDMI_CEC_CONTROL_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HdmiCecControl {}
+
     // -- Which devices the playback device can send a <Standby> message to upon going to sleep.
     /**
      * Send <Standby> to TV only.
@@ -347,8 +370,90 @@ public final class HdmiControlManager {
             SEND_STANDBY_ON_SLEEP_NONE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StandbyBehavior {
-    }
+    public @interface StandbyBehavior {}
+
+    // -- Which power state action should be taken when Active Source is lost.
+    /**
+     * No action to be taken.
+     *
+     * @hide
+     */
+    public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
+    /**
+     * Go to standby immediately.
+     *
+     * @hide
+     */
+    public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
+    /**
+     * @hide
+     */
+    @StringDef({
+            POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE,
+            POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActiveSourceLostBehavior {}
+
+    // -- Whether System Audio Mode muting is enabled or disabled.
+    /**
+     * System Audio Mode muting enabled.
+     *
+     * @hide
+     */
+    public static final String SYSTEM_AUDIO_MODE_MUTING_ENABLED = "1";
+    /**
+     * System Audio Mode muting disabled.
+     *
+     * @hide
+     */
+    public static final String SYSTEM_AUDIO_MODE_MUTING_DISABLED = "0";
+    /**
+     * @hide
+     */
+    @StringDef({
+            SYSTEM_AUDIO_MODE_MUTING_ENABLED,
+            SYSTEM_AUDIO_MODE_MUTING_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemAudioModeMuting {}
+
+    // -- Settings available in the CEC Configuration.
+    /**
+     * Name of a setting deciding whether the CEC is enabled.
+     *
+     * @hide
+     */
+    public static final String SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
+    /**
+     * Name of a setting deciding on the Standby message behaviour on sleep.
+     *
+     * @hide
+     */
+    public static final String SETTING_NAME_SEND_STANDBY_ON_SLEEP = "send_standby_on_sleep";
+    /**
+     * Name of a setting deciding on power state action when losing Active Source.
+     *
+     * @hide
+     */
+    public static final String SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
+            "power_state_change_on_active_source_lost";
+    /**
+     * Name of a setting deciding whether System Audio Muting is allowed.
+     *
+     * @hide
+     */
+    public static final String SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING = "system_audio_mode_muting";
+    /**
+     * @hide
+     */
+    @StringDef({
+        SETTING_NAME_HDMI_CEC_ENABLED,
+        SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+        SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+        SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+    })
+    public @interface SettingName {}
 
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
@@ -1185,5 +1290,234 @@ public final class HdmiControlManager {
                 }
             }
         };
+    }
+
+    /**
+     * Get a set of user-modifiable settings.
+     *
+     * @return a set of user-modifiable settings.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public List<String> getAvailableCecSettings() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getAvailableCecSettings();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a set of allowed values for a settings.
+     *
+     * @param name name of the setting
+     * @return a set of allowed values for a settings. {@code null} on failure.
+     * @throws IllegalArgumentException when setting {@code name} does not exist.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public List<String> getAllowedCecSettingValues(@NonNull String name) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getAllowedCecSettingValues(name);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the 'hdmi_cec_enabled' option.
+     *
+     * @param value the desired value
+     * @throws IllegalArgumentException when the new value is not allowed.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setHdmiCecEnabled(@NonNull @HdmiCecControl String value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingValue(SETTING_NAME_HDMI_CEC_ENABLED, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the value of 'hdmi_cec_enabled' option.
+     *
+     * @return the current value.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @HdmiCecControl
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public String getHdmiCecEnabled() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingValue(SETTING_NAME_HDMI_CEC_ENABLED);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the 'send_standby_on_sleep' option.
+     *
+     * @param value the desired value
+     * @throws IllegalArgumentException when the new value is not allowed.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setSendStandbyOnSleep(@NonNull @StandbyBehavior String value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingValue(SETTING_NAME_SEND_STANDBY_ON_SLEEP, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the value of 'send_standby_on_sleep' option.
+     *
+     * @return the current value.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @StandbyBehavior
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public String getSendStandbyOnSleep() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingValue(SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the 'power_state_change_on_active_source_lost' option.
+     *
+     * @param value the desired value
+     * @throws IllegalArgumentException when the new value is not allowed
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setPowerStateChangeOnActiveSourceLost(
+            @NonNull @ActiveSourceLostBehavior String value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingValue(
+                    SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the value of 'power_state_change_on_active_source_lost' option.
+     *
+     * @return the current value.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @ActiveSourceLostBehavior
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public String getPowerStateChangeOnActiveSourceLost() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingValue(
+                    SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the 'system_audio_mode_muting' option.
+     *
+     * @param value the desired value
+     * @throws IllegalArgumentException when the new value is not allowed.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setSystemAudioModeMuting(@NonNull @SystemAudioModeMuting String value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingValue(SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the value of 'system_audio_mode_muting' option.
+     *
+     * @return the current value.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemAudioModeMuting
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public String getSystemAudioModeMuting() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingValue(SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

@@ -20,3 +20,11 @@ xsd_config {
     api_dir: "display-device-config/schema",
     package_name: "com.android.server.display.config",
 }
+
+
+xsd_config {
+    name: "cec-config",
+    srcs: ["cec-config/cec-config.xsd"],
+    api_dir: "cec-config/schema",
+    package_name: "com.android.server.hdmi.cec.config",
+}
