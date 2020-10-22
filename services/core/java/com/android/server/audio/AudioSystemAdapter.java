@@ -17,9 +17,12 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
+import android.media.audiopolicy.AudioMix;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +40,25 @@ public class AudioSystemAdapter {
      */
     static final @NonNull AudioSystemAdapter getDefaultAdapter() {
         return new AudioSystemAdapter();
+    }
+
+    /**
+     * Same as {@link AudioSystem#getDevicesForStream(int)}
+     * @param stream a valid stream type
+     * @return a mask of device types
+     */
+    public int getDevicesForStream(int stream) {
+        return AudioSystem.getDevicesForStream(stream);
+    }
+
+    /**
+     * Same as {@link AudioSystem#getDevicesForAttributes(AudioAttributes)}
+     * @param attributes the attributes for which the routing is queried
+     * @return the devices that the stream with the given attributes would be routed to
+     */
+    public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        return AudioSystem.getDevicesForAttributes(attributes);
     }
 
     /**
@@ -177,5 +199,105 @@ public class AudioSystemAdapter {
      */
     public boolean isStreamActive(int stream, int inPastMs) {
         return AudioSystem.isStreamActive(stream, inPastMs);
+    }
+
+    /**
+     * Same as {@link AudioSystem#isStreamActiveRemotely(int, int)}
+     * @param stream
+     * @param inPastMs
+     * @return
+     */
+    public boolean isStreamActiveRemotely(int stream, int inPastMs) {
+        return AudioSystem.isStreamActiveRemotely(stream, inPastMs);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setPhoneState(int, int)}
+     * @param state
+     * @param uid
+     * @return
+     */
+    public int setPhoneState(int state, int uid) {
+        return AudioSystem.setPhoneState(state, uid);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setAllowedCapturePolicy(int, int)}
+     * @param uid
+     * @param flags
+     * @return
+     */
+    public int setAllowedCapturePolicy(int uid, int flags) {
+        return AudioSystem.setAllowedCapturePolicy(uid, flags);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setForceUse(int, int)}
+     * @param usage
+     * @param config
+     * @return
+     */
+    public int setForceUse(int usage, int config) {
+        return AudioSystem.setForceUse(usage, config);
+    }
+
+    /**
+     * Same as {@link AudioSystem#getForceUse(int)}
+     * @param usage
+     * @return
+     */
+    public int getForceUse(int usage) {
+        return AudioSystem.getForceUse(usage);
+    }
+
+    /**
+     * Same as {@link AudioSystem#registerPolicyMixes(ArrayList, boolean)}
+     * @param mixes
+     * @param register
+     * @return
+     */
+    public int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register) {
+        return AudioSystem.registerPolicyMixes(mixes, register);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setUidDeviceAffinities(int, int[], String[])}
+     * @param uid
+     * @param types
+     * @param addresses
+     * @return
+     */
+    public int setUidDeviceAffinities(int uid, @NonNull int[] types,  @NonNull String[] addresses) {
+        return AudioSystem.setUidDeviceAffinities(uid, types, addresses);
+    }
+
+    /**
+     * Same as {@link AudioSystem#removeUidDeviceAffinities(int)}
+     * @param uid
+     * @return
+     */
+    public int removeUidDeviceAffinities(int uid) {
+        return AudioSystem.removeUidDeviceAffinities(uid);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setUserIdDeviceAffinities(int, int[], String[])}
+     * @param userId
+     * @param types
+     * @param addresses
+     * @return
+     */
+    public int setUserIdDeviceAffinities(int userId, @NonNull int[] types,
+            @NonNull String[] addresses) {
+        return AudioSystem.setUserIdDeviceAffinities(userId, types, addresses);
+    }
+
+    /**
+     * Same as {@link AudioSystem#removeUserIdDeviceAffinities(int)}
+     * @param userId
+     * @return
+     */
+    public int removeUserIdDeviceAffinities(int userId) {
+        return AudioSystem.removeUserIdDeviceAffinities(userId);
     }
 }
