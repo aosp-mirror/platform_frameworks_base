@@ -11904,6 +11904,10 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
   }
 
+  public class ImsManager {
+    method @NonNull public android.telephony.ims.SipDelegateManager getSipDelegateManager(int);
+  }
+
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
     method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
@@ -11939,10 +11943,13 @@ package android.telephony.ims {
     method public void disableIms(int);
     method public void enableIms(int);
     method public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method public long getImsServiceCapabilities();
     method public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @Nullable public android.telephony.ims.stub.SipTransportImplBase getSipTransport(int);
     method public final void onUpdateSupportedImsFeatures(android.telephony.ims.stub.ImsFeatureConfiguration) throws android.os.RemoteException;
     method public android.telephony.ims.stub.ImsFeatureConfiguration querySupportedImsFeatures();
     method public void readyForFeatureCreation();
+    field public static final long CAPABILITY_SIP_DELEGATE_CREATION = 2L; // 0x2L
   }
 
   public final class ImsSsData implements android.os.Parcelable {
@@ -12186,6 +12193,10 @@ package android.telephony.ims {
 
   public class RcsUceAdapter {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
+  }
+
+  public class SipDelegateManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isSupported() throws android.telephony.ims.ImsException;
   }
 
 }
@@ -12435,6 +12446,10 @@ package android.telephony.ims.stub {
     method public int updateClir(int);
     method public int updateColp(boolean);
     method public int updateColr(int);
+  }
+
+  public class SipTransportImplBase {
+    ctor public SipTransportImplBase(@NonNull java.util.concurrent.Executor);
   }
 
 }
