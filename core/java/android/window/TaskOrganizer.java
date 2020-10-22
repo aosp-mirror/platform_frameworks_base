@@ -104,7 +104,7 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Creates a persistent root task in WM for a particular windowing-mode. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
-    public TaskAppearedInfo createRootTask(int displayId, int windowingMode) {
+    public ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode) {
         try {
             return mTaskOrganizerController.createRootTask(displayId, windowingMode);
         } catch (RemoteException e) {

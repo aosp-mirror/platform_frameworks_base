@@ -479,33 +479,16 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testCreateDeleteRootTasks() {
-        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
-            @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
-
-            @Override
-            public void onTaskVanished(RunningTaskInfo container) { }
-
-            @Override
-            public void onTaskInfoChanged(RunningTaskInfo info) {
-            }
-
-            @Override
-            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
-            }
-        };
-        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
-
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 Display.DEFAULT_DISPLAY,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).getTaskInfo();
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 info1.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
 
         RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 Display.DEFAULT_DISPLAY,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                 info2.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info2.topActivityType);
@@ -539,7 +522,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
@@ -597,7 +580,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         lastReportedTiles.clear();
         called[0] = false;
 
@@ -658,9 +641,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).getTaskInfo();
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).getTaskInfo();
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         final int initialRootTaskCount = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
                 mDisplayContent.mDisplayId, null /* activityTypes */).size();

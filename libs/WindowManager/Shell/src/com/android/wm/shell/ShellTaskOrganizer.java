@@ -137,20 +137,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         }
     }
 
-    public TaskAppearedInfo createRootTask(
-            int displayId, int windowingMode, TaskListener listener) {
-        synchronized (mLock) {
-            ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s",
-                    displayId, windowingMode, listener.toString());
-            final TaskAppearedInfo info = super.createRootTask(displayId, windowingMode);
-
-            // Add the listener and send the task appeared signal
-            mTaskListeners.put(info.getTaskInfo().taskId, listener);
-            onTaskAppeared(info);
-            return info;
-        }
-    }
-
     /**
      * Adds a listener for a specific task id.
      */

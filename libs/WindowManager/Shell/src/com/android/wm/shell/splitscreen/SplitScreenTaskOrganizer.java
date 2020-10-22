@@ -33,7 +33,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.TaskAppearedInfo;
 
 import androidx.annotation.NonNull;
 
@@ -69,15 +68,10 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     void init() throws RemoteException {
         synchronized (this) {
             try {
-                final TaskAppearedInfo primary = mTaskOrganizer.createRootTask(
-                        Display.DEFAULT_DISPLAY, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, this);
-                final TaskAppearedInfo secondary = mTaskOrganizer.createRootTask(
-                        Display.DEFAULT_DISPLAY, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, this);
-                mPrimary = primary.getTaskInfo();
-                mPrimarySurface = primary.getLeash();
-                mSecondary = secondary.getTaskInfo();
-                mSecondarySurface = secondary.getLeash();
-                enableSplitScreenSupportIfNeeded();
+                mPrimary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
+                        WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                mSecondary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
+                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
             } catch (Exception e) {
                 // teardown to prevent callbacks
                 mTaskOrganizer.removeListener(this);
@@ -98,29 +92,43 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
         mSplitScreenController.mTransactionPool.release(t);
     }
 
-    private void enableSplitScreenSupportIfNeeded() {
-        if (mSplitScreenSupported || mPrimarySurface == null || mSecondarySurface == null) return;
+    @Override
+    public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        synchronized (this) {
+            if (mPrimary == null || mSecondary == null) {
+                Log.w(TAG, "Received onTaskAppeared before creating root tasks " + taskInfo);
+                return;
+            }
 
-        mSplitScreenSupported = true;
+            if (taskInfo.token.equals(mPrimary.token)) {
+                mPrimarySurface = leash;
+            } else if (taskInfo.token.equals(mSecondary.token)) {
+                mSecondarySurface = leash;
+            }
 
-        // Initialize dim surfaces:
-        mPrimaryDim = new SurfaceControl.Builder(mSurfaceSession)
-                .setParent(mPrimarySurface).setColorLayer()
-                .setName("Primary Divider Dim")
-                .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
-                .build();
-        mSecondaryDim = new SurfaceControl.Builder(mSurfaceSession)
-                .setParent(mSecondarySurface).setColorLayer()
-                .setName("Secondary Divider Dim")
-                .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
-                .build();
-        SurfaceControl.Transaction t = getTransaction();
-        t.setLayer(mPrimaryDim, Integer.MAX_VALUE);
-        t.setColor(mPrimaryDim, new float[]{0f, 0f, 0f});
-        t.setLayer(mSecondaryDim, Integer.MAX_VALUE);
-        t.setColor(mSecondaryDim, new float[]{0f, 0f, 0f});
-        t.apply();
-        releaseTransaction(t);
+            if (!mSplitScreenSupported && mPrimarySurface != null && mSecondarySurface != null) {
+                mSplitScreenSupported = true;
+
+                // Initialize dim surfaces:
+                mPrimaryDim = new SurfaceControl.Builder(mSurfaceSession)
+                        .setParent(mPrimarySurface).setColorLayer()
+                        .setName("Primary Divider Dim")
+                        .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
+                        .build();
+                mSecondaryDim = new SurfaceControl.Builder(mSurfaceSession)
+                        .setParent(mSecondarySurface).setColorLayer()
+                        .setName("Secondary Divider Dim")
+                        .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
+                        .build();
+                SurfaceControl.Transaction t = getTransaction();
+                t.setLayer(mPrimaryDim, Integer.MAX_VALUE);
+                t.setColor(mPrimaryDim, new float[]{0f, 0f, 0f});
+                t.setLayer(mSecondaryDim, Integer.MAX_VALUE);
+                t.setColor(mSecondaryDim, new float[]{0f, 0f, 0f});
+                t.apply();
+                releaseTransaction(t);
+            }
+        }
     }
 
     @Override
