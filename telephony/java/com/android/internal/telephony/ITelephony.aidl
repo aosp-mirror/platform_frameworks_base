@@ -58,6 +58,7 @@ import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
+import com.android.internal.telephony.ICallForwardingInfoCallback;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -1639,78 +1640,15 @@ interface ITelephony {
      */
     void carrierActionResetAll(int subId);
 
-    /**
-     * Gets the voice call forwarding info {@link CallForwardingInfo}, given the call forward
-     * reason.
-     *
-     * @param callForwardingReason the call forwarding reasons which are the bitwise-OR combination
-     * of the following constants:
-     * <ol>
-     * <li>{@link CallForwardingInfo#REASON_BUSY} </li>
-     * <li>{@link CallForwardingInfo#REASON_NO_REPLY} </li>
-     * <li>{@link CallForwardingInfo#REASON_NOT_REACHABLE} </li>
-     * </ol>
-     *
-     * @throws IllegalArgumentException if callForwardingReason is not a bitwise-OR combination
-     * of {@link CallForwardingInfo.REASON_BUSY}, {@link CallForwardingInfo.REASON_BUSY},
-     * {@link CallForwardingInfo.REASON_NOT_REACHABLE}
-     *
-     * @return {@link CallForwardingInfo} with the status {@link CallForwardingInfo#STATUS_ACTIVE}
-     * or {@link CallForwardingInfo#STATUS_INACTIVE} and the target phone number to forward calls
-     * to, if it's available. Otherwise, it will return a {@link CallForwardingInfo} with status
-     * {@link CallForwardingInfo#STATUS_NOT_SUPPORTED} or
-     * {@link CallForwardingInfo#STATUS_FDN_CHECK_FAILURE} depending on the situation.
-     *
-     * @hide
-     */
-    CallForwardingInfo getCallForwarding(int subId, int callForwardingReason);
+    void getCallForwarding(int subId, int callForwardingReason,
+            ICallForwardingInfoCallback callback);
 
-    /**
-     * Sets the voice call forwarding info including status (enable/disable), call forwarding
-     * reason, the number to forward, and the timeout before the forwarding is attempted.
-     *
-     * @param callForwardingInfo {@link CallForwardingInfo} to setup the call forwarding.
-     * Enabling if {@link CallForwardingInfo#getStatus()} returns
-     * {@link CallForwardingInfo#STATUS_ACTIVE}; Disabling if
-     * {@link CallForwardingInfo#getStatus()} returns {@link CallForwardingInfo#STATUS_INACTIVE}.
-     *
-     * @throws IllegalArgumentException if any of the following:
-     * 0) callForwardingInfo is null.
-     * 1) {@link CallForwardingInfo#getStatus()} for callForwardingInfo returns neither
-     * {@link CallForwardingInfo#STATUS_ACTIVE} nor {@link CallForwardingInfo#STATUS_INACTIVE}.
-     * 2) {@link CallForwardingInfo#getReason()} for callForwardingInfo doesn't return the
-     * bitwise-OR combination of {@link CallForwardingInfo.REASON_BUSY},
-     * {@link CallForwardingInfo.REASON_BUSY}, {@link CallForwardingInfo.REASON_NOT_REACHABLE}
-     * 3) {@link CallForwardingInfo#getNumber()} for callForwardingInfo returns null.
-     * 4) {@link CallForwardingInfo#getTimeout()} for callForwardingInfo returns nagetive value.
-     *
-     * @return {@code true} to indicate it was set successfully; {@code false} otherwise.
-     *
-     * @hide
-     */
-    boolean setCallForwarding(int subId, in CallForwardingInfo callForwardingInfo);
+    void setCallForwarding(int subId, in CallForwardingInfo callForwardingInfo,
+            IIntegerConsumer callback);
 
-    /**
-     * Gets the status of voice call waiting function. Call waiting function enables the waiting
-     * for the incoming call when it reaches the user who is busy to make another call and allows
-     * users to decide whether to switch to the incoming call.
-     *
-     * @return the status of call waiting function.
-     * @hide
-     */
-    int getCallWaitingStatus(int subId);
+    void getCallWaitingStatus(int subId, IIntegerConsumer callback);
 
-    /**
-     * Sets the status for voice call waiting function. Call waiting function enables the waiting
-     * for the incoming call when it reaches the user who is busy to make another call and allows
-     * users to decide whether to switch to the incoming call.
-     *
-     * @param isEnable {@code true} to enable; {@code false} to disable.
-     * @return {@code true} to indicate it was set successfully; {@code false} otherwise.
-     *
-     * @hide
-     */
-    boolean setCallWaitingStatus(int subId, boolean isEnable);
+    void setCallWaitingStatus(int subId, boolean enabled, IIntegerConsumer callback);
 
     /**
      * Policy control of data connection. Usually used when data limit is passed.
