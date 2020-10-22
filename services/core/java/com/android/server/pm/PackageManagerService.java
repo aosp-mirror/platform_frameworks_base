@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,8 +46,10 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_PERMISSION_GROUP;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
+import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
@@ -233,6 +234,7 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
@@ -17617,6 +17619,49 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    private boolean doesSignatureMatchForPermissions(@NonNull String sourcePackageName,
+            @NonNull ParsedPackage parsedPackage, int scanFlags) {
+        // If the defining package is signed with our cert, it's okay.  This
+        // also includes the "updating the same package" case, of course.
+        // "updating same package" could also involve key-rotation.
+
+        final PackageSetting sourcePackageSetting;
+        synchronized (mLock) {
+            sourcePackageSetting = mSettings.getPackageLPr(sourcePackageName);
+        }
+
+        final SigningDetails sourceSigningDetails = (sourcePackageSetting == null
+                ? SigningDetails.UNKNOWN : sourcePackageSetting.getSigningDetails());
+        final KeySetManagerService ksms = mSettings.mKeySetManagerService;
+        if (sourcePackageName.equals(parsedPackage.getPackageName())
+                && (ksms.shouldCheckUpgradeKeySetLocked(
+                sourcePackageSetting, scanFlags))) {
+            return ksms.checkUpgradeKeySetLocked(sourcePackageSetting, parsedPackage);
+        } else {
+
+            // in the event of signing certificate rotation, we need to see if the
+            // package's certificate has rotated from the current one, or if it is an
+            // older certificate with which the current is ok with sharing permissions
+            if (sourceSigningDetails.checkCapability(
+                    parsedPackage.getSigningDetails(),
+                    PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
+                return true;
+            } else if (parsedPackage.getSigningDetails().checkCapability(
+                    sourceSigningDetails,
+                    PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
+                // the scanned package checks out, has signing certificate rotation
+                // history, and is newer; bring it over
+                synchronized (mLock) {
+                    sourcePackageSetting.signatures.mSigningDetails =
+                            parsedPackage.getSigningDetails();
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     @GuardedBy("mInstallLock")
     private PrepareResult preparePackageLI(InstallArgs args, PackageInstalledInfo res)
             throws PrepareFailure {
@@ -17775,6 +17820,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
+            /*
+             * Cannot properly check CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS using CompatChanges
+             * as this only works for packages that are installed
+             *
+             * TODO: Move logic for permission group compatibility into PermissionManagerService
+             */
+            boolean cannotInstallWithBadPermissionGroups =
+                    parsedPackage.getTargetSdkVersion() >= Build.VERSION_CODES.S;
+
             PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps != null) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
@@ -17826,8 +17880,33 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.origUsers = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
             }
 
+            final int numGroups = ArrayUtils.size(parsedPackage.getPermissionGroups());
+            for (int groupNum = 0; groupNum < numGroups; groupNum++) {
+                final ParsedPermissionGroup group =
+                        parsedPackage.getPermissionGroups().get(groupNum);
+                final PermissionGroupInfo sourceGroup = getPermissionGroupInfo(group.getName(), 0);
 
-            int N = ArrayUtils.size(parsedPackage.getPermissions());
+                if (sourceGroup != null && cannotInstallWithBadPermissionGroups) {
+                    final String sourcePackageName = sourceGroup.packageName;
+
+                    if ((replace || !parsedPackage.getPackageName().equals(sourcePackageName))
+                            && !doesSignatureMatchForPermissions(sourcePackageName, parsedPackage,
+                            scanFlags)) {
+                        EventLog.writeEvent(0x534e4554, "146211400", -1,
+                                parsedPackage.getPackageName());
+
+                        throw new PrepareFailure(INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP,
+                                "Package "
+                                        + parsedPackage.getPackageName()
+                                        + " attempting to redeclare permission group "
+                                        + group.getName() + " already owned by "
+                                        + sourcePackageName);
+                    }
+                }
+            }
+
+           // TODO: Move logic for checking permission compatibility into PermissionManagerService
+            final int N = ArrayUtils.size(parsedPackage.getPermissions());
             for (int i = N - 1; i >= 0; i--) {
                 final ParsedPermission perm = parsedPackage.getPermissions().get(i);
                 final BasePermission bp = mPermissionManager.getPermissionTEMP(perm.getName());
@@ -17843,46 +17922,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Check whether the newly-scanned package wants to define an already-defined perm
                 if (bp != null) {
-                    // If the defining package is signed with our cert, it's okay.  This
-                    // also includes the "updating the same package" case, of course.
-                    // "updating same package" could also involve key-rotation.
-                    final boolean sigsOk;
                     final String sourcePackageName = bp.getPackageName();
-                    final PackageSetting sourcePackageSetting;
-                    synchronized (mLock) {
-                        sourcePackageSetting = mSettings.getPackageLPr(sourcePackageName);
-                    }
-                    final SigningDetails sourceSigningDetails = (sourcePackageSetting == null
-                            ? SigningDetails.UNKNOWN : sourcePackageSetting.getSigningDetails());
-                    final KeySetManagerService ksms = mSettings.mKeySetManagerService;
-                    if (sourcePackageName.equals(parsedPackage.getPackageName())
-                            && (ksms.shouldCheckUpgradeKeySetLocked(
-                            sourcePackageSetting, scanFlags))) {
-                        sigsOk = ksms.checkUpgradeKeySetLocked(sourcePackageSetting, parsedPackage);
-                    } else {
 
-                        // in the event of signing certificate rotation, we need to see if the
-                        // package's certificate has rotated from the current one, or if it is an
-                        // older certificate with which the current is ok with sharing permissions
-                        if (sourceSigningDetails.checkCapability(
-                                parsedPackage.getSigningDetails(),
-                                PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
-                            sigsOk = true;
-                        } else if (parsedPackage.getSigningDetails().checkCapability(
-                                sourceSigningDetails,
-                                PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
-                            // the scanned package checks out, has signing certificate rotation
-                            // history, and is newer; bring it over
-                            synchronized (mLock) {
-                                sourcePackageSetting.signatures.mSigningDetails =
-                                        parsedPackage.getSigningDetails();
-                            }
-                            sigsOk = true;
-                        } else {
-                            sigsOk = false;
-                        }
-                    }
-                    if (!sigsOk) {
+                    if (!doesSignatureMatchForPermissions(sourcePackageName, parsedPackage,
+                            scanFlags)) {
                         // If the owning package is the system itself, we log but allow
                         // install to proceed; we fail the install on all other permission
                         // redefinitions.
@@ -17913,6 +17956,52 @@ public class PackageManagerService extends IPackageManager.Stub
                                         + perm.getName()
                                         + " to runtime; keeping old protection level");
                                 perm.setProtectionLevel(bp.getProtectionLevel());
+                            }
+                        }
+                    }
+                }
+
+                if (perm.getGroup() != null && cannotInstallWithBadPermissionGroups) {
+                    boolean isPermGroupDefinedByPackage = false;
+                    for (int groupNum = 0; groupNum < numGroups; groupNum++) {
+                        if (parsedPackage.getPermissionGroups().get(groupNum).getName()
+                                .equals(perm.getGroup())) {
+                            isPermGroupDefinedByPackage = true;
+                            break;
+                        }
+                    }
+
+                    if (!isPermGroupDefinedByPackage) {
+                        final PermissionGroupInfo sourceGroup =
+                                getPermissionGroupInfo(perm.getGroup(), 0);
+
+                        if (sourceGroup == null) {
+                            EventLog.writeEvent(0x534e4554, "146211400", -1,
+                                    parsedPackage.getPackageName());
+
+                            throw new PrepareFailure(INSTALL_FAILED_BAD_PERMISSION_GROUP,
+                                    "Package "
+                                            + parsedPackage.getPackageName()
+                                            + " attempting to declare permission "
+                                            + perm.getName() + " in non-existing group "
+                                            + perm.getGroup());
+                        } else {
+                            String groupSourcePackageName = sourceGroup.packageName;
+
+                            if (!PLATFORM_PACKAGE_NAME.equals(groupSourcePackageName)
+                                    && !doesSignatureMatchForPermissions(groupSourcePackageName,
+                                    parsedPackage, scanFlags)) {
+                                EventLog.writeEvent(0x534e4554, "146211400", -1,
+                                        parsedPackage.getPackageName());
+
+                                throw new PrepareFailure(INSTALL_FAILED_BAD_PERMISSION_GROUP,
+                                        "Package "
+                                                + parsedPackage.getPackageName()
+                                                + " attempting to declare permission "
+                                                + perm.getName() + " in group "
+                                                + perm.getGroup() + " owned by package "
+                                                + groupSourcePackageName
+                                                + " with incompatible certificate");
                             }
                         }
                     }
