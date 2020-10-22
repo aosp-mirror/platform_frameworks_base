@@ -34,6 +34,7 @@ public final class PipBoundsState {
     private static final String TAG = PipBoundsState.class.getSimpleName();
 
     private final @NonNull Rect mBounds = new Rect();
+    private float mAspectRatio;
     private PipReentryState mPipReentryState;
     private ComponentName mLastPipComponentName;
 
@@ -44,6 +45,14 @@ public final class PipBoundsState {
     @NonNull
     public Rect getBounds() {
         return new Rect(mBounds);
+    }
+
+    public void setAspectRatio(float aspectRatio) {
+        mAspectRatio = aspectRatio;
+    }
+
+    public float getAspectRatio() {
+        return mAspectRatio;
     }
 
     /**
@@ -120,6 +129,7 @@ public final class PipBoundsState {
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mBounds=" + mBounds);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
+        pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {
