@@ -2334,11 +2334,11 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
-        public List<String> getAvailableCecSettings() {
+        public List<String> getUserCecSettings() {
             enforceAccessPermission();
             long token = Binder.clearCallingIdentity();
             try {
-                return HdmiControlService.this.getHdmiCecConfig().getAvailableSettings();
+                return HdmiControlService.this.getHdmiCecConfig().getUserSettings();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

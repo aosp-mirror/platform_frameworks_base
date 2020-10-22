@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.CecSettingName;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -179,13 +181,13 @@ public class HdmiCecConfig {
     @Storage
     private int getStorage(@NonNull Setting setting) {
         switch (setting.getName()) {
-            case HdmiControlManager.SETTING_NAME_HDMI_CEC_ENABLED:
+            case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
                 return STORAGE_GLOBAL_SETTINGS;
-            case HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP:
+            case HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP:
                 return STORAGE_GLOBAL_SETTINGS;
-            case HdmiControlManager.SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
+            case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SYSPROPS;
-            case HdmiControlManager.SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
+            case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return STORAGE_SYSPROPS;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
@@ -195,13 +197,13 @@ public class HdmiCecConfig {
 
     private String getStorageKey(@NonNull Setting setting) {
         switch (setting.getName()) {
-            case HdmiControlManager.SETTING_NAME_HDMI_CEC_ENABLED:
+            case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
                 return Global.HDMI_CONTROL_ENABLED;
-            case HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP:
+            case HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
-            case HdmiControlManager.SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
+            case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return SYSPROP_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST;
-            case HdmiControlManager.SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
+            case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return SYSPROP_SYSTEM_AUDIO_MODE_MUTING;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
@@ -238,33 +240,44 @@ public class HdmiCecConfig {
     }
 
     /**
-     * Returns a list of currently available settings based on the XML metadata.
+     * Returns a list of all settings based on the XML metadata.
      */
-    public List<String> getAvailableSettings() {
-        Set<String> availableSettings = new HashSet<String>();
+    public @CecSettingName List<String> getAllSettings() {
+        List<String> allSettings = new ArrayList<String>();
+        for (Setting setting : mProductConfig.getSetting()) {
+            allSettings.add(setting.getName());
+        }
+        return allSettings;
+    }
+
+    /**
+     * Returns a list of user-modifiable settings based on the XML metadata.
+     */
+    public @CecSettingName List<String> getUserSettings() {
+        Set<String> userSettings = new HashSet<String>();
         // First read from the product config.
         for (Setting setting : mProductConfig.getSetting()) {
             if (setting.getUserConfigurable()) {
-                availableSettings.add(setting.getName());
+                userSettings.add(setting.getName());
             }
         }
         if (mVendorOverride != null) {
             // Next either add or remove based on the vendor override.
             for (Setting setting : mVendorOverride.getSetting()) {
                 if (setting.getUserConfigurable()) {
-                    availableSettings.add(setting.getName());
+                    userSettings.add(setting.getName());
                 } else {
-                    availableSettings.remove(setting.getName());
+                    userSettings.remove(setting.getName());
                 }
             }
         }
-        return new ArrayList(availableSettings);
+        return new ArrayList(userSettings);
     }
 
     /**
      * For a given setting name returns values that are allowed for that setting.
      */
-    public List<String> getAllowedValues(@NonNull String name) {
+    public List<String> getAllowedValues(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -279,7 +292,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the default value for that setting.
      */
-    public String getDefaultValue(@NonNull String name) {
+    public String getDefaultValue(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -290,7 +303,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the current value of that setting.
      */
-    public String getValue(@NonNull Context context, @NonNull String name) {
+    public String getValue(@NonNull Context context, @NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -302,7 +315,8 @@ public class HdmiCecConfig {
     /**
      * For a given setting name and value sets the current value of that setting.
      */
-    public void setValue(@NonNull Context context, @NonNull String name, @NonNull String value) {
+    public void setValue(@NonNull Context context, @NonNull @CecSettingName String name,
+                         @NonNull String value) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
