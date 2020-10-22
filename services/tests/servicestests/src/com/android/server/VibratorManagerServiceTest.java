@@ -16,10 +16,16 @@
 
 package com.android.server;
 
+import static com.android.server.testutils.TestUtils.assertExpectException;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.CombinedVibrationEffect;
+import android.os.Process;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -40,9 +46,16 @@ import org.mockito.junit.MockitoRule;
 @Presubmit
 public class VibratorManagerServiceTest {
 
-    @Rule public MockitoRule rule = MockitoJUnit.rule();
+    private static final int UID = Process.ROOT_UID;
+    private static final String PACKAGE_NAME = "package";
+    private static final VibrationAttributes ALARM_ATTRS =
+            new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
 
-    @Mock private VibratorManagerService.NativeWrapper mNativeWrapperMock;
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
+    @Mock
+    private VibratorManagerService.NativeWrapper mNativeWrapperMock;
 
     @Before
     public void setUp() throws Exception {
@@ -72,7 +85,26 @@ public class VibratorManagerServiceTest {
 
     @Test
     public void getVibratorIds_withNonEmptyResultFromNative_returnsSameArray() {
-        when(mNativeWrapperMock.getVibratorIds()).thenReturn(new int[]{ 1, 2 });
-        assertArrayEquals(new int[]{ 1, 2 }, createService().getVibratorIds());
+        when(mNativeWrapperMock.getVibratorIds()).thenReturn(new int[]{1, 2});
+        assertArrayEquals(new int[]{1, 2}, createService().getVibratorIds());
+    }
+
+    @Test
+    public void vibrate_isUnsupported() {
+        VibratorManagerService service = createService();
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+        assertExpectException(UnsupportedOperationException.class,
+                "Not implemented",
+                () -> service.vibrate(UID, PACKAGE_NAME, effect, ALARM_ATTRS, "reason", service));
+    }
+
+    @Test
+    public void cancelVibrate_isUnsupported() {
+        VibratorManagerService service = createService();
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+        assertExpectException(UnsupportedOperationException.class,
+                "Not implemented", () -> service.cancelVibrate(service));
     }
 }
