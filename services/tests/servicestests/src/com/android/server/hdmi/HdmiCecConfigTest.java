@@ -64,16 +64,53 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void getAvailableCecSettings_Empty() {
+    public void getAllCecSettings_Empty() {
         HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getAvailableSettings()).isEmpty();
+        assertThat(hdmiCecConfig.getAllSettings()).isEmpty();
     }
 
     @Test
-    public void getAvailableCecSettings_OnlyMasterXml() {
+    public void getAllCecSettings_BasicSanity() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<cec-settings>"
+                + "  <setting name=\"hdmi_cec_enabled\""
+                + "           user-configurable=\"true\">"
+                + "    <allowed-values>"
+                + "      <value string-value=\"0\" />"
+                + "      <value string-value=\"1\" />"
+                + "    </allowed-values>"
+                + "    <default-value string-value=\"1\" />"
+                + "  </setting>"
+                + "  <setting name=\"send_standby_on_sleep\""
+                + "           user-configurable=\"false\">"
+                + "    <allowed-values>"
+                + "      <value string-value=\"to_tv\" />"
+                + "      <value string-value=\"broadcast\" />"
+                + "      <value string-value=\"none\" />"
+                + "    </allowed-values>"
+                + "    <default-value string-value=\"to_tv\" />"
+                + "  </setting>"
+                + "</cec-settings>", null);
+        assertThat(hdmiCecConfig.getAllSettings())
+                .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                                 HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+    }
+
+    @Test
+    public void getUserCecSettings_Empty() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<cec-settings>"
+                + "</cec-settings>", null);
+        assertThat(hdmiCecConfig.getUserSettings()).isEmpty();
+    }
+
+    @Test
+    public void getUserCecSettings_OnlyMasterXml() {
         HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
@@ -95,13 +132,13 @@ public final class HdmiCecConfigTest {
                 + "    <default-value string-value=\"to_tv\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getAvailableSettings())
-                .containsExactly(HdmiControlManager.SETTING_NAME_HDMI_CEC_ENABLED,
-                                 HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+        assertThat(hdmiCecConfig.getUserSettings())
+                .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                                 HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
     }
 
     @Test
-    public void getAvailableCecSettings_WithOverride() {
+    public void getUserCecSettings_WithOverride() {
         HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
@@ -135,8 +172,8 @@ public final class HdmiCecConfigTest {
                 + "    <default-value string-value=\"to_tv\" />"
                 + "  </setting>"
                 + "</cec-settings>");
-        assertThat(hdmiCecConfig.getAvailableSettings())
-                .containsExactly(HdmiControlManager.SETTING_NAME_HDMI_CEC_ENABLED);
+        assertThat(hdmiCecConfig.getUserSettings())
+                .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
     }
 
     @Test
@@ -165,7 +202,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getAllowedValues(
-                    HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP))
+                    HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP))
                 .containsExactly(HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV,
                                  HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST,
                                  HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE);
@@ -197,7 +234,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getDefaultValue(
-                    HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP))
+                    HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP))
                 .isEqualTo(HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
     }
 
@@ -231,7 +268,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getValue(mContext,
-                    HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP))
+                    HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP))
                 .isEqualTo(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
     }
 
@@ -256,7 +293,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getValue(mContext,
-                    HdmiControlManager.SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST))
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST))
                 .isEqualTo(HdmiProperties.power_state_change_on_active_source_lost_values
                         .STANDBY_NOW.name().toLowerCase());
     }
@@ -288,7 +325,7 @@ public final class HdmiCecConfigTest {
                 + "</cec-settings>", null);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setValue(mContext,
-                        HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+                        HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                         HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST));
     }
 
@@ -309,7 +346,7 @@ public final class HdmiCecConfigTest {
                 + "</cec-settings>", null);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setValue(mContext,
-                        HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+                        HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                         "bar"));
     }
 
@@ -329,7 +366,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         hdmiCecConfig.setValue(mContext,
-                               HdmiControlManager.SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+                               HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                                HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
         verify(mStorageAdapter).storeGlobalSetting(mContext,
                   Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
@@ -351,9 +388,9 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         hdmiCecConfig.setValue(mContext,
-                        HdmiControlManager.SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
-                        HdmiProperties.power_state_change_on_active_source_lost_values
-                            .STANDBY_NOW.name().toLowerCase());
+                  HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                  HdmiProperties.power_state_change_on_active_source_lost_values
+                      .STANDBY_NOW.name().toLowerCase());
         verify(mStorageAdapter).storeSystemProperty(
                   HdmiCecConfig.SYSPROP_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                   HdmiProperties.power_state_change_on_active_source_lost_values

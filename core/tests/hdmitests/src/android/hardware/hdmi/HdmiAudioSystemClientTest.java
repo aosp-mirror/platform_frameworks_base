@@ -376,7 +376,7 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
-        public List<String> getAvailableCecSettings() {
+        public List<String> getUserCecSettings() {
             return new ArrayList<>();
         }
 
