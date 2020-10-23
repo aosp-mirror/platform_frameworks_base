@@ -380,7 +380,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
         final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
-                != mPipBoundsHandler.getDisplayRotation();
+                != mPipBoundsState.getDisplayInfo().rotation;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds)
@@ -490,7 +490,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         // If the displayId of the task is different than what PipBoundsHandler has, then update
         // it. This is possible if we entered PiP on an external display.
-        if (info.displayId != mPipBoundsHandler.getDisplayInfo().displayId
+        if (info.displayId != mPipBoundsState.getDisplayInfo().displayId
                 && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
@@ -811,7 +811,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect currentDestinationBounds = animator.getDestinationBounds();
         destinationBoundsOut.set(currentDestinationBounds);
         if (!fromImeAdjustment && !fromShelfAdjustment
-                && mPipBoundsHandler.getDisplayBounds().contains(currentDestinationBounds)) {
+                && mPipBoundsState.getDisplayBounds().contains(currentDestinationBounds)) {
             // no need to update the destination bounds, bail early
             return;
         }

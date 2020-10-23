@@ -44,6 +44,7 @@ import androidx.annotation.Nullable;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
@@ -136,7 +137,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
                 @Override
                 public void onDisplayAdded(int displayId) {
-                    mPipBoundsHandler.setDisplayLayout(
+                    mPipBoundsState.setDisplayLayout(
                             mDisplayController.getDisplayLayout(displayId));
                 }
             };
@@ -184,7 +185,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         @Override
         public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mHandler.post(() -> mPipBoundsHandler.onDisplayInfoChanged(displayInfo));
+            mHandler.post(() -> mPipBoundsState.setDisplayInfo(displayInfo));
         }
 
         @Override
@@ -233,7 +234,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             final DisplayInfo newDisplayInfo = new DisplayInfo();
             displayController.getDisplay(displayId).getDisplayInfo(newDisplayInfo);
-            mPipBoundsHandler.onDisplayInfoChanged(newDisplayInfo);
+            mPipBoundsState.setDisplayInfo(newDisplayInfo);
             updateMovementBounds(null /* toBounds */, false /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdustment */,
                     null /* wct */);
@@ -249,7 +250,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // listener calls back
         final DisplayInfo displayInfo = new DisplayInfo();
         context.getDisplay().getDisplayInfo(displayInfo);
-        mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
+        mPipBoundsState.setDisplayInfo(displayInfo);
 
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(
@@ -298,7 +299,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     @Override
     public void onOverlayChanged() {
         mHandler.post(() -> {
-            mPipBoundsHandler.onOverlayChanged(mContext, mContext.getDisplay());
+            mPipBoundsState.setDisplayLayout(new DisplayLayout(mContext, mContext.getDisplay()));
             updateMovementBounds(null /* toBounds */,
                     false /* fromRotation */, false /* fromImeAdjustment */,
                     false /* fromShelfAdjustment */,
@@ -443,8 +444,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
         // passing to mTouchHandler/mPipTaskOrganizer
         final Rect outBounds = new Rect(toBounds);
+        mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
         mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                outBounds, mTmpDisplayInfo);
+                outBounds);
         // mTouchHandler would rely on the bounds populated from mPipTaskOrganizer
         mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation, fromImeAdjustment,
                 fromShelfAdjustment, wct);

@@ -21,8 +21,10 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.util.Size;
+import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -37,6 +39,8 @@ public final class PipBoundsState {
     private float mAspectRatio;
     private PipReentryState mPipReentryState;
     private ComponentName mLastPipComponentName;
+    private final DisplayInfo mDisplayInfo = new DisplayInfo();
+    private final DisplayLayout mDisplayLayout = new DisplayLayout();
 
     void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
@@ -88,6 +92,42 @@ public final class PipBoundsState {
         return mLastPipComponentName;
     }
 
+    @NonNull
+    public DisplayInfo getDisplayInfo() {
+        return mDisplayInfo;
+    }
+
+    /**
+     * Update the display info.
+     */
+    public void setDisplayInfo(@NonNull DisplayInfo displayInfo) {
+        mDisplayInfo.copyFrom(displayInfo);
+    }
+
+    public void setDisplayRotation(int rotation) {
+        mDisplayInfo.rotation = rotation;
+    }
+
+    /**
+     * Returns the display's bound.
+     */
+    @NonNull
+    public Rect getDisplayBounds() {
+        return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+    }
+
+    /**
+     * Update the display layout.
+     */
+    public void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
+        mDisplayLayout.set(displayLayout);
+    }
+
+    @NonNull
+    public DisplayLayout getDisplayLayout() {
+        return mDisplayLayout;
+    }
+
     @VisibleForTesting
     void clearReentryState() {
         mPipReentryState = null;
@@ -130,6 +170,8 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mBounds=" + mBounds);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
+        pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
+        pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {
