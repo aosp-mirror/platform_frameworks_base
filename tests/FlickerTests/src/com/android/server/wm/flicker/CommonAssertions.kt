@@ -30,7 +30,7 @@ fun WmAssertion.statusBarWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("statusBarWindowIsAlwaysVisible", enabled, bugId) {
+    all("statusBarWindowIsAlwaysVisible", bugId, enabled) {
         this.showsAboveAppWindow(STATUS_BAR_WINDOW_TITLE)
     }
 }
@@ -40,7 +40,7 @@ fun WmAssertion.navBarWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("navBarWindowIsAlwaysVisible", enabled, bugId) {
+    all("navBarWindowIsAlwaysVisible", bugId, enabled) {
         this.showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE)
     }
 }
@@ -56,7 +56,7 @@ fun LayersAssertion.noUncoveredRegions(
     val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
     val endingBounds = WindowUtils.getDisplayBounds(endRotation)
     if (allStates) {
-        all("noUncoveredRegions", enabled, bugId) {
+        all("noUncoveredRegions", bugId, enabled) {
             if (startingBounds == endingBounds) {
                 this.coversAtLeastRegion(startingBounds)
             } else {
@@ -82,7 +82,7 @@ fun LayersAssertion.navBarLayerIsAlwaysVisible(
     enabled: Boolean = bugId == 0
 ) {
     if (rotatesScreen) {
-        all("navBarLayerIsAlwaysVisible", enabled, bugId) {
+        all("navBarLayerIsAlwaysVisible", bugId, enabled) {
             this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
                     .then()
                     .hidesLayer(NAVIGATION_BAR_WINDOW_TITLE)
@@ -90,7 +90,7 @@ fun LayersAssertion.navBarLayerIsAlwaysVisible(
                     .showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
         }
     } else {
-        all("navBarLayerIsAlwaysVisible", enabled, bugId) {
+        all("navBarLayerIsAlwaysVisible", bugId, enabled) {
             this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
         }
     }
@@ -103,7 +103,7 @@ fun LayersAssertion.statusBarLayerIsAlwaysVisible(
     enabled: Boolean = bugId == 0
 ) {
     if (rotatesScreen) {
-        all("statusBarLayerIsAlwaysVisible", enabled, bugId) {
+        all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
             this.showsLayer(STATUS_BAR_WINDOW_TITLE)
                     .then()
                     hidesLayer(STATUS_BAR_WINDOW_TITLE)
@@ -111,7 +111,7 @@ fun LayersAssertion.statusBarLayerIsAlwaysVisible(
                     .showsLayer(STATUS_BAR_WINDOW_TITLE)
         }
     } else {
-        all("statusBarLayerIsAlwaysVisible", enabled, bugId) {
+        all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
             this.showsLayer(STATUS_BAR_WINDOW_TITLE)
         }
     }
@@ -127,10 +127,10 @@ fun LayersAssertion.navBarLayerRotatesAndScales(
     val startingPos = WindowUtils.getNavigationBarPosition(beginRotation)
     val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
 
-    start("navBarLayerRotatesAndScales_StartingPos", enabled, bugId) {
+    start("navBarLayerRotatesAndScales_StartingPos", bugId, enabled) {
         this.hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, startingPos)
     }
-    end("navBarLayerRotatesAndScales_EndingPost", enabled, bugId) {
+    end("navBarLayerRotatesAndScales_EndingPost", bugId, enabled) {
         this.hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, endingPos)
     }
 
@@ -151,10 +151,10 @@ fun LayersAssertion.statusBarLayerRotatesScales(
     val startingPos = WindowUtils.getStatusBarPosition(beginRotation)
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
-    start("statusBarLayerRotatesScales_StartingPos", enabled, bugId) {
+    start("statusBarLayerRotatesScales_StartingPos", bugId, enabled) {
         this.hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, startingPos)
     }
-    end("statusBarLayerRotatesScales_EndingPos", enabled, bugId) {
+    end("statusBarLayerRotatesScales_EndingPos", bugId, enabled) {
         this.hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, endingPos)
     }
 }
