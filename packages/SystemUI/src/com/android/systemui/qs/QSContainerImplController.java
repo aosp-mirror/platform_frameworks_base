@@ -34,7 +34,7 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
     }
 
     @Override
-    public void initInternal() {
+    public void onInit() {
         mQuickStatusBarHeaderController.init();
     }
 
