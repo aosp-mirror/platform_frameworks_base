@@ -48,12 +48,11 @@ import java.util.Objects;
 public final class PhoneAccount implements Parcelable {
 
     /**
-     * String extra which determines the order in which {@link PhoneAccount}s are sorted
+     * Integer extra which determines the order in which {@link PhoneAccount}s are sorted
      *
      * This is an extras key set via {@link Builder#setExtras} which determines the order in which
      * {@link PhoneAccount}s from the same {@link ConnectionService} are sorted. The accounts
-     * are sorted by this key via standard lexicographical order, (as implemented in
-     * {@link String#compareTo}), and this ordering is used to
+     * are sorted in ascending order by this key, and this ordering is used to
      * determine priority when a call can be placed via multiple accounts.
      *
      * When multiple {@link PhoneAccount}s are supplied with the same sort order key, no ordering is
