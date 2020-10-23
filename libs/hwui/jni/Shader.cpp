@@ -133,11 +133,25 @@ static jlong LinearGradient_create(JNIEnv* env, jobject, jlong matrixPtr,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static jlong RadialGradient_create(JNIEnv* env, jobject, jlong matrixPtr, jfloat x, jfloat y,
-        jfloat radius, jlongArray colorArray, jfloatArray posArray, jint tileMode,
+static jlong RadialGradient_create(JNIEnv* env,
+        jobject,
+        jlong matrixPtr,
+        jfloat startX,
+        jfloat startY,
+        jfloat startRadius,
+        jfloat endX,
+        jfloat endY,
+        jfloat endRadius,
+        jlongArray colorArray,
+        jfloatArray posArray,
+        jint tileMode,
         jlong colorSpaceHandle) {
-    SkPoint center;
-    center.set(x, y);
+
+    SkPoint start;
+    start.set(startX, startY);
+
+    SkPoint end;
+    end.set(endX, endY);
 
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
@@ -148,11 +162,17 @@ static jlong RadialGradient_create(JNIEnv* env, jobject, jlong matrixPtr, jfloat
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    sk_sp<SkShader> shader = SkGradientShader::MakeRadial(center, radius, &colors[0],
-            GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
-            static_cast<SkTileMode>(tileMode), sGradientShaderFlags, nullptr);
+    auto colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
+    auto skTileMode = static_cast<SkTileMode>(tileMode);
+    sk_sp<SkShader> shader = SkGradientShader::MakeTwoPointConical(start, startRadius, end,
+                    endRadius, &colors[0], std::move(colorSpace), pos, colors.size(), skTileMode,
+                    sGradientShaderFlags, nullptr);
     ThrowIAE_IfNull(env, shader);
 
+    // Explicitly create a new shader with the specified matrix to match existing behavior.
+    // Passing in the matrix in the instantiation above can throw exceptions for non-invertible
+    // matrices. However, makeWithLocalMatrix will still allow for the shader to be created
+    // and skia handles null-shaders internally (i.e. is ignored)
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     if (matrix) {
         shader = shader->makeWithLocalMatrix(*matrix);
@@ -279,7 +299,7 @@ static const JNINativeMethod gLinearGradientMethods[] = {
 };
 
 static const JNINativeMethod gRadialGradientMethods[] = {
-    { "nativeCreate",     "(JFFF[J[FIJ)J",  (void*)RadialGradient_create     },
+    { "nativeCreate",     "(JFFFFFF[J[FIJ)J",  (void*)RadialGradient_create     },
 };
 
 static const JNINativeMethod gSweepGradientMethods[] = {
