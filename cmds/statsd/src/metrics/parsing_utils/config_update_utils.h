@@ -187,7 +187,7 @@ bool updateMetrics(
         std::set<int64_t>& noReportMetricIds,
         std::unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
         std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
-        std::vector<int>& metricsWithActivation);
+        std::vector<int>& metricsWithActivation, std::set<int64_t>& replacedMetrics);
 
 // Updates the existing MetricsManager from a new StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.

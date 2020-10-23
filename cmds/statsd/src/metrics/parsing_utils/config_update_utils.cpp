@@ -643,7 +643,7 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                    set<int64_t>& noReportMetricIds,
                    unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
                    unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
-                   vector<int>& metricsWithActivation) {
+                   vector<int>& metricsWithActivation, set<int64_t>& replacedMetrics) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     sp<EventMatcherWizard> matcherWizard = new EventMatcherWizard(allAtomMatchingTrackers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
@@ -689,6 +689,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createCountMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, metric, metricIndex,
@@ -726,6 +728,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createDurationMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, metric, metricIndex,
@@ -763,6 +767,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createEventMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, metric, metricIndex, allAtomMatchingTrackers,
@@ -800,6 +806,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createValueMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, pullerManager, metric, metricIndex,
@@ -838,6 +846,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createGaugeMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, pullerManager, metric, metricIndex,
@@ -859,7 +869,6 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         }
         newMetricProducers.push_back(producer.value());
     }
-    // TODO: perform update for value metric.
 
     const set<int> atomsAllowedFromAnyUid(config.whitelisted_atom_ids().begin(),
                                           config.whitelisted_atom_ids().end());
@@ -910,6 +919,7 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         set<int64_t>& noReportMetricIds) {
     set<int64_t> replacedMatchers;
     set<int64_t> replacedConditions;
+    set<int64_t> replacedMetrics;
     vector<ConditionState> conditionCache;
     unordered_map<int64_t, int> stateAtomIdMap;
     unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
@@ -951,7 +961,7 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                        replacedStates, oldMetricProducerMap, oldMetricProducers,
                        newMetricProducerMap, newMetricProducers, conditionToMetricMap,
                        trackerToMetricMap, noReportMetricIds, activationTrackerToMetricMap,
-                       deactivationTrackerToMetricMap, metricsWithActivation)) {
+                       deactivationTrackerToMetricMap, metricsWithActivation, replacedMetrics)) {
         ALOGE("initMetricProducers failed");
         return false;
     }

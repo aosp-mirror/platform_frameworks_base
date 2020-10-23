@@ -1812,6 +1812,7 @@ TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
@@ -1820,13 +1821,14 @@ TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
             /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
             newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {event1Id, event1Index}, {event2Id, event2Index}, {event3Id, event3Index},
             {event4Id, event4Index}, {event6Id, event6Index},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+    EXPECT_EQ(replacedMetrics, set<int64_t>({event2Id, event3Id, event4Id}));
 
     // Make sure preserved metrics are the same.
     ASSERT_EQ(newMetricProducers.size(), 5);
@@ -2041,6 +2043,7 @@ TEST_F(ConfigUpdateTest, TestUpdateCountMetrics) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
@@ -2049,13 +2052,14 @@ TEST_F(ConfigUpdateTest, TestUpdateCountMetrics) {
             oldMetricProducerMap, oldMetricProducers, newMetricProducerMap, newMetricProducers,
             conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {count1Id, count1Index}, {count2Id, count2Index}, {count3Id, count3Index},
             {count4Id, count4Index}, {count6Id, count6Index},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+    EXPECT_EQ(replacedMetrics, set<int64_t>({count2Id, count3Id, count4Id}));
 
     // Make sure preserved metrics are the same.
     ASSERT_EQ(newMetricProducers.size(), 5);
@@ -2250,6 +2254,7 @@ TEST_F(ConfigUpdateTest, TestUpdateGaugeMetrics) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
@@ -2258,13 +2263,14 @@ TEST_F(ConfigUpdateTest, TestUpdateGaugeMetrics) {
             /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
             newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {gauge1Id, gauge1Index}, {gauge2Id, gauge2Index}, {gauge3Id, gauge3Index},
             {gauge4Id, gauge4Index}, {gauge6Id, gauge6Index},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+    EXPECT_EQ(replacedMetrics, set<int64_t>({gauge2Id, gauge3Id, gauge4Id}));
 
     // Make sure preserved metrics are the same.
     ASSERT_EQ(newMetricProducers.size(), 5);
@@ -2567,6 +2573,7 @@ TEST_F(ConfigUpdateTest, TestUpdateDurationMetrics) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, /*replacedMatchers=*/{},
@@ -2575,7 +2582,7 @@ TEST_F(ConfigUpdateTest, TestUpdateDurationMetrics) {
             oldMetricProducerMap, oldMetricProducers, newMetricProducerMap, newMetricProducers,
             conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {duration1Id, duration1Index}, {duration2Id, duration2Index},
@@ -2583,7 +2590,7 @@ TEST_F(ConfigUpdateTest, TestUpdateDurationMetrics) {
             {duration6Id, duration6Index},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
-
+    EXPECT_EQ(replacedMetrics, set<int64_t>({duration2Id, duration3Id, duration4Id}));
     // Make sure preserved metrics are the same.
     ASSERT_EQ(newMetricProducers.size(), 5);
     EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(duration1Id)],
@@ -2831,6 +2838,7 @@ TEST_F(ConfigUpdateTest, TestUpdateValueMetrics) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, /*replacedMatchers=*/{},
@@ -2839,13 +2847,14 @@ TEST_F(ConfigUpdateTest, TestUpdateValueMetrics) {
             oldMetricProducerMap, oldMetricProducers, newMetricProducerMap, newMetricProducers,
             conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {value1Id, value1Index}, {value2Id, value2Index}, {value3Id, value3Index},
             {value4Id, value4Index}, {value6Id, value6Index},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+    EXPECT_EQ(replacedMetrics, set<int64_t>({value2Id, value3Id, value4Id}));
 
     // Make sure preserved metrics are the same.
     ASSERT_EQ(newMetricProducers.size(), 5);
@@ -3005,6 +3014,7 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricActivations) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, config, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
@@ -3013,7 +3023,7 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricActivations) {
             /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
             newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     // Verify event activation/deactivation maps.
     ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 3);
@@ -3157,6 +3167,7 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
     vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
     EXPECT_TRUE(updateMetrics(
             key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
             oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
@@ -3165,7 +3176,7 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
             /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
             newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
             activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-            metricsWithActivation));
+            metricsWithActivation, replacedMetrics));
 
     unordered_map<int64_t, int> expectedMetricProducerMap = {
             {countMetricId, countMetricIndex}, {durationMetricId, durationMetricIndex},
@@ -3173,6 +3184,8 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
             {gaugeMetricId, gaugeMetricIndex},
     };
     EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+
+    EXPECT_EQ(replacedMetrics, set<int64_t>({eventMetricId, gaugeMetricId}));
 
     // Make sure preserved metrics are the same.
     ASSERT_EQ(newMetricProducers.size(), 5);
