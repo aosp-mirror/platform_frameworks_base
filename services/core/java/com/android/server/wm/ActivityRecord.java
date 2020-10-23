@@ -2592,7 +2592,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 // When finishing the activity preemptively take the snapshot before the app window
                 // is marked as hidden and any configuration changes take place
-                if (mAtmService.mWindowManager.mTaskSnapshotController != null) {
+                // Note that RecentsAnimation will handle task snapshot while switching apps with
+                // the best capture timing (e.g. IME window capture),
+                // No need additional task capture while task is controlled by RecentsAnimation.
+                if (mAtmService.mWindowManager.mTaskSnapshotController != null
+                        && !task.isAnimatingByRecents()) {
                     final ArraySet<Task> tasks = Sets.newArraySet(task);
                     mAtmService.mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
                     mAtmService.mWindowManager.mTaskSnapshotController
