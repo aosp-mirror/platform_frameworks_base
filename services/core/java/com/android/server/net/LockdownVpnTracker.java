@@ -95,11 +95,13 @@ public class LockdownVpnTracker {
         mProfile = Objects.requireNonNull(profile);
 
         final Intent configIntent = new Intent(ACTION_VPN_SETTINGS);
-        mConfigIntent = PendingIntent.getActivity(mContext, 0, configIntent, 0);
+        mConfigIntent = PendingIntent.getActivity(mContext, 0 /* requestCode */, configIntent,
+                PendingIntent.FLAG_IMMUTABLE);
 
         final Intent resetIntent = new Intent(ACTION_LOCKDOWN_RESET);
         resetIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mResetIntent = PendingIntent.getBroadcast(mContext, 0, resetIntent, 0);
+        mResetIntent = PendingIntent.getBroadcast(mContext, 0 /* requestCode */, resetIntent,
+                PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
