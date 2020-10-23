@@ -113,6 +113,7 @@ import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.ActivityState.PAUSED;
 import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
@@ -3661,14 +3662,9 @@ class Task extends WindowContainer<WindowContainer> {
         super.setInitialSurfaceControlProperties(b);
     }
 
-    boolean isTaskAnimating() {
-        final RecentsAnimationController recentsAnim = mWmService.getRecentsAnimationController();
-        if (recentsAnim != null) {
-            if (recentsAnim.isAnimatingTask(this)) {
-                return true;
-            }
-        }
-        return forAllTasks((t) -> { return t != this && t.isTaskAnimating(); });
+    /** Checking if self or its child tasks are animated by recents animation. */
+    boolean isAnimatingByRecents() {
+        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS);
     }
 
     @Override
