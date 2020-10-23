@@ -4049,7 +4049,8 @@ public class AudioManager {
         //     the associated intent will be handled by the component being registered
         mediaButtonIntent.setComponent(eventReceiver);
         PendingIntent pi = PendingIntent.getBroadcast(getContext(),
-                0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
+                0/*requestCode, ignored*/, mediaButtonIntent,
+                PendingIntent.FLAG_IMMUTABLE);
         registerMediaButtonIntent(pi, eventReceiver);
     }
 
@@ -4102,7 +4103,8 @@ public class AudioManager {
         //     the associated intent will be handled by the component being registered
         mediaButtonIntent.setComponent(eventReceiver);
         PendingIntent pi = PendingIntent.getBroadcast(getContext(),
-                0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
+                0/*requestCode, ignored*/, mediaButtonIntent,
+                PendingIntent.FLAG_IMMUTABLE);
         unregisterMediaButtonIntent(pi);
     }
 
