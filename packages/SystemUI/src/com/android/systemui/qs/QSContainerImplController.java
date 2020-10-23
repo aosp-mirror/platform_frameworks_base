@@ -35,7 +35,7 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
             new ConfigurationController.ConfigurationListener() {
         @Override
         public void onConfigChanged(Configuration newConfig) {
-            mView.updateResources(mQsPanelController);
+            mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         }
     };
 
@@ -60,7 +60,7 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
 
     @Override
     protected void onViewAttached() {
-        mView.updateResources(mQsPanelController);
+        mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         mQsPanelController.setMediaVisibilityChangedListener((visible) -> {
             if (mQsPanelController.isShown()) {
                 mView.onMediaVisibilityChanged(true);

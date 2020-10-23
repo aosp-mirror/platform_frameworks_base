@@ -43,6 +43,7 @@ import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.util.animation.DisappearParameters;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,7 +91,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
                 QSCustomizerController qsCustomizerController, MediaHost mediaHost,
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
-            super(view, host, qsCustomizerController, mediaHost,
+            super(view, host, qsCustomizerController, true, mediaHost,
                     metricsLogger, uiEventLogger, dumpManager);
         }
 
@@ -113,6 +114,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mQSTileRevealControllerFactory.create(any(), any()))
                 .thenReturn(mQSTileRevealController);
+        when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost, mMetricsLogger, mUiEventLogger, mDumpManager);
@@ -126,7 +128,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.onViewDetached();
 
         QSPanelControllerBase<QSPanel> controller = new QSPanelControllerBase<QSPanel>(
-                mQSPanel, mQSTileHost, mQSCustomizerController, mMediaHost, mMetricsLogger,
+                mQSPanel, mQSTileHost, mQSCustomizerController, true, mMediaHost, mMetricsLogger,
                 mUiEventLogger, mDumpManager) {
             @Override
             protected QSTileRevealController createTileRevealController() {

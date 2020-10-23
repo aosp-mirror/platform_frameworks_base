@@ -112,9 +112,9 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
 
         mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
-                mQSTileHost, mQSCustomizerController, mMediaHost, mQSTileRevealControllerFactory,
-                mDumpManager, mMetricsLogger, mUiEventLogger, mBrightnessControllerFactory,
-                mToggleSliderViewControllerFactory);
+                mQSTileHost, mQSCustomizerController, true, mMediaHost,
+                mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
+                mBrightnessControllerFactory, mToggleSliderViewControllerFactory);
 
         mController.init();
     }

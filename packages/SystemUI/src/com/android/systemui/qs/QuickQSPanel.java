@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
@@ -29,7 +28,6 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -57,9 +55,8 @@ public class QuickQSPanel extends QSPanel {
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             QSLogger qsLogger,
-            @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger) {
-        super(context, attrs, qsLogger, mediaHost, uiEventLogger);
+        super(context, attrs, qsLogger, uiEventLogger);
         mMaxTiles = Math.min(DEFAULT_MAX_TILES,
                 getResources().getInteger(R.integer.quick_qs_panel_max_columns));
         applyBottomMargin((View) mRegularTileLayout);

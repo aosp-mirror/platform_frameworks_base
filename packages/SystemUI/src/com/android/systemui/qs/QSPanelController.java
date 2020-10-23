@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
@@ -77,13 +78,14 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
+            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory) {
-        super(view, qstileHost, qsCustomizerController, mediaHost, metricsLogger, uiEventLogger,
-                dumpManager);
+        super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
+                uiEventLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
@@ -111,7 +113,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     protected void onViewAttached() {
         super.onViewAttached();
 
-        mView.updateMediaDisappearParameters();
+        updateMediaDisappearParameters();
 
         mTunerService.addTunable(mView, QS_SHOW_BRIGHTNESS);
         mView.updateResources();
@@ -140,11 +142,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             mBrightnessMirrorController.removeCallback(mBrightnessMirrorListener);
         }
         super.onViewDetached();
-    }
-
-    /** TODO(b/168904199): Remove this method once view is controllerized. */
-    QSPanel getView() {
-        return mView;
     }
 
     /**
@@ -277,7 +274,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** */
     public void setContentMargins(int startMargin, int endMargin) {
-        mView.setContentMargins(startMargin, endMargin);
+        mView.setContentMargins(startMargin, endMargin, mMediaHost.getHostView());
     }
 
     /** */

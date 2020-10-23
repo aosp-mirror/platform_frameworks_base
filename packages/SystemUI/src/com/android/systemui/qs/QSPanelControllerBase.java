@@ -17,10 +17,12 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
+import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -32,12 +34,15 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.animation.DisappearParameters;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
+
+import javax.inject.Named;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -51,6 +56,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         implements Dumpable{
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
+    private final boolean mUsingMediaPlayer;
     protected final MediaHost mMediaHost;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
@@ -81,12 +87,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return null;
     };
 
+    private boolean mUsingHorizontalLayout;
+
     protected QSPanelControllerBase(T view, QSTileHost host,
-            QSCustomizerController qsCustomizerController, MediaHost mediaHost,
+            QSCustomizerController qsCustomizerController,
+            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer, MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
         super(view);
         mHost = host;
         mQsCustomizerController = qsCustomizerController;
+        mUsingMediaPlayer = usingMediaPlayer;
         mMediaHost = mediaHost;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
@@ -242,11 +252,65 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean switchTileLayout(boolean force) {
-        if (mView.switchTileLayout(force, mRecords)) {
+        /** Whether or not the QuickQSPanel currently contains a media player. */
+        boolean horizontal = shouldUseHorizontalLayout();
+        if (mView.getDivider() != null) {
+            if (!horizontal && mUsingMediaPlayer && mMediaHost.getVisible()) {
+                mView.getDivider().setVisibility(View.VISIBLE);
+            } else {
+                mView.getDivider().setVisibility(View.GONE);
+            }
+        }
+        if (horizontal != mUsingHorizontalLayout || force) {
+            mUsingHorizontalLayout = horizontal;
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
+                mView.removeTile(record);
+                record.tile.removeCallback(record.callback);
+            }
+            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
+            updateMediaDisappearParameters();
+
             setTiles();
+
             return true;
         }
         return false;
+    }
+
+    /**
+     * Update the way the media disappears based on if we're using the horizontal layout
+     */
+    void updateMediaDisappearParameters() {
+        if (!mUsingMediaPlayer) {
+            return;
+        }
+        DisappearParameters parameters = mMediaHost.getDisappearParameters();
+        if (mUsingHorizontalLayout) {
+            // Only height remaining
+            parameters.getDisappearSize().set(0.0f, 0.4f);
+            // Disappearing on the right side on the bottom
+            parameters.getGonePivot().set(1.0f, 1.0f);
+            // translating a bit horizontal
+            parameters.getContentTranslationFraction().set(0.25f, 1.0f);
+            parameters.setDisappearEnd(0.6f);
+        } else {
+            // Only width remaining
+            parameters.getDisappearSize().set(1.0f, 0.0f);
+            // Disappearing on the bottom
+            parameters.getGonePivot().set(0.0f, 1.0f);
+            // translating a bit vertical
+            parameters.getContentTranslationFraction().set(0.0f, 1.05f);
+            parameters.setDisappearEnd(0.95f);
+        }
+        parameters.setFadeStartPosition(0.95f);
+        parameters.setDisappearStart(0.0f);
+        mMediaHost.setDisappearParameters(parameters);
+    }
+
+    boolean shouldUseHorizontalLayout() {
+        return mUsingMediaPlayer && mMediaHost.getVisible()
+                && getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void logTiles() {

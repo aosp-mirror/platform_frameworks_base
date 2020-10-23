@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -51,11 +52,12 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
+            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
-        super(view, qsTileHost, qsCustomizerController, mediaHost, metricsLogger, uiEventLogger,
-                dumpManager);
+        super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
+                uiEventLogger, dumpManager);
     }
 
     @Override
@@ -97,6 +99,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             }
         }
         super.setTiles(mAllTiles.subList(0, mView.getNumQuickTiles()), true);
+    }
+
+    /** */
+    public void setContentMargins(int marginStart, int marginEnd) {
+        mView.setContentMargins(marginStart, marginEnd, mMediaHost.getHostView());
     }
 
     public int getNumQuickTiles() {
