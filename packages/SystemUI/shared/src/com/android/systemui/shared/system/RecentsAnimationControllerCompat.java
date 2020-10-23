@@ -17,6 +17,7 @@
 package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
@@ -66,6 +67,21 @@ public class RecentsAnimationControllerCompat {
             mAnimationController.hideCurrentInputMethod();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set hide input method", e);
+        }
+    }
+
+    /**
+     * Sets the final bounds on a Task. This is used by Launcher to notify the system that
+     * animating Activity to PiP has completed and the associated task surface should be updated
+     * accordingly. This should be called before `finish`
+     * @param taskId Task id of the Activity in PiP mode.
+     * @param destinationBounds Bounds of the PiP window on home.
+     */
+    public void setFinishTaskBounds(int taskId, Rect destinationBounds) {
+        try {
+            mAnimationController.setFinishTaskBounds(taskId, destinationBounds);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to set finish task bounds", e);
         }
     }
 

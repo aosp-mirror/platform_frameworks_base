@@ -68,7 +68,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
-import com.android.wm.shell.pip.phone.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
@@ -339,7 +338,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams) {
         mShouldIgnoreEnteringPipTransition = true;
-        mState = State.ENTERING_PIP;
+        sendOnPipTransitionStarted(componentName, TRANSITION_DIRECTION_TO_PIP);
         mPipBoundsState.setLastPipComponentName(componentName);
         mPipBoundsState.setAspectRatio(getAspectRatioOrDefault(pictureInPictureParams));
         return mPipBoundsHandler.getDestinationBounds(null /* bounds */,
@@ -351,7 +350,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
     public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
-        mPipBoundsState.setBounds(destinationBounds);
+        // do nothing if there is no startSwipePipToHome being called before
+        if (mShouldIgnoreEnteringPipTransition) {
+            mPipBoundsState.setBounds(destinationBounds);
+        }
     }
 
     /**
@@ -494,11 +496,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         if (mShouldIgnoreEnteringPipTransition) {
-            // Animation has been finished together with Recents, directly apply the sync
-            // transaction to PiP here.
-            applyEnterPipSyncTransaction(mPipBoundsState.getBounds(), () -> {
-                mState = State.ENTERED_PIP;
-            });
+            // animation is finished in the Launcher and here we directly apply the final touch.
+            applyEnterPipSyncTransaction(mPipBoundsState.getBounds(),
+                    () -> sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP));
             mShouldIgnoreEnteringPipTransition = false;
             return;
         }
@@ -589,11 +589,19 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
+        sendOnPipTransitionStarted(mTaskInfo.baseActivity, direction);
+    }
+
+    private void sendOnPipTransitionStarted(ComponentName componentName,
+            @PipAnimationController.TransitionDirection int direction) {
+        if (direction == TRANSITION_DIRECTION_TO_PIP) {
+            mState = State.ENTERING_PIP;
+        }
         final Rect pipBounds = mPipBoundsState.getBounds();
         runOnMainHandler(() -> {
             for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                 final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction, pipBounds);
+                callback.onPipTransitionStarted(componentName, direction, pipBounds);
             }
         });
     }
@@ -703,6 +711,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         mShouldDeferEnteringPip = false;
+        mShouldIgnoreEnteringPipTransition = false;
         mPictureInPictureParams = null;
         mState = State.UNDEFINED;
         mPipUiEventLoggerLogger.setTaskInfo(null);
@@ -1080,7 +1089,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         // By default, simply reset the windowing mode to undefined.
         return WINDOWING_MODE_UNDEFINED;
     }
-
 
     private void animateResizePip(Rect currentBounds, Rect destinationBounds, Rect sourceHintRect,
             @PipAnimationController.TransitionDirection int direction, int durationMs) {
