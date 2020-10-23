@@ -26,10 +26,8 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
-import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.Environment;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -149,27 +147,6 @@ public class BackgroundDexOptService extends JobService {
         }
     }
 
-    // Returns the current battery level as a 0-100 integer.
-    private int getBatteryLevel() {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent intent = registerReceiver(null, filter);
-        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        boolean present = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
-
-        if (!present) {
-            // No battery, treat as if 100%, no possibility of draining battery.
-            return 100;
-        }
-
-        if (level < 0 || scale <= 0) {
-            // Battery data unavailable. This should never happen, so assume the worst.
-            return 0;
-        }
-
-        return (100 * level / scale);
-    }
-
     private long getLowStorageThreshold(Context context) {
         @SuppressWarnings("deprecation")
         final long lowThreshold = StorageManager.from(context).getStorageLowBytes(mDataDir);
@@ -198,9 +175,8 @@ public class BackgroundDexOptService extends JobService {
 
     private void postBootUpdate(JobParameters jobParams, PackageManagerService pm,
             ArraySet<String> pkgs) {
-        // Load low battery threshold from the system config. This is a 0-100 integer.
-        final int lowBatteryThreshold = getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        final BatteryManagerInternal batteryManagerInternal =
+                LocalServices.getService(BatteryManagerInternal.class);
         final long lowThreshold = getLowStorageThreshold(this);
 
         mAbortPostBootUpdate.set(false);
@@ -215,7 +191,7 @@ public class BackgroundDexOptService extends JobService {
                 // Different job, which supersedes this one, is running.
                 break;
             }
-            if (getBatteryLevel() < lowBatteryThreshold) {
+            if (batteryManagerInternal.getBatteryLevelLow()) {
                 // Rather bail than completely drain the battery.
                 break;
             }
