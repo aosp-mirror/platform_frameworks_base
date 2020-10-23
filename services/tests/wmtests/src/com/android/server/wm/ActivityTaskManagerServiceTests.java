@@ -54,6 +54,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Tests for the {@link ActivityTaskManagerService} class.
@@ -261,15 +262,17 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testUpdateSleep() {
         doCallRealMethod().when(mWm.mRoot).hasAwakeDisplay();
         mSupervisor.mGoingToSleepWakeLock = mock(PowerManager.WakeLock.class);
+        final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
+                .setTask(mWm.mRoot.getDefaultTaskDisplayArea().getOrCreateRootHomeTask()).build();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         topActivity.setState(Task.ActivityState.RESUMED, "test");
 
-        final Runnable assertTopNonSleeping = () -> {
+        final Consumer<ActivityRecord> assertTopNonSleeping = activity -> {
             assertFalse(mAtm.mInternal.isSleeping());
             assertEquals(ActivityManager.PROCESS_STATE_TOP, mAtm.mInternal.getTopProcessState());
-            assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
+            assertEquals(activity.app, mAtm.mInternal.getTopApp());
         };
-        assertTopNonSleeping.run();
+        assertTopNonSleeping.accept(topActivity);
 
         // Sleep all displays.
         mWm.mRoot.forAllDisplays(display -> doReturn(true).when(display).shouldSleep());
@@ -279,13 +282,18 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertTrue(mAtm.mInternal.isSleeping());
         assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
                 mAtm.mInternal.getTopProcessState());
-        assertNull(mAtm.mInternal.getTopApp());
+        // The top app should not change while sleeping.
+        assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
+
+        // Move the current top to back, the top app should update to the next activity.
+        topActivity.getRootTask().moveToBack("test", null /* self */);
+        assertEquals(homeActivity.app, mAtm.mInternal.getTopApp());
 
         // Wake all displays.
         mWm.mRoot.forAllDisplays(display -> doReturn(false).when(display).shouldSleep());
         mAtm.updateSleepIfNeededLocked();
 
-        assertTopNonSleeping.run();
+        assertTopNonSleeping.accept(homeActivity);
     }
 }
 
