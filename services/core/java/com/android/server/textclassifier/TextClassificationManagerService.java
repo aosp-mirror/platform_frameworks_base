@@ -66,7 +66,6 @@ import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -458,6 +457,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 callback.onFailure();
             } else if (serviceState.isBoundLocked()) {
                 if (!serviceState.checkRequestAcceptedLocked(Binder.getCallingUid(), methodName)) {
+                    Slog.w(LOG_TAG, String.format("UID %d is not allowed to see the %s request",
+                            Binder.getCallingUid(), methodName));
+                    callback.onFailure();
                     return;
                 }
                 textClassifierServiceConsumer.accept(serviceState.mService);
@@ -497,7 +499,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         private final IBinder mBinder;
         @NonNull
         private final Runnable mRequest;
-        @Nullable
+        @NonNull
         private final Runnable mOnServiceFailure;
         @GuardedBy("mLock")
         @NonNull
@@ -516,7 +518,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
          * @param uid              the calling uid of the request.
          */
         PendingRequest(@Nullable String name,
-                @NonNull ThrowingRunnable request, @Nullable ThrowingRunnable onServiceFailure,
+                @NonNull ThrowingRunnable request, @NonNull ThrowingRunnable onServiceFailure,
                 @Nullable IBinder binder,
                 @NonNull TextClassificationManagerService service,
                 @NonNull ServiceState serviceState, int uid) {
@@ -524,7 +526,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             mRequest =
                     logOnFailure(Objects.requireNonNull(request), "handling pending request");
             mOnServiceFailure =
-                    logOnFailure(onServiceFailure, "notifying callback of service failure");
+                    logOnFailure(Objects.requireNonNull(onServiceFailure),
+                            "notifying callback of service failure");
             mBinder = binder;
             mService = service;
             mServiceState = Objects.requireNonNull(serviceState);
@@ -799,9 +802,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                         request -> {
                             Slog.w(LOG_TAG,
                                     String.format("Pending request[%s] is dropped", request.mName));
-                            if (request.mOnServiceFailure != null) {
-                                request.mOnServiceFailure.run();
-                            }
+                            request.mOnServiceFailure.run();
                         });
         @Nullable
         @GuardedBy("mLock")
@@ -843,15 +844,16 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             while ((request = mPendingRequests.poll()) != null) {
                 if (isBoundLocked()) {
                     if (!checkRequestAcceptedLocked(request.mUid, request.mName)) {
-                        return;
-                    }
-                    request.mRequest.run();
-                } else {
-                    if (request.mOnServiceFailure != null) {
-                        Slog.d(LOG_TAG, "Unable to bind TextClassifierService for PendingRequest "
-                                + request.mName);
+                        Slog.w(LOG_TAG, String.format("UID %d is not allowed to see the %s request",
+                                request.mUid, request.mName));
                         request.mOnServiceFailure.run();
+                    } else {
+                        request.mRequest.run();
                     }
+                } else {
+                    Slog.d(LOG_TAG, "Unable to bind TextClassifierService for PendingRequest "
+                            + request.mName);
+                    request.mOnServiceFailure.run();
                 }
 
                 if (request.mBinder != null) {
