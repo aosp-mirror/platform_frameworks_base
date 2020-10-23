@@ -17,31 +17,43 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
-import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_UNSET;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_CLOSE;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_UNSET;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_OPEN;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
@@ -104,6 +116,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -111,6 +124,7 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.RemoteAnimationAdapter;
 import android.view.WindowManager.TransitionFlags;
+import android.view.WindowManager.TransitionOldType;
 import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -170,9 +184,10 @@ public class AppTransition implements Dump {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
 
-    private @TransitionType int mNextAppTransition = TRANSIT_UNSET;
+    private @TransitionOldType int mNextAppTransitionOld = TRANSIT_OLD_UNSET;
     private @TransitionFlags int mNextAppTransitionFlags = 0;
-    private int mLastUsedAppTransition = TRANSIT_UNSET;
+    private final ArrayList<Integer> mNextAppTransitionRequests = new ArrayList<>();
+    private @TransitionOldType int mLastUsedAppTransition = TRANSIT_OLD_UNSET;
     private String mLastOpeningApp;
     private String mLastClosingApp;
     private String mLastChangingApp;
@@ -315,21 +330,36 @@ public class AppTransition implements Dump {
     }
 
     boolean isTransitionSet() {
-        return mNextAppTransition != TRANSIT_UNSET;
+        return mNextAppTransitionOld != TRANSIT_OLD_UNSET || !mNextAppTransitionRequests.isEmpty();
     }
 
-    boolean isTransitionEqual(@TransitionType int transit) {
-        return mNextAppTransition == transit;
+    // TODO(new-app-tranistion): Remove this after migrating to new app transition system.
+    boolean isTransitionOldEqual(@TransitionOldType int transit) {
+        return mNextAppTransitionOld == transit;
     }
 
-    @TransitionType int getAppTransition() {
-        return mNextAppTransition;
+    boolean isUnoccluding() {
+        return WindowManagerService.sUseNewAppTransit
+                ? mNextAppTransitionRequests.contains(TRANSIT_OLD_KEYGUARD_UNOCCLUDE)
+                : mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+    }
+
+    @TransitionOldType
+    int getAppTransitionOld() {
+        return mNextAppTransitionOld;
      }
 
-    private void setAppTransition(int transit, int flags) {
-        mNextAppTransition = transit;
+    boolean transferFrom(AppTransition other) {
+        prepareAppTransitionOld(other.getAppTransitionOld(), true /* alwaysKeepCurrent */,
+                0 /* flags */, false /* forceOverride */);
+        mNextAppTransitionRequests.addAll(other.mNextAppTransitionRequests);
+        return prepare();
+    }
+
+    private void setAppTransitionOld(@TransitionOldType int transit, int flags) {
+        mNextAppTransitionOld = transit;
         mNextAppTransitionFlags |= flags;
-        setLastAppTransition(TRANSIT_UNSET, null, null, null);
+        setLastAppTransition(TRANSIT_OLD_UNSET, null, null, null);
         updateBooster();
         if (isTransitionSet()) {
             removeAppTransitionTimeoutCallbacks();
@@ -431,8 +461,9 @@ public class AppTransition implements Dump {
      *         layout pass needs to be done
      */
     int goodToGo(int transit, ActivityRecord topOpeningApp, ArraySet<ActivityRecord> openingApps) {
-        mNextAppTransition = TRANSIT_UNSET;
+        mNextAppTransitionOld = TRANSIT_OLD_UNSET;
         mNextAppTransitionFlags = 0;
+        mNextAppTransitionRequests.clear();
         setAppTransitionState(APP_STATE_RUNNING);
         final WindowContainer wc =
                 topOpeningApp != null ? topOpeningApp.getAnimatingContainer() : null;
@@ -463,7 +494,7 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final int transit = mNextAppTransition;
+        final int transit = mNextAppTransitionOld;
         // The RemoteAnimationControl didn't register AppTransitionListener and
         // only initialized the finish and timeout callback when goodToGo().
         // So cancel the remote animation here to prevent the animation can't do
@@ -471,7 +502,7 @@ public class AppTransition implements Dump {
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.cancelAnimation("freeze");
         }
-        setAppTransition(TRANSIT_UNSET, 0 /* flags */);
+        setAppTransitionOld(TRANSIT_OLD_UNSET, 0 /* flags */);
         clear();
         setReady();
         notifyAppTransitionCancelledLocked(transit);
@@ -493,7 +524,7 @@ public class AppTransition implements Dump {
 
     private boolean needsBoosting() {
         final boolean recentsAnimRunning = mService.getRecentsAnimationController() != null;
-        return mNextAppTransition != TRANSIT_UNSET
+        return mNextAppTransitionOld != TRANSIT_OLD_UNSET
                 || mAppTransitionState == APP_STATE_READY
                 || mAppTransitionState == APP_STATE_RUNNING
                 || recentsAnimRunning;
@@ -645,11 +676,13 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int updateToTranslucentAnimIfNeeded(int anim, int transit) {
-        if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_OPEN && anim == R.anim.activity_open_enter) {
+    private int updateToTranslucentAnimIfNeeded(int anim, @TransitionOldType int transit) {
+        if (transit == TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN
+                && anim == R.anim.activity_open_enter) {
             return R.anim.activity_translucent_open_enter;
         }
-        if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE && anim == R.anim.activity_close_exit) {
+        if (transit == TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE
+                && anim == R.anim.activity_close_exit) {
             return R.anim.activity_translucent_close_exit;
         }
         return anim;
@@ -752,8 +785,8 @@ public class AppTransition implements Dump {
             set.addAnimation(alpha);
             set.setDetachWallpaper(true);
             a = set;
-        } else  if (transit == TRANSIT_WALLPAPER_INTRA_OPEN ||
-                    transit == TRANSIT_WALLPAPER_INTRA_CLOSE) {
+        } else  if (transit == TRANSIT_OLD_WALLPAPER_INTRA_OPEN
+                || transit == TRANSIT_OLD_WALLPAPER_INTRA_CLOSE) {
             // If we are on top of the wallpaper, we need an animation that
             // correctly handles the wallpaper staying static behind all of
             // the animated elements.  To do this, will just have the existing
@@ -770,8 +803,8 @@ public class AppTransition implements Dump {
         // task transition duration.
         final long duration;
         switch (transit) {
-            case TRANSIT_ACTIVITY_OPEN:
-            case TRANSIT_ACTIVITY_CLOSE:
+            case TRANSIT_OLD_ACTIVITY_OPEN:
+            case TRANSIT_OLD_ACTIVITY_CLOSE:
                 duration = mConfigShortAnimTime;
                 break;
             default:
@@ -950,16 +983,16 @@ public class AppTransition implements Dump {
         } else {
             final long duration;
             switch (transit) {
-                case TRANSIT_ACTIVITY_OPEN:
-                case TRANSIT_ACTIVITY_CLOSE:
+                case TRANSIT_OLD_ACTIVITY_OPEN:
+                case TRANSIT_OLD_ACTIVITY_CLOSE:
                     duration = mConfigShortAnimTime;
                     break;
                 default:
                     duration = DEFAULT_APP_TRANSITION_DURATION;
                     break;
             }
-            if (transit == TRANSIT_WALLPAPER_INTRA_OPEN ||
-                    transit == TRANSIT_WALLPAPER_INTRA_CLOSE) {
+            if (transit == TRANSIT_OLD_WALLPAPER_INTRA_OPEN
+                    || transit == TRANSIT_OLD_WALLPAPER_INTRA_CLOSE) {
                 // If we are on top of the wallpaper, we need an animation that
                 // correctly handles the wallpaper staying static behind all of
                 // the animated elements.  To do this, will just have the existing
@@ -1002,8 +1035,8 @@ public class AppTransition implements Dump {
         // task transition duration.
         final int duration;
         switch (transit) {
-            case TRANSIT_ACTIVITY_OPEN:
-            case TRANSIT_ACTIVITY_CLOSE:
+            case TRANSIT_OLD_ACTIVITY_OPEN:
+            case TRANSIT_OLD_ACTIVITY_CLOSE:
                 duration = mConfigShortAnimTime;
                 break;
             default:
@@ -1306,7 +1339,7 @@ public class AppTransition implements Dump {
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_UP: {
                 // Previous app window during the scale up
-                if (transit == TRANSIT_WALLPAPER_INTRA_OPEN) {
+                if (transit == TRANSIT_OLD_WALLPAPER_INTRA_OPEN) {
                     // Fade out the source activity if we are animating to a wallpaper
                     // activity.
                     a = new AlphaAnimation(1, 0);
@@ -1317,7 +1350,7 @@ public class AppTransition implements Dump {
             }
             case THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN: {
                 // Target app window during the scale down
-                if (transit == TRANSIT_WALLPAPER_INTRA_OPEN) {
+                if (transit == TRANSIT_OLD_WALLPAPER_INTRA_OPEN) {
                     // Fade in the destination activity if we are animating from a wallpaper
                     // activity.
                     a = new AlphaAnimation(0, 1);
@@ -1452,7 +1485,7 @@ public class AppTransition implements Dump {
             }
             case THUMBNAIL_TRANSITION_EXIT_SCALE_UP: {
                 // Exiting app while the thumbnail is scaling up should fade or stay in place
-                if (transit == TRANSIT_WALLPAPER_INTRA_OPEN) {
+                if (transit == TRANSIT_OLD_WALLPAPER_INTRA_OPEN) {
                     // Fade out while bringing up selected activity. This keeps the
                     // current activity from showing through a launching wallpaper
                     // activity.
@@ -1545,7 +1578,7 @@ public class AppTransition implements Dump {
                 && !mNextAppTransitionOverrideRequested
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CLIP_REVEAL
-                && mNextAppTransition != TRANSIT_KEYGUARD_GOING_AWAY;
+                && mNextAppTransitionOld != TRANSIT_OLD_KEYGUARD_GOING_AWAY;
     }
 
     RemoteAnimationController getRemoteAnimationController() {
@@ -1585,35 +1618,35 @@ public class AppTransition implements Dump {
         Animation a;
         if (isKeyguardGoingAwayTransit(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
-        } else if (transit == TRANSIT_KEYGUARD_OCCLUDE) {
+        } else if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
             a = null;
-        } else if (transit == TRANSIT_KEYGUARD_UNOCCLUDE && !enter) {
+        } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE && !enter) {
             a = loadAnimationRes(lp, com.android.internal.R.anim.wallpaper_open_exit);
-        } else if (transit == TRANSIT_CRASHING_ACTIVITY_CLOSE) {
+        } else if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
             a = null;
-        } else if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
-                || transit == TRANSIT_TASK_OPEN
-                || transit == TRANSIT_TASK_TO_FRONT)) {
+        } else if (isVoiceInteraction && (transit == TRANSIT_OLD_ACTIVITY_OPEN
+                || transit == TRANSIT_OLD_TASK_OPEN
+                || transit == TRANSIT_OLD_TASK_TO_FRONT)) {
             a = loadAnimationRes(lp, enter
                     ? com.android.internal.R.anim.voice_activity_open_enter
                     : com.android.internal.R.anim.voice_activity_open_exit);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s", a,
-                    appTransitionToString(transit), enter, Debug.getCallers(3));
-        } else if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_CLOSE
-                || transit == TRANSIT_TASK_CLOSE
-                || transit == TRANSIT_TASK_TO_BACK)) {
+                    appTransitionOldToString(transit), enter, Debug.getCallers(3));
+        } else if (isVoiceInteraction && (transit == TRANSIT_OLD_ACTIVITY_CLOSE
+                || transit == TRANSIT_OLD_TASK_CLOSE
+                || transit == TRANSIT_OLD_TASK_TO_BACK)) {
             a = loadAnimationRes(lp, enter
                     ? com.android.internal.R.anim.voice_activity_close_enter
                     : com.android.internal.R.anim.voice_activity_close_exit);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s", a,
-                    appTransitionToString(transit), enter, Debug.getCallers(3));
-        } else if (transit == TRANSIT_ACTIVITY_RELAUNCH) {
+                    appTransitionOldToString(transit), enter, Debug.getCallers(3));
+        } else if (transit == TRANSIT_OLD_ACTIVITY_RELAUNCH) {
             a = createRelaunchAnimation(frame, insets);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=%d transit=%s Callers=%s", a,
-                    mNextAppTransition, appTransitionToString(transit),
+                    mNextAppTransitionOld, appTransitionOldToString(transit),
                     Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimationRes(mNextAppTransitionPackage, enter ?
@@ -1621,25 +1654,25 @@ public class AppTransition implements Dump {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s "
                             + "isEntrance=%b Callers=%s",
-                    a, appTransitionToString(transit), enter, Debug.getCallers(3));
+                    a, appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE) {
             a = loadAnimationRes(mNextAppTransitionPackage, mNextAppTransitionInPlace);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM_IN_PLACE "
                             + "transit=%s Callers=%s",
-                    a, appTransitionToString(transit), Debug.getCallers(3));
+                    a, appTransitionOldToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
             a = createClipRevealAnimationLocked(transit, enter, frame, displayFrame);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CLIP_REVEAL "
                             + "transit=%s Callers=%s",
-                    a, appTransitionToString(transit), Debug.getCallers(3));
+                    a, appTransitionOldToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
             a = createScaleUpAnimationLocked(transit, enter, frame);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=ANIM_SCALE_UP transit=%s "
                             + "isEntrance=%s Callers=%s",
-                    a, appTransitionToString(transit), enter, Debug.getCallers(3));
+                    a, appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP ||
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
@@ -1651,7 +1684,7 @@ public class AppTransition implements Dump {
                             + "Callers=%s",
                     a,  mNextAppTransitionScaleUp
                             ? "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN",
-                    appTransitionToString(transit), enter, Debug.getCallers(3));
+                    appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP ||
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
@@ -1665,77 +1698,77 @@ public class AppTransition implements Dump {
                     a, mNextAppTransitionScaleUp
                             ? "ANIM_THUMBNAIL_ASPECT_SCALE_UP"
                         : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN",
-                    appTransitionToString(transit), enter, Debug.getCallers(3));
+                    appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS && enter) {
             a = loadAnimationRes("android",
                     com.android.internal.R.anim.task_open_enter_cross_profile_apps);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS: "
                             + "anim=%s transit=%s isEntrance=true Callers=%s",
-                    a, appTransitionToString(transit), Debug.getCallers(3));
-        } else if (transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE) {
+                    a, appTransitionOldToString(transit), Debug.getCallers(3));
+        } else if (transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE) {
             // In the absence of a specific adapter, we just want to keep everything stationary.
             a = new AlphaAnimation(1.f, 1.f);
             a.setDuration(WindowChangeAnimationSpec.ANIMATION_DURATION);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s transit=%s isEntrance=%b Callers=%s",
-                    a, appTransitionToString(transit), enter, Debug.getCallers(3));
+                    a, appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else {
             int animAttr = 0;
             switch (transit) {
-                case TRANSIT_ACTIVITY_OPEN:
-                case TRANSIT_TRANSLUCENT_ACTIVITY_OPEN:
+                case TRANSIT_OLD_ACTIVITY_OPEN:
+                case TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN:
                     animAttr = enter
                             ? WindowAnimation_activityOpenEnterAnimation
                             : WindowAnimation_activityOpenExitAnimation;
                     break;
-                case TRANSIT_ACTIVITY_CLOSE:
-                case TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE:
+                case TRANSIT_OLD_ACTIVITY_CLOSE:
+                case TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE:
                     animAttr = enter
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
                     break;
-                case TRANSIT_TASK_OPEN:
+                case TRANSIT_OLD_TASK_OPEN:
                     animAttr = enter
                             ? WindowAnimation_taskOpenEnterAnimation
                             : WindowAnimation_taskOpenExitAnimation;
                     break;
-                case TRANSIT_TASK_CLOSE:
+                case TRANSIT_OLD_TASK_CLOSE:
                     animAttr = enter
                             ? WindowAnimation_taskCloseEnterAnimation
                             : WindowAnimation_taskCloseExitAnimation;
                     break;
-                case TRANSIT_TASK_TO_FRONT:
+                case TRANSIT_OLD_TASK_TO_FRONT:
                     animAttr = enter
                             ? WindowAnimation_taskToFrontEnterAnimation
                             : WindowAnimation_taskToFrontExitAnimation;
                     break;
-                case TRANSIT_TASK_TO_BACK:
+                case TRANSIT_OLD_TASK_TO_BACK:
                     animAttr = enter
                             ? WindowAnimation_taskToBackEnterAnimation
                             : WindowAnimation_taskToBackExitAnimation;
                     break;
-                case TRANSIT_WALLPAPER_OPEN:
+                case TRANSIT_OLD_WALLPAPER_OPEN:
                     animAttr = enter
                             ? WindowAnimation_wallpaperOpenEnterAnimation
                             : WindowAnimation_wallpaperOpenExitAnimation;
                     break;
-                case TRANSIT_WALLPAPER_CLOSE:
+                case TRANSIT_OLD_WALLPAPER_CLOSE:
                     animAttr = enter
                             ? WindowAnimation_wallpaperCloseEnterAnimation
                             : WindowAnimation_wallpaperCloseExitAnimation;
                     break;
-                case TRANSIT_WALLPAPER_INTRA_OPEN:
+                case TRANSIT_OLD_WALLPAPER_INTRA_OPEN:
                     animAttr = enter
                             ? WindowAnimation_wallpaperIntraOpenEnterAnimation
                             : WindowAnimation_wallpaperIntraOpenExitAnimation;
                     break;
-                case TRANSIT_WALLPAPER_INTRA_CLOSE:
+                case TRANSIT_OLD_WALLPAPER_INTRA_CLOSE:
                     animAttr = enter
                             ? WindowAnimation_wallpaperIntraCloseEnterAnimation
                             : WindowAnimation_wallpaperIntraCloseExitAnimation;
                     break;
-                case TRANSIT_TASK_OPEN_BEHIND:
+                case TRANSIT_OLD_TASK_OPEN_BEHIND:
                     animAttr = enter
                             ? WindowAnimation_launchTaskBehindSourceAnimation
                             : WindowAnimation_launchTaskBehindTargetAnimation;
@@ -1744,7 +1777,7 @@ public class AppTransition implements Dump {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "
                             + "Callers=%s",
-                    a, animAttr, appTransitionToString(transit), enter,
+                    a, animAttr, appTransitionOldToString(transit), enter,
                     Debug.getCallers(3));
         }
         setAppTransitionFinishedCallbackIfNeeded(a);
@@ -1760,14 +1793,16 @@ public class AppTransition implements Dump {
         final boolean subtle =
                 (mNextAppTransitionFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0;
         return mService.mPolicy.createHiddenByKeyguardExit(
-                transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER, toShade, subtle);
+                transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER, toShade, subtle);
     }
 
     int getAppStackClipMode() {
-        return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
+        return mNextAppTransitionRequests.contains(TRANSIT_RELAUNCH)
+                || mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY)
+                || mNextAppTransitionOld == TRANSIT_OLD_ACTIVITY_RELAUNCH
                 || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
-                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY
-                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER
+                || mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                 ? STACK_CLIP_NONE
                 : STACK_CLIP_AFTER_ANIM;
     }
@@ -1965,7 +2000,100 @@ public class AppTransition implements Dump {
 
     @Override
     public String toString() {
-        return "mNextAppTransition=" + appTransitionToString(mNextAppTransition);
+        StringBuilder sb = new StringBuilder();
+        sb.append("mNextAppTransition=");
+        sb.append(appTransitionOldToString(mNextAppTransitionOld));
+        sb.append(", mNextAppTransitionRequests=[");
+
+        boolean separator = false;
+        for (Integer transit : mNextAppTransitionRequests) {
+            if (separator) {
+                sb.append(", ");
+            }
+            sb.append(appTransitionToString(transit));
+            separator = true;
+        }
+        sb.append("]");
+        sb.append(", mNextAppTransitionFlags="
+                + appTransitionFlagsToString(mNextAppTransitionFlags));
+        return sb.toString();
+    }
+
+    /**
+     * Returns the human readable name of a old window transition.
+     *
+     * @param transition The old window transition.
+     * @return The transition symbolic name.
+     */
+    public static String appTransitionOldToString(@TransitionOldType int transition) {
+        switch (transition) {
+            case TRANSIT_OLD_UNSET: {
+                return "TRANSIT_OLD_UNSET";
+            }
+            case TRANSIT_OLD_NONE: {
+                return "TRANSIT_OLD_NONE";
+            }
+            case TRANSIT_OLD_ACTIVITY_OPEN: {
+                return "TRANSIT_OLD_ACTIVITY_OPEN";
+            }
+            case TRANSIT_OLD_ACTIVITY_CLOSE: {
+                return "TRANSIT_OLD_ACTIVITY_CLOSE";
+            }
+            case TRANSIT_OLD_TASK_OPEN: {
+                return "TRANSIT_OLD_TASK_OPEN";
+            }
+            case TRANSIT_OLD_TASK_CLOSE: {
+                return "TRANSIT_OLD_TASK_CLOSE";
+            }
+            case TRANSIT_OLD_TASK_TO_FRONT: {
+                return "TRANSIT_OLD_TASK_TO_FRONT";
+            }
+            case TRANSIT_OLD_TASK_TO_BACK: {
+                return "TRANSIT_OLD_TASK_TO_BACK";
+            }
+            case TRANSIT_OLD_WALLPAPER_CLOSE: {
+                return "TRANSIT_OLD_WALLPAPER_CLOSE";
+            }
+            case TRANSIT_OLD_WALLPAPER_OPEN: {
+                return "TRANSIT_OLD_WALLPAPER_OPEN";
+            }
+            case TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
+                return "TRANSIT_OLD_WALLPAPER_INTRA_OPEN";
+            }
+            case TRANSIT_OLD_WALLPAPER_INTRA_CLOSE: {
+                return "TRANSIT_OLD_WALLPAPER_INTRA_CLOSE";
+            }
+            case TRANSIT_OLD_TASK_OPEN_BEHIND: {
+                return "TRANSIT_OLD_TASK_OPEN_BEHIND";
+            }
+            case TRANSIT_OLD_ACTIVITY_RELAUNCH: {
+                return "TRANSIT_OLD_ACTIVITY_RELAUNCH";
+            }
+            case TRANSIT_OLD_KEYGUARD_GOING_AWAY: {
+                return "TRANSIT_OLD_KEYGUARD_GOING_AWAY";
+            }
+            case TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER: {
+                return "TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER";
+            }
+            case TRANSIT_OLD_KEYGUARD_OCCLUDE: {
+                return "TRANSIT_OLD_KEYGUARD_OCCLUDE";
+            }
+            case TRANSIT_OLD_KEYGUARD_UNOCCLUDE: {
+                return "TRANSIT_OLD_KEYGUARD_UNOCCLUDE";
+            }
+            case TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN: {
+                return "TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN";
+            }
+            case TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE: {
+                return "TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE";
+            }
+            case TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE: {
+                return "TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE";
+            }
+            default: {
+                return "<UNKNOWN: " + transition + ">";
+            }
+        }
     }
 
     /**
@@ -1974,70 +2102,37 @@ public class AppTransition implements Dump {
      * @param transition The window transition.
      * @return The transition symbolic name.
      */
-    public static String appTransitionToString(int transition) {
+    public static String appTransitionToString(@TransitionType int transition) {
         switch (transition) {
-            case TRANSIT_UNSET: {
-                return "TRANSIT_UNSET";
-            }
             case TRANSIT_NONE: {
                 return "TRANSIT_NONE";
             }
-            case TRANSIT_ACTIVITY_OPEN: {
-                return "TRANSIT_ACTIVITY_OPEN";
+            case TRANSIT_OPEN: {
+                return "TRANSIT_OPEN";
             }
-            case TRANSIT_ACTIVITY_CLOSE: {
-                return "TRANSIT_ACTIVITY_CLOSE";
+            case TRANSIT_CLOSE: {
+                return "TRANSIT_CLOSE";
             }
-            case TRANSIT_TASK_OPEN: {
-                return "TRANSIT_TASK_OPEN";
+            case TRANSIT_TO_FRONT: {
+                return "TRANSIT_TO_FRONT";
             }
-            case TRANSIT_TASK_CLOSE: {
-                return "TRANSIT_TASK_CLOSE";
+            case TRANSIT_TO_BACK: {
+                return "TRANSIT_TO_BACK";
             }
-            case TRANSIT_TASK_TO_FRONT: {
-                return "TRANSIT_TASK_TO_FRONT";
+            case TRANSIT_RELAUNCH: {
+                return "TRANSIT_RELAUNCH";
             }
-            case TRANSIT_TASK_TO_BACK: {
-                return "TRANSIT_TASK_TO_BACK";
-            }
-            case TRANSIT_WALLPAPER_CLOSE: {
-                return "TRANSIT_WALLPAPER_CLOSE";
-            }
-            case TRANSIT_WALLPAPER_OPEN: {
-                return "TRANSIT_WALLPAPER_OPEN";
-            }
-            case TRANSIT_WALLPAPER_INTRA_OPEN: {
-                return "TRANSIT_WALLPAPER_INTRA_OPEN";
-            }
-            case TRANSIT_WALLPAPER_INTRA_CLOSE: {
-                return "TRANSIT_WALLPAPER_INTRA_CLOSE";
-            }
-            case TRANSIT_TASK_OPEN_BEHIND: {
-                return "TRANSIT_TASK_OPEN_BEHIND";
-            }
-            case TRANSIT_ACTIVITY_RELAUNCH: {
-                return "TRANSIT_ACTIVITY_RELAUNCH";
+            case TRANSIT_CHANGE_WINDOWING_MODE: {
+                return "TRANSIT_CHANGE_WINDOWING_MODE";
             }
             case TRANSIT_KEYGUARD_GOING_AWAY: {
                 return "TRANSIT_KEYGUARD_GOING_AWAY";
-            }
-            case TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER: {
-                return "TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER";
             }
             case TRANSIT_KEYGUARD_OCCLUDE: {
                 return "TRANSIT_KEYGUARD_OCCLUDE";
             }
             case TRANSIT_KEYGUARD_UNOCCLUDE: {
                 return "TRANSIT_KEYGUARD_UNOCCLUDE";
-            }
-            case TRANSIT_TRANSLUCENT_ACTIVITY_OPEN: {
-                return "TRANSIT_TRANSLUCENT_ACTIVITY_OPEN";
-            }
-            case TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE: {
-                return "TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE";
-            }
-            case TRANSIT_CRASHING_ACTIVITY_CLOSE: {
-                return "TRANSIT_CRASHING_ACTIVITY_CLOSE";
             }
             default: {
                 return "<UNKNOWN: " + transition + ">";
@@ -2083,6 +2178,41 @@ public class AppTransition implements Dump {
             default:
                 return "unknown type=" + mNextAppTransitionType;
         }
+    }
+
+    private static final ArrayList<Pair<Integer, String>> sFlagToString;
+
+    static {
+        sFlagToString = new ArrayList<>();
+        sFlagToString.add(new Pair<>(TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE,
+                "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE"));
+        sFlagToString.add(new Pair<>(TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
+                "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION"));
+        sFlagToString.add(new Pair<>(TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
+                "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER"));
+        sFlagToString.add(new Pair<>(TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+                "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION"));
+        sFlagToString.add(new Pair<>(TRANSIT_FLAG_APP_CRASHED,
+                "TRANSIT_FLAG_APP_CRASHED"));
+    }
+
+    /**
+     * Returns the human readable names of transit flags.
+     *
+     * @param flags a bitmask combination of transit flags.
+     * @return The combination of symbolic names.
+     */
+    public static String appTransitionFlagsToString(int flags) {
+        String sep = "";
+        StringBuilder sb = new StringBuilder();
+        for (Pair<Integer, String> pair : sFlagToString) {
+            if ((flags & pair.first) != 0) {
+                sb.append(sep);
+                sb.append(pair.second);
+                sep = " | ";
+            }
+        }
+        return sb.toString();
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -2145,9 +2275,9 @@ public class AppTransition implements Dump {
             pw.print(prefix); pw.print("mNextAppTransitionCallback=");
                     pw.println(mNextAppTransitionCallback);
         }
-        if (mLastUsedAppTransition != TRANSIT_NONE) {
+        if (mLastUsedAppTransition != TRANSIT_OLD_NONE) {
             pw.print(prefix); pw.print("mLastUsedAppTransition=");
-                    pw.println(appTransitionToString(mLastUsedAppTransition));
+                    pw.println(appTransitionOldToString(mLastUsedAppTransition));
             pw.print(prefix); pw.print("mLastOpeningApp=");
                     pw.println(mLastOpeningApp);
             pw.print(prefix); pw.print("mLastClosingApp=");
@@ -2165,7 +2295,7 @@ public class AppTransition implements Dump {
      * @return true if transition is not running and should not be skipped, false if transition is
      *         already running
      */
-    boolean prepareAppTransitionLocked(@TransitionType int transit, boolean alwaysKeepCurrent,
+    boolean prepareAppTransitionOld(@TransitionOldType int transit, boolean alwaysKeepCurrent,
             @TransitionFlags int flags, boolean forceOverride) {
         if (mService.mAtmService.getTransitionController().adaptLegacyPrepare(
                 transit, flags, forceOverride)) {
@@ -2174,32 +2304,42 @@ public class AppTransition implements Dump {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d "
                         + "Callers=%s",
-                appTransitionToString(transit), this, alwaysKeepCurrent,
+                appTransitionOldToString(transit), this, alwaysKeepCurrent,
                 mDisplayContent.getDisplayId(), Debug.getCallers(5));
-        final boolean allowSetCrashing = !isKeyguardTransit(mNextAppTransition)
-                && transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
+        final boolean allowSetCrashing = !isKeyguardTransit(mNextAppTransitionOld)
+                && transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
         if (forceOverride || isKeyguardTransit(transit) || !isTransitionSet()
-                || mNextAppTransition == TRANSIT_NONE || allowSetCrashing) {
-            setAppTransition(transit, flags);
+                || mNextAppTransitionOld == TRANSIT_OLD_NONE || allowSetCrashing) {
+            setAppTransitionOld(transit, flags);
         }
         // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
         // relies on the fact that we always execute a Keyguard transition after preparing one. We
         // also don't want to change away from a crashing transition.
-        else if (!alwaysKeepCurrent && !isKeyguardTransit(mNextAppTransition)
-                && mNextAppTransition != TRANSIT_CRASHING_ACTIVITY_CLOSE) {
-            if (transit == TRANSIT_TASK_OPEN && isTransitionEqual(TRANSIT_TASK_CLOSE)) {
+        else if (!alwaysKeepCurrent && !isKeyguardTransit(mNextAppTransitionOld)
+                && mNextAppTransitionOld != TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
+            if (transit == TRANSIT_OLD_TASK_OPEN && isTransitionOldEqual(TRANSIT_OLD_TASK_CLOSE)) {
                 // Opening a new task always supersedes a close for the anim.
-                setAppTransition(transit, flags);
-            } else if (transit == TRANSIT_ACTIVITY_OPEN
-                    && isTransitionEqual(TRANSIT_ACTIVITY_CLOSE)) {
+                setAppTransitionOld(transit, flags);
+            } else if (transit == TRANSIT_OLD_ACTIVITY_OPEN
+                    && isTransitionOldEqual(TRANSIT_OLD_ACTIVITY_CLOSE)) {
                 // Opening a new activity always supersedes a close for the anim.
-                setAppTransition(transit, flags);
-            } else if (isTaskTransit(transit) && isActivityTransit(mNextAppTransition)) {
+                setAppTransitionOld(transit, flags);
+            } else if (isTaskTransit(transit) && isActivityTransit(mNextAppTransitionOld)) {
                 // Task animations always supersede activity animations, because if we have both, it
                 // usually means that activity transition were just trampoline activities.
-                setAppTransition(transit, flags);
+                setAppTransitionOld(transit, flags);
             }
         }
+        return prepare();
+    }
+
+    boolean prepareAppTransition(@TransitionType int transit, @TransitionFlags int flags) {
+        mNextAppTransitionRequests.add(transit);
+        mNextAppTransitionFlags |= flags;
+        updateBooster();
+        removeAppTransitionTimeoutCallbacks();
+        mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable,
+                APP_TRANSITION_TIMEOUT_MS);
         return prepare();
     }
 
@@ -2208,44 +2348,44 @@ public class AppTransition implements Dump {
      *         away, false otherwise
      */
     public static boolean isKeyguardGoingAwayTransit(int transit) {
-        return transit == TRANSIT_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+        return transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
     }
 
-    static boolean isKeyguardTransit(int transit) {
-        return isKeyguardGoingAwayTransit(transit) || transit == TRANSIT_KEYGUARD_OCCLUDE
-                || transit == TRANSIT_KEYGUARD_UNOCCLUDE;
+    static boolean isKeyguardTransit(@TransitionOldType int transit) {
+        return isKeyguardGoingAwayTransit(transit) || transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
+                || transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
     }
 
-    static boolean isTaskTransit(int transit) {
+    static boolean isTaskTransit(@TransitionOldType int transit) {
         return isTaskOpenTransit(transit)
-                || transit == TRANSIT_TASK_CLOSE
-                || transit == TRANSIT_TASK_TO_BACK;
+                || transit == TRANSIT_OLD_TASK_CLOSE
+                || transit == TRANSIT_OLD_TASK_TO_BACK;
     }
 
-    private static  boolean isTaskOpenTransit(int transit) {
-        return transit == TRANSIT_TASK_OPEN
-                || transit == TRANSIT_TASK_OPEN_BEHIND
-                || transit == TRANSIT_TASK_TO_FRONT;
+    private static  boolean isTaskOpenTransit(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_OPEN
+                || transit == TRANSIT_OLD_TASK_OPEN_BEHIND
+                || transit == TRANSIT_OLD_TASK_TO_FRONT;
     }
 
-    static boolean isActivityTransit(int transit) {
-        return transit == TRANSIT_ACTIVITY_OPEN
-                || transit == TRANSIT_ACTIVITY_CLOSE
-                || transit == TRANSIT_ACTIVITY_RELAUNCH;
+    static boolean isActivityTransit(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_ACTIVITY_OPEN
+                || transit == TRANSIT_OLD_ACTIVITY_CLOSE
+                || transit == TRANSIT_OLD_ACTIVITY_RELAUNCH;
     }
 
-    static boolean isChangeTransit(int transit) {
-        return transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE;
+    static boolean isChangeTransit(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
     }
 
-    static boolean isClosingTransit(int transit) {
-        return transit == TRANSIT_ACTIVITY_CLOSE
-                || transit == TRANSIT_TASK_CLOSE
-                || transit == TRANSIT_WALLPAPER_CLOSE
-                || transit == TRANSIT_WALLPAPER_INTRA_CLOSE
-                || transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE
-                || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
+    static boolean isClosingTransit(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_ACTIVITY_CLOSE
+                || transit == TRANSIT_OLD_TASK_CLOSE
+                || transit == TRANSIT_OLD_WALLPAPER_CLOSE
+                || transit == TRANSIT_OLD_WALLPAPER_INTRA_CLOSE
+                || transit == TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE
+                || transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
     }
 
     /**

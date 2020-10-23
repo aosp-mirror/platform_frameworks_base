@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -66,7 +66,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
         RemoteAnimationAdapter adapter =
                 new RemoteAnimationAdapter(new TestRemoteAnimationRunner(), 10, 1, false);
-        definition.addRemoteAnimation(TRANSIT_TASK_CHANGE_WINDOWING_MODE, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE, adapter);
         dc.registerRemoteAnimations(definition);
     }
 

@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -59,7 +59,7 @@ public class TransitionTests extends WindowTestsBase {
         opening.mVisibleRequested = true;
         ArrayMap<WindowContainer, Transition.ChangeInfo> participants = new ArrayMap<>();
 
-        int transitType = TRANSIT_TASK_OPEN;
+        int transitType = TRANSIT_OLD_TASK_OPEN;
 
         // Check basic both tasks participating
         participants.put(oldTask, new Transition.ChangeInfo());
@@ -113,7 +113,7 @@ public class TransitionTests extends WindowTestsBase {
         opening2.mVisibleRequested = true;
         ArrayMap<WindowContainer, Transition.ChangeInfo> participants = new ArrayMap<>();
 
-        int transitType = TRANSIT_TASK_OPEN;
+        int transitType = TRANSIT_OLD_TASK_OPEN;
 
         // Check full promotion from leaf
         participants.put(oldTask, new Transition.ChangeInfo());
@@ -152,7 +152,7 @@ public class TransitionTests extends WindowTestsBase {
         showing2.mVisibleRequested = true;
         ArrayMap<WindowContainer, Transition.ChangeInfo> participants = new ArrayMap<>();
 
-        int transitType = TRANSIT_TASK_OPEN;
+        int transitType = TRANSIT_OLD_TASK_OPEN;
 
         // Check promotion to DisplayArea
         participants.put(showing, new Transition.ChangeInfo());

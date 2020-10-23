@@ -64,26 +64,6 @@ public class WindowManagerPermissionTests extends TestCase {
         } catch (RemoteException e) {
             fail("Unexpected remote exception");
         }
-
-        try {
-            mWm.prepareAppTransition(0, false);
-            fail("IWindowManager.prepareAppTransition did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.executeAppTransition();
-            fail("IWindowManager.executeAppTransition did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
     }
 
     @SmallTest

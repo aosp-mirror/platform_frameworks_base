@@ -27,7 +27,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DRAW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -1075,7 +1075,7 @@ class WindowStateAnimator {
                 }
                 if (attr >= 0) {
                     a = mWin.getDisplayContent().mAppTransition.loadAnimationAttr(
-                            mWin.mAttrs, attr, TRANSIT_NONE);
+                            mWin.mAttrs, attr, TRANSIT_OLD_NONE);
                 }
             }
             if (DEBUG_ANIM) Slog.v(TAG,

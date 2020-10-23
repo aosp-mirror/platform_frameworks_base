@@ -32,7 +32,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
@@ -113,6 +113,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
+
 
 /**
  * Tests for the {@link ActivityRecord} class.
@@ -844,7 +845,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(PAUSING, mActivity.getState());
         verify(mActivity).setVisibility(eq(false));
         verify(mActivity.mDisplayContent)
-                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+                .prepareAppTransitionOld(eq(TRANSIT_OLD_TASK_CLOSE),
+                        eq(false) /* alwaysKeepCurrent */);
     }
 
     /**
@@ -888,7 +890,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(mActivity).setVisibility(eq(false));
         verify(mActivity.mDisplayContent)
-                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+                .prepareAppTransitionOld(eq(TRANSIT_OLD_TASK_CLOSE),
+                        eq(false) /* alwaysKeepCurrent */);
         verify(mActivity.mDisplayContent, never()).executeAppTransition();
     }
 
@@ -904,7 +907,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(mActivity, atLeast(1)).setVisibility(eq(false));
         verify(mActivity.mDisplayContent)
-                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+                .prepareAppTransitionOld(eq(TRANSIT_OLD_TASK_CLOSE),
+                        eq(false) /* alwaysKeepCurrent */);
         verify(mActivity.mDisplayContent).executeAppTransition();
     }
 
@@ -922,7 +926,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
         verify(mActivity.mDisplayContent, never())
-                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+                .prepareAppTransitionOld(eq(TRANSIT_OLD_TASK_CLOSE),
+                        eq(false) /* alwaysKeepCurrent */);
     }
 
     /**
