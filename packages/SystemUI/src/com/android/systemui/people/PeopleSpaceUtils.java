@@ -50,7 +50,7 @@ public class PeopleSpaceUtils {
             IPeopleManager peopleManager
     ) throws Exception {
         boolean showAllConversations = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE) == 0;
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
         List<ConversationChannelWrapper> conversations =
                 notificationManager.getConversations(
                         !showAllConversations /* priority only */).getList();
