@@ -3361,6 +3361,7 @@ message StyleUIChanged {
     optional int32 color_preference = 9;
     optional android.stats.style.LocationPreference location_preference = 10;
     optional android.stats.style.DatePreference date_preference = 11;
+    optional android.stats.style.LaunchedPreference launched_preference = 12;
 }
 
 /**
