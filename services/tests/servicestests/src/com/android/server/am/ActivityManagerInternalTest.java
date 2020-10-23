@@ -62,6 +62,8 @@ public class ActivityManagerInternalTest {
                 .getContext();
         doReturn(mServiceThreadRule.getThread().getThreadHandler()).when(mMockInjector)
                 .getUiHandler(any());
+        final ProcessList dummyList = new ProcessList();
+        doReturn(dummyList).when(mMockInjector).getProcessList(any());
         mAms = new ActivityManagerService(mMockInjector, mServiceThreadRule.getThread());
         mAmi = mAms.new LocalService();
     }
