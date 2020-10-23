@@ -10077,24 +10077,27 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isActivityStartAllowed(int uid, String packageName) {
-            boolean block = CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
-            if (block || mPackagesShown.add(packageName)) {
-                mUiHandler.post(() ->
-                        Toast.makeText(getUiContext(),
-                                "Indirect activity start from "
-                                        + packageName + ". "
-                                        + "This will be blocked in S.\n"
-                                        + "See go/s-trampolines.",
-                                Toast.LENGTH_LONG).show());
-            }
-            String message =
+            String toastMessage = "Indirect activity start from " + packageName;
+            String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
-            if (block) {
-                Slog.e(TAG, message + " blocked");
+
+            if (CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid)) {
+                toast(toastMessage + " blocked.");
+                Slog.e(TAG, logcatMessage + " blocked");
                 return false;
+            } else {
+                if (mPackagesShown.add(packageName)) {
+                    toast(toastMessage + ". This will be blocked in S.");
+                }
+                Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
+                return true;
             }
-            Slog.w(TAG, message + ", this should be avoided for performance reasons");
-            return true;
+        }
+
+        private void toast(String message) {
+            mUiHandler.post(() ->
+                    Toast.makeText(getUiContext(), message + "\nSee go/s-trampolines.",
+                            Toast.LENGTH_LONG).show());
         }
     }
 }
