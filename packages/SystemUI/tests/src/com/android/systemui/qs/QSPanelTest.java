@@ -32,8 +32,6 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
@@ -55,7 +53,6 @@ import java.util.Collections;
 @SmallTest
 public class QSPanelTest extends SysuiTestCase {
 
-    private MetricsLogger mMetricsLogger;
     private TestableLooper mTestableLooper;
     private QSPanel mQsPanel;
     @Mock
@@ -73,7 +70,6 @@ public class QSPanelTest extends SysuiTestCase {
     private QSTileView mQSTileView;
     @Mock
     private ActivityStarter mActivityStarter;
-    private UiEventLoggerFake mUiEventLogger;
 
     @Before
     public void setup() throws Exception {
@@ -88,10 +84,8 @@ public class QSPanelTest extends SysuiTestCase {
         mDndTileRecord.tile = dndTile;
         mDndTileRecord.tileView = mQSTileView;
 
-        mUiEventLogger = new UiEventLoggerFake();
         mTestableLooper.runWithLooper(() -> {
-            mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mQsPanel = new QSPanel(mContext, null, mQSLogger, mUiEventLogger);
+            mQsPanel = new QSPanel(mContext, null, mQSLogger);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
@@ -121,15 +115,6 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mCallback).onShowingDetail(any(), anyInt(), anyInt());
-    }
-
-    @Test
-    public void setListening() {
-        mQsPanel.setListening(true, "dnd");
-        verify(mQSLogger).logAllTilesChangeListening(true, mQsPanel.getDumpableTag(), "dnd");
-
-        mQsPanel.setListening(false, "dnd");
-        verify(mQSLogger).logAllTilesChangeListening(false, mQsPanel.getDumpableTag(), "dnd");
     }
 
     @Test

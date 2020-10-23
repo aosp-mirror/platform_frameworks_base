@@ -75,7 +75,7 @@ public class TileLayoutTest extends SysuiTestCase {
     public void testSetListening_CallsSetListeningOnTile() {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
-        mTileLayout.setListening(true);
+        mTileLayout.setListening(true, null);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, true);
     }
 
@@ -83,14 +83,14 @@ public class TileLayoutTest extends SysuiTestCase {
     public void testSetListening_SameValueIsNoOp() {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
-        mTileLayout.setListening(false);
+        mTileLayout.setListening(false, null);
         verify(tileRecord.tile, times(1)).setListening(any(), anyBoolean());
     }
 
     @Test
     public void testSetListening_ChangesValueForAddingFutureTiles() {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
-        mTileLayout.setListening(true);
+        mTileLayout.setListening(true, null);
         mTileLayout.addTile(tileRecord);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, true);
     }
@@ -98,7 +98,7 @@ public class TileLayoutTest extends SysuiTestCase {
     @Test
     public void testRemoveTile_CallsSetListeningFalseOnTile() {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
-        mTileLayout.setListening(true);
+        mTileLayout.setListening(true, null);
         mTileLayout.addTile(tileRecord);
         mTileLayout.removeTile(tileRecord);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, false);
@@ -108,7 +108,7 @@ public class TileLayoutTest extends SysuiTestCase {
     public void testRemoveAllViews_CallsSetListeningFalseOnAllTiles() {
         QSPanelControllerBase.TileRecord tileRecord1 = createTileRecord();
         QSPanelControllerBase.TileRecord tileRecord2 = createTileRecord();
-        mTileLayout.setListening(true);
+        mTileLayout.setListening(true, null);
         mTileLayout.addTile(tileRecord1);
         mTileLayout.addTile(tileRecord2);
         mTileLayout.removeAllViews();

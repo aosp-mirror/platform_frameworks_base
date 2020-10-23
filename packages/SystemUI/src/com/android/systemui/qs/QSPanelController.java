@@ -36,6 +36,7 @@ import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -85,10 +86,10 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
-            BrightnessController.Factory brightnessControllerFactory,
+            QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory) {
-        super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
-                uiEventLogger, dumpManager);
+        super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
+                metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;

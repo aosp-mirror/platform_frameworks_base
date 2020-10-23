@@ -231,6 +231,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
+        when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
         FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
                 mDisplayMetrics);
 

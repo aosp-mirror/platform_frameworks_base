@@ -33,6 +33,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -60,6 +61,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected final MediaHost mMediaHost;
     protected final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
+    private final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
@@ -92,7 +94,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected QSPanelControllerBase(T view, QSTileHost host,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer, MediaHost mediaHost,
-            MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
+            MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
+            DumpManager dumpManager) {
         super(view);
         mHost = host;
         mQsCustomizerController = qsCustomizerController;
@@ -100,6 +103,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mMediaHost = mediaHost;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
+        mQSLogger = qsLogger;
         mDumpManager = dumpManager;
     }
 
@@ -124,6 +128,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected void onViewDetached() {
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.removeCallback(mQSHostCallback);
+
+        mView.getTileLayout().setListening(false, mUiEventLogger);
 
         mMediaHost.removeVisibilityChangeListener(mMediaHostVisibilityListener);
 
@@ -248,7 +254,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
 
     void setListening(boolean listening) {
-        mView.setListening(listening, mCachedSpecs);
+        mView.setListening(listening);
+
+        if (mView.getTileLayout() != null) {
+            mQSLogger.logAllTilesChangeListening(listening, mView.getDumpableTag(), mCachedSpecs);
+            mView.getTileLayout().setListening(listening, mUiEventLogger);
+        }
     }
 
     boolean switchTileLayout(boolean force) {
@@ -267,7 +278,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 mView.removeTile(record);
                 record.tile.removeCallback(record.callback);
             }
-            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
+            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force,
+                    mUiEventLogger);
             updateMediaDisappearParameters();
 
             setTiles();

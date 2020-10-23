@@ -84,7 +84,6 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     private QSDetail.Callback mCallback;
     private final QSLogger mQSLogger;
-    protected final UiEventLogger mUiEventLogger;
     protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
@@ -125,8 +124,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     public QSPanel(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            QSLogger qsLogger,
-            UiEventLogger uiEventLogger
+            QSLogger qsLogger
     ) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
@@ -134,7 +132,6 @@ public class QSPanel extends LinearLayout implements Tunable {
                 R.dimen.quick_settings_bottom_margin_media);
         mContext = context;
         mQSLogger = qsLogger;
-        mUiEventLogger = uiEventLogger;
 
         setOrientation(VERTICAL);
 
@@ -241,14 +238,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             }
         }
         setMeasuredDimension(getMeasuredWidth(), height);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        if (mTileLayout != null) {
-            mTileLayout.setListening(false);
-        }
-        super.onDetachedFromWindow();
     }
 
     protected String getDumpableTag() {
@@ -468,15 +457,9 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     /** */
-    public void setListening(boolean listening, String cachedSpecs) {
-        if (mListening == listening) return;
+    public void setListening(boolean listening) {
         mListening = listening;
-        if (mTileLayout != null) {
-            mQSLogger.logAllTilesChangeListening(listening, getDumpableTag(), cachedSpecs);
-            mTileLayout.setListening(listening);
-        }
     }
-
 
     public void showDetailAdapter(boolean show, DetailAdapter adapter, int[] locationInWindow) {
         int xInWindow = locationInWindow[0];
@@ -756,7 +739,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         mSecurityFooter = view;
     }
 
-    void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force) {
+    void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force,
+            UiEventLogger uiEventLogger) {
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
             View visibleView = horizontal ? mHorizontalLinearLayout : (View) mRegularTileLayout;
@@ -775,7 +759,7 @@ public class QSPanel extends LinearLayout implements Tunable {
             switchAllContentToParent(newParent, newLayout);
             reAttachMediaHost(mediaHostView, horizontal);
             mTileLayout = newLayout;
-            newLayout.setListening(mListening);
+            newLayout.setListening(mListening, uiEventLogger);
             if (needsDynamicRowsAndColumns()) {
                 newLayout.setMinRows(horizontal ? 2 : 1);
                 // Let's use 3 columns to match the current layout
@@ -835,7 +819,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         boolean updateResources();
 
         /** */
-        void setListening(boolean listening);
+        void setListening(boolean listening, UiEventLogger uiEventLogger);
 
         /**
          * Set the minimum number of rows to show

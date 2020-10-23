@@ -42,6 +42,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -76,6 +77,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     private MetricsLogger mMetricsLogger;
     private UiEventLoggerFake mUiEventLogger = new UiEventLoggerFake();
+    @Mock
+    private QSLogger mQSLogger;
     private DumpManager mDumpManager = new DumpManager();
     @Mock
     QSTileImpl mQSTile;
@@ -90,9 +93,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     private class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
                 QSCustomizerController qsCustomizerController, MediaHost mediaHost,
-                MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
-            super(view, host, qsCustomizerController, true, mediaHost,
-                    metricsLogger, uiEventLogger, dumpManager);
+                MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
+                DumpManager dumpManager) {
+            super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
+                    qsLogger, dumpManager);
         }
 
         @Override
@@ -110,6 +114,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.openPanelEvent()).thenReturn(QSEvent.QS_PANEL_EXPANDED);
         when(mQSPanel.closePanelEvent()).thenReturn(QSEvent.QS_PANEL_COLLAPSED);
         when(mQSPanel.createRegularTileLayout()).thenReturn(mPagedTileLayout);
+        when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
+        when(mQSTile.getTileSpec()).thenReturn("dnd");
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mQSTileRevealControllerFactory.create(any(), any()))
@@ -117,7 +123,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
-                mQSCustomizerController, mMediaHost, mMetricsLogger, mUiEventLogger, mDumpManager);
+                mQSCustomizerController, mMediaHost,
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
 
         mController.init();
         reset(mQSTileRevealController);
@@ -127,9 +134,9 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     public void testSetRevealExpansion_preAttach() {
         mController.onViewDetached();
 
-        QSPanelControllerBase<QSPanel> controller = new QSPanelControllerBase<QSPanel>(
-                mQSPanel, mQSTileHost, mQSCustomizerController, true, mMediaHost, mMetricsLogger,
-                mUiEventLogger, mDumpManager) {
+        QSPanelControllerBase<QSPanel> controller = new TestableQSPanelControllerBase(mQSPanel,
+                mQSTileHost, mQSCustomizerController, mMediaHost,
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager) {
             @Override
             protected QSTileRevealController createTileRevealController() {
                 return mQSTileRevealController;
@@ -197,4 +204,14 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         assertEquals(expected, w.getBuffer().toString());
     }
 
+    @Test
+    public void setListening() {
+        mController.setListening(true);
+        verify(mQSLogger).logAllTilesChangeListening(true, "QSPanel", "dnd");
+        verify(mPagedTileLayout).setListening(true, mUiEventLogger);
+
+        mController.setListening(false);
+        verify(mQSLogger).logAllTilesChangeListening(false, "QSPanel", "dnd");
+        verify(mPagedTileLayout).setListening(false, mUiEventLogger);
+    }
 }
