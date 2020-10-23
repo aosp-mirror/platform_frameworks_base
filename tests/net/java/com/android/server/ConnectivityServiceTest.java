@@ -147,6 +147,7 @@ import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
 import android.net.DataStallReportParcelable;
+import android.net.EthernetManager;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
@@ -358,6 +359,7 @@ public class ConnectivityServiceTest {
     @Mock AppOpsManager mAppOpsManager;
     @Mock TelephonyManager mTelephonyManager;
     @Mock MockableSystemProperties mSystemProperties;
+    @Mock EthernetManager mEthernetManager;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -445,6 +447,7 @@ public class ConnectivityServiceTest {
             if (Context.LOCATION_SERVICE.equals(name)) return mLocationManager;
             if (Context.APP_OPS_SERVICE.equals(name)) return mAppOpsManager;
             if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
+            if (Context.ETHERNET_SERVICE.equals(name)) return mEthernetManager;
             return super.getSystemService(name);
         }
 
@@ -1274,7 +1277,6 @@ public class ConnectivityServiceTest {
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
         doReturn(mIpConnectivityMetrics).when(deps).getIpConnectivityMetrics();
         doReturn(mBatteryStatsService).when(deps).getBatteryStatsService();
-        doReturn(true).when(deps).hasService(Context.ETHERNET_SERVICE);
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(
                     inv.getArgument(0), inv.getArgument(1), inv.getArgument(2));

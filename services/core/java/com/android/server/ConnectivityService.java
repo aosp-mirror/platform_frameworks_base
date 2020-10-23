@@ -929,13 +929,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         /**
-         * @see ServiceManager#checkService(String)
-         */
-        public boolean hasService(@NonNull String name) {
-            return ServiceManager.checkService(name) != null;
-        }
-
-        /**
          * @see IpConnectivityMetrics.Logger
          */
         public IpConnectivityMetrics.Logger getMetricsLogger() {
@@ -1078,7 +1071,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Do the same for Ethernet, since it's often not specified in the configs, although many
         // devices can use it via USB host adapters.
-        if (mNetConfigs[TYPE_ETHERNET] == null && mDeps.hasService(Context.ETHERNET_SERVICE)) {
+        if (mNetConfigs[TYPE_ETHERNET] == null
+                && mContext.getSystemService(Context.ETHERNET_SERVICE) != null) {
             mLegacyTypeTracker.addSupportedType(TYPE_ETHERNET);
             mNetworksDefined++;
         }
