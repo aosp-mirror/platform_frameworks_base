@@ -2761,4 +2761,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: S
     REDUCE_BRIGHT_COLORS_SETTINGS = 1853;
+
+    // OPEN: Settings > Location > Time Zone Detection
+    // CATEGORY: SETTINGS
+    // OS: S
+    LOCATION_TIME_ZONE_DETECTION = 1854;
 }
