@@ -168,14 +168,18 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
     @Test
     public void testSetExpanded_Metrics() {
+        when(mQSPanel.isExpanded()).thenReturn(false);
         mController.setExpanded(true);
         verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(true));
+        verify(mQSLogger).logPanelExpanded(true, mQSPanel.getDumpableTag());
         assertEquals(1, mUiEventLogger.numLogs());
         assertEquals(QSEvent.QS_PANEL_EXPANDED.getId(), mUiEventLogger.eventId(0));
         mUiEventLogger.getLogs().clear();
 
+        when(mQSPanel.isExpanded()).thenReturn(true);
         mController.setExpanded(false);
         verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(false));
+        verify(mQSLogger).logPanelExpanded(false, mQSPanel.getDumpableTag());
         assertEquals(1, mUiEventLogger.numLogs());
         assertEquals(QSEvent.QS_PANEL_COLLAPSED.getId(), mUiEventLogger.eventId(0));
         mUiEventLogger.getLogs().clear();
