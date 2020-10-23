@@ -50,12 +50,14 @@ public abstract class TvPipModule {
     @Provides
     static Optional<Pip> providePip(
             Context context,
+            PipBoundsState pipBoundsState,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         return Optional.of(
                 new PipController(
                         context,
+                        pipBoundsState,
                         pipBoundsHandler,
                         pipTaskOrganizer,
                         windowManagerShellWrapper));
