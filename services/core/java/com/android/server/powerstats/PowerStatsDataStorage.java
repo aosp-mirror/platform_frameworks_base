@@ -17,7 +17,7 @@
 package com.android.server.powerstats;
 
 import android.content.Context;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.util.FileRotator;
 
@@ -127,7 +127,7 @@ public class PowerStatsDataStorage {
                     DataElement dataElement = new DataElement(in);
                     mCallback.onReadDataElement(dataElement.getData());
                 } catch (IOException e) {
-                    Log.e(TAG, "Failed to read from storage. " + e.getMessage());
+                    Slog.e(TAG, "Failed to read from storage. " + e.getMessage());
                 }
             }
         }
@@ -170,7 +170,7 @@ public class PowerStatsDataStorage {
         mDataStorageDir = dataStoragePath;
 
         if (!mDataStorageDir.exists() && !mDataStorageDir.mkdirs()) {
-            Log.wtf(TAG, "mDataStorageDir does not exist: " + mDataStorageDir.getPath());
+            Slog.wtf(TAG, "mDataStorageDir does not exist: " + mDataStorageDir.getPath());
             mFileRotator = null;
         } else {
             // Delete files written with an old version number.  The version is included in the
@@ -208,7 +208,7 @@ public class PowerStatsDataStorage {
                         currentTimeMillis);
                 mFileRotator.maybeRotate(currentTimeMillis);
             } catch (IOException e) {
-                Log.e(TAG, "Failed to write to on-device storage: " + e);
+                Slog.e(TAG, "Failed to write to on-device storage: " + e);
             }
 
             mLock.unlock();
