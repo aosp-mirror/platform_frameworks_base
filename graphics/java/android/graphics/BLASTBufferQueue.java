@@ -29,7 +29,7 @@ public final class BLASTBufferQueue {
     private static native long nativeCreate(String name, long surfaceControl, long width,
                                             long height, boolean tripleBufferingEnabled);
     private static native void nativeDestroy(long ptr);
-    private static native Surface nativeGetSurface(long ptr);
+    private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height);
     private static native void nativeFlushShadowQueue(long ptr);
@@ -49,7 +49,15 @@ public final class BLASTBufferQueue {
      * @return a new Surface instance from the IGraphicsBufferProducer of the adapter.
      */
     public Surface createSurface() {
-        return nativeGetSurface(mNativeObject);
+        return nativeGetSurface(mNativeObject, false /* includeSurfaceControlHandle */);
+    }
+
+    /**
+     * @return a new Surface instance from the IGraphicsBufferProducer of the adapter and
+     * the SurfaceControl handle.
+     */
+    public Surface createSurfaceWithHandle() {
+        return nativeGetSurface(mNativeObject, true /* includeSurfaceControlHandle */);
     }
 
     public void setNextTransaction(SurfaceControl.Transaction t) {
