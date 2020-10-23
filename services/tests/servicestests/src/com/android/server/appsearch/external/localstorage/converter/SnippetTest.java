@@ -19,6 +19,7 @@ package com.android.server.appsearch.external.localstorage.converter;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.appsearch.SearchResult;
+import android.app.appsearch.SearchResultPage;
 
 import com.android.server.appsearch.proto.DocumentProto;
 import com.android.server.appsearch.proto.PropertyProto;
@@ -75,8 +76,9 @@ public class SnippetTest {
                 .build();
 
         // Making ResultReader and getting Snippet values.
-        for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
-            SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
+        SearchResultPage searchResultPage =
+                SearchResultToProtoConverter.convertToSearchResultPage(searchResultProto);
+        for (SearchResult result : searchResultPage.getResults()) {
             SearchResult.MatchInfo match = result.getMatches().get(0);
             assertThat(match.getPropertyPath()).isEqualTo(propertyKeyString);
             assertThat(match.getFullText()).isEqualTo(propertyValueString);
@@ -121,8 +123,9 @@ public class SnippetTest {
                 .addResults(resultProto)
                 .build();
 
-        for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
-            SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
+        SearchResultPage searchResultPage =
+                SearchResultToProtoConverter.convertToSearchResultPage(searchResultProto);
+        for (SearchResult result : searchResultPage.getResults()) {
             assertThat(result.getMatches()).isEmpty();
         }
     }
@@ -182,8 +185,9 @@ public class SnippetTest {
                 .build();
 
         // Making ResultReader and getting Snippet values.
-        for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
-            SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
+        SearchResultPage searchResultPage =
+                SearchResultToProtoConverter.convertToSearchResultPage(searchResultProto);
+        for (SearchResult result : searchResultPage.getResults()) {
 
             SearchResult.MatchInfo match1 = result.getMatches().get(0);
             assertThat(match1.getPropertyPath()).isEqualTo("sender.name");

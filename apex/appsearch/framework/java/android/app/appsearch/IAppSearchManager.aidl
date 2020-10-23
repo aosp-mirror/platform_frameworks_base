@@ -92,7 +92,7 @@ interface IAppSearchManager {
         in AndroidFuture<AppSearchResult> callback);
 
     /**
-     * Deletes documents by URI.
+     * Removes documents by URI.
      *
      * @param databaseName The databaseName the document is in.
      * @param namespace    Namespace of the document to remove.
@@ -105,36 +105,23 @@ interface IAppSearchManager {
      *     where the keys are document URIs. If a document doesn't exist, it will be reported as a
      *     failure where the {@code throwable} is {@code null}.
      */
-    void delete(
+    void removeByUri(
         in String databaseName,
         in String namespace,
         in List<String> uris,
         in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
-     * Deletes documents by schema type.
+     * Removes documents by given query.
      *
-     * @param databaseName The databaseName the document is in.
-     * @param schemaTypes The schema types of the documents to delete
-     * @param callback
-     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
-     *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
-     *     {@code callback} will be completed with an
-     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;
-     *     where the keys are schema types. If a schema type doesn't exist, it will be reported as a
-     *     failure where the {@code throwable} is {@code null}.
+     * @param databaseName The databaseName this query for.
+     * @param queryExpression String to search for
+     * @param searchSpecBundle SearchSpec bundle
+     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link SearchResults}&gt;&gt;
      */
-    void deleteByTypes(
+    void removeByQuery(
         in String databaseName,
-        in List<String> schemaTypes,
-        in AndroidFuture<AppSearchBatchResult> callback);
-
-    /**
-     * Deletes all documents belonging to the calling app.
-     *
-     * @param databaseName The databaseName to remove all documents from.
-     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt;&gt;.
-     *     Will be completed with the result of the call.
-     */
-    void deleteAll(in String databaseName, in AndroidFuture<AppSearchResult> callback);
+        in String queryExpression,
+        in Bundle searchSpecBundle,
+        in AndroidFuture<AppSearchResult> callback);
 }

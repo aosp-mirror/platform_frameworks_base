@@ -22,8 +22,10 @@ import android.annotation.NonNull;
 
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.SearchResult;
+import android.app.appsearch.SearchResultPage;
 
 import com.google.android.icing.proto.SearchResultProto;
+import com.google.android.icing.proto.SearchResultProtoOrBuilder;
 import com.google.android.icing.proto.SnippetMatchProto;
 import com.google.android.icing.proto.SnippetProto;
 
@@ -38,9 +40,24 @@ import java.util.ArrayList;
 public class SearchResultToProtoConverter {
     private SearchResultToProtoConverter() {}
 
+
+    /** Translate a {@link SearchResultProto} into {@link SearchResultPage}. */
+    @NonNull
+    public static SearchResultPage convertToSearchResultPage(
+            @NonNull SearchResultProtoOrBuilder proto) {
+        Bundle bundle = new Bundle();
+        bundle.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, proto.getNextPageToken());
+        ArrayList<Bundle> resultBundles = new ArrayList<>(proto.getResultsCount());
+        for (int i = 0; i < proto.getResultsCount(); i++) {
+            resultBundles.add(convertToSearchResultBundle(proto.getResults(i)));
+        }
+        bundle.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, resultBundles);
+        return new SearchResultPage(bundle);
+    }
+
     /** Translate a {@link SearchResultProto.ResultProto} into {@link SearchResult}. */
     @NonNull
-    public static SearchResult convertSearchResult(
+    private static Bundle convertToSearchResultBundle(
             @NonNull SearchResultProto.ResultProtoOrBuilder proto) {
         Bundle bundle = new Bundle();
         GenericDocument document = GenericDocumentToProtoConverter.convert(proto.getDocument());
@@ -59,7 +76,7 @@ public class SearchResultToProtoConverter {
         }
         bundle.putParcelableArrayList(SearchResult.MATCHES_FIELD, matchList);
 
-        return new SearchResult(bundle);
+        return bundle;
     }
 
     private static Bundle convertToMatchInfoBundle(
