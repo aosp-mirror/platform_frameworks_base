@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 
 import androidx.test.filters.SmallTest;
@@ -887,6 +888,65 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
         verify(mOverlayViewController2, never()).inflate(mBaseLayout);
     }
 
+    @Test
+    public void showView_setInsetsToFitByType_setsFitInsetsType() {
+        int insetTypeToFit = WindowInsets.Type.navigationBars();
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(insetTypeToFit);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(insetTypeToFit);
+    }
+
+    @Test
+    public void refreshInsetsToFit_setInsetsToFitBySide_setsFitInsetsSides() {
+        int insetSidesToFit = WindowInsets.Side.LEFT;
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetSidesToFit()).thenReturn(insetSidesToFit);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsSides(insetSidesToFit);
+    }
+
+    @Test
+    public void refreshInsetsToFit_setInsetsToFitBySideUsed_firstFitsAllSystemBars() {
+        int insetSidesToFit = WindowInsets.Side.LEFT;
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetSidesToFit()).thenReturn(insetSidesToFit);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(WindowInsets.Type.systemBars());
+    }
+
+    @Test
+    public void refreshInsetsToFit_bothInsetTypeAndSideDefined_insetSideTakesPrecedence() {
+        int insetTypesToFit = WindowInsets.Type.navigationBars();
+        int insetSidesToFit = WindowInsets.Side.LEFT;
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(insetTypesToFit);
+        when(mOverlayViewController1.getInsetSidesToFit()).thenReturn(insetSidesToFit);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsSides(insetSidesToFit);
+    }
+
+    @Test
+    public void refreshInsetsToFit_bothInsetTypeAndSideDefined_insetTypeIgnored() {
+        int insetTypesToFit = WindowInsets.Type.navigationBars();
+        int insetSidesToFit = WindowInsets.Side.LEFT;
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(insetTypesToFit);
+        when(mOverlayViewController1.getInsetSidesToFit()).thenReturn(insetSidesToFit);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController, never()).setFitInsetsTypes(insetTypesToFit);
+    }
+
     private void setupOverlayViewController1() {
         setupOverlayViewController(mOverlayViewController1, R.id.overlay_view_controller_stub_1,
                 R.id.overlay_view_controller_1);
@@ -913,6 +973,8 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
         }
         when(overlayViewController.getLayout()).thenReturn(layout);
         when(overlayViewController.isInflated()).thenReturn(true);
+        when(overlayViewController.getInsetSidesToFit()).thenReturn(
+                OverlayViewController.INVALID_INSET_SIDE);
     }
 
     private void setOverlayViewControllerAsShowing(OverlayViewController overlayViewController) {
