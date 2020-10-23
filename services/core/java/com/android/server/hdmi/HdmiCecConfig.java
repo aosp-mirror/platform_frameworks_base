@@ -135,6 +135,12 @@ public class HdmiCecConfig {
         mStorageAdapter = storageAdapter;
         mProductConfig = productConfig;
         mVendorOverride = vendorOverride;
+        if (mProductConfig == null) {
+            Slog.i(TAG, "CEC master configuration XML missing.");
+        }
+        if (mVendorOverride == null) {
+            Slog.i(TAG, "CEC OEM configuration override XML missing.");
+        }
     }
 
     HdmiCecConfig(@NonNull Context context) {
@@ -164,6 +170,9 @@ public class HdmiCecConfig {
 
     @Nullable
     private Setting getSetting(@NonNull String name) {
+        if (mProductConfig == null) {
+            return null;
+        }
         if (mVendorOverride != null) {
             // First read from the vendor override.
             for (Setting setting : mVendorOverride.getSetting()) {
@@ -245,6 +254,9 @@ public class HdmiCecConfig {
      * Returns a list of all settings based on the XML metadata.
      */
     public @CecSettingName List<String> getAllSettings() {
+        if (mProductConfig == null) {
+            return new ArrayList<String>();
+        }
         List<String> allSettings = new ArrayList<String>();
         for (Setting setting : mProductConfig.getSetting()) {
             allSettings.add(setting.getName());
@@ -256,6 +268,9 @@ public class HdmiCecConfig {
      * Returns a list of user-modifiable settings based on the XML metadata.
      */
     public @CecSettingName List<String> getUserSettings() {
+        if (mProductConfig == null) {
+            return new ArrayList<String>();
+        }
         Set<String> userSettings = new HashSet<String>();
         // First read from the product config.
         for (Setting setting : mProductConfig.getSetting()) {
