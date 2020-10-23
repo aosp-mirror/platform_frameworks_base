@@ -1231,12 +1231,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return "/data/system/";
         }
 
+        @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
         PendingIntent pendingIntentGetActivityAsUser(Context context, int requestCode,
                 @NonNull Intent intent, int flags, Bundle options, UserHandle user) {
             return PendingIntent.getActivityAsUser(
                     context, requestCode, intent, flags, options, user);
         }
 
+        @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
         PendingIntent pendingIntentGetBroadcast(
                 Context context, int requestCode, Intent intent, int flags) {
             return PendingIntent.getBroadcast(context, requestCode, intent, flags);
