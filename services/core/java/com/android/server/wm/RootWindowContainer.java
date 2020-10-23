@@ -511,6 +511,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void onChildPositionChanged(WindowContainer child) {
         mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                 !mWmService.mPerDisplayFocusEnabled /* updateInputWindows */);
+        mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
     /**
@@ -2624,12 +2625,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         throw new IllegalStateException("Failed to find a stack behind stack=" + stack
                 + " in=" + taskDisplayArea);
-    }
-
-    @Override
-    void positionChildAt(int position, DisplayContent child, boolean includingParents) {
-        super.positionChildAt(position, child, includingParents);
-        mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
     Configuration getDisplayOverrideConfiguration(int displayId) {
