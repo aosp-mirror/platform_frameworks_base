@@ -91,6 +91,7 @@ class OpenAppWarmTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+
                             appWindowReplacesLauncherAsTopWindow(testApp)
                             wallpaperWindowBecomesInvisible(enabled = false)
                         }
@@ -103,9 +104,11 @@ class OpenAppWarmTest(
                                 configuration.endRotation)
                             statusBarLayerRotatesScales(Surface.ROTATION_0,
                                 configuration.endRotation)
-                            navBarLayerIsAlwaysVisible(
-                                enabled = configuration.endRotation == Surface.ROTATION_0)
-                            statusBarLayerIsAlwaysVisible(enabled = false)
+                            navBarLayerIsAlwaysVisible(Surface.ROTATION_0 !=
+                                    configuration.endRotation)
+                            statusBarLayerIsAlwaysVisible(Surface.ROTATION_0 !=
+                                    configuration.endRotation)
+
                             wallpaperLayerBecomesInvisible(testApp)
                         }
 
