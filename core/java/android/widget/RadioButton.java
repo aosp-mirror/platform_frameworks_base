@@ -16,9 +16,12 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.android.internal.R;
 
 
 /**
@@ -96,6 +99,17 @@ public class RadioButton extends CompoundButton {
                         radioGroup.getIndexWithinVisibleButtons(this), 1, 0, 1,
                         false, isChecked()));
             }
+        }
+    }
+
+    /** @hide **/
+    @Override
+    @NonNull
+    protected CharSequence getButtonStateDescription() {
+        if (isChecked()) {
+            return getResources().getString(R.string.selected);
+        } else {
+            return getResources().getString(R.string.not_selected);
         }
     }
 }
