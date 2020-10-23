@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
@@ -61,9 +62,12 @@ public class SystemAudioInitiationActionFromAvrTest {
     @Before
     public void SetUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
-        HdmiControlService hdmiControlService =
-                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
 
+        Context context = InstrumentationRegistry.getTargetContext();
+
+        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
+
+        HdmiControlService hdmiControlService = new HdmiControlService(context) {
                     @Override
                     void sendCecCommand(
                             HdmiCecMessage command, @Nullable SendMessageCallback callback) {
@@ -155,6 +159,11 @@ public class SystemAudioInitiationActionFromAvrTest {
                     @Override
                     int pathToPortId(int path) {
                         return -1;
+                    }
+
+                    @Override
+                    HdmiCecConfig getHdmiCecConfig() {
+                        return hdmiCecConfig;
                     }
                 };
 

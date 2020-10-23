@@ -26,7 +26,6 @@ import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_SERVICE_CONTROL;
-import static com.android.server.hdmi.Constants.VERSION_1_4;
 import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 
 import android.annotation.IntDef;
@@ -81,7 +80,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
-import com.android.server.hdmi.Constants.CecVersion;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
@@ -391,8 +389,8 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private Looper mIoLooper;
 
-    @CecVersion
-    private int mCecVersion = Constants.VERSION_1_4;
+    @HdmiControlManager.HdmiCecVersion
+    private int mCecVersion;
 
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
@@ -820,7 +818,8 @@ public class HdmiControlService extends SystemService {
 
     private void initializeCec(int initiatedBy) {
         mAddressAllocated = false;
-        mCecVersion = readIntSetting(Global.HDMI_CEC_VERSION, VERSION_1_4);
+        mCecVersion = getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION);
 
         mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, true);
         mCecController.setLanguage(mMenuLanguage);
@@ -1028,7 +1027,7 @@ public class HdmiControlService extends SystemService {
     /**
      * Returns version of CEC.
      */
-    @CecVersion
+    @HdmiControlManager.HdmiCecVersion
     int getCecVersion() {
         return mCecVersion;
     }
@@ -2191,7 +2190,6 @@ public class HdmiControlService extends SystemService {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
-            pw.println("mCecVersion: " + mCecVersion);
             pw.println("mProhibitMode: " + mProhibitMode);
             pw.println("mPowerStatus: " + mPowerStatus);
 

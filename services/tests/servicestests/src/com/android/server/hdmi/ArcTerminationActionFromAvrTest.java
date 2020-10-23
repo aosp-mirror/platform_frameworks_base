@@ -77,6 +77,8 @@ public class ArcTerminationActionFromAvrTest {
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
+        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
+
         HdmiControlService hdmiControlService =
                 new HdmiControlService(mContextSpy) {
                     @Override
@@ -106,6 +108,11 @@ public class ArcTerminationActionFromAvrTest {
                     @Override
                     Looper getServiceLooper() {
                         return mTestLooper.getLooper();
+                    }
+
+                    @Override
+                    HdmiCecConfig getHdmiCecConfig() {
+                        return hdmiCecConfig;
                     }
                 };
 

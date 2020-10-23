@@ -74,6 +74,8 @@ public class ActiveSourceActionTest {
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
+        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
+
         mHdmiControlService = new HdmiControlService(mContextSpy) {
             @Override
             AudioManager getAudioManager() {
@@ -103,6 +105,11 @@ public class ActiveSourceActionTest {
             @Override
             void writeStringSystemProperty(String key, String value) {
                 // do nothing
+            }
+
+            @Override
+            HdmiCecConfig getHdmiCecConfig() {
+                return hdmiCecConfig;
             }
         };
 

@@ -1006,22 +1006,22 @@ public final class HdmiCecConfigTest {
         HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
                 mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"system_audio_mode_muting\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+                        + "<cec-settings>"
+                        + "  <setting name=\"system_audio_mode_muting\""
+                        + "           value-type=\"int\""
+                        + "           user-configurable=\"true\">"
+                        + "    <allowed-values>"
+                        + "      <value int-value=\"0\" />"
+                        + "      <value int-value=\"1\" />"
+                        + "    </allowed-values>"
+                        + "    <default-value int-value=\"1\" />"
+                        + "  </setting>"
+                        + "</cec-settings>", null);
         hdmiCecConfig.setIntValue(
-                  HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
-                  HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+                HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
         verify(mStorageAdapter).storeSystemProperty(
-                  HdmiCecConfig.SYSPROP_SYSTEM_AUDIO_MODE_MUTING,
-                  Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED));
+                HdmiCecConfig.SYSPROP_SYSTEM_AUDIO_MODE_MUTING,
+                Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED));
     }
 }
