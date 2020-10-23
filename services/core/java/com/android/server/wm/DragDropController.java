@@ -31,10 +31,8 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.View;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
 import java.util.Objects;
@@ -70,8 +68,17 @@ class DragDropController {
     @NonNull private AtomicReference<IDragDropCallback> mCallback = new AtomicReference<>(
             new IDragDropCallback() {});
 
+    DragDropController(WindowManagerService service, Looper looper) {
+        mService = service;
+        mHandler = new DragHandler(service, looper);
+    }
+
     boolean dragDropActiveLocked() {
         return mDragState != null && !mDragState.isClosing();
+    }
+
+    boolean dragSurfaceRelinquished() {
+        return mDragState != null && mDragState.mRelinquishDragSurface;
     }
 
     void registerCallback(IDragDropCallback callback) {
@@ -79,17 +86,12 @@ class DragDropController {
         mCallback.set(callback);
     }
 
-    DragDropController(WindowManagerService service, Looper looper) {
-        mService = service;
-        mHandler = new DragHandler(service, looper);
-    }
-
     void sendDragStartedIfNeededLocked(WindowState window) {
         mDragState.sendDragStartedIfNeededLocked(window);
     }
 
-    IBinder performDrag(SurfaceSession session, int callerPid, int callerUid, IWindow window,
-            int flags, SurfaceControl surface, int touchSource, float touchX, float touchY,
+    IBinder performDrag(int callerPid, int callerUid, IWindow window, int flags,
+            SurfaceControl surface, int touchSource, float touchX, float touchY,
             float thumbCenterX, float thumbCenterY, ClipData data) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "perform drag: win=" + window + " surface=" + surface + " flags=" +
@@ -157,6 +159,7 @@ class DragDropController {
                         return null;
                     }
 
+                    final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
                     mDragState.mData = data;
                     mDragState.broadcastDragStartedLocked(touchX, touchY);
                     mDragState.overridePointerIconLocked(touchSource);
@@ -165,7 +168,6 @@ class DragDropController {
                     mDragState.mThumbOffsetY = thumbCenterY;
 
                     // Make the surface visible at the proper location
-                    final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
                     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
 
                     final SurfaceControl.Transaction transaction = mDragState.mTransaction;
@@ -229,6 +231,8 @@ class DragDropController {
                 }
 
                 mDragState.mDragResult = consumed;
+                mDragState.mRelinquishDragSurface = consumed
+                        && mDragState.targetInterceptsGlobalDrag(callingWin);
                 mDragState.endDragLocked();
             }
         } finally {

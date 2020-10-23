@@ -316,6 +316,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return createWindow(null, type, activity, name);
     }
 
+    // TODO: Move these calls to a builder?
+    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
+            IWindow iwindow) {
+        final WindowToken token = createWindowToken(
+                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
+        return createWindow(parent, type, token, name, 0 /* ownerId */,
+                false /* ownerCanAddInternalSystemWindow */, iwindow);
+    }
+
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
         final WindowToken token = createWindowToken(
                 dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
@@ -350,8 +359,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow) {
+        return createWindow(parent, type, token, name, ownerId, ownerCanAddInternalSystemWindow,
+                mIWindow);
+    }
+
+    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
+            int ownerId, boolean ownerCanAddInternalSystemWindow, IWindow iwindow) {
         return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
-                ownerCanAddInternalSystemWindow, mWm, mMockSession, mIWindow,
+                ownerCanAddInternalSystemWindow, mWm, mMockSession, iwindow,
                 mSystemServicesTestRule.getPowerManagerWrapper());
     }
 

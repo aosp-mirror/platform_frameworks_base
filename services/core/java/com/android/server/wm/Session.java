@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.DEVICE_POWER;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -30,7 +32,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITION
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
+import android.app.PendingIntent;
 import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -58,8 +65,10 @@ import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -272,12 +281,69 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
+        // Validate and resolve ClipDescription data before clearing the calling identity
+        validateAndResolveDragMimeTypeExtras(data, Binder.getCallingUid());
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDragDropController.performDrag(mSurfaceSession, mPid, mUid, window,
-                    flags, surface, touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
+            return mDragDropController.performDrag(mPid, mUid, window, flags, surface, touchSource,
+                    touchX, touchY, thumbCenterX, thumbCenterY, data);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Validates the given drag data.
+     */
+    @VisibleForTesting
+    public void validateAndResolveDragMimeTypeExtras(ClipData data, int callingUid) {
+        final ClipDescription desc = data != null ? data.getDescription() : null;
+        if (desc == null) {
+            return;
+        }
+        // Ensure that only one of the app mime types are set
+        final boolean hasActivity = desc.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY);
+        int appMimeTypeCount = (hasActivity ? 1 : 0);
+        if (appMimeTypeCount == 0) {
+            return;
+        } else if (appMimeTypeCount > 1) {
+            throw new IllegalArgumentException("Can not specify more than one of activity, "
+                    + "or task mime types");
+        }
+        // Ensure that data is provided and that they are intents
+        if (data.getItemCount() == 0) {
+            throw new IllegalArgumentException("Unexpected number of items (none)");
+        }
+        for (int i = 0; i < data.getItemCount(); i++) {
+            if (data.getItemAt(i).getIntent() == null) {
+                throw new IllegalArgumentException("Unexpected item, expected an intent");
+            }
+        }
+
+        if (hasActivity) {
+            long origId = Binder.clearCallingIdentity();
+            try {
+                // Resolve the activity info for each intent
+                for (int i = 0; i < data.getItemCount(); i++) {
+                    final ClipData.Item item = data.getItemAt(i);
+                    final Intent intent = item.getIntent();
+                    final PendingIntent pi = intent.getParcelableExtra(
+                            ClipDescription.EXTRA_PENDING_INTENT);
+                    final UserHandle user = intent.getParcelableExtra(Intent.EXTRA_USER);
+                    if (pi == null || user == null) {
+                        throw new IllegalArgumentException("Clip data must include the pending "
+                                + "intent to launch and its associated user to launch for.");
+                    }
+                    final Intent launchIntent = mService.mAmInternal.getIntentForIntentSender(
+                            pi.getIntentSender().getTarget());
+                    final ActivityInfo info = mService.mAtmService.resolveActivityInfoForIntent(
+                            launchIntent, null /* resolvedType */, user.getIdentifier(),
+                            callingUid);
+                    item.setActivityInfo(info);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
 

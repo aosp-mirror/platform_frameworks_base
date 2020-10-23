@@ -399,23 +399,10 @@ public final class PendingIntent implements Parcelable {
      */
     public static PendingIntent getActivity(Context context, int requestCode,
             @NonNull Intent intent, @Flags int flags, @Nullable Bundle options) {
-        String packageName = context.getPackageName();
-        String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
-                context.getContentResolver()) : null;
-        checkFlags(flags, packageName);
-        try {
-            intent.migrateExtraStreamToClipData(context);
-            intent.prepareToLeaveProcess(context);
-            IIntentSender target =
-                ActivityManager.getService().getIntentSenderWithFeature(
-                    ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
-                    context.getAttributionTag(), null, null, requestCode, new Intent[] { intent },
-                    resolvedType != null ? new String[] { resolvedType } : null,
-                    flags, options, context.getUserId());
-            return target != null ? new PendingIntent(target) : null;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        // Some tests only mock Context.getUserId(), so fallback to the id Context.getUser() is null
+        final UserHandle user = context.getUser();
+        return getActivityAsUser(context, requestCode, intent, flags, options,
+                user != null ? user : UserHandle.of(context.getUserId()));
     }
 
     /**
@@ -543,24 +530,10 @@ public final class PendingIntent implements Parcelable {
      */
     public static PendingIntent getActivities(Context context, int requestCode,
             @NonNull Intent[] intents, @Flags int flags, @Nullable Bundle options) {
-        String packageName = context.getPackageName();
-        String[] resolvedTypes = new String[intents.length];
-        for (int i=0; i<intents.length; i++) {
-            intents[i].migrateExtraStreamToClipData(context);
-            intents[i].prepareToLeaveProcess(context);
-            resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
-        }
-        checkFlags(flags, packageName);
-        try {
-            IIntentSender target =
-                ActivityManager.getService().getIntentSenderWithFeature(
-                    ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
-                    context.getAttributionTag(), null, null, requestCode, intents, resolvedTypes,
-                    flags, options, context.getUserId());
-            return target != null ? new PendingIntent(target) : null;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        // Some tests only mock Context.getUserId(), so fallback to the id Context.getUser() is null
+        final UserHandle user = context.getUser();
+        return getActivitiesAsUser(context, requestCode, intents, flags, options,
+                user != null ? user : UserHandle.of(context.getUserId()));
     }
 
     /**

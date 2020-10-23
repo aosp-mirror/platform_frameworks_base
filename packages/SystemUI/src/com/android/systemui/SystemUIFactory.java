@@ -103,11 +103,13 @@ public class SystemUIFactory {
             // components that shouldn't be run in the test environment
             builder = builder.setPip(mWMComponent.getPip())
                     .setSplitScreen(mWMComponent.getSplitScreen())
-                    .setOneHanded(mWMComponent.getOneHanded());
+                    .setOneHanded(mWMComponent.getOneHanded())
+                    .setShellDump(mWMComponent.getShellDump());
         } else {
             builder = builder.setPip(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
-                    .setOneHanded(Optional.ofNullable(null));
+                    .setOneHanded(Optional.ofNullable(null))
+                    .setShellDump(Optional.ofNullable(null));
         }
         mSysUIComponent = builder
                 .setInputConsumerController(mWMComponent.getInputConsumerController())

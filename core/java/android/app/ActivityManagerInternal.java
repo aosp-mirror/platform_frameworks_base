@@ -475,4 +475,10 @@ public abstract class ActivityManagerInternal {
      * @return true if exists, false otherwise.
      */
     public abstract boolean isPendingTopUid(int uid);
+
+    /**
+     * @return the intent for the given intent sender.
+     */
+    @Nullable
+    public abstract Intent getIntentForIntentSender(IIntentSender sender);
 }
