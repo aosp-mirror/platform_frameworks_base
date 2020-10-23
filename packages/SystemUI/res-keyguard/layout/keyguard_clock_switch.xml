@@ -67,6 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
+        android:layout_marginBottom="24dp"
         android:visibility="gone">
         <com.android.keyguard.GradientTextClock
             android:id="@+id/gradient_clock_view"
@@ -88,4 +89,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/clock_view" />
+
+    <com.android.systemui.statusbar.phone.NotificationIconContainer
+        android:id="@+id/left_aligned_notification_icon_container"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/notification_shelf_height"
+        android:layout_marginTop="@dimen/widget_vertical_padding"
+        android:layout_below="@id/keyguard_status_area"
+        android:visibility="gone"
+    />
 </com.android.keyguard.KeyguardClockSwitch>
