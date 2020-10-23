@@ -14322,10 +14322,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
         }
 
-        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
-            return false;
-        }
-
         // only when not installed from ADB, skip verification for instant apps when
         // the installer and verifier are the same.
         if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
