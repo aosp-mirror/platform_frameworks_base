@@ -178,8 +178,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     /** Initialize the Controller. */
-    public void init() {
-        super.init();
+    public void initInternal() {
         mKeyguardSecurityContainerController.init();
     }
 

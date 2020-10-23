@@ -105,6 +105,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     // TODO(shell-transitions): move to a more "global" Shell location as this isn't only for Tasks
     private final Transitions mTransitions;
 
+    private final Object mLock = new Object();
+
     public ShellTaskOrganizer(SyncTransactionQueue syncQueue, TransactionPool transactionPool,
             ShellExecutor mainExecutor, ShellExecutor animExecutor) {
         this(null, syncQueue, transactionPool, mainExecutor, animExecutor);
@@ -114,7 +116,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
             SyncTransactionQueue syncQueue, TransactionPool transactionPool,
             ShellExecutor mainExecutor, ShellExecutor animExecutor) {
-        super(taskOrganizerController);
+        super(taskOrganizerController, mainExecutor);
         addListenerForType(new FullscreenTaskListener(syncQueue), TASK_LISTENER_TYPE_FULLSCREEN);
         mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
@@ -122,68 +124,62 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public List<TaskAppearedInfo> registerOrganizer() {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Registering organizer");
-        final List<TaskAppearedInfo> taskInfos = super.registerOrganizer();
-        for (int i = 0; i < taskInfos.size(); i++) {
-            final TaskAppearedInfo info = taskInfos.get(i);
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Existing task: id=%d component=%s",
-                    info.getTaskInfo().taskId, info.getTaskInfo().baseIntent);
-            onTaskAppeared(info);
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Registering organizer");
+            final List<TaskAppearedInfo> taskInfos = super.registerOrganizer();
+            for (int i = 0; i < taskInfos.size(); i++) {
+                final TaskAppearedInfo info = taskInfos.get(i);
+                ProtoLog.v(WM_SHELL_TASK_ORG, "Existing task: id=%d component=%s",
+                        info.getTaskInfo().taskId, info.getTaskInfo().baseIntent);
+                onTaskAppeared(info);
+            }
+            return taskInfos;
         }
-        return taskInfos;
-    }
-
-    public TaskAppearedInfo createRootTask(
-            int displayId, int windowingMode, TaskListener listener) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG,
-                "createRootTask() displayId=%d winMode=%d listener=%s",
-                displayId, windowingMode, listener.toString());
-        final TaskAppearedInfo info = super.createRootTask(displayId, windowingMode);
-
-        // Add the listener and send the task appeared signal
-        mTaskListeners.put(info.getTaskInfo().taskId, listener);
-        onTaskAppeared(info);
-        return info;
     }
 
     /**
      * Adds a listener for a specific task id.
      */
     public void addListenerForTaskId(TaskListener listener, int taskId) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "addListenerForTaskId taskId=%s", taskId);
-        if (mTaskListeners.get(taskId) != null) {
-            throw new IllegalArgumentException("Listener for taskId=" + taskId + " already exists");
-        }
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "addListenerForTaskId taskId=%s", taskId);
+            if (mTaskListeners.get(taskId) != null) {
+                throw new IllegalArgumentException(
+                        "Listener for taskId=" + taskId + " already exists");
+            }
 
-        final TaskAppearedInfo info = mTasks.get(taskId);
-        if (info == null) {
-            throw new IllegalArgumentException("addListenerForTaskId unknown taskId=" + taskId);
-        }
+            final TaskAppearedInfo info = mTasks.get(taskId);
+            if (info == null) {
+                throw new IllegalArgumentException("addListenerForTaskId unknown taskId=" + taskId);
+            }
 
-        final TaskListener oldListener = getTaskListener(info.getTaskInfo());
-        mTaskListeners.put(taskId, listener);
-        updateTaskListenerIfNeeded(info.getTaskInfo(), info.getLeash(), oldListener, listener);
+            final TaskListener oldListener = getTaskListener(info.getTaskInfo());
+            mTaskListeners.put(taskId, listener);
+            updateTaskListenerIfNeeded(info.getTaskInfo(), info.getLeash(), oldListener, listener);
+        }
     }
 
     /**
      * Adds a listener for tasks with given types.
      */
     public void addListenerForType(TaskListener listener, @TaskListenerType int... listenerTypes) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "addListenerForType types=%s listener=%s",
-                Arrays.toString(listenerTypes), listener);
-        for (int listenerType : listenerTypes) {
-            if (mTaskListeners.get(listenerType) != null) {
-                throw new IllegalArgumentException("Listener for listenerType=" + listenerType
-                        + " already exists");
-            }
-            mTaskListeners.put(listenerType, listener);
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "addListenerForType types=%s listener=%s",
+                    Arrays.toString(listenerTypes), listener);
+            for (int listenerType : listenerTypes) {
+                if (mTaskListeners.get(listenerType) != null) {
+                    throw new IllegalArgumentException("Listener for listenerType=" + listenerType
+                            + " already exists");
+                }
+                mTaskListeners.put(listenerType, listener);
 
-            // Notify the listener of all existing tasks with the given type.
-            for (int i = mTasks.size() - 1; i >= 0; --i) {
-                final TaskAppearedInfo data = mTasks.valueAt(i);
-                final TaskListener taskListener = getTaskListener(data.getTaskInfo());
-                if (taskListener != listener) continue;
-                listener.onTaskAppeared(data.getTaskInfo(), data.getLeash());
+                // Notify the listener of all existing tasks with the given type.
+                for (int i = mTasks.size() - 1; i >= 0; --i) {
+                    final TaskAppearedInfo data = mTasks.valueAt(i);
+                    final TaskListener taskListener = getTaskListener(data.getTaskInfo());
+                    if (taskListener != listener) continue;
+                    listener.onTaskAppeared(data.getTaskInfo(), data.getLeash());
+                }
             }
         }
     }
@@ -192,30 +188,32 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      * Removes a registered listener.
      */
     public void removeListener(TaskListener listener) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "Remove listener=%s", listener);
-        final int index = mTaskListeners.indexOfValue(listener);
-        if (index == -1) {
-            Log.w(TAG, "No registered listener found");
-            return;
-        }
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Remove listener=%s", listener);
+            final int index = mTaskListeners.indexOfValue(listener);
+            if (index == -1) {
+                Log.w(TAG, "No registered listener found");
+                return;
+            }
 
-        // Collect tasks associated with the listener we are about to remove.
-        final ArrayList<TaskAppearedInfo> tasks = new ArrayList<>();
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final TaskAppearedInfo data = mTasks.valueAt(i);
-            final TaskListener taskListener = getTaskListener(data.getTaskInfo());
-            if (taskListener != listener) continue;
-            tasks.add(data);
-        }
+            // Collect tasks associated with the listener we are about to remove.
+            final ArrayList<TaskAppearedInfo> tasks = new ArrayList<>();
+            for (int i = mTasks.size() - 1; i >= 0; --i) {
+                final TaskAppearedInfo data = mTasks.valueAt(i);
+                final TaskListener taskListener = getTaskListener(data.getTaskInfo());
+                if (taskListener != listener) continue;
+                tasks.add(data);
+            }
 
-        // Remove listener
-        mTaskListeners.removeAt(index);
+            // Remove listener
+            mTaskListeners.removeAt(index);
 
-        // Associate tasks with new listeners if needed.
-        for (int i = tasks.size() - 1; i >= 0; --i) {
-            final TaskAppearedInfo data = tasks.get(i);
-            updateTaskListenerIfNeeded(data.getTaskInfo(), data.getLeash(),
-                    null /* oldListener already removed*/, getTaskListener(data.getTaskInfo()));
+            // Associate tasks with new listeners if needed.
+            for (int i = tasks.size() - 1; i >= 0; --i) {
+                final TaskAppearedInfo data = tasks.get(i);
+                updateTaskListenerIfNeeded(data.getTaskInfo(), data.getLeash(),
+                        null /* oldListener already removed*/, getTaskListener(data.getTaskInfo()));
+            }
         }
     }
 
@@ -224,12 +222,16 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      * appears.
      */
     public void setPendingLaunchCookieListener(IBinder cookie, TaskListener listener) {
-        mLaunchCookieToListener.put(cookie, listener);
+        synchronized (mLock) {
+            mLaunchCookieToListener.put(cookie, listener);
+        }
     }
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
-        onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
+        synchronized (mLock) {
+            onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
+        }
     }
 
     private void onTaskAppeared(TaskAppearedInfo info) {
@@ -245,35 +247,41 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "Task info changed taskId=%d", taskInfo.taskId);
-        final TaskAppearedInfo data = mTasks.get(taskInfo.taskId);
-        final TaskListener oldListener = getTaskListener(data.getTaskInfo());
-        final TaskListener newListener = getTaskListener(taskInfo);
-        mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, data.getLeash()));
-        final boolean updated = updateTaskListenerIfNeeded(
-                taskInfo, data.getLeash(), oldListener, newListener);
-        if (!updated && newListener != null) {
-            newListener.onTaskInfoChanged(taskInfo);
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Task info changed taskId=%d", taskInfo.taskId);
+            final TaskAppearedInfo data = mTasks.get(taskInfo.taskId);
+            final TaskListener oldListener = getTaskListener(data.getTaskInfo());
+            final TaskListener newListener = getTaskListener(taskInfo);
+            mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, data.getLeash()));
+            final boolean updated = updateTaskListenerIfNeeded(
+                    taskInfo, data.getLeash(), oldListener, newListener);
+            if (!updated && newListener != null) {
+                newListener.onTaskInfoChanged(taskInfo);
+            }
         }
     }
 
     @Override
     public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "Task root back pressed taskId=%d", taskInfo.taskId);
-        final TaskListener listener = getTaskListener(taskInfo);
-        if (listener != null) {
-            listener.onBackPressedOnTaskRoot(taskInfo);
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Task root back pressed taskId=%d", taskInfo.taskId);
+            final TaskListener listener = getTaskListener(taskInfo);
+            if (listener != null) {
+                listener.onBackPressedOnTaskRoot(taskInfo);
+            }
         }
     }
 
     @Override
     public void onTaskVanished(RunningTaskInfo taskInfo) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "Task vanished taskId=%d", taskInfo.taskId);
-        final int taskId = taskInfo.taskId;
-        final TaskListener listener = getTaskListener(mTasks.get(taskId).getTaskInfo());
-        mTasks.remove(taskId);
-        if (listener != null) {
-            listener.onTaskVanished(taskInfo);
+        synchronized (mLock) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Task vanished taskId=%d", taskInfo.taskId);
+            final int taskId = taskInfo.taskId;
+            final TaskListener listener = getTaskListener(mTasks.get(taskId).getTaskInfo());
+            mTasks.remove(taskId);
+            if (listener != null) {
+                listener.onTaskVanished(taskInfo);
+            }
         }
     }
 
@@ -368,32 +376,34 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
-        final String innerPrefix = prefix + "  ";
-        final String childPrefix = innerPrefix + "  ";
-        pw.println(prefix + TAG);
-        pw.println(innerPrefix + mTaskListeners.size() + " Listeners");
-        for (int i = mTaskListeners.size() - 1; i >= 0; --i) {
-            final int key = mTaskListeners.keyAt(i);
-            final TaskListener listener = mTaskListeners.valueAt(i);
-            pw.println(innerPrefix + "#" + i + " " + taskListenerTypeToString(key));
-            listener.dump(pw, childPrefix);
-        }
+        synchronized (mLock) {
+            final String innerPrefix = prefix + "  ";
+            final String childPrefix = innerPrefix + "  ";
+            pw.println(prefix + TAG);
+            pw.println(innerPrefix + mTaskListeners.size() + " Listeners");
+            for (int i = mTaskListeners.size() - 1; i >= 0; --i) {
+                final int key = mTaskListeners.keyAt(i);
+                final TaskListener listener = mTaskListeners.valueAt(i);
+                pw.println(innerPrefix + "#" + i + " " + taskListenerTypeToString(key));
+                listener.dump(pw, childPrefix);
+            }
 
-        pw.println();
-        pw.println(innerPrefix + mTasks.size() + " Tasks");
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final int key = mTasks.keyAt(i);
-            final TaskAppearedInfo info = mTasks.valueAt(i);
-            final TaskListener listener = getTaskListener(info.getTaskInfo());
-            pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener);
-        }
+            pw.println();
+            pw.println(innerPrefix + mTasks.size() + " Tasks");
+            for (int i = mTasks.size() - 1; i >= 0; --i) {
+                final int key = mTasks.keyAt(i);
+                final TaskAppearedInfo info = mTasks.valueAt(i);
+                final TaskListener listener = getTaskListener(info.getTaskInfo());
+                pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener);
+            }
 
-        pw.println();
-        pw.println(innerPrefix + mLaunchCookieToListener.size() + " Launch Cookies");
-        for (int i = mLaunchCookieToListener.size() - 1; i >= 0; --i) {
-            final IBinder key = mLaunchCookieToListener.keyAt(i);
-            final TaskListener listener = mLaunchCookieToListener.valueAt(i);
-            pw.println(innerPrefix + "#" + i + " cookie=" + key + " listener=" + listener);
+            pw.println();
+            pw.println(innerPrefix + mLaunchCookieToListener.size() + " Launch Cookies");
+            for (int i = mLaunchCookieToListener.size() - 1; i >= 0; --i) {
+                final IBinder key = mLaunchCookieToListener.keyAt(i);
+                final TaskListener listener = mLaunchCookieToListener.valueAt(i);
+                pw.println(innerPrefix + "#" + i + " cookie=" + key + " listener=" + listener);
+            }
         }
     }
 }

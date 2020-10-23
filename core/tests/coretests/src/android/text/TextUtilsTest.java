@@ -853,6 +853,8 @@ public class TextUtilsTest {
 
     @Test
     public void testFormatSimple_Advanced() {
+        assertEquals("000000000000002a.ext",
+                formatSimple("%016x.%s", 42, "ext"));
         assertEquals("crtcl=0x002a:intrsv=Y:grnk=0x0018:gsmry=A:example:rnk=0x0000",
                 formatSimple("crtcl=0x%04x:intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
                         42, 'Y', 24, 'A', "example", 0));

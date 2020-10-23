@@ -2215,7 +2215,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             caller.getUid(), doAdmin.getUid());
 
         Preconditions.checkCallAuthorization(
-                doAdmin.info.getComponent().equals(caller.getComponentName()),
+                !caller.hasAdminComponent()
+                || doAdmin.info.getComponent().equals(caller.getComponentName()),
                 "Caller component %s is not device owner",
                         caller.getComponentName());
 
@@ -2238,7 +2239,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             caller.getUid());
 
         Preconditions.checkCallAuthorization(
-                poAdmin.info.getComponent().equals(caller.getComponentName()),
+                !caller.hasAdminComponent()
+                || poAdmin.info.getComponent().equals(caller.getComponentName()),
                 "Caller component %s is not profile owner",
                         caller.getComponentName());
 
@@ -4423,23 +4425,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         // If caller has PO (or DO) throw or fail silently depending on its target SDK level.
-        Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller) || isProfileOwner(caller),
-                String.format("UID %d is not a device or profile owner", caller.getUid()));
-
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userHandle);
-            if (admin != null) {
+        if (isDeviceOwner(caller) || isProfileOwner(caller)) {
+            synchronized (getLockObject()) {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
                 if (getTargetSdk(admin.info.getPackageName(), userHandle) < Build.VERSION_CODES.O) {
                     Slog.e(LOG_TAG, "DPC can no longer call resetPassword()");
                     return false;
                 }
                 throw new SecurityException("Device admin can no longer call resetPassword()");
             }
+        }
 
+        // Caller is not DO or PO, could either be unauthorized or Device Admin.
+        synchronized (getLockObject()) {
             // Legacy device admin cannot call resetPassword either
-            admin = getActiveAdminForCallerLocked(
+            ActiveAdmin admin = getActiveAdminForCallerLocked(
                     null, DeviceAdminInfo.USES_POLICY_RESET_PASSWORD, false);
+            Preconditions.checkCallAuthorization(admin != null,
+                    "Unauthorized caller cannot call resetPassword.");
             if (getTargetSdk(admin.info.getPackageName(),
                     userHandle) <= android.os.Build.VERSION_CODES.M) {
                 Slog.e(LOG_TAG, "Device admin can no longer call resetPassword()");

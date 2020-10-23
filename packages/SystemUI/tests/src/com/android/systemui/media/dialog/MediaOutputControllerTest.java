@@ -27,14 +27,19 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Notification;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
+import android.text.TextUtils;
 
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -44,6 +49,8 @@ import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
@@ -60,6 +67,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "com.test.package.name";
     private static final String TEST_DEVICE_1_ID = "test_device_1_id";
     private static final String TEST_DEVICE_2_ID = "test_device_2_id";
+    private static final String TEST_DEVICE_3_ID = "test_device_3_id";
+    private static final String TEST_DEVICE_4_ID = "test_device_4_id";
+    private static final String TEST_DEVICE_5_ID = "test_device_5_id";
     private static final String TEST_ARTIST = "test_artist";
     private static final String TEST_SONG = "test_song";
     private static final String TEST_SESSION_ID = "test_session_id";
@@ -77,6 +87,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private RoutingSessionInfo mRemoteSessionInfo = mock(RoutingSessionInfo.class);
     private ShadeController mShadeController = mock(ShadeController.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
+    private NotificationEntryManager mNotificationEntryManager =
+            mock(NotificationEntryManager.class);
 
     private Context mSpyContext;
     private MediaOutputController mMediaOutputController;
@@ -96,8 +108,10 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 MediaSessionManager.class);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
                 mCachedBluetoothDeviceManager);
-        mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
+
+        mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -139,8 +153,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void start_withoutPackageName_verifyMediaControllerInit() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, mMediaSessionManager,
-                mLocalBluetoothManager, mShadeController, mStarter);
+        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
 
         mMediaOutputController.start(mCb);
 
@@ -159,8 +174,10 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
-        mMediaOutputController = new MediaOutputController(mSpyContext, null, mMediaSessionManager,
-                mLocalBluetoothManager, mShadeController, mStarter);
+        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
+
         mMediaOutputController.start(mCb);
 
         mMediaOutputController.stop();
@@ -344,5 +361,128 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE);
 
         assertThat(mMediaOutputController.isZeroMode()).isFalse();
+    }
+
+    @Test
+    public void getGroupMediaDevices_differentDeviceOrder_showingSameOrder() {
+        final MediaDevice selectedMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectedMediaDevice2 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice2 = mock(MediaDevice.class);
+        final List<MediaDevice> selectedMediaDevices = new ArrayList<>();
+        final List<MediaDevice> selectableMediaDevices = new ArrayList<>();
+        when(selectedMediaDevice1.getId()).thenReturn(TEST_DEVICE_1_ID);
+        when(selectedMediaDevice2.getId()).thenReturn(TEST_DEVICE_2_ID);
+        when(selectableMediaDevice1.getId()).thenReturn(TEST_DEVICE_3_ID);
+        when(selectableMediaDevice2.getId()).thenReturn(TEST_DEVICE_4_ID);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        selectableMediaDevices.add(selectableMediaDevice2);
+        doReturn(selectedMediaDevices).when(mLocalMediaManager).getSelectedMediaDevice();
+        doReturn(selectableMediaDevices).when(mLocalMediaManager).getSelectableMediaDevice();
+        final List<MediaDevice> groupMediaDevices = mMediaOutputController.getGroupMediaDevices();
+        // Reset order
+        selectedMediaDevices.clear();
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectableMediaDevices.clear();
+        selectableMediaDevices.add(selectableMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        final List<MediaDevice> newDevices = mMediaOutputController.getGroupMediaDevices();
+
+        assertThat(newDevices.size()).isEqualTo(groupMediaDevices.size());
+        for (int i = 0; i < groupMediaDevices.size(); i++) {
+            assertThat(TextUtils.equals(groupMediaDevices.get(i).getId(),
+                    newDevices.get(i).getId())).isTrue();
+        }
+    }
+
+    @Test
+    public void getGroupMediaDevices_newDevice_verifyDeviceOrder() {
+        final MediaDevice selectedMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectedMediaDevice2 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice1 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice2 = mock(MediaDevice.class);
+        final MediaDevice selectableMediaDevice3 = mock(MediaDevice.class);
+        final List<MediaDevice> selectedMediaDevices = new ArrayList<>();
+        final List<MediaDevice> selectableMediaDevices = new ArrayList<>();
+        when(selectedMediaDevice1.getId()).thenReturn(TEST_DEVICE_1_ID);
+        when(selectedMediaDevice2.getId()).thenReturn(TEST_DEVICE_2_ID);
+        when(selectableMediaDevice1.getId()).thenReturn(TEST_DEVICE_3_ID);
+        when(selectableMediaDevice2.getId()).thenReturn(TEST_DEVICE_4_ID);
+        when(selectableMediaDevice3.getId()).thenReturn(TEST_DEVICE_5_ID);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        selectableMediaDevices.add(selectableMediaDevice2);
+        doReturn(selectedMediaDevices).when(mLocalMediaManager).getSelectedMediaDevice();
+        doReturn(selectableMediaDevices).when(mLocalMediaManager).getSelectableMediaDevice();
+        final List<MediaDevice> groupMediaDevices = mMediaOutputController.getGroupMediaDevices();
+        // Reset order
+        selectedMediaDevices.clear();
+        selectedMediaDevices.add(selectedMediaDevice2);
+        selectedMediaDevices.add(selectedMediaDevice1);
+        selectableMediaDevices.clear();
+        selectableMediaDevices.add(selectableMediaDevice3);
+        selectableMediaDevices.add(selectableMediaDevice2);
+        selectableMediaDevices.add(selectableMediaDevice1);
+        final List<MediaDevice> newDevices = mMediaOutputController.getGroupMediaDevices();
+
+        assertThat(newDevices.size()).isEqualTo(5);
+        for (int i = 0; i < groupMediaDevices.size(); i++) {
+            assertThat(TextUtils.equals(groupMediaDevices.get(i).getId(),
+                    newDevices.get(i).getId())).isTrue();
+        }
+        assertThat(newDevices.get(4).getId()).isEqualTo(TEST_DEVICE_5_ID);
+    }
+
+    @Test
+    public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
+        mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
+
+        assertThat(mMediaOutputController.getNotificationIcon()).isNull();
+    }
+
+    @Test
+    public void getNotificationLargeIcon_withPackageNameAndMediaSession_returnsIconCompat() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        final Icon icon = mock(Icon.class);
+        entryList.add(entry);
+
+        when(mNotificationEntryManager.getActiveNotificationsForCurrentUser())
+                .thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.hasMediaSession()).thenReturn(true);
+        when(notification.getLargeIcon()).thenReturn(icon);
+
+        assertThat(mMediaOutputController.getNotificationIcon() instanceof IconCompat).isTrue();
+    }
+
+    @Test
+    public void getNotificationLargeIcon_withPackageNameAndNoMediaSession_returnsNull() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        final Icon icon = mock(Icon.class);
+        entryList.add(entry);
+
+        when(mNotificationEntryManager.getActiveNotificationsForCurrentUser())
+                .thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.hasMediaSession()).thenReturn(false);
+        when(notification.getLargeIcon()).thenReturn(icon);
+
+        assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }
 }

@@ -513,7 +513,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         @UnsupportedAppUsage
         boolean stopped;
         boolean hideForNow;
-        Configuration newConfig;
         Configuration createdConfig;
         Configuration overrideConfig;
         // Used to save the last reported configuration from server side so that activity
@@ -2220,21 +2219,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         final IBinder b = ServiceManager.getService("permissionmgr");
         sPermissionManager = IPermissionManager.Stub.asInterface(b);
         return sPermissionManager;
-    }
-
-    private Configuration mMainThreadConfig = new Configuration();
-
-    Configuration applyConfigCompatMainThread(int displayDensity, Configuration config,
-            CompatibilityInfo compat) {
-        if (config == null) {
-            return null;
-        }
-        if (!compat.supportsScreen()) {
-            mMainThreadConfig.setTo(config);
-            config = mMainThreadConfig;
-            compat.applyToConfiguration(displayDensity, config);
-        }
-        return config;
     }
 
     /**
@@ -4597,14 +4581,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         // The window is now visible if it has been added, we are not
         // simply finishing, and we are not starting another activity.
         if (!r.activity.mFinished && willBeVisible && r.activity.mDecor != null && !r.hideForNow) {
-            if (r.newConfig != null) {
-                performConfigurationChangedForActivity(r, r.newConfig);
-                if (DEBUG_CONFIGURATION) {
-                    Slog.v(TAG, "Resuming activity " + r.activityInfo.name + " with newConfig "
-                            + r.activity.mCurrentConfig);
-                }
-                r.newConfig = null;
-            }
             if (localLOGV) Slog.v(TAG, "Resuming " + r + " with isForward=" + isForward);
             ViewRootImpl impl = r.window.getDecorView().getViewRootImpl();
             WindowManager.LayoutParams l = impl != null
@@ -4909,13 +4885,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                     if (r.activity.mVisibleFromClient) {
                         r.activity.makeVisible();
                     }
-                }
-                if (r.newConfig != null) {
-                    performConfigurationChangedForActivity(r, r.newConfig);
-                    if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
-                            + r.activityInfo.name + " with new config "
-                            + r.activity.mCurrentConfig);
-                    r.newConfig = null;
                 }
             } else {
                 if (r.activity.mVisibleFromServer) {
@@ -5488,8 +5457,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    ArrayList<ComponentCallbacks2> collectComponentCallbacks(
-            boolean allActivities, Configuration newConfig) {
+    ArrayList<ComponentCallbacks2> collectComponentCallbacks(boolean includeActivities) {
         ArrayList<ComponentCallbacks2> callbacks
                 = new ArrayList<ComponentCallbacks2>();
 
@@ -5498,29 +5466,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             for (int i=0; i<NAPP; i++) {
                 callbacks.add(mAllApplications.get(i));
             }
-            final int NACT = mActivities.size();
-            for (int i=0; i<NACT; i++) {
-                ActivityClientRecord ar = mActivities.valueAt(i);
-                Activity a = ar.activity;
-                if (a != null) {
-                    Configuration thisConfig = applyConfigCompatMainThread(
-                            mCurDefaultDisplayDpi, newConfig,
-                            ar.packageInfo.getCompatibilityInfo());
-                    if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
-                        // If the activity is currently resumed, its configuration
-                        // needs to change right now.
+            if (includeActivities) {
+                for (int i = mActivities.size() - 1; i >= 0; i--) {
+                    final Activity a = mActivities.valueAt(i).activity;
+                    if (a != null && !a.mFinished) {
                         callbacks.add(a);
-                    } else if (thisConfig != null) {
-                        // Otherwise, we will tell it about the change
-                        // the next time it is resumed or shown.  Note that
-                        // the activity manager may, before then, decide the
-                        // activity needs to be destroyed to handle its new
-                        // configuration.
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.v(TAG, "Setting activity "
-                                    + ar.activityInfo.name + " newConfig=" + thisConfig);
-                        }
-                        ar.newConfig = thisConfig;
                     }
                 }
             }
@@ -5541,17 +5491,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         return callbacks;
-    }
-
-    /**
-     * Updates the configuration for an Activity in its current display.
-     *
-     * @see #performConfigurationChangedForActivity(ActivityClientRecord, Configuration, int,
-     *      boolean)
-     */
-    private void performConfigurationChangedForActivity(ActivityClientRecord r,
-            Configuration newBaseConfig) {
-        performConfigurationChangedForActivity(r, newBaseConfig, r.activity.getDisplayId());
     }
 
     /**
@@ -5804,7 +5743,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(false, config);
+        final ArrayList<ComponentCallbacks2> callbacks =
+                collectComponentCallbacks(false /* includeActivities */);
 
         freeTextLayoutCachesIfNeeded(configDiff);
 
@@ -5812,13 +5752,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             final int N = callbacks.size();
             for (int i=0; i<N; i++) {
                 ComponentCallbacks2 cb = callbacks.get(i);
-                if (cb instanceof Activity) {
-                    // If callback is an Activity - call corresponding method to consider override
-                    // config and avoid onConfigurationChanged if it hasn't changed.
-                    Activity a = (Activity) cb;
-                    performConfigurationChangedForActivity(mActivities.get(a.getActivityToken()),
-                            config);
-                } else if (!equivalent) {
+                if (!equivalent) {
                     performConfigurationChanged(cb, config);
                 } else {
                     // TODO (b/135719017): Temporary log for debugging IME service.
@@ -6206,7 +6140,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     final void handleLowMemory() {
-        ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
+        final ArrayList<ComponentCallbacks2> callbacks =
+                collectComponentCallbacks(true /* includeActivities */);
 
         final int N = callbacks.size();
         for (int i=0; i<N; i++) {
@@ -6238,7 +6173,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
+        final ArrayList<ComponentCallbacks2> callbacks =
+                collectComponentCallbacks(true /* includeActivities */);
 
         final int N = callbacks.size();
         for (int i = 0; i < N; i++) {

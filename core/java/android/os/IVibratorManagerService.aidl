@@ -16,9 +16,13 @@
 
 package android.os;
 
+import android.os.CombinedVibrationEffect;
 import android.os.VibrationAttributes;
 
 /** {@hide} */
 interface IVibratorManagerService {
     int[] getVibratorIds();
+    void vibrate(int uid, String opPkg, in CombinedVibrationEffect effect,
+            in VibrationAttributes attributes, String reason, IBinder token);
+    void cancelVibrate(IBinder token);
 }

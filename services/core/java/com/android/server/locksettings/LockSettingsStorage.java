@@ -17,6 +17,7 @@
 package com.android.server.locksettings;
 
 import static android.content.Context.USER_SERVICE;
+import static android.text.TextUtils.formatSimple;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -527,7 +528,7 @@ class LockSettingsStorage {
     protected String getSynthenticPasswordStateFilePathForUser(int userId, long handle,
             String name) {
         final File baseDir = getSyntheticPasswordDirectoryForUser(userId);
-        final String baseName = String.format("%016x.%s", handle, name);
+        final String baseName = formatSimple("%016x.%s", handle, name);
         return new File(baseDir, baseName).getAbsolutePath();
     }
 

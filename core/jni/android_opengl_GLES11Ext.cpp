@@ -893,7 +893,8 @@ android_glEGLImageTargetTexture2DOES__ILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, image, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _array, (void *)((char *)image - _bufferOffset),
+                       _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -930,7 +931,8 @@ android_glEGLImageTargetRenderbufferStorageOES__ILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, image, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _array, (void *)((char *)image - _bufferOffset),
+                       _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);

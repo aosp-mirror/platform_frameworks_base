@@ -19209,7 +19209,7 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putInt(Intent.EXTRA_UID, removedUid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, dataRemoved);
             extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
-            extras.putBoolean(Intent.EXTRA_REMOVED_BY_SYSTEM, removedBySystem);
+            extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
             if (isUpdate || isRemovedPackageSystemUpdate) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
@@ -22417,11 +22417,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
                 ipw.println("Known Packages:");
                 ipw.increaseIndent();
-                for (int i = 0; i < LAST_KNOWN_PACKAGE; i++) {
+                for (int i = 0; i <= LAST_KNOWN_PACKAGE; i++) {
                     final String knownPackage = mPmInternal.knownPackageToString(i);
-                    if ("Unknown".equals(knownPackage)) {
-                        continue;
-                    }
                     ipw.print(knownPackage);
                     ipw.println(":");
                     final String[] pkgNames = mPmInternal.getKnownPackageNames(i,

@@ -116,6 +116,19 @@ public abstract class IContextHubWrapper {
      */
     public abstract void onWifiSettingChanged(boolean enabled);
 
+    /**
+     * @return True if this version of the Contexthub HAL supports airplane mode setting
+     * notifications.
+     */
+    public abstract boolean supportsAirplaneModeSettingNotifications();
+
+    /**
+     * Notifies the Contexthub implementation of an airplane mode setting change.
+     *
+     * @param enabled true if the airplane mode setting has been enabled.
+     */
+    public abstract void onAirplaneModeSettingChanged(boolean enabled);
+
     private static class ContextHubWrapperV1_0 extends IContextHubWrapper {
         private android.hardware.contexthub.V1_0.IContexthub mHub;
 
@@ -135,10 +148,17 @@ public abstract class IContextHubWrapper {
             return false;
         }
 
+        public boolean supportsAirplaneModeSettingNotifications() {
+            return false;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
         }
 
         public void onWifiSettingChanged(boolean enabled) {
+        }
+
+        public void onAirplaneModeSettingChanged(boolean enabled) {
         }
     }
 
@@ -161,6 +181,10 @@ public abstract class IContextHubWrapper {
             return false;
         }
 
+        public boolean supportsAirplaneModeSettingNotifications() {
+            return false;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             try {
                 mHub.onSettingChanged(Setting.LOCATION,
@@ -171,6 +195,9 @@ public abstract class IContextHubWrapper {
         }
 
         public void onWifiSettingChanged(boolean enabled) {
+        }
+
+        public void onAirplaneModeSettingChanged(boolean enabled) {
         }
     }
 
@@ -193,6 +220,10 @@ public abstract class IContextHubWrapper {
             return true;
         }
 
+        public boolean supportsAirplaneModeSettingNotifications() {
+            return true;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             sendSettingChanged(Setting.LOCATION,
                     enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
@@ -200,6 +231,11 @@ public abstract class IContextHubWrapper {
 
         public void onWifiSettingChanged(boolean enabled) {
             sendSettingChanged(android.hardware.contexthub.V1_2.Setting.WIFI_AVAILABLE,
+                    enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+        }
+
+        public void onAirplaneModeSettingChanged(boolean enabled) {
+            sendSettingChanged(android.hardware.contexthub.V1_2.Setting.AIRPLANE_MODE,
                     enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
         }
 

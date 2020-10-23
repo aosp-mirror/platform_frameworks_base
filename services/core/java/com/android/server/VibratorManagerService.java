@@ -16,12 +16,15 @@
 
 package com.android.server;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.os.CombinedVibrationEffect;
 import android.os.IBinder;
 import android.os.IVibratorManagerService;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.VibrationAttributes;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -64,6 +67,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Override // Binder call
     public int[] getVibratorIds() {
         return Arrays.copyOf(mVibratorIds, mVibratorIds.length);
+    }
+
+    @Override // Binder call
+    public void vibrate(int uid, String opPkg, CombinedVibrationEffect effect,
+            @Nullable VibrationAttributes attrs, String reason, IBinder token) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override // Binder call
+    public void cancelVibrate(IBinder token) {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override

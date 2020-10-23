@@ -584,6 +584,95 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(statusBarController.isTransparentAllowed(w));
     }
 
+    @Test
+    public void testDisplayIgnoreOrientationRequest_fixedOrientationAppLaunchedInTaskLetterbox() {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(0, SCREEN_ORIENTATION_PORTRAIT);
+
+        final Rect displayBounds = mActivity.mDisplayContent.getBounds();
+        final Rect taskBounds = mTask.getBounds();
+        final Rect activityBounds = mActivity.getBounds();
+
+        // Display shouldn't be rotated.
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED,
+                mActivity.mDisplayContent.getLastOrientation());
+        assertTrue(displayBounds.width() > displayBounds.height());
+
+        // App should launch in task level letterboxing.
+        assertTrue(mTask.isTaskLetterboxed());
+        assertFalse(mActivity.inSizeCompatMode());
+        assertEquals(taskBounds, activityBounds);
+
+        // Task bounds should be 700x1400 with the ratio as the display.
+        assertEquals(displayBounds.height(), taskBounds.height());
+        assertEquals(displayBounds.height() * displayBounds.height() / displayBounds.width(),
+                taskBounds.width());
+    }
+
+    @Test
+    public void testDisplayIgnoreOrientationRequest_taskLetterboxBecameSizeCompatAfterRotate() {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(0, SCREEN_ORIENTATION_PORTRAIT);
+
+        final Rect activityBounds = mActivity.getBounds();
+
+        // Rotate display to portrait.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        final Rect displayBounds = mActivity.mDisplayContent.getBounds();
+        final Rect newTaskBounds = mTask.getBounds();
+        final Rect newActivityBounds = mActivity.getBounds();
+        assertTrue(displayBounds.width() < displayBounds.height());
+
+        // App should be in size compat.
+        assertFalse(mTask.isTaskLetterboxed());
+        assertScaled();
+        assertEquals(activityBounds.width(), newActivityBounds.width());
+        assertEquals(activityBounds.height(), newActivityBounds.height());
+    }
+
+    @Test
+    public void testDisplayIgnoreOrientationRequest_sizeCompatAfterRotate() {
+        // Set up a display in portrait and ignoring orientation request.
+        setUpDisplaySizeWithApp(1400, 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(0, SCREEN_ORIENTATION_PORTRAIT);
+
+        Rect displayBounds = mActivity.mDisplayContent.getBounds();
+        Rect activityBounds = mActivity.getBounds();
+
+        // App should launch in fullscreen.
+        assertFalse(mTask.isTaskLetterboxed());
+        assertFalse(mActivity.inSizeCompatMode());
+        assertEquals(displayBounds, activityBounds);
+
+        // Rotate display to landscape.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        displayBounds = mActivity.mDisplayContent.getBounds();
+        activityBounds = mActivity.getBounds();
+        assertTrue(displayBounds.width() > displayBounds.height());
+
+        // App should be in size compat.
+        assertFalse(mTask.isTaskLetterboxed());
+        assertScaled();
+
+        // App bounds should be 700x1400 with the ratio as the display.
+        assertEquals(displayBounds.height(), activityBounds.height());
+        assertEquals(displayBounds.height() * displayBounds.height() / displayBounds.width(),
+                activityBounds.width());
+    }
+
     private static WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;

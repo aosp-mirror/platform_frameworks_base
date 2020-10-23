@@ -2905,6 +2905,11 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
+        if (refActivity != null && refActivity.hasCompatDisplayInsets()) {
+            // App prefers to keep its original size.
+            return;
+        }
+
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
         final float aspect = ((float) parentHeight) / parentWidth;
@@ -3794,6 +3799,10 @@ class Task extends WindowContainer<WindowContainer> {
                 || activityType == ACTIVITY_TYPE_ASSISTANT;
     }
 
+    boolean isTaskLetterboxed() {
+        return getWindowingMode() == WINDOWING_MODE_FULLSCREEN && !matchParentBounds();
+    }
+
     @Override
     boolean fillsParent() {
         // From the perspective of policy, we still want to report that this task fills parent
@@ -3940,7 +3949,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (control != null) {
             // We let the transition to be controlled by RecentsAnimation, and callback task's
             // RemoteAnimationTarget for remote runner to animate.
-            if (enter) {
+            if (enter && !isHomeOrRecentsStack()) {
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                         "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
                         control, asTask(), AppTransition.appTransitionToString(transit));
