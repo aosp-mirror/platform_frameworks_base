@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -128,7 +130,7 @@ public final class CellIdentityNr extends CellIdentity {
 
         if (mNci == CellInfo.UNAVAILABLE_LONG) return;
 
-        mGlobalCellId = plmn + String.format("%09x", mNci);
+        mGlobalCellId = plmn + formatSimple("%09x", mNci);
     }
 
     /**
