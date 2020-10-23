@@ -1109,4 +1109,17 @@ public abstract class PackageManagerInternal {
         }
     }
 
+    /**
+     * Retrieve all of the information we know about a particular activity class including its
+     * package states.
+     *
+     * @param packageName a specific package
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     *                         of the calling UID.
+     * @param userId The user for whom the package is installed
+     * @return IncrementalStatesInfo that contains information about package states.
+     */
+    public abstract IncrementalStatesInfo getIncrementalStatesInfo(String packageName,
+            int filterCallingUid, int userId);
+
 }
