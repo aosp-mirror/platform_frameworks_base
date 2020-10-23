@@ -535,7 +535,8 @@ public final class KeyChain {
         }
         intent.putExtra(EXTRA_ISSUERS, (Serializable) issuersList);
         // the PendingIntent is used to get calling package name
-        intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(), 0));
+        intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE));
         activity.startActivity(intent);
     }
 
