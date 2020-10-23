@@ -113,7 +113,7 @@ public class SystemUIApplication extends Application implements
                     // TODO(b/170396074): Remove this when we don't need an icon anymore.
                     try {
                         int showPeopleSpace = Settings.Global.getInt(context.getContentResolver(),
-                                Settings.Global.SHOW_PEOPLE_SPACE);
+                                Settings.Global.SHOW_PEOPLE_SPACE, 0);
                         context.getPackageManager().setComponentEnabledSetting(
                                 new ComponentName(context, PeopleSpaceActivity.class),
                                 showPeopleSpace == 1
@@ -128,7 +128,7 @@ public class SystemUIApplication extends Application implements
                     // TODO(b/170396074): Remove this when we don't need a widget anymore.
                     try {
                         int showPeopleSpace = Settings.Global.getInt(context.getContentResolver(),
-                                Settings.Global.SHOW_PEOPLE_SPACE);
+                                Settings.Global.SHOW_PEOPLE_SPACE, 0);
                         context.getPackageManager().setComponentEnabledSetting(
                                 new ComponentName(context, PeopleSpaceWidgetProvider.class),
                                 showPeopleSpace == 1
