@@ -98,7 +98,7 @@ interface INotificationManager
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     NotificationChannel getNotificationChannel(String callingPkg, int userId, String pkg, String channelId);
     NotificationChannel getConversationNotificationChannel(String callingPkg, int userId, String pkg, String channelId, boolean returnParentIfNoConversationChannel, String conversationId);
-    void createConversationNotificationChannelForPackage(String pkg, int uid, String triggeringKey, in NotificationChannel parentChannel, String conversationId);
+    void createConversationNotificationChannelForPackage(String pkg, int uid, in NotificationChannel parentChannel, String conversationId);
     NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, String conversationId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, String channelId);
     void deleteConversationNotificationChannels(String pkg, int uid, String conversationId);

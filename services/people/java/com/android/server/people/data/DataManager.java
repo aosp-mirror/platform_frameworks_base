@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.Person;
 import android.app.people.ConversationChannel;
@@ -98,6 +99,7 @@ public class DataManager {
 
     private static final String TAG = "DataManager";
 
+    private static final long RECENT_NOTIFICATIONS_MAX_AGE_MS = 10 * DateUtils.DAY_IN_MILLIS;
     private static final long QUERY_EVENTS_MAX_AGE_MS = 5L * DateUtils.MINUTE_IN_MILLIS;
     private static final long USAGE_STATS_QUERY_INTERVAL_SEC = 120L;
     @VisibleForTesting static final int MAX_CACHED_RECENT_SHORTCUTS = 30;
@@ -232,8 +234,12 @@ public class DataManager {
                 if (shortcutInfo == null || parentChannel == null) {
                     return;
                 }
+                NotificationChannelGroup parentChannelGroup =
+                        mNotificationManagerInternal.getNotificationChannelGroup(packageName,
+                                uid, parentChannel.getId());
                 conversationChannels.add(
-                        new ConversationChannel(shortcutInfo, parentChannel,
+                        new ConversationChannel(shortcutInfo, uid, parentChannel,
+                                parentChannelGroup,
                                 conversationInfo.getLastEventTimestamp(),
                                 hasActiveNotifications(packageName, userId, shortcutId)));
             });
@@ -259,6 +265,14 @@ public class DataManager {
      * notifications.
      */
     public void removeAllRecentConversations(@UserIdInt int callingUserId) {
+        pruneOldRecentConversations(callingUserId, Long.MAX_VALUE);
+    }
+
+    /**
+     * Uncaches the shortcuts for all the recent conversations that haven't been interacted with
+     * recently.
+     */
+    public void pruneOldRecentConversations(@UserIdInt int callingUserId, long currentTimeMs) {
         forPackagesInProfile(callingUserId, packageData -> {
             String packageName = packageData.getPackageName();
             int userId = packageData.getUserId();
@@ -266,12 +280,16 @@ public class DataManager {
             packageData.forAllConversations(conversationInfo -> {
                 String shortcutId = conversationInfo.getShortcutId();
                 if (isCachedRecentConversation(conversationInfo)
+                        && (currentTimeMs - conversationInfo.getLastEventTimestamp()
+                        > RECENT_NOTIFICATIONS_MAX_AGE_MS)
                         && !hasActiveNotifications(packageName, userId, shortcutId)) {
                     idsToUncache.add(shortcutId);
                 }
             });
-            mShortcutServiceInternal.uncacheShortcuts(callingUserId, mContext.getPackageName(),
-                    packageName, idsToUncache, userId, ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            if (!idsToUncache.isEmpty()) {
+                mShortcutServiceInternal.uncacheShortcuts(callingUserId, mContext.getPackageName(),
+                        packageName, idsToUncache, userId, ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            }
         });
     }
 
@@ -371,6 +389,7 @@ public class DataManager {
                 packageData.getEventStore().deleteEventHistories(EventStore.CATEGORY_SMS);
             }
             packageData.pruneOrphanEvents();
+            pruneOldRecentConversations(userId, System.currentTimeMillis());
             cleanupCachedShortcuts(userId, MAX_CACHED_RECENT_SHORTCUTS);
         });
     }
