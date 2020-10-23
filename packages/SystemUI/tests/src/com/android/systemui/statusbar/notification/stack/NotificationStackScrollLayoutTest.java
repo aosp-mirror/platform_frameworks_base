@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static android.provider.Settings.Secure.NOTIFICATION_HISTORY_ENABLED;
-import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
@@ -64,7 +63,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -102,17 +100,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
-    private int mOriginalInterruptionModelSetting;
 
     @Before
     @UiThreadTest
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
 
-        mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
         Settings.Secure.putIntForUser(mContext.getContentResolver(), NOTIFICATION_HISTORY_ENABLED,
                 1, UserHandle.USER_CURRENT);
 
@@ -164,12 +157,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
-    }
-
-    @After
-    public void tearDown() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, mOriginalInterruptionModelSetting);
     }
 
     @Test
