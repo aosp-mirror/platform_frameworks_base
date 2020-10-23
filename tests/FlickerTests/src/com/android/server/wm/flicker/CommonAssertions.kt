@@ -45,6 +45,15 @@ fun WmAssertion.navBarWindowIsAlwaysVisible(
     }
 }
 
+fun WmAssertion.visibleWindowsShownMoreThanOneConsecutiveEntry(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("visibleWindowShownMoreThanOneConsecutiveEntry", bugId, enabled) {
+        this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+}
+
 @JvmOverloads
 fun LayersAssertion.noUncoveredRegions(
     beginRotation: Int,
@@ -156,6 +165,15 @@ fun LayersAssertion.statusBarLayerRotatesScales(
     }
     end("statusBarLayerRotatesScales_EndingPos", bugId, enabled) {
         this.hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, endingPos)
+    }
+}
+
+fun LayersAssertion.visibleLayersShownMoreThanOneConsecutiveEntry(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("visibleLayersShownMoreThanOneConsecutiveEntry", bugId, enabled) {
+        this.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 }
 
