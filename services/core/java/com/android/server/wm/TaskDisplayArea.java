@@ -50,6 +50,7 @@ import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
@@ -996,6 +997,13 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                 false /* createdByOrganizer */);
     }
 
+    Task createStack(int windowingMode, int activityType, boolean onTop, ActivityInfo info,
+            Intent intent, boolean createdByOrganizer) {
+        return createStack(windowingMode, activityType, onTop, null /* info */, null /* intent */,
+                false /* createdByOrganizer */ , false /* deferTaskAppear */,
+                null /* launchCookie */);
+    }
+
     /**
      * Creates a stack matching the input windowing mode and activity type on this display.
      *
@@ -1013,10 +1021,14 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      * @param intent             The intent that started this task.
      * @param createdByOrganizer @{code true} if this is created by task organizer, @{code false}
      *                           otherwise.
+     * @param deferTaskAppear    @{code true} if the task appeared signal should be deferred.
+     * @param launchCookie       Launch cookie used for tracking/association of the task we are
+     *                           creating.
      * @return The newly created stack.
      */
     Task createStack(int windowingMode, int activityType, boolean onTop, ActivityInfo info,
-            Intent intent, boolean createdByOrganizer) {
+            Intent intent, boolean createdByOrganizer, boolean deferTaskAppear,
+            IBinder launchCookie) {
         if (activityType == ACTIVITY_TYPE_UNDEFINED && !createdByOrganizer) {
             // Can't have an undefined stack type yet...so re-map to standard. Anyone that wants
             // anything else should be passing it in anyways...except for the task organizer.
@@ -1048,7 +1060,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
         final int stackId = getNextStackId();
         return createStackUnchecked(windowingMode, activityType, stackId, onTop, info, intent,
-                createdByOrganizer);
+                createdByOrganizer, deferTaskAppear, launchCookie);
     }
 
     /** @return the root task to create the next task in. */
@@ -1078,8 +1090,9 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     @VisibleForTesting
-    Task createStackUnchecked(int windowingMode, int activityType, int stackId,
-            boolean onTop, ActivityInfo info, Intent intent, boolean createdByOrganizer) {
+    Task createStackUnchecked(int windowingMode, int activityType, int stackId, boolean onTop,
+            ActivityInfo info, Intent intent, boolean createdByOrganizer, boolean deferTaskAppear,
+            IBinder launchCookie) {
         if (windowingMode == WINDOWING_MODE_PINNED && activityType != ACTIVITY_TYPE_STANDARD) {
             throw new IllegalArgumentException("Stack with windowing mode cannot with non standard "
                     + "activity type.");
@@ -1097,7 +1110,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
 
         final Task stack = new Task(mAtmService, stackId, activityType,
-                info, intent, createdByOrganizer);
+                info, intent, createdByOrganizer, deferTaskAppear, launchCookie);
         if (launchRootTask != null) {
             launchRootTask.addChild(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
             if (onTop) {

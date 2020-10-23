@@ -795,6 +795,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean mTaskAppearedSent;
 
+    // If the sending of the task appear signal should be deferred until this flag is set back to
+    // false.
+    private boolean mDeferTaskAppear;
+
     /**
      * This task was created by the task organizer which has the following implementations.
      * <ul>
@@ -807,14 +811,20 @@ class Task extends WindowContainer<WindowContainer> {
     @VisibleForTesting
     boolean mCreatedByOrganizer;
 
+    // Tracking cookie for the creation of this task.
+    IBinder mLaunchCookie;
+
     /**
      * Don't use constructor directly. Use {@link TaskDisplayArea#createStackUnchecked()} instead.
      */
-    Task(ActivityTaskManagerService atmService, int id, int activityType,
-            ActivityInfo info, Intent intent, boolean createdByOrganizer) {
+    Task(ActivityTaskManagerService atmService, int id, int activityType, ActivityInfo info,
+            Intent intent, boolean createdByOrganizer, boolean deferTaskAppear,
+            IBinder launchCookie) {
         this(atmService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 null /*taskDescription*/, null /*stack*/);
         mCreatedByOrganizer = createdByOrganizer;
+        mLaunchCookie = launchCookie;
+        mDeferTaskAppear = deferTaskAppear;
         setActivityType(activityType);
     }
 
@@ -4088,6 +4098,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
             info.addLaunchCookie(r.mLaunchCookie);
         });
@@ -4857,6 +4868,13 @@ class Task extends WindowContainer<WindowContainer> {
         return mHasBeenVisible;
     }
 
+    void setDeferTaskAppear(boolean deferTaskAppear) {
+        mDeferTaskAppear = deferTaskAppear;
+        if (!mDeferTaskAppear) {
+            sendTaskAppeared();
+        }
+    }
+
     /** In the case that these conditions are true, we want to send the Task to the organizer:
      *     1. An organizer has been set
      *     2. The Task was created by the organizer
@@ -4868,6 +4886,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean taskAppearedReady() {
         if (mTaskOrganizer == null) {
+            return false;
+        }
+
+        if (mDeferTaskAppear) {
             return false;
         }
 

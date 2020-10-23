@@ -479,21 +479,22 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testCreateDeleteRootTasks() {
-        RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                Display.DEFAULT_DISPLAY,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+
+        Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+        RunningTaskInfo info1 = task1.getTaskInfo();
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 info1.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
 
-        RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                Display.DEFAULT_DISPLAY,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+        RunningTaskInfo info2 = task2.getTaskInfo();
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                 info2.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info2.topActivityType);
 
-        DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
         List<Task> infos = getTasksCreatedByOrganizer(dc);
         assertEquals(2, infos.size());
 
@@ -521,8 +522,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
-        RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+        RunningTaskInfo info1 = task.getTaskInfo();
 
         final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
@@ -579,8 +581,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
-        RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+        RunningTaskInfo info1 = task.getTaskInfo();
         lastReportedTiles.clear();
         called[0] = false;
 
@@ -640,10 +643,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
-        RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+
+        Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+        RunningTaskInfo info1 = task1.getTaskInfo();
+        Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+        RunningTaskInfo info2 = task2.getTaskInfo();
 
         final int initialRootTaskCount = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
                 mDisplayContent.mDisplayId, null /* activityTypes */).size();

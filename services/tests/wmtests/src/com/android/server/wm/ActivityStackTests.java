@@ -245,9 +245,8 @@ public class ActivityStackTests extends WindowTestsBase {
                 .setStack(rootHomeTask)
                 .setCreateTask(true)
                 .build();
-        final Task secondaryStack = (Task) WindowContainer.fromBinder(
-                mAtm.mTaskOrganizerController.createRootTask(rootHomeTask.getDisplayId(),
-                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token.asBinder());
+        final Task secondaryStack = mAtm.mTaskOrganizerController.createRootTask(
+                rootHomeTask.getDisplayContent(), WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
 
         rootHomeTask.reparent(secondaryStack, POSITION_TOP);
         assertEquals(secondaryStack, rootHomeTask.getParent());
