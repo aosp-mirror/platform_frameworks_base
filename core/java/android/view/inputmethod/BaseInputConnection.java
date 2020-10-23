@@ -19,6 +19,8 @@ package android.view.inputmethod;
 import static android.view.OnReceiveContentCallback.Payload.SOURCE_INPUT_METHOD;
 
 import android.annotation.CallSuper;
+import android.annotation.IntRange;
+import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -582,6 +584,48 @@ public class BaseInputConnection implements InputConnection {
             return content.subSequence(b, b + length);
         }
         return TextUtils.substring(content, b, b + length);
+    }
+
+    /**
+     * The default implementation returns the given amount of text around the current cursor
+     * position in the buffer.
+     */
+    @Nullable
+    public SurroundingText getSurroundingText(
+            @IntRange(from = 0) int beforeLength, @IntRange(from = 0)  int afterLength, int flags) {
+        final Editable content = getEditable();
+        if (content == null) return null;
+
+        int selStart = Selection.getSelectionStart(content);
+        int selEnd = Selection.getSelectionEnd(content);
+
+        // Guard against the case where the cursor has not been positioned yet.
+        if (selStart < 0 || selEnd < 0) {
+            return null;
+        }
+
+        if (selStart > selEnd) {
+            int tmp = selStart;
+            selStart = selEnd;
+            selEnd = tmp;
+        }
+
+        int contentLength = content.length();
+        int startPos = selStart - beforeLength;
+        int endPos = selEnd + afterLength;
+
+        // Guards the start and end pos within range [0, contentLength].
+        startPos = Math.max(0, startPos);
+        endPos = Math.min(contentLength, endPos);
+
+        CharSequence surroundingText;
+        if ((flags & GET_TEXT_WITH_STYLES) != 0) {
+            surroundingText = content.subSequence(startPos, endPos);
+        } else {
+            surroundingText = TextUtils.substring(content, startPos, endPos);
+        }
+        return new SurroundingText(
+                surroundingText, selStart - startPos, selEnd - startPos, startPos);
     }
 
     /**

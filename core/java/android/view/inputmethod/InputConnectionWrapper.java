@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -95,6 +96,16 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public CharSequence getSelectedText(int flags) {
         return mTarget.getSelectedText(flags);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Nullable
+    @Override
+    public SurroundingText getSurroundingText(int beforeLength, int afterLength, int flags) {
+        return mTarget.getSurroundingText(beforeLength, afterLength, flags);
     }
 
     /**
