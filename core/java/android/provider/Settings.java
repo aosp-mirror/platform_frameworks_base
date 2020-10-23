@@ -14613,6 +14613,17 @@ public final class Settings {
          */
         public static final String MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH =
                 "maximum_obscuring_opacity_for_touch";
+
+        /**
+         * Used to enable / disable the Restricted Networking Mode in which network access is
+         * restricted to apps holding the CONNECTIVITY_USE_RESTRICTED_NETWORKS permission.
+         *
+         * Values are:
+         * 0: disabled
+         * 1: enabled
+         * @hide
+         */
+        public static final String RESTRICTED_NETWORKING_MODE = "restricted_networking_mode";
     }
 
     /**

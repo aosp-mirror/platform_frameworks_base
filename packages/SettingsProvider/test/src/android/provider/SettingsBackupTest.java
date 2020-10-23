@@ -419,6 +419,7 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_WIMAX,
                     Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
+                    Settings.Global.RESTRICTED_NETWORKING_MODE,
                     Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
                     Settings.Global.SAFE_BOOT_DISALLOWED,
                     Settings.Global.SELINUX_STATUS,
