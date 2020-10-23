@@ -140,7 +140,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
-import android.window.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
@@ -267,6 +266,7 @@ import android.view.WindowManager.RemoveContentMode;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.window.ClientWindowFrames;
+import android.window.TaskSnapshot;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2202,7 +2202,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mPendingPositionChanged = null;
             }
 
-            if (mUseBLASTSync && win.useBLASTSync()) {
+            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
