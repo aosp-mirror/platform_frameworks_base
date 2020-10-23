@@ -137,12 +137,24 @@ ASurfaceControl* ASurfaceControl_createFromWindow(ANativeWindow* window, const c
         return nullptr;
     }
 
+    Surface* surface = static_cast<Surface*>(window);
+    sp<IBinder> parentHandle = surface->getSurfaceControlHandle();
+
     uint32_t flags = ISurfaceComposerClient::eFXSurfaceBufferState;
-    sp<SurfaceControl> surfaceControl =
-            client->createWithSurfaceParent(String8(debug_name), 0 /* width */, 0 /* height */,
-                                            // Format is only relevant for buffer queue layers.
-                                            PIXEL_FORMAT_UNKNOWN /* format */, flags,
-                                            static_cast<Surface*>(window));
+    sp<SurfaceControl> surfaceControl;
+    if (parentHandle) {
+        surfaceControl =
+                client->createSurface(String8(debug_name), 0 /* width */, 0 /* height */,
+                                      // Format is only relevant for buffer queue layers.
+                                      PIXEL_FORMAT_UNKNOWN /* format */, flags, parentHandle);
+    } else {
+        surfaceControl =
+                client->createWithSurfaceParent(String8(debug_name), 0 /* width */, 0 /* height */,
+                                                // Format is only relevant for buffer queue layers.
+                                                PIXEL_FORMAT_UNKNOWN /* format */, flags,
+                                                static_cast<Surface*>(window));
+    }
+
     if (!surfaceControl) {
         return nullptr;
     }
@@ -164,7 +176,7 @@ ASurfaceControl* ASurfaceControl_create(ASurfaceControl* parent, const char* deb
             client->createSurface(String8(debug_name), 0 /* width */, 0 /* height */,
                                   // Format is only relevant for buffer queue layers.
                                   PIXEL_FORMAT_UNKNOWN /* format */, flags,
-                                  surfaceControlParent);
+                                  surfaceControlParent->getHandle());
     if (!surfaceControl) {
         return nullptr;
     }
