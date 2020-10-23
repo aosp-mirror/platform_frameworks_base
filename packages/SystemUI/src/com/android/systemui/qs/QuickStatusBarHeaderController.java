@@ -257,14 +257,14 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mRingerContainer.setOnClickListener(mOnClickListener);
         mPrivacyChip.setOnClickListener(mOnClickListener);
 
-        // Ignore privacy icons because they show in the space above QQS
-        mIconContainer.addIgnoredSlots(getIgnoredIconSlots());
-        mIconContainer.setShouldRestrictIcons(false);
-        mStatusBarIconController.addIconGroup(mIconManager);
-
         mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
         mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
         mLocationIndicatorsEnabled = mPrivacyItemController.getLocationAvailable();
+
+        // Ignore privacy icons because they show in the space above QQS
+        mIconContainer.setIgnoredSlots(getIgnoredIconSlots());
+        mIconContainer.setShouldRestrictIcons(false);
+        mStatusBarIconController.addIconGroup(mIconManager);
 
         setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
 
@@ -337,16 +337,17 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private List<String> getIgnoredIconSlots() {
         ArrayList<String> ignored = new ArrayList<>();
         if (getChipEnabled()) {
-            ignored.add(mView.getResources().getString(
-                    com.android.internal.R.string.status_bar_camera));
-            ignored.add(mView.getResources().getString(
-                    com.android.internal.R.string.status_bar_microphone));
+            if (mAllIndicatorsEnabled || mMicCameraIndicatorsEnabled) {
+                ignored.add(mView.getResources().getString(
+                        com.android.internal.R.string.status_bar_camera));
+                ignored.add(mView.getResources().getString(
+                        com.android.internal.R.string.status_bar_microphone));
+            }
             if (mAllIndicatorsEnabled || mLocationIndicatorsEnabled) {
                 ignored.add(mView.getResources().getString(
                         com.android.internal.R.string.status_bar_location));
             }
         }
-
         return ignored;
     }
 
