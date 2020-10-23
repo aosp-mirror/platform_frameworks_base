@@ -56,7 +56,7 @@ public class NotificationChannelHelper {
         try {
             channel.setName(getName(entry));
             notificationManager.createConversationNotificationChannelForPackage(
-                    pkg, appUid, entry.getSbn().getKey(), channel,
+                    pkg, appUid, channel,
                     conversationId);
             channel = notificationManager.getConversationNotificationChannel(
                     context.getOpPackageName(), UserHandle.getUserId(appUid), pkg,

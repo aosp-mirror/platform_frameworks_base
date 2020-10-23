@@ -1349,6 +1349,24 @@ public class PreferencesHelper implements RankingConfig {
         return groups;
     }
 
+    public NotificationChannelGroup getGroupForChannel(String pkg, int uid, String channelId) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences p = getPackagePreferencesLocked(pkg, uid);
+            if (p != null) {
+                NotificationChannel nc = p.channels.get(channelId);
+                if (nc != null && !nc.isDeleted()) {
+                    if (nc.getGroup() != null) {
+                        NotificationChannelGroup group = p.groups.get(nc.getGroup());
+                        if (group != null) {
+                            return group;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public ArrayList<ConversationChannelWrapper> getConversations(boolean onlyImportant) {
         synchronized (mPackagePreferences) {
             ArrayList<ConversationChannelWrapper> conversations = new ArrayList<>();
