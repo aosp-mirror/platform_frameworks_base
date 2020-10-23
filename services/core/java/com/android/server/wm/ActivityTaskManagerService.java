@@ -5109,7 +5109,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         deferResume);
             }
 
-            kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
+            if (!deferResume) {
+                kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
+            }
         } finally {
             continueWindowLayout();
         }

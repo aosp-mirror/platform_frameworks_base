@@ -60,6 +60,27 @@ import java.util.function.Consumer;
  * @hide Only for use within the system server.
  */
 public abstract class PackageManagerInternal {
+    @IntDef(prefix = "PACKAGE_", value = {
+            PACKAGE_SYSTEM,
+            PACKAGE_SETUP_WIZARD,
+            PACKAGE_INSTALLER,
+            PACKAGE_VERIFIER,
+            PACKAGE_BROWSER,
+            PACKAGE_SYSTEM_TEXT_CLASSIFIER,
+            PACKAGE_PERMISSION_CONTROLLER,
+            PACKAGE_WELLBEING,
+            PACKAGE_DOCUMENTER,
+            PACKAGE_CONFIGURATOR,
+            PACKAGE_INCIDENT_REPORT_APPROVER,
+            PACKAGE_APP_PREDICTOR,
+            PACKAGE_OVERLAY_CONFIG_SIGNATURE,
+            PACKAGE_WIFI,
+            PACKAGE_COMPANION,
+            PACKAGE_RETAIL_DEMO,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KnownPackage {}
+
     public static final int PACKAGE_SYSTEM = 0;
     public static final int PACKAGE_SETUP_WIZARD = 1;
     public static final int PACKAGE_INSTALLER = 2;
@@ -72,11 +93,13 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_CONFIGURATOR = 9;
     public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
     public static final int PACKAGE_APP_PREDICTOR = 11;
+    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 12;
     public static final int PACKAGE_WIFI = 13;
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
-    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 16;
-    public static final int LAST_KNOWN_PACKAGE = PACKAGE_OVERLAY_CONFIG_SIGNATURE;
+    // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
+    // Please note the numbers should be continuous.
+    public static final int LAST_KNOWN_PACKAGE = PACKAGE_RETAIL_DEMO;
 
     @IntDef(flag = true, prefix = "RESOLVE_", value = {
             RESOLVE_NON_BROWSER_ONLY,
@@ -117,26 +140,6 @@ public abstract class PackageManagerInternal {
      * integrity component does not allow install to proceed.
      */
     public static final int INTEGRITY_VERIFICATION_REJECT = 0;
-
-    @IntDef(value = {
-        PACKAGE_SYSTEM,
-        PACKAGE_SETUP_WIZARD,
-        PACKAGE_INSTALLER,
-        PACKAGE_VERIFIER,
-        PACKAGE_BROWSER,
-        PACKAGE_SYSTEM_TEXT_CLASSIFIER,
-        PACKAGE_PERMISSION_CONTROLLER,
-        PACKAGE_WELLBEING,
-        PACKAGE_DOCUMENTER,
-        PACKAGE_CONFIGURATOR,
-        PACKAGE_INCIDENT_REPORT_APPROVER,
-        PACKAGE_APP_PREDICTOR,
-        PACKAGE_WIFI,
-        PACKAGE_COMPANION,
-        PACKAGE_RETAIL_DEMO,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface KnownPackage {}
 
     /** Observer called whenever the list of packages changes */
     public interface PackageListObserver {

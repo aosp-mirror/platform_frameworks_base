@@ -109,7 +109,6 @@ import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
-import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -1310,7 +1309,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
-        final boolean handled = getDisplayRotation().respectAppRequestedOrientation();
+        final boolean handled = handlesOrientationChangeFromDescendant();
         if (config == null) {
             return handled;
         }
@@ -1334,7 +1333,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean handlesOrientationChangeFromDescendant() {
-        return getDisplayRotation().respectAppRequestedOrientation();
+        return !mIgnoreOrientationRequest && !getDisplayRotation().isFixedToUserRotation();
     }
 
     /**
@@ -2346,7 +2345,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     int getOrientation() {
         mLastOrientationSource = null;
-        if (mIgnoreOrientationRequest) {
+        if (!handlesOrientationChangeFromDescendant()) {
             // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
             ProtoLog.v(WM_DEBUG_ORIENTATION,
                     "Display id=%d is ignoring all orientation requests, return %d",
@@ -5072,7 +5071,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 }
             }
 
-            kept = mAtmService.ensureConfigAndVisibilityAfterUpdate(starting, changes);
+            if (!deferResume) {
+                kept = mAtmService.ensureConfigAndVisibilityAfterUpdate(starting, changes);
+            }
         } finally {
             mAtmService.continueWindowLayout();
         }

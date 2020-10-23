@@ -73,6 +73,7 @@ java_library_static {
         ":vold_aidl",
         ":platform-compat-config",
         ":display-device-config",
+        ":cec-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",

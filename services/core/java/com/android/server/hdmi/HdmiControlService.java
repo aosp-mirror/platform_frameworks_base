@@ -95,10 +95,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -186,6 +188,9 @@ public class HdmiControlService extends SystemService {
     // Whether HDMI CEC volume control is enabled or not.
     @GuardedBy("mLock")
     private boolean mHdmiCecVolumeControlEnabled;
+
+    // Make sure HdmiCecConfig is instantiated and the XMLs are read.
+    private final HdmiCecConfig mHdmiCecConfig = new HdmiCecConfig();
 
     /**
      * Interface to report send result.
@@ -2316,6 +2321,19 @@ public class HdmiControlService extends SystemService {
             pw.println("mHdmiCecVolumeControlEnabled: " + mHdmiCecVolumeControlEnabled);
             pw.decreaseIndent();
 
+            // CEC settings
+            pw.println("CEC settings:");
+            pw.increaseIndent();
+            HdmiCecConfig hdmiCecConfig = HdmiControlService.this.getHdmiCecConfig();
+            List<String> allSettings = hdmiCecConfig.getAllSettings();
+            Set<String> userSettings = new HashSet<>(hdmiCecConfig.getUserSettings());
+            for (String setting : allSettings) {
+                pw.println(setting + ": " + hdmiCecConfig.getValue(getContext(), setting)
+                        + " (default: " + hdmiCecConfig.getDefaultValue(setting) + ")"
+                        + (userSettings.contains(setting) ? " [modifiable]" : ""));
+            }
+            pw.decreaseIndent();
+
             pw.println("mMhlController: ");
             pw.increaseIndent();
             mMhlController.dump(pw);
@@ -2327,6 +2345,50 @@ public class HdmiControlService extends SystemService {
                 pw.increaseIndent();
                 mCecController.dump(pw);
                 pw.decreaseIndent();
+            }
+        }
+
+        @Override
+        public List<String> getUserCecSettings() {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getUserSettings();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public List<String> getAllowedCecSettingValues(String name) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getAllowedValues(name);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public String getCecSettingValue(String name) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getValue(getContext(), name);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setCecSettingValue(String name, String value) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                HdmiControlService.this.getHdmiCecConfig().setValue(getContext(), name, value);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
@@ -3388,5 +3450,9 @@ public class HdmiControlService extends SystemService {
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRA_PARAM1, extra);
         getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                 HdmiControlService.PERMISSION);
+    }
+
+    HdmiCecConfig getHdmiCecConfig() {
+        return mHdmiCecConfig;
     }
 }

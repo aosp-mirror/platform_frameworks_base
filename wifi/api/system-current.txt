@@ -263,7 +263,7 @@ package android.net.wifi {
     field public static final int BAND_2GHZ = 1; // 0x1
     field public static final int BAND_5GHZ = 2; // 0x2
     field public static final int BAND_6GHZ = 4; // 0x4
-    field public static final int BAND_ANY = 7; // 0x7
+    field @Deprecated public static final int BAND_ANY = 7; // 0x7
     field public static final int RANDOMIZATION_NONE = 0; // 0x0
     field public static final int RANDOMIZATION_PERSISTENT = 1; // 0x1
   }

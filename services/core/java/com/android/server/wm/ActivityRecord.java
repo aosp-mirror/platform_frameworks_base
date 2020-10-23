@@ -179,6 +179,7 @@ import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
@@ -4217,7 +4218,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Note that we ignore display frozen since we want the opening / closing transition type
         // can be updated correctly even display frozen, and it's safe since in applyAnimation will
         // still check DC#okToAnimate again if the transition animation is fine to apply.
-        if (okToAnimate(true /* ignoreFrozen */) && appTransition.isTransitionSet()) {
+        final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
+        if (okToAnimate(true /* ignoreFrozen */) && (appTransition.isTransitionSet()
+                || (recentsAnimating && !isActivityTypeHome()))) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
@@ -6086,7 +6089,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
+        final boolean show = isVisible() || isAnimating(PARENTS,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
@@ -6402,6 +6406,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLastReportedConfiguration.setConfiguration(global, override);
     }
 
+    boolean hasCompatDisplayInsets() {
+        return mCompatDisplayInsets != null;
+    }
+
     /**
      * @return {@code true} if this activity is in size compatibility mode that uses the different
      *         density than its parent or its bounds don't fit in parent naturally.
@@ -6540,7 +6548,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
-        onRequestedOverrideConfigurationChanged(EMPTY);
+
+        // Recompute from Task because letterbox can also happen on Task level.
+        task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
     }
 
     @Override
@@ -6649,9 +6659,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ? requestedOrientation
                 : newParentConfiguration.orientation;
         int rotation = newParentConfiguration.windowConfiguration.getRotation();
-        final boolean canChangeOrientation = handlesOrientationChangeFromDescendant();
-        if (canChangeOrientation && !mCompatDisplayInsets.mIsFloating) {
-            // Use parent rotation because the original display can rotate by requested orientation.
+        final boolean isFixedToUserRotation = mDisplayContent == null
+                || mDisplayContent.getDisplayRotation().isFixedToUserRotation();
+        if (!isFixedToUserRotation && !mCompatDisplayInsets.mIsFloating) {
+            // Use parent rotation because the original display can be rotated.
             resolvedConfig.windowConfiguration.setRotation(rotation);
         } else {
             final int overrideRotation = resolvedConfig.windowConfiguration.getRotation();
@@ -6667,7 +6678,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect containingAppBounds = new Rect();
         final Rect containingBounds = mTmpBounds;
         mCompatDisplayInsets.getContainerBounds(containingAppBounds, containingBounds, rotation,
-                orientation, orientationRequested, canChangeOrientation);
+                orientation, orientationRequested, isFixedToUserRotation);
         resolvedBounds.set(containingBounds);
         // The size of floating task is fixed (only swap), so the aspect ratio is already correct.
         if (!mCompatDisplayInsets.mIsFloating) {
@@ -7736,7 +7747,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect[] mStableInsets = new Rect[4];
 
         /** Constructs the environment to simulate the bounds behavior of the given container. */
-        CompatDisplayInsets(DisplayContent display, WindowContainer container) {
+        CompatDisplayInsets(DisplayContent display, ActivityRecord container) {
             mIsFloating = container.getWindowConfiguration().tasksAreFloating();
             if (mIsFloating) {
                 final Rect containerBounds = container.getWindowConfiguration().getBounds();
@@ -7752,16 +7763,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return;
             }
 
-            // If the activity is not floating, assume it fills the display.
-            mWidth = display.mBaseDisplayWidth;
-            mHeight = display.mBaseDisplayHeight;
+            if (container.getTask().isTaskLetterboxed()) {
+                // For apps in Task letterbox, it should fill the task bounds.
+                final Rect taskBounds = container.getTask().getBounds();
+                mWidth = taskBounds.width();
+                mHeight = taskBounds.height();
+            } else {
+                // If the activity is not floating nor letterboxed, assume it fills the display.
+                mWidth = display.mBaseDisplayWidth;
+                mHeight = display.mBaseDisplayHeight;
+            }
             final DisplayPolicy policy = display.getDisplayPolicy();
             for (int rotation = 0; rotation < 4; rotation++) {
                 mNonDecorInsets[rotation] = new Rect();
                 mStableInsets[rotation] = new Rect();
                 final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-                final int dw = rotated ? mHeight : mWidth;
-                final int dh = rotated ? mWidth : mHeight;
+                final int dw = rotated ? display.mBaseDisplayHeight : display.mBaseDisplayWidth;
+                final int dh = rotated ? display.mBaseDisplayWidth : display.mBaseDisplayHeight;
                 final DisplayCutout cutout = display.calculateDisplayCutoutForRotation(rotation)
                         .getDisplayCutout();
                 policy.getNonDecorInsetsLw(rotation, dw, dh, cutout, mNonDecorInsets[rotation]);
@@ -7787,7 +7805,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         /** Gets the horizontal centered container bounds for size compatibility mode. */
         void getContainerBounds(Rect outAppBounds, Rect outBounds, int rotation, int orientation,
-                boolean orientationRequested, boolean canChangeOrientation) {
+                boolean orientationRequested, boolean isFixedToUserRotation) {
             getFrameByOrientation(outBounds, orientation);
             if (mIsFloating) {
                 outAppBounds.set(outBounds);
@@ -7800,7 +7818,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final boolean isOrientationMismatched =
                     ((outBounds.width() > outBounds.height()) != (dW > dH));
 
-            if (isOrientationMismatched && !canChangeOrientation && orientationRequested) {
+            if (isOrientationMismatched && isFixedToUserRotation && orientationRequested) {
                 // The orientation is mismatched but the display cannot rotate. The bounds will fit
                 // to the short side of container.
                 if (orientation == ORIENTATION_LANDSCAPE) {

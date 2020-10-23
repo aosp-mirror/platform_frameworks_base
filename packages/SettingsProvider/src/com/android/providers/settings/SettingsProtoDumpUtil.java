@@ -1494,9 +1494,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
                 GlobalSettingsProto.Webview.DATA_REDUCTION_PROXY_KEY);
         dumpSetting(s, p,
-                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
-                GlobalSettingsProto.Webview.FALLBACK_LOGIC_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.WEBVIEW_PROVIDER,
                 GlobalSettingsProto.Webview.PROVIDER);
         dumpSetting(s, p,

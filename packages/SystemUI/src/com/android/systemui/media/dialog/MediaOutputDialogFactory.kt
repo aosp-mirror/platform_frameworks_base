@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.session.MediaSessionManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.phone.ShadeController
 import javax.inject.Inject
 
@@ -31,7 +32,8 @@ class MediaOutputDialogFactory @Inject constructor(
     private val mediaSessionManager: MediaSessionManager,
     private val lbm: LocalBluetoothManager?,
     private val shadeController: ShadeController,
-    private val starter: ActivityStarter
+    private val starter: ActivityStarter,
+    private val notificationEntryManager: NotificationEntryManager
 ) {
     companion object {
         var mediaOutputDialog: MediaOutputDialog? = null
@@ -40,9 +42,8 @@ class MediaOutputDialogFactory @Inject constructor(
     /** Creates a [MediaOutputDialog] for the given package. */
     fun create(packageName: String, aboveStatusBar: Boolean) {
         mediaOutputDialog?.dismiss()
-
-        mediaOutputDialog = MediaOutputController(context, packageName, mediaSessionManager, lbm,
-                shadeController, starter).run {
+        mediaOutputDialog = MediaOutputController(context, packageName, aboveStatusBar,
+                mediaSessionManager, lbm, shadeController, starter, notificationEntryManager).run {
             MediaOutputDialog(context, aboveStatusBar, this) }
     }
 

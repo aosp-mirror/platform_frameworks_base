@@ -62,6 +62,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.RescueParty;
 
@@ -261,7 +262,8 @@ public class ContentProviderHelper {
                     // doesn't kill our process.
                     Slog.wtf(TAG, "Existing provider " + cpr.name.flattenToShortString()
                             + " is crashing; detaching " + r);
-                    boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
+                    boolean lastRef = decProviderCountLocked(conn, cpr, token, stable,
+                            false, false);
                     if (!lastRef) {
                         // This wasn't the last ref our process had on
                         // the provider...  we will be killed during cleaning up, bail.
@@ -697,10 +699,7 @@ public class ContentProviderHelper {
                 if (conn == null) {
                     throw new NullPointerException("connection is null");
                 }
-                if (decProviderCountLocked(conn, null, null, stable)) {
-                    mService.updateOomAdjLocked(conn.provider.proc,
-                            OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
-                }
+                decProviderCountLocked(conn, null, null, stable, true, true);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1275,30 +1274,56 @@ public class ContentProviderHelper {
 
     @GuardedBy("mService")
     private boolean decProviderCountLocked(ContentProviderConnection conn,
-            ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable) {
+            ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable,
+            boolean enforceDelay, boolean updateOomAdj) {
         if (conn == null) {
             cpr.removeExternalProcessHandleLocked(externalProcessToken);
             return false;
         }
-        if (conn.decrementCount(stable) != 0) {
+
+        if (conn.totalRefCount() > 1) {
+            conn.decrementCount(stable);
             return false;
         }
+        if (enforceDelay) {
+            // delay the removal of the provider for 5 seconds - this optimizes for those cases
+            // where providers are released and then quickly re-acquired, causing lots of churn.
+            BackgroundThread.getHandler().postDelayed(() -> {
+                handleProviderRemoval(conn, stable, updateOomAdj);
+            }, 5 * 1000);
+        } else {
+            handleProviderRemoval(conn, stable, updateOomAdj);
+        }
+        return true;
+    }
 
-        cpr = conn.provider;
-        conn.stopAssociation();
-        cpr.connections.remove(conn);
-        conn.client.conProviders.remove(conn);
-        if (conn.client.setProcState < ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
-            // The client is more important than last activity -- note the time this
-            // is happening, so we keep the old provider process around a bit as last
-            // activity to avoid thrashing it.
-            if (cpr.proc != null) {
-                cpr.proc.lastProviderTime = SystemClock.uptimeMillis();
+    private void handleProviderRemoval(ContentProviderConnection conn, boolean stable,
+            boolean updateOomAdj) {
+        synchronized (mService) {
+            // if the proc was already killed or this is not the last reference, simply exit.
+            if (conn == null || conn.provider == null || conn.decrementCount(stable) != 0) {
+                return;
+            }
+
+            final ContentProviderRecord cpr = conn.provider;
+            conn.stopAssociation();
+            cpr.connections.remove(conn);
+            conn.client.conProviders.remove(conn);
+            if (conn.client.setProcState < ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                // The client is more important than last activity -- note the time this
+                // is happening, so we keep the old provider process around a bit as last
+                // activity to avoid thrashing it.
+                if (cpr.proc != null) {
+                    cpr.proc.lastProviderTime = SystemClock.uptimeMillis();
+                }
+            }
+            mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
+                    cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
+            if (updateOomAdj) {
+                mService.updateOomAdjLocked(conn.provider.proc,
+                        OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
             }
         }
-        mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
-                cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
-        return true;
     }
 
     /**

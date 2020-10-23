@@ -301,7 +301,10 @@ public abstract class PackageManager {
     /**
      * {@link PackageInfo} flag: return information about the
      * intent filters supported by the activity.
+     *
+     * @deprecated The platform does not support getting {@link IntentFilter}s for the package.
      */
+    @Deprecated
     public static final int GET_INTENT_FILTERS          = 0x00000020;
 
     /**
@@ -1573,6 +1576,26 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_PARSE_FAILED_SKIPPED = -125;
+
+    /**
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because it is attempting to define a permission group that is already defined by some
+     * existing package.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP = -126;
+
+    /**
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because it is attempting to define a permission in a group that does not exists or that is
+     * defined by an packages with an incompatible certificate.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {

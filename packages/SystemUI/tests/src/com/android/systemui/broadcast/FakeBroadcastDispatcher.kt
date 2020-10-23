@@ -53,7 +53,7 @@ class FakeBroadcastDispatcher(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         executor: Executor?,
-        user: UserHandle
+        user: UserHandle?
     ) {
         registeredReceivers.add(receiver)
     }

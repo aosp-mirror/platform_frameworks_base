@@ -16,6 +16,8 @@
 
 package com.android.internal.compat;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.IntDef;
 import android.util.Log;
 import android.util.Slog;
@@ -175,7 +177,7 @@ public final class ChangeReporter {
     }
 
     private void debugLog(int uid, long changeId, int state) {
-        String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
+        String message = formatSimple("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
         if (mSource == SOURCE_SYSTEM_SERVER) {
             Slog.d(TAG, message);

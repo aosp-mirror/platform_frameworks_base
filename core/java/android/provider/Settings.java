@@ -10434,14 +10434,6 @@ public final class Settings {
                 "webview_data_reduction_proxy_key";
 
        /**
-        * Whether or not the WebView fallback mechanism should be enabled.
-        * 0=disabled, 1=enabled.
-        * @hide
-        */
-       public static final String WEBVIEW_FALLBACK_LOGIC_ENABLED =
-               "webview_fallback_logic_enabled";
-
-       /**
         * Name of the package used as WebView provider (if unset the provider is instead determined
         * by the system).
         * @hide

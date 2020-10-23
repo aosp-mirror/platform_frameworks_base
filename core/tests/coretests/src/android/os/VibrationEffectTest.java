@@ -28,6 +28,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 
 import android.content.ContentInterface;
 import android.content.ContentResolver;
@@ -97,6 +98,73 @@ public class VibrationEffectTest {
         VibrationEffect expectedEffect = VibrationEffect.get(VibrationEffect.RINGTONES[1]);
         assertNotNull(expectedEffect);
         assertEquals(expectedEffect, effect);
+    }
+
+    @Test
+    public void testValidateOneShot() {
+        VibrationEffect.createOneShot(1, 255).validate();
+        VibrationEffect.createOneShot(1, VibrationEffect.DEFAULT_AMPLITUDE).validate();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createOneShot(-1, 255).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createOneShot(0, 255).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createOneShot(1, -2).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createOneShot(1, 256).validate());
+    }
+
+    @Test
+    public void testValidatePrebaked() {
+        VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK).validate();
+        VibrationEffect.createPredefined(VibrationEffect.RINGTONES[1]).validate();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createPredefined(-1).validate());
+    }
+
+    @Test
+    public void testValidateWaveform() {
+        VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1).validate();
+        VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, 0).validate();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createWaveform(new long[0], new int[0], -1).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createWaveform(TEST_TIMINGS, new int[0], -1).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createWaveform(
+                        new long[]{0, 0, 0}, TEST_AMPLITUDES, -1).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createWaveform(
+                        TEST_TIMINGS, new int[]{-1, -1, -2}, -1).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.createWaveform(
+                        TEST_TIMINGS, TEST_AMPLITUDES, TEST_TIMINGS.length).validate());
+    }
+
+    @Test
+    public void testValidateComposed() {
+        VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
+                .compose()
+                .validate();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition().addPrimitive(-1).compose().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, -1, 10)
+                        .compose()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, -1)
+                        .compose()
+                        .validate());
     }
 
     @Test

@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
+import static android.text.TextUtils.formatSimple;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -1892,7 +1893,7 @@ public final class BroadcastQueue {
     }
 
     private String createBroadcastTraceTitle(BroadcastRecord record, int state) {
-        return String.format("Broadcast %s from %s (%s) %s",
+        return formatSimple("Broadcast %s from %s (%s) %s",
                 state == BroadcastRecord.DELIVERY_PENDING ? "in queue" : "dispatched",
                 record.callerPackage == null ? "" : record.callerPackage,
                 record.callerApp == null ? "process unknown" : record.callerApp.toShortString(),

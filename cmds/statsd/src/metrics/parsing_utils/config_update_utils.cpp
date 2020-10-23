@@ -546,7 +546,21 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
             return false;
         }
     }
-
+    for (int i = 0; i < config.value_metric_size(); i++, metricIndex++) {
+        const ValueMetric& metric = config.value_metric(i);
+        set<int64_t> conditionDependencies;
+        if (metric.has_condition()) {
+            conditionDependencies.insert(metric.condition());
+        }
+        if (!determineMetricUpdateStatus(
+                    config, metric, metric.id(), METRIC_TYPE_VALUE, {metric.what()},
+                    conditionDependencies, metric.slice_by_state(), metric.links(),
+                    oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+                    replacedMatchers, replacedConditions, replacedStates,
+                    metricsToUpdate[metricIndex])) {
+            return false;
+        }
+    }
     for (int i = 0; i < config.gauge_metric_size(); i++, metricIndex++) {
         const GaugeMetric& metric = config.gauge_metric(i);
         set<int64_t> conditionDependencies;
