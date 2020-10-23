@@ -142,7 +142,6 @@ public class SecureSettings {
         Settings.Secure.CHARGING_VIBRATION_ENABLED,
         Settings.Secure.ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
         Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
-        Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL,
         Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
         Settings.Secure.UI_NIGHT_MODE,
         Settings.Secure.DARK_THEME_CUSTOM_START_TIME,

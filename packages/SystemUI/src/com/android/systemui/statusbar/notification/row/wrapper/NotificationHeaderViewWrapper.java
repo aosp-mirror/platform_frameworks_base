@@ -34,12 +34,10 @@ import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
-import com.android.systemui.R;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.CustomInterpolatorTransformation;
 import com.android.systemui.statusbar.notification.ImageTransformState;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -67,13 +65,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
-    private boolean mShowExpandButtonAtEnd;
 
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
-        mShowExpandButtonAtEnd = ctx.getResources().getBoolean(
-                R.bool.config_showNotificationExpandButtonAtEnd)
-                || NotificationUtils.useNewInterruptionModel(ctx);
         mTransformationHelper = new ViewTransformationHelper();
 
         // we want to avoid that the header clashes with the other text when transforming
@@ -115,9 +109,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
         mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
         mFeedbackIcon = mView.findViewById(com.android.internal.R.id.feedback);
-        if (mNotificationHeader != null) {
-            mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
-        }
     }
 
     private void addFeedbackOnClickListener(ExpandableNotificationRow row) {

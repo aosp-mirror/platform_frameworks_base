@@ -37,7 +37,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -150,8 +149,7 @@ public class KeyguardCoordinator implements Coordinator {
         if (entry == null) {
             return false;
         }
-        if (NotificationUtils.useNewInterruptionModel(mContext)
-                && mHideSilentNotificationsOnLockscreen) {
+        if (mHideSilentNotificationsOnLockscreen) {
             return mHighPriorityProvider.isHighPriority(entry);
         } else {
             return entry.getRepresentativeEntry() != null

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -54,7 +55,6 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mFeedbackIcon;
-    private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
     private int mHeaderTextMarginEnd;
     private Drawable mBackground;
@@ -86,14 +86,15 @@ public class NotificationHeaderView extends ViewGroup {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public NotificationHeaderView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public NotificationHeaderView(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
         mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
 
-        int[] attrIds = { android.R.attr.gravity };
+        int[] attrIds = {android.R.attr.gravity};
         TypedArray ta = context.obtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes);
         mGravity = ta.getInt(0, 0);
         ta.recycle();
@@ -102,13 +103,14 @@ public class NotificationHeaderView extends ViewGroup {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mAppName = findViewById(com.android.internal.R.id.app_name_text);
-        mHeaderText = findViewById(com.android.internal.R.id.header_text);
-        mSecondaryHeaderText = findViewById(com.android.internal.R.id.header_text_secondary);
-        mExpandButton = findViewById(com.android.internal.R.id.expand_button);
-        mIcon = findViewById(com.android.internal.R.id.icon);
-        mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
-        mFeedbackIcon = findViewById(com.android.internal.R.id.feedback);
+        mAppName = findViewById(R.id.app_name_text);
+        mHeaderText = findViewById(R.id.header_text);
+        mSecondaryHeaderText = findViewById(R.id.header_text_secondary);
+        mExpandButton = findViewById(R.id.expand_button);
+        mIcon = findViewById(R.id.icon);
+        mProfileBadge = findViewById(R.id.profile_badge);
+        mFeedbackIcon = findViewById(R.id.feedback);
+        setClipToPadding(false);
     }
 
     @Override
@@ -134,9 +136,7 @@ public class NotificationHeaderView extends ViewGroup {
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
             // Icons that should go at the end
-            if ((child == mExpandButton && mShowExpandButtonAtEnd)
-                    || child == mProfileBadge
-                    || child == mFeedbackIcon) {
+            if (child == mExpandButton || child == mProfileBadge || child == mFeedbackIcon) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             } else {
                 totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
@@ -198,9 +198,7 @@ public class NotificationHeaderView extends ViewGroup {
             int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
             int bottom = top + childHeight;
             // Icons that should go at the end
-            if ((child == mExpandButton && mShowExpandButtonAtEnd)
-                    || child == mProfileBadge
-                    || child == mFeedbackIcon) {
+            if (child == mExpandButton || child == mProfileBadge || child == mFeedbackIcon) {
                 if (end == getMeasuredWidth()) {
                     layoutRight = end - mContentEndMargin;
                 } else {
@@ -227,7 +225,7 @@ public class NotificationHeaderView extends ViewGroup {
 
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new ViewGroup.MarginLayoutParams(getContext(), attrs);
+        return new MarginLayoutParams(getContext(), attrs);
     }
 
     /**
@@ -256,7 +254,7 @@ public class NotificationHeaderView extends ViewGroup {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return super.verifyDrawable(who) || who == mBackground;
     }
 
@@ -292,22 +290,13 @@ public class NotificationHeaderView extends ViewGroup {
         updateTouchListener();
     }
 
+    /**
+     * Sets whether or not the work badge appears at the end of the NotificationHeaderView.
+     * The expand button will always be closer to the end.
+     */
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
         if (showWorkBadgeAtEnd != mShowWorkBadgeAtEnd) {
-            setClipToPadding(!showWorkBadgeAtEnd);
             mShowWorkBadgeAtEnd = showWorkBadgeAtEnd;
-        }
-    }
-
-    /**
-     * Sets whether or not the expand button appears at the end of the NotificationHeaderView. If
-     * both this and {@link #setShowWorkBadgeAtEnd(boolean)} have been set to true, then the
-     * expand button will appear closer to the end than the work badge.
-     */
-    public void setShowExpandButtonAtEnd(boolean showExpandButtonAtEnd) {
-        if (showExpandButtonAtEnd != mShowExpandButtonAtEnd) {
-            setClipToPadding(!showExpandButtonAtEnd);
-            mShowExpandButtonAtEnd = showExpandButtonAtEnd;
         }
     }
 
@@ -331,7 +320,10 @@ public class NotificationHeaderView extends ViewGroup {
         return mHeaderTextMarginEnd;
     }
 
-    public class HeaderTouchListener implements View.OnTouchListener {
+    /**
+     * Handles clicks on the header based on the region tapped.
+     */
+    public class HeaderTouchListener implements OnTouchListener {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
         private Rect mExpandButtonRect;

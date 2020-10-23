@@ -387,9 +387,6 @@
          off-screen. -->
     <bool name="config_fadeDependingOnAmountSwiped">false</bool>
 
-    <!-- Whether or not to show the expand button at the end of the notification header. -->
-    <bool name="config_showNotificationExpandButtonAtEnd">false</bool>
-
     <!-- Whether or the notifications should be clipped to be reduced in height if it has been
          scrolled to the top of the screen. -->
     <bool name="config_clipNotificationScrollToTop">true</bool>
