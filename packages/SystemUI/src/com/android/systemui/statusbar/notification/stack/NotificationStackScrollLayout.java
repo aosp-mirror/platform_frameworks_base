@@ -1340,8 +1340,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearStartPosition() {
         if (isHeadsUpTransition()) {
-            return mHeadsUpInset
-                    + getFirstVisibleSection().getFirstVisibleChild().getPinnedHeadsUpHeight();
+            final NotificationSection firstVisibleSection = getFirstVisibleSection();
+            final int pinnedHeight = firstVisibleSection != null
+                    ? firstVisibleSection.getFirstVisibleChild().getPinnedHeadsUpHeight()
+                    : 0;
+            return mHeadsUpInset + pinnedHeight;
         }
         return getMinExpansionHeight();
     }
