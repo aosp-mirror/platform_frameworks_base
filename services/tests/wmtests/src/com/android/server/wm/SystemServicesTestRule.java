@@ -296,6 +296,7 @@ public class SystemServicesTestRule implements TestRule {
         // Called when moving activity to pinned stack.
         doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
                 anyInt(), anyBoolean(), anyBoolean());
+        spyOn(mWmService.mDisplayWindowSettings);
 
         // Setup factory classes to prevent calls to native code.
         mTransaction = spy(StubTransaction.class);

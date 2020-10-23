@@ -85,7 +85,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         void finishWrite(OutputStream os, boolean success);
     }
 
-    private final ReadableSettingsStorage mBaseSettingsStorage;
+    private final ReadableSettingsStorage mVendorSettingsStorage;
     /**
      * The preferred type of a display identifier to use when storing and retrieving entries from
      * the base (vendor) settings file.
@@ -93,8 +93,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
      * @see #getIdentifier(DisplayInfo, int)
      */
     @DisplayIdentifierType
-    private int mBaseIdentifierType;
-    private final Map<String, SettingsEntry> mBaseSettings = new HashMap<>();
+    private int mVendorIdentifierType;
+    private final Map<String, SettingsEntry> mVendorSettings = new HashMap<>();
 
     private final WritableSettingsStorage mOverrideSettingsStorage;
     /**
@@ -107,28 +107,56 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     private int mOverrideIdentifierType;
     private final Map<String, SettingsEntry> mOverrideSettings = new HashMap<>();
 
+    /**
+     * Enables or disables settings provided from the vendor settings storage.
+     *
+     * @see #setVendorSettingsIgnored(boolean)
+     */
+    private boolean mIgnoreVendorSettings = true;
+
     DisplayWindowSettingsProvider() {
         this(new AtomicFileStorage(getVendorSettingsFile()),
                 new AtomicFileStorage(getOverrideSettingsFile()));
     }
 
     @VisibleForTesting
-    DisplayWindowSettingsProvider(@NonNull ReadableSettingsStorage baseSettingsStorage,
+    DisplayWindowSettingsProvider(@NonNull ReadableSettingsStorage vendorSettingsStorage,
             @NonNull WritableSettingsStorage overrideSettingsStorage) {
-        mBaseSettingsStorage = baseSettingsStorage;
+        mVendorSettingsStorage = vendorSettingsStorage;
         mOverrideSettingsStorage = overrideSettingsStorage;
         readSettings();
+    }
+
+    /**
+     * Enables or disables settings provided from the vendor settings storage. If {@code true}, the
+     * vendor settings will be ignored and only the override settings will be returned from
+     * {@link #getSettings(DisplayInfo)}. If {@code false}, settings returned from
+     * {@link #getSettings(DisplayInfo)} will be a merged result of the vendor settings and the
+     * override settings.
+     */
+    void setVendorSettingsIgnored(boolean ignored) {
+        mIgnoreVendorSettings = ignored;
+    }
+
+    /**
+     * Returns whether or not the vendor settings are being ignored.
+     *
+     * @see #setVendorSettingsIgnored(boolean)
+     */
+    @VisibleForTesting
+    boolean getVendorSettingsIgnored() {
+        return mIgnoreVendorSettings;
     }
 
     @Override
     @NonNull
     public SettingsEntry getSettings(@NonNull DisplayInfo info) {
-        SettingsEntry baseSettings = getBaseSettingsEntry(info);
+        SettingsEntry vendorSettings = getVendorSettingsEntry(info);
         SettingsEntry overrideSettings = getOrCreateOverrideSettingsEntry(info);
-        if (baseSettings == null) {
+        if (vendorSettings == null) {
             return new SettingsEntry(overrideSettings);
         } else {
-            SettingsEntry mergedSettings = new SettingsEntry(baseSettings);
+            SettingsEntry mergedSettings = new SettingsEntry(vendorSettings);
             mergedSettings.updateFrom(overrideSettings);
             return mergedSettings;
         }
@@ -151,18 +179,22 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     @Nullable
-    private SettingsEntry getBaseSettingsEntry(DisplayInfo info) {
-        final String identifier = getIdentifier(info, mBaseIdentifierType);
+    private SettingsEntry getVendorSettingsEntry(DisplayInfo info) {
+        if (mIgnoreVendorSettings) {
+            return null;
+        }
+
+        final String identifier = getIdentifier(info, mVendorIdentifierType);
         SettingsEntry settings;
         // Try to get corresponding settings using preferred identifier for the current config.
-        if ((settings = mBaseSettings.get(identifier)) != null) {
+        if ((settings = mVendorSettings.get(identifier)) != null) {
             return settings;
         }
         // Else, fall back to the display name.
-        if ((settings = mBaseSettings.get(info.name)) != null) {
+        if ((settings = mVendorSettings.get(info.name)) != null) {
             // Found an entry stored with old identifier.
-            mBaseSettings.remove(info.name);
-            mBaseSettings.put(identifier, settings);
+            mVendorSettings.remove(info.name);
+            mVendorSettings.put(identifier, settings);
             return settings;
         }
         return null;
@@ -191,10 +223,10 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     private void readSettings() {
-        FileData baseFileData = readSettings(mBaseSettingsStorage);
-        if (baseFileData != null) {
-            mBaseIdentifierType = baseFileData.mIdentifierType;
-            mBaseSettings.putAll(baseFileData.mSettings);
+        FileData vendorFileData = readSettings(mVendorSettingsStorage);
+        if (vendorFileData != null) {
+            mVendorIdentifierType = vendorFileData.mIdentifierType;
+            mVendorSettings.putAll(vendorFileData.mSettings);
         }
 
         FileData overrideFileData = readSettings(mOverrideSettingsStorage);
