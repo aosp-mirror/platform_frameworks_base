@@ -1673,7 +1673,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCanTurnScreenOn() {
+    public void testFullscreenWindowCanTurnScreenOn() {
         mStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         doReturn(true).when(mActivity).getTurnScreenOnFlag();
 
@@ -1681,11 +1681,11 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testFreeformWindowCantTurnScreenOn() {
+    public void testFreeformWindowCanTurnScreenOn() {
         mStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         doReturn(true).when(mActivity).getTurnScreenOnFlag();
 
-        assertFalse(mActivity.canTurnScreenOn());
+        assertTrue(mActivity.canTurnScreenOn());
     }
 
     @Test

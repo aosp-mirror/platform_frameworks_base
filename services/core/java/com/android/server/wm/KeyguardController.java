@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
@@ -166,7 +167,7 @@ class KeyguardController {
 
         if (keyguardChanged) {
             // Irrelevant to AOD.
-            dismissDockedStackIfNeeded();
+            dismissMultiWindowModeForTaskIfNeeded(null /* currentTaskControllsingOcclusion */);
             setKeyguardGoingAway(false);
             if (keyguardShowing) {
                 mDismissalRequested = false;
@@ -334,8 +335,12 @@ class KeyguardController {
 
     /**
      * Called when occluded state changed.
+     *
+     * @param currentTaskControllingOcclusion the task that controls the state whether keyguard
+     *      should be occluded. That is the task to be shown on top of keyguard if it requests so.
      */
-    private void handleOccludedChanged(int displayId) {
+    private void handleOccludedChanged(
+            int displayId, @Nullable Task currentTaskControllingOcclusion) {
         // TODO(b/113840485): Handle app transition for individual display, and apply occluded
         // state change to secondary displays.
         // For now, only default display fully supports occluded change. Other displays only
@@ -364,7 +369,7 @@ class KeyguardController {
                 mService.continueWindowLayout();
             }
         }
-        dismissDockedStackIfNeeded();
+        dismissMultiWindowModeForTaskIfNeeded(currentTaskControllingOcclusion);
     }
 
     /**
@@ -427,19 +432,30 @@ class KeyguardController {
         }
     }
 
-    private void dismissDockedStackIfNeeded() {
+    private void dismissMultiWindowModeForTaskIfNeeded(
+            @Nullable Task currentTaskControllingOcclusion) {
         // TODO(b/113840485): Handle docked stack for individual display.
-        if (mKeyguardShowing && isDisplayOccluded(DEFAULT_DISPLAY)) {
-            // The lock screen is currently showing, but is occluded by a window that can
-            // show on top of the lock screen. In this can we want to dismiss the docked
-            // stack since it will be complicated/risky to try to put the activity on top
-            // of the lock screen in the right fullscreen configuration.
-            final TaskDisplayArea taskDisplayArea = mRootWindowContainer
-                    .getDefaultTaskDisplayArea();
-            if (!taskDisplayArea.isSplitScreenModeActivated()) {
-                return;
-            }
+        if (!mKeyguardShowing || !isDisplayOccluded(DEFAULT_DISPLAY)) {
+            return;
+        }
+
+        // Dismiss split screen
+
+        // The lock screen is currently showing, but is occluded by a window that can
+        // show on top of the lock screen. In this can we want to dismiss the docked
+        // stack since it will be complicated/risky to try to put the activity on top
+        // of the lock screen in the right fullscreen configuration.
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        if (taskDisplayArea.isSplitScreenModeActivated()) {
             taskDisplayArea.onSplitScreenModeDismissed();
+        }
+
+        // Dismiss freeform windowing mode
+        if (currentTaskControllingOcclusion == null) {
+            return;
+        }
+        if (currentTaskControllingOcclusion.inFreeformWindowingMode()) {
+            currentTaskControllingOcclusion.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         }
     }
 
@@ -572,7 +588,7 @@ class KeyguardController {
             }
 
             if (lastOccluded != mOccluded) {
-                controller.handleOccludedChanged(mDisplayId);
+                controller.handleOccludedChanged(mDisplayId, task);
             }
         }
 
