@@ -42,6 +42,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -83,6 +84,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     private TriggerSensor mTriggerSensor;
     @Mock
     private DozeLog mDozeLog;
+    @Mock
+    private AuthController mAuthController;
     @Mock
     private ProximitySensor mProximitySensor;
     private FakeSettings mFakeSettings = new FakeSettings();
@@ -156,7 +159,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         TestableDozeSensors() {
             super(getContext(), mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
-                    mProximitySensor, mFakeSettings);
+                    mProximitySensor, mFakeSettings, mAuthController);
             for (TriggerSensor sensor : mSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()

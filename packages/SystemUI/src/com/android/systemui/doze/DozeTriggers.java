@@ -177,7 +177,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mAllowPulseTriggers = true;
         mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
-                secureSettings);
+                secureSettings, authController);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = proxCheck;
@@ -286,7 +286,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 } else if (isPickup) {
                     gentleWakeUp(pulseReason);
                 } else if (isUdfpsLongPress) {
-                    gentleWakeUp(pulseReason);
+                    requestPulse(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, true, null);
                     // Since the gesture won't be received by the UDFPS view, manually inject an
                     // event.
                     mAuthController.onAodInterrupt((int) screenX, (int) screenY);
