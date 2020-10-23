@@ -3274,7 +3274,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
-            ConfigurationContainer requestingContainer) {
+            WindowContainer requestingContainer) {
         if (super.onDescendantOrientationChanged(freezeDisplayToken, requestingContainer)) {
             return true;
         }
@@ -3282,6 +3282,18 @@ class Task extends WindowContainer<WindowContainer> {
         // No one in higher hierarchy handles this request, let's adjust our bounds to fulfill
         // it if possible.
         if (getParent() != null) {
+            final ActivityRecord activity = requestingContainer.asActivityRecord();
+            if (activity != null) {
+                // Clear the size compat cache to recompute the bounds for requested orientation;
+                // otherwise when Task#computeFullscreenBounds(), it will not try to do Task level
+                // letterboxing because app may prefer to keep its original size (size compat).
+                //
+                // Normally, ActivityRecord#clearSizeCompatMode() recomputes from its parent Task,
+                // which is the leaf Task. However, because this orientation request is new to all
+                // Tasks, pass false to clearSizeCompatMode, and trigger onConfigurationChanged from
+                // here (root Task) to make sure all Tasks are up-to-date.
+                activity.clearSizeCompatMode(false /* recomputeTask */);
+            }
             onConfigurationChanged(getParent().getConfiguration());
             return true;
         }
