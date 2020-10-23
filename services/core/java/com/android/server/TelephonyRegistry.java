@@ -2130,11 +2130,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 mOutgoingSmsEmergencyNumber[phoneId] = emergencyNumber;
                 for (Record r : mRecords) {
+                    // Send to all listeners regardless of subscription
                     if (r.matchPhoneStateListenerEvent(
-                            PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_SMS)
-                                    && idMatch(r.subId, subId, phoneId)) {
+                            PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_SMS)) {
                         try {
-                            r.callback.onOutgoingEmergencySms(emergencyNumber);
+                            r.callback.onOutgoingEmergencySms(emergencyNumber, subId);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }

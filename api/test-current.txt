@@ -1630,6 +1630,8 @@ package android.telephony {
 
   public class PhoneStateListener {
     method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+    method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
+    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
   }
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {

@@ -991,12 +991,40 @@ public class PhoneStateListener {
     /**
      * Callback invoked when an outgoing SMS is placed to an emergency number.
      *
+     * This method will be called when an emergency sms is sent on any subscription.
      * @param sentEmergencyNumber the emergency number {@link EmergencyNumber} the SMS is sent to.
+     *
+     * @deprecated Use {@link #onOutgoingEmergencySms(EmergencyNumber, int)}.
      * @hide
      */
     @SystemApi
+    @TestApi
+    @Deprecated
     public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
         // default implementation empty
+    }
+
+    /**
+     * Smsback invoked when an outgoing sms is sent to an emergency number.
+     *
+     * This method will be called when an emergency sms is sent on any subscription,
+     * regardless of which subscription this listener was registered on.
+     *
+     * The default implementation of this method calls
+     * {@link #onOutgoingEmergencySms(EmergencyNumber)} for backwards compatibility purposes. Do
+     * not call {@code super(...)} from within your implementation unless you want
+     * {@link #onOutgoingEmergencySms(EmergencyNumber)} to be called as well.
+     *
+     * @param sentEmergencyNumber The {@link EmergencyNumber} the emergency sms was sent to.
+     * @param subscriptionId The subscription ID used to send the emergency sms.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber,
+            int subscriptionId) {
+        // Default implementation for backwards compatibility
+        onOutgoingEmergencySms(sentEmergencyNumber);
     }
 
     /**
@@ -1376,13 +1404,14 @@ public class PhoneStateListener {
                                     subscriptionId)));
         }
 
-        public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
+        public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber,
+                int subscriptionId) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
-                            () -> psl.onOutgoingEmergencySms(sentEmergencyNumber)));
+                            () -> psl.onOutgoingEmergencySms(sentEmergencyNumber, subscriptionId)));
         }
 
         public void onPhoneCapabilityChanged(PhoneCapability capability) {
