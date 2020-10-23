@@ -4420,7 +4420,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
         sDefaults.putAll(Ims.getDefaults());
-        sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
