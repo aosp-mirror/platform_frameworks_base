@@ -196,6 +196,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         final int screenY = 100;
         final int reason = DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS;
         mTriggers.onSensor(reason, screenX, screenY, null);
+        verify(mHost).extendPulse(reason);
         verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY));
     }
 
