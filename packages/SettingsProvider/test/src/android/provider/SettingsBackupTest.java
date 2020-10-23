@@ -593,7 +593,40 @@ public class SettingsBackupTest {
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
-                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
+                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT,
+                    Settings.Global.Wearable.HAS_PAY_TOKENS,
+                    Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
+                    Settings.Global.Wearable.HOTWORD_DETECTION_ENABLED,
+                    Settings.Global.Wearable.SMART_REPLIES_ENABLED,
+                    Settings.Global.Wearable.DEFAULT_VIBRATION,
+                    Settings.Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
+                    Settings.Global.Wearable.RETAIL_MODE,
+                    Settings.Global.Wearable.PLAY_STORE_AVAILABILITY,
+                    Settings.Global.Wearable.BUG_REPORT,
+                    Settings.Global.Wearable.SMART_ILLUMINATE_ENABLED,
+                    Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
+                    Settings.Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
+                    Settings.Global.Wearable.CLOCKWORK_24HR_TIME,
+                    Settings.Global.Wearable.AUTO_WIFI,
+                    Settings.Global.Wearable.WIFI_POWER_SAVE,
+                    Settings.Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
+                    Settings.Global.Wearable.WIRELESS_DEBUG_MODE,
+                    Settings.Global.Wearable.WIFI_DEBUG_PORT,
+                    Settings.Global.Wearable.UPDOWN_GESTURES_ENABLED,
+                    Settings.Global.Wearable.SETUP_SKIPPED,
+                    Settings.Global.Wearable.LAST_CALL_FORWARD_ACTION,
+                    Settings.Global.Wearable.STEM_1_TYPE,
+                    Settings.Global.Wearable.STEM_1_DATA,
+                    Settings.Global.Wearable.STEM_1_DEFAULT_DATA,
+                    Settings.Global.Wearable.STEM_2_TYPE,
+                    Settings.Global.Wearable.STEM_2_DATA,
+                    Settings.Global.Wearable.STEM_2_DEFAULT_DATA,
+                    Settings.Global.Wearable.STEM_3_TYPE,
+                    Settings.Global.Wearable.STEM_3_DATA,
+                    Settings.Global.Wearable.STEM_3_DEFAULT_DATA,
+                    Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
+                    Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
+                    Settings.Global.Wearable.ALTERNATE_LAUNCHER_ENABLED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -763,8 +796,10 @@ public class SettingsBackupTest {
 
     @Test
     public void globalSettingsBackedUpOrDenied() {
+        Set<String> candidateSettings = getCandidateSettings(Settings.Global.class);
+        candidateSettings.addAll(getCandidateSettings(Settings.Global.Wearable.class));
         checkSettingsBackedUpOrDenied(
-                getCandidateSettings(Settings.Global.class),
+                candidateSettings,
                 newHashSet(GlobalSettings.SETTINGS_TO_BACKUP),
                 BACKUP_DENY_LIST_GLOBAL_SETTINGS);
     }
@@ -792,8 +827,7 @@ public class SettingsBackupTest {
                 .that(intersect(settingsToBackup, denylist)).isEmpty();
     }
 
-    private static Set<String> getCandidateSettings(
-            Class<? extends Settings.NameValueTable> clazz) {
+    private static Set<String> getCandidateSettings(Class<?> clazz) {
         HashSet<String> result = new HashSet<String>();
         for (Field field : clazz.getDeclaredFields()) {
             if (looksLikeValidSetting(field)) {
