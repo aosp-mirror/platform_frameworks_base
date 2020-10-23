@@ -3592,7 +3592,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return {@code true} if the activity windowing mode is not
+     * @return {@code true} if the activity windowing mode is not in
      *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and a) activity
      *         contains windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the
      *         activity has set {@link #mShowWhenLocked}, or b) if the activity has set
@@ -7546,7 +7546,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Determines whether this ActivityRecord can turn the screen on. It checks whether the flag
      * {@link ActivityRecord#getTurnScreenOnFlag} is set and checks whether the ActivityRecord
-     * should be visible depending on Keyguard and window state.
+     * should be visible depending on Keyguard state.
      *
      * @return true if the screen can be turned on, false otherwise.
      */
@@ -7555,7 +7555,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         final Task stack = getRootTask();
-        return stack != null && !stack.inMultiWindowMode()
+        return stack != null
                 && mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 
