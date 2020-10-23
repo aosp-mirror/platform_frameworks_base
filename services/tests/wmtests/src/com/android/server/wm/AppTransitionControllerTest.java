@@ -20,10 +20,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -76,8 +76,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         translucentOpening.setVisible(false);
         mDisplayContent.mOpeningApps.add(behind);
         mDisplayContent.mOpeningApps.add(translucentOpening);
-        assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
-                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(TRANSIT_TASK_OPEN));
+        assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
+                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
+                        TRANSIT_OLD_TASK_OPEN));
     }
 
     @Test
@@ -89,8 +90,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         translucentClosing.setOccludesParent(false);
         mDisplayContent.mClosingApps.add(translucentClosing);
-        assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
-                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(TRANSIT_TASK_CLOSE));
+        assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
+                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
+                        TRANSIT_OLD_TASK_CLOSE));
     }
 
     @Test
@@ -104,9 +106,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         translucentOpening.setVisible(false);
         mDisplayContent.mOpeningApps.add(behind);
         mDisplayContent.mOpeningApps.add(translucentOpening);
-        assertEquals(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
+        assertEquals(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
                 mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
-                        TRANSIT_TASK_CHANGE_WINDOWING_MODE));
+                        TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE));
     }
 
     @Test
@@ -121,11 +123,11 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = opening.getTask();
         mDisplayContent.mOpeningApps.add(opening);
         mDisplayContent.mClosingApps.add(closing);
-        assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
+        assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_OLD_ACTIVITY_OPEN, task));
         closing.getTask().removeChild(closing);
         task.addChild(closing, 0);
-        assertTrue(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
-        assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_TASK_OPEN, task));
+        assertTrue(mAppTransitionController.isTransitWithinTask(TRANSIT_OLD_ACTIVITY_OPEN, task));
+        assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_OLD_TASK_OPEN, task));
     }
 
     @Test

@@ -102,10 +102,12 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_UNSET;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_OLD_UNSET;
+import static android.view.WindowManager.TransitionOldType;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -1314,7 +1316,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (prevDc.mOpeningApps.remove(this)) {
             // Transfer opening transition to new display.
             mDisplayContent.mOpeningApps.add(this);
-            mDisplayContent.prepareAppTransition(prevDc.mAppTransition.getAppTransition(), true);
+            mDisplayContent.transferAppTransitionFrom(prevDc);
             mDisplayContent.executeAppTransition();
         }
 
@@ -2575,7 +2577,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final boolean endTask = task.getActivityBelow(this) == null
                     && !task.isClearingToReuseTask();
-            final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
+            final int transit = endTask ? TRANSIT_OLD_TASK_CLOSE : TRANSIT_OLD_ACTIVITY_CLOSE;
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
@@ -2588,7 +2590,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 if (DEBUG_VISIBILITY || DEBUG_TRANSITION) {
                     Slog.v(TAG_TRANSITION, "Prepare close transition: finishing " + this);
                 }
-                mDisplayContent.prepareAppTransition(transit, false);
+                mDisplayContent.prepareAppTransitionOld(transit, false);
+                mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
 
                 // When finishing the activity preemptively take the snapshot before the app window
                 // is marked as hidden and any configuration changes take place
@@ -2663,15 +2666,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private void prepareActivityHideTransitionAnimationIfOvarlay(int transit) {
+    private void prepareActivityHideTransitionAnimationIfOvarlay(@TransitionOldType int transit) {
         if (mTaskOverlay) {
             prepareActivityHideTransitionAnimation(transit);
         }
     }
 
-    private void prepareActivityHideTransitionAnimation(int transit) {
+    private void prepareActivityHideTransitionAnimation(@TransitionOldType int transit) {
         final DisplayContent dc = mDisplayContent;
-        dc.prepareAppTransition(transit, false);
+        dc.prepareAppTransitionOld(transit, false);
+        dc.prepareAppTransition(TRANSIT_CLOSE);
         setVisibility(false);
         dc.executeAppTransition();
     }
@@ -4222,6 +4226,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Note that we ignore display frozen since we want the opening / closing transition type
         // can be updated correctly even display frozen, and it's safe since in applyAnimation will
         // still check DC#okToAnimate again if the transition animation is fine to apply.
+        // TODO(new-app-transition): Rewrite this logic using WM Shell.
         final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
         if (okToAnimate(true /* ignoreFrozen */) && (appTransition.isTransitionSet()
                 || (recentsAnimating && !isActivityTypeHome()))) {
@@ -4232,7 +4237,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 displayContent.mClosingApps.add(this);
                 mEnteringAnimation = false;
             }
-            if (appTransition.getAppTransition() == TRANSIT_TASK_OPEN_BEHIND) {
+            if (appTransition.getAppTransitionOld() == TRANSIT_OLD_TASK_OPEN_BEHIND) {
                 // We're launchingBehind, add the launching activity to mOpeningApps.
                 final WindowState win = getDisplayContent().findFocusedWindow();
                 if (win != null) {
@@ -6201,7 +6206,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.onAnimationFinished(type, anim);
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AR#onAnimationFinished");
-        mTransit = TRANSIT_UNSET;
+        mTransit = TRANSIT_OLD_UNSET;
         mTransitFlags = 0;
         mNeedsAnimationBoundsLayer = false;
 

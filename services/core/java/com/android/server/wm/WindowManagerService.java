@@ -78,6 +78,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
+import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
@@ -254,7 +257,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
-import android.view.WindowManager.TransitionType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.window.ClientWindowFrames;
@@ -417,6 +419,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
     static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
             DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
+
+    /**
+     * Use new app transit framework.
+     */
+    private static final String USE_NEW_APP_TRANSIT =
+            "persist.wm.use_new_app_transit";
+    /**
+     * @see #USE_NEW_APP_TRANSIT
+     */
+    static boolean sUseNewAppTransit = SystemProperties.getBoolean(USE_NEW_APP_TRANSIT, false);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -1860,8 +1872,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
         dc.mOpeningApps.add(activity);
-        dc.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT,
-                0 /* flags */, false /* forceOverride */);
+        dc.prepareAppTransitionOld(WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH,
+                ALWAYS_KEEP_CURRENT, 0 /* flags */, false /* forceOverride */);
+        dc.prepareAppTransition(TRANSIT_RELAUNCH);
         dc.mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
                 frame.width(), frame.height());
         dc.executeAppTransition();
@@ -1876,8 +1889,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = activity.getDisplayContent();
         if (mDisplayFrozen && !dc.mOpeningApps.contains(activity) && activity.isRelaunching()) {
             dc.mOpeningApps.add(activity);
-            dc.prepareAppTransition(WindowManager.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT, 0 /* flags */,
+            dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, !ALWAYS_KEEP_CURRENT, 0 /* flags */,
                     false /* forceOverride */);
+            dc.prepareAppTransition(TRANSIT_NONE);
             dc.executeAppTransition();
         }
     }
@@ -2757,14 +2771,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // TODO(multi-display): remove when no default display use case.
-    // (i.e. KeyguardController / RecentsAnimation)
-    @Override
-    public void prepareAppTransition(@TransitionType int transit, boolean alwaysKeepCurrent) {
+    void prepareAppTransitionNone() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-        getDefaultDisplayContentLocked().prepareAppTransition(transit,
-                alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
+        getDefaultDisplayContentLocked().prepareAppTransitionOld(TRANSIT_OLD_NONE,
+                false /* alwaysKeepCurrent */,
+                0 /* flags */, false /* forceOverride */);
+        getDefaultDisplayContentLocked().prepareAppTransition(TRANSIT_NONE);
     }
 
     @Override
@@ -2810,7 +2824,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // TODO(multi-display): remove when no default display use case.
     // (i.e. KeyguardController / RecentsAnimation)
-    @Override
     public void executeAppTransition() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "executeAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
