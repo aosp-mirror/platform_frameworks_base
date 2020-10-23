@@ -71,12 +71,12 @@ import java.util.concurrent.Executors;
  To transcode a media file, first create a {@link TranscodingRequest} through its builder class
  {@link TranscodingRequest.Builder}. Transcode requests are then enqueue to the manager through
  {@link MediaTranscodeManager#enqueueRequest(
-         TranscodingRequest, Executor,OnTranscodingFinishedListener)}
+         TranscodingRequest, Executor, OnTranscodingFinishedListener)}
  TranscodeRequest are processed based on client process's priority and request priority. When a
  transcode operation is completed the caller is notified via its
  {@link OnTranscodingFinishedListener}.
- In the meantime the caller may use the returned TranscodingJob object to cancel or check the status
- of a specific transcode operation.
+ In the meantime the caller may use the returned TranscodingSession object to cancel or check the
+ status of a specific transcode operation.
  <p>
  Here is an example where <code>Builder</code> is used to specify all parameters
 
@@ -145,10 +145,11 @@ public final class MediaTranscodeManager {
      */
     public static final int PRIORITY_UNKNOWN = 0;
     /**
-     * PRIORITY_REALTIME indicates that the transcoding request is time-critical and that the client
-     * wants the transcoding result as soon as possible.
+     * PRIORITY_REALTIME indicates that the transcoding request is time-critical and that the
+     * client wants the transcoding result as soon as possible.
      * <p> Set PRIORITY_REALTIME only if the transcoding is time-critical as it will involve
-     * performance penalty due to resource reallocation to prioritize the jobs with higher priority.
+     * performance penalty due to resource reallocation to prioritize the sessions with higher
+     * priority.
      * TODO(hkuang): Add more description of this when priority is finalized.
      */
     public static final int PRIORITY_REALTIME = 1;
@@ -156,7 +157,7 @@ public final class MediaTranscodeManager {
     /**
      * PRIORITY_OFFLINE indicates the transcoding is not time-critical and the client does not need
      * the transcoding result as soon as possible.
-     * <p>Jobs with PRIORITY_OFFLINE will be scheduled behind PRIORITY_REALTIME. Always set to
+     * <p>Sessions with PRIORITY_OFFLINE will be scheduled behind PRIORITY_REALTIME. Always set to
      * PRIORITY_OFFLINE if client does not need the result as soon as possible and could accept
      * delay of the transcoding result.
      * @hide
@@ -182,12 +183,12 @@ public final class MediaTranscodeManager {
     public interface OnTranscodingFinishedListener {
         /**
          * Called when the transcoding operation has finished. The receiver may use the
-         * TranscodingJob to check the result, i.e. whether the operation succeeded, was canceled or
-         * if an error occurred.
+         * TranscodingSession to check the result, i.e. whether the operation succeeded, was
+         * canceled or if an error occurred.
          *
-         * @param transcodingJob The TranscodingJob instance for the finished transcoding operation.
+         * @param session The TranscodingSession instance for the finished transcoding operation.
          */
-        void onTranscodingFinished(@NonNull TranscodingJob transcodingJob);
+        void onTranscodingFinished(@NonNull TranscodingSession session);
     }
 
     private final Context mContext;
@@ -196,76 +197,80 @@ public final class MediaTranscodeManager {
     private final int mPid;
     private final int mUid;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private final HashMap<Integer, TranscodingJob> mPendingTranscodingJobs = new HashMap();
+    private final HashMap<Integer, TranscodingSession> mPendingTranscodingSessions = new HashMap();
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     @NonNull private ITranscodingClient mTranscodingClient = null;
     private static MediaTranscodeManager sMediaTranscodeManager;
 
-    private void handleTranscodingFinished(int jobId, TranscodingResultParcel result) {
-        synchronized (mPendingTranscodingJobs) {
-            // Gets the job associated with the jobId and removes it from
-            // mPendingTranscodingJobs.
-            final TranscodingJob job = mPendingTranscodingJobs.remove(jobId);
+    private void handleTranscodingFinished(int sessionId, TranscodingResultParcel result) {
+        synchronized (mPendingTranscodingSessions) {
+            // Gets the session associated with the sessionId and removes it from
+            // mPendingTranscodingSessions.
+            final TranscodingSession session = mPendingTranscodingSessions.remove(sessionId);
 
-            if (job == null) {
+            if (session == null) {
                 // This should not happen in reality.
-                Log.e(TAG, "Job " + jobId + " is not in PendingJobs");
+                Log.e(TAG, "Session " + sessionId + " is not in Pendingsessions");
                 return;
             }
 
-            // Updates the job status and result.
-            job.updateStatusAndResult(TranscodingJob.STATUS_FINISHED,
-                    TranscodingJob.RESULT_SUCCESS);
+            // Updates the session status and result.
+            session.updateStatusAndResult(TranscodingSession.STATUS_FINISHED,
+                    TranscodingSession.RESULT_SUCCESS);
 
-            // Notifies client the job is done.
-            if (job.mListener != null && job.mListenerExecutor != null) {
-                job.mListenerExecutor.execute(() -> job.mListener.onTranscodingFinished(job));
+            // Notifies client the session is done.
+            if (session.mListener != null && session.mListenerExecutor != null) {
+                session.mListenerExecutor.execute(
+                        () -> session.mListener.onTranscodingFinished(session));
             }
         }
     }
 
-    private void handleTranscodingFailed(int jobId, int errorCode) {
-        synchronized (mPendingTranscodingJobs) {
-            // Gets the job associated with the jobId and removes it from
-            // mPendingTranscodingJobs.
-            final TranscodingJob job = mPendingTranscodingJobs.remove(jobId);
+    private void handleTranscodingFailed(int sessionId, int errorCode) {
+        synchronized (mPendingTranscodingSessions) {
+            // Gets the session associated with the sessionId and removes it from
+            // mPendingTranscodingSessions.
+            final TranscodingSession session = mPendingTranscodingSessions.remove(sessionId);
 
-            if (job == null) {
+            if (session == null) {
                 // This should not happen in reality.
-                Log.e(TAG, "Job " + jobId + " is not in PendingJobs");
+                Log.e(TAG, "Session " + sessionId + " is not in Pendingsessions");
                 return;
             }
 
-            // Updates the job status and result.
-            job.updateStatusAndResult(TranscodingJob.STATUS_FINISHED,
-                    TranscodingJob.RESULT_ERROR);
+            // Updates the session status and result.
+            session.updateStatusAndResult(TranscodingSession.STATUS_FINISHED,
+                    TranscodingSession.RESULT_ERROR);
 
-            // Notifies client the job failed.
-            if (job.mListener != null && job.mListenerExecutor != null) {
-                job.mListenerExecutor.execute(() -> job.mListener.onTranscodingFinished(job));
+            // Notifies client the session failed.
+            if (session.mListener != null && session.mListenerExecutor != null) {
+                session.mListenerExecutor.execute(
+                        () -> session.mListener.onTranscodingFinished(session));
             }
         }
     }
 
-    private void handleTranscodingProgressUpdate(int jobId, int newProgress) {
-        synchronized (mPendingTranscodingJobs) {
-            // Gets the job associated with the jobId.
-            final TranscodingJob job = mPendingTranscodingJobs.get(jobId);
+    private void handleTranscodingProgressUpdate(int sessionId, int newProgress) {
+        synchronized (mPendingTranscodingSessions) {
+            // Gets the session associated with the sessionId.
+            final TranscodingSession session = mPendingTranscodingSessions.get(sessionId);
 
-            if (job == null) {
+            if (session == null) {
                 // This should not happen in reality.
-                Log.e(TAG, "Job " + jobId + " is not in PendingJobs");
+                Log.e(TAG, "Session " + sessionId + " is not in Pendingsessions");
                 return;
             }
 
-            // Updates the job progress.
-            job.updateProgress(newProgress);
+            // Updates the session progress.
+            session.updateProgress(newProgress);
 
             // Notifies client the progress update.
-            if (job.mProgressUpdateExecutor != null && job.mProgressUpdateListener != null) {
-                job.mProgressUpdateExecutor.execute(
-                        () -> job.mProgressUpdateListener.onProgressUpdate(job, newProgress));
+            if (session.mProgressUpdateExecutor != null
+                    && session.mProgressUpdateListener != null) {
+                session.mProgressUpdateExecutor.execute(
+                        () -> session.mProgressUpdateListener.onProgressUpdate(session,
+                                newProgress));
             }
         }
     }
@@ -294,47 +299,48 @@ public final class MediaTranscodeManager {
     /*
      * Handle client binder died event.
      * Upon receiving a binder died event of the client, we will do the following:
-     * 1) For the job that is running, notify the client that the job is failed with error code,
-     *    so client could choose to retry the job or not.
+     * 1) For the session that is running, notify the client that the session is failed with
+     *    error code,  so client could choose to retry the session or not.
      *    TODO(hkuang): Add a new error code to signal service died error.
-     * 2) For the jobs that is still pending or paused, we will resubmit the job internally once
-     *    we successfully reconnect to the service and register a new client.
+     * 2) For the sessions that is still pending or paused, we will resubmit the session
+     *    once we successfully reconnect to the service and register a new client.
      * 3) When trying to connect to the service and register a new client. The service may need time
      *    to reboot or never boot up again. So we will retry for a number of times. If we still
-     *    could not connect, we will notify client job failure for the pending and paused jobs.
+     *    could not connect, we will notify client session failure for the pending and paused
+     *    sessions.
      */
     private void onClientDied() {
         synchronized (mLock) {
             mTranscodingClient = null;
         }
 
-        // Delegates the job notification and retry to the executor as it may take some time.
+        // Delegates the session notification and retry to the executor as it may take some time.
         mExecutor.execute(() -> {
-            // List to track the jobs that we want to retry.
-            List<TranscodingJob> retryJobs = new ArrayList<TranscodingJob>();
+            // List to track the sessions that we want to retry.
+            List<TranscodingSession> retrySessions = new ArrayList<TranscodingSession>();
 
-            // First notify the client of job failure for all the running jobs.
-            synchronized (mPendingTranscodingJobs) {
-                for (Map.Entry<Integer, TranscodingJob> entry :
-                        mPendingTranscodingJobs.entrySet()) {
-                    TranscodingJob job = entry.getValue();
+            // First notify the client of session failure for all the running sessions.
+            synchronized (mPendingTranscodingSessions) {
+                for (Map.Entry<Integer, TranscodingSession> entry :
+                        mPendingTranscodingSessions.entrySet()) {
+                    TranscodingSession session = entry.getValue();
 
-                    if (job.getStatus() == TranscodingJob.STATUS_RUNNING) {
-                        job.updateStatusAndResult(TranscodingJob.STATUS_FINISHED,
-                                TranscodingJob.RESULT_ERROR);
+                    if (session.getStatus() == TranscodingSession.STATUS_RUNNING) {
+                        session.updateStatusAndResult(TranscodingSession.STATUS_FINISHED,
+                                TranscodingSession.RESULT_ERROR);
 
-                        // Remove the job from pending jobs.
-                        mPendingTranscodingJobs.remove(entry.getKey());
+                        // Remove the session from pending sessions.
+                        mPendingTranscodingSessions.remove(entry.getKey());
 
-                        if (job.mListener != null && job.mListenerExecutor != null) {
-                            Log.i(TAG, "Notify client job failed");
-                            job.mListenerExecutor.execute(
-                                    () -> job.mListener.onTranscodingFinished(job));
+                        if (session.mListener != null && session.mListenerExecutor != null) {
+                            Log.i(TAG, "Notify client session failed");
+                            session.mListenerExecutor.execute(
+                                    () -> session.mListener.onTranscodingFinished(session));
                         }
-                    } else if (job.getStatus() == TranscodingJob.STATUS_PENDING
-                            || job.getStatus() == TranscodingJob.STATUS_PAUSED) {
-                        // Add the job to retryJobs to handle them later.
-                        retryJobs.add(job);
+                    } else if (session.getStatus() == TranscodingSession.STATUS_PENDING
+                            || session.getStatus() == TranscodingSession.STATUS_PAUSED) {
+                        // Add the session to retrySessions to handle them later.
+                        retrySessions.add(session);
                     }
                 }
             }
@@ -351,37 +357,37 @@ public final class MediaTranscodeManager {
                 }
             }
 
-            for (TranscodingJob job : retryJobs) {
-                // Notify the job failure if we fails to connect to the service or fail
-                // to retry the job.
+            for (TranscodingSession session : retrySessions) {
+                // Notify the session failure if we fails to connect to the service or fail
+                // to retry the session.
                 if (!haveTranscodingClient) {
                     // TODO(hkuang): Return correct error code to the client.
-                    handleTranscodingFailed(job.getJobId(), 0 /*unused */);
+                    handleTranscodingFailed(session.getSessionId(), 0 /*unused */);
                 }
 
                 try {
                     // Do not set hasRetried for retry initiated by MediaTranscodeManager.
-                    job.retryInternal(false /*setHasRetried*/);
+                    session.retryInternal(false /*setHasRetried*/);
                 } catch (Exception re) {
                     // TODO(hkuang): Return correct error code to the client.
-                    handleTranscodingFailed(job.getJobId(), 0 /*unused */);
+                    handleTranscodingFailed(session.getSessionId(), 0 /*unused */);
                 }
             }
         });
     }
 
-    private void updateStatus(int jobId, int status) {
-        synchronized (mPendingTranscodingJobs) {
-            final TranscodingJob job = mPendingTranscodingJobs.get(jobId);
+    private void updateStatus(int sessionId, int status) {
+        synchronized (mPendingTranscodingSessions) {
+            final TranscodingSession session = mPendingTranscodingSessions.get(sessionId);
 
-            if (job == null) {
+            if (session == null) {
                 // This should not happen in reality.
-                Log.e(TAG, "Job " + jobId + " is not in PendingJobs");
+                Log.e(TAG, "Session " + sessionId + " is not in Pendingsessions");
                 return;
             }
 
-            // Updates the job status.
-            job.updateStatus(status);
+            // Updates the session status.
+            session.updateStatus(status);
         }
     }
 
@@ -415,40 +421,42 @@ public final class MediaTranscodeManager {
                 }
 
                 @Override
-                public void onTranscodingStarted(int jobId) throws RemoteException {
-                    updateStatus(jobId, TranscodingJob.STATUS_RUNNING);
+                public void onTranscodingStarted(int sessionId) throws RemoteException {
+                    updateStatus(sessionId, TranscodingSession.STATUS_RUNNING);
                 }
 
                 @Override
-                public void onTranscodingPaused(int jobId) throws RemoteException {
-                    updateStatus(jobId, TranscodingJob.STATUS_PAUSED);
+                public void onTranscodingPaused(int sessionId) throws RemoteException {
+                    updateStatus(sessionId, TranscodingSession.STATUS_PAUSED);
                 }
 
                 @Override
-                public void onTranscodingResumed(int jobId) throws RemoteException {
-                    updateStatus(jobId, TranscodingJob.STATUS_RUNNING);
+                public void onTranscodingResumed(int sessionId) throws RemoteException {
+                    updateStatus(sessionId, TranscodingSession.STATUS_RUNNING);
                 }
 
                 @Override
-                public void onTranscodingFinished(int jobId, TranscodingResultParcel result)
+                public void onTranscodingFinished(int sessionId, TranscodingResultParcel result)
                         throws RemoteException {
-                    handleTranscodingFinished(jobId, result);
+                    handleTranscodingFinished(sessionId, result);
                 }
 
                 @Override
-                public void onTranscodingFailed(int jobId, int errorCode) throws RemoteException {
-                    handleTranscodingFailed(jobId, errorCode);
+                public void onTranscodingFailed(int sessionId, int errorCode)
+                        throws RemoteException {
+                    handleTranscodingFailed(sessionId, errorCode);
                 }
 
                 @Override
-                public void onAwaitNumberOfSessionsChanged(int jobId, int oldAwaitNumber,
+                public void onAwaitNumberOfSessionsChanged(int sessionId, int oldAwaitNumber,
                         int newAwaitNumber) throws RemoteException {
                     //TODO(hkuang): Implement this.
                 }
 
                 @Override
-                public void onProgressUpdate(int jobId, int newProgress) throws RemoteException {
-                    handleTranscodingProgressUpdate(jobId, newProgress);
+                public void onProgressUpdate(int sessionId, int newProgress)
+                        throws RemoteException {
+                    handleTranscodingProgressUpdate(sessionId, newProgress);
                 }
             };
 
@@ -1023,14 +1031,14 @@ public final class MediaTranscodeManager {
      * enqueued transcoding operation. The caller can use that instance to query the status or
      * progress, and to get the result once the operation has completed.
      */
-    public static final class TranscodingJob {
-        /** The job is enqueued but not yet running. */
+    public static final class TranscodingSession {
+        /** The session is enqueued but not yet running. */
         public static final int STATUS_PENDING = 1;
-        /** The job is currently running. */
+        /** The session is currently running. */
         public static final int STATUS_RUNNING = 2;
-        /** The job is finished. */
+        /** The session is finished. */
         public static final int STATUS_FINISHED = 3;
-        /** The job is paused. */
+        /** The session is paused. */
         public static final int STATUS_PAUSED = 4;
 
         /** @hide */
@@ -1043,13 +1051,13 @@ public final class MediaTranscodeManager {
         @Retention(RetentionPolicy.SOURCE)
         public @interface Status {}
 
-        /** The job does not have a result yet. */
+        /** The session does not have a result yet. */
         public static final int RESULT_NONE = 1;
-        /** The job completed successfully. */
+        /** The session completed successfully. */
         public static final int RESULT_SUCCESS = 2;
-        /** The job encountered an error while running. */
+        /** The session encountered an error while running. */
         public static final int RESULT_ERROR = 3;
-        /** The job was canceled by the caller. */
+        /** The session was canceled by the caller. */
         public static final int RESULT_CANCELED = 4;
 
         /** @hide */
@@ -1067,12 +1075,12 @@ public final class MediaTranscodeManager {
         public interface OnProgressUpdateListener {
             /**
              * Called when the progress changes. The progress is in percentage between 0 and 1,
-             * where 0 means that the job has not yet started and 100 means that it has finished.
+             * where 0 means the session has not yet started and 100 means that it has finished.
              *
-             * @param job      The job associated with the progress.
+             * @param session      The session associated with the progress.
              * @param progress The new progress ranging from 0 ~ 100 inclusive.
              */
-            void onProgressUpdate(@NonNull TranscodingJob job,
+            void onProgressUpdate(@NonNull TranscodingSession session,
                     @IntRange(from = 0, to = 100) int progress);
         }
 
@@ -1096,10 +1104,10 @@ public final class MediaTranscodeManager {
         private @Result int mResult = RESULT_NONE;
         @GuardedBy("mLock")
         private boolean mHasRetried = false;
-        // The original request that associated with this job.
+        // The original request that associated with this session.
         private final TranscodingRequest mRequest;
 
-        private TranscodingJob(
+        private TranscodingSession(
                 @NonNull MediaTranscodeManager manager,
                 @NonNull TranscodingRequest request,
                 @NonNull TranscodingSessionParcel parcel,
@@ -1147,19 +1155,19 @@ public final class MediaTranscodeManager {
             }
         }
 
-        private void updateStatusAndResult(@Status int jobStatus,
-                @Result int jobResult) {
+        private void updateStatusAndResult(@Status int sessionStatus,
+                @Result int sessionResult) {
             synchronized (mLock) {
-                mStatus = jobStatus;
-                mResult = jobResult;
+                mStatus = sessionStatus;
+                mResult = sessionResult;
             }
         }
 
         /**
-         * Resubmit the transcoding job to the service.
-         * Note that only the job that fails or gets cancelled could be retried and each job could
-         * be retried only once. After that, Client need to enqueue a new request if they want to
-         * try again.
+         * Resubmit the transcoding session to the service.
+         * Note that only the session that fails or gets cancelled could be retried and each session
+         * could be retried only once. After that, Client need to enqueue a new request if they want
+         * to try again.
          *
          * @throws MediaTranscodingException.ServiceNotAvailableException if the service
          *         is temporarily unavailable due to internal service rebooting. Client could retry
@@ -1177,11 +1185,11 @@ public final class MediaTranscodeManager {
             synchronized (mLock) {
                 if (mStatus == STATUS_PENDING || mStatus == STATUS_RUNNING) {
                     throw new UnsupportedOperationException(
-                            "Failed to retry as job is in processing");
+                            "Failed to retry as session is in processing");
                 }
 
                 if (mHasRetried) {
-                    throw new UnsupportedOperationException("Job has been retried already");
+                    throw new UnsupportedOperationException("Session has been retried already");
                 }
 
                 // Get the client interface.
@@ -1191,7 +1199,7 @@ public final class MediaTranscodeManager {
                             "Service rebooting. Try again later");
                 }
 
-                synchronized (mManager.mPendingTranscodingJobs) {
+                synchronized (mManager.mPendingTranscodingSessions) {
                     try {
                         // Submits the request to MediaTranscoding service.
                         TranscodingSessionParcel sessionParcel = new TranscodingSessionParcel();
@@ -1200,10 +1208,10 @@ public final class MediaTranscodeManager {
                             throw new UnsupportedOperationException("Failed to enqueue request");
                         }
 
-                        // Replace the old job id wit the new one.
+                        // Replace the old session id wit the new one.
                         mSessionId = sessionParcel.sessionId;
-                        // Adds the new job back into pending jobs.
-                        mManager.mPendingTranscodingJobs.put(mSessionId, this);
+                        // Adds the new session back into pending sessions.
+                        mManager.mPendingTranscodingSessions.put(mSessionId, this);
                     } catch (RemoteException re) {
                         throw new MediaTranscodingException.ServiceNotAvailableException(
                                 "Failed to resubmit request to Transcoding service");
@@ -1215,13 +1223,13 @@ public final class MediaTranscodeManager {
         }
 
         /**
-         * Cancels the transcoding job and notify the listener.
-         * If the job happened to finish before being canceled this call is effectively a no-op and
-         * will not update the result in that case.
+         * Cancels the transcoding session and notify the listener.
+         * If the session happened to finish before being canceled this call is effectively a no-op
+         * and will not update the result in that case.
          */
         public void cancel() {
             synchronized (mLock) {
-                // Check if the job is finished already.
+                // Check if the session is finished already.
                 if (mStatus != STATUS_FINISHED) {
                     try {
                         ITranscodingClient client = mManager.getTranscodingClient();
@@ -1230,22 +1238,22 @@ public final class MediaTranscodeManager {
                             client.cancelSession(mSessionId);
                         }
                     } catch (RemoteException re) {
-                        //TODO(hkuang): Find out what to do if failing to cancel the job.
-                        Log.e(TAG, "Failed to cancel the job due to exception:  " + re);
+                        //TODO(hkuang): Find out what to do if failing to cancel the session.
+                        Log.e(TAG, "Failed to cancel the session due to exception:  " + re);
                     }
                     mStatus = STATUS_FINISHED;
                     mResult = RESULT_CANCELED;
 
-                    // Notifies client the job is canceled.
+                    // Notifies client the session is canceled.
                     mListenerExecutor.execute(() -> mListener.onTranscodingFinished(this));
                 }
             }
         }
 
         /**
-         * Gets the progress of the transcoding job. The progress is between 0 and 100, where 0
-         * means that the job has not yet started and 100 means that it is finished. For the
-         * cancelled job, the progress will be the last updated progress before it is cancelled.
+         * Gets the progress of the transcoding session. The progress is between 0 and 100, where 0
+         * means that the session has not yet started and 100 means that it is finished. For the
+         * cancelled session, the progress will be the last updated progress before it is cancelled.
          * @return The progress.
          */
         @IntRange(from = 0, to = 100)
@@ -1256,7 +1264,7 @@ public final class MediaTranscodeManager {
         }
 
         /**
-         * Gets the status of the transcoding job.
+         * Gets the status of the transcoding session.
          * @return The status.
          */
         public @Status int getStatus() {
@@ -1266,15 +1274,15 @@ public final class MediaTranscodeManager {
         }
 
         /**
-         * Gets jobId of the transcoding job.
-         * @return job id.
+         * Gets sessionId of the transcoding session.
+         * @return session id.
          */
-        public int getJobId() {
+        public int getSessionId() {
             return mSessionId;
         }
 
         /**
-         * Gets the result of the transcoding job.
+         * Gets the result of the transcoding session.
          * @return The result.
          */
         public @Result int getResult() {
@@ -1323,7 +1331,7 @@ public final class MediaTranscodeManager {
                     status = String.valueOf(mStatus);
                     break;
             }
-            return String.format(" Job: {id: %d, status: %s, result: %s, progress: %d}",
+            return String.format(" session: {id: %d, status: %s, result: %s, progress: %d}",
                     mSessionId, status, result, mProgress);
         }
 
@@ -1349,13 +1357,13 @@ public final class MediaTranscodeManager {
     /**
      * Enqueues a TranscodingRequest for execution.
      * <p> Upon successfully accepting the request, MediaTranscodeManager will return a
-     * {@link TranscodingJob} to the client. Client should use {@link TranscodingJob} to track the
-     * progress and get the result.
+     * {@link TranscodingSession} to the client. Client should use {@link TranscodingSession} to
+     * track the progress and get the result.
      *
      * @param transcodingRequest The TranscodingRequest to enqueue.
      * @param listenerExecutor   Executor on which the listener is notified.
-     * @param listener           Listener to get notified when the transcoding job is finished.
-     * @return A TranscodingJob for this operation.
+     * @param listener           Listener to get notified when the transcoding session is finished.
+     * @return A TranscodingSession for this operation.
      * @throws FileNotFoundException if the source Uri or destination Uri could not be opened.
      * @throws UnsupportedOperationException if the request could not be fulfilled.
      * @throws MediaTranscodingException.ServiceNotAvailableException if the service
@@ -1363,7 +1371,7 @@ public final class MediaTranscodeManager {
      *         again after receiving this exception.
      */
     @NonNull
-    public TranscodingJob enqueueRequest(
+    public TranscodingSession enqueueRequest(
             @NonNull TranscodingRequest transcodingRequest,
             @NonNull @CallbackExecutor Executor listenerExecutor,
             @NonNull OnTranscodingFinishedListener listener)
@@ -1382,9 +1390,9 @@ public final class MediaTranscodeManager {
         // Submits the request to MediaTranscoding service.
         try {
             TranscodingSessionParcel sessionParcel = new TranscodingSessionParcel();
-            // Synchronizes the access to mPendingTranscodingJobs to make sure the job Id is
-            // inserted in the mPendingTranscodingJobs in the callback handler.
-            synchronized (mPendingTranscodingJobs) {
+            // Synchronizes the access to mPendingTranscodingSessions to make sure the session Id is
+            // inserted in the mPendingTranscodingSessions in the callback handler.
+            synchronized (mPendingTranscodingSessions) {
                 synchronized (mLock) {
                     if (mTranscodingClient == null) {
                         // Try to register with the service again.
@@ -1402,16 +1410,16 @@ public final class MediaTranscodeManager {
                     }
                 }
 
-                // Wraps the TranscodingSessionParcel into a TranscodingJob and returns it to client for
-                // tracking.
-                TranscodingJob job = new TranscodingJob(this, transcodingRequest,
+                // Wraps the TranscodingSessionParcel into a TranscodingSession and returns it to
+                // client for tracking.
+                TranscodingSession session = new TranscodingSession(this, transcodingRequest,
                         sessionParcel,
                         listenerExecutor,
                         listener);
 
-                // Adds the new job into pending jobs.
-                mPendingTranscodingJobs.put(job.getJobId(), job);
-                return job;
+                // Adds the new session into pending sessions.
+                mPendingTranscodingSessions.put(session.getSessionId(), session);
+                return session;
             }
         } catch (RemoteException re) {
             throw new UnsupportedOperationException(
