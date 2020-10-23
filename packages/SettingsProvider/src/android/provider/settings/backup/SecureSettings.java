@@ -176,8 +176,8 @@ public class SecureSettings {
         Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
         Settings.Secure.TAPS_APP_TO_EXIT,
         Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
-        Settings.Secure.PANIC_GESTURE_ENABLED,
-        Settings.Secure.PANIC_SOUND_ENABLED,
+        Settings.Secure.EMERGENCY_GESTURE_ENABLED,
+        Settings.Secure.EMERGENCY_GESTURE_SOUND_ENABLED,
         Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED,
         Settings.Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS,
         Settings.Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT

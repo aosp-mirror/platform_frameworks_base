@@ -197,7 +197,7 @@ public class GestureLauncherService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED),
                 false, mSettingObserver, mUserId);
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.PANIC_GESTURE_ENABLED),
+                Settings.Secure.getUriFor(Settings.Secure.EMERGENCY_GESTURE_ENABLED),
                 false, mSettingObserver, mUserId);
     }
 
@@ -361,7 +361,7 @@ public class GestureLauncherService extends SystemService {
      */
     public static boolean isEmergencyGestureEnabled(Context context, int userId) {
         return Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.PANIC_GESTURE_ENABLED, 0, userId) != 0;
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED, 0, userId) != 0;
     }
 
     /**

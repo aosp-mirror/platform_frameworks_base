@@ -2038,11 +2038,11 @@ class SettingsProtoDumpUtil {
 
         final long emergencyResponseToken = p.start(SecureSettingsProto.EMERGENCY_RESPONSE);
         dumpSetting(s, p,
-                Settings.Secure.PANIC_GESTURE_ENABLED,
-                SecureSettingsProto.EmergencyResponse.PANIC_GESTURE_ENABLED);
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED,
+                SecureSettingsProto.EmergencyResponse.EMERGENCY_GESTURE_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.PANIC_SOUND_ENABLED,
-                SecureSettingsProto.EmergencyResponse.PANIC_SOUND_ENABLED);
+                Settings.Secure.EMERGENCY_GESTURE_SOUND_ENABLED,
+                SecureSettingsProto.EmergencyResponse.EMERGENCY_GESTURE_SOUND_ENABLED);
         p.end(emergencyResponseToken);
 
         dumpSetting(s, p,

@@ -8395,18 +8395,19 @@ public final class Settings {
         public static final String CAMERA_GESTURE_DISABLED = "camera_gesture_disabled";
 
         /**
-         * Whether the panic button (emergency sos) gesture should be enabled.
+         * Whether the emergency gesture should be enabled.
          *
          * @hide
          */
-        public static final String PANIC_GESTURE_ENABLED = "panic_gesture_enabled";
+        public static final String EMERGENCY_GESTURE_ENABLED = "emergency_gesture_enabled";
 
         /**
-         * Whether the panic button (emergency sos) sound should be enabled.
+         * Whether the emergency gesture sound should be enabled.
          *
          * @hide
          */
-        public static final String PANIC_SOUND_ENABLED = "panic_sound_enabled";
+        public static final String EMERGENCY_GESTURE_SOUND_ENABLED =
+                "emergency_gesture_sound_enabled";
 
         /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
