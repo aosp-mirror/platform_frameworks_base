@@ -71,6 +71,18 @@ package android.os {
 
 }
 
+package android.telephony {
+
+  public abstract class CellSignalStrength {
+    method public static int getNumSignalStrengthLevels();
+  }
+
+  public class TelephonyManager {
+    method @NonNull public static int[] getAllNetworkTypes();
+  }
+
+}
+
 package android.util {
 
   public final class Log {
