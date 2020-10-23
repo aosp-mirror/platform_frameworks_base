@@ -10348,11 +10348,11 @@ package android.telephony.data {
     method public int getSuggestedRetryTime();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
-    field public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 2; // 0x2
-    field public static final int HANDOVER_FAILURE_MODE_LEGACY = 1; // 0x1
-    field public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 3; // 0x3
-    field public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 4; // 0x4
-    field public static final int HANDOVER_FAILURE_MODE_UNKNOWN = 0; // 0x0
+    field public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 1; // 0x1
+    field public static final int HANDOVER_FAILURE_MODE_LEGACY = 0; // 0x0
+    field public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 2; // 0x2
+    field public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 3; // 0x3
+    field public static final int HANDOVER_FAILURE_MODE_UNKNOWN = -1; // 0xffffffff
     field public static final int LINK_STATUS_ACTIVE = 2; // 0x2
     field public static final int LINK_STATUS_DORMANT = 1; // 0x1
     field public static final int LINK_STATUS_INACTIVE = 0; // 0x0
