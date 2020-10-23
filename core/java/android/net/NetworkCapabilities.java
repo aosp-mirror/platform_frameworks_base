@@ -170,6 +170,7 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_MCX,
             NET_CAPABILITY_PARTIAL_CONNECTIVITY,
             NET_CAPABILITY_TEMPORARILY_NOT_METERED,
+            NET_CAPABILITY_OEM_PRIVATE,
     })
     public @interface NetCapability { }
 
@@ -345,8 +346,15 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_TEMPORARILY_NOT_METERED = 25;
 
+    /**
+     * Indicates that this network is private to the OEM and meant only for OEM use.
+     * @hide
+     */
+    @SystemApi
+    public static final int NET_CAPABILITY_OEM_PRIVATE = 26;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_TEMPORARILY_NOT_METERED;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_OEM_PRIVATE;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -404,7 +412,8 @@ public final class NetworkCapabilities implements Parcelable {
      * {@see #maybeMarkCapabilitiesRestricted}.
      */
     private static final long FORCE_RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_OEM_PAID);
+            (1 << NET_CAPABILITY_OEM_PAID)
+            | (1 << NET_CAPABILITY_OEM_PRIVATE);
 
     /**
      * Capabilities that suggest that a network is unrestricted.
@@ -1910,6 +1919,7 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_MCX:                  return "MCX";
             case NET_CAPABILITY_PARTIAL_CONNECTIVITY: return "PARTIAL_CONNECTIVITY";
             case NET_CAPABILITY_TEMPORARILY_NOT_METERED:    return "TEMPORARILY_NOT_METERED";
+            case NET_CAPABILITY_OEM_PRIVATE:          return "OEM_PRIVATE";
             default:                                  return Integer.toString(capability);
         }
     }
