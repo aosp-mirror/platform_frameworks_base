@@ -313,7 +313,7 @@ static jlong nativeGetFromBlastBufferQueue(JNIEnv* env, jclass clazz, jlong nati
         return nativeObject;
     }
 
-    sp<Surface> surface = queue->getSurface();
+    sp<Surface> surface = queue->getSurface(true /* includeSurfaceControlHandle */);
     if (surface != NULL) {
         surface->incStrong(&sRefBaseOwner);
     }
@@ -349,7 +349,8 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
     sp<Surface> sur;
     if (surfaceShim.graphicBufferProducer != nullptr) {
         // we have a new IGraphicBufferProducer, create a new Surface for it
-        sur = new Surface(surfaceShim.graphicBufferProducer, true);
+        sur = new Surface(surfaceShim.graphicBufferProducer, true,
+                          surfaceShim.surfaceControlHandle);
         // and keep a reference before passing to java
         sur->incStrong(&sRefBaseOwner);
     }
@@ -373,6 +374,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     android::view::Surface surfaceShim;
     if (self != nullptr) {
         surfaceShim.graphicBufferProducer = self->getIGraphicBufferProducer();
+        surfaceShim.surfaceControlHandle = self->getSurfaceControlHandle();
     }
     // Calling code in Surface.java has already written the name of the Surface
     // to the Parcel
