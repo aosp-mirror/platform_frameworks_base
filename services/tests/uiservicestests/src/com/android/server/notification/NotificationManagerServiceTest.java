@@ -7145,7 +7145,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(child).recordDismissalSentiment(anyInt());
     }
 
-    @Test
+    // TODO (b/171418004): renable after app outreach
+    /*@Test
     public void testImmutableBubbleIntent() throws Exception {
         when(mAmi.getPendingIntentFlags(pi1))
                 .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
@@ -7160,7 +7161,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         } catch (IllegalArgumentException e) {
             // good
         }
-    }
+    }*/
 
     @Test
     public void testMutableBubbleIntent() throws Exception {

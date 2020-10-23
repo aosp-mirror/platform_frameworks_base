@@ -6091,14 +6091,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         // bubble or inline reply that's immutable?
-        if (n.getBubbleMetadata() != null
+        // TODO (b/171418004): renable after app outreach
+        /*if (n.getBubbleMetadata() != null
                 && n.getBubbleMetadata().getIntent() != null
                 && hasFlag(mAmi.getPendingIntentFlags(
                         n.getBubbleMetadata().getIntent().getTarget()),
                         PendingIntent.FLAG_IMMUTABLE)) {
             throw new IllegalArgumentException(r.getKey() + " Not posted."
                     + " PendingIntents attached to bubbles must be mutable");
-        }
+        }*/
 
         if (n.actions != null) {
             for (Notification.Action action : n.actions) {
