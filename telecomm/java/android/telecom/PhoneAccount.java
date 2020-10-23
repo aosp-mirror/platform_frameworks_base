@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -51,8 +52,17 @@ public final class PhoneAccount implements Parcelable {
      *
      * This is an extras key set via {@link Builder#setExtras} which determines the order in which
      * {@link PhoneAccount}s from the same {@link ConnectionService} are sorted. The accounts
-     * are sorted by this key via standard lexicographical order, and this ordering is used to
+     * are sorted by this key via standard lexicographical order, (as implemented in
+     * {@link String#compareTo}), and this ordering is used to
      * determine priority when a call can be placed via multiple accounts.
+     *
+     * When multiple {@link PhoneAccount}s are supplied with the same sort order key, no ordering is
+     * guaranteed between those {@link PhoneAccount}s. Additionally, no ordering is guaranteed
+     * between {@link PhoneAccount}s that do not supply this extra, and all such accounts
+     * will be sorted after the accounts that do supply this extra.
+     *
+     * An example of a sort order key is slot index (see {@link TelephonyManager#getSlotIndex()}),
+     * which is the one used by the cell Telephony stack.
      * @hide
      */
     @SystemApi
