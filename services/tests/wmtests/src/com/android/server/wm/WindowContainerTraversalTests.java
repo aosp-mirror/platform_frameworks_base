@@ -56,7 +56,7 @@ public class WindowContainerTraversalTests extends WindowTestsBase {
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
                 TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
 
-        mDisplayContent.mInputMethodTarget = splitScreenWindow;
+        mDisplayContent.setImeLayeringTarget(splitScreenWindow);
 
         Consumer<WindowState> c = mock(Consumer.class);
         mDisplayContent.forAllWindows(c, false);

@@ -292,7 +292,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         // Make IME attach to the window and can produce insets.
         final DisplayContent dc = mTestDisplayContent;
-        dc.mInputMethodTarget = w;
+        dc.setImeLayeringTarget(w);
         WindowState mockIme = mock(WindowState.class);
         Mockito.doReturn(true).when(mockIme).isVisibleNow();
         dc.mInputMethodWindow = mockIme;

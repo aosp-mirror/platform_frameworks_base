@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
+import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IME_TARGET_FROM_IME;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.INSETS_SOURCE_PROVIDER;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IS_IME_LAYOUT_DRAWN;
@@ -75,7 +78,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             ProtoLog.d(WM_DEBUG_IME, "Run showImeRunner");
             // Target should still be the same.
             if (isReadyToShowIme()) {
-                final InsetsControlTarget target = mDisplayContent.mInputMethodControlTarget;
+                final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
 
                 ProtoLog.i(WM_DEBUG_IME, "call showInsets(ime) on %s",
                         target.getWindow() != null ? target.getWindow().getName() : "");
@@ -130,7 +133,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         // Also, if imeTarget is closing, it would be considered as outdated target.
         // TODO(b/139861270): Remove the child & sublayer check once IMMS is aware of
         //  actual IME target.
-        final InsetsControlTarget dcTarget = mDisplayContent.mInputMethodTarget;
+        final InsetsControlTarget dcTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
         if (dcTarget == null || mImeRequester == null) {
             return false;
         }
@@ -165,11 +168,11 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     private boolean isImeInputTarget(InsetsControlTarget target) {
-        return target == mDisplayContent.mInputMethodInputTarget;
+        return target == mDisplayContent.getImeTarget(IME_TARGET_INPUT);
     }
 
     private boolean sameAsImeControlTarget() {
-        final InsetsControlTarget target = mDisplayContent.mInputMethodControlTarget;
+        final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
         return target == mImeRequester
                 && (mImeRequester.getWindow() == null
                 || !mImeRequester.getWindow().isClosing());

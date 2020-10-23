@@ -30,6 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 
 import static org.junit.Assert.assertEquals;
@@ -270,7 +271,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The position should be horizontal centered.
         assertEquals((displayWidth - bounds.width()) / 2, bounds.left);
 
-        mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
+        mActivity.mDisplayContent.setImeLayeringTarget(addWindowToActivity(mActivity));
         // Make sure IME cannot attach to the app, otherwise IME window will also be shifted.
         assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
 
@@ -290,9 +291,9 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
 
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
-        mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
-        mActivity.mDisplayContent.mInputMethodInputTarget =
-                mActivity.mDisplayContent.mInputMethodTarget;
+        mActivity.mDisplayContent.setImeLayeringTarget(addWindowToActivity(mActivity));
+        mActivity.mDisplayContent.setImeInputTarget(
+                mActivity.mDisplayContent.getImeTarget(IME_TARGET_LAYERING).getWindow());
         // Because the aspect ratio of display doesn't exceed the max aspect ratio of activity.
         // The activity should still fill its parent container and IME can attach to the activity.
         assertTrue(mActivity.matchParentBounds());
