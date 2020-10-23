@@ -3200,4 +3200,56 @@ public class WifiConfiguration implements Parcelable {
                 || allowedKeyManagement.get(KeyMgmt.WAPI_PSK);
     }
 
+    /**
+     * Get a unique key which represent this Wi-Fi configuration profile. If two profiles are for
+     * the same Wi-Fi network, but from different providers (apps, carriers, or data subscriptions),
+     * they would have different keys.
+     * @return a unique key which represent this profile.
+     * @hide
+     */
+    @SystemApi
+    @NonNull public String getProfileKey() {
+        if (mPasspointUniqueId != null) {
+            return mPasspointUniqueId;
+        }
+
+        String key = SSID + getDefaultSecurityType();
+        if (!shared) {
+            key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
+        }
+        if (fromWifiNetworkSuggestion) {
+            key += "_" + creatorName + "-" + carrierId + "-" + subscriptionId;
+        }
+
+        return key;
+    }
+
+    private String getDefaultSecurityType() {
+        String key;
+        if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+            key = KeyMgmt.strings[KeyMgmt.WPA_PSK];
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
+                || allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+            key = KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        } else if (wepTxKeyIndex >= 0 && wepTxKeyIndex < wepKeys.length
+                && wepKeys[wepTxKeyIndex] != null) {
+            key = "WEP";
+        } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
+            key = KeyMgmt.strings[KeyMgmt.OWE];
+        } else if (allowedKeyManagement.get(KeyMgmt.SAE)) {
+            key = KeyMgmt.strings[KeyMgmt.SAE];
+        } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+            key = KeyMgmt.strings[KeyMgmt.SUITE_B_192];
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_PSK)) {
+            key = KeyMgmt.strings[KeyMgmt.WAPI_PSK];
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
+            key = KeyMgmt.strings[KeyMgmt.WAPI_CERT];
+        } else if (allowedKeyManagement.get(KeyMgmt.OSEN)) {
+            key = KeyMgmt.strings[KeyMgmt.OSEN];
+        } else {
+            key = KeyMgmt.strings[KeyMgmt.NONE];
+        }
+        return key;
+    }
+
 }

@@ -7585,6 +7585,7 @@ package android.net.wifi {
     method @Deprecated @NonNull public android.net.IpConfiguration getIpConfiguration();
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getPrintableSsid();
+    method @Deprecated @NonNull public String getProfileKey();
     method @Deprecated public int getRecentFailureReason();
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
