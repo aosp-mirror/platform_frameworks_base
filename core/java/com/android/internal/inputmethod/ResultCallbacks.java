@@ -129,4 +129,32 @@ public final class ResultCallbacks {
             }
         };
     }
+
+    /**
+     * Creates {@link ISurroundingTextResultCallback.Stub} that is to set
+     * {@link CancellationGroup.Completable.SurroundingText} when receiving the result.
+     *
+     * @param value {@link CancellationGroup.Completable.SurroundingText} to be set when receiving
+     *              the result.
+     * @return {@link ISurroundingTextResultCallback.Stub} that can be passed as a binder IPC
+     *         parameter.
+     */
+    @AnyThread
+    public static ISurroundingTextResultCallback.Stub of(
+            @NonNull CancellationGroup.Completable.SurroundingText value) {
+        final AtomicReference<WeakReference<CancellationGroup.Completable.SurroundingText>>
+                atomicRef = new AtomicReference<>(new WeakReference<>(value));
+
+        return new ISurroundingTextResultCallback.Stub() {
+            @BinderThread
+            @Override
+            public void onResult(android.view.inputmethod.SurroundingText result) {
+                final CancellationGroup.Completable.SurroundingText value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onComplete(result);
+            }
+        };
+    }
 }
