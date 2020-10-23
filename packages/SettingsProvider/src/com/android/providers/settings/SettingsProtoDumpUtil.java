@@ -863,9 +863,6 @@ class SettingsProtoDumpUtil {
         p.end(intentFirewallToken);
 
         dumpSetting(s, p,
-                Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS,
-                GlobalSettingsProto.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS);
-        dumpSetting(s, p,
                 Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
                 GlobalSettingsProto.KEEP_PROFILE_IN_BACKGROUND);
 

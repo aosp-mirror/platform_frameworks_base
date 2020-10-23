@@ -339,6 +339,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
             boolean apiQuotaScheduleUpdated = false;
             boolean concurrencyUpdated = false;
+            for (int controller = 0; controller < mControllers.size(); controller++) {
+                final StateController sc = mControllers.get(controller);
+                sc.prepareForUpdatedConstantsLocked();
+            }
+
             synchronized (mLock) {
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
@@ -384,6 +389,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                                     && !concurrencyUpdated) {
                                 mConstants.updateConcurrencyConstantsLocked();
                                 concurrencyUpdated = true;
+                            } else {
+                                for (int ctrlr = 0; ctrlr < mControllers.size(); ctrlr++) {
+                                    final StateController sc = mControllers.get(ctrlr);
+                                    sc.processConstantLocked(properties, name);
+                                }
                             }
                             break;
                     }
