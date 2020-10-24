@@ -64,6 +64,12 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
+    public void getAllCecSettings_NoMasterXml() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        assertThat(hdmiCecConfig.getAllSettings()).isEmpty();
+    }
+
+    @Test
     public void getAllCecSettings_Empty() {
         HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
@@ -98,6 +104,12 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getAllSettings())
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                                  HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+    }
+
+    @Test
+    public void getUserCecSettings_NoMasterXml() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        assertThat(hdmiCecConfig.getUserSettings()).isEmpty();
     }
 
     @Test
@@ -177,6 +189,13 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
+    public void getAllowedValues_NoMasterXml() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> hdmiCecConfig.getAllowedValues("foo"));
+    }
+
+    @Test
     public void getAllowedValues_InvalidSetting() {
         HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
@@ -209,6 +228,13 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
+    public void getDefaultValue_NoMasterXml() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> hdmiCecConfig.getDefaultValue("foo"));
+    }
+
+    @Test
     public void getDefaultValue_InvalidSetting() {
         HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
@@ -236,6 +262,13 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getDefaultValue(
                     HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP))
                 .isEqualTo(HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
+    }
+
+    @Test
+    public void getValue_NoMasterXml() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> hdmiCecConfig.getValue("foo"));
     }
 
     @Test
@@ -296,6 +329,13 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST))
                 .isEqualTo(HdmiProperties.power_state_change_on_active_source_lost_values
                         .STANDBY_NOW.name().toLowerCase());
+    }
+
+    @Test
+    public void setValue_NoMasterXml() {
+        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> hdmiCecConfig.setValue("foo", "bar"));
     }
 
     @Test
@@ -400,7 +440,10 @@ public final class HdmiCecConfigTest {
         CecSettings productConfig = null;
         CecSettings vendorOverride = null;
         try {
-            productConfig = XmlParser.read(new ByteArrayInputStream(productConfigXml.getBytes()));
+            if (productConfigXml != null) {
+                productConfig = XmlParser.read(
+                        new ByteArrayInputStream(productConfigXml.getBytes()));
+            }
             if (vendorOverrideXml != null) {
                 vendorOverride = XmlParser.read(
                         new ByteArrayInputStream(vendorOverrideXml.getBytes()));
