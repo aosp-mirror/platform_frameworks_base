@@ -316,8 +316,8 @@ public class ActivityManager {
     public static final int START_RETURN_INTENT_TO_CALLER = FIRST_START_SUCCESS_CODE + 1;
 
     /**
-     * Result for IActivityManaqer.startActivity: activity wasn't really started, but
-     * a task was simply brought to the foreground.
+     * Result for IActivityManaqer.startActivity: activity was started or brought forward in an
+     * existing task which was brought to the foreground.
      * @hide
      */
     public static final int START_TASK_TO_FRONT = FIRST_START_SUCCESS_CODE + 2;

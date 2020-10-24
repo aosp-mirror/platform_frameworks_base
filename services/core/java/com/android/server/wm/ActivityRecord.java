@@ -4167,6 +4167,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 appToken, visible, appTransition, isVisible(), mVisibleRequested,
                 Debug.getCallers(6));
 
+        // Before setting mVisibleRequested so we can track changes.
+        mAtmService.getTransitionController().collect(this);
+
         onChildVisibilityRequested(visible);
 
         final DisplayContent displayContent = getDisplayContent();
@@ -4236,8 +4239,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             transferStartingWindowFromHiddenAboveTokenIfNeeded();
         }
 
-        // TODO(b/169035022): move to a more-appropriate place.
-        mAtmService.getTransitionController().collect(this);
+        // If in a transition, defer commits for activities that are going invisible
         if (!visible && mAtmService.getTransitionController().inTransition()) {
             return;
         }

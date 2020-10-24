@@ -1591,11 +1591,18 @@ class ActivityStarter {
                 if (newTransition != null) {
                     newTransition.abort();
                 }
-            } else if (newTransition != null) {
-                mService.getTransitionController().requestStartTransition(newTransition);
             } else {
-                // Make the collecting transition wait until this request is ready.
-                mService.getTransitionController().setReady(false);
+                if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
+                    // The activity is started new rather than just brought forward, so record
+                    // it as an existence change.
+                    mService.getTransitionController().collectExistenceChange(r);
+                }
+                if (newTransition != null) {
+                    mService.getTransitionController().requestStartTransition(newTransition);
+                } else {
+                    // Make the collecting transition wait until this request is ready.
+                    mService.getTransitionController().setReady(false);
+                }
             }
         }
 
@@ -2629,7 +2636,7 @@ class ActivityStarter {
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
-        mService.getTransitionController().collect(task);
+        mService.getTransitionController().collectExistenceChange(task);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
 
         ProtoLog.v(WM_DEBUG_TASKS, "Starting new activity %s in new task %s",

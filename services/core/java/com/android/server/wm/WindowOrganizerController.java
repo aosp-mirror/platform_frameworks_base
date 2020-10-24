@@ -233,9 +233,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (syncId >= 0) {
                     addToSyncSet(syncId, wc);
                 }
+                if (transition != null) transition.collect(wc);
 
                 int containerEffect = applyWindowContainerChange(wc, entry.getValue());
-                if (transition != null) transition.collect(wc);
                 effects |= containerEffect;
 
                 // Lifecycle changes will trigger ensureConfig for everything.
@@ -256,7 +256,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (syncId >= 0) {
                     addToSyncSet(syncId, wc);
                 }
-                        effects |= sanitizeAndApplyHierarchyOp(wc, hop);
                 if (transition != null) {
                     transition.collect(wc);
                     if (hop.isReparent() && hop.getNewParent() != null) {
@@ -269,6 +268,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         transition.collect(parentWc);
                     }
                 }
+                effects |= sanitizeAndApplyHierarchyOp(wc, hop);
             }
             // Queue-up bounds-change transactions for tasks which are now organized. Do
             // this after hierarchy ops so we have the final organized state.
