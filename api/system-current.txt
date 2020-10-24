@@ -4936,6 +4936,7 @@ package android.media.tv {
   }
 
   public abstract class TvInputService extends android.app.Service {
+    method @Nullable public android.os.IBinder createExtension();
     method @Nullable public android.media.tv.TvInputInfo onHardwareAdded(android.media.tv.TvInputHardwareInfo);
     method @Nullable public String onHardwareRemoved(android.media.tv.TvInputHardwareInfo);
     method @Nullable public android.media.tv.TvInputInfo onHdmiDeviceAdded(android.hardware.hdmi.HdmiDeviceInfo);
