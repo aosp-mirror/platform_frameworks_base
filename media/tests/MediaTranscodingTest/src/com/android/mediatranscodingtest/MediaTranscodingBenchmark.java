@@ -20,8 +20,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
-import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
+import android.media.MediaTranscodeManager.TranscodingSession;
 import android.media.MediaTranscodingException;
 import android.net.Uri;
 import android.test.ActivityInstrumentationTestCase2;
@@ -129,17 +129,20 @@ public class MediaTranscodingBenchmark
             Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
             long startTimeMs = System.currentTimeMillis();
-            TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
-                    transcodingJob -> {
+            TranscodingSession session = mMediaTranscodeManager.enqueueRequest(request,
+                    listenerExecutor,
+                    TranscodingSession -> {
                         Log.d(TAG,
-                                "Transcoding completed with result: " + transcodingJob.getResult());
-                        assertEquals(transcodingJob.getResult(), TranscodingJob.RESULT_SUCCESS);
+                                "Transcoding completed with result: "
+                                        + TranscodingSession.getResult());
+                        assertEquals(TranscodingSession.getResult(),
+                                TranscodingSession.RESULT_SUCCESS);
                         transcodingTime.set(System.currentTimeMillis() - startTimeMs);
                         totalTimeMs.addAndGet(transcodingTime.get());
                         transcodeCompleteSemaphore.release();
                     });
 
-            if (job != null) {
+            if (session != null) {
                 Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
                 boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
                         timeoutSeconds, TimeUnit.SECONDS);
@@ -154,7 +157,7 @@ public class MediaTranscodingBenchmark
 
     // Calculate the maximum wait time based on minimum transcoding throughput and frame number.
     private int calMaxTranscodingWaitTimeSeconds(int numberFrames, int minTranscodingFps) {
-        float waitTime =  (float) numberFrames / (float) minTranscodingFps;
+        float waitTime = (float) numberFrames / (float) minTranscodingFps;
         // If waitTimeSeconds is 0, wait for 1 second at least.
         int waitTimeSeconds = (int) Math.ceil(waitTime);
         return waitTimeSeconds == 0 ? 1 : waitTimeSeconds;

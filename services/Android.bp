@@ -1,17 +1,3 @@
-java_defaults {
-    name: "services_defaults",
-    plugins: [
-        "error_prone_android_framework",
-    ],
-    errorprone: {
-        javacflags: [
-            "-Xep:AndroidFrameworkBinderIdentity:ERROR",
-            "-Xep:AndroidFrameworkCompatChange:ERROR",
-            "-Xep:AndroidFrameworkUid:ERROR",
-        ],
-    },
-}
-
 filegroup {
     name: "services-main-sources",
     srcs: ["java/**/*.java"],

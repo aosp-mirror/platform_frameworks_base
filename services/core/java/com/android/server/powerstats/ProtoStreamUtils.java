@@ -19,7 +19,7 @@ package com.android.server.powerstats;
 import android.hardware.power.stats.ChannelInfo;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
-import android.util.Log;
+import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -27,6 +27,7 @@ import android.util.proto.WireTypeMismatchException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +57,14 @@ public class ProtoStreamUtils {
 
         public static void print(ChannelInfo[] channelInfo) {
             for (int i = 0; i < channelInfo.length; i++) {
-                Log.d(TAG, "ChannelId = " + channelInfo[i].channelId
+                Slog.d(TAG, "ChannelId = " + channelInfo[i].channelId
+                        + ", ChannelName = " + channelInfo[i].channelName);
+            }
+        }
+
+        public static void dumpsys(ChannelInfo[] channelInfo, PrintWriter pw) {
+            for (int i = 0; i < channelInfo.length; i++) {
+                pw.println("ChannelId = " + channelInfo[i].channelId
                         + ", ChannelName = " + channelInfo[i].channelName);
             }
         }
@@ -100,11 +108,11 @@ public class ProtoStreamUtils {
                         return energyMeasurementList.toArray(
                             new EnergyMeasurement[energyMeasurementList.size()]);
                     } else {
-                        Log.e(TAG, "Unhandled field in proto: "
+                        Slog.e(TAG, "Unhandled field in proto: "
                                 + ProtoUtils.currentFieldToString(pis));
                     }
                 } catch (WireTypeMismatchException wtme) {
-                    Log.e(TAG, "Wire Type mismatch in proto: "
+                    Slog.e(TAG, "Wire Type mismatch in proto: "
                             + ProtoUtils.currentFieldToString(pis));
                 }
             }
@@ -136,12 +144,12 @@ public class ProtoStreamUtils {
                             return energyMeasurement;
 
                         default:
-                            Log.e(TAG, "Unhandled field in EnergyMeasurementProto: "
+                            Slog.e(TAG, "Unhandled field in EnergyMeasurementProto: "
                                     + ProtoUtils.currentFieldToString(pis));
                             break;
                     }
                 } catch (WireTypeMismatchException wtme) {
-                    Log.e(TAG, "Wire Type mismatch in EnergyMeasurementProto: "
+                    Slog.e(TAG, "Wire Type mismatch in EnergyMeasurementProto: "
                             + ProtoUtils.currentFieldToString(pis));
                 }
             }
@@ -149,7 +157,7 @@ public class ProtoStreamUtils {
 
         public static void print(EnergyMeasurement[] energyMeasurement) {
             for (int i = 0; i < energyMeasurement.length; i++) {
-                Log.d(TAG, "ChannelId = " + energyMeasurement[i].channelId
+                Slog.d(TAG, "ChannelId = " + energyMeasurement[i].channelId
                         + ", Timestamp (ms) = " + energyMeasurement[i].timestampMs
                         + ", Energy (uWs) = " + energyMeasurement[i].energyUWs);
             }
@@ -169,7 +177,13 @@ public class ProtoStreamUtils {
 
         public static void print(int[] energyConsumerId) {
             for (int i = 0; i < energyConsumerId.length; i++) {
-                Log.d(TAG, "EnergyConsumerId = " + energyConsumerId[i]);
+                Slog.d(TAG, "EnergyConsumerId = " + energyConsumerId[i]);
+            }
+        }
+
+        public static void dumpsys(int[] energyConsumerId, PrintWriter pw) {
+            for (int i = 0; i < energyConsumerId.length; i++) {
+                pw.println("EnergyConsumerId = " + energyConsumerId[i]);
             }
         }
     }
@@ -215,11 +229,11 @@ public class ProtoStreamUtils {
                         return energyConsumerResultList.toArray(
                             new EnergyConsumerResult[energyConsumerResultList.size()]);
                     } else {
-                        Log.e(TAG, "Unhandled field in proto: "
+                        Slog.e(TAG, "Unhandled field in proto: "
                                 + ProtoUtils.currentFieldToString(pis));
                     }
                 } catch (WireTypeMismatchException wtme) {
-                    Log.e(TAG, "Wire Type mismatch in proto: "
+                    Slog.e(TAG, "Wire Type mismatch in proto: "
                             + ProtoUtils.currentFieldToString(pis));
                 }
             }
@@ -251,12 +265,12 @@ public class ProtoStreamUtils {
                             return energyConsumerResult;
 
                         default:
-                            Log.e(TAG, "Unhandled field in EnergyConsumerResultProto: "
+                            Slog.e(TAG, "Unhandled field in EnergyConsumerResultProto: "
                                     + ProtoUtils.currentFieldToString(pis));
                             break;
                     }
                 } catch (WireTypeMismatchException wtme) {
-                    Log.e(TAG, "Wire Type mismatch in EnergyConsumerResultProto: "
+                    Slog.e(TAG, "Wire Type mismatch in EnergyConsumerResultProto: "
                             + ProtoUtils.currentFieldToString(pis));
                 }
             }
@@ -264,7 +278,7 @@ public class ProtoStreamUtils {
 
         public static void print(EnergyConsumerResult[] energyConsumerResult) {
             for (int i = 0; i < energyConsumerResult.length; i++) {
-                Log.d(TAG, "EnergyConsumerId = " + energyConsumerResult[i].energyConsumerId
+                Slog.d(TAG, "EnergyConsumerId = " + energyConsumerResult[i].energyConsumerId
                         + ", Timestamp (ms) = " + energyConsumerResult[i].timestampMs
                         + ", Energy (uWs) = " + energyConsumerResult[i].energyUWs);
             }

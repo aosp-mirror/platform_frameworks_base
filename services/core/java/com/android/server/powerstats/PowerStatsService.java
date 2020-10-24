@@ -18,16 +18,19 @@ package com.android.server.powerstats;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.power.stats.ChannelInfo;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.UserHandle;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.PowerStatsHALWrapper.PowerStatsHALWrapperImpl;
+import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -98,7 +101,7 @@ public class PowerStatsService extends SystemService {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             if (mPowerStatsLogger == null) {
-                Log.e(TAG, "PowerStats HAL is not initialized.  No data available.");
+                Slog.e(TAG, "PowerStats HAL is not initialized.  No data available.");
             } else {
                 if (args.length > 0 && "--proto".equals(args[0])) {
                     if ("model".equals(args[1])) {
@@ -106,6 +109,14 @@ public class PowerStatsService extends SystemService {
                     } else if ("meter".equals(args[1])) {
                         mPowerStatsLogger.writeMeterDataToFile(fd);
                     }
+                } else if (args.length == 0) {
+                    pw.println("PowerStatsService dumpsys: available ChannelInfos");
+                    ChannelInfo[] channelInfo = mPowerStatsHALWrapper.getEnergyMeterInfo();
+                    ChannelInfoUtils.dumpsys(channelInfo, pw);
+
+                    pw.println("PowerStatsService dumpsys: available EnergyConsumerIds");
+                    int[] energyConsumerId = mPowerStatsHALWrapper.getEnergyConsumerInfo();
+                    EnergyConsumerIdUtils.dumpsys(energyConsumerId, pw);
                 }
             }
         }
@@ -127,7 +138,7 @@ public class PowerStatsService extends SystemService {
         mPowerStatsHALWrapper = mInjector.createPowerStatsHALWrapperImpl();
 
         if (mPowerStatsHALWrapper.initialize()) {
-            if (DEBUG) Log.d(TAG, "Starting PowerStatsService");
+            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService");
 
             // Only start logger and triggers if initialization is successful.
             mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
@@ -136,7 +147,7 @@ public class PowerStatsService extends SystemService {
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {
-            Log.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
+            Slog.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
         }
     }
 

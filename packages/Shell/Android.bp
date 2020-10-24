@@ -1,5 +1,6 @@
 android_app {
     name: "Shell",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java",":dumpstate_aidl"],
     aidl: {
         include_dirs: ["frameworks/native/cmds/dumpstate/binder"],

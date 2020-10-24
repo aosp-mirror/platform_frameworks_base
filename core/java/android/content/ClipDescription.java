@@ -64,6 +64,12 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
 
     /**
+     * The MIME type for an activity.
+     * @hide
+     */
+    public static final String MIMETYPE_APPLICATION_ACTIVITY = "application/vnd.android.activity";
+
+    /**
      * The MIME type for data whose type is otherwise unknown.
      * <p>
      * Per RFC 2046, the "application" media type is to be used for discrete
@@ -74,31 +80,22 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_UNKNOWN = "application/octet-stream";
 
     /**
-     * The name of the extra used to define a component name when copying/dragging
-     * an app icon from Launcher.
+     * The pending intent for the activity to launch.
      * <p>
-     * Type: String
-     * </p>
-     * <p>
-     * Use {@link ComponentName#unflattenFromString(String)}
-     * and {@link ComponentName#flattenToString()} to convert the extra value
-     * to/from {@link ComponentName}.
+     * Type: PendingIntent
      * </p>
      * @hide
      */
-    public static final String EXTRA_TARGET_COMPONENT_NAME =
-            "android.content.extra.TARGET_COMPONENT_NAME";
+    public static final String EXTRA_PENDING_INTENT = "android.intent.extra.PENDING_INTENT";
 
     /**
-     * The name of the extra used to define a user serial number when copying/dragging
-     * an app icon from Launcher.
+     * The activity options bundle to use when launching an activity.
      * <p>
-     * Type: long
+     * Type: Bundle
      * </p>
      * @hide
      */
-    public static final String EXTRA_USER_SERIAL_NUMBER =
-            "android.content.extra.USER_SERIAL_NUMBER";
+    public static final String EXTRA_ACTIVITY_OPTIONS = "android.intent.extra.ACTIVITY_OPTIONS";
 
 
     final CharSequence mLabel;

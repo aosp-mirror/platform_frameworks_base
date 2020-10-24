@@ -16590,6 +16590,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isPendingTopUid(int uid) {
             return mPendingStartActivityUids.isPendingTopUid(uid);
         }
+
+        @Override
+        public Intent getIntentForIntentSender(IIntentSender sender) {
+            return ActivityManagerService.this.getIntentForIntentSender(sender);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
