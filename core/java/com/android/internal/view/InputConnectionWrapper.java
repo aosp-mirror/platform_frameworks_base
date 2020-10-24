@@ -33,6 +33,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.ResultCallbacks;
@@ -155,6 +156,38 @@ public class InputConnectionWrapper implements InputConnection {
             return null;
         }
         return getResultOrNull(value, "getSelectedText()");
+    }
+
+    /**
+     * Get {@link SurroundingText} around the current cursor, with <var>beforeLength</var>
+     * characters of text before the cursor, <var>afterLength</var> characters of text after the
+     * cursor, and all of the selected text.
+     * @param beforeLength The expected length of the text before the cursor
+     * @param afterLength The expected length of the text after the cursor
+     * @param flags Supplies additional options controlling how the text is returned. May be either
+     *              0 or {@link #GET_TEXT_WITH_STYLES}.
+     * @return the surrounding text around the cursor position; the length of the returned text
+     * might be less than requested.  It could also be {@code null} when the editor or system could
+     * not support this protocol.
+     */
+    @AnyThread
+    public SurroundingText getSurroundingText(int beforeLength, int afterLength, int flags) {
+        if (mCancellationGroup.isCanceled()) {
+            return null;
+        }
+        if (isMethodMissing(MissingMethodFlags.GET_SURROUNDING_TEXT)) {
+            // This method is not implemented.
+            return null;
+        }
+        final CancellationGroup.Completable.SurroundingText value =
+                mCancellationGroup.createCompletableSurroundingText();
+        try {
+            mIInputContext.getSurroundingText(beforeLength, afterLength, flags,
+                    ResultCallbacks.of(value));
+        } catch (RemoteException e) {
+            return null;
+        }
+        return getResultOrNull(value, "getSurroundingText()");
     }
 
     @AnyThread

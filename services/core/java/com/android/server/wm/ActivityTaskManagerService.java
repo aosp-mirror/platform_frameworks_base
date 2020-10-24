@@ -65,6 +65,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -5547,11 +5548,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void updateTopApp(ActivityRecord topResumedActivity) {
-        // If system is sleeping, use the given record (it should be null) because there won't be
-        // the next resumed activity. Otherwise the process of pausing activity will keep with top
-        // state even the activity has paused and stopped.
-        final ActivityRecord top = mSleeping || topResumedActivity != null ? topResumedActivity
-                // If there is no resumed activity, it will choose the pausing activity.
+        final ActivityRecord top = topResumedActivity != null ? topResumedActivity
+                // If there is no resumed activity, it will choose the pausing or focused activity.
                 : mRootWindowContainer.getTopResumedActivity();
         mTopApp = top != null ? top.app : null;
     }
@@ -6183,10 +6181,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (dc == null) {
                     return;
                 }
-                final boolean wasTransitionSet =
-                        dc.mAppTransition.getAppTransition() != TRANSIT_NONE;
+                final boolean wasTransitionSet = dc.mAppTransition.isTransitionSet();
                 if (!wasTransitionSet) {
-                    dc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
+                    dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, false /* alwaysKeepCurrent */);
+                    dc.prepareAppTransition(TRANSIT_NONE);
                 }
                 mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
 

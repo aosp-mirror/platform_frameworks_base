@@ -1207,7 +1207,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             // Therefore, we must explicitly recreate the {@link Surface} in these
             // cases.
             if (mUseBlastAdapter) {
-                mSurface.transferFrom(mBlastBufferQueue.createSurface());
+                mSurface.transferFrom(mBlastBufferQueue.createSurfaceWithHandle());
             } else {
                 mSurface.createFrom(mSurfaceControl);
             }

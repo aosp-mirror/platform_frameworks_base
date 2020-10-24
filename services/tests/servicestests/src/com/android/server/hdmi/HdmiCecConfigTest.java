@@ -245,7 +245,7 @@ public final class HdmiCecConfigTest {
                 + "<cec-settings>"
                 + "</cec-settings>", null);
         assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getValue(mContext, "foo"));
+                () -> hdmiCecConfig.getValue("foo"));
     }
 
     @Test
@@ -267,7 +267,7 @@ public final class HdmiCecConfigTest {
                 + "    <default-value string-value=\"to_tv\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getValue(mContext,
+        assertThat(hdmiCecConfig.getValue(
                     HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP))
                 .isEqualTo(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
     }
@@ -292,7 +292,7 @@ public final class HdmiCecConfigTest {
                 + "    <default-value string-value=\"none\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getValue(mContext,
+        assertThat(hdmiCecConfig.getValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST))
                 .isEqualTo(HdmiProperties.power_state_change_on_active_source_lost_values
                         .STANDBY_NOW.name().toLowerCase());
@@ -305,7 +305,7 @@ public final class HdmiCecConfigTest {
                 + "<cec-settings>"
                 + "</cec-settings>", null);
         assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.setValue(mContext, "foo", "bar"));
+                () -> hdmiCecConfig.setValue("foo", "bar"));
     }
 
     @Test
@@ -324,7 +324,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.setValue(mContext,
+                () -> hdmiCecConfig.setValue(
                         HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                         HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST));
     }
@@ -345,7 +345,7 @@ public final class HdmiCecConfigTest {
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.setValue(mContext,
+                () -> hdmiCecConfig.setValue(
                         HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                         "bar"));
     }
@@ -365,8 +365,7 @@ public final class HdmiCecConfigTest {
                 + "    <default-value string-value=\"to_tv\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
-        hdmiCecConfig.setValue(mContext,
-                               HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+        hdmiCecConfig.setValue(HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                                HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
         verify(mStorageAdapter).storeGlobalSetting(mContext,
                   Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
@@ -387,7 +386,7 @@ public final class HdmiCecConfigTest {
                 + "    <default-value string-value=\"none\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
-        hdmiCecConfig.setValue(mContext,
+        hdmiCecConfig.setValue(
                   HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                   HdmiProperties.power_state_change_on_active_source_lost_values
                       .STANDBY_NOW.name().toLowerCase());
@@ -409,6 +408,6 @@ public final class HdmiCecConfigTest {
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing CEC config strings", e);
         }
-        return new HdmiCecConfig(productConfig, vendorOverride, mStorageAdapter);
+        return new HdmiCecConfig(mContext, mStorageAdapter, productConfig, vendorOverride);
     }
 }

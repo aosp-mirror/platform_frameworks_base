@@ -3381,7 +3381,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void createConversationNotificationChannelForPackage(String pkg, int uid,
-                String triggeringKey, NotificationChannel parentChannel, String conversationId) {
+                NotificationChannel parentChannel, String conversationId) {
             enforceSystemOrSystemUI("only system can call this");
             Preconditions.checkNotNull(parentChannel);
             Preconditions.checkNotNull(conversationId);
@@ -5590,6 +5590,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public NotificationChannelGroup getNotificationChannelGroup(String pkg, int uid, String
+                channelId) {
+            return mPreferencesHelper.getGroupForChannel(pkg, uid, channelId);
+        }
+
+        @Override
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
@@ -6091,14 +6097,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         // bubble or inline reply that's immutable?
-        if (n.getBubbleMetadata() != null
+        // TODO (b/171418004): renable after app outreach
+        /*if (n.getBubbleMetadata() != null
                 && n.getBubbleMetadata().getIntent() != null
                 && hasFlag(mAmi.getPendingIntentFlags(
                         n.getBubbleMetadata().getIntent().getTarget()),
                         PendingIntent.FLAG_IMMUTABLE)) {
             throw new IllegalArgumentException(r.getKey() + " Not posted."
                     + " PendingIntents attached to bubbles must be mutable");
-        }
+        }*/
 
         if (n.actions != null) {
             for (Notification.Action action : n.actions) {
@@ -10077,24 +10084,27 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isActivityStartAllowed(int uid, String packageName) {
-            boolean block = CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
-            if (block || mPackagesShown.add(packageName)) {
-                mUiHandler.post(() ->
-                        Toast.makeText(getUiContext(),
-                                "Indirect activity start from "
-                                        + packageName + ". "
-                                        + "This will be blocked in S.\n"
-                                        + "See go/s-trampolines.",
-                                Toast.LENGTH_LONG).show());
-            }
-            String message =
+            String toastMessage = "Indirect activity start from " + packageName;
+            String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
-            if (block) {
-                Slog.e(TAG, message + " blocked");
+
+            if (CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid)) {
+                toast(toastMessage + " blocked.");
+                Slog.e(TAG, logcatMessage + " blocked");
                 return false;
+            } else {
+                if (mPackagesShown.add(packageName)) {
+                    toast(toastMessage + ". This will be blocked in S.");
+                }
+                Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
+                return true;
             }
-            Slog.w(TAG, message + ", this should be avoided for performance reasons");
-            return true;
+        }
+
+        private void toast(String message) {
+            mUiHandler.post(() ->
+                    Toast.makeText(getUiContext(), message + "\nSee go/s-trampolines.",
+                            Toast.LENGTH_LONG).show());
         }
     }
 }

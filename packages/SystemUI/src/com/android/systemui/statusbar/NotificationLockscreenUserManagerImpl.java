@@ -54,7 +54,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -345,8 +344,7 @@ public class NotificationLockscreenUserManagerImpl implements
             return false;
         }
         boolean exceedsPriorityThreshold;
-        if (NotificationUtils.useNewInterruptionModel(mContext)
-                && hideSilentNotificationsOnLockscreen()) {
+        if (hideSilentNotificationsOnLockscreen()) {
             exceedsPriorityThreshold =
                     entry.getBucket() == BUCKET_MEDIA_CONTROLS
                             || (entry.getBucket() != BUCKET_SILENT

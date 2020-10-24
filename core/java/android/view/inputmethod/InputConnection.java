@@ -16,13 +16,19 @@
 
 package android.view.inputmethod;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The InputConnection interface is the communication channel from an
@@ -122,14 +128,20 @@ import android.view.KeyEvent;
  * of each other, and the IME may use them however they see fit.</p>
  */
 public interface InputConnection {
+    /** @hide */
+    @IntDef(flag = true, prefix = { "GET_TEXT_" }, value = {
+            GET_TEXT_WITH_STYLES,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface GetTextType {}
+
     /**
-     * Flag for use with {@link #getTextAfterCursor} and
-     * {@link #getTextBeforeCursor} to have style information returned
-     * along with the text. If not set, {@link #getTextAfterCursor}
-     * sends only the raw text, without style or other spans. If set,
-     * it may return a complex CharSequence of both text and style
-     * spans. <strong>Editor authors</strong>: you should strive to
-     * send text with styles if possible, but it is not required.
+     * Flag for use with {@link #getTextAfterCursor}, {@link #getTextBeforeCursor} and
+     * {@link #getSurroundingText} to have style information returned along with the text. If not
+     * set, {@link #getTextAfterCursor} sends only the raw text, without style or other spans. If
+     * set, it may return a complex CharSequence of both text and style spans.
+     * <strong>Editor authors</strong>: you should strive to send text with styles if possible, but
+     * it is not required.
      */
     int GET_TEXT_WITH_STYLES = 0x0001;
 
@@ -262,6 +274,61 @@ public interface InputConnection {
      * this method.
      */
     CharSequence getSelectedText(int flags);
+
+    /**
+     * Gets the surrounding text around the current cursor, with <var>beforeLength</var> characters
+     * of text before the cursor (start of the selection), <var>afterLength</var> characters of text
+     * after the cursor (end of the selection), and all of the selected text.
+     *
+     * <p>This method may fail either if the input connection has become invalid (such as its
+     * process crashing), or the client is taking too long to respond with the text (it is given a
+     * couple seconds to return), or the protocol is not supported. In any of these cases, null is
+     * returned.
+     *
+     * <p>This method does not affect the text in the editor in any way, nor does it affect the
+     * selection or composing spans.</p>
+     *
+     * <p>If {@link #GET_TEXT_WITH_STYLES} is supplied as flags, the editor should return a
+     * {@link android.text.Spanned} with all the spans set on the text.</p>
+     *
+     * <p><strong>IME authors:</strong> please consider this will trigger an IPC round-trip that
+     * will take some time. Assume this method consumes a lot of time. If you are using this to get
+     * the initial surrounding text around the cursor, you may consider using
+     * {@link EditorInfo#getInitialTextBeforeCursor(int, int)},
+     * {@link EditorInfo#getInitialSelectedText(int)}, and
+     * {@link EditorInfo#getInitialTextAfterCursor(int, int)} to prevent IPC costs.</p>
+     *
+     * @param beforeLength The expected length of the text before the cursor.
+     * @param afterLength The expected length of the text after the cursor.
+     * @param flags Supplies additional options controlling how the text is returned. Defined by the
+     *              constants.
+     * @return an {@link android.view.inputmethod.SurroundingText} object describing the surrounding
+     * text and state of selection, or null if the input connection is no longer valid, or the
+     * editor can't comply with the request for some reason, or the application does not implement
+     * this method. The length of the returned text might be less than the sum of
+     * <var>beforeLength</var> and <var>afterLength</var> .
+     */
+    @Nullable
+    default SurroundingText getSurroundingText(
+            @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength,
+            @GetTextType int flags) {
+        CharSequence textBeforeCursor = getTextBeforeCursor(beforeLength, flags);
+        if (textBeforeCursor == null) {
+            textBeforeCursor = "";
+        }
+        CharSequence selectedText = getSelectedText(flags);
+        if (selectedText == null) {
+            selectedText = "";
+        }
+        CharSequence textAfterCursor = getTextAfterCursor(afterLength, flags);
+        if (textAfterCursor == null) {
+            textAfterCursor = "";
+        }
+        CharSequence surroundingText =
+                TextUtils.concat(textBeforeCursor, selectedText, textAfterCursor);
+        return new SurroundingText(surroundingText, textBeforeCursor.length(),
+                textBeforeCursor.length() + selectedText.length(), -1);
+    }
 
     /**
      * Retrieve the current capitalization mode in effect at the

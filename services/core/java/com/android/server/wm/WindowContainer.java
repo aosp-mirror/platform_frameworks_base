@@ -2550,7 +2550,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         ProtoLog.d(WM_DEBUG_APP_TRANSITIONS,
                 "Loading animation for app transition. transit=%s enter=%b frame=%s insets=%s "
                         + "surfaceInsets=%s",
-                AppTransition.appTransitionToString(transit), enter, frame, insets, surfaceInsets);
+                AppTransition.appTransitionOldToString(transit), enter, frame, insets,
+                surfaceInsets);
         final Configuration displayConfig = displayContent.getConfiguration();
         final Animation a = getDisplayContent().mAppTransition.loadAnimation(lp, transit, enter,
                 displayConfig.uiMode, displayConfig.orientation, frame, displayFrame, insets,

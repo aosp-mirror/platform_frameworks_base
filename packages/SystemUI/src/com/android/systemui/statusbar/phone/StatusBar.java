@@ -1035,10 +1035,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStackScrollerController.getNotificationListContainer();
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
-        updateAodIconArea();
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        mNotificationPanelViewController.setOnReinflationListener(this::updateAodIconArea);
         mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
@@ -1268,12 +1266,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
-    }
-
-    private void updateAodIconArea() {
-        mNotificationIconAreaController.setupAodIcons(
-                getNotificationShadeWindowView()
-                        .findViewById(R.id.clock_notification_icon_container));
     }
 
     @NonNull

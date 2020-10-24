@@ -19,6 +19,7 @@ package android.view;
 import android.app.ActivityManager;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.graphics.GraphicBuffer;
+import android.graphics.Rect;
 
 /**
  * Passed to the {@link IRecentsAnimationRunner} in order for the runner to control to let the
@@ -35,6 +36,15 @@ interface IRecentsAnimationController {
      */
     @UnsupportedAppUsage
     ActivityManager.TaskSnapshot screenshotTask(int taskId);
+
+    /**
+     * Sets the final bounds on a Task. This is used by Launcher to notify the system that
+     * animating Activity to PiP has completed and the associated task surface should be updated
+     * accordingly. This should be called before `finish`
+     * @param taskId for which the leash should be updated
+     * @param destinationBounds bounds of the final PiP window
+     */
+     void setFinishTaskBounds(int taskId, in Rect destinationBounds);
 
     /**
      * Notifies to the system that the animation into Recents should end, and all leashes associated

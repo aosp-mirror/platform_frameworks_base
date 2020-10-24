@@ -325,7 +325,8 @@ public class NetworkNotificationManager {
     public void setProvNotificationVisible(boolean visible, int id, String action) {
         if (visible) {
             Intent intent = new Intent(action);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
             showNotification(id, NotificationType.SIGN_IN, null, null, pendingIntent, false);
         } else {
             clearNotification(id);

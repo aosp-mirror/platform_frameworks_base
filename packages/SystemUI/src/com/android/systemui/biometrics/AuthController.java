@@ -456,6 +456,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
+   /**
+     * Whether the current user has a UDFP enrolled.
+     */
+    public boolean hasUdfpsEnrolled() {
+        // TODO: (b/171392825) right now only checks whether the UDFPS sensor exists on this device
+        //  but not whether user has enrolled or not
+        return mUdfpsController != null;
+    }
+
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
         final @BiometricAuthenticator.Modality int type = args.argi1;

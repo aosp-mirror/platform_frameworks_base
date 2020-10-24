@@ -34,12 +34,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.window.WindowContainerTransaction;
-
-import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
 
@@ -54,8 +51,6 @@ public class PipBoundsHandler {
 
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
-    private final DisplayInfo mDisplayInfo = new DisplayInfo();
-    private DisplayLayout mDisplayLayout;
 
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
@@ -74,7 +69,6 @@ public class PipBoundsHandler {
     public PipBoundsHandler(Context context, @NonNull PipBoundsState pipBoundsState) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = new PipSnapAlgorithm(context);
-        mDisplayLayout = new DisplayLayout();
         reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
@@ -106,22 +100,6 @@ public class PipBoundsHandler {
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
-    }
-
-    /**
-     * Sets or update latest {@link DisplayLayout} when new display added or rotation callbacks
-     * from {@link DisplayController.OnDisplaysChangedListener}
-     * @param newDisplayLayout latest {@link DisplayLayout}
-     */
-    public void setDisplayLayout(DisplayLayout newDisplayLayout) {
-        mDisplayLayout.set(newDisplayLayout);
-    }
-
-    /**
-     * Get the current saved display info.
-     */
-    public DisplayInfo getDisplayInfo() {
-        return mDisplayInfo;
     }
 
     /**
@@ -160,7 +138,7 @@ public class PipBoundsHandler {
      * Note that both inset and normal bounds will be calculated here rather than in the caller.
      */
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-            Rect animatingBounds, DisplayInfo displayInfo) {
+            Rect animatingBounds) {
         getInsetBounds(insetBounds);
         final Rect defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION, null);
         normalBounds.set(defaultBounds);
@@ -171,7 +149,6 @@ public class PipBoundsHandler {
             transformBoundsToAspectRatio(normalBounds, mPipBoundsState.getAspectRatio(),
                     false /* useCurrentMinEdgeSize */, false /* useCurrentSize */);
         }
-        displayInfo.copyFrom(mDisplayInfo);
     }
 
     /**
@@ -180,23 +157,6 @@ public class PipBoundsHandler {
      */
     public PipSnapAlgorithm getSnapAlgorithm() {
         return mSnapAlgorithm;
-    }
-
-    public Rect getDisplayBounds() {
-        return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-    }
-
-    public int getDisplayRotation() {
-        return mDisplayInfo.rotation;
-    }
-
-    /**
-     * Responds to IPinnedStackListener on {@link DisplayInfo} change.
-     * It will normally follow up with a
-     * {@link #onMovementBoundsChanged(Rect, Rect, Rect, DisplayInfo)} callback.
-     */
-    public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-        mDisplayInfo.copyFrom(displayInfo);
     }
 
     /**
@@ -250,10 +210,6 @@ public class PipBoundsHandler {
         return mDefaultAspectRatio;
     }
 
-    public void onOverlayChanged(Context context, Display display) {
-        mDisplayLayout = new DisplayLayout(context, display);
-    }
-
     /**
      * Updatest the display info and display layout on rotation change. This is needed even when we
      * aren't in PIP because the rotation layout is used to calculate the proper insets for the
@@ -262,13 +218,13 @@ public class PipBoundsHandler {
     public void onDisplayRotationChangedNotInPip(Context context, int toRotation) {
         // Update the display layout, note that we have to do this on every rotation even if we
         // aren't in PIP since we need to update the display layout to get the right resources
-        mDisplayLayout.rotateTo(context.getResources(), toRotation);
+        mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
 
         // Populate the new {@link #mDisplayInfo}.
         // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
         // therefore, the width/height may require a swap first.
         // Moving forward, we should get the new dimensions after rotation from DisplayLayout.
-        mDisplayInfo.rotation = toRotation;
+        mPipBoundsState.setDisplayRotation(toRotation);
         updateDisplayInfoIfNeeded();
     }
 
@@ -282,7 +238,8 @@ public class PipBoundsHandler {
             Rect outInsetBounds,
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) {
         // Bail early if the event is not sent to current {@link #mDisplayInfo}
-        if ((displayId != mDisplayInfo.displayId) || (fromRotation == toRotation)) {
+        if ((displayId != mPipBoundsState.getDisplayInfo().displayId)
+                || (fromRotation == toRotation)) {
             return false;
         }
 
@@ -302,13 +259,13 @@ public class PipBoundsHandler {
         final float snapFraction = getSnapFraction(postChangeStackBounds);
 
         // Update the display layout
-        mDisplayLayout.rotateTo(context.getResources(), toRotation);
+        mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
 
         // Populate the new {@link #mDisplayInfo}.
         // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
         // therefore, the width/height may require a swap first.
         // Moving forward, we should get the new dimensions after rotation from DisplayLayout.
-        mDisplayInfo.rotation = toRotation;
+        mPipBoundsState.getDisplayInfo().rotation = toRotation;
         updateDisplayInfoIfNeeded();
 
         // Calculate the stack bounds in the new orientation based on same fraction along the
@@ -325,16 +282,17 @@ public class PipBoundsHandler {
     }
 
     private void updateDisplayInfoIfNeeded() {
+        final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
         final boolean updateNeeded;
-        if ((mDisplayInfo.rotation == ROTATION_0) || (mDisplayInfo.rotation == ROTATION_180)) {
-            updateNeeded = (mDisplayInfo.logicalWidth > mDisplayInfo.logicalHeight);
+        if ((displayInfo.rotation == ROTATION_0) || (displayInfo.rotation == ROTATION_180)) {
+            updateNeeded = (displayInfo.logicalWidth > displayInfo.logicalHeight);
         } else {
-            updateNeeded = (mDisplayInfo.logicalWidth < mDisplayInfo.logicalHeight);
+            updateNeeded = (displayInfo.logicalWidth < displayInfo.logicalHeight);
         }
         if (updateNeeded) {
-            final int newLogicalHeight = mDisplayInfo.logicalWidth;
-            mDisplayInfo.logicalWidth = mDisplayInfo.logicalHeight;
-            mDisplayInfo.logicalHeight = newLogicalHeight;
+            final int newLogicalHeight = displayInfo.logicalWidth;
+            displayInfo.logicalWidth = displayInfo.logicalHeight;
+            displayInfo.logicalHeight = newLogicalHeight;
         }
     }
 
@@ -370,8 +328,9 @@ public class PipBoundsHandler {
             size = mSnapAlgorithm.getSizeForAspectRatio(
                     new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
         } else {
+            final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
             size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, minEdgeSize,
-                    mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+                    displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
 
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
@@ -421,8 +380,9 @@ public class PipBoundsHandler {
         } else {
             final Rect insetBounds = new Rect();
             getInsetBounds(insetBounds);
+            final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
             size = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
-                    mDefaultMinSize, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+                    mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
             Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
                     0, Math.max(mIsImeShowing ? mImeHeight : 0,
                             mIsShelfShowing ? mShelfHeight : 0),
@@ -435,11 +395,12 @@ public class PipBoundsHandler {
      * Populates the bounds on the screen that the PIP can be visible in.
      */
     protected void getInsetBounds(Rect outRect) {
-        Rect insets = mDisplayLayout.stableInsets();
+        final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
+        Rect insets = mPipBoundsState.getDisplayLayout().stableInsets();
         outRect.set(insets.left + mScreenEdgeInsets.x,
                 insets.top + mScreenEdgeInsets.y,
-                mDisplayInfo.logicalWidth - insets.right - mScreenEdgeInsets.x,
-                mDisplayInfo.logicalHeight - insets.bottom - mScreenEdgeInsets.y);
+                displayInfo.logicalWidth - insets.right - mScreenEdgeInsets.x,
+                displayInfo.logicalHeight - insets.bottom - mScreenEdgeInsets.y);
     }
 
     /**
@@ -493,7 +454,6 @@ public class PipBoundsHandler {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
         pw.println(innerPrefix + "mDefaultAspectRatio=" + mDefaultAspectRatio);
         pw.println(innerPrefix + "mMinAspectRatio=" + mMinAspectRatio);
         pw.println(innerPrefix + "mMaxAspectRatio=" + mMaxAspectRatio);

@@ -214,6 +214,26 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
+        public void setFinishTaskBounds(int taskId, Rect destinationBounds) {
+            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                    "setFinishTaskBounds(%d): bounds=%s", taskId, destinationBounds);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService.getWindowManagerLock()) {
+                    for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+                        final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
+                        if (taskAdapter.mTask.mTaskId == taskId) {
+                            taskAdapter.mFinishBounds.set(destinationBounds);
+                            break;
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void finish(boolean moveHomeToTop, boolean sendUserLeaveHint) {
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "finish(%b): mCanceled=%b", moveHomeToTop, mCanceled);
@@ -739,6 +759,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 taskAdapter.mTask.dontAnimateDimExit();
             }
             removeAnimation(taskAdapter);
+            taskAdapter.maybeApplyFinishBounds();
         }
 
         for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
@@ -925,7 +946,9 @@ public class RecentsAnimationController implements DeathRecipient {
         private RemoteAnimationTarget mTarget;
         private final Rect mBounds = new Rect();
         // The bounds of the target relative to its parent.
-        private Rect mLocalBounds = new Rect();
+        private final Rect mLocalBounds = new Rect();
+        // The bounds of the target when animation is finished
+        private final Rect mFinishBounds = new Rect();
 
         TaskAnimationAdapter(Task task, boolean isRecentTaskInvisible) {
             mTask = task;
@@ -958,6 +981,17 @@ public class RecentsAnimationController implements DeathRecipient {
                     mLocalBounds, mBounds, mTask.getWindowConfiguration(),
                     mIsRecentTaskInvisible, null, null, mTask.getPictureInPictureParams());
             return mTarget;
+        }
+
+        void maybeApplyFinishBounds() {
+            if (!mFinishBounds.isEmpty()) {
+                final SurfaceControl taskSurface = mTask.getSurfaceControl();
+                mTask.getPendingTransaction()
+                        .setPosition(taskSurface, mFinishBounds.left, mFinishBounds.top)
+                        .setWindowCrop(taskSurface, mFinishBounds.width(), mFinishBounds.height())
+                        .apply();
+                mFinishBounds.setEmpty();
+            }
         }
 
         @Override
@@ -1005,6 +1039,7 @@ public class RecentsAnimationController implements DeathRecipient {
             }
             pw.println("mIsRecentTaskInvisible=" + mIsRecentTaskInvisible);
             pw.println("mLocalBounds=" + mLocalBounds);
+            pw.println("mFinishBounds=" + mFinishBounds);
             pw.println("mBounds=" + mBounds);
             pw.println("mIsRecentTaskInvisible=" + mIsRecentTaskInvisible);
         }

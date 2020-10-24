@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window closing back to app window transitions.
- * To run this test: `atest FlickerTests:CloseImeWindowToAppTest`
+ * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToHomeTest`
  */
 @Presubmit
 @RequiresDevice
@@ -94,14 +94,16 @@ class CloseImeAutoOpenWindowToHomeTest(
                         }
 
                         layersTrace {
-                            navBarLayerIsAlwaysVisible(bugId = 140855415)
-                            statusBarLayerIsAlwaysVisible(bugId = 140855415)
                             noUncoveredRegions(configuration.startRotation, Surface.ROTATION_0,
                                 allStates = false)
                             navBarLayerRotatesAndScales(configuration.startRotation,
                                 Surface.ROTATION_0, bugId = 140855415)
                             statusBarLayerRotatesScales(configuration.startRotation,
                                 Surface.ROTATION_0)
+                            navBarLayerIsAlwaysVisible(configuration.startRotation !=
+                                    Surface.ROTATION_0)
+                            statusBarLayerIsAlwaysVisible(configuration.startRotation !=
+                                    Surface.ROTATION_0)
                             imeLayerBecomesInvisible(bugId = 141458352)
                             imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
                         }

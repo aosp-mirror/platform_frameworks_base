@@ -318,8 +318,13 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         }
     }
 
-    status_t err = client->createSurfaceChecked(
-            String8(name.c_str()), w, h, format, &surface, flags, parent, std::move(metadata));
+    sp<IBinder> parentHandle;
+    if (parent != nullptr) {
+        parentHandle = parent->getHandle();
+    }
+
+    status_t err = client->createSurfaceChecked(String8(name.c_str()), w, h, format, &surface,
+                                                flags, parentHandle, std::move(metadata));
     if (err == NAME_NOT_FOUND) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return 0;

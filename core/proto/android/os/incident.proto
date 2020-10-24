@@ -511,9 +511,14 @@ message IncidentProto {
         (section).args = "sensorservice --proto"
     ];
 
-    optional com.android.server.powerstats.PowerStatsServiceProto powerstats = 3054 [
+    optional com.android.server.powerstats.PowerStatsServiceMeterProto powerstats_meter = 3054 [
         (section).type = SECTION_DUMPSYS,
-        (section).args = "power_stats --proto"
+        (section).args = "power_stats --proto meter"
+    ];
+
+    optional com.android.server.powerstats.PowerStatsServiceModelProto powerstats_model = 3055 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "power_stats --proto model"
     ];
 
     // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999

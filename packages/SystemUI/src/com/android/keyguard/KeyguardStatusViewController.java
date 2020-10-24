@@ -27,6 +27,8 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
@@ -50,8 +52,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
+    private final NotificationIconAreaController mNotificationIconAreaController;
 
     private boolean mKeyguardStatusViewAnimating;
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     @Inject
     public KeyguardStatusViewController(
@@ -60,17 +64,19 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardClockSwitchController keyguardClockSwitchController,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            NotificationIconAreaController notificationIconAreaController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
         mKeyguardStateController = keyguardStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
+        mNotificationIconAreaController = notificationIconAreaController;
     }
 
     @Override
-    public void initInternal() {
+    public void onInit() {
         mKeyguardClockSwitchController.init();
     }
 
@@ -78,6 +84,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     protected void onViewAttached() {
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mConfigurationController.addCallback(mConfigurationListener);
+        updateAodIcons();
     }
 
     @Override
@@ -248,6 +255,17 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mKeyguardClockSwitchController.refresh();
     }
 
+    private void updateAodIcons() {
+        NotificationIconContainer nic = (NotificationIconContainer)
+                mView.findViewById(com.android.systemui.R.id.clock_notification_icon_container);
+        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
+            // alternate icon area is set in KeyguardClockSwitchController
+            mNotificationIconAreaController.setupAodIcons(nic, mLockScreenMode);
+        } else {
+            nic.setVisibility(View.GONE);
+        }
+    }
+
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
         @Override
@@ -265,8 +283,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onLockScreenModeChanged(int mode) {
+            mLockScreenMode = mode;
             mKeyguardClockSwitchController.updateLockScreenMode(mode);
             mKeyguardSliceViewController.updateLockScreenMode(mode);
+            updateAodIcons();
         }
 
         @Override

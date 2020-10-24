@@ -36,9 +36,12 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
@@ -511,6 +514,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void onChildPositionChanged(WindowContainer child) {
         mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                 !mWmService.mPerDisplayFocusEnabled /* updateInputWindows */);
+        mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
     /**
@@ -2175,7 +2179,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
             // Set a transition to ensure that we don't immediately try and update the visibility
             // of the activity entering PIP
-            r.getDisplayContent().prepareAppTransition(TRANSIT_NONE, false);
+            r.getDisplayContent().prepareAppTransitionOld(TRANSIT_OLD_NONE, false);
+            r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
             final boolean singleActivity = task.getChildCount() == 1;
             final Task stack;
@@ -2206,8 +2211,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // to the list of apps being closed, and request its transition to be ran.
                 final ActivityRecord oldTopActivity = task.getTopMostActivity();
                 if (oldTopActivity != null && oldTopActivity.isState(STOPPED)
-                        && task.getDisplayContent().mAppTransition.getAppTransition()
-                        == TRANSIT_TASK_TO_BACK) {
+                        && task.getDisplayContent().mAppTransition.getAppTransitionOld()
+                        == TRANSIT_OLD_TASK_TO_BACK) {
                     task.getDisplayContent().mClosingApps.add(oldTopActivity);
                     oldTopActivity.mRequestForceTransition = true;
                 }
@@ -2626,12 +2631,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 + " in=" + taskDisplayArea);
     }
 
-    @Override
-    void positionChildAt(int position, DisplayContent child, boolean includingParents) {
-        super.positionChildAt(position, child, includingParents);
-        mStackSupervisor.updateTopResumedActivityIfNeeded();
-    }
-
     Configuration getDisplayOverrideConfiguration(int displayId) {
         final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
         if (displayContent == null) {
@@ -2799,8 +2798,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         r.detachFromProcess();
-        r.mDisplayContent.prepareAppTransition(
-                TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+        r.mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
+                false /* alwaysKeepCurrent */);
+        r.mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.destroyIfPossible("handleAppCrashed");
     }
 

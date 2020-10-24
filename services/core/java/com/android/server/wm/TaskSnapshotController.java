@@ -157,7 +157,6 @@ class TaskSnapshotController {
         if (shouldDisableSnapshots()) {
             return;
         }
-
         // We need to take a snapshot of the task if and only if all activities of the task are
         // either closing or hidden.
         getClosingTasks(closingApps, mTmpTasks);
@@ -445,10 +444,17 @@ class TaskSnapshotController {
         for (int i = closingApps.size() - 1; i >= 0; i--) {
             final ActivityRecord activity = closingApps.valueAt(i);
             final Task task = activity.getTask();
+            if (task == null) continue;
 
+            // Since RecentsAnimation will handle task snapshot while switching apps with the
+            // best capture timing (e.g. IME window capture),
+            // No need additional task capture while task is controlled by RecentsAnimation.
+            if (task.isAnimatingByRecents()) {
+                mSkipClosingAppSnapshotTasks.add(task);
+            }
             // If the task of the app is not visible anymore, it means no other app in that task
             // is opening. Thus, the task is closing.
-            if (task != null && !task.isVisible() && !mSkipClosingAppSnapshotTasks.contains(task)) {
+            if (!task.isVisible() && !mSkipClosingAppSnapshotTasks.contains(task)) {
                 outClosingTasks.add(task);
             }
         }
@@ -571,7 +577,10 @@ class TaskSnapshotController {
                 synchronized (mService.mGlobalLock) {
                     mTmpTasks.clear();
                     mService.mRoot.forAllTasks(task -> {
-                        if (task.isVisible()) {
+                        // Since RecentsAnimation will handle task snapshot while switching apps
+                        // with the best capture timing (e.g. IME window capture), No need
+                        // additional task capture while task is controlled by RecentsAnimation.
+                        if (task.isVisible() && !task.isAnimatingByRecents()) {
                             mTmpTasks.add(task);
                         }
                     });

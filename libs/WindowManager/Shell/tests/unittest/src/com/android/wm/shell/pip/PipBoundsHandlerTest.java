@@ -65,7 +65,7 @@ public class PipBoundsHandlerTest extends PipTestCase {
         mPipBoundsState = new PipBoundsState();
         mPipBoundsHandler = new PipBoundsHandler(mContext, mPipBoundsState);
 
-        mPipBoundsHandler.onDisplayInfoChanged(mDefaultDisplayInfo);
+        mPipBoundsState.setDisplayInfo(mDefaultDisplayInfo);
     }
 
     private void initializeMockResources() {

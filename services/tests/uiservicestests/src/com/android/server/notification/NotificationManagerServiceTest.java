@@ -6691,7 +6691,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 orig)));
 
         mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, "key", orig, "friend");
+                PKG, mUid, orig, "friend");
 
         NotificationChannel friendChannel = mBinderService.getConversationNotificationChannel(
                 PKG, 0, PKG, original.getId(), false, "friend");
@@ -6726,10 +6726,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         String conversationId = "friend";
 
         mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, "key", NotificationChannel.CREATOR.createFromParcel(msgParcel),
+                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(msgParcel),
                 conversationId);
         mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, "key", NotificationChannel.CREATOR.createFromParcel(callParcel),
+                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(callParcel),
                 conversationId);
 
         NotificationChannel messagesChild = mBinderService.getConversationNotificationChannel(
@@ -7145,7 +7145,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(child).recordDismissalSentiment(anyInt());
     }
 
-    @Test
+    // TODO (b/171418004): renable after app outreach
+    /*@Test
     public void testImmutableBubbleIntent() throws Exception {
         when(mAmi.getPendingIntentFlags(pi1))
                 .thenReturn(FLAG_IMMUTABLE | FLAG_ONE_SHOT);
@@ -7160,7 +7161,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         } catch (IllegalArgumentException e) {
             // good
         }
-    }
+    }*/
 
     @Test
     public void testMutableBubbleIntent() throws Exception {

@@ -54,6 +54,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.util.ArrayList;
@@ -106,6 +107,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private int mSuspendPipResizingReason;
 
     private Context mContext;
+    private PipBoundsState mPipBoundsState;
     private PipBoundsHandler mPipBoundsHandler;
     private PipTaskOrganizer mPipTaskOrganizer;
     private IActivityTaskManager mActivityTaskManager;
@@ -208,9 +210,10 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mHandler.post(() -> {
-                // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
+                mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
+                // Populate the inset / normal bounds from mPipBoundsHandler first.
                 mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mPipBounds,
-                        mDefaultPipBounds, mTmpDisplayInfo);
+                        mDefaultPipBounds);
             });
         }
 
@@ -226,6 +229,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     }
 
     public PipController(Context context,
+            PipBoundsState pipBoundsState,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             WindowManagerShellWrapper windowManagerShellWrapper
@@ -233,13 +237,14 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         if (!mInitialized) {
             mInitialized = true;
             mContext = context;
+            mPipBoundsState = pipBoundsState;
             mPipNotification = new PipNotification(context, this);
             mPipBoundsHandler = pipBoundsHandler;
             // Ensure that we have the display info in case we get calls to update the bounds
             // before the listener calls back
             final DisplayInfo displayInfo = new DisplayInfo();
             context.getDisplay().getDisplayInfo(displayInfo);
-            mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
+            mPipBoundsState.setDisplayInfo(displayInfo);
 
             mResizeAnimationDuration = context.getResources()
                     .getInteger(R.integer.config_pipResizeAnimationDuration);

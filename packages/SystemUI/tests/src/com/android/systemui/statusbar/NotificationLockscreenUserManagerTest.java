@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.content.Intent.ACTION_USER_SWITCHED;
-import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_MEDIA_CONTROLS;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_PEOPLE;
@@ -322,8 +321,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
         Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
-        Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
 
         NotificationEntry entry = new NotificationEntryBuilder()
@@ -338,8 +335,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void testShowSilentNotifications_settingSaysHide() {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
 
@@ -358,8 +353,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
         Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
-        Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
 
         final Notification notification = mock(Notification.class);
@@ -376,8 +369,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void testShowSilentNotificationsMediaBucket_settingSaysHide() {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
 

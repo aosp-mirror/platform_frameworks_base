@@ -91,9 +91,7 @@ public class NotificationIconAreaController implements
 
     private boolean mAnimationsEnabled;
     private int mAodIconTint;
-    private boolean mFullyHidden;
     private boolean mAodIconsVisible;
-    private boolean mIsPulsing;
     private boolean mShowLowPriority = true;
 
     @VisibleForTesting
@@ -158,22 +156,23 @@ public class NotificationIconAreaController implements
     }
 
     /**
-     * Called by the StatusBar. The StatusBar passes the NotificationIconContainer which holds
-     * the aod icons.
+     * Called by the Keyguard*ViewController whose view contains the aod icons.
      */
-    void setupAodIcons(@NonNull NotificationIconContainer aodIcons) {
+    public void setupAodIcons(@NonNull NotificationIconContainer aodIcons,
+            int lockScreenMode) {
         boolean changed = mAodIcons != null;
         if (changed) {
             mAodIcons.setAnimationsEnabled(false);
             mAodIcons.removeAllViews();
         }
         mAodIcons = aodIcons;
-        mAodIcons.setOnLockScreen(true);
+        mAodIcons.setOnLockScreen(true, lockScreenMode);
         updateAodIconsVisibility(false /* animate */);
         updateAnimations();
         if (changed) {
             updateAodNotificationIcons();
         }
+        updateIconLayoutParams(mContext);
     }
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
@@ -182,23 +181,31 @@ public class NotificationIconAreaController implements
     }
 
     public void onDensityOrFontScaleChanged(Context context) {
+        updateIconLayoutParams(context);
+    }
+
+    private void updateIconLayoutParams(Context context) {
         reloadDimens(context);
         final FrameLayout.LayoutParams params = generateIconLayoutParams();
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
             View child = mNotificationIcons.getChildAt(i);
             child.setLayoutParams(params);
         }
-        for (int i = 0; i < mShelfIcons.getChildCount(); i++) {
-            View child = mShelfIcons.getChildAt(i);
-            child.setLayoutParams(params);
-        }
         for (int i = 0; i < mCenteredIcon.getChildCount(); i++) {
             View child = mCenteredIcon.getChildAt(i);
             child.setLayoutParams(params);
         }
-        for (int i = 0; i < mAodIcons.getChildCount(); i++) {
-            View child = mAodIcons.getChildAt(i);
-            child.setLayoutParams(params);
+        if (mShelfIcons != null) {
+            for (int i = 0; i < mShelfIcons.getChildCount(); i++) {
+                View child = mShelfIcons.getChildAt(i);
+                child.setLayoutParams(params);
+            }
+        }
+        if (mAodIcons != null) {
+            for (int i = 0; i < mAodIcons.getChildCount(); i++) {
+                View child = mAodIcons.getChildAt(i);
+                child.setLayoutParams(params);
+            }
         }
     }
 
@@ -358,6 +365,9 @@ public class NotificationIconAreaController implements
     }
 
     public void updateAodNotificationIcons() {
+        if (mAodIcons == null) {
+            return;
+        }
         updateIconsForLayout(entry -> entry.getIcons().getAodIcon(), mAodIcons,
                 false /* showAmbient */,
                 true /* showLowPriority */,
@@ -546,6 +556,9 @@ public class NotificationIconAreaController implements
 
     @Override
     public void onDozingChanged(boolean isDozing) {
+        if (mAodIcons == null) {
+            return;
+        }
         boolean animate = mDozeParameters.getAlwaysOn()
                 && !mDozeParameters.getDisplayNeedsBlanking();
         mAodIcons.setDozing(isDozing, animate, 0);
@@ -564,7 +577,9 @@ public class NotificationIconAreaController implements
 
     private void updateAnimations() {
         boolean inShade = mStatusBarStateController.getState() == StatusBarState.SHADE;
-        mAodIcons.setAnimationsEnabled(mAnimationsEnabled && !inShade);
+        if (mAodIcons != null) {
+            mAodIcons.setAnimationsEnabled(mAnimationsEnabled && !inShade);
+        }
         mCenteredIcon.setAnimationsEnabled(mAnimationsEnabled && inShade);
         mNotificationIcons.setAnimationsEnabled(mAnimationsEnabled && inShade);
     }
@@ -575,6 +590,9 @@ public class NotificationIconAreaController implements
     }
 
     public void appearAodIcons() {
+        if (mAodIcons == null) {
+            return;
+        }
         if (mDozeParameters.shouldControlScreenOff()) {
             mAodIcons.setTranslationY(-mAodIconAppearTranslation);
             mAodIcons.setAlpha(0);
@@ -637,6 +655,9 @@ public class NotificationIconAreaController implements
     }
 
     private void updateAodIconsVisibility(boolean animate) {
+        if (mAodIcons == null) {
+            return;
+        }
         boolean visible = mBypassController.getBypassEnabled()
                 || mWakeUpCoordinator.getNotificationsFullyHidden();
         if (mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {

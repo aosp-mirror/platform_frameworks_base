@@ -22,7 +22,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -919,7 +919,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
-        wc.getDisplayContent().prepareAppTransition(TRANSIT_TASK_OPEN, false);
+        wc.getDisplayContent().prepareAppTransitionOld(TRANSIT_OLD_TASK_OPEN, false);
         wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
         spyOn(wc);
         doReturn(true).when(wc).okToAnimate();
@@ -930,7 +930,7 @@ public class WindowContainerTests extends WindowTestsBase {
         // of the animation.
         ArrayList<WindowContainer<WindowState>> sources = new ArrayList<>();
         sources.add(act);
-        assertTrue(wc.applyAnimation(null, TRANSIT_TASK_OPEN, true, false, sources));
+        assertTrue(wc.applyAnimation(null, TRANSIT_OLD_TASK_OPEN, true, false, sources));
 
         assertEquals(act, wc.getTopMostActivity());
         assertTrue(wc.isAnimating());
@@ -943,7 +943,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // Make sure animation finish callback will be received and reset animating state after
         // animation finish.
-        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_TASK_OPEN, act,
+        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_OLD_TASK_OPEN, act,
                 mDisplayContent.mOpeningApps);
         verify(wc).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION), any());
         assertFalse(wc.isAnimating());

@@ -22,7 +22,6 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
-import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -50,7 +49,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -69,7 +67,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -163,15 +160,6 @@ public class NotificationInfoTest extends SysuiTestCase {
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
-
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
-    }
-
-    @After
-    public void tearDown() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
     }
 
     @Test

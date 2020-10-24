@@ -22,6 +22,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -47,6 +48,8 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     ConfigurationController mConfigurationController;
+    @Mock
+    NotificationIconAreaController mNotificationIconAreaController;
 
     private KeyguardStatusViewController mController;
 
@@ -60,7 +63,8 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardClockSwitchController,
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
-                mConfigurationController);
+                mConfigurationController,
+                mNotificationIconAreaController);
     }
 
     @Test

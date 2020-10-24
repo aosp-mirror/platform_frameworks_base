@@ -8936,12 +8936,6 @@ public final class Settings {
                 "packages_to_clear_data_before_full_restore";
 
         /**
-         * Setting to determine whether to use the new notification priority handling features.
-         * @hide
-         */
-        public static final String NOTIFICATION_NEW_INTERRUPTION_MODEL = "new_interruption_model";
-
-        /**
          * How often to check for location access.
          * @hide
          */

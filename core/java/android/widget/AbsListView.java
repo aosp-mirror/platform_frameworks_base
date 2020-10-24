@@ -82,6 +82,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.SurroundingText;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.widget.RemoteViews.OnClickHandler;
@@ -5994,6 +5995,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public CharSequence getSelectedText(int flags) {
             if (mTarget == null) return "";
             return mTarget.getSelectedText(flags);
+        }
+
+        @Override
+        public SurroundingText getSurroundingText(int beforeLength, int afterLength, int flags) {
+            if (mTarget == null) return null;
+            return mTarget.getSurroundingText(beforeLength, afterLength, flags);
         }
 
         @Override

@@ -140,7 +140,6 @@ interface IWindowManager
      * @displayId The ID of the display where this token should be removed.
      */
     void removeWindowToken(IBinder token, int displayId);
-    void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
 
     /**
      * Sets a singular remote controller of display rotations. There can only be one. The
@@ -180,8 +179,6 @@ interface IWindowManager
     @UnsupportedAppUsage
     void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter,
             int displayId);
-    @UnsupportedAppUsage
-    void executeAppTransition();
 
     /**
       * Used by system ui to report that recents has shown itself.
