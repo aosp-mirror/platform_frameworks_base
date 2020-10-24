@@ -63,18 +63,16 @@ public final class GnssMeasurementsProvider extends
 
         @Nullable
         @Override
-        protected ListenerOperation<IGnssMeasurementsListener> onActive() {
+        protected void onActive() {
             mLocationAttributionHelper.reportHighPowerLocationStart(
                     getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
-            return null;
         }
 
         @Nullable
         @Override
-        protected ListenerOperation<IGnssMeasurementsListener> onInactive() {
+        protected void onInactive() {
             mLocationAttributionHelper.reportHighPowerLocationStop(
                     getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
-            return null;
         }
     }
 

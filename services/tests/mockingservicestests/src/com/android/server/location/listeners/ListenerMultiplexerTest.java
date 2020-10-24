@@ -34,7 +34,6 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.server.location.listeners.ListenerMultiplexer.UpdateServiceLock;
 
 import org.junit.Before;
@@ -58,6 +57,9 @@ public class ListenerMultiplexerTest {
 
         void onRegistrationAdded(Consumer<TestListenerRegistration> consumer,
                 TestListenerRegistration registration);
+
+        void onRegistrationReplaced(Consumer<TestListenerRegistration> consumer,
+                TestListenerRegistration oldRegistration, TestListenerRegistration newRegistration);
 
         void onRegistrationRemoved(Consumer<TestListenerRegistration> consumer,
                 TestListenerRegistration registration);
@@ -90,8 +92,39 @@ public class ListenerMultiplexerTest {
         assertThat(mMultiplexer.mRegistered).isTrue();
         assertThat(mMultiplexer.mMergedRequest).isEqualTo(0);
 
+        mMultiplexer.addListener(1, consumer);
+        mInOrder.verify(mCallbacks).onRegistrationRemoved(eq(consumer),
+                any(TestListenerRegistration.class));
+        mInOrder.verify(mCallbacks).onRegistrationReplaced(eq(consumer),
+                any(TestListenerRegistration.class), any(TestListenerRegistration.class));
+        assertThat(mMultiplexer.mRegistered).isTrue();
+        assertThat(mMultiplexer.mMergedRequest).isEqualTo(1);
+
         mMultiplexer.notifyListeners();
         verify(consumer).accept(any(TestListenerRegistration.class));
+    }
+
+    @Test
+    public void testReplace() {
+        Consumer<TestListenerRegistration> oldConsumer = mock(Consumer.class);
+        Consumer<TestListenerRegistration> consumer = mock(Consumer.class);
+
+        mMultiplexer.addListener(0, oldConsumer);
+        mInOrder.verify(mCallbacks).onRegister();
+        mInOrder.verify(mCallbacks).onRegistrationAdded(eq(oldConsumer),
+                any(TestListenerRegistration.class));
+        mInOrder.verify(mCallbacks).onActive();
+        mMultiplexer.replaceListener(1, oldConsumer, consumer);
+        mInOrder.verify(mCallbacks).onRegistrationRemoved(eq(oldConsumer),
+                any(TestListenerRegistration.class));
+        mInOrder.verify(mCallbacks).onRegistrationReplaced(eq(consumer),
+                any(TestListenerRegistration.class), any(TestListenerRegistration.class));
+        assertThat(mMultiplexer.mRegistered).isTrue();
+        assertThat(mMultiplexer.mMergedRequest).isEqualTo(1);
+
+        mMultiplexer.notifyListeners();
+        verify(consumer).accept(any(TestListenerRegistration.class));
+        verify(oldConsumer, never()).accept(any(TestListenerRegistration.class));
     }
 
     @Test
@@ -319,8 +352,7 @@ public class ListenerMultiplexerTest {
     }
 
     private static class TestListenerRegistration extends
-            RequestListenerRegistration<Integer, Consumer<TestListenerRegistration>,
-                    ListenerOperation<Consumer<TestListenerRegistration>>> {
+            RequestListenerRegistration<Integer, Consumer<TestListenerRegistration>> {
 
         boolean mActive = true;
 
@@ -332,9 +364,7 @@ public class ListenerMultiplexerTest {
 
     private static class TestMultiplexer extends
             ListenerMultiplexer<Consumer<TestListenerRegistration>,
-                    Consumer<TestListenerRegistration>,
-                    ListenerOperation<Consumer<TestListenerRegistration>>, TestListenerRegistration,
-                    Integer> {
+                    Consumer<TestListenerRegistration>, TestListenerRegistration, Integer> {
 
         boolean mRegistered;
         int mMergedRequest;
@@ -351,7 +381,13 @@ public class ListenerMultiplexerTest {
         }
 
         public void addListener(Integer request, Consumer<TestListenerRegistration> consumer) {
-            addRegistration(consumer, new TestListenerRegistration(request, consumer));
+            putRegistration(consumer, new TestListenerRegistration(request, consumer));
+        }
+
+        public void replaceListener(Integer request, Consumer<TestListenerRegistration> oldConsumer,
+                Consumer<TestListenerRegistration> consumer) {
+            replaceRegistration(oldConsumer, consumer,
+                    new TestListenerRegistration(request, consumer));
         }
 
         public void removeListener(Consumer<TestListenerRegistration> consumer) {
@@ -419,6 +455,13 @@ public class ListenerMultiplexerTest {
         protected void onRegistrationAdded(Consumer<TestListenerRegistration> consumer,
                 TestListenerRegistration registration) {
             mCallbacks.onRegistrationAdded(consumer, registration);
+        }
+
+        @Override
+        protected void onRegistrationReplaced(Consumer<TestListenerRegistration> consumer,
+                TestListenerRegistration oldRegistration,
+                TestListenerRegistration newRegistration) {
+            mCallbacks.onRegistrationReplaced(consumer, oldRegistration, newRegistration);
         }
 
         @Override

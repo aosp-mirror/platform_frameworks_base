@@ -24,7 +24,6 @@ import android.location.util.identity.CallerIdentity;
 import android.os.Process;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.server.FgThread;
 
 import java.util.Objects;
@@ -38,11 +37,9 @@ import java.util.concurrent.Executor;
  *
  * @param <TRequest>           request type
  * @param <TListener>          listener type
- * @param <TListenerOperation> listener operation type
  */
-public abstract class RemoteListenerRegistration<TRequest, TListener,
-        TListenerOperation extends ListenerOperation<TListener>> extends
-        RemovableListenerRegistration<TRequest, TListener, TListenerOperation> {
+public abstract class RemoteListenerRegistration<TRequest, TListener> extends
+        RemovableListenerRegistration<TRequest, TListener> {
 
     @VisibleForTesting
     public static final Executor IN_PROCESS_EXECUTOR = FgThread.getExecutor();

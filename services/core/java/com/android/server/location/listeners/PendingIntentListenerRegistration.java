@@ -21,8 +21,6 @@ import android.app.PendingIntent;
 import android.location.util.identity.CallerIdentity;
 import android.util.Log;
 
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
-
 /**
  * A registration that works with PendingIntent keys, and registers a CancelListener to
  * automatically remove the registration if the PendingIntent is canceled. The key for this
@@ -32,8 +30,7 @@ import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
  * @param <TListener> listener type
  */
 public abstract class PendingIntentListenerRegistration<TRequest, TListener> extends
-        RemoteListenerRegistration<TRequest, TListener, ListenerOperation<TListener>> implements
-        PendingIntent.CancelListener {
+        RemoteListenerRegistration<TRequest, TListener> implements PendingIntent.CancelListener {
 
     /**
      * Interface to allowed pending intent retrieval when keys are not themselves PendingIntents.
@@ -73,7 +70,7 @@ public abstract class PendingIntentListenerRegistration<TRequest, TListener> ext
     protected void onPendingIntentListenerUnregister() {}
 
     @Override
-    public void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
+    protected void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
         if (e instanceof PendingIntent.CanceledException) {
             Log.w(getOwner().getTag(), "registration " + this + " removed", e);
             remove();
