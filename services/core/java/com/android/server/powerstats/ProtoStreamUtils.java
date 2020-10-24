@@ -27,6 +27,7 @@ import android.util.proto.WireTypeMismatchException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +58,13 @@ public class ProtoStreamUtils {
         public static void print(ChannelInfo[] channelInfo) {
             for (int i = 0; i < channelInfo.length; i++) {
                 Slog.d(TAG, "ChannelId = " + channelInfo[i].channelId
+                        + ", ChannelName = " + channelInfo[i].channelName);
+            }
+        }
+
+        public static void dumpsys(ChannelInfo[] channelInfo, PrintWriter pw) {
+            for (int i = 0; i < channelInfo.length; i++) {
+                pw.println("ChannelId = " + channelInfo[i].channelId
                         + ", ChannelName = " + channelInfo[i].channelName);
             }
         }
@@ -170,6 +178,12 @@ public class ProtoStreamUtils {
         public static void print(int[] energyConsumerId) {
             for (int i = 0; i < energyConsumerId.length; i++) {
                 Slog.d(TAG, "EnergyConsumerId = " + energyConsumerId[i]);
+            }
+        }
+
+        public static void dumpsys(int[] energyConsumerId, PrintWriter pw) {
+            for (int i = 0; i < energyConsumerId.length; i++) {
+                pw.println("EnergyConsumerId = " + energyConsumerId[i]);
             }
         }
     }
