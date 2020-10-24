@@ -27,7 +27,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
@@ -38,8 +37,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
-import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -54,7 +52,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -74,9 +71,8 @@ public class WMShellTest extends SysuiTestCase {
     @Mock PipTouchHandler mPipTouchHandler;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
-    @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock ProtoTracer mProtoTracer;
-    @Mock PackageManager mMockPackageManager;
+    @Mock ShellDump mShellDump;
 
     @Before
     public void setUp() {
@@ -86,7 +82,8 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
                 mInputConsumerController, mKeyguardUpdateMonitor, mTaskStackChangeListeners,
                 mNavigationModeController, mScreenLifecycle, mSysUiState, Optional.of(mPip),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
+                Optional.of(mSplitScreen), Optional.of(mOneHanded), mProtoTracer,
+                Optional.of(mShellDump));
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
     }

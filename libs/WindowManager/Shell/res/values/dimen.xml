@@ -69,4 +69,7 @@
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->
     <dimen name="gestures_onehanded_drag_threshold">20dp</dimen>
+
+    <!-- The amount to inset the drop target regions from the edge of the display -->
+    <dimen name="drop_layout_display_margin">16dp</dimen>
 </resources>
