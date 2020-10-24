@@ -18,7 +18,7 @@ package com.android.server.powerstats;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
+import android.util.Slog;
 
 /**
  * TimerTrigger sets a 60 second opportunistic timer using postDelayed.
@@ -39,7 +39,7 @@ public final class TimerTrigger extends PowerStatsLogTrigger {
             // Do not wake the device for these messages.  Opportunistically log rail data every
             // LOG_PERIOD_MS.
             mHandler.postDelayed(mLogData, LOG_PERIOD_MS);
-            if (DEBUG) Log.d(TAG, "Received delayed message.  Log rail data");
+            if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data");
             logPowerStatsData();
         }
     };

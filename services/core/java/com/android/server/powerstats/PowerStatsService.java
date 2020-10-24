@@ -21,7 +21,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.UserHandle;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -98,7 +98,7 @@ public class PowerStatsService extends SystemService {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             if (mPowerStatsLogger == null) {
-                Log.e(TAG, "PowerStats HAL is not initialized.  No data available.");
+                Slog.e(TAG, "PowerStats HAL is not initialized.  No data available.");
             } else {
                 if (args.length > 0 && "--proto".equals(args[0])) {
                     if ("model".equals(args[1])) {
@@ -127,7 +127,7 @@ public class PowerStatsService extends SystemService {
         mPowerStatsHALWrapper = mInjector.createPowerStatsHALWrapperImpl();
 
         if (mPowerStatsHALWrapper.initialize()) {
-            if (DEBUG) Log.d(TAG, "Starting PowerStatsService");
+            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService");
 
             // Only start logger and triggers if initialization is successful.
             mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
@@ -136,7 +136,7 @@ public class PowerStatsService extends SystemService {
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {
-            Log.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
+            Slog.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
         }
     }
 
