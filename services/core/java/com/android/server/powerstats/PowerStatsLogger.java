@@ -23,7 +23,7 @@ import android.hardware.power.stats.EnergyMeasurement;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
+import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
@@ -58,7 +58,7 @@ public final class PowerStatsLogger extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case MSG_LOG_TO_DATA_STORAGE:
-                if (DEBUG) Log.d(TAG, "Logging to data storage");
+                if (DEBUG) Slog.d(TAG, "Logging to data storage");
 
                 // Log power meter data.
                 EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.readEnergyMeters();
@@ -83,7 +83,7 @@ public final class PowerStatsLogger extends Handler {
      *           is written in protobuf format as defined by powerstatsservice.proto.
      */
     public void writeMeterDataToFile(FileDescriptor fd) {
-        if (DEBUG) Log.d(TAG, "Writing meter data to file");
+        if (DEBUG) Slog.d(TAG, "Writing meter data to file");
 
         final ProtoOutputStream pos = new ProtoOutputStream(fd);
 
@@ -106,12 +106,12 @@ public final class PowerStatsLogger extends Handler {
                         EnergyMeasurementUtils.packProtoMessage(energyMeasurement, pos);
                         if (DEBUG) EnergyMeasurementUtils.print(energyMeasurement);
                     } catch (IOException e) {
-                        Log.e(TAG, "Failed to write energy meter data to incident report.");
+                        Slog.e(TAG, "Failed to write energy meter data to incident report.");
                     }
                 }
             });
         } catch (IOException e) {
-            Log.e(TAG, "Failed to write energy meter info to incident report.");
+            Slog.e(TAG, "Failed to write energy meter info to incident report.");
         }
 
         pos.flush();
@@ -124,7 +124,7 @@ public final class PowerStatsLogger extends Handler {
      *           is written in protobuf format as defined by powerstatsservice.proto.
      */
     public void writeModelDataToFile(FileDescriptor fd) {
-        if (DEBUG) Log.d(TAG, "Writing model data to file");
+        if (DEBUG) Slog.d(TAG, "Writing model data to file");
 
         final ProtoOutputStream pos = new ProtoOutputStream(fd);
 
@@ -147,12 +147,12 @@ public final class PowerStatsLogger extends Handler {
                         EnergyConsumerResultUtils.packProtoMessage(energyConsumerResult, pos);
                         if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResult);
                     } catch (IOException e) {
-                        Log.e(TAG, "Failed to write energy model data to incident report.");
+                        Slog.e(TAG, "Failed to write energy model data to incident report.");
                     }
                 }
             });
         } catch (IOException e) {
-            Log.e(TAG, "Failed to write energy model info to incident report.");
+            Slog.e(TAG, "Failed to write energy model info to incident report.");
         }
 
         pos.flush();
