@@ -1734,6 +1734,7 @@ package android.telephony {
 
   public final class ModemActivityInfo implements android.os.Parcelable {
     ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    method public boolean isEmpty();
     method public boolean isValid();
   }
 
