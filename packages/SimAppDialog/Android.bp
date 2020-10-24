@@ -1,5 +1,6 @@
 android_app {
     name: "SimAppDialog",
+    defaults: ["platform_app_defaults"],
 
     srcs: ["src/**/*.java"],
 

@@ -163,6 +163,7 @@ android_library {
 
 android_app {
     name: "SystemUI",
+    defaults: ["platform_app_defaults"],
     static_libs: [
         "SystemUI-core",
     ],
@@ -184,5 +185,4 @@ android_app {
         "privapp_whitelist_com.android.systemui",
         "checked-wm_shell_protolog.json",
     ],
-
 }
