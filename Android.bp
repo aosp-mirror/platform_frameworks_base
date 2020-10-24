@@ -14,6 +14,37 @@
 
 // Build the master framework library.
 
+// Defaults for platform code that runs inside system_server
+java_defaults {
+    name: "platform_service_defaults",
+    plugins: [
+        "error_prone_android_framework",
+    ],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkBinderIdentity:ERROR",
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
+}
+
+// Defaults for platform apps
+java_defaults {
+    name: "platform_app_defaults",
+    plugins: [
+        "error_prone_android_framework",
+    ],
+    errorprone: {
+        javacflags: [
+            // We're less worried about performance in app code
+            "-Xep:AndroidFrameworkEfficientCollections:OFF",
+            "-Xep:AndroidFrameworkEfficientParcelable:OFF",
+            "-Xep:AndroidFrameworkEfficientStrings:OFF",
+        ],
+    },
+}
+
 // READ ME: ########################################################
 //
 // When updating this list of aidl files, consider if that aidl is

@@ -13,6 +13,7 @@
 // limitations under the License.
 android_app {
     name: "StatementService",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     optimize: {
         proguard_flags_files: ["proguard.flags"],
