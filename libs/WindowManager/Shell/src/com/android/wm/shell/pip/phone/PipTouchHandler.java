@@ -783,8 +783,8 @@ public class PipTouchHandler {
                 // If User releases the PIP window while it's out of the display bounds, put
                 // PIP into stashed mode.
                 if (mEnableStash
-                        && (animatingBounds.right > mPipBoundsHandler.getDisplayBounds().right
-                        || animatingBounds.left < mPipBoundsHandler.getDisplayBounds().left)) {
+                        && (animatingBounds.right > mPipBoundsState.getDisplayBounds().right
+                        || animatingBounds.left < mPipBoundsState.getDisplayBounds().left)) {
                     mMotionHelper.stashToEdge(vel.x, vel.y, this::flingEndAction /* endAction */);
                 } else {
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,

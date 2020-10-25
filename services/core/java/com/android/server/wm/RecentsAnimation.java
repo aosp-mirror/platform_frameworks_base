@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -221,7 +220,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
                         targetStack, getStackAbove(targetStack));
 
-                mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                mWindowManager.prepareAppTransitionNone();
                 mWindowManager.executeAppTransition();
 
                 // TODO: Maybe wait for app to draw in this particular case?
@@ -377,7 +376,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         return;
                     }
 
-                    mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                    mWindowManager.prepareAppTransitionNone();
                     mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, false);
                     mService.mRootWindowContainer.resumeFocusedStacksTopActivities();
 
@@ -436,7 +435,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 || controller.isTargetApp(stack.getTopNonFinishingActivity()))
                 && controller.shouldDeferCancelUntilNextTransition()) {
             // Always prepare an app transition since we rely on the transition callbacks to cleanup
-            mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+            mWindowManager.prepareAppTransitionNone();
             controller.setCancelOnNextTransitionStart();
         }
     }

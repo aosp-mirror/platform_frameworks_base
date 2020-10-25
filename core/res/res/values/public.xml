@@ -3074,6 +3074,8 @@
     <public name="config_systemAutomotiveCluster" />
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemVideoCall" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public name="config_systemAutomotiveProjection" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

@@ -18,16 +18,19 @@ package com.android.server.powerstats;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.power.stats.ChannelInfo;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.UserHandle;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.PowerStatsHALWrapper.PowerStatsHALWrapperImpl;
+import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -43,7 +46,8 @@ public class PowerStatsService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String DATA_STORAGE_SUBDIR = "powerstats";
     private static final int DATA_STORAGE_VERSION = 0;
-    private static final String DATA_STORAGE_FILENAME = "log.powerstats." + DATA_STORAGE_VERSION;
+    private static final String METER_FILENAME = "log.powerstats.meter." + DATA_STORAGE_VERSION;
+    private static final String MODEL_FILENAME = "log.powerstats.model." + DATA_STORAGE_VERSION;
 
     private final Injector mInjector;
 
@@ -63,8 +67,12 @@ public class PowerStatsService extends SystemService {
                 DATA_STORAGE_SUBDIR);
         }
 
-        String createDataStorageFilename() {
-            return DATA_STORAGE_FILENAME;
+        String createMeterFilename() {
+            return METER_FILENAME;
+        }
+
+        String createModelFilename() {
+            return MODEL_FILENAME;
         }
 
         IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
@@ -72,9 +80,10 @@ public class PowerStatsService extends SystemService {
         }
 
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String dataStorageFilename, IPowerStatsHALWrapper powerStatsHALWrapper) {
-            return new PowerStatsLogger(context, dataStoragePath, dataStorageFilename,
-                powerStatsHALWrapper);
+                String meterFilename, String modelFilename,
+                IPowerStatsHALWrapper powerStatsHALWrapper) {
+            return new PowerStatsLogger(context, dataStoragePath, meterFilename,
+                modelFilename, powerStatsHALWrapper);
         }
 
         BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
@@ -91,11 +100,23 @@ public class PowerStatsService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-            if (args.length > 0 && "--proto".equals(args[0])) {
-                if (mPowerStatsLogger == null) {
-                    Log.e(TAG, "PowerStats HAL is not initialized.  No data available.");
-                } else {
-                    mPowerStatsLogger.writeToFile(fd);
+            if (mPowerStatsLogger == null) {
+                Slog.e(TAG, "PowerStats HAL is not initialized.  No data available.");
+            } else {
+                if (args.length > 0 && "--proto".equals(args[0])) {
+                    if ("model".equals(args[1])) {
+                        mPowerStatsLogger.writeModelDataToFile(fd);
+                    } else if ("meter".equals(args[1])) {
+                        mPowerStatsLogger.writeMeterDataToFile(fd);
+                    }
+                } else if (args.length == 0) {
+                    pw.println("PowerStatsService dumpsys: available ChannelInfos");
+                    ChannelInfo[] channelInfo = mPowerStatsHALWrapper.getEnergyMeterInfo();
+                    ChannelInfoUtils.dumpsys(channelInfo, pw);
+
+                    pw.println("PowerStatsService dumpsys: available EnergyConsumerIds");
+                    int[] energyConsumerId = mPowerStatsHALWrapper.getEnergyConsumerInfo();
+                    EnergyConsumerIdUtils.dumpsys(energyConsumerId, pw);
                 }
             }
         }
@@ -117,16 +138,16 @@ public class PowerStatsService extends SystemService {
         mPowerStatsHALWrapper = mInjector.createPowerStatsHALWrapperImpl();
 
         if (mPowerStatsHALWrapper.initialize()) {
-            if (DEBUG) Log.d(TAG, "Starting PowerStatsService");
+            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService");
 
             // Only start logger and triggers if initialization is successful.
             mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
-                mInjector.createDataStoragePath(), mInjector.createDataStorageFilename(),
-                mPowerStatsHALWrapper);
+                mInjector.createDataStoragePath(), mInjector.createMeterFilename(),
+                mInjector.createModelFilename(), mPowerStatsHALWrapper);
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {
-            Log.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
+            Slog.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
         }
     }
 

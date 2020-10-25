@@ -17,6 +17,7 @@
 package android.app.people;
 
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.content.pm.ShortcutInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,7 +31,9 @@ import android.os.Parcelable;
 public final class ConversationChannel implements Parcelable {
 
     private ShortcutInfo mShortcutInfo;
+    private int mUid;
     private NotificationChannel mParentNotificationChannel;
+    private NotificationChannelGroup mParentNotificationChannelGroup;
     private long mLastEventTimestamp;
     private boolean mHasActiveNotifications;
 
@@ -46,18 +49,24 @@ public final class ConversationChannel implements Parcelable {
         }
     };
 
-    public ConversationChannel(ShortcutInfo shortcutInfo,
-            NotificationChannel parentNotificationChannel, long lastEventTimestamp,
+    public ConversationChannel(ShortcutInfo shortcutInfo, int uid,
+            NotificationChannel parentNotificationChannel,
+            NotificationChannelGroup parentNotificationChannelGroup, long lastEventTimestamp,
             boolean hasActiveNotifications) {
         mShortcutInfo = shortcutInfo;
+        mUid = uid;
         mParentNotificationChannel = parentNotificationChannel;
+        mParentNotificationChannelGroup = parentNotificationChannelGroup;
         mLastEventTimestamp = lastEventTimestamp;
         mHasActiveNotifications = hasActiveNotifications;
     }
 
     public ConversationChannel(Parcel in) {
         mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
+        mUid = in.readInt();
         mParentNotificationChannel = in.readParcelable(NotificationChannel.class.getClassLoader());
+        mParentNotificationChannelGroup =
+                in.readParcelable(NotificationChannelGroup.class.getClassLoader());
         mLastEventTimestamp = in.readLong();
         mHasActiveNotifications = in.readBoolean();
     }
@@ -70,7 +79,9 @@ public final class ConversationChannel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(mShortcutInfo, flags);
+        dest.writeInt(mUid);
         dest.writeParcelable(mParentNotificationChannel, flags);
+        dest.writeParcelable(mParentNotificationChannelGroup, flags);
         dest.writeLong(mLastEventTimestamp);
         dest.writeBoolean(mHasActiveNotifications);
     }
@@ -79,8 +90,16 @@ public final class ConversationChannel implements Parcelable {
         return mShortcutInfo;
     }
 
+    public int getUid() {
+        return mUid;
+    }
+
     public NotificationChannel getParentNotificationChannel() {
         return mParentNotificationChannel;
+    }
+
+    public NotificationChannelGroup getParentNotificationChannelGroup() {
+        return mParentNotificationChannelGroup;
     }
 
     public long getLastEventTimestamp() {

@@ -58,10 +58,6 @@ public class HdmiCecConfig {
     private static final String ETC_DIR = "etc";
     private static final String CONFIG_FILE = "cec_config.xml";
 
-    @Nullable private CecSettings mProductConfig = null;
-    @Nullable private CecSettings mVendorOverride = null;
-    @Nullable private StorageAdapter mStorageAdapter = null;
-
     @IntDef({
         STORAGE_SYSPROPS,
         STORAGE_GLOBAL_SETTINGS,
@@ -82,6 +78,11 @@ public class HdmiCecConfig {
      */
     public static final String SYSPROP_SYSTEM_AUDIO_MODE_MUTING =
             "ro.hdmi.cec.audio.system_audio_mode_muting.enabled";
+
+    @NonNull private final Context mContext;
+    @NonNull private final StorageAdapter mStorageAdapter;
+    @Nullable private final CecSettings mProductConfig;
+    @Nullable private final CecSettings mVendorOverride;
 
     /**
      * Setting storage input/output helper class.
@@ -126,20 +127,28 @@ public class HdmiCecConfig {
     }
 
     @VisibleForTesting
-    HdmiCecConfig(@Nullable CecSettings productConfig,
-                  @Nullable CecSettings vendorOverride,
-                  @Nullable StorageAdapter storageAdapter) {
+    HdmiCecConfig(@NonNull Context context,
+                  @NonNull StorageAdapter storageAdapter,
+                  @Nullable CecSettings productConfig,
+                  @Nullable CecSettings vendorOverride) {
+        mContext = context;
+        mStorageAdapter = storageAdapter;
         mProductConfig = productConfig;
         mVendorOverride = vendorOverride;
-        mStorageAdapter = storageAdapter;
+        if (mProductConfig == null) {
+            Slog.i(TAG, "CEC master configuration XML missing.");
+        }
+        if (mVendorOverride == null) {
+            Slog.i(TAG, "CEC OEM configuration override XML missing.");
+        }
     }
 
-    HdmiCecConfig() {
-        this(readSettingsFromFile(Environment.buildPath(Environment.getProductDirectory(),
+    HdmiCecConfig(@NonNull Context context) {
+        this(context, new StorageAdapter(),
+             readSettingsFromFile(Environment.buildPath(Environment.getProductDirectory(),
                                                         ETC_DIR, CONFIG_FILE)),
              readSettingsFromFile(Environment.buildPath(Environment.getVendorDirectory(),
-                                                        ETC_DIR, CONFIG_FILE)),
-             new StorageAdapter());
+                                                        ETC_DIR, CONFIG_FILE)));
     }
 
     @Nullable
@@ -161,6 +170,9 @@ public class HdmiCecConfig {
 
     @Nullable
     private Setting getSetting(@NonNull String name) {
+        if (mProductConfig == null) {
+            return null;
+        }
         if (mVendorOverride != null) {
             // First read from the vendor override.
             for (Setting setting : mVendorOverride.getSetting()) {
@@ -211,7 +223,7 @@ public class HdmiCecConfig {
         }
     }
 
-    private String retrieveValue(@NonNull Context context, @NonNull Setting setting) {
+    private String retrieveValue(@NonNull Setting setting) {
         @Storage int storage = getStorage(setting);
         String storageKey = getStorageKey(setting);
         if (storage == STORAGE_SYSPROPS) {
@@ -220,14 +232,13 @@ public class HdmiCecConfig {
                     setting.getDefaultValue().getStringValue());
         } else if (storage == STORAGE_GLOBAL_SETTINGS) {
             Slog.d(TAG, "Reading '" + storageKey + "' global setting.");
-            return mStorageAdapter.retrieveGlobalSetting(context, storageKey,
+            return mStorageAdapter.retrieveGlobalSetting(mContext, storageKey,
                     setting.getDefaultValue().getStringValue());
         }
         return null;
     }
 
-    private void storeValue(@NonNull Context context, @NonNull Setting setting,
-                            @NonNull String value) {
+    private void storeValue(@NonNull Setting setting, @NonNull String value) {
         @Storage int storage = getStorage(setting);
         String storageKey = getStorageKey(setting);
         if (storage == STORAGE_SYSPROPS) {
@@ -235,7 +246,7 @@ public class HdmiCecConfig {
             mStorageAdapter.storeSystemProperty(storageKey, value);
         } else if (storage == STORAGE_GLOBAL_SETTINGS) {
             Slog.d(TAG, "Setting '" + storageKey + "' global setting.");
-            mStorageAdapter.storeGlobalSetting(context, storageKey, value);
+            mStorageAdapter.storeGlobalSetting(mContext, storageKey, value);
         }
     }
 
@@ -243,6 +254,9 @@ public class HdmiCecConfig {
      * Returns a list of all settings based on the XML metadata.
      */
     public @CecSettingName List<String> getAllSettings() {
+        if (mProductConfig == null) {
+            return new ArrayList<String>();
+        }
         List<String> allSettings = new ArrayList<String>();
         for (Setting setting : mProductConfig.getSetting()) {
             allSettings.add(setting.getName());
@@ -254,6 +268,9 @@ public class HdmiCecConfig {
      * Returns a list of user-modifiable settings based on the XML metadata.
      */
     public @CecSettingName List<String> getUserSettings() {
+        if (mProductConfig == null) {
+            return new ArrayList<String>();
+        }
         Set<String> userSettings = new HashSet<String>();
         // First read from the product config.
         for (Setting setting : mProductConfig.getSetting()) {
@@ -303,20 +320,19 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the current value of that setting.
      */
-    public String getValue(@NonNull Context context, @NonNull @CecSettingName String name) {
+    public String getValue(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
         }
         Slog.d(TAG, "Getting CEC setting value '" + name + "'.");
-        return retrieveValue(context, setting);
+        return retrieveValue(setting);
     }
 
     /**
      * For a given setting name and value sets the current value of that setting.
      */
-    public void setValue(@NonNull Context context, @NonNull @CecSettingName String name,
-                         @NonNull String value) {
+    public void setValue(@NonNull @CecSettingName String name, @NonNull String value) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -329,6 +345,6 @@ public class HdmiCecConfig {
                                                + "' value: '" + value + "'.");
         }
         Slog.d(TAG, "Updating CEC setting '" + name + "' to '" + value + "'.");
-        storeValue(context, setting, value);
+        storeValue(setting, value);
     }
 }

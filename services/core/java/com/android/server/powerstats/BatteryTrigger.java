@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.util.Log;
+import android.util.Slog;
 
 /**
  * BatteryTrigger instantiates a BroadcastReceiver that listens for changes
@@ -42,7 +42,7 @@ public final class BatteryTrigger extends PowerStatsLogTrigger {
                     int newBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
 
                     if (newBatteryLevel < mBatteryLevel) {
-                        if (DEBUG) Log.d(TAG, "Battery level dropped.  Log rail data");
+                        if (DEBUG) Slog.d(TAG, "Battery level dropped.  Log rail data");
                         logPowerStatsData();
                     }
 

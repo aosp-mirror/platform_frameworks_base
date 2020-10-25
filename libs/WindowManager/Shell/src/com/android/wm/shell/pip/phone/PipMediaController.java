@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 import android.app.IActivityManager;
@@ -180,25 +181,25 @@ public class PipMediaController {
         mPauseAction = new RemoteAction(Icon.createWithResource(mContext,
                 R.drawable.pip_ic_pause_white), pauseDescription, pauseDescription,
                 PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PAUSE),
-                        FLAG_UPDATE_CURRENT));
+                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
         String playDescription = mContext.getString(R.string.pip_play);
         mPlayAction = new RemoteAction(Icon.createWithResource(mContext,
                 R.drawable.pip_ic_play_arrow_white), playDescription, playDescription,
                 PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PLAY),
-                        FLAG_UPDATE_CURRENT));
+                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
         String nextDescription = mContext.getString(R.string.pip_skip_to_next);
         mNextAction = new RemoteAction(Icon.createWithResource(mContext,
                 R.drawable.pip_ic_skip_next_white), nextDescription, nextDescription,
                 PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_NEXT),
-                        FLAG_UPDATE_CURRENT));
+                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
         String prevDescription = mContext.getString(R.string.pip_skip_to_prev);
         mPrevAction = new RemoteAction(Icon.createWithResource(mContext,
                 R.drawable.pip_ic_skip_previous_white), prevDescription, prevDescription,
                 PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PREV),
-                        FLAG_UPDATE_CURRENT));
+                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
     }
 
     /**

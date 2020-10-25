@@ -1231,12 +1231,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return "/data/system/";
         }
 
+        @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
         PendingIntent pendingIntentGetActivityAsUser(Context context, int requestCode,
                 @NonNull Intent intent, int flags, Bundle options, UserHandle user) {
             return PendingIntent.getActivityAsUser(
                     context, requestCode, intent, flags, options, user);
         }
 
+        @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
         PendingIntent pendingIntentGetBroadcast(
                 Context context, int requestCode, Intent intent, int flags) {
             return PendingIntent.getBroadcast(context, requestCode, intent, flags);
@@ -5791,8 +5793,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
         Objects.requireNonNull(admin, "ComponentName is null");
 
-        final CallerIdentity caller = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+        final CallerIdentity caller = getNonPrivilegedOrAdminCallerIdentity(admin);
+        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                && (isDeviceOwner(caller) || isProfileOwner(caller)))
                 || hasCallingPermission(PERMISSION_MAINLINE_NETWORK_STACK));
 
         return mInjector.binderWithCleanCallingIdentity(

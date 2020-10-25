@@ -191,8 +191,9 @@ public class SuspendedAppActivity extends AlertActivity
         mOnUnsuspend = intent.getParcelableExtra(EXTRA_UNSUSPEND_INTENT);
         if (mSuppliedDialogInfo != null) {
             try {
-                mSuspendingAppResources = mPm.getResourcesForApplicationAsUser(mSuspendingPackage,
-                        mUserId);
+                mSuspendingAppResources = createContextAsUser(
+                        UserHandle.of(mUserId), /* flags */ 0).getPackageManager()
+                        .getResourcesForApplication(mSuspendedPackage);
             } catch (PackageManager.NameNotFoundException ne) {
                 Slog.e(TAG, "Could not find resources for " + mSuspendingPackage, ne);
             }

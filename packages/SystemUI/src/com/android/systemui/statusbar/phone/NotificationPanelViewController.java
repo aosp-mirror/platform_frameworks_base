@@ -441,7 +441,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardIndicationController mKeyguardIndicationController;
     private Consumer<Boolean> mAffordanceLaunchListener;
     private int mShelfHeight;
-    private Runnable mOnReinflationListener;
     private int mDarkIconSize;
     private int mHeadsUpInset;
     private boolean mHeadsUpPinnedMode;
@@ -767,9 +766,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 false,
                 mBarState);
         setKeyguardBottomAreaVisibility(mBarState, false);
-        if (mOnReinflationListener != null) {
-            mOnReinflationListener.run();
-        }
     }
 
     private void initBottomArea() {
@@ -3100,10 +3096,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void showTransientIndication(int id) {
         mKeyguardIndicationController.showTransientIndication(id);
-    }
-
-    public void setOnReinflationListener(Runnable onReinflationListener) {
-        mOnReinflationListener = onReinflationListener;
     }
 
     public void setAlpha(float alpha) {

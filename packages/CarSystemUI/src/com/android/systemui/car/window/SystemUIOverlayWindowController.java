@@ -120,6 +120,13 @@ public class SystemUIOverlayWindowController implements
         updateWindow();
     }
 
+    /** Sets the sides of system bar insets to fit. Note: This should be rarely used. */
+    public void setFitInsetsSides(@WindowInsets.Side.InsetsSide int sides) {
+        mLpChanged.setFitInsetsSides(sides);
+        mLpChanged.setFitInsetsIgnoringVisibility(mUsingStableInsets);
+        updateWindow();
+    }
+
     /** Sets the window to the visible state. */
     public void setWindowVisible(boolean visible) {
         mVisible = visible;

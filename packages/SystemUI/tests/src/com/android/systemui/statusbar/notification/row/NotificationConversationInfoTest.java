@@ -995,7 +995,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mTestHandler, null, Optional.of(mBubbles));
 
         verify(mMockINotificationManager, times(1)).createConversationNotificationChannelForPackage(
-                anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
+                anyString(), anyInt(), any(), eq(CONVERSATION_ID));
     }
 
     @Test
@@ -1020,7 +1020,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mTestHandler, null, Optional.of(mBubbles));
 
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
-                anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
+                anyString(), anyInt(), any(), eq(CONVERSATION_ID));
     }
 
     @Test

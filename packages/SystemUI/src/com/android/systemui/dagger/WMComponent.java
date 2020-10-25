@@ -18,8 +18,9 @@ package com.android.systemui.dagger;
 
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.wmshell.WMShellModule;
+import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -47,22 +48,25 @@ public interface WMComponent {
      * Initializes all the WMShell components before starting any of the SystemUI components.
      */
     default void init() {
-        // This is to prevent circular init problem by separating registration step out of its
-        // constructor. And make sure the initialization of DisplayImeController won't depend on
-        // specific feature anymore.
-        getDisplayImeController().startMonitorDisplays();
-        getShellTaskOrganizer().registerOrganizer();
+        getShellInit().init();
     }
 
-    // Required components to be initialized at start up
+    // Gets the Shell init instance
     @WMSingleton
-    ShellTaskOrganizer getShellTaskOrganizer();
+    ShellInit getShellInit();
 
+    // Gets the Shell dump instance
     @WMSingleton
-    DisplayImeController getDisplayImeController();
+    Optional<ShellDump> getShellDump();
 
+    // TODO(b/162923491): Refactor this out so Pip doesn't need to inject this
     @WMSingleton
     InputConsumerController getInputConsumerController();
+
+    // TODO(b/162923491): To be removed once Bubbles migrates over to the Shell
+
+    @WMSingleton
+    ShellTaskOrganizer getShellTaskOrganizer();
 
     // TODO(b/162923491): We currently pass the instances through to SysUI, but that may change
     //                    depending on the threading mechanism we go with

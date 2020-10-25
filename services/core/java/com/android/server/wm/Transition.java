@@ -22,8 +22,8 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANI
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 
 import android.annotation.NonNull;
 import android.os.Binder;
@@ -65,7 +65,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private static final int STATE_PLAYING = 2;
 
-    final @WindowManager.TransitionType int mType;
+    final @WindowManager.TransitionOldType int mType;
     private int mSyncId;
     private @WindowManager.TransitionFlags int mFlags;
     private final TransitionController mController;
@@ -74,7 +74,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private int mState = STATE_COLLECTING;
     private boolean mReadyCalled = false;
 
-    Transition(@WindowManager.TransitionType int type,
+    Transition(@WindowManager.TransitionOldType int type,
             @WindowManager.TransitionFlags int flags, TransitionController controller) {
         mType = type;
         mFlags = flags;
@@ -182,7 +182,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (dc == null) {
             return;
         }
-        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
+        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY) {
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
@@ -196,10 +196,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 }
             }
         }
-        if (transit == TRANSIT_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
             dc.startKeyguardExitOnNonAppWindows(
-                    transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
             mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(transit, 0);

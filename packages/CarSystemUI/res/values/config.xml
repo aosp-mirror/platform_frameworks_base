@@ -154,4 +154,13 @@
 
     <!-- The Activity name for the Rear View Camera, if empty, the feature will be disabled. -->
     <string name="config_rearViewCameraActivity" translatable="false"></string>
+
+    <!-- Whether the Notification Panel should be inset by the top system bar. -->
+    <bool name="config_notif_panel_inset_by_top_systembar" translatable="false">false</bool>
+    <!-- Whether the Notification Panel should be inset by the bottom system bar. -->
+    <bool name="config_notif_panel_inset_by_bottom_systembar" translatable="false">true</bool>
+    <!-- Whether the Notification Panel should be inset by the left system bar. -->
+    <bool name="config_notif_panel_inset_by_left_systembar" translatable="false">false</bool>
+    <!-- Whether the Notification Panel should be inset by the right system bar. -->
+    <bool name="config_notif_panel_inset_by_right_systembar" translatable="false">false</bool>
 </resources>

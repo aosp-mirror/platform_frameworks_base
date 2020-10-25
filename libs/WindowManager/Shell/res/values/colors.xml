@@ -22,4 +22,7 @@
     <drawable name="forced_resizable_background">#59000000</drawable>
     <color name="minimize_dock_shadow_start">#60000000</color>
     <color name="minimize_dock_shadow_end">#00000000</color>
+
+    <!-- Background for the various drop targets when handling drag and drop. -->
+    <color name="drop_outline_background">#330000FF</color>
 </resources>

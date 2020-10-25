@@ -27,15 +27,20 @@ import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.InputConsumerController;
+import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
@@ -55,6 +60,33 @@ import dagger.Provides;
  */
 @Module
 public abstract class WMShellBaseModule {
+
+    @WMSingleton
+    @Provides
+    static ShellInit provideShellInit(DisplayImeController displayImeController,
+            DragAndDropController dragAndDropController,
+            ShellTaskOrganizer shellTaskOrganizer,
+            Optional<SplitScreen> splitScreenOptional) {
+        return new ShellInit(displayImeController,
+                dragAndDropController,
+                shellTaskOrganizer,
+                splitScreenOptional);
+    }
+
+    /**
+     * Note, this is only optional because we currently pass this to the SysUI component scope and
+     * for non-primary users, we may inject a null-optional for that dependency.
+     */
+    @WMSingleton
+    @Provides
+    static Optional<ShellDump> provideShellDump(ShellTaskOrganizer shellTaskOrganizer,
+            Optional<SplitScreen> splitScreenOptional,
+            Optional<Pip> pipOptional,
+            Optional<OneHanded> oneHandedOptional) {
+        return Optional.of(new ShellDump(shellTaskOrganizer, splitScreenOptional, pipOptional,
+                oneHandedOptional));
+    }
+
     @WMSingleton
     @Provides
     static TransactionPool provideTransactionPool() {
@@ -66,6 +98,12 @@ public abstract class WMShellBaseModule {
     static DisplayController provideDisplayController(Context context, @Main Handler handler,
             IWindowManager wmService) {
         return new DisplayController(context, handler, wmService);
+    }
+
+    @WMSingleton
+    @Provides
+    static DragAndDropController provideDragAndDropController(DisplayController displayController) {
+        return new DragAndDropController(displayController);
     }
 
     @WMSingleton

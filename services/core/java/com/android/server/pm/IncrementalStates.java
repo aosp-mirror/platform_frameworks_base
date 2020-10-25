@@ -105,8 +105,8 @@ public final class IncrementalStates {
             if (!mStartableState.isStartable()) {
                 mStartableState.adoptNewStartableStateLocked(true);
             }
-            if (mLoadingState.isLoading() != isIncremental) {
-                mLoadingState.adoptNewLoadingStateLocked(isIncremental);
+            if (!isIncremental) {
+                updateProgressLocked(1);
             }
         }
         mHandler.post(PooledLambda.obtainRunnable(

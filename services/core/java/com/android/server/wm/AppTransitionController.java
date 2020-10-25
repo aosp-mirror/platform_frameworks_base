@@ -17,27 +17,27 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
-import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_CLOSE;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
-import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_OPEN;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -63,7 +63,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManager.TransitionType;
+import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -109,10 +109,12 @@ public class AppTransitionController {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "**** GOOD TO GO");
+        // TODO(new-app-transition): Compute the best transition from
+        //  appTransition.mNextAppTransitionRequests
         final AppTransition appTransition = mDisplayContent.mAppTransition;
-        int transit = appTransition.getAppTransition();
+        int transit = appTransition.getAppTransitionOld();
         if (mDisplayContent.mSkipAppTransitionAnimation && !isKeyguardGoingAwayTransit(transit)) {
-            transit = WindowManager.TRANSIT_UNSET;
+            transit = WindowManager.TRANSIT_OLD_UNSET;
         }
         mDisplayContent.mSkipAppTransitionAnimation = false;
         mDisplayContent.mNoAnimationNotifyOnTransitionFinished.clear();
@@ -226,7 +228,7 @@ public class AppTransitionController {
     }
 
     RemoteAnimationAdapter getRemoteAnimationOverride(@NonNull WindowContainer container,
-            @TransitionType int transit, ArraySet<Integer> activityTypes) {
+            @TransitionOldType int transit, ArraySet<Integer> activityTypes) {
         final RemoteAnimationDefinition definition = container.getRemoteAnimationDefinition();
         if (definition != null) {
             final RemoteAnimationAdapter adapter = definition.getAdapter(transit, activityTypes);
@@ -245,8 +247,8 @@ public class AppTransitionController {
      * set of defined remote animations in the app window token.
      */
     private void overrideWithRemoteAnimationIfSet(ActivityRecord animLpActivity,
-            @TransitionType int transit, ArraySet<Integer> activityTypes) {
-        if (transit == TRANSIT_CRASHING_ACTIVITY_CLOSE) {
+            @TransitionOldType int transit, ArraySet<Integer> activityTypes) {
+        if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
             // The crash transition has higher priority than any involved remote animations.
             return;
         }
@@ -269,7 +271,7 @@ public class AppTransitionController {
     /**
      * @return The window token that determines the animation theme.
      */
-    private ActivityRecord findAnimLayoutParamsToken(@TransitionType int transit,
+    private ActivityRecord findAnimLayoutParamsToken(@TransitionOldType int transit,
             ArraySet<Integer> activityTypes) {
         ActivityRecord result;
         final ArraySet<ActivityRecord> closingApps = mDisplayContent.mClosingApps;
@@ -357,7 +359,7 @@ public class AppTransitionController {
      *                         interaction session driving task.
      */
     private void applyAnimations(ArraySet<WindowContainer> wcs, ArraySet<ActivityRecord> apps,
-            @TransitionType int transit, boolean visible, LayoutParams animLp,
+            @TransitionOldType int transit, boolean visible, LayoutParams animLp,
             boolean voiceInteraction) {
         final int wcsCount = wcs.size();
         for (int i = 0; i < wcsCount; i++) {
@@ -490,9 +492,9 @@ public class AppTransitionController {
      *                         interaction session driving task.
      */
     private void applyAnimations(ArraySet<ActivityRecord> openingApps,
-            ArraySet<ActivityRecord> closingApps, @TransitionType int transit,
+            ArraySet<ActivityRecord> closingApps, @TransitionOldType int transit,
             LayoutParams animLp, boolean voiceInteraction) {
-        if (transit == WindowManager.TRANSIT_UNSET
+        if (transit == WindowManager.TRANSIT_OLD_UNSET
                 || (openingApps.isEmpty() && closingApps.isEmpty())) {
             return;
         }
@@ -583,7 +585,7 @@ public class AppTransitionController {
         }
     }
 
-    private void handleChangingApps(@TransitionType int transit) {
+    private void handleChangingApps(@TransitionOldType int transit) {
         final ArraySet<WindowContainer> apps = mDisplayContent.mChangingContainers;
         final int appsCount = apps.size();
         for (int i = 0; i < appsCount; i++) {
@@ -593,8 +595,8 @@ public class AppTransitionController {
         }
     }
 
-    private void handleNonAppWindowsInTransition(@TransitionType int transit, int flags) {
-        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
+    private void handleNonAppWindowsInTransition(@TransitionOldType int transit, int flags) {
+        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY) {
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
@@ -606,10 +608,10 @@ public class AppTransitionController {
                 }
             }
         }
-        if (transit == TRANSIT_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
             mDisplayContent.startKeyguardExitOnNonAppWindows(
-                    transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
         }
@@ -689,13 +691,13 @@ public class AppTransitionController {
         return true;
     }
 
-    private int maybeUpdateTransitToWallpaper(@TransitionType int transit,
+    private int maybeUpdateTransitToWallpaper(@TransitionOldType int transit,
             boolean openingAppHasWallpaper, boolean closingAppHasWallpaper) {
         // Given no app transition pass it through instead of a wallpaper transition.
         // Never convert the crashing transition.
         // Never convert a change transition since the top activity isn't changing and will likely
         // still be above an opening wallpaper.
-        if (transit == TRANSIT_NONE || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE
+        if (transit == TRANSIT_OLD_NONE || transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE
                 || AppTransition.isChangeTransit(transit)) {
             return transit;
         }
@@ -705,7 +707,7 @@ public class AppTransitionController {
                 && ((wallpaperTarget.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
                 // Update task open transition to wallpaper transition when wallpaper is visible.
                 // (i.e.launching app info activity from recent tasks)
-                || ((transit == TRANSIT_TASK_OPEN || transit == TRANSIT_TASK_TO_FRONT)
+                || ((transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT)
                 && mWallpaperControllerLocked.isWallpaperVisible()));
         // If wallpaper is animating or wallpaperTarget doesn't have SHOW_WALLPAPER flag set,
         // don't consider upgrading to wallpaper transition.
@@ -725,10 +727,10 @@ public class AppTransitionController {
                         "New wallpaper target=%s, oldWallpaper=%s, openingApps=%s, closingApps=%s",
                         wallpaperTarget, oldWallpaper, openingApps, closingApps);
 
-        if (openingCanBeWallpaperTarget && transit == TRANSIT_KEYGUARD_GOING_AWAY) {
-            transit = TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+        if (openingCanBeWallpaperTarget && transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY) {
+            transit = TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                    "New transit: %s", AppTransition.appTransitionToString(transit));
+                    "New transit: %s", AppTransition.appTransitionOldToString(transit));
         }
         // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
         // relies on the fact that we always execute a Keyguard transition after preparing one.
@@ -736,37 +738,37 @@ public class AppTransitionController {
             if (closingAppHasWallpaper && openingAppHasWallpaper) {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Wallpaper animation!");
                 switch (transit) {
-                    case TRANSIT_ACTIVITY_OPEN:
-                    case TRANSIT_TASK_OPEN:
-                    case TRANSIT_TASK_TO_FRONT:
-                        transit = TRANSIT_WALLPAPER_INTRA_OPEN;
+                    case TRANSIT_OLD_ACTIVITY_OPEN:
+                    case TRANSIT_OLD_TASK_OPEN:
+                    case TRANSIT_OLD_TASK_TO_FRONT:
+                        transit = TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
                         break;
-                    case TRANSIT_ACTIVITY_CLOSE:
-                    case TRANSIT_TASK_CLOSE:
-                    case TRANSIT_TASK_TO_BACK:
-                        transit = TRANSIT_WALLPAPER_INTRA_CLOSE;
+                    case TRANSIT_OLD_ACTIVITY_CLOSE:
+                    case TRANSIT_OLD_TASK_CLOSE:
+                    case TRANSIT_OLD_TASK_TO_BACK:
+                        transit = TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
                         break;
                 }
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "New transit: %s", AppTransition.appTransitionToString(transit));
+                        "New transit: %s", AppTransition.appTransitionOldToString(transit));
             } else if (oldWallpaper != null && !mDisplayContent.mOpeningApps.isEmpty()
                     && !openingApps.contains(oldWallpaper.mActivityRecord)
                     && closingApps.contains(oldWallpaper.mActivityRecord)
                     && topClosingApp == oldWallpaper.mActivityRecord) {
                 // We are transitioning from an activity with a wallpaper to one without.
-                transit = TRANSIT_WALLPAPER_CLOSE;
+                transit = TRANSIT_OLD_WALLPAPER_CLOSE;
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                         "New transit away from wallpaper: %s",
-                                AppTransition.appTransitionToString(transit));
+                                AppTransition.appTransitionOldToString(transit));
             } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()
                     && openingApps.contains(wallpaperTarget.mActivityRecord)
                     && topOpeningApp == wallpaperTarget.mActivityRecord
-                    && transit != TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE) {
+                    && transit != TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE) {
                 // We are transitioning from an activity without
                 // a wallpaper to now showing the wallpaper
-                transit = TRANSIT_WALLPAPER_OPEN;
+                transit = TRANSIT_OLD_WALLPAPER_OPEN;
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "New transit into wallpaper: %s",
-                        AppTransition.appTransitionToString(transit));
+                        AppTransition.appTransitionOldToString(transit));
             }
         }
         return transit;
@@ -780,12 +782,12 @@ public class AppTransitionController {
      *
      * @param transit The current transition type.
      * @return The current transition type or
-     *         {@link WindowManager#TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE}/
-     *         {@link WindowManager#TRANSIT_TRANSLUCENT_ACTIVITY_OPEN} if appropriate for the
+     *         {@link WindowManager#TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE}/
+     *         {@link WindowManager#TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN} if appropriate for the
      *         situation.
      */
     @VisibleForTesting
-    int maybeUpdateTransitToTranslucentAnim(@TransitionType int transit) {
+    int maybeUpdateTransitToTranslucentAnim(@TransitionOldType int transit) {
         if (AppTransition.isChangeTransit(transit)) {
             // There's no special animation to handle change animations with translucent apps
             return transit;
@@ -812,10 +814,10 @@ public class AppTransitionController {
         }
 
         if (taskOrActivity && allTranslucentClosingApps && allOpeningVisible) {
-            return TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
+            return TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
         }
         if (taskOrActivity && allTranslucentOpeningApps && mDisplayContent.mClosingApps.isEmpty()) {
-            return TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
+            return TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
         }
         return transit;
     }
@@ -825,16 +827,16 @@ public class AppTransitionController {
      * to determine whether animations should be clipped to the task bounds instead of stack bounds.
      */
     @VisibleForTesting
-    boolean isTransitWithinTask(@TransitionType int transit, Task task) {
+    boolean isTransitWithinTask(@TransitionOldType int transit, Task task) {
         if (task == null
                 || !mDisplayContent.mChangingContainers.isEmpty()) {
             // if there is no task, then we can't constrain to the task.
             // if anything is changing, it can animate outside its task.
             return false;
         }
-        if (!(transit == TRANSIT_ACTIVITY_OPEN
-                || transit == TRANSIT_ACTIVITY_CLOSE
-                || transit == TRANSIT_ACTIVITY_RELAUNCH)) {
+        if (!(transit == TRANSIT_OLD_ACTIVITY_OPEN
+                || transit == TRANSIT_OLD_ACTIVITY_CLOSE
+                || transit == TRANSIT_OLD_ACTIVITY_RELAUNCH)) {
             // only activity-level transitions will be within-task.
             return false;
         }

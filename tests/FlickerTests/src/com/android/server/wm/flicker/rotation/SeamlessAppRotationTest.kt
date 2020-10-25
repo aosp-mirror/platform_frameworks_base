@@ -173,7 +173,7 @@ class SeamlessAppRotationTest(
                             }
                         }
 
-                        all("noUncoveredRegions"/*, bugId = 147659548*/) {
+                        all("noUncoveredRegions", bugId = 147659548) {
                             if (startingBounds == endingBounds) {
                                 this.coversAtLeastRegion(startingBounds)
                             } else {

@@ -2040,6 +2040,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topStack = mRootWindowContainer.getTopDisplayFocusedStack();
         if (topStack == null || topStack.mResumedActivity == prevTopActivity) {
+            if (mService.isSleepingLocked()) {
+                // There won't be a next resumed activity. The top process should still be updated
+                // according to the current top focused activity.
+                mService.updateTopApp(null /* topResumedActivity */);
+            }
             return;
         }
 

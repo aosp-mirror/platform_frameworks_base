@@ -37,6 +37,7 @@ import java.util.Objects;
  * updating, and disappearing and reappearing on the SD card.
  */
 public abstract class PackageMonitor extends android.content.BroadcastReceiver {
+    static final String TAG = "PackageMonitor";
     static final IntentFilter sPackageFilt = new IntentFilter();
     static final IntentFilter sNonDataFilt = new IntentFilter();
     static final IntentFilter sExternalFilt = new IntentFilter();
@@ -48,6 +49,9 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         sPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        sPackageFilt.addAction(Intent.ACTION_PACKAGE_STARTABLE);
+        sPackageFilt.addAction(Intent.ACTION_PACKAGE_UNSTARTABLE);
+        sPackageFilt.addAction(Intent.ACTION_PACKAGE_FULLY_LOADED);
         sPackageFilt.addDataScheme("package");
         sNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
         sNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
@@ -305,6 +309,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public void onPackageDataCleared(String packageName, int uid) {
     }
 
+    /**
+     * Callback to indicate the package's state has changed.
+     * @param packageName Name of an installed package
+     * @param uid The UID the package runs under.
+     */
+    public void onPackageStateChanged(String packageName, int uid) {}
+
     public int getChangingUserId() {
         return mChangeUserId;
     }
@@ -452,12 +463,21 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             mSomePackagesChanged = true;
             onPackagesUnsuspended(pkgList);
+        } else if (Intent.ACTION_PACKAGE_STARTABLE.equals(action)
+                || Intent.ACTION_PACKAGE_UNSTARTABLE.equals(action)
+                || Intent.ACTION_PACKAGE_FULLY_LOADED.equals(action)) {
+            String pkg = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+            int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
+            mSomePackagesChanged = false;
+            if (pkg != null) {
+                onPackageStateChanged(pkg, uid);
+            }
         }
 
         if (mSomePackagesChanged) {
             onSomePackagesChanged();
         }
-        
+
         onFinishPackageChanges();
         mChangeUserId = UserHandle.USER_NULL;
     }

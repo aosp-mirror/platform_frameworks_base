@@ -169,7 +169,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     @Override
-    public void initInternal() {
+    public void onInit() {
         mSecurityViewFlipperController.init();
     }
 

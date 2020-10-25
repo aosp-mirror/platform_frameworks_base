@@ -27,6 +27,9 @@ import android.view.WindowInsets;
  * Owns a {@link View} that is present in SystemUIOverlayWindow.
  */
 public class OverlayViewController {
+    protected static final int INVALID_INSET_SIDE = -1;
+    protected static final int NO_INSET_SIDE = 0;
+
     private final int mStubId;
     private final OverlayViewGlobalStateController mOverlayViewGlobalStateController;
 
@@ -187,5 +190,29 @@ public class OverlayViewController {
     @WindowInsets.Type.InsetsType
     protected int getInsetTypesToFit() {
         return statusBars();
+    }
+
+    /**
+     * Optionally returns the sides of enabled system bar insets to fit to the sysui overlay window
+     * when this {@link OverlayViewController} is in the foreground.
+     *
+     * For example, if the bottom and left system bars are enabled and this method returns
+     * WindowInsets.Side.LEFT, then the inset from the bottom system bar will be ignored.
+     *
+     * NOTE: By default, this method returns {@link #INVALID_INSET_SIDE}, so insets to fit are
+     * defined by {@link #getInsetTypesToFit()}, and not by this method, unless it is overridden
+     * by subclasses.
+     *
+     * NOTE: {@link #NO_INSET_SIDE} signifies no insets from any system bars will be honored. Each
+     * {@link OverlayViewController} can first take this value and add sides of the system bar
+     * insets to honor to it.
+     *
+     * NOTE: If getInsetSidesToFit is overridden to return {@link WindowInsets.Side}, it always
+     * takes precedence over {@link #getInsetTypesToFit()}. That is, the return value of {@link
+     * #getInsetTypesToFit()} will be ignored.
+     */
+    @WindowInsets.Side.InsetsSide
+    protected int getInsetSidesToFit() {
+        return INVALID_INSET_SIDE;
     }
 }

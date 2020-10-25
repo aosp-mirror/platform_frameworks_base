@@ -35,11 +35,13 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.ICharSequenceResultCallback;
 import com.android.internal.inputmethod.IExtractedTextResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
+import com.android.internal.inputmethod.ISurroundingTextResultCallback;
 import com.android.internal.os.SomeArgs;
 
 public abstract class IInputConnectionWrapper extends IInputContext.Stub {
@@ -70,6 +72,8 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
     private static final int DO_CLOSE_CONNECTION = 150;
     private static final int DO_COMMIT_CONTENT = 160;
+    private static final int DO_GET_SURROUNDING_TEXT = 41;
+
 
     @GuardedBy("mLock")
     @Nullable
@@ -125,6 +129,21 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     public void getSelectedText(int flags, ICharSequenceResultCallback callback) {
         dispatchMessage(mH.obtainMessage(DO_GET_SELECTED_TEXT, flags, 0 /* unused */, callback));
+    }
+
+    /**
+     * Dispatches the request for retrieving surrounding text.
+     *
+     * <p>See {@link InputConnection#getSurroundingText(int, int, int)}.
+     */
+    public void getSurroundingText(int beforeLength, int afterLength, int flags,
+            ISurroundingTextResultCallback callback) {
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = beforeLength;
+        args.arg2 = afterLength;
+        args.arg3 = flags;
+        args.arg4 = callback;
+        dispatchMessage(mH.obtainMessage(DO_GET_SURROUNDING_TEXT, flags, 0 /* unused */, args));
     }
 
     public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
@@ -290,6 +309,33 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to return the result to getSelectedText()."
                             + " result=" + result, e);
+                }
+                return;
+            }
+            case DO_GET_SURROUNDING_TEXT: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                try {
+                    int beforeLength = (int) args.arg1;
+                    int afterLength  = (int) args.arg2;
+                    int flags = (int) args.arg3;
+                    final ISurroundingTextResultCallback callback =
+                            (ISurroundingTextResultCallback) args.arg4;
+                    final InputConnection ic = getInputConnection();
+                    final SurroundingText result;
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG, "getSurroundingText on inactive InputConnection");
+                        result = null;
+                    } else {
+                        result = ic.getSurroundingText(beforeLength, afterLength, flags);
+                    }
+                    try {
+                        callback.onResult(result);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to return the result to getSurroundingText()."
+                                + " result=" + result, e);
+                    }
+                } finally {
+                    args.recycle();
                 }
                 return;
             }

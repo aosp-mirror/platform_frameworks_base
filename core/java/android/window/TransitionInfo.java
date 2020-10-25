@@ -63,11 +63,11 @@ public final class TransitionInfo implements Parcelable {
     })
     public @interface TransitionMode {}
 
-    private final @WindowManager.TransitionType int mType;
+    private final @WindowManager.TransitionOldType int mType;
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
     /** @hide */
-    public TransitionInfo(@WindowManager.TransitionType int type) {
+    public TransitionInfo(@WindowManager.TransitionOldType int type) {
         mType = type;
     }
 

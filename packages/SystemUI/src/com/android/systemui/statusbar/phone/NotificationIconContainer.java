@@ -34,6 +34,7 @@ import android.view.animation.Interpolator;
 import androidx.collection.ArrayMap;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
@@ -148,6 +149,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mActualPaddingStart = NO_VALUE;
     private boolean mDozing;
     private boolean mOnLockScreen;
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
@@ -453,7 +455,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             mFirstVisibleIconState = mIconStates.get(getChildAt(0));
         }
 
-        boolean center = mOnLockScreen;
+        boolean center = mOnLockScreen
+                && mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
         if (center && translationX < getLayoutEnd()) {
             float initialTranslation =
                     mFirstVisibleIconState == null ? 0 : mFirstVisibleIconState.xTranslation;
@@ -686,8 +689,13 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }
 
-    public void setOnLockScreen(boolean onLockScreen) {
+    /**
+     * Set whether the device is on the lockscreen and which lockscreen mode the device is
+     * configured to. Depending on these values, the layout of the AOD icons change.
+     */
+    public void setOnLockScreen(boolean onLockScreen, int lockScreenMode) {
         mOnLockScreen = onLockScreen;
+        mLockScreenMode = lockScreenMode;
     }
 
     public class IconState extends ViewState {

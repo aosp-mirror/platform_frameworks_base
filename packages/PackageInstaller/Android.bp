@@ -14,6 +14,7 @@
 
 android_app {
     name: "PackageInstaller",
+    defaults: ["platform_app_defaults"],
 
     srcs: ["src/**/*.java"],
 

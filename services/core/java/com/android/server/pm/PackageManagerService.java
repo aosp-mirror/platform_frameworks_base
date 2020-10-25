@@ -181,6 +181,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
@@ -14322,10 +14323,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
         }
 
-        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
-            return false;
-        }
-
         // only when not installed from ADB, skip verification for instant apps when
         // the installer and verifier are the same.
         if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
@@ -25835,7 +25832,19 @@ public class PackageManagerService extends IPackageManager.Stub
             return mIncrementalManager.unregisterLoadingProgressCallback(ps.getPathString(),
                     (IPackageLoadingProgressCallback) callback.getBinder());
         }
+
+        @Override
+        public IncrementalStatesInfo getIncrementalStatesInfo(
+                @NonNull String packageName, int filterCallingUid, int userId) {
+            final PackageSetting ps = getPackageSettingForUser(packageName, filterCallingUid,
+                    userId);
+            if (ps == null) {
+                return null;
+            }
+            return ps.getIncrementalStates();
+        }
     }
+
 
     @GuardedBy("mLock")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {

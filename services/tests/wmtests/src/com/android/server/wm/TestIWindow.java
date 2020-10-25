@@ -30,7 +30,12 @@ import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
 
+import java.util.ArrayList;
+
 public class TestIWindow extends IWindow.Stub {
+
+    private ArrayList<DragEvent> mDragEvents;
+
     @Override
     public void executeCommand(String command, String parameters,
             ParcelFileDescriptor descriptor) throws RemoteException {
@@ -85,8 +90,16 @@ public class TestIWindow extends IWindow.Stub {
     public void dispatchWallpaperCommand(String action, int x, int y, int z, Bundle extras,
             boolean sync) throws RemoteException {
     }
+
+    public void setDragEventJournal(ArrayList<DragEvent> journal) {
+        mDragEvents = journal;
+    }
+
     @Override
     public void dispatchDragEvent(DragEvent event) throws RemoteException {
+        if (mDragEvents != null) {
+            mDragEvents.add(DragEvent.obtain(event));
+        }
     }
 
     @Override

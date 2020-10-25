@@ -49,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.window.OverlayPanelViewController;
+import com.android.systemui.car.window.OverlayViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -83,6 +84,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private final StatusBarStateController mStatusBarStateController;
     private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
     private final NotificationVisibilityLogger mNotificationVisibilityLogger;
+
+    private final boolean mFitTopSystemBarInset;
+    private final boolean mFitBottomSystemBarInset;
+    private final boolean mFitLeftSystemBarInset;
+    private final boolean mFitRightSystemBarInset;
 
     private float mInitialBackgroundAlpha;
     private float mBackgroundAlphaDiff;
@@ -164,6 +170,15 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mResources.getBoolean(
                 com.android.car.notification.R.bool
                         .config_enableHeadsUpNotificationWhenNotificationShadeOpen);
+
+        mFitTopSystemBarInset = mResources.getBoolean(
+                R.bool.config_notif_panel_inset_by_top_systembar);
+        mFitBottomSystemBarInset = mResources.getBoolean(
+                R.bool.config_notif_panel_inset_by_bottom_systembar);
+        mFitLeftSystemBarInset = mResources.getBoolean(
+                R.bool.config_notif_panel_inset_by_left_systembar);
+        mFitRightSystemBarInset = mResources.getBoolean(
+                R.bool.config_notif_panel_inset_by_right_systembar);
     }
 
     // CommandQueue.Callbacks
@@ -215,8 +230,26 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     }
 
     @Override
-    protected int getInsetTypesToFit() {
-        return WindowInsets.Type.navigationBars();
+    protected int getInsetSidesToFit() {
+        int insetSidesToFit = OverlayViewController.NO_INSET_SIDE;
+
+        if (mFitTopSystemBarInset) {
+            insetSidesToFit = insetSidesToFit | WindowInsets.Side.TOP;
+        }
+
+        if (mFitBottomSystemBarInset) {
+            insetSidesToFit = insetSidesToFit | WindowInsets.Side.BOTTOM;
+        }
+
+        if (mFitLeftSystemBarInset) {
+            insetSidesToFit = insetSidesToFit | WindowInsets.Side.LEFT;
+        }
+
+        if (mFitRightSystemBarInset) {
+            insetSidesToFit = insetSidesToFit | WindowInsets.Side.RIGHT;
+        }
+
+        return insetSidesToFit;
     }
 
     @Override

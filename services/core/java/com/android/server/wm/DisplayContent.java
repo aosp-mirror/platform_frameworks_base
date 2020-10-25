@@ -70,9 +70,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
@@ -4498,16 +4498,43 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mPointerEventDispatcher.unregisterInputEventListener(listener);
     }
 
-    void prepareAppTransition(@WindowManager.TransitionType int transit,
+    /**
+     * Transfer app transition from other display to this display.
+     *
+     * @param from Display from where the app transition is transferred.
+     *
+     * TODO(new-app-transition): Remove this once the shell handles app transition.
+     */
+    void transferAppTransitionFrom(DisplayContent from) {
+        final boolean prepared = mAppTransition.transferFrom(from.mAppTransition);
+        if (prepared && okToAnimate()) {
+            mSkipAppTransitionAnimation = false;
+        }
+    }
+
+    void prepareAppTransitionOld(@WindowManager.TransitionOldType int transit,
             boolean alwaysKeepCurrent) {
-        prepareAppTransition(transit, alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
+        prepareAppTransitionOld(transit, alwaysKeepCurrent, 0 /* flags */,
+                false /* forceOverride */);
+    }
+
+    void prepareAppTransitionOld(@WindowManager.TransitionOldType int transit,
+            boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
+            boolean forceOverride) {
+        final boolean prepared = mAppTransition.prepareAppTransitionOld(
+                transit, alwaysKeepCurrent, flags, forceOverride);
+        if (prepared && okToAnimate()) {
+            mSkipAppTransitionAnimation = false;
+        }
+    }
+
+    void prepareAppTransition(@WindowManager.TransitionType int transit) {
+        prepareAppTransition(transit, 0 /* flags */);
     }
 
     void prepareAppTransition(@WindowManager.TransitionType int transit,
-            boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
-            boolean forceOverride) {
-        final boolean prepared = mAppTransition.prepareAppTransitionLocked(
-                transit, alwaysKeepCurrent, flags, forceOverride);
+            @WindowManager.TransitionFlags int flags) {
+        final boolean prepared = mAppTransition.prepareAppTransition(transit, flags);
         if (prepared && okToAnimate()) {
             mSkipAppTransitionAnimation = false;
         }
@@ -4557,10 +4584,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Check if pending app transition is for activity / task launch. */
     boolean isNextTransitionForward() {
-        final int transit = mAppTransition.getAppTransition();
-        return transit == TRANSIT_ACTIVITY_OPEN
-                || transit == TRANSIT_TASK_OPEN
-                || transit == TRANSIT_TASK_TO_FRONT;
+        final int transit = mAppTransition.getAppTransitionOld();
+        return transit == TRANSIT_OLD_ACTIVITY_OPEN
+                || transit == TRANSIT_OLD_TASK_OPEN
+                || transit == TRANSIT_OLD_TASK_TO_FRONT;
     }
 
     /**

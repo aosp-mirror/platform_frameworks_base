@@ -6191,9 +6191,30 @@ public abstract class PackageManager {
     public abstract Resources getResourcesForApplication(@NonNull String packageName)
             throws NameNotFoundException;
 
-    /** @hide */
+    /**
+     * Please don't use this function because it is no longer supported.
+     *
+     * @deprecated Instead of using this function, please use
+     *             {@link Context#createContextAsUser(UserHandle, int)} to create the specified user
+     *             context, {@link Context#getPackageManager()} to get PackageManager instance for
+     *             the specified user, and then
+     *             {@link PackageManager#getResourcesForApplication(String)} to get the same
+     *             Resources instance.
+     * @see {@link Context#createContextAsUser(android.os.UserHandle, int)}
+     * @see {@link Context#getPackageManager()}
+     * @see {@link android.content.pm.PackageManager#getResourcesForApplication(java.lang.String)}
+     * TODO(b/170852794): mark maxTargetSdk as {@code Build.VERSION_CODES.S}
+     * @hide
+     */
     @NonNull
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170928809,
+            publicAlternatives = "Use {@code Context#createContextAsUser(UserHandle, int)}"
+                    + " to create the relevant user context,"
+                    + " {@link android.content.Context#getPackageManager()} and"
+                    + " {@link android.content.pm.PackageManager#getResourcesForApplication("
+                    + "java.lang.String)}"
+                    + " instead.")
+    @Deprecated
     public abstract Resources getResourcesForApplicationAsUser(@NonNull String packageName,
             @UserIdInt int userId) throws NameNotFoundException;
 

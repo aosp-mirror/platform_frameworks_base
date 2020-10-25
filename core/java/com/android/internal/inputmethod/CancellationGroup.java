@@ -263,6 +263,16 @@ public final class CancellationGroup {
                 super(factory);
             }
         }
+
+        /**
+         * Completable object of {@link android.view.inputmethod.SurroundingText}.
+         */
+        public static final class SurroundingText
+                extends Values<android.view.inputmethod.SurroundingText> {
+            private SurroundingText(@NonNull CancellationGroup factory) {
+                super(factory);
+            }
+        }
     }
 
     /**
@@ -291,6 +301,16 @@ public final class CancellationGroup {
     public Completable.ExtractedText createCompletableExtractedText() {
         return new Completable.ExtractedText(this);
     }
+
+    /**
+     * @return an instance of {@link Completable.SurroundingText} that is associated with this
+     *         {@link CancellationGroup}.
+     */
+    @AnyThread
+    public Completable.SurroundingText createCompletableSurroundingText() {
+        return new Completable.SurroundingText(this);
+    }
+
 
     @AnyThread
     private boolean registerLatch(@NonNull CountDownLatch latch) {
