@@ -1129,6 +1129,10 @@
     <string name="capital_off" msgid="7443704171014626777">"ഓഫ്"</string>
     <string name="checked" msgid="9179896827054513119">"പരിശോധിച്ചത്"</string>
     <string name="not_checked" msgid="7972320087569023342">"പരിശോധിക്കാത്തത്"</string>
+    <!-- no translation found for selected (6614607926197755875) -->
+    <skip />
+    <!-- no translation found for not_selected (410652016565864475) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"പൂർണ്ണമായ പ്രവർത്തനം ഉപയോഗിക്കുന്നു"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ഉപയോഗിച്ച് പ്രവർത്തനം പൂർത്തിയാക്കുക"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"പ്രവർത്തനം പൂർത്തിയാക്കുക"</string>

@@ -1129,6 +1129,10 @@
     <string name="capital_off" msgid="7443704171014626777">"ஆஃப்"</string>
     <string name="checked" msgid="9179896827054513119">"இயக்கப்பட்டுள்ளது"</string>
     <string name="not_checked" msgid="7972320087569023342">"முடக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for selected (6614607926197755875) -->
+    <skip />
+    <!-- no translation found for not_selected (410652016565864475) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"இதைப் பயன்படுத்தி செயலை நிறைவுசெய்"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ஐப் பயன்படுத்தி செயலை முடிக்கவும்"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"செயலை முடி"</string>

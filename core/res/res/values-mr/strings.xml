@@ -167,15 +167,15 @@
     <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"सुरक्षित कनेक्शन इंस्टॉल करू शकलो नाही."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL अवैध असल्यामुळे पेज उघडू शकलो नाही."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"फायलीवर प्रवेश करू शकलो नाही."</string>
-    <string name="httpErrorFileNotFound" msgid="5191433324871147386">"विनंती केलेली फाईल शोधू शकलो नाही."</string>
+    <string name="httpErrorFileNotFound" msgid="5191433324871147386">"विनंती केलेली फाइल शोधू शकलो नाही."</string>
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"बर्‍याच विनंत्यांवर प्रक्रिया होत आहे. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g> साठी साइन इन एरर"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"सिंक करा"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"सिंक करू शकत नाही"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"खूप जास्त <xliff:g id="CONTENT_TYPE">%s</xliff:g> हटवण्याचा प्रयत्न केला."</string>
-    <string name="low_memory" product="tablet" msgid="5557552311566179924">"टॅबलेट संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फाईल हटवा."</string>
+    <string name="low_memory" product="tablet" msgid="5557552311566179924">"टॅबलेट संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फाइल हटवा."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"पाहण्याचे संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फाइल हटवा."</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV डिव्हाइस स्टोरेज पूर्ण भरलेले आहे. जागा मोकळी करण्यासाठी काही फाईल हटवा."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV डिव्हाइस स्टोरेज पूर्ण भरलेले आहे. जागा मोकळी करण्यासाठी काही फाइल हटवा."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फोन संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फाइल हटवा."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="other">प्रमाणपत्र अधिकार इंस्टॉल केले</item>
@@ -415,11 +415,11 @@
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"हा अ‍ॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"हे ॲप तुमच्या Android TV डिव्हाइसवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"हे अ‍ॅप तुमच्या Android TV डिव्हाइसवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"हा अ‍ॅप आपल्या फोनवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"कॅलेंडर इव्हेंट जोडा किंवा बदला आणि मालकाला न कळवता अतिथींना ईमेल पाठवा"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"हा अ‍ॅप आपल्या टॅब्लेटवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"हे ॲप तुमच्या Android TV डिव्हाइसवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हे अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"हे अ‍ॅप तुमच्या Android TV डिव्हाइसवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हे अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"हा अ‍ॅप आपल्या फोनवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"अतिरिक्त स्थान प्रदाता आदेश अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"अ‍ॅपला अतिरिक्त स्‍थान प्रदाता आदेशावर प्रवेश करण्‍याची अनुमती देते. हे कदाचित अ‍ॅपला GPS किंवा इतर स्‍थान स्रोत च्या ऑपरेशनमध्‍ये हस्तक्षेप करण्‍याची अनुमती देऊ शकते."</string>
@@ -881,11 +881,11 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"खाते अनलॉक करा"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"बरेच पॅटर्न प्रयत्न"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"वापरकर्तानाव (ईमेल)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"वापरकर्ता नाव (ईमेल)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"पासवर्ड"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"साइन इन करा"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"अवैध वापरकर्तानाव किंवा पासवर्ड."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"तुमचे वापरकर्तानाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"अवैध वापरकर्ता नाव किंवा पासवर्ड."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"तुमचे वापरकर्ता नाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"तपासत आहे..."</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"अनलॉक करा"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"ध्वनी सुरू"</string>
@@ -961,7 +961,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"ब्राउझरने भेट दिलेल्या सर्व URL चा इतिहास आणि ब्राउझरचे सर्व बुकमार्क वाचण्यास अ‍ॅप ला अनुमती देते. टीप: या परवानगीची तृतीय-पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमता असलेल्या अन्य अनुप्रयोगांद्वारे अंमलबजावणी करू शकत नाही."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"वेब बुकमार्क आणि इतिहास लिहा"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"तुमच्या टॅब्लेटवर स्टोअर केलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. हे ब्राउझर डेटा मिटविण्यासाठी किंवा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अ‍ॅप्लिकेशनद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"तुमच्या Android TV डिव्हाइसवर साठवलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी ॲप ला अनुमती देते. हे ॲपला ब्राउझर डेटा मिटवण्याची किंवा सुधारित करण्याची परवानगी देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अ‍ॅप्लिकेशनद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"तुमच्या Android TV डिव्हाइसवर साठवलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. हे अ‍ॅपला ब्राउझर डेटा मिटवण्याची किंवा सुधारित करण्याची परवानगी देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अ‍ॅप्लिकेशनद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"तुमच्या फोनवर स्टोअर केलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. हे ब्राउझर डेटा मिटविण्यासाठी किंवा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अ‍ॅप्लिकेशनद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"अलार्म सेट करा"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"इंस्टॉल केलेल्या अलार्म घड्याळ ॲपमध्ये अलार्म सेट करण्यासाठी ॲपला अनुमती देते. काही अलार्म घड्याळ ॲप्समध्ये हे वैशिष्ट्य नसू शकते."</string>
@@ -1129,6 +1129,10 @@
     <string name="capital_off" msgid="7443704171014626777">"बंद"</string>
     <string name="checked" msgid="9179896827054513119">"तपासले"</string>
     <string name="not_checked" msgid="7972320087569023342">"तपासले नाही"</string>
+    <!-- no translation found for selected (6614607926197755875) -->
+    <skip />
+    <!-- no translation found for not_selected (410652016565864475) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"याचा वापर करून क्रिया पूर्ण करा"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s वापरून क्रिया पूर्ण करा"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"क्रिया पूर्ण झाली"</string>
@@ -1440,8 +1444,8 @@
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"कायम सुरू असलेल्या VPN मधून डिस्कनेक्ट केले"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"कायम सुरू असलेल्या VPN शी कनेक्ट करता आले नाही"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"नेटवर्क किंवा VPN सेटिंग्ज बदला"</string>
-    <string name="upload_file" msgid="8651942222301634271">"फाईल निवडा"</string>
-    <string name="no_file_chosen" msgid="4146295695162318057">"फाईल निवडली नाही"</string>
+    <string name="upload_file" msgid="8651942222301634271">"फाइल निवडा"</string>
+    <string name="no_file_chosen" msgid="4146295695162318057">"फाइल निवडली नाही"</string>
     <string name="reset" msgid="3865826612628171429">"रीसेट करा"</string>
     <string name="submit" msgid="862795280643405865">"सबमिट करा"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ड्रायव्हिंग अ‍ॅप सुरू आहे"</string>
@@ -1603,11 +1607,11 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"पिन कोड जुळत नाहीत"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"बरेच पॅटर्न प्रयत्न"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
-    <string name="kg_login_username_hint" msgid="1765453775467133251">"वापरकर्तानाव (ईमेल)"</string>
+    <string name="kg_login_username_hint" msgid="1765453775467133251">"वापरकर्ता नाव (ईमेल)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"पासवर्ड"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"साइन इन करा"</string>
-    <string name="kg_login_invalid_input" msgid="8292367491901220210">"अवैध वापरकर्तानाव किंवा पासवर्ड."</string>
-    <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"तुमचे वापरकर्तानाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
+    <string name="kg_login_invalid_input" msgid="8292367491901220210">"अवैध वापरकर्ता नाव किंवा पासवर्ड."</string>
+    <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"तुमचे वापरकर्ता नाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"खाते तपासत आहे…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"तुम्ही तुमचा पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
@@ -1961,7 +1965,7 @@
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"डेबिट कार्ड"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"पेमेंट कार्ड"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"कार्ड"</string>
-    <string name="autofill_save_type_username" msgid="1018816929884640882">"वापरकर्तानाव"</string>
+    <string name="autofill_save_type_username" msgid="1018816929884640882">"वापरकर्ता नाव"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ईमेल ॲड्रेस"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"शांत रहा आणि जवळपास निवारा शोधा."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"किनारपट्टीचे प्रदेश आणि नदीकाठची क्षेत्रे त्वरित रिकामी करून उंच मैदानासारख्या अधिक सुरक्षित ठिकाणी जा."</string>
