@@ -280,6 +280,116 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise standard network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3EapNetworkWithStandardApi() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa3EnterpriseStandardModeConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.IEEE8021X));
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_EAP));
+        assertFalse(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
+        // here.
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNotNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise network
+     * with 192-bit RSA SuiteB certificates.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3EapNetworkWithSuiteBRsaCerts() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_SUITE_B_RSA3072_CERT);
+        enterpriseConfig.setClientKeyEntryWithCertificateChain(FakeKeys.CLIENT_SUITE_B_RSA3072_KEY,
+                new X509Certificate[] {FakeKeys.CLIENT_SUITE_B_RSA3072_CERT});
+
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa3EnterpriseStandardModeConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.IEEE8021X));
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_EAP));
+        assertFalse(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
+        // here.
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNotNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise network
+     * with 192-bit ECC certificates.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3EapNetworkWithSuiteBEccCerts() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_SUITE_B_ECDSA_CERT);
+        enterpriseConfig.setClientKeyEntryWithCertificateChain(FakeKeys.CLIENT_SUITE_B_ECC_KEY,
+                new X509Certificate[] {FakeKeys.CLIENT_SUITE_B_ECDSA_CERT});
+
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa3EnterpriseStandardModeConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.IEEE8021X));
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_EAP));
+        assertFalse(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
+        // here.
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNotNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
      * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise 192-bit RSA SuiteB network.
      */
     @Test
@@ -295,6 +405,41 @@ public class WifiNetworkSuggestionTest {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa3EnterpriseConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.GCMP_256));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupManagementCiphers
+                .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
+        // here.
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNotNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise 192-bit RSA SuiteB network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3SuiteBRsaEapNetworWith192BitApi() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_SUITE_B_RSA3072_CERT);
+        enterpriseConfig.setClientKeyEntryWithCertificateChain(FakeKeys.CLIENT_SUITE_B_RSA3072_KEY,
+                new X509Certificate[] {FakeKeys.CLIENT_SUITE_B_RSA3072_CERT});
+
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa3Enterprise192BitModeConfig(enterpriseConfig)
                 .build();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
@@ -349,6 +494,41 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise 192-bit ECC SuiteB network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpa3SuiteBEccEapNetworkWith192BitApi() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_SUITE_B_ECDSA_CERT);
+        enterpriseConfig.setClientKeyEntryWithCertificateChain(FakeKeys.CLIENT_SUITE_B_ECC_KEY,
+                new X509Certificate[] {FakeKeys.CLIENT_SUITE_B_ECDSA_CERT});
+
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa3Enterprise192BitModeConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.GCMP_256));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupManagementCiphers
+                .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
+        // here.
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNotNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
      * Ensure create enterprise suggestion requires CA, when CA certificate is missing, will throw
      * an exception.
      */
@@ -378,7 +558,7 @@ public class WifiNetworkSuggestionTest {
 
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
-                .setWpa3EnterpriseConfig(enterpriseConfig)
+                .setWpa3EnterpriseStandardModeConfig(enterpriseConfig)
                 .build();
     }
 
@@ -600,15 +780,16 @@ public class WifiNetworkSuggestionTest {
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
      * when both {@link WifiNetworkSuggestion.Builder#setWpa3Passphrase(String)} and
-     * {@link WifiNetworkSuggestion.Builder#setWpa3EnterpriseConfig(WifiEnterpriseConfig)} are
-     * invoked.
+     * {@link WifiNetworkSuggestion.Builderi
+     * #setWpa3EnterpriseStandardModeConfig(WifiEnterpriseConfig)}
+     * are invoked.
      */
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSuggestionBuilderWithBothWpa3PasphraseAndEnterprise() {
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa3Passphrase(TEST_PRESHARED_KEY)
-                .setWpa3EnterpriseConfig(new WifiEnterpriseConfig())
+                .setWpa3EnterpriseStandardModeConfig(new WifiEnterpriseConfig())
                 .build();
     }
 
@@ -670,7 +851,9 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
-     * when both {@link WifiNetworkSuggestion.Builder#setWpa3EnterpriseConfig(WifiEnterpriseConfig)}
+     * when both
+     * {@link WifiNetworkSuggestion.Builder
+     * #setWpa3EnterpriseStandardModeConfig(WifiEnterpriseConfig)}
      * and {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are
      * invoked.
      */
@@ -678,7 +861,7 @@ public class WifiNetworkSuggestionTest {
     public void testWifiNetworkSuggestionBuilderWithBothEnterpriseAndPasspointConfig() {
         PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
         new WifiNetworkSuggestion.Builder()
-                .setWpa3EnterpriseConfig(new WifiEnterpriseConfig())
+                .setWpa3EnterpriseStandardModeConfig(new WifiEnterpriseConfig())
                 .setPasspointConfig(passpointConfiguration)
                 .build();
     }
