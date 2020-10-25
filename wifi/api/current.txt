@@ -479,7 +479,9 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setSsidPattern(@NonNull android.os.PatternMatcher);
     method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa2EnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
     method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa2Passphrase(@NonNull String);
-    method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa3EnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
+    method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa3Enterprise192BitModeConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
+    method @Deprecated @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa3EnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
+    method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa3EnterpriseStandardModeConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
     method @NonNull public android.net.wifi.WifiNetworkSpecifier.Builder setWpa3Passphrase(@NonNull String);
   }
 
@@ -527,7 +529,9 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWapiPassphrase(@NonNull String);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa2EnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa2Passphrase(@NonNull String);
-    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa3EnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa3Enterprise192BitModeConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
+    method @Deprecated @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa3EnterpriseConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa3EnterpriseStandardModeConfig(@NonNull android.net.wifi.WifiEnterpriseConfig);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setWpa3Passphrase(@NonNull String);
   }
 

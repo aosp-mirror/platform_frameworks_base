@@ -1129,6 +1129,10 @@
     <string name="capital_off" msgid="7443704171014626777">"VALIWE"</string>
     <string name="checked" msgid="9179896827054513119">"kuhloliwe"</string>
     <string name="not_checked" msgid="7972320087569023342">"akuhloliwe"</string>
+    <!-- no translation found for selected (6614607926197755875) -->
+    <skip />
+    <!-- no translation found for not_selected (410652016565864475) -->
+    <skip />
     <string name="whichApplication" msgid="5432266899591255759">"Qedela isenzo usebenzisa"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Qedela isenzo usebenzisa i-%1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Qedela isenzo"</string>
