@@ -25,6 +25,12 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -92,6 +98,7 @@ import android.view.Display;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
+import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
 
 import java.io.BufferedReader;
@@ -309,6 +316,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runCompat(pw);
                 case "refresh-settings-cache":
                     return runRefreshSettingsCache();
+                case "memory-factor":
+                    return runMemoryFactor(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3014,6 +3023,81 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return -1;
     }
 
+    private int runSetMemoryFactor(PrintWriter pw) throws RemoteException {
+        final String levelArg = getNextArgRequired();
+        @MemFactor int level = ADJ_MEM_FACTOR_NOTHING;
+        switch (levelArg) {
+            case "NORMAL":
+                level = ADJ_MEM_FACTOR_NORMAL;
+                break;
+            case "MODERATE":
+                level = ADJ_MEM_FACTOR_MODERATE;
+                break;
+            case "LOW":
+                level = ADJ_MEM_FACTOR_LOW;
+                break;
+            case "CRITICAL":
+                level = ADJ_MEM_FACTOR_CRITICAL;
+                break;
+            default:
+                try {
+                    level = Integer.parseInt(levelArg);
+                } catch (NumberFormatException e) {
+                }
+                if (level < ADJ_MEM_FACTOR_NORMAL || level > ADJ_MEM_FACTOR_CRITICAL) {
+                    getErrPrintWriter().println("Error: Unknown level option: " + levelArg);
+                    return -1;
+                }
+        }
+        mInternal.setMemFactorOverride(level);
+        return 0;
+    }
+
+    private int runShowMemoryFactor(PrintWriter pw) throws RemoteException {
+        final @MemFactor int level = mInternal.getMemoryTrimLevel();
+        switch (level) {
+            case ADJ_MEM_FACTOR_NOTHING:
+                pw.println("<UNKNOWN>");
+                break;
+            case ADJ_MEM_FACTOR_NORMAL:
+                pw.println("NORMAL");
+                break;
+            case ADJ_MEM_FACTOR_MODERATE:
+                pw.println("MODERATE");
+                break;
+            case ADJ_MEM_FACTOR_LOW:
+                pw.println("LOW");
+                break;
+            case ADJ_MEM_FACTOR_CRITICAL:
+                pw.println("CRITICAL");
+                break;
+        }
+        pw.flush();
+        return 0;
+    }
+
+    private int runResetMemoryFactor(PrintWriter pw) throws RemoteException {
+        mInternal.setMemFactorOverride(ADJ_MEM_FACTOR_NOTHING);
+        return 0;
+    }
+
+    private int runMemoryFactor(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                "runMemoryFactor()");
+
+        final String op = getNextArgRequired();
+        switch (op) {
+            case "set":
+                return runSetMemoryFactor(pw);
+            case "show":
+                return runShowMemoryFactor(pw);
+            case "reset":
+                return runResetMemoryFactor(pw);
+            default:
+                getErrPrintWriter().println("Error: unknown command '" + op + "'");
+                return -1;
+        }
+    }
 
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
@@ -3334,6 +3418,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("            Removes all existing overrides for all changes for ");
             pw.println("            <PACKAGE_NAME> (back to default behaviour).");
             pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("  memory-factor [command] [...]: sub-commands for overriding memory pressure factor");
+            pw.println("         set <NORMAL|MODERATE|LOW|CRITICAL>");
+            pw.println("            Overrides memory pressure factor. May also supply a raw int level");
+            pw.println("         show");
+            pw.println("            Shows the existing memory pressure factor");
+            pw.println("         reset");
+            pw.println("            Removes existing override for memory pressure factor");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

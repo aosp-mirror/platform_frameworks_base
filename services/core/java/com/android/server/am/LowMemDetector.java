@@ -16,7 +16,18 @@
 
 package com.android.server.am;
 
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.internal.app.procstats.ProcessStats.ADJ_NOTHING;
+
+import android.annotation.IntDef;
+
 import com.android.internal.annotations.GuardedBy;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Detects low memory using PSI.
@@ -32,13 +43,20 @@ public final class LowMemDetector {
     private final Object mPressureStateLock = new Object();
 
     @GuardedBy("mPressureStateLock")
-    private int mPressureState = MEM_PRESSURE_NONE;
+    private int mPressureState = ADJ_MEM_FACTOR_NORMAL;
+
+    public static final int ADJ_MEM_FACTOR_NOTHING = ADJ_NOTHING;
 
     /* getPressureState return values */
-    public static final int MEM_PRESSURE_NONE = 0;
-    public static final int MEM_PRESSURE_LOW = 1;
-    public static final int MEM_PRESSURE_MEDIUM = 2;
-    public static final int MEM_PRESSURE_HIGH = 3;
+    @IntDef(prefix = { "ADJ_MEM_FACTOR_" }, value = {
+        ADJ_MEM_FACTOR_NOTHING,
+        ADJ_MEM_FACTOR_NORMAL,
+        ADJ_MEM_FACTOR_MODERATE,
+        ADJ_MEM_FACTOR_LOW,
+        ADJ_MEM_FACTOR_CRITICAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MemFactor{}
 
     LowMemDetector(ActivityManagerService am) {
         mAm = am;
@@ -62,7 +80,7 @@ public final class LowMemDetector {
      * there should be conversion performed here to translate pressure state
      * into memFactor.
      */
-    public int getMemFactor() {
+    public @MemFactor int getMemFactor() {
         synchronized (mPressureStateLock) {
             return mPressureState;
         }

@@ -339,6 +339,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
+import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
@@ -8210,10 +8211,22 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int getMemoryTrimLevel() {
+    public @MemFactor int getMemoryTrimLevel() {
         enforceNotIsolatedCaller("getMyMemoryState");
         synchronized (this) {
             return mAppProfiler.getLastMemoryLevelLocked();
+        }
+    }
+
+    void setMemFactorOverride(@MemFactor int level) {
+        synchronized (this) {
+            if (level == mAppProfiler.getLastMemoryLevelLocked()) {
+                return;
+            }
+
+            mAppProfiler.setMemFactorOverrideLocked(level);
+            // Kick off an oom adj update since we forced a mem factor update.
+            updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
         }
     }
 
