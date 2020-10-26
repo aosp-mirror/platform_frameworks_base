@@ -44,7 +44,7 @@ import android.util.proto.ProtoOutputStream;
   *      public void run() {
   *          Looper.prepare();
   *
-  *          mHandler = new Handler() {
+  *          mHandler = new Handler(Looper.myLooper()) {
   *              public void handleMessage(Message msg) {
   *                  // process incoming messages here
   *              }
