@@ -148,6 +148,27 @@ optional<sp<MetricProducer>> createEventMetricProducerAndUpdateMetadata(
         std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
         std::vector<int>& metricsWithActivation);
 
+// Creates a CountMetricProducer and updates the vectors/maps used by MetricsManager with
+// the appropriate indices. Returns an sp to the producer, or nullopt if there was an error.
+optional<sp<MetricProducer>> createValueMetricProducerAndUpdateMetadata(
+        const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseNs,
+        const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
+        const ValueMetric& metric, const int metricIndex,
+        const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+        const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
+        std::vector<sp<ConditionTracker>>& allConditionTrackers,
+        const std::unordered_map<int64_t, int>& conditionTrackerMap,
+        const std::vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
+        const sp<EventMatcherWizard>& matcherWizard,
+        const std::unordered_map<int64_t, int>& stateAtomIdMap,
+        const std::unordered_map<int64_t, std::unordered_map<int, int64_t>>& allStateGroupMaps,
+        const std::unordered_map<int64_t, int>& metricToActivationMap,
+        std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
+        std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
+        std::unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+        std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+        std::vector<int>& metricsWithActivation);
+
 // Creates a GaugeMetricProducer and updates the vectors/maps used by MetricsManager with
 // the appropriate indices. Returns an sp to the producer, or nullopt if there was an error.
 optional<sp<MetricProducer>> createGaugeMetricProducerAndUpdateMetadata(
