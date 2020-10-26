@@ -106,10 +106,8 @@ class CloseImeWindowToHomeTest(
                                 Surface.ROTATION_0, bugId = 140855415)
                             statusBarLayerRotatesScales(configuration.startRotation,
                                 Surface.ROTATION_0)
-                            navBarLayerIsAlwaysVisible(configuration.startRotation !=
-                                    Surface.ROTATION_0)
-                            statusBarLayerIsAlwaysVisible(configuration.startRotation !=
-                                    Surface.ROTATION_0)
+                            navBarLayerIsAlwaysVisible(enabled = false)
+                            statusBarLayerIsAlwaysVisible(enabled = false)
                             imeLayerBecomesInvisible(bugId = 153739621)
                             imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
                         }
