@@ -130,6 +130,10 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
                             mLauncherApps.getShortcutIconDrawable(shortcutInfo, 0)
                     )
             );
+
+            Intent fillInIntent = new Intent();
+            fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_SHORTCUT_INFO, shortcutInfo);
+            personView.setOnClickFillInIntent(R.id.item, fillInIntent);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);
         }
