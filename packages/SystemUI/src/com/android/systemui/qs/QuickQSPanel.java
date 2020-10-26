@@ -336,7 +336,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public int getNumVisibleTiles() {
-            return mColumns;
+            return Math.min(mRecords.size(), mColumns);
         }
 
         @Override
@@ -353,6 +353,7 @@ public class QuickQSPanel extends QSPanel {
             boolean startedListening = !mListening && listening;
             super.setListening(listening);
             if (startedListening) {
+                // getNumVisibleTiles() <= mRecords.size()
                 for (int i = 0; i < getNumVisibleTiles(); i++) {
                     QSTile tile = mRecords.get(i).tile;
                     mUiEventLogger.logWithInstanceId(QSEvent.QQS_TILE_VISIBLE, 0,
