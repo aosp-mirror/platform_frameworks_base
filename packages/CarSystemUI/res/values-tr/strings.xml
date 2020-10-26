@@ -28,6 +28,5 @@
     <string name="user_add_user_message_update" msgid="7061671307004867811">"Herhangi bir kullanıcı, diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
     <string name="car_loading_profile" msgid="4507385037552574474">"Yükleniyor"</string>
     <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"Kullanıcı yükleniyor (<xliff:g id="FROM_USER">%1$d</xliff:g> kullanıcısından <xliff:g id="TO_USER">%2$d</xliff:g> kullanıcısına)"</string>
-    <!-- no translation found for rear_view_camera_close_button_text (8430918817320533693) -->
-    <skip />
+    <string name="rear_view_camera_close_button_text" msgid="8430918817320533693">"Kapat"</string>
 </resources>
