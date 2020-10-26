@@ -409,6 +409,7 @@
   <java-symbol type="integer" name="config_defaultPictureInPictureGravity" />
   <java-symbol type="dimen" name="config_pictureInPictureMinAspectRatio" />
   <java-symbol type="dimen" name="config_pictureInPictureMaxAspectRatio" />
+  <java-symbol type="integer" name="config_pictureInPictureMaxNumberOfActions" />
   <java-symbol type="dimen" name="config_closeToSquareDisplayMaxAspectRatio" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />

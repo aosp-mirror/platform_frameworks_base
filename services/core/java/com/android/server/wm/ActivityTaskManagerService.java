@@ -4172,13 +4172,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @Override
-    public int getMaxNumPictureInPictureActions(IBinder token) {
-        // Currently, this is a static constant, but later, we may change this to be dependent on
-        // the context of the activity
-        return 3;
-    }
-
     /**
      * Checks the state of the system and the activity associated with the given {@param token} to
      * verify that picture-in-picture is supported for that activity.
@@ -4216,7 +4209,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         // Truncate the number of actions if necessary
-        params.truncateActions(getMaxNumPictureInPictureActions(token));
+        params.truncateActions(ActivityTaskManager.getMaxNumPictureInPictureActions(mContext));
 
         return r;
     }

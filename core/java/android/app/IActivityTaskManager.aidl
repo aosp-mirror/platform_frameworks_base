@@ -303,7 +303,6 @@ interface IActivityTaskManager {
     boolean enterPictureInPictureMode(in IBinder token, in PictureInPictureParams params);
     void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
     void requestPictureInPictureMode(in IBinder token);
-    int getMaxNumPictureInPictureActions(in IBinder token);
     IBinder getUriPermissionOwnerForActivity(in IBinder activityToken);
 
     /**
