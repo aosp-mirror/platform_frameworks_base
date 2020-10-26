@@ -19,6 +19,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
+import android.provider.Settings.Global;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
 
     private int mPowerStatusCounter = 0;
 
+    private HdmiCecLocalDeviceSource mSource;
+
     // Factory method. Ensures arguments are valid.
     static OneTouchPlayAction create(HdmiCecLocalDeviceSource source,
             int targetAddress, IHdmiControlCallback callback) {
@@ -74,27 +77,33 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
 
     @Override
     boolean start() {
+        // Because only source device can create this action, it's safe to cast.
+        mSource = source();
         sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
         broadcastActiveSource();
+        // If the device is not an audio system itself, request the connected audio system to
+        // turn on.
+        if (shouldTurnOnConnectedAudioSystem()) {
+            sendCommand(HdmiCecMessageBuilder.buildSystemAudioModeRequest(getSourceAddress(),
+                    Constants.ADDR_AUDIO_SYSTEM, getSourcePath(), true));
+        }
         queryDevicePowerStatus();
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
 
     private void broadcastActiveSource() {
-        // Because only source device can create this action, it's safe to cast.
-        HdmiCecLocalDeviceSource source = source();
-        source.mService.setAndBroadcastActiveSourceFromOneDeviceType(
+        mSource.mService.setAndBroadcastActiveSourceFromOneDeviceType(
                 mTargetAddress, getSourcePath(), "OneTouchPlayAction#broadcastActiveSource()");
         // When OneTouchPlay is called, client side should be responsible to send out the intent
         // of which internal source, for example YouTube, it would like to switch to.
         // Here we only update the active port and the active source records in the local
         // device as well as claiming Active Source.
-        if (source.mService.audioSystem() != null) {
-            source = source.mService.audioSystem();
+        if (mSource.mService.audioSystem() != null) {
+            mSource = mSource.mService.audioSystem();
         }
-        source.setRoutingPort(Constants.CEC_SWITCH_HOME);
-        source.setLocalActivePort(Constants.CEC_SWITCH_HOME);
+        mSource.setRoutingPort(Constants.CEC_SWITCH_HOME);
+        mSource.setLocalActivePort(Constants.CEC_SWITCH_HOME);
     }
 
     private void queryDevicePowerStatus() {
@@ -150,5 +159,15 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         } catch (RemoteException e) {
             Slog.e(TAG, "Callback failed:" + e);
         }
+    }
+
+    private boolean shouldTurnOnConnectedAudioSystem() {
+        HdmiControlService service = mSource.mService;
+        if (service.isAudioSystemDevice()) {
+            return false;
+        }
+        String sendStandbyOnSleep = service.readStringSetting(
+                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP, "");
+        return sendStandbyOnSleep.equals(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
     }
 }
