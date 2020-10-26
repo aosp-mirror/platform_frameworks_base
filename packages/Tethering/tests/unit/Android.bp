@@ -67,7 +67,6 @@ java_defaults {
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
     ],
-    jarjar_rules: "jarjar-rules.txt",
 }
 
 // Library containing the unit tests. This is used by the coverage test target to pull in the
@@ -88,6 +87,7 @@ android_test {
         "device-tests",
         "mts",
     ],
+    jarjar_rules: ":TetheringTestsJarJarRules",
     defaults: ["TetheringTestsDefaults"],
     compile_multilib: "both",
 }
