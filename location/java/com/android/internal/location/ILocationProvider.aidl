@@ -35,6 +35,8 @@ interface ILocationProvider {
     @UnsupportedAppUsage(maxTargetSdk = 30, publicAlternatives = "{@code Do not use}")
     oneway void setRequest(in ProviderRequest request, in WorkSource ws);
 
+    oneway void flush();
+
     @UnsupportedAppUsage(maxTargetSdk = 30, publicAlternatives = "{@code Do not use}")
     oneway void sendExtraCommand(String command, in Bundle extras);
 }

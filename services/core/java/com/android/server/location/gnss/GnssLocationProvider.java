@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -39,6 +41,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.location.LocationResult;
 import android.location.util.identity.CallerIdentity;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
@@ -298,6 +301,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @GuardedBy("mLock")
     private boolean mGpsEnabled;
 
+    @GuardedBy("mLock")
+    private boolean mBatchingEnabled;
+
     private boolean mShutdown;
 
     @GuardedBy("mLock")
@@ -314,6 +320,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // true if we started navigation in the HAL, only change value of this in setStarted
     private boolean mStarted;
+
+    // true if batching is being used
+    private boolean mBatchingStarted;
 
     // for logging of latest change, and warning of ongoing location after a stop
     private long mStartedChangedElapsedRealtime;
@@ -371,7 +380,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
     private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
     private final NtpTimeHelper mNtpTimeHelper;
-    private final GnssBatchingProvider mGnssBatchingProvider;
     private final GnssGeofenceProvider mGnssGeofenceProvider;
     private final GnssCapabilitiesProvider mGnssCapabilitiesProvider;
     private final GnssSatelliteBlacklistHelper mGnssSatelliteBlacklistHelper;
@@ -420,6 +428,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
 
     private volatile boolean mItarSpeedLimitExceeded = false;
+
+    @GuardedBy("mLock")
+    private final ArrayList<Runnable> mFlushListeners = new ArrayList<>(0);
 
     // GNSS Metrics
     private GnssMetrics mGnssMetrics;
@@ -625,7 +636,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssSatelliteBlacklistHelper =
                 new GnssSatelliteBlacklistHelper(mContext,
                         mLooper, this);
-        mGnssBatchingProvider = new GnssBatchingProvider();
         mGnssGeofenceProvider = new GnssGeofenceProvider();
 
         setProperties(PROPERTIES);
@@ -922,7 +932,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         mC2KServerHost, mC2KServerPort);
             }
 
-            mGnssBatchingProvider.enable();
+            mBatchingEnabled = native_init_batching() && native_get_batch_size() > 1;
             if (mGnssVisibilityControl != null) {
                 mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */ true);
             }
@@ -938,13 +948,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         setGpsEnabled(false);
         updateClientUids(new WorkSource());
         stopNavigating();
-        mAlarmManager.cancel(mWakeupIntent);
-        mAlarmManager.cancel(mTimeoutIntent);
+        stopBatching();
 
         if (mGnssVisibilityControl != null) {
             mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */ false);
         }
-        mGnssBatchingProvider.disable();
         // do this before releasing wakelock
         native_cleanup();
     }
@@ -957,7 +965,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // ... but disable if PowerManager overrides
         enabled &= !mDisableGpsForPowerManager;
 
-        // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
+        // .. but enable anyway, if there's an active settings-ignored request
         enabled |= (mProviderRequest != null
                 && mProviderRequest.isActive()
                 && mProviderRequest.isLocationSettingsIgnored());
@@ -979,6 +987,30 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean isGpsEnabled() {
         synchronized (mLock) {
             return mGpsEnabled;
+        }
+    }
+
+    /**
+     * Returns the hardware batch size available in this hardware implementation. If the available
+     * size is variable, for example, based on other operations consuming memory, this is the
+     * minimum size guaranteed to be available for batching operations.
+     */
+    public int getBatchSize() {
+        return native_get_batch_size();
+    }
+
+    @Override
+    protected void onFlush(Runnable listener) {
+        boolean added = false;
+        synchronized (mLock) {
+            if (mBatchingEnabled) {
+                added = mFlushListeners.add(listener);
+            }
+        }
+        if (!added) {
+            listener.run();
+        } else {
+            native_flush_batch();
         }
     }
 
@@ -1011,46 +1043,64 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 Log.w(TAG, "interval overflow: " + mProviderRequest.getIntervalMillis());
                 mFixInterval = Integer.MAX_VALUE;
             }
+            // requested batch size, or zero to disable batching
+            int batchSize;
+            try {
+                batchSize = mBatchingEnabled ? Math.toIntExact(
+                        mProviderRequest.getMaxUpdateDelayMillis() / mFixInterval) : 0;
+            } catch (ArithmeticException e) {
+                batchSize = Integer.MAX_VALUE;
+            }
+
+            if (batchSize < getBatchSize()) {
+                batchSize = 0;
+            }
 
             // apply request to GPS engine
-            if (mStarted && hasCapability(GPS_CAPABILITY_SCHEDULING)) {
-                // change period and/or lowPowerMode
-                if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
-                        mFixInterval, 0, 0, mLowPowerMode)) {
-                    Log.e(TAG, "set_position_mode failed in updateRequirements");
-                }
-            } else if (!mStarted) {
-                // start GPS
-                startNavigating();
+            if (batchSize > 0) {
+                stopNavigating();
+                startBatching();
             } else {
-                // GNSS Engine is already ON, but no GPS_CAPABILITY_SCHEDULING
-                mAlarmManager.cancel(mTimeoutIntent);
-                if (mFixInterval >= NO_FIX_TIMEOUT) {
-                    // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
-                    // and our fix interval is not short
-                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
+                stopBatching();
+
+                if (mStarted && hasCapability(GPS_CAPABILITY_SCHEDULING)) {
+                    // change period and/or lowPowerMode
+                    if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
+                            mFixInterval, mLowPowerMode)) {
+                        Log.e(TAG, "set_position_mode failed in updateRequirements");
+                    }
+                } else if (!mStarted) {
+                    // start GPS
+                    startNavigating();
+                } else {
+                    // GNSS Engine is already ON, but no GPS_CAPABILITY_SCHEDULING
+                    mAlarmManager.cancel(mTimeoutIntent);
+                    if (mFixInterval >= NO_FIX_TIMEOUT) {
+                        // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
+                        // and our fix interval is not short
+                        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                                SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
+                    }
                 }
             }
         } else {
             updateClientUids(new WorkSource());
 
             stopNavigating();
-            mAlarmManager.cancel(mWakeupIntent);
-            mAlarmManager.cancel(mTimeoutIntent);
+            stopBatching();
         }
     }
 
     private boolean setPositionMode(int mode, int recurrence, int minInterval,
-            int preferredAccuracy, int preferredTime, boolean lowPowerMode) {
+            boolean lowPowerMode) {
         GnssPositionMode positionMode = new GnssPositionMode(mode, recurrence, minInterval,
-                preferredAccuracy, preferredTime, lowPowerMode);
+                0, 0, lowPowerMode);
         if (mLastPositionMode != null && mLastPositionMode.equals(positionMode)) {
             return true;
         }
 
         boolean result = native_set_position_mode(mode, recurrence, minInterval,
-                preferredAccuracy, preferredTime, lowPowerMode);
+                0, 0, lowPowerMode);
         if (result) {
             mLastPositionMode = positionMode;
         } else {
@@ -1210,7 +1260,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
             mLowPowerMode = mProviderRequest.isLowPower();
             if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
-                    interval, 0, 0, mLowPowerMode)) {
+                    interval, mLowPowerMode)) {
                 setStarted(false);
                 Log.e(TAG, "set_position_mode failed in startNavigating()");
                 return;
@@ -1247,6 +1297,27 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // reset SV count to zero
             mLocationExtras.reset();
         }
+        mAlarmManager.cancel(mTimeoutIntent);
+        mAlarmManager.cancel(mWakeupIntent);
+    }
+
+    private void startBatching() {
+        if (DEBUG) {
+            Log.d(TAG, "startBatching " + mFixInterval);
+        }
+        if (native_start_batch(MILLISECONDS.toNanos(mFixInterval), true)) {
+            mBatchingStarted = true;
+        } else {
+            Log.e(TAG, "native_start_batch failed in startBatching()");
+        }
+    }
+
+    private void stopBatching() {
+        if (DEBUG) Log.d(TAG, "stopBatching");
+        if (mBatchingStarted) {
+            native_stop_batch();
+            mBatchingStarted = false;
+        }
     }
 
     private void setStarted(boolean started) {
@@ -1259,8 +1330,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private void hibernate() {
         // stop GPS until our next fix interval arrives
         stopNavigating();
-        mAlarmManager.cancel(mTimeoutIntent);
-        mAlarmManager.cancel(mWakeupIntent);
         long now = SystemClock.elapsedRealtime();
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + mFixInterval, mWakeupIntent);
     }
@@ -1291,7 +1360,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         location.setExtras(mLocationExtras.getBundle());
 
-        reportLocation(location);
+        reportLocation(LocationResult.wrap(location).validate());
 
         if (mStarted) {
             mGnssMetrics.logReceivedLocationStatus(hasLatLong);
@@ -1474,7 +1543,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         Log.i(TAG, "restartRequests");
 
         restartLocationRequest();
-        mGnssBatchingProvider.resumeIfStarted();
         mGnssGeofenceProvider.resumeIfStarted();
     }
 
@@ -1545,13 +1613,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     /**
-     * @hide
-     */
-    public GnssBatchingProvider getGnssBatchingProvider() {
-        return mGnssBatchingProvider;
-    }
-
-    /**
      * Interface for GnssMetrics methods.
      */
     public interface GnssMetricsProvider {
@@ -1575,12 +1636,24 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return mGnssCapabilitiesProvider;
     }
 
-    void reportLocationBatch(Location[] locationArray) {
-        List<Location> locations = new ArrayList<>(Arrays.asList(locationArray));
+    void reportLocationBatch(Location[] locations) {
         if (DEBUG) {
-            Log.d(TAG, "Location batch of size " + locationArray.length + " reported");
+            Log.d(TAG, "Location batch of size " + locations.length + " reported");
         }
-        reportLocation(locations);
+
+        Runnable[] listeners;
+        synchronized (mLock) {
+            listeners = mFlushListeners.toArray(new Runnable[0]);
+            mFlushListeners.clear();
+        }
+
+        if (locations.length > 0) {
+            reportLocation(LocationResult.create(Arrays.asList(locations)).validate());
+        }
+
+        for (Runnable listener : listeners) {
+            listener.run();
+        }
     }
 
     void downloadPsdsData(int psdsType) {
@@ -2032,6 +2105,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         TimeUtils.formatDuration(SystemClock.elapsedRealtime()
                 - mStartedChangedElapsedRealtime, s);
         s.append(" ago)").append('\n');
+        s.append("mBatchingEnabled=").append(mBatchingEnabled).append('\n');
+        s.append("mBatchingStarted=").append(mBatchingStarted).append('\n');
+        s.append("mBatchSize=").append(getBatchSize()).append('\n');
         s.append("mFixInterval=").append(mFixInterval).append('\n');
         s.append("mLowPowerMode=").append(mLowPowerMode).append('\n');
         s.append("mDisableGpsForPowerManager=").append(mDisableGpsForPowerManager).append('\n');
@@ -2067,7 +2143,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     // preallocated to avoid memory allocation in reportNmea()
-    private byte[] mNmeaBuffer = new byte[120];
+    private final byte[] mNmeaBuffer = new byte[120];
 
     private static native boolean native_is_gnss_visibility_control_supported();
 
@@ -2119,4 +2195,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             int lac, int cid);
 
     private native void native_agps_set_id(int type, String setid);
+
+    private static native boolean native_init_batching();
+
+    private static native void native_cleanup_batching();
+
+    private static native int native_get_batch_size();
+
+    private static native boolean native_start_batch(long periodNanos, boolean wakeOnFifoFull);
+
+    private static native void native_flush_batch();
+
+    private static native boolean native_stop_batch();
 }

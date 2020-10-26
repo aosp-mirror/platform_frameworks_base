@@ -23,7 +23,6 @@ import static android.location.LocationManager.GPS_PROVIDER;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,13 +47,11 @@ import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssRequest;
 import android.location.GnssSingleSatCorrection;
-import android.location.IBatchedLocationCallback;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssStatusListener;
 import android.location.INetInitiatedListener;
-import android.location.Location;
 import android.location.LocationManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -99,7 +96,6 @@ public class GnssManagerServiceTest {
     @Mock private LocationManagerInternal mLocationManagerInternal;
     @Mock private GnssNative.GnssNativeInitNative mGnssInitNative;
     @Mock private GnssLocationProvider mMockGnssLocationProvider;
-    @Mock private GnssBatchingProvider mMockGnssBatchingProvider;
     @Mock private GnssLocationProvider.GnssSystemInfoProvider mMockGnssSystemInfoProvider;
     @Mock private GnssCapabilitiesProvider mMockGnssCapabilitiesProvider;
     @Mock private GnssMeasurementCorrectionsProvider mMockGnssMeasurementCorrectionsProvider;
@@ -148,8 +144,6 @@ public class GnssManagerServiceTest {
         // Setup GnssLocationProvider to return providers
         when(mMockGnssLocationProvider.getGnssStatusProvider()).thenReturn(
                 mTestGnssStatusProvider);
-        when(mMockGnssLocationProvider.getGnssBatchingProvider()).thenReturn(
-                mMockGnssBatchingProvider);
         when(mMockGnssLocationProvider.getGnssCapabilitiesProvider()).thenReturn(
                 mMockGnssCapabilitiesProvider);
         when(mMockGnssLocationProvider.getGnssSystemInfoProvider()).thenReturn(
@@ -164,10 +158,6 @@ public class GnssManagerServiceTest {
                 mNetInitiatedListener);
         when(mMockGnssLocationProvider.getGnssAntennaInfoProvider()).thenReturn(
                 mTestGnssAntennaInfoProvider);
-
-        // Setup GnssBatching provider
-        when(mMockGnssBatchingProvider.start(anyLong(), anyBoolean())).thenReturn(true);
-        when(mMockGnssBatchingProvider.stop()).thenReturn(true);
 
         // Create GnssManagerService
         mGnssManagerService = new GnssManagerService(mMockContext, mInjector,
@@ -202,12 +192,6 @@ public class GnssManagerServiceTest {
         IGnssAntennaInfoListener mockListener = mock(IGnssAntennaInfoListener.class);
         overrideAsBinder(mockListener);
         return mockListener;
-    }
-
-    private IBatchedLocationCallback createMockBatchedLocationCallback() {
-        IBatchedLocationCallback mockedCallback = mock(IBatchedLocationCallback.class);
-        overrideAsBinder(mockedCallback);
-        return mockedCallback;
     }
 
     private IGnssNavigationMessageListener createMockGnssNavigationMessageListener() {
@@ -356,174 +340,6 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         assertThat(mGnssManagerService.getGnssCapabilities()).isEqualTo(mGnssCapabilities);
-    }
-
-    @Test
-    public void getGnssBatchSizeWithoutPermissionsTest() {
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class,
-                () -> mGnssManagerService.getGnssBatchSize());
-    }
-
-    @Test
-    public void getGnssBatchSizeWithPermissionsTest() {
-        final int gnssBatchSize = 10;
-        when(mMockGnssBatchingProvider.getBatchSize()).thenReturn(gnssBatchSize);
-        enableLocationPermissions();
-
-        assertThat(mGnssManagerService.getGnssBatchSize()).isEqualTo(
-                gnssBatchSize);
-    }
-
-    @Test
-    public void startGnssBatchWithoutPermissionsTest() {
-        final long periodNanos = 100L;
-        final boolean wakeOnFifoFull = true;
-
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class,
-                () -> mGnssManagerService.startGnssBatch(periodNanos, wakeOnFifoFull,
-                        TEST_PACKAGE, null));
-        verify(mMockGnssBatchingProvider, times(0)).start(periodNanos, wakeOnFifoFull);
-    }
-
-    @Test
-    public void startGnssBatchWithPermissionsTest() {
-        final long periodNanos = 100L;
-        final boolean wakeOnFifoFull = true;
-
-        enableLocationPermissions();
-
-        assertThat(mGnssManagerService.startGnssBatch(periodNanos, wakeOnFifoFull,
-                TEST_PACKAGE, null))
-                .isEqualTo(
-                        true);
-        verify(mMockGnssBatchingProvider, times(1)).start(100L, true);
-    }
-
-    @Test
-    public void addGnssBatchCallbackWithoutPermissionsTest() throws RemoteException {
-        IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = new ArrayList<>();
-
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class, () -> mGnssManagerService.setGnssBatchingCallback(
-                mockBatchedLocationCallback, TEST_PACKAGE, null));
-
-        mGnssManagerService.onReportLocation(mockLocationList);
-
-        verify(mockBatchedLocationCallback, times(0)).onLocationBatch(mockLocationList);
-    }
-
-    @Test
-    public void addGnssBatchCallbackWithPermissionsTest() throws RemoteException {
-        IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = new ArrayList<>();
-
-        enableLocationPermissions();
-
-        assertThat(mGnssManagerService.setGnssBatchingCallback(
-                mockBatchedLocationCallback, TEST_PACKAGE, null))
-                .isEqualTo(true);
-
-        mGnssManagerService.onReportLocation(mockLocationList);
-
-        verify(mockBatchedLocationCallback, times(1)).onLocationBatch(mockLocationList);
-    }
-
-    @Test
-    public void replaceGnssBatchCallbackTest() throws RemoteException {
-        IBatchedLocationCallback mockBatchedLocationCallback1 = createMockBatchedLocationCallback();
-        IBatchedLocationCallback mockBatchedLocationCallback2 = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = new ArrayList<>();
-
-        enableLocationPermissions();
-
-        assertThat(mGnssManagerService.setGnssBatchingCallback(
-                mockBatchedLocationCallback1, TEST_PACKAGE, null))
-                .isEqualTo(true);
-        assertThat(mGnssManagerService.setGnssBatchingCallback(
-                mockBatchedLocationCallback2, TEST_PACKAGE, null))
-                .isEqualTo(true);
-
-        mGnssManagerService.onReportLocation(mockLocationList);
-
-        verify(mockBatchedLocationCallback1, times(0)).onLocationBatch(mockLocationList);
-        verify(mockBatchedLocationCallback2, times(1)).onLocationBatch(mockLocationList);
-    }
-
-    @Test
-    public void flushGnssBatchWithoutPermissionsTest() {
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class,
-                () -> mGnssManagerService.flushGnssBatch());
-        verify(mMockGnssBatchingProvider, times(0)).flush();
-    }
-
-    @Test
-    public void flushGnssBatchWithPermissionsTest() {
-        enableLocationPermissions();
-        mGnssManagerService.flushGnssBatch();
-
-        verify(mMockGnssBatchingProvider, times(1)).flush();
-    }
-
-    @Test
-    public void removeGnssBatchingCallbackWithoutPermissionsTest() throws RemoteException {
-        IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = new ArrayList<>();
-
-        enableLocationPermissions();
-
-        mGnssManagerService.setGnssBatchingCallback(mockBatchedLocationCallback,
-                TEST_PACKAGE, null);
-
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class,
-                () -> mGnssManagerService.removeGnssBatchingCallback());
-
-        enableLocationPermissions();
-        mGnssManagerService.onReportLocation(mockLocationList);
-
-        verify(mockBatchedLocationCallback, times(1)).onLocationBatch(mockLocationList);
-    }
-
-    @Test
-    public void removeGnssBatchingCallbackWithPermissionsTest() throws RemoteException {
-        IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = new ArrayList<>();
-
-        enableLocationPermissions();
-
-        mGnssManagerService.setGnssBatchingCallback(mockBatchedLocationCallback,
-                TEST_PACKAGE, null);
-
-        mGnssManagerService.removeGnssBatchingCallback();
-
-        mGnssManagerService.onReportLocation(mockLocationList);
-
-        verify(mockBatchedLocationCallback, times(0)).onLocationBatch(mockLocationList);
-    }
-
-    @Test
-    public void stopGnssBatchWithoutPermissionsTest() {
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class, () -> mGnssManagerService.stopGnssBatch());
-        verify(mMockGnssBatchingProvider, times(0)).stop();
-    }
-
-    @Test
-    public void stopGnssBatchWithPermissionsTest() {
-        enableLocationPermissions();
-
-        assertThat(mGnssManagerService.stopGnssBatch()).isEqualTo(true);
-        verify(mMockGnssBatchingProvider, times(1)).stop();
     }
 
     @Test

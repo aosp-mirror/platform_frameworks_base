@@ -20,7 +20,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.content.Context;
 import android.location.Criteria;
-import android.location.Location;
+import android.location.LocationResult;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 
@@ -61,12 +61,17 @@ public class PassiveLocationProvider extends AbstractLocationProvider {
     /**
      * Pass a location into the passive provider.
      */
-    public void updateLocation(Location location) {
-        reportLocation(location);
+    public void updateLocation(LocationResult locationResult) {
+        reportLocation(locationResult);
     }
 
     @Override
     public void onSetRequest(ProviderRequest request) {}
+
+    @Override
+    protected void onFlush(Runnable callback) {
+        callback.run();
+    }
 
     @Override
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}

@@ -90,14 +90,14 @@ public class LocationEventLog extends LocalEventLog {
     }
 
     /** Logs a new incoming location for a location provider. */
-    public synchronized void logProviderReceivedLocation(String provider) {
-        addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider);
+    public synchronized void logProviderReceivedLocations(String provider, int numLocations) {
+        addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider, numLocations);
     }
 
     /** Logs a location deliver for a client of a location provider. */
-    public synchronized void logProviderDeliveredLocation(String provider,
+    public synchronized void logProviderDeliveredLocations(String provider, int numLocations,
             CallerIdentity identity) {
-        addLogEvent(EVENT_PROVIDER_DELIVER_LOCATION, provider, identity);
+        addLogEvent(EVENT_PROVIDER_DELIVER_LOCATION, provider, numLocations, identity);
     }
 
     /** Logs that the location power save mode has changed. */
@@ -126,10 +126,11 @@ public class LocationEventLog extends LocalEventLog {
                 return new ProviderUpdateEvent(timeDelta, (String) args[0],
                         (ProviderRequest) args[1]);
             case EVENT_PROVIDER_RECEIVE_LOCATION:
-                return new ProviderReceiveLocationEvent(timeDelta, (String) args[0]);
+                return new ProviderReceiveLocationEvent(timeDelta, (String) args[0],
+                        (Integer) args[1]);
             case EVENT_PROVIDER_DELIVER_LOCATION:
                 return new ProviderDeliverLocationEvent(timeDelta, (String) args[0],
-                        (CallerIdentity) args[1]);
+                        (Integer) args[1], (CallerIdentity) args[2]);
             case EVENT_LOCATION_POWER_SAVE_MODE_CHANGE:
                 return new LocationPowerSaveModeEvent(timeDelta, (Integer) args[0]);
             default:
@@ -226,33 +227,38 @@ public class LocationEventLog extends LocalEventLog {
     private static class ProviderReceiveLocationEvent extends LogEvent {
 
         private final String mProvider;
+        private final int mNumLocations;
 
-        private ProviderReceiveLocationEvent(long timeDelta, String provider) {
+        private ProviderReceiveLocationEvent(long timeDelta, String provider, int numLocations) {
             super(timeDelta);
             mProvider = provider;
+            mNumLocations = numLocations;
         }
 
         @Override
         public String getLogString() {
-            return mProvider + " provider received location";
+            return mProvider + " provider received location[" + mNumLocations + "]";
         }
     }
 
     private static class ProviderDeliverLocationEvent extends LogEvent {
 
         private final String mProvider;
+        private final int mNumLocations;
         @Nullable private final CallerIdentity mIdentity;
 
-        private ProviderDeliverLocationEvent(long timeDelta, String provider,
+        private ProviderDeliverLocationEvent(long timeDelta, String provider, int numLocations,
                 @Nullable CallerIdentity identity) {
             super(timeDelta);
             mProvider = provider;
+            mNumLocations = numLocations;
             mIdentity = identity;
         }
 
         @Override
         public String getLogString() {
-            return mProvider + " provider delivered location to " + mIdentity;
+            return mProvider + " provider delivered location[" + mNumLocations + "] to "
+                    + mIdentity;
         }
     }
 

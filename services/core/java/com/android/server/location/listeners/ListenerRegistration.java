@@ -16,7 +16,6 @@
 
 package com.android.server.location.listeners;
 
-
 import android.annotation.Nullable;
 
 import com.android.internal.listeners.ListenerExecutor;
@@ -108,8 +107,8 @@ public class ListenerRegistration<TListener> implements ListenerExecutor {
      * May be overridden by subclasses to handle listener operation failures. The default behavior
      * is to further propagate any exceptions. Will always be invoked on the executor thread.
      */
-    protected void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
-        throw new AssertionError(e);
+    protected void onOperationFailure(ListenerOperation<TListener> operation, Exception exception) {
+        throw new AssertionError(exception);
     }
 
     /**

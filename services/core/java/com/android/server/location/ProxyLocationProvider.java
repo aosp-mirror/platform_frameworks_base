@@ -21,7 +21,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
-import android.location.Location;
+import android.location.LocationResult;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
@@ -38,6 +38,7 @@ import com.android.server.ServiceWatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -65,6 +66,9 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
     final Context mContext;
     final ServiceWatcher mServiceWatcher;
+
+    @GuardedBy("mLock")
+    final ArrayList<Runnable> mFlushListeners = new ArrayList<>(0);
 
     @GuardedBy("mLock")
     Proxy mProxy;
@@ -107,10 +111,18 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
     }
 
     private void onUnbind() {
+        Runnable[] flushListeners;
         synchronized (mLock) {
             mProxy = null;
             mService = null;
             setState(State.EMPTY_STATE);
+            flushListeners = mFlushListeners.toArray(new Runnable[0]);
+            mFlushListeners.clear();
+        }
+
+        final int size = flushListeners.length;
+        for (int i = 0; i < size; ++i) {
+            flushListeners[i].run();
         }
     }
 
@@ -120,6 +132,38 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
             provider.setRequest(request, request.getWorkSource());
+        });
+    }
+
+    @Override
+    protected void onFlush(Runnable callback) {
+        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+            @Override
+            public void run(IBinder binder) throws RemoteException {
+                ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
+
+                // at first glance it would be more straightforward to pass the flush callback
+                // through to the provider and allow it to be invoked directly. however, in this
+                // case the binder calls 1) provider delivering flushed locations 2) provider
+                // delivering flush complete, while correctly ordered within the provider, would
+                // be invoked on different binder objects and thus would have no defined order
+                // on the system server side. thus, we ensure that both (1) and (2) are invoked
+                // on the same binder object (the ILocationProviderManager) and have a well
+                // defined ordering, so that the flush callback will always happen after
+                // location delivery.
+                synchronized (mLock) {
+                    mFlushListeners.add(callback);
+                }
+                provider.flush();
+            }
+
+            @Override
+            public void onError() {
+                synchronized (mLock) {
+                    mFlushListeners.remove(callback);
+                }
+                callback.run();
+            }
         });
     }
 
@@ -209,12 +253,31 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
         // executed on binder thread
         @Override
-        public void onReportLocation(Location location) {
+        public void onReportLocation(LocationResult locationResult) {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
                 }
-                reportLocation(location);
+
+                reportLocation(locationResult.validate());
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onFlushComplete() {
+            Runnable callback = null;
+            synchronized (mLock) {
+                if (mProxy != this) {
+                    return;
+                }
+                if (!mFlushListeners.isEmpty()) {
+                    callback = mFlushListeners.remove(0);
+                }
+            }
+
+            if (callback != null) {
+                callback.run();
             }
         }
     }

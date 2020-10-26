@@ -15,18 +15,24 @@ package com.android.location.provider {
     method @Deprecated protected void onDisable();
     method @Deprecated protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method @Deprecated protected void onEnable();
+    method protected void onFlush(com.android.location.provider.LocationProviderBase.OnFlushCompleteCallback);
     method @Deprecated protected int onGetStatus(android.os.Bundle);
     method @Deprecated protected long onGetStatusUpdateTime();
     method protected void onInit();
     method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
     method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
     method public void reportLocation(android.location.Location);
+    method public void reportLocation(android.location.LocationResult);
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
     method @RequiresApi(android.os.Build.VERSION_CODES.R) public void setAllowed(boolean);
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setEnabled(boolean);
     method @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
     field public static final String FUSED_PROVIDER = "fused";
+  }
+
+  protected static interface LocationProviderBase.OnFlushCompleteCallback {
+    method public void onFlushComplete();
   }
 
   @Deprecated public final class LocationRequestUnbundled {
@@ -50,6 +56,7 @@ package com.android.location.provider {
   public final class ProviderRequestUnbundled {
     method public long getInterval();
     method @Deprecated @NonNull public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
+    method @RequiresApi(android.os.Build.VERSION_CODES.S) public long getMaxUpdateDelayMillis();
     method @android.location.LocationRequest.Quality @RequiresApi(android.os.Build.VERSION_CODES.S) public int getQuality();
     method public boolean getReportLocation();
     method @NonNull @RequiresApi(android.os.Build.VERSION_CODES.S) public android.os.WorkSource getWorkSource();
