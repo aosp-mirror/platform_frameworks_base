@@ -27,6 +27,7 @@ import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItemController
+import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.settings.UserTracker
@@ -86,6 +87,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var qsCarrierGroupController: QSCarrierGroupController
     @Mock
+    private lateinit var privacyLogger: PrivacyLogger
+    @Mock
     private lateinit var iconContainer: StatusIconContainer
     @Mock
     private lateinit var qsCarrierGroup: QSCarrierGroup
@@ -123,7 +126,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 demoModeController,
                 userTracker,
                 quickQSPanelController,
-                qsCarrierGroupControllerBuilder
+                qsCarrierGroupControllerBuilder,
+                privacyLogger
         )
     }
 

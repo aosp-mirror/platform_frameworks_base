@@ -43,6 +43,7 @@ import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.PrivacyChipEvent;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
@@ -90,6 +91,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final StatusIconContainer mIconContainer;
     private final StatusBarIconController.TintedIconManager mIconManager;
     private final DemoMode mDemoModeReceiver;
+    private final PrivacyLogger mPrivacyLogger;
 
     private boolean mListening;
     private AlarmClockInfo mNextAlarm;
@@ -213,7 +215,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             QSTileHost qsTileHost, StatusBarIconController statusBarIconController,
             CommandQueue commandQueue, DemoModeController demoModeController,
             UserTracker userTracker, QuickQSPanelController quickQSPanelController,
-            QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
+            QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder,
+            PrivacyLogger privacyLogger) {
         super(view);
         mZenModeController = zenModeController;
         mNextAlarmController = nextAlarmController;
@@ -228,6 +231,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mUserTracker = userTracker;
         mLifecycle = new LifecycleRegistry(mLifecycleOwner);
         mHeaderQsPanelController = quickQSPanelController;
+        mPrivacyLogger = privacyLogger;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
@@ -323,6 +327,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private void setChipVisibility(boolean chipVisible) {
         if (chipVisible && getChipEnabled()) {
             mPrivacyChip.setVisibility(View.VISIBLE);
+            mPrivacyLogger.logChipVisible(true);
             // Makes sure that the chip is logged as viewed at most once each time QS is opened
             // mListening makes sure that the callback didn't return after the user closed QS
             if (!mPrivacyChipLogged && mListening) {
@@ -330,6 +335,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mUiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_VIEW);
             }
         } else {
+            mPrivacyLogger.logChipVisible(false);
             mPrivacyChip.setVisibility(View.GONE);
         }
     }

@@ -19,20 +19,31 @@ import com.android.systemui.R
 
 typealias Privacy = PrivacyType
 
-enum class PrivacyType(val nameId: Int, val iconId: Int) {
+enum class PrivacyType(val nameId: Int, val iconId: Int, val logName: String) {
     // This is uses the icons used by the corresponding permission groups in the AndroidManifest
-    TYPE_CAMERA(R.string.privacy_type_camera,
-            com.android.internal.R.drawable.perm_group_camera),
-    TYPE_MICROPHONE(R.string.privacy_type_microphone,
-            com.android.internal.R.drawable.perm_group_microphone),
-    TYPE_LOCATION(R.string.privacy_type_location,
-            com.android.internal.R.drawable.perm_group_location);
+    TYPE_CAMERA(
+        R.string.privacy_type_camera,
+        com.android.internal.R.drawable.perm_group_camera,
+        "camera"
+    ),
+    TYPE_MICROPHONE(
+        R.string.privacy_type_microphone,
+        com.android.internal.R.drawable.perm_group_microphone,
+        "microphone"
+    ),
+    TYPE_LOCATION(
+        R.string.privacy_type_location,
+        com.android.internal.R.drawable.perm_group_location,
+        "location"
+    );
 
     fun getName(context: Context) = context.resources.getString(nameId)
 
     fun getIcon(context: Context) = context.resources.getDrawable(iconId, context.theme)
 }
 
-data class PrivacyItem(val privacyType: PrivacyType, val application: PrivacyApplication)
+data class PrivacyItem(val privacyType: PrivacyType, val application: PrivacyApplication) {
+    fun toLog(): String = "(${privacyType.logName}, ${application.packageName}(${application.uid}))"
+}
 
 data class PrivacyApplication(val packageName: String, val uid: Int)
