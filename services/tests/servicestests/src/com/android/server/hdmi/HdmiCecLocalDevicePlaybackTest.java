@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IThermalService;
@@ -973,5 +974,74 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message)).isTrue();
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
         assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void oneTouchPlay_SendStandbyOnSleepToTv() {
+        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
+                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
+        mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(mPlaybackLogicalAddress,
+                ADDR_TV);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+        HdmiCecMessage systemAudioModeRequest = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM, mPlaybackPhysicalAddress, true);
+        assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(systemAudioModeRequest);
+    }
+
+    @Test
+    public void oneTouchPlay_SendStandbyOnSleepBroadcast() {
+        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
+                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
+        mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(mPlaybackLogicalAddress,
+                ADDR_TV);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+        HdmiCecMessage systemAudioModeRequest = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM, mPlaybackPhysicalAddress, true);
+        assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
+        assertThat(mNativeWrapper.getResultMessages()).contains(systemAudioModeRequest);
+    }
+
+    @Test
+    public void oneTouchPlay_SendStandbyOnSleepNone() {
+        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
+                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE);
+        mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(mPlaybackLogicalAddress,
+                ADDR_TV);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+        HdmiCecMessage systemAudioModeRequest = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM, mPlaybackPhysicalAddress, true);
+        assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(systemAudioModeRequest);
     }
 }
