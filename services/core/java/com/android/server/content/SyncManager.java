@@ -210,7 +210,7 @@ public class SyncManager {
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
 
-    private static final boolean USE_WTF_FOR_ACCOUNT_ERROR = false;
+    private static final boolean USE_WTF_FOR_ACCOUNT_ERROR = true;
 
     private static final int SYNC_OP_STATE_VALID = 0;
     // "1" used to include errors 3, 4 and 5 but now it's split up.
