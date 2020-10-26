@@ -1364,6 +1364,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+        task.maybeUpdateLetterboxBounds(this, getLetterboxParams(w));
     }
 
     void updateLetterboxSurface(WindowState winHint) {
@@ -1375,6 +1376,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
             mLetterbox.applySurfaceChanges(getPendingTransaction());
         }
+    }
+
+    @Nullable
+    private Rect getLetterboxParams(WindowState w) {
+        boolean isLetterboxed = w.isLetterboxedAppWindow() && fillsParent();
+        return isLetterboxed ? getBounds() : null;
     }
 
     Rect getLetterboxInsets() {

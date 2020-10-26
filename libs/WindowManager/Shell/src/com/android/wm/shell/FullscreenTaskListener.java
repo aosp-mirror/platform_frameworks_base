@@ -20,9 +20,7 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCR
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
 import android.app.ActivityManager;
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
 
@@ -39,7 +37,7 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private final SyncTransactionQueue mSyncQueue;
 
-    private final ArrayMap<Integer, SurfaceControl> mTasks = new ArrayMap<>();
+    private final ArraySet<Integer> mTasks = new ArraySet<>();
 
     FullscreenTaskListener(SyncTransactionQueue syncQueue) {
         mSyncQueue = syncQueue;
@@ -48,17 +46,17 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (mTasks) {
-            if (mTasks.containsKey(taskInfo.taskId)) {
+            if (mTasks.contains(taskInfo.taskId)) {
                 throw new RuntimeException("Task appeared more than once: #" + taskInfo.taskId);
             }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                     taskInfo.taskId);
-            mTasks.put(taskInfo.taskId, leash);
+            mTasks.add(taskInfo.taskId);
             mSyncQueue.runInSync(t -> {
                 // Reset several properties back to fullscreen (PiP, for example, leaves all these
                 // properties in a bad state).
-                updateSurfacePosition(t, taskInfo, leash);
                 t.setWindowCrop(leash, null);
+                t.setPosition(leash, 0, 0);
                 // TODO(shell-transitions): Eventually set everything in transition so there's no
                 //                          SF Transaction here.
                 if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -73,29 +71,12 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
         synchronized (mTasks) {
-            if (mTasks.remove(taskInfo.taskId) == null) {
+            if (!mTasks.remove(taskInfo.taskId)) {
                 Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
                 return;
             }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                     taskInfo.taskId);
-        }
-    }
-
-    @Override
-    public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        synchronized (mTasks) {
-            if (!mTasks.containsKey(taskInfo.taskId)) {
-                Slog.e(TAG, "Changed Task wasn't appeared or already vanished: #"
-                        + taskInfo.taskId);
-                return;
-            }
-            final SurfaceControl leash = mTasks.get(taskInfo.taskId);
-            mSyncQueue.runInSync(t -> {
-                // Reposition the task in case the bounds has been changed (such as Task level
-                // letterboxing).
-                updateSurfacePosition(t, taskInfo, leash);
-            });
         }
     }
 
@@ -112,12 +93,4 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_FULLSCREEN);
     }
 
-    /** Places the Task surface to the latest position. */
-    private static void updateSurfacePosition(SurfaceControl.Transaction t,
-            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        // TODO(170725334) drop this after ag/12876439
-        final Configuration config = taskInfo.getConfiguration();
-        final Rect bounds = config.windowConfiguration.getBounds();
-        t.setPosition(leash, bounds.left, bounds.top);
-    }
 }
