@@ -56,6 +56,16 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                 MacAddress.BROADCAST_ADDRESS;
 
         /**
+         * Set WPA Enterprise type according to certificate security level.
+         * This is for backward compatibility in R.
+         */
+        private static final int WPA3_ENTERPRISE_AUTO = 0;
+        /** Set WPA Enterprise type to standard mode only. */
+        private static final int WPA3_ENTERPRISE_STANDARD = 1;
+        /** Set WPA Enterprise type to 192 bit mode only. */
+        private static final int WPA3_ENTERPRISE_192_BIT = 2;
+
+        /**
          * SSID pattern match specified by the app.
          */
         private @Nullable PatternMatcher mSsidPatternMatcher;
@@ -86,6 +96,10 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * certificates and other settings associated with the WPA3-Enterprise networks.
          */
         private @Nullable WifiEnterpriseConfig mWpa3EnterpriseConfig;
+        /**
+         * Indicate what type this WPA3-Enterprise network is.
+         */
+        private int mWpa3EnterpriseType = WPA3_ENTERPRISE_AUTO;
         /**
          * This is a network that does not broadcast its SSID, so an
          * SSID-specific probe request must be used for scans.
@@ -249,13 +263,70 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * sha384WithRSAEncryption (OID 1.2.840.113549.1.1.12) or ecdsa-with-SHA384
          * (OID 1.2.840.10045.4.3.3).
          *
+         * @deprecated use {@link #setWpa3EnterpriseStandardModeConfig(WifiEnterpriseConfig)} or
+         * {@link #setWpa3Enterprise192BitModeConfig(WifiEnterpriseConfig)} to specify
+         * WPA3-Enterprise type explicitly.
+         *
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
+        @Deprecated
         public @NonNull Builder setWpa3EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
             mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+            return this;
+        }
+
+        /**
+         * Set the associated enterprise configuration for this network. Needed for authenticating
+         * to standard WPA3-Enterprise networks. See {@link WifiEnterpriseConfig} for description.
+         * For WPA3-Enterprise in 192-bit security mode networks,
+         * see {@link #setWpa3Enterprise192BitModeConfig(WifiEnterpriseConfig)} for description.
+         *
+         * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setWpa3EnterpriseStandardModeConfig(
+                @NonNull WifiEnterpriseConfig enterpriseConfig) {
+            checkNotNull(enterpriseConfig);
+            mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+            mWpa3EnterpriseType = WPA3_ENTERPRISE_STANDARD;
+            return this;
+        }
+
+        /**
+         * Set the associated enterprise configuration for this network. Needed for authenticating
+         * to WPA3-Enterprise in 192-bit security mode networks. See {@link WifiEnterpriseConfig}
+         * for description. Both the client and CA certificates must be provided,
+         * and must be of type of either sha384WithRSAEncryption with key length of 3072bit or
+         * more (OID 1.2.840.113549.1.1.12), or ecdsa-with-SHA384 with key length of 384bit or
+         * more (OID 1.2.840.10045.4.3.3).
+         *
+         * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @throws IllegalArgumentException if the EAP type or certificates do not
+         *                                  meet 192-bit mode requirements.
+         */
+        public @NonNull Builder setWpa3Enterprise192BitModeConfig(
+                @NonNull WifiEnterpriseConfig enterpriseConfig) {
+            checkNotNull(enterpriseConfig);
+            if (enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.TLS) {
+                throw new IllegalArgumentException("The 192-bit mode network type must be TLS");
+            }
+            if (!WifiEnterpriseConfig.isSuiteBCipherCert(
+                    enterpriseConfig.getClientCertificate())) {
+                throw new IllegalArgumentException(
+                    "The client certificate does not meet 192-bit mode requirements.");
+            }
+            if (!WifiEnterpriseConfig.isSuiteBCipherCert(
+                    enterpriseConfig.getCaCertificate())) {
+                throw new IllegalArgumentException(
+                    "The CA certificate does not meet 192-bit mode requirements.");
+            }
+
+            mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+            mWpa3EnterpriseType = WPA3_ENTERPRISE_192_BIT;
             return this;
         }
 
@@ -289,12 +360,16 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                 configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
                 configuration.enterpriseConfig = mWpa2EnterpriseConfig;
             } else if (mWpa3EnterpriseConfig != null) { // WPA3-Enterprise
-                if (mWpa3EnterpriseConfig.getEapMethod() == WifiEnterpriseConfig.Eap.TLS
+                if (mWpa3EnterpriseType == WPA3_ENTERPRISE_AUTO
+                        && mWpa3EnterpriseConfig.getEapMethod() == WifiEnterpriseConfig.Eap.TLS
                         && WifiEnterpriseConfig.isSuiteBCipherCert(
                         mWpa3EnterpriseConfig.getClientCertificate())
                         && WifiEnterpriseConfig.isSuiteBCipherCert(
                         mWpa3EnterpriseConfig.getCaCertificate())) {
-                    // WPA3-Enterprise in 192-bit security mode (Suite-B)
+                    // WPA3-Enterprise in 192-bit security mode
+                    configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
+                } else if (mWpa3EnterpriseType == WPA3_ENTERPRISE_192_BIT) {
+                    // WPA3-Enterprise in 192-bit security mode
                     configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
                 } else {
                     // WPA3-Enterprise
