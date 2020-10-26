@@ -352,9 +352,6 @@ interface INetworkManagementService
 
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
-    void setDefaultNetId(int netId);
-    void clearDefaultNetId();
-
     /**
      * Set permission for a network.
      * @param permission PERMISSION_NONE to clear permissions.
