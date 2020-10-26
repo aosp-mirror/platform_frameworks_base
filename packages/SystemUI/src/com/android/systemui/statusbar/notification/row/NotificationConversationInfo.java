@@ -247,7 +247,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mShortcutManager = shortcutManager;
-        mShortcutInfo = entry.getRanking().getShortcutInfo();
+        mShortcutInfo = entry.getRanking().getConversationShortcutInfo();
         if (mShortcutInfo == null) {
             throw new IllegalArgumentException("Does not have required information");
         }

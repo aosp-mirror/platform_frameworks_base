@@ -403,7 +403,7 @@ class Bubble implements BubbleViewProvider {
         mInstanceId = entry.getStatusBarNotification().getInstanceId();
         mFlyoutMessage = extractFlyoutMessage(entry);
         if (entry.getRanking() != null) {
-            mShortcutInfo = entry.getRanking().getShortcutInfo();
+            mShortcutInfo = entry.getRanking().getConversationShortcutInfo();
             mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
             if (entry.getRanking().getChannel() != null) {
                 mIsImportantConversation =

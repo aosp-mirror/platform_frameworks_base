@@ -1885,7 +1885,7 @@ public abstract class NotificationListenerService extends Service {
          * <p>This might be null even if the notification is a conversation notification, if
          * the posting app hasn't opted into the full conversation feature set yet.</p>
          */
-        public @Nullable ShortcutInfo getShortcutInfo() {
+        public @Nullable ShortcutInfo getConversationShortcutInfo() {
             return mShortcutInfo;
         }
 

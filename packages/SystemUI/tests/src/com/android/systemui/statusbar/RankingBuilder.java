@@ -83,7 +83,7 @@ public class RankingBuilder {
         mCanBubble = ranking.canBubble();
         mIsVisuallyInterruptive = ranking.visuallyInterruptive();
         mIsConversation = ranking.isConversation();
-        mShortcutInfo = ranking.getShortcutInfo();
+        mShortcutInfo = ranking.getConversationShortcutInfo();
         mRankingAdjustment = ranking.getRankingAdjustment();
         mIsBubble = ranking.isBubble();
     }
