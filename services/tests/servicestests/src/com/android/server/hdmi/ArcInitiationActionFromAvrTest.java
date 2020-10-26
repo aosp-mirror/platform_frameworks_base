@@ -123,7 +123,7 @@ public class ArcInitiationActionFromAvrTest {
         hdmiControlService.setCecController(hdmiCecController);
         hdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(hdmiControlService));
         hdmiControlService.setMessageValidator(new HdmiCecMessageValidator(hdmiControlService));
-        hdmiControlService.initPortInfo();
+        hdmiControlService.initService();
         mAction = new ArcInitiationActionFromAvr(mHdmiCecLocalDeviceAudioSystem);
 
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
