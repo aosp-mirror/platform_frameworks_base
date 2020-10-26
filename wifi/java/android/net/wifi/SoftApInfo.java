@@ -20,11 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.Objects;
 
@@ -141,7 +141,7 @@ public final class SoftApInfo implements Parcelable {
      */
     @Nullable
     public MacAddress getBssid() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return mBssid;
@@ -180,7 +180,7 @@ public final class SoftApInfo implements Parcelable {
      * @return valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
      */
     public @WifiAnnotations.WifiStandard int getWifiStandard() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return mWifiStandard;

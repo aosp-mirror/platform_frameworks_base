@@ -16,13 +16,14 @@
 
 package android.net.wifi;
 
-import android.net.MacAddress;
-import android.net.wifi.util.SdkLevelUtil;
-import android.os.Parcel;
-
 import static org.junit.Assert.assertEquals;
 
+import android.net.MacAddress;
+import android.os.Parcel;
+
 import androidx.test.filters.SmallTest;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.Test;
 
@@ -84,7 +85,7 @@ public class SoftApInfoTest {
         SoftApInfo info = new SoftApInfo();
         assertEquals(info.getFrequency(), 0);
         assertEquals(info.getBandwidth(), SoftApInfo.CHANNEL_WIDTH_INVALID);
-        if (SdkLevelUtil.isAtLeastS()) {
+        if (SdkLevel.isAtLeastS()) {
             assertEquals(info.getBssid(), null);
             assertEquals(info.getWifiStandard(), ScanResult.WIFI_STANDARD_UNKNOWN);
         }
