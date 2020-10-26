@@ -2921,13 +2921,27 @@ class Task extends WindowContainer<WindowContainer> {
 
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
-        final float aspect = ((float) parentHeight) / parentWidth;
+        float aspect = Math.max(parentWidth, parentHeight)
+                / (float) Math.min(parentWidth, parentHeight);
+
+        // Adjust the Task letterbox bounds to fit the app request aspect ratio in order to use the
+        // extra available space.
+        if (refActivity != null) {
+            final float maxAspectRatio = refActivity.info.maxAspectRatio;
+            final float minAspectRatio = refActivity.info.minAspectRatio;
+            if (aspect > maxAspectRatio && maxAspectRatio != 0) {
+                aspect = maxAspectRatio;
+            } else if (aspect < minAspectRatio) {
+                aspect = minAspectRatio;
+            }
+        }
+
         if (forcedOrientation == ORIENTATION_LANDSCAPE) {
-            final int height = (int) (parentWidth / aspect);
+            final int height = (int) Math.rint(parentWidth / aspect);
             final int top = parentBounds.centerY() - height / 2;
             outBounds.set(parentBounds.left, top, parentBounds.right, top + height);
         } else {
-            final int width = (int) (parentHeight * aspect);
+            final int width = (int) Math.rint(parentHeight / aspect);
             final int left = parentBounds.centerX() - width / 2;
             outBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
         }
