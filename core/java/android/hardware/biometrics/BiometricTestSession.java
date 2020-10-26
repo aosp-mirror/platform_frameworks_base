@@ -46,7 +46,7 @@ public class BiometricTestSession implements AutoCloseable {
         mContext = context;
         mTestSession = testSession;
         mTestedUsers = new ArraySet<>();
-        enableTestHal(true);
+        setTestHalEnabled(true);
     }
 
     /**
@@ -56,12 +56,12 @@ public class BiometricTestSession implements AutoCloseable {
      * secure pathways such as HAT/Keystore are not testable, since they depend on the TEE or its
      * equivalent for the secret key.
      *
-     * @param enableTestHal If true, enable testing with a fake HAL instead of the real HAL.
+     * @param enabled If true, enable testing with a fake HAL instead of the real HAL.
      */
     @RequiresPermission(TEST_BIOMETRIC)
-    private void enableTestHal(boolean enableTestHal) {
+    private void setTestHalEnabled(boolean enabled) {
         try {
-            mTestSession.enableTestHal(enableTestHal);
+            mTestSession.setTestHalEnabled(enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -178,10 +178,12 @@ public class BiometricTestSession implements AutoCloseable {
     @Override
     @RequiresPermission(TEST_BIOMETRIC)
     public void close() {
+        // Disable the test HAL first, so that enumerate is run on the real HAL, which should have
+        // no enrollments. Test-only framework enrollments will be deleted.
+        setTestHalEnabled(false);
+
         for (int user : mTestedUsers) {
             cleanupInternalState(user);
         }
-
-        enableTestHal(false);
     }
 }

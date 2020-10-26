@@ -66,3 +66,36 @@ message PerformanceStatsProto {
     // Total number of permanent lockouts.
     optional int32 permanent_lockout = 5;
 }
+
+// Internal FingerprintService states. The above messages (FingerprintServiceDumpProto, etc)
+// are used for legacy metrics and should not be modified.
+message FingerprintServiceStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated SensorStateProto sensor_states = 1;
+}
+
+// State of a single sensor.
+message SensorStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Unique sensorId
+    optional int32 sensor_id = 1;
+
+    // State of the sensor's scheduler. True if currently handling an operation, false if idle.
+    optional bool is_busy = 2;
+
+    // User states for this sensor.
+    repeated UserStateProto user_states = 3;
+}
+
+// State of a specific user for a specific sensor.
+message UserStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Android user ID
+    optional int32 user_id = 1;
+
+    // Number of fingerprints enrolled
+    optional int32 num_enrolled = 2;
+}

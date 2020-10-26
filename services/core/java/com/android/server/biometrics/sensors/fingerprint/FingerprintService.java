@@ -52,11 +52,10 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.internal.R;
@@ -92,55 +91,6 @@ public class FingerprintService extends SystemService {
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull private List<ServiceProvider> mServiceProviders;
-    @NonNull private final ArrayMap<Integer, TestSession> mTestSessions;
-
-    private final class TestSession extends ITestSession.Stub {
-        private final int mSensorId;
-
-        TestSession(int sensorId) {
-            mSensorId = sensorId;
-        }
-
-        @Override
-        public void enableTestHal(boolean enableTestHal) {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void startEnroll(int userId) {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void finishEnroll(int userId) {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void acceptAuthentication(int userId)  {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void rejectAuthentication(int userId)  {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void notifyAcquired(int userId, int acquireInfo)  {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void notifyError(int userId, int errorCode)  {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-
-        @Override
-        public void cleanupInternalState(int userId)  {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
-        }
-    }
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
@@ -150,20 +100,22 @@ public class FingerprintService extends SystemService {
         public ITestSession createTestSession(int sensorId, String opPackageName) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
-            final TestSession session;
-            synchronized (mTestSessions) {
-                if (!mTestSessions.containsKey(sensorId)) {
-                    mTestSessions.put(sensorId, new TestSession(sensorId));
+            for (ServiceProvider provider : mServiceProviders) {
+                if (provider.containsSensor(sensorId)) {
+                    return provider.createTestSession(sensorId, opPackageName);
                 }
-                session = mTestSessions.get(sensorId);
             }
-            return session;
+
+            return null;
         }
 
         @Override // Binder call
         public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(
                 String opPackageName) {
-            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (getContext().checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+            }
 
             final List<FingerprintSensorPropertiesInternal> properties =
                     FingerprintService.this.getSensorProperties();
@@ -424,12 +376,28 @@ public class FingerprintService extends SystemService {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                for (ServiceProvider provider : mServiceProviders) {
-                    for (FingerprintSensorPropertiesInternal props :
-                            provider.getSensorProperties()) {
-                        if (args.length > 0 && "--proto".equals(args[0])) {
-                            provider.dumpProto(props.sensorId, fd);
-                        } else {
+                if (args.length > 1 && "--proto".equals(args[0]) && "--state".equals(args[1])) {
+                    final ProtoOutputStream proto = new ProtoOutputStream(fd);
+                    for (ServiceProvider provider : mServiceProviders) {
+                        for (FingerprintSensorPropertiesInternal props
+                                : provider.getSensorProperties()) {
+                            provider.dumpProtoState(props.sensorId, proto);
+                        }
+                    }
+                    proto.flush();
+                } else if (args.length > 0 && "--proto".equals(args[0])) {
+                    for (ServiceProvider provider : mServiceProviders) {
+                        for (FingerprintSensorPropertiesInternal props
+                                : provider.getSensorProperties()) {
+                            provider.dumpProtoMetrics(props.sensorId, fd);
+                        }
+                    }
+                } else {
+                    for (ServiceProvider provider : mServiceProviders) {
+                        for (FingerprintSensorPropertiesInternal props
+                                : provider.getSensorProperties()) {
+                            pw.println("Dumping for sensorId: " + props.sensorId
+                                    + ", provider: " + provider.getClass().getSimpleName());
                             provider.dumpInternal(props.sensorId, pw);
                         }
                     }
@@ -622,7 +590,6 @@ public class FingerprintService extends SystemService {
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
-        mTestSessions = new ArrayMap<>();
 
         initializeAidlHals();
     }
@@ -648,7 +615,7 @@ public class FingerprintService extends SystemService {
                 try {
                     final SensorProps[] props = fp.getSensorProps();
                     final FingerprintProvider provider =
-                            new FingerprintProvider(getContext(), props, fqName,
+                            new FingerprintProvider(getContext(), props, instance,
                                     mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
                     mServiceProviders.add(provider);
                 } catch (RemoteException e) {

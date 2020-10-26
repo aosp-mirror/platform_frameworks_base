@@ -19,11 +19,13 @@ package com.android.server.biometrics.sensors.fingerprint;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -110,7 +112,11 @@ public interface ServiceProvider {
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
-    void dumpProto(int sensorId, @NonNull FileDescriptor fd);
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto);
+
+    void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
 
     void dumpInternal(int sensorId, @NonNull PrintWriter pw);
+
+    @NonNull ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
 }
