@@ -5264,14 +5264,12 @@ class Task extends WindowContainer<WindowContainer> {
             taskDisplayArea.moveHomeStackToFront(reason + " returnToHome");
         }
 
-        if (isRootTask()) {
-            taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */,
-                    reason);
-        }
+        final Task lastFocusedTask = isRootTask() ? taskDisplayArea.getFocusedStack() : null;
         if (task == null) {
             task = this;
         }
         task.getParent().positionChildAt(POSITION_TOP, task, true /* includingParents */);
+        taskDisplayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
     }
 
     /**
@@ -5294,8 +5292,9 @@ class Task extends WindowContainer<WindowContainer> {
             if (parentTask != null) {
                 parentTask.moveToBack(reason, this);
             } else {
-                displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/,
-                        reason);
+                final Task lastFocusedTask = displayArea.getFocusedStack();
+                displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/);
+                displayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
@@ -6822,13 +6821,10 @@ class Task extends WindowContainer<WindowContainer> {
             // get calculated incorrectly.
             mDisplayContent.deferUpdateImeTarget();
 
-            // Shift all activities with this task up to the top
-            // of the stack, keeping them in the same internal order.
-            positionChildAtTop(tr);
-
             // Don't refocus if invisible to current user
             final ActivityRecord top = tr.getTopNonFinishingActivity();
             if (top == null || !top.okToShowLocked()) {
+                positionChildAtTop(tr);
                 if (top != null) {
                     mStackSupervisor.mRecentTasks.add(top.getTask());
                 }
@@ -6836,20 +6832,15 @@ class Task extends WindowContainer<WindowContainer> {
                 return;
             }
 
-            // Set focus to the top running activity of this stack.
-            final ActivityRecord r = topRunningActivity();
-            if (r != null) {
-                r.moveFocusableActivityToTop(reason);
-            }
+            // Set focus to the top running activity of this task and move all its parents to top.
+            top.moveFocusableActivityToTop(reason);
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
                 mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_NONE,
                         false /* alwaysKeepCurrent */);
                 mDisplayContent.prepareAppTransition(TRANSIT_NONE);
-                if (r != null) {
-                    mStackSupervisor.mNoAnimActivities.add(r);
-                }
+                mStackSupervisor.mNoAnimActivities.add(top);
                 ActivityOptions.abort(options);
             } else {
                 updateTransitLocked(TRANSIT_OLD_TASK_TO_FRONT, TRANSIT_TO_FRONT,

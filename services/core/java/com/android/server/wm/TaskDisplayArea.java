@@ -334,29 +334,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return true;
     }
 
-    void positionChildAt(int position, Task child, boolean includingParents,
-            String updateLastFocusedTaskReason) {
-        final Task prevFocusedTask = updateLastFocusedTaskReason != null ? getFocusedStack() : null;
-
-        positionChildAt(position, child, includingParents);
-
-        if (updateLastFocusedTaskReason == null) {
-            return;
-        }
-
-        final Task currentFocusedStack = getFocusedStack();
-        if (currentFocusedStack == prevFocusedTask) {
-            return;
-        }
-
-        mLastFocusedStack = prevFocusedTask;
-        EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser,
-                mDisplayContent.mDisplayId,
-                currentFocusedStack == null ? -1 : currentFocusedStack.getRootTaskId(),
-                mLastFocusedStack == null ? -1 : mLastFocusedStack.getRootTaskId(),
-                updateLastFocusedTaskReason);
-    }
-
     @Override
     void positionChildAt(int position, Task child, boolean includingParents) {
         final boolean moveToTop = position >= getChildCount() - 1;
@@ -1187,6 +1164,24 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
     Task getLastFocusedStack() {
         return mLastFocusedStack;
+    }
+
+    void updateLastFocusedRootTask(Task prevFocusedTask, String updateLastFocusedTaskReason) {
+        if (updateLastFocusedTaskReason == null) {
+            return;
+        }
+
+        final Task currentFocusedTask = getFocusedStack();
+        if (currentFocusedTask == prevFocusedTask) {
+            return;
+        }
+
+        mLastFocusedStack = prevFocusedTask;
+        EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser,
+                mDisplayContent.mDisplayId,
+                currentFocusedTask == null ? -1 : currentFocusedTask.getRootTaskId(),
+                mLastFocusedStack == null ? -1 : mLastFocusedStack.getRootTaskId(),
+                updateLastFocusedTaskReason);
     }
 
     boolean allResumedActivitiesComplete() {
