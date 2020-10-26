@@ -60,7 +60,6 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.wm.shell.R;
@@ -551,8 +550,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         return null;
     }
 
-    @VisibleForTesting
-    void enterPipWithAlphaAnimation(Rect destinationBounds, long durationMs) {
+    private void enterPipWithAlphaAnimation(Rect destinationBounds, long durationMs) {
         // If we are fading the PIP in, then we should move the pip to the final location as
         // soon as possible, but set the alpha immediately since the transaction can take a
         // while to process
