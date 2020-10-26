@@ -1130,7 +1130,7 @@ public class GestureLauncherServiceTest {
     private void withEmergencyGestureEnabledSettingValue(boolean enable) {
         Settings.Secure.putIntForUser(
                 mContentResolver,
-                Settings.Secure.PANIC_GESTURE_ENABLED,
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED,
                 enable ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
