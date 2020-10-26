@@ -83,6 +83,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
+import com.android.net.module.util.PermissionUtils;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.net.BaseNetworkObserver;
@@ -1781,7 +1782,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public void noteNetworkInterfaceForTransports(final String iface, int[] transportTypes) {
-        enforceCallingPermission();
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         synchronized (mLock) {
             mHandler.post(() -> {
                 mStats.noteNetworkInterfaceForTransports(iface, transportTypes);

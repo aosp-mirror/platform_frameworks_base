@@ -208,6 +208,10 @@ package android.net {
 
 package android.os {
 
+  public final class BatteryStatsManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
+  }
+
   public class Binder implements android.os.IBinder {
     method public final void markVintfStability();
   }
