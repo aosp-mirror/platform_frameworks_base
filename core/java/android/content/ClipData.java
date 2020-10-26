@@ -651,45 +651,57 @@ public class ClipData implements Parcelable {
             StringBuilder b = new StringBuilder(128);
 
             b.append("ClipData.Item { ");
-            toShortString(b);
+            toShortString(b, true);
             b.append(" }");
 
             return b.toString();
         }
 
-        /** @hide */
-        public void toShortString(StringBuilder b) {
+        /**
+         * Appends this item to the given builder.
+         * @param redactContent If true, redacts common forms of PII; otherwise appends full
+         *                      details.
+         * @hide
+         */
+        public void toShortString(StringBuilder b, boolean redactContent) {
+            boolean first = true;
             if (mHtmlText != null) {
-                b.append("H:");
-                b.append(mHtmlText);
-            } else if (mText != null) {
-                b.append("T:");
-                b.append(mText);
-            } else if (mUri != null) {
-                b.append("U:");
-                b.append(mUri);
-            } else if (mIntent != null) {
-                b.append("I:");
-                mIntent.toShortString(b, true, true, true, true);
-            } else {
-                b.append("NULL");
+                first = false;
+                if (redactContent) {
+                    b.append("H(").append(mHtmlText.length()).append(')');
+                } else {
+                    b.append("H:").append(mHtmlText);
+                }
             }
-        }
-
-        /** @hide */
-        public void toShortSummaryString(StringBuilder b) {
-            if (mHtmlText != null) {
-                b.append("HTML");
-            } else if (mText != null) {
-                b.append("TEXT");
-            } else if (mUri != null) {
-                b.append("U:");
-                b.append(mUri);
-            } else if (mIntent != null) {
+            if (mText != null) {
+                if (!first) {
+                    b.append(' ');
+                }
+                first = false;
+                if (redactContent) {
+                    b.append("T(").append(mText.length()).append(')');
+                } else {
+                    b.append("T:").append(mText);
+                }
+            }
+            if (mUri != null) {
+                if (!first) {
+                    b.append(' ');
+                }
+                first = false;
+                if (redactContent) {
+                    b.append("U(").append(mUri.getScheme()).append(')');
+                } else {
+                    b.append("U:").append(mUri);
+                }
+            }
+            if (mIntent != null) {
+                if (!first) {
+                    b.append(' ');
+                }
+                first = false;
                 b.append("I:");
-                mIntent.toShortString(b, true, true, true, true);
-            } else {
-                b.append("NULL");
+                mIntent.toShortString(b, redactContent, true, true, true);
             }
         }
 
@@ -1040,17 +1052,21 @@ public class ClipData implements Parcelable {
         StringBuilder b = new StringBuilder(128);
 
         b.append("ClipData { ");
-        toShortString(b);
+        toShortString(b, true);
         b.append(" }");
 
         return b.toString();
     }
 
-    /** @hide */
-    public void toShortString(StringBuilder b) {
+    /**
+     * Appends this clip to the given builder.
+     * @param redactContent If true, redacts common forms of PII; otherwise appends full details.
+     * @hide
+     */
+    public void toShortString(StringBuilder b, boolean redactContent) {
         boolean first;
         if (mClipDescription != null) {
-            first = !mClipDescription.toShortString(b);
+            first = !mClipDescription.toShortString(b, redactContent);
         } else {
             first = true;
         }
@@ -1064,26 +1080,21 @@ public class ClipData implements Parcelable {
             b.append('x');
             b.append(mIcon.getHeight());
         }
-        for (int i=0; i<mItems.size(); i++) {
+        if (mItems.size() != 1) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append(mItems.size()).append(" items:");
+        }
+        for (int i = 0; i < mItems.size(); i++) {
             if (!first) {
                 b.append(' ');
             }
             first = false;
             b.append('{');
-            mItems.get(i).toShortString(b);
+            mItems.get(i).toShortString(b, redactContent);
             b.append('}');
-        }
-    }
-
-    /** @hide */
-    public void toShortStringShortItems(StringBuilder b, boolean first) {
-        if (mItems.size() > 0) {
-            if (!first) {
-                b.append(' ');
-            }
-            for (int i=0; i<mItems.size(); i++) {
-                b.append("{...}");
-            }
         }
     }
 
