@@ -1980,7 +1980,7 @@ public class CameraDeviceImpl extends CameraDevice
                 // Either send a partial result or the final capture completed result
                 if (isPartialResult) {
                     final CaptureResult resultAsCapture =
-                            new CaptureResult(result, request, resultExtras);
+                            new CaptureResult(getId(), result, request, resultExtras);
                     // Partial result
                     resultDispatch = new Runnable() {
                         @Override
@@ -1992,7 +1992,7 @@ public class CameraDeviceImpl extends CameraDevice
                                     for (int i = 0; i < holder.getRequestCount(); i++) {
                                         CameraMetadataNative resultLocal =
                                                 new CameraMetadataNative(resultCopy);
-                                        CaptureResult resultInBatch = new CaptureResult(
+                                        CaptureResult resultInBatch = new CaptureResult(getId(),
                                                 resultLocal, holder.getRequest(i), resultExtras);
 
                                         holder.getCallback().onCaptureProgressed(
@@ -2019,8 +2019,8 @@ public class CameraDeviceImpl extends CameraDevice
                     final Range<Integer> fpsRange =
                             request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
                     final int subsequenceId = resultExtras.getSubsequenceId();
-                    final TotalCaptureResult resultAsCapture = new TotalCaptureResult(result,
-                            request, resultExtras, partialResults, holder.getSessionId(),
+                    final TotalCaptureResult resultAsCapture = new TotalCaptureResult(getId(),
+                            result, request, resultExtras, partialResults, holder.getSessionId(),
                             physicalResults);
                     // Final capture result
                     resultDispatch = new Runnable() {
@@ -2038,9 +2038,9 @@ public class CameraDeviceImpl extends CameraDevice
                                                 new CameraMetadataNative(resultCopy);
                                         // No logical multi-camera support for batched output mode.
                                         TotalCaptureResult resultInBatch = new TotalCaptureResult(
-                                            resultLocal, holder.getRequest(i), resultExtras,
-                                            partialResults, holder.getSessionId(),
-                                            new PhysicalCaptureResultInfo[0]);
+                                                getId(), resultLocal, holder.getRequest(i),
+                                                resultExtras, partialResults, holder.getSessionId(),
+                                                new PhysicalCaptureResultInfo[0]);
 
                                         holder.getCallback().onCaptureCompleted(
                                             CameraDeviceImpl.this,
