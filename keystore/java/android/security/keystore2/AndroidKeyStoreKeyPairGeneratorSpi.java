@@ -18,6 +18,8 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.keymint.KeyParameter;
+import android.hardware.keymint.SecurityLevel;
 import android.os.Build;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
@@ -35,9 +37,7 @@ import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyMetadata;
-import android.system.keystore2.KeyParameter;
 import android.system.keystore2.ResponseCode;
-import android.system.keystore2.SecurityLevel;
 import android.util.Log;
 
 import libcore.util.EmptyArray;

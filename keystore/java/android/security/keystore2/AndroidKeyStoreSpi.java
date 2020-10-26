@@ -18,6 +18,9 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.keymint.HardwareAuthenticatorType;
+import android.hardware.keymint.KeyParameter;
+import android.hardware.keymint.SecurityLevel;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
@@ -36,9 +39,7 @@ import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyEntryResponse;
 import android.system.keystore2.KeyMetadata;
-import android.system.keystore2.KeyParameter;
 import android.system.keystore2.ResponseCode;
-import android.system.keystore2.SecurityLevel;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -871,16 +872,13 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         List<AuthenticatorSpec> authenticatorSpecs = new ArrayList<>();
 
         AuthenticatorSpec authenticatorSpec = new AuthenticatorSpec();
-        // TODO Replace with HardwareAuthenticatorType.PASSWORD when KeyMint AIDL spec has landed.
-        authenticatorSpec.authenticatorType = 1; // HardwareAuthenticatorType.PASSWORD
+        authenticatorSpec.authenticatorType = HardwareAuthenticatorType.PASSWORD;
         authenticatorSpec.authenticatorId = GateKeeper.getSecureUserId();
         authenticatorSpecs.add(authenticatorSpec);
 
         for (long sid : biometricSids) {
             AuthenticatorSpec authSpec = new AuthenticatorSpec();
-            // TODO Replace with HardwareAuthenticatorType.FINGERPRINT when KeyMint AIDL spec has
-            //      landed.
-            authSpec.authenticatorType = 2; // HardwareAuthenticatorType.FINGERPRINT
+            authSpec.authenticatorType = HardwareAuthenticatorType.FINGERPRINT;
             authSpec.authenticatorId = sid;
             authenticatorSpecs.add(authSpec);
         }
