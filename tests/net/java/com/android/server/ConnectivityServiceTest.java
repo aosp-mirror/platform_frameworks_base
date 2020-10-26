@@ -6141,6 +6141,7 @@ public class ConnectivityServiceTest {
         verify(mMockNetd, times(1)).networkCreatePhysical(eq(cellNetId), anyInt());
         assertRoutesAdded(cellNetId, ipv6Subnet, defaultRoute);
         verify(mMockDnsResolver, times(1)).createNetworkCache(eq(cellNetId));
+        verify(mMockNetd, times(1)).networkAddInterface(cellNetId, MOBILE_IFNAME);
         verify(mBatteryStatsService).noteNetworkInterfaceType(cellLp.getInterfaceName(),
                 TYPE_MOBILE);
 
@@ -6197,7 +6198,7 @@ public class ConnectivityServiceTest {
                 .getStackedLinks();
         assertEquals(makeClatLinkProperties(myIpv4), stackedLps.get(0));
         assertRoutesAdded(cellNetId, stackedDefault);
-
+        verify(mMockNetd, times(1)).networkAddInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
         // Change trivial linkproperties and see if stacked link is preserved.
         cellLp.addDnsServer(InetAddress.getByName("8.8.8.8"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
@@ -6228,6 +6229,7 @@ public class ConnectivityServiceTest {
                 (lp) -> lp.getStackedLinks().size() == 0);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
         assertRoutesRemoved(cellNetId, stackedDefault);
+        verify(mMockNetd, times(1)).networkRemoveInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
 
         verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME, kOtherNat64Prefix.toString());
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
@@ -6236,6 +6238,7 @@ public class ConnectivityServiceTest {
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 1);
         assertRoutesAdded(cellNetId, stackedDefault);
+        verify(mMockNetd, times(1)).networkAddInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
         reset(mMockNetd);
 
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
@@ -6260,7 +6263,7 @@ public class ConnectivityServiceTest {
         // The interface removed callback happens but has no effect after stop is called.
         clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
         networkCallback.assertNoCallback();
-
+        verify(mMockNetd, times(1)).networkRemoveInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
         reset(mNetworkManagementService);
@@ -6293,6 +6296,7 @@ public class ConnectivityServiceTest {
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 1 && lp.getNat64Prefix() != null);
         assertRoutesAdded(cellNetId, stackedDefault);
+        verify(mMockNetd, times(1)).networkAddInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
 
         // NAT64 prefix is removed. Expect that clat is stopped.
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
@@ -6305,8 +6309,8 @@ public class ConnectivityServiceTest {
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 0);
+        verify(mMockNetd, times(1)).networkRemoveInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
         verifyNoMoreInteractions(mMockNetd);
-
         // Clean up.
         mCellNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
