@@ -42,11 +42,6 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_REQ
 import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_READY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.CLIENTS;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ELAPSED_REALTIME_NANOS;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.INPUT_METHOD_MANAGER_SERVICE;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.INPUT_METHOD_SERVICE;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorTraceFileProto.ENTRY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -97,7 +92,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.LocaleList;
@@ -145,6 +139,8 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -733,8 +729,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
     private final String mSlotIme;
-
-    private HandlerThread mTracingThread;
 
     /**
      * Registered {@link InputMethodListListener}.
@@ -1707,9 +1701,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
-
-        mTracingThread = new HandlerThread("android.tracing", Process.THREAD_PRIORITY_FOREGROUND);
-        mTracingThread.start();
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -4019,58 +4010,33 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @Override
     @GuardedBy("mMethodMap")
-    public void startProtoDump(byte[] clientProtoDump) {
-        mTracingThread.getThreadHandler().post(() -> {
-            if (!ImeTracing.getInstance().isAvailable() || !ImeTracing.getInstance().isEnabled()) {
+    public void startProtoDump(byte[] protoDump, int source, String where) {
+        if (protoDump == null) {
+            // Dump not triggered from IMMS, but no proto information provided.
+            return;
+        }
+        ImeTracing tracingInstance = ImeTracing.getInstance();
+        if (!tracingInstance.isAvailable() || !tracingInstance.isEnabled()) {
+            return;
+        }
+
+        ProtoOutputStream proto = new ProtoOutputStream();
+        switch (source) {
+            case ImeTracing.IME_TRACING_FROM_CLIENT:
+                final long client_token = proto.start(InputMethodClientsTraceFileProto.ENTRY);
+                proto.write(InputMethodClientsTraceProto.ELAPSED_REALTIME_NANOS,
+                        SystemClock.elapsedRealtimeNanos());
+                proto.write(InputMethodClientsTraceProto.WHERE, where);
+                proto.write(InputMethodClientsTraceProto.CLIENTS, protoDump);
+                proto.end(client_token);
+                break;
+            case ImeTracing.IME_TRACING_FROM_IMS:
+                // TODO (b/154348613)
+            default:
+                // Dump triggered by a source not recognised.
                 return;
-            }
-            if (clientProtoDump == null && mCurClient == null) {
-                return;
-            }
-
-            ProtoOutputStream proto = new ProtoOutputStream();
-            final long token = proto.start(ENTRY);
-            proto.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
-            dumpDebug(proto, INPUT_METHOD_MANAGER_SERVICE);
-
-            IBinder service = null;
-            synchronized (mMethodMap) {
-                if (mCurMethod != null) {
-                    service = mCurMethod.asBinder();
-                }
-            }
-
-            if (service != null) {
-                try {
-                    proto.write(INPUT_METHOD_SERVICE,
-                            TransferPipe.dumpAsync(service, ImeTracing.PROTO_ARG));
-                } catch (IOException | RemoteException e) {
-                    Log.e(TAG, "Exception while collecting ime process dump", e);
-                }
-            }
-
-            if (clientProtoDump != null) {
-                proto.write(CLIENTS, clientProtoDump);
-            } else {
-                IBinder client = null;
-                synchronized (mMethodMap) {
-                    if (mCurClient != null && mCurClient.client != null) {
-                        client = mCurClient.client.asBinder();
-                    }
-                }
-
-                if (client != null) {
-                    try {
-                        proto.write(CLIENTS,
-                                TransferPipe.dumpAsync(client, ImeTracing.PROTO_ARG));
-                    } catch (IOException | RemoteException e) {
-                        Log.e(TAG, "Exception while collecting client side ime dump", e);
-                    }
-                }
-            }
-            proto.end(token);
-            ImeTracing.getInstance().addToBuffer(proto);
-        });
+        }
+        tracingInstance.addToBuffer(proto, source);
     }
 
     @BinderThread

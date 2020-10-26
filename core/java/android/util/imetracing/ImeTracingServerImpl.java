@@ -17,11 +17,11 @@
 package android.util.imetracing;
 
 import static android.os.Build.IS_USER;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorTraceFileProto.MAGIC_NUMBER;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorTraceFileProto.MAGIC_NUMBER_H;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorTraceFileProto.MAGIC_NUMBER_L;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto.MAGIC_NUMBER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto.MAGIC_NUMBER_H;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto.MAGIC_NUMBER_L;
 
-import android.os.RemoteException;
+import android.inputmethodservice.InputMethodService;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
 import android.util.Log;
@@ -38,20 +38,23 @@ import java.io.PrintWriter;
  * @hide
  */
 class ImeTracingServerImpl extends ImeTracing {
-    private static final String TRACE_FILENAME = "/data/misc/wmtrace/ime_trace.pb";
+    private static final String TRACE_DIRNAME = "/data/misc/wmtrace/";
+    private static final String TRACE_FILENAME_CLIENTS = "ime_trace_clients.pb";
     private static final int BUFFER_CAPACITY = 4096 * 1024;
 
     // Needed for winscope to auto-detect the dump type. Explained further in
-    // core.proto.android.view.inputmethod.inputmethodeditortrace.proto
-    private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
+    // core.proto.android.view.inputmethod.inputmethodeditortrace.proto. This magic number
+    // corresponds to InputMethodClientsTraceFileProto.
+    private static final long MAGIC_NUMBER_CLIENTS_VALUE =
+            ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
-    private final TraceBuffer mBuffer;
-    private final File mTraceFile;
+    private final TraceBuffer mBufferClients;
+    private final File mTraceFileClients;
     private final Object mEnabledLock = new Object();
 
     ImeTracingServerImpl() throws ServiceNotFoundException {
-        mBuffer = new TraceBuffer<>(BUFFER_CAPACITY);
-        mTraceFile = new File(TRACE_FILENAME);
+        mBufferClients = new TraceBuffer<>(BUFFER_CAPACITY);
+        mTraceFileClients = new File(TRACE_DIRNAME + TRACE_FILENAME_CLIENTS);
     }
 
     /**
@@ -60,9 +63,19 @@ class ImeTracingServerImpl extends ImeTracing {
      * @param proto dump to be added to the buffer
      */
     @Override
-    public void addToBuffer(ProtoOutputStream proto) {
+    public void addToBuffer(ProtoOutputStream proto, int source) {
         if (isAvailable() && isEnabled()) {
-            mBuffer.add(proto);
+            switch (source) {
+                case IME_TRACING_FROM_CLIENT:
+                    mBufferClients.add(proto);
+                    return;
+                case IME_TRACING_FROM_IMS:
+                    // TODO (b/154348613)
+                case IME_TRACING_FROM_IMMS:
+                    // TODO (b/154348613)
+                default:
+                    // Source not recognised.
+            }
         }
     }
 
@@ -93,21 +106,25 @@ class ImeTracingServerImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerDump() {
-        if (isAvailable() && isEnabled()) {
-            try {
-                mService.startProtoDump(null);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Exception while triggering proto dump", e);
-            }
-        }
+    public void triggerClientDump(String where) {
+        // Intentionally left empty, this is implemented in ImeTracingClientImpl
     }
 
-    private void writeTraceToFileLocked() {
+    @Override
+    public void triggerServiceDump(String where, InputMethodService service) {
+        // Intentionally left empty, this is implemented in ImeTracingClientImpl
+    }
+
+    @Override
+    public void triggerManagerServiceDump(String where) {
+        // TODO (b/154348613)
+    }
+
+    private void writeTracesToFilesLocked() {
         try {
             ProtoOutputStream proto = new ProtoOutputStream();
-            proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
-            mBuffer.writeTraceToFile(mTraceFile, proto);
+            proto.write(MAGIC_NUMBER, MAGIC_NUMBER_CLIENTS_VALUE);
+            mBufferClients.writeTraceToFile(mTraceFileClients, proto);
         } catch (IOException e) {
             Log.e(TAG, "Unable to write buffer to file", e);
         }
@@ -126,9 +143,9 @@ class ImeTracingServerImpl extends ImeTracing {
                 return;
             }
 
-            pw.println("Starting tracing to " + mTraceFile + ".");
+            pw.println("Starting tracing in " + TRACE_DIRNAME + ": " + TRACE_FILENAME_CLIENTS);
             sEnabled = true;
-            mBuffer.resetBuffer();
+            mBufferClients.resetBuffer();
         }
     }
 
@@ -145,10 +162,11 @@ class ImeTracingServerImpl extends ImeTracing {
                 return;
             }
 
-            pw.println("Stopping tracing and writing traces to " + mTraceFile + ".");
+            pw.println("Stopping tracing and writing traces in " + TRACE_DIRNAME + ": "
+                    + TRACE_FILENAME_CLIENTS);
             sEnabled = false;
-            writeTraceToFileLocked();
-            mBuffer.resetBuffer();
+            writeTracesToFilesLocked();
+            mBufferClients.resetBuffer();
         }
     }
 }

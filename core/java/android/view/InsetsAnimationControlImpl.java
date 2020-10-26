@@ -138,7 +138,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                 new Bounds(mHiddenInsets, mShownInsets));
 
         if ((mTypes & WindowInsets.Type.ime()) != 0) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump("InsetsAnimationControlImpl");
         }
     }
 

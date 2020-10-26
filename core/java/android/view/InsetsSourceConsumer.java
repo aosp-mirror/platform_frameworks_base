@@ -329,7 +329,8 @@ public class InsetsSourceConsumer {
     @VisibleForTesting(visibility = PACKAGE)
     public boolean notifyAnimationFinished() {
         if (mType == ITYPE_IME) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump(
+                    "InsetsSourceConsumer#notifyAnimationFinished");
         }
         if (mPendingFrame != null) {
             InsetsSource source = mState.getSource(mType);

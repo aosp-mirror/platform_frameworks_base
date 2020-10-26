@@ -16,6 +16,7 @@
 
 package android.util.imetracing;
 
+import android.inputmethodservice.InputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
@@ -27,16 +28,12 @@ import android.view.inputmethod.InputMethodManager;
  * @hide
  */
 class ImeTracingClientImpl extends ImeTracing {
-
-    private boolean mDumpInProgress;
-    private final Object mDumpInProgressLock = new Object();
-
     ImeTracingClientImpl() throws ServiceNotFoundException, RemoteException {
         sEnabled = mService.isImeTraceEnabled();
     }
 
     @Override
-    public void addToBuffer(ProtoOutputStream proto) {
+    public void addToBuffer(ProtoOutputStream proto, int source) {
     }
 
     @Override
@@ -45,27 +42,36 @@ class ImeTracingClientImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerDump() {
-        if (isAvailable() && isEnabled()) {
-            boolean doDump = false;
-            synchronized (mDumpInProgressLock) {
-                if (!mDumpInProgress) {
-                    mDumpInProgress = true;
-                    doDump = true;
-                }
-            }
-
-            if (doDump) {
-                try {
-                    ProtoOutputStream proto = new ProtoOutputStream();
-                    InputMethodManager.dumpProto(proto);
-                    mService.startProtoDump(proto.getBytes());
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Exception while sending ime-related client dump to server", e);
-                } finally {
-                    mDumpInProgress = false;
-                }
-            }
+    public void triggerClientDump(String where) {
+        if (!isEnabled() || !isAvailable()) {
+            return;
         }
+
+        synchronized (mDumpInProgressLock) {
+            if (mDumpInProgress) {
+                return;
+            }
+            mDumpInProgress = true;
+        }
+
+        try {
+            ProtoOutputStream proto = new ProtoOutputStream();
+            InputMethodManager.dumpProto(proto);
+            sendToService(proto.getBytes(), IME_TRACING_FROM_CLIENT, where);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while sending ime-related client dump to server", e);
+        } finally {
+            mDumpInProgress = false;
+        }
+    }
+
+    @Override
+    public void triggerServiceDump(String where, InputMethodService service) {
+        // TODO (b/154348613)
+    }
+
+    @Override
+    public void triggerManagerServiceDump(String where) {
+        // Intentionally left empty, this is implemented in ImeTracingServerImpl
     }
 }

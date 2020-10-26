@@ -313,7 +313,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @Override
         public void onReady(WindowInsetsAnimationController controller, int types) {
             if ((types & ime()) != 0) {
-                ImeTracing.getInstance().triggerDump();
+                ImeTracing.getInstance().triggerClientDump(
+                        "InsetsController.InternalAnimationControlListener#onReady");
             }
 
             mController = controller;
@@ -832,7 +833,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             Log.d(TAG, "show(ime(), fromIme=" + fromIme + ")");
         }
         if (fromIme) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump("InsetsController#show");
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
             Trace.asyncTraceBegin(TRACE_TAG_VIEW, "IC.showRequestFromIme", 0);
         } else {
@@ -888,7 +889,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     void hide(@InsetsType int types, boolean fromIme) {
         if (fromIme) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump("InsetsController#hide");
             Trace.asyncTraceBegin(TRACE_TAG_VIEW, "IC.hideRequestFromIme", 0);
         } else {
             Trace.asyncTraceBegin(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
@@ -928,7 +929,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
         if (fromIme) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump(
+                    "InsetsController#controlWindowInsetsAnimation");
         }
 
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
@@ -1335,7 +1337,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @InsetsType int types, boolean animationFinished, @AnimationType int animationType,
             boolean fromIme) {
         if ((types & ime()) != 0) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump("InsetsController#hideDirectly");
         }
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
@@ -1350,7 +1352,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void showDirectly(@InsetsType int types, boolean fromIme) {
         if ((types & ime()) != 0) {
-            ImeTracing.getInstance().triggerDump();
+            ImeTracing.getInstance().triggerClientDump("InsetsController#showDirectly");
         }
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {

@@ -79,8 +79,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.IME_FOCUS_CONTROLLER;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.INSETS_CONTROLLER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
@@ -9222,7 +9222,7 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void showInsets(@InsetsType int types, boolean fromIme) {
             if (fromIme) {
-                ImeTracing.getInstance().triggerDump();
+                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#showInsets");
             }
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -9233,7 +9233,7 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void hideInsets(@InsetsType int types, boolean fromIme) {
             if (fromIme) {
-                ImeTracing.getInstance().triggerDump();
+                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#hideInsets");
             }
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
