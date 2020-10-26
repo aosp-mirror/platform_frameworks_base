@@ -111,6 +111,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runGetIgnoreOrientationRequest(pw);
                 case "dump-visible-window-views":
                     return runDumpVisibleWindowViews(pw);
+                case "set-task-letterbox-aspect-ratio":
+                    return runSetTaskLetterboxAspectRatio(pw);
+                case "get-task-letterbox-aspect-ratio":
+                    return runGetTaskLetterboxAspectRatio(pw);
                 case "reset":
                     return runReset(pw);
                 default:
@@ -509,6 +513,38 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetTaskLetterboxAspectRatio(PrintWriter pw) throws RemoteException {
+        final float aspectRatio;
+        try {
+            String arg = getNextArgRequired();
+            if ("reset".equals(arg)) {
+                mInternal.resetTaskLetterboxAspectRatio();
+                return 0;
+            }
+            aspectRatio = Float.parseFloat(arg);
+        } catch (NumberFormatException  e) {
+            getErrPrintWriter().println("Error: bad aspect ratio format " + e);
+            return -1;
+        } catch (IllegalArgumentException  e) {
+            getErrPrintWriter().println(
+                    "Error: 'reset' or aspect ratio should be provided as an argument " + e);
+            return -1;
+        }
+
+        mInternal.setTaskLetterboxAspectRatio(aspectRatio);
+        return 0;
+    }
+
+    private int runGetTaskLetterboxAspectRatio(PrintWriter pw) throws RemoteException {
+        final float aspectRatio = mInternal.getTaskLetterboxAspectRatio();
+        if (aspectRatio <= WindowManagerService.MIN_TASK_LETTERBOX_ASPECT_RATIO) {
+            pw.println("Letterbox aspect ratio is not set");
+        } else {
+            pw.println("Letterbox aspect ratio is " + aspectRatio);
+        }
+        return 0;
+    }
+
     private int runReset(PrintWriter pw) throws RemoteException {
         int displayId = getDisplayId(getNextArg());
 
@@ -532,6 +568,9 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         // set-ignore-orientation-request
         mInterface.setIgnoreOrientationRequest(displayId, false /* ignoreOrientationRequest */);
+
+        // set-task-letterbox-aspect-ratio
+        mInternal.resetTaskLetterboxAspectRatio();
 
         pw.println("Reset all settings for displayId=" + displayId);
         return 0;
@@ -563,6 +602,12 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
         pw.println("    If app requested orientation should be ignored.");
+        pw.println("  set-task-letterbox-aspect-ratio [reset|aspectRatio]");
+        pw.println("  get-task-letterbox-aspect-ratio");
+        pw.println("    Aspect ratio of task level letterboxing. If aspectRatio <= "
+                + WindowManagerService.MIN_TASK_LETTERBOX_ASPECT_RATIO);
+        pw.println("    both it and R.dimen.config_taskLetterboxAspectRatio will be ignored");
+        pw.println("    and framework implementation will be used to determine aspect ratio.");
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
         if (!IS_USER) {
