@@ -100,10 +100,8 @@ class OpenAppColdTest(
                                 configuration.endRotation)
                             statusBarLayerRotatesScales(Surface.ROTATION_0,
                                 configuration.endRotation)
-                            navBarLayerIsAlwaysVisible(Surface.ROTATION_0 !=
-                                    configuration.endRotation)
-                            statusBarLayerIsAlwaysVisible(Surface.ROTATION_0 !=
-                                    configuration.endRotation)
+                            navBarLayerIsAlwaysVisible(enabled = false)
+                            statusBarLayerIsAlwaysVisible(enabled = false)
 
                             wallpaperLayerBecomesInvisible(testApp)
                         }
