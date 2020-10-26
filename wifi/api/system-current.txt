@@ -246,6 +246,7 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApCapability> CREATOR;
     field public static final long SOFTAP_FEATURE_ACS_OFFLOAD = 1L; // 0x1L
     field public static final long SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 2L; // 0x2L
+    field public static final long SOFTAP_FEATURE_MAC_ADDRESS_CUSTOMIZATION = 8L; // 0x8L
     field public static final long SOFTAP_FEATURE_WPA3_SAE = 4L; // 0x4L
   }
 
