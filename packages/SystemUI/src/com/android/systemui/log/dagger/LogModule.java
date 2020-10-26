@@ -120,6 +120,18 @@ public class LogModule {
         return buffer;
     }
 
+    /** Provides a logging buffer for all logs related to privacy indicators in SystemUI. */
+    @Provides
+    @SysUISingleton
+    @PrivacyLog
+    public static LogBuffer providePrivacyLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer(("PrivacyLog"), 100, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton

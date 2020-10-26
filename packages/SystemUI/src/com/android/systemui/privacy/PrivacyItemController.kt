@@ -32,6 +32,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -48,6 +49,7 @@ class PrivacyItemController @Inject constructor(
     @Background private val bgExecutor: Executor,
     private val deviceConfigProxy: DeviceConfigProxy,
     private val userTracker: UserTracker,
+    private val logger: PrivacyLogger,
     dumpManager: DumpManager
 ) : Dumpable {
 
@@ -158,6 +160,7 @@ class PrivacyItemController @Inject constructor(
             }
             val userId = UserHandle.getUserId(uid)
             if (userId in currentUserIds) {
+                logger.logUpdatedItemFromAppOps(code, uid, packageName, active)
                 update(false)
             }
         }
@@ -194,6 +197,7 @@ class PrivacyItemController @Inject constructor(
         bgExecutor.execute {
             if (updateUsers) {
                 currentUserIds = userTracker.userProfiles.map { it.id }
+                logger.logCurrentProfilesChanged(currentUserIds)
             }
             updateListAndNotifyChanges.run()
         }
@@ -260,6 +264,8 @@ class PrivacyItemController @Inject constructor(
         }
         val list = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
                 .mapNotNull { toPrivacyItem(it) }.distinct()
+        logger.logUpdatedPrivacyItemsList(
+                list.joinToString(separator = ", ", transform = PrivacyItem::toLog))
         privacyList = list
     }
 
