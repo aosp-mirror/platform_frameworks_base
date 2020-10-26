@@ -25843,6 +25843,20 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return ps.getIncrementalStates();
         }
+
+        @Override
+        public void notifyPackageCrashOrAnr(@NonNull String packageName) {
+            final PackageSetting ps;
+            synchronized (mLock) {
+                ps = mSettings.mPackages.get(packageName);
+                if (ps == null) {
+                    Slog.w(TAG, "Failed notifyPackageCrash. Package " + packageName
+                            + " is not installed");
+                    return;
+                }
+            }
+            ps.setStatesOnCrashOrAnr();
+        }
     }
 
 
