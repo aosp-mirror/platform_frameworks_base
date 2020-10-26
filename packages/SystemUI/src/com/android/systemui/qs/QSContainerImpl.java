@@ -205,12 +205,11 @@ public class QSContainerImpl extends FrameLayout {
         mQSPanelContainer.setLayoutParams(layoutParams);
 
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
-        mContentPaddingStart = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_start);
-        int newPaddingEnd = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_end);
-        boolean marginsChanged = newPaddingEnd != mContentPaddingEnd;
-        mContentPaddingEnd = newPaddingEnd;
+        int padding = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_shade_content_margin_horizontal);
+        boolean marginsChanged = padding != mContentPaddingStart || padding != mContentPaddingEnd;
+        mContentPaddingStart = padding;
+        mContentPaddingEnd = padding;
         if (marginsChanged) {
             updatePaddingsAndMargins();
         }
