@@ -104,6 +104,7 @@ import android.util.SparseArray;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
@@ -139,7 +140,7 @@ class PackageManagerShellCommand extends ShellCommand {
     private static final String STDIN_PATH = "-";
     /** Path where ART profiles snapshots are dumped for the shell user */
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
-    private static final int DEFAULT_WAIT_MS = 60 * 1000;
+    private static final int DEFAULT_STAGED_READY_TIMEOUT_MS = 60 * 1000;
     private static final String TAG = "PackageManagerShellCommand";
 
     final IPackageManager mInterface;
@@ -1304,11 +1305,12 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             abandonSession = false;
 
-            if (!params.sessionParams.isStaged || !params.mWaitForStagedSessionReady) {
-                pw.println("Success");
-                return 0;
+            if (params.sessionParams.isStaged && params.stagedReadyTimeoutMs > 0) {
+                return doWaitForStagedSessionRead(sessionId, params.stagedReadyTimeoutMs, pw);
             }
-            return doWaitForStagedSessionRead(sessionId, params.timeoutMs, pw);
+
+            pw.println("Success");
+            return 0;
         } finally {
             if (abandonSession) {
                 try {
@@ -1321,9 +1323,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int doWaitForStagedSessionRead(int sessionId, long timeoutMs, PrintWriter pw)
               throws RemoteException {
-        if (timeoutMs <= 0) {
-            timeoutMs = DEFAULT_WAIT_MS;
-        }
+        Preconditions.checkArgument(timeoutMs > 0);
         PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
                 .getSessionInfo(sessionId);
         if (si == null) {
@@ -1373,25 +1373,14 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runInstallCommit() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         String opt;
-        boolean waitForStagedSessionReady = true;
-        long timeoutMs = -1;
+        long stagedReadyTimeoutMs = DEFAULT_STAGED_READY_TIMEOUT_MS;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
-                case "--wait-for-staged-ready":
-                    waitForStagedSessionReady = true;
-                    // If there is only one remaining argument, then it represents the sessionId, we
-                    // shouldn't try to parse it as timeoutMs.
-                    if (getRemainingArgsCount() > 1) {
-                        try {
-                            timeoutMs = Long.parseLong(peekNextArg());
-                            getNextArg();
-                        } catch (NumberFormatException ignore) {
-                        }
-                    }
+                case "--staged-ready-timeout":
+                    stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
                     break;
-                case "--no-wait":
-                    waitForStagedSessionReady = false;
-                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown option: " + opt);
             }
         }
         final int sessionId = Integer.parseInt(getNextArg());
@@ -1400,11 +1389,11 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         final PackageInstaller.SessionInfo si = mInterface.getPackageInstaller()
                 .getSessionInfo(sessionId);
-        if (si == null || !si.isStaged() || !waitForStagedSessionReady) {
-            pw.println("Success");
-            return 0;
+        if (si != null && si.isStaged() && stagedReadyTimeoutMs > 0) {
+            return doWaitForStagedSessionRead(sessionId, stagedReadyTimeoutMs, pw);
         }
-        return doWaitForStagedSessionRead(sessionId, timeoutMs, pw);
+        pw.println("Success");
+        return 0;
     }
 
     private int runInstallCreate() throws RemoteException {
@@ -2738,8 +2727,7 @@ class PackageManagerShellCommand extends ShellCommand {
         SessionParams sessionParams;
         String installerPackageName;
         int userId = UserHandle.USER_ALL;
-        boolean mWaitForStagedSessionReady = true;
-        long timeoutMs = DEFAULT_WAIT_MS;
+        long stagedReadyTimeoutMs = DEFAULT_STAGED_READY_TIMEOUT_MS;
     }
 
     private InstallParams makeInstallParams() {
@@ -2868,16 +2856,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     }
                     sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
                     break;
-                case "--wait-for-staged-ready":
-                    params.mWaitForStagedSessionReady = true;
-                    try {
-                        params.timeoutMs = Long.parseLong(peekNextArg());
-                        getNextArg();
-                    } catch (NumberFormatException ignore) {
-                    }
-                    break;
-                case "--no-wait":
-                    params.mWaitForStagedSessionReady = false;
+                case "--staged-ready-timeout":
+                    params.stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
                     break;
                 case "--skip-verification":
                     sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
@@ -3600,7 +3580,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
         pw.println("       [--enable-rollback]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
-        pw.println("       [--apex] [--wait-for-staged-ready TIMEOUT]");
+        pw.println("       [--apex] [--staged-ready-timeout TIMEOUT]");
         pw.println("       [PATH [SPLIT...]|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as");
         pw.println("    file path(s) or '-' to read from stdin.  Options are:");
@@ -3628,9 +3608,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          3=device setup, 4=user request");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --apex: install an .apex file, not an .apk");
-        pw.println("      --wait-for-staged-ready: when performing staged install, wait TIMEOUT");
-        pw.println("          ms for pre-reboot verification to complete. If TIMEOUT is not");
-        pw.println("          specified it will wait for " + DEFAULT_WAIT_MS + " milliseconds.");
+        pw.println("      --staged-ready-timeout: By default, staged sessions wait "
+                + DEFAULT_STAGED_READY_TIMEOUT_MS);
+        pw.println("          milliseconds for pre-reboot verification to complete when");
+        pw.println("          performing staged install. This flag is used to alter the waiting");
+        pw.println("          time. You can skip the waiting time by specifying a TIMEOUT of '0'");
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
         pw.println("       [--instant] [--full] [--wait] [--restrict-permissions] PACKAGE");
