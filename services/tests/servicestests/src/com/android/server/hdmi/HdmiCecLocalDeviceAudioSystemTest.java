@@ -15,13 +15,9 @@
  */
 package com.android.server.hdmi;
 
-import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
-import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE;
-
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
-import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_TUNER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.MESSAGE_GIVE_AUDIO_STATUS;
@@ -226,7 +222,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
             new HdmiPortInfo(
                 4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
-        mHdmiControlService.initPortInfo();
+        mHdmiControlService.initService();
         // No TV device interacts with AVR so system audio control won't be turned on here
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
@@ -651,75 +647,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRoutingChange(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
-    }
-
-    @Test
-    public void updateCecDevice_deviceNotExists_addDevice() {
-        assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_ADD_DEVICE);
-        HdmiDeviceInfo newDevice = new HdmiDeviceInfo(
-                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
-                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
-
-        mHdmiCecLocalDeviceAudioSystem.updateCecDevice(newDevice);
-        assertThat(mDeviceInfo).isEqualTo(newDevice);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-            .getCecDeviceInfo(newDevice.getLogicalAddress())).isEqualTo(newDevice);
-        assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_ADD_DEVICE);
-    }
-
-    @Test
-    public void updateCecDevice_deviceExists_doNothing() {
-        mInvokeDeviceEventState = 0;
-        HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
-                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
-                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
-        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
-
-        mHdmiCecLocalDeviceAudioSystem.updateCecDevice(oldDevice);
-        assertThat(mInvokeDeviceEventState).isEqualTo(0);
-    }
-
-    @Test
-    public void updateCecDevice_deviceInfoDifferent_updateDevice() {
-        assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_UPDATE_DEVICE);
-        HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
-                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
-                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
-        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
-
-        HdmiDeviceInfo differentDevice = new HdmiDeviceInfo(
-                ADDR_PLAYBACK_1, 0x2300, 4, HdmiDeviceInfo.DEVICE_PLAYBACK,
-                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
-
-        mHdmiCecLocalDeviceAudioSystem.updateCecDevice(differentDevice);
-        assertThat(mDeviceInfo).isEqualTo(differentDevice);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-            .getCecDeviceInfo(differentDevice.getLogicalAddress())).isEqualTo(differentDevice);
-        assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_UPDATE_DEVICE);
-    }
-
-    @Test
-    @Ignore("b/120845532")
-    public void handleReportPhysicalAddress_differentPath_addDevice() {
-        assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_ADD_DEVICE);
-        HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
-                ADDR_PLAYBACK_1, 0x2100, 2, HdmiDeviceInfo.DEVICE_PLAYBACK,
-                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_1));
-        mHdmiCecLocalDeviceAudioSystem.addDeviceInfo(oldDevice);
-
-        HdmiDeviceInfo differentDevice = new HdmiDeviceInfo(
-                ADDR_PLAYBACK_2, 0x2200, 1, HdmiDeviceInfo.DEVICE_PLAYBACK,
-                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(ADDR_PLAYBACK_2));
-        HdmiCecMessage reportPhysicalAddress = HdmiCecMessageBuilder
-                .buildReportPhysicalAddressCommand(
-                        ADDR_PLAYBACK_2, 0x2200, HdmiDeviceInfo.DEVICE_PLAYBACK);
-        mHdmiCecLocalDeviceAudioSystem.handleReportPhysicalAddress(reportPhysicalAddress);
-
-        mTestLooper.dispatchAll();
-        assertThat(mDeviceInfo).isEqualTo(differentDevice);
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-            .getCecDeviceInfo(differentDevice.getLogicalAddress())).isEqualTo(differentDevice);
-        assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_ADD_DEVICE);
     }
 
     @Test

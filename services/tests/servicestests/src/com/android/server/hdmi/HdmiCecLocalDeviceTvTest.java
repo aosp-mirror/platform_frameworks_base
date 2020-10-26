@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.IPowerManager;
@@ -103,7 +104,11 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
-        mHdmiControlService.initPortInfo();
+        HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
+        hdmiPortInfos[0] =
+                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x1000, true, false, false);
+        mNativeWrapper.setPortInfo(hdmiPortInfos);
+        mHdmiControlService.initService();
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTvPhysicalAddress = 0x0000;
         mNativeWrapper.setPhysicalAddress(mTvPhysicalAddress);
@@ -119,8 +124,9 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void onAddressAllocated_invokesDeviceDiscovery() {
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
-        mHdmiCecLocalDeviceTv.onAddressAllocated(0, HdmiControlService.INITIATED_BY_BOOT_UP);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
         mTestLooper.dispatchAll();
 

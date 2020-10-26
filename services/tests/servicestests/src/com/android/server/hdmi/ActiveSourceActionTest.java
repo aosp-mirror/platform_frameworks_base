@@ -114,7 +114,7 @@ public class ActiveSourceActionTest {
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
-        mHdmiControlService.initPortInfo();
+        mHdmiControlService.initService();
         mPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
