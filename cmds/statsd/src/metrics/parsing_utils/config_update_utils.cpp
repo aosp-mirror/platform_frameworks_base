@@ -580,7 +580,6 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
             return false;
         }
     }
-    // TODO: determine update status for value metrics.
     return true;
 }
 
@@ -749,8 +748,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         newMetricProducers.push_back(producer.value());
     }
     for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
-        newMetricProducerMap[config.event_metric(i).id()] = metricIndex;
         const EventMetric& metric = config.event_metric(i);
+        newMetricProducerMap[metric.id()] = metricIndex;
         optional<sp<MetricProducer>> producer;
         switch (metricsToUpdate[metricIndex]) {
             case UPDATE_PRESERVE: {
@@ -784,6 +783,45 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         }
         newMetricProducers.push_back(producer.value());
     }
+
+    for (int i = 0; i < config.value_metric_size(); i++, metricIndex++) {
+        const ValueMetric& metric = config.value_metric(i);
+        newMetricProducerMap[metric.id()] = metricIndex;
+        optional<sp<MetricProducer>> producer;
+        switch (metricsToUpdate[metricIndex]) {
+            case UPDATE_PRESERVE: {
+                producer = updateMetric(
+                        config, i, metricIndex, metric.id(), allAtomMatchingTrackers,
+                        oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, matcherWizard,
+                        allConditionTrackers, conditionTrackerMap, wizard, oldMetricProducerMap,
+                        oldMetricProducers, metricToActivationMap, trackerToMetricMap,
+                        conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                break;
+            }
+            case UPDATE_REPLACE:
+            case UPDATE_NEW: {
+                producer = createValueMetricProducerAndUpdateMetadata(
+                        key, config, timeBaseNs, currentTimeNs, pullerManager, metric, metricIndex,
+                        allAtomMatchingTrackers, newAtomMatchingTrackerMap, allConditionTrackers,
+                        conditionTrackerMap, initialConditionCache, wizard, matcherWizard,
+                        stateAtomIdMap, allStateGroupMaps, metricToActivationMap,
+                        trackerToMetricMap, conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                break;
+            }
+            default: {
+                ALOGE("Metric \"%lld\" update state is unknown. This should never happen",
+                      (long long)metric.id());
+                return false;
+            }
+        }
+        if (!producer) {
+            return false;
+        }
+        newMetricProducers.push_back(producer.value());
+    }
+
     for (int i = 0; i < config.gauge_metric_size(); i++, metricIndex++) {
         const GaugeMetric& metric = config.gauge_metric(i);
         newMetricProducerMap[metric.id()] = metricIndex;

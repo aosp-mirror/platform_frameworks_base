@@ -47,7 +47,7 @@ struct PastValueBucket {
 // - a condition change
 // - an app upgrade
 // - an alarm set to the end of the bucket
-class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
+class ValueMetricProducer : public MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(
             const ConfigKey& key, const ValueMetric& valueMetric, const int conditionIndex,
@@ -155,7 +155,23 @@ private:
     // causes the bucket to be invalidated will not notify StatsdStats.
     void skipCurrentBucket(const int64_t dropTimeNs, const BucketDropReason reason);
 
-    const int mWhatMatcherIndex;
+    bool onConfigUpdatedLocked(
+            const StatsdConfig& config, const int configIndex, const int metricIndex,
+            const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+            const std::unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+            const std::unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+            const sp<EventMatcherWizard>& matcherWizard,
+            const std::vector<sp<ConditionTracker>>& allConditionTrackers,
+            const std::unordered_map<int64_t, int>& conditionTrackerMap,
+            const sp<ConditionWizard>& wizard,
+            const std::unordered_map<int64_t, int>& metricToActivationMap,
+            std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
+            std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
+            std::unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+            std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+            std::vector<int>& metricsWithActivation) override;
+
+    int mWhatMatcherIndex;
 
     sp<EventMatcherWizard> mEventMatcherWizard;
 
@@ -369,6 +385,8 @@ private:
     FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPushedEvents);
     FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPulledValue);
     FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPulledValueWhileConditionFalse);
+
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateValueMetrics);
 
     friend class ValueMetricProducerTestHelper;
 };
