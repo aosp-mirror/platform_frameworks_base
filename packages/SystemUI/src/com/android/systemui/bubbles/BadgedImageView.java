@@ -113,6 +113,18 @@ public class BadgedImageView extends ImageView {
         setClickable(true);
     }
 
+    public void showDotAndBadge(boolean onLeft) {
+        removeDotSuppressionFlag(BadgedImageView.SuppressionFlag.BEHIND_STACK);
+        animateDotBadgePositions(onLeft);
+
+    }
+
+    public void hideDotAndBadge(boolean onLeft) {
+        addDotSuppressionFlag(BadgedImageView.SuppressionFlag.BEHIND_STACK);
+        mOnLeft = onLeft;
+        hideBadge();
+    }
+
     /**
      * Updates the view with provided info.
      */

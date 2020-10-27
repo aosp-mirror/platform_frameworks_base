@@ -34,6 +34,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BadgedImageView;
 import com.android.systemui.bubbles.BubblePositioner;
 import com.android.systemui.bubbles.BubbleStackView;
 import com.android.wm.shell.animation.PhysicsAnimator;
@@ -45,6 +46,7 @@ import com.google.android.collect.Sets;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.function.IntSupplier;
 
@@ -62,6 +64,10 @@ public class StackAnimationController extends
     /** Values to use for animating bubbles in. */
     private static final float ANIMATE_IN_STIFFNESS = 1000f;
     private static final int ANIMATE_IN_START_DELAY = 25;
+
+    /** Values to use for animating updated bubble to top of stack. */
+    private static final float BUBBLE_SWAP_SCALE = 0.8f;
+    private static final long BUBBLE_SWAP_DURATION = 300L;
 
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
@@ -180,6 +186,12 @@ public class StackAnimationController extends
 
     /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
+    /** Offset between stack y and animation y for bubble swap. */
+    private float mSwapAnimationOffset;
+    /** Max number of bubbles to show in the expanded bubble row. */
+    private int mMaxBubbles;
+    /** Default bubble elevation. */
+    private int mElevation;
     /** Diameter of the bubble icon. */
     private int mBubbleBitmapSize;
     /** Width of the bubble (icon and padding). */
@@ -770,6 +782,50 @@ public class StackAnimationController extends
         }
     }
 
+    public void animateReorder(List<View> bubbleViews, Runnable after)  {
+        for (int newIndex = 0; newIndex < bubbleViews.size(); newIndex++) {
+            View view = bubbleViews.get(newIndex);
+            final int oldIndex= mLayout.indexOfChild(view);
+            animateSwap(view, oldIndex,  newIndex, after);
+        }
+    }
+
+    private void animateSwap(View view, int oldIndex, int newIndex, Runnable finishReorder) {
+        final float newY = getStackPosition().y + newIndex * mSwapAnimationOffset;
+        final float swapY = newIndex == 0
+                ? newY - mSwapAnimationOffset  // Above top of stack
+                : newY + mSwapAnimationOffset;  // Below where bubble will be
+        view.animate()
+                .scaleX(BUBBLE_SWAP_SCALE)
+                .scaleY(BUBBLE_SWAP_SCALE)
+                .translationY(swapY)
+                .setDuration(BUBBLE_SWAP_DURATION)
+                .withEndAction(() -> finishSwapAnimation(view, oldIndex, newIndex, finishReorder));
+    }
+
+    private void finishSwapAnimation(View view, int oldIndex, int newIndex,
+            Runnable finishReorder) {
+
+        // At this point, swapping bubbles have the least overlap.
+        // Update z-index and badge visibility here for least jarring transition.
+        view.setZ((mMaxBubbles * mElevation) - newIndex);
+        BadgedImageView bv = (BadgedImageView) view;
+        if (oldIndex == 0 && newIndex > 0) {
+            bv.hideDotAndBadge(!isStackOnLeftSide());
+        } else if (oldIndex > 0 && newIndex == 0) {
+            bv.showDotAndBadge(!isStackOnLeftSide());
+        }
+
+        // Animate bubble back into stack, at new index and original size.
+        final float newY = getStackPosition().y + newIndex * mStackOffset;
+        view.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .translationY(newY)
+                .setDuration(BUBBLE_SWAP_DURATION)
+                .withEndAction(() -> finishReorder.run());
+    }
+
     @Override
     void onChildReordered(View child, int oldIndex, int newIndex) {
         if (isStackPositionSet()) {
@@ -781,6 +837,9 @@ public class StackAnimationController extends
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
         Resources res = layout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mSwapAnimationOffset = res.getDimensionPixelSize(R.dimen.bubble_swap_animation_offset);
+        mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
+        mElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
