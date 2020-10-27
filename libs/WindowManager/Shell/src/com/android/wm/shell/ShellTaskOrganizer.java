@@ -20,8 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
@@ -29,6 +27,7 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG
 import android.annotation.IntDef;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.WindowingMode;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -63,15 +62,13 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public static final int TASK_LISTENER_TYPE_FULLSCREEN = -2;
     public static final int TASK_LISTENER_TYPE_MULTI_WINDOW = -3;
     public static final int TASK_LISTENER_TYPE_PIP = -4;
-    public static final int TASK_LISTENER_TYPE_SPLIT_SCREEN = -5;
-    public static final int TASK_LISTENER_TYPE_LETTERBOX = -6;
+    public static final int TASK_LISTENER_TYPE_LETTERBOX = -5;
 
     @IntDef(prefix = {"TASK_LISTENER_TYPE_"}, value = {
             TASK_LISTENER_TYPE_UNDEFINED,
             TASK_LISTENER_TYPE_FULLSCREEN,
             TASK_LISTENER_TYPE_MULTI_WINDOW,
             TASK_LISTENER_TYPE_PIP,
-            TASK_LISTENER_TYPE_SPLIT_SCREEN,
             TASK_LISTENER_TYPE_LETTERBOX,
     })
     public @interface TaskListenerType {}
@@ -137,6 +134,14 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             }
             return taskInfos;
         }
+    }
+
+    public void createRootTask(int displayId, int windowingMode, TaskListener listener) {
+        ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s",
+                displayId, windowingMode, listener.toString());
+        final IBinder cookie = new Binder();
+        setPendingLaunchCookieListener(cookie, listener);
+        super.createRootTask(displayId, windowingMode, cookie);
     }
 
     /**
@@ -238,10 +243,10 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     private void onTaskAppeared(TaskAppearedInfo info) {
         final int taskId = info.getTaskInfo().taskId;
-        ProtoLog.v(WM_SHELL_TASK_ORG, "Task appeared taskId=%d", taskId);
         mTasks.put(taskId, info);
         final TaskListener listener =
                 getTaskListener(info.getTaskInfo(), true /*removeLaunchCookieIfNeeded*/);
+        ProtoLog.v(WM_SHELL_TASK_ORG, "Task appeared taskId=%d listener=%s", taskId, listener);
         if (listener != null) {
             listener.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
@@ -336,7 +341,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     @WindowingMode
-    private static int getWindowingMode(RunningTaskInfo taskInfo) {
+    public static int getWindowingMode(RunningTaskInfo taskInfo) {
         return taskInfo.configuration.windowConfiguration.getWindowingMode();
     }
 
@@ -350,9 +355,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                         : TASK_LISTENER_TYPE_FULLSCREEN;
             case WINDOWING_MODE_MULTI_WINDOW:
                 return TASK_LISTENER_TYPE_MULTI_WINDOW;
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
-                return TASK_LISTENER_TYPE_SPLIT_SCREEN;
             case WINDOWING_MODE_PINNED:
                 return TASK_LISTENER_TYPE_PIP;
             case WINDOWING_MODE_FREEFORM:
@@ -370,8 +372,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                 return "TASK_LISTENER_TYPE_LETTERBOX";
             case TASK_LISTENER_TYPE_MULTI_WINDOW:
                 return "TASK_LISTENER_TYPE_MULTI_WINDOW";
-            case TASK_LISTENER_TYPE_SPLIT_SCREEN:
-                return "TASK_LISTENER_TYPE_SPLIT_SCREEN";
             case TASK_LISTENER_TYPE_PIP:
                 return "TASK_LISTENER_TYPE_PIP";
             case TASK_LISTENER_TYPE_UNDEFINED:

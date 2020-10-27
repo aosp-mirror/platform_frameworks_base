@@ -75,7 +75,7 @@ public class SplitScreenController implements SplitScreen,
     private final DividerState mDividerState = new DividerState();
     private final ForcedResizableInfoActivityController mForcedResizableController;
     private final Handler mHandler;
-    private final SplitScreenTaskOrganizer mSplits;
+    private final SplitScreenTaskListener mSplits;
     private final SystemWindows mSystemWindows;
     final TransactionPool mTransactionPool;
     private final WindowManagerProxy mWindowManagerProxy;
@@ -117,7 +117,7 @@ public class SplitScreenController implements SplitScreen,
         mTransactionPool = transactionPool;
         mWindowManagerProxy = new WindowManagerProxy(syncQueue, shellTaskOrganizer);
         mTaskOrganizer = shellTaskOrganizer;
-        mSplits = new SplitScreenTaskOrganizer(this, shellTaskOrganizer);
+        mSplits = new SplitScreenTaskListener(this, shellTaskOrganizer);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
                 shellTaskOrganizer);
         mRotationController =
@@ -164,6 +164,14 @@ public class SplitScreenController implements SplitScreen,
         // Don't initialize the divider or anything until we get the default display.
     }
 
+    void onSplitScreenSupported() {
+        // Set starting tile bounds based on middle target
+        final WindowContainerTransaction tct = new WindowContainerTransaction();
+        int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
+        mSplitLayout.resizeSplits(midPos, tct);
+        mTaskOrganizer.applyTransaction(tct);
+    }
+
     @Override
     public boolean isSplitScreenSupported() {
         return mSplits.isSplitScreenSupported();
@@ -196,11 +204,6 @@ public class SplitScreenController implements SplitScreen,
         }
         try {
             mSplits.init();
-            // Set starting tile bounds based on middle target
-            final WindowContainerTransaction tct = new WindowContainerTransaction();
-            int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
-            mSplitLayout.resizeSplits(midPos, tct);
-            mTaskOrganizer.applyTransaction(tct);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to register docked stack listener", e);
             removeDivider();

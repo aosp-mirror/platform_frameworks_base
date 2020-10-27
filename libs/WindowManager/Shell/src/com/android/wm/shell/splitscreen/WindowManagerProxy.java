@@ -88,7 +88,7 @@ class WindowManagerProxy {
         mTaskOrganizer = taskOrganizer;
     }
 
-    void dismissOrMaximizeDocked(final SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout,
+    void dismissOrMaximizeDocked(final SplitScreenTaskListener tiles, SplitDisplayLayout layout,
             final boolean dismissOrMaximize) {
         mExecutor.execute(() -> applyDismissSplit(tiles, layout, dismissOrMaximize));
     }
@@ -189,7 +189,7 @@ class WindowManagerProxy {
      *
      * @return whether the home stack is resizable
      */
-    boolean applyEnterSplit(SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout) {
+    boolean applyEnterSplit(SplitScreenTaskListener tiles, SplitDisplayLayout layout) {
         // Set launchtile first so that any stack created after
         // getAllRootTaskInfos and before reparent (even if unlikely) are placed
         // correctly.
@@ -242,7 +242,7 @@ class WindowManagerProxy {
      *                          split (thus resulting in the top of the secondary split becoming
      *                          fullscreen. {@code false} resolves the other way.
      */
-    void applyDismissSplit(SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout,
+    void applyDismissSplit(SplitScreenTaskListener tiles, SplitDisplayLayout layout,
             boolean dismissOrMaximize) {
         // Set launch root first so that any task created after getChildContainers and
         // before reparent (pretty unlikely) are put into fullscreen.
