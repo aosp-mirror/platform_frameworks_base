@@ -2836,13 +2836,22 @@ class Task extends WindowContainer<WindowContainer> {
 
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+        final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
 
         // Resolve override windowing mode to fullscreen for home task (even on freeform
         // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
-            final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
             windowingMode = WindowConfiguration.isSplitScreenWindowingMode(parentWindowingMode)
                     ? parentWindowingMode : WINDOWING_MODE_FULLSCREEN;
+            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+        }
+
+        // Do not allow non-resizable non-pinned tasks to be in a multi-window mode - they should
+        // use their parent's windowing mode, or fullscreen.
+        if (!isResizeable() && windowingMode != WINDOWING_MODE_PINNED
+                && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+            windowingMode = WindowConfiguration.inMultiWindowMode(parentWindowingMode)
+                    ? WINDOWING_MODE_FULLSCREEN : parentWindowingMode;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
@@ -3362,7 +3371,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     boolean isResizeable(boolean checkSupportsPip) {
-        return (mAtmService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+        final boolean forceResizable = mAtmService.mForceResizableActivities
+                && getActivityType() == ACTIVITY_TYPE_STANDARD;
+        return (forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
                 || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
@@ -7241,7 +7252,7 @@ class Task extends WindowContainer<WindowContainer> {
             ActivityRecord source, ActivityOptions options) {
 
         Task task;
-        if (DisplayContent.alwaysCreateStack(getWindowingMode(), getActivityType())) {
+        if (DisplayContent.canReuseExistingTask(getWindowingMode(), getActivityType())) {
             // This stack will only contain one task, so just return itself since all stacks ara now
             // tasks and all tasks are now stacks.
             task = reuseAsLeafTask(voiceSession, voiceInteractor, intent, info, activity);
