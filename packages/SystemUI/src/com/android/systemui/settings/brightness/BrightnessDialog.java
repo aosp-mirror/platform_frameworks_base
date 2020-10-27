@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.settings;
+package com.android.systemui.settings.brightness;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import javax.inject.Inject;
@@ -36,11 +33,15 @@ import javax.inject.Inject;
 public class BrightnessDialog extends Activity {
 
     private BrightnessController mBrightnessController;
+    private final BrightnessSlider.Factory mToggleSliderFactory;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
-    public BrightnessDialog(BroadcastDispatcher broadcastDispatcher) {
+    public BrightnessDialog(
+            BroadcastDispatcher broadcastDispatcher,
+            BrightnessSlider.Factory factory) {
         mBroadcastDispatcher = broadcastDispatcher;
+        mToggleSliderFactory = factory;
     }
 
 
@@ -50,16 +51,21 @@ public class BrightnessDialog extends Activity {
 
         final Window window = getWindow();
 
-        window.setGravity(Gravity.TOP);
+        window.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
 
-        View v = LayoutInflater.from(this).inflate(
-                R.layout.quick_settings_brightness_dialog, null);
-        setContentView(v);
+        // Calling this creates the decor View, so setLayout takes proper effect
+        // (see Dialog#onWindowAttributesChanged)
+        window.getDecorView();
+        window.setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
 
-        final ToggleSliderView slider = findViewById(R.id.brightness_slider);
-        mBrightnessController = new BrightnessController(this, slider, mBroadcastDispatcher);
+
+        BrightnessSlider controller = mToggleSliderFactory.create(this, null);
+        controller.init();
+        setContentView(controller.getRootView());
+        mBrightnessController = new BrightnessController(this, controller, mBroadcastDispatcher);
     }
 
     @Override

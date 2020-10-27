@@ -97,6 +97,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -260,6 +261,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
     @Mock private DemoModeController mDemoModeController;
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
+    @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -419,7 +421,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
                 mStatusBarTouchableRegionManager,
-                mNotificationIconAreaController);
+                mNotificationIconAreaController,
+                mBrightnessSliderFactory);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);

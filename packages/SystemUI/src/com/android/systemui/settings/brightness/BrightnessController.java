@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.settings;
+package com.android.systemui.settings.brightness;
 
 import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MAX;
 import static com.android.settingslib.display.BrightnessUtils.convertGammaToLinearFloat;
@@ -47,6 +47,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
@@ -100,13 +101,14 @@ public class BrightnessController implements ToggleSlider.Listener {
     private ValueAnimator mSliderAnimator;
 
     public interface BrightnessStateChangeCallback {
-        public void onBrightnessLevelChanged();
+        /** Indicates that some of the brightness settings have changed */
+        void onBrightnessLevelChanged();
     }
 
     /** ContentObserver to watch brightness */
     private class BrightnessObserver extends ContentObserver {
 
-        public BrightnessObserver(Handler handler) {
+        BrightnessObserver(Handler handler) {
             super(handler);
         }
 
@@ -339,11 +341,6 @@ public class BrightnessController implements ToggleSlider.Listener {
         return mChangeCallbacks.remove(cb);
     }
 
-    @Override
-    public void onInit(ToggleSlider control) {
-        // Do nothing
-    }
-
     public void registerCallbacks() {
         mBackgroundHandler.post(mStartListeningRunnable);
     }
@@ -355,7 +352,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     @Override
-    public void onChanged(ToggleSlider toggleSlider, boolean tracking, boolean automatic,
+    public void onChanged(boolean tracking, boolean automatic,
             int value, boolean stopTracking) {
         if (mExternalChange) return;
 
@@ -409,7 +406,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                ((ToggleSliderView)mControl).setEnforcedAdmin(
+                mControl.setEnforcedAdmin(
                         RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                                 UserManager.DISALLOW_CONFIG_BRIGHTNESS,
                                 mUserTracker.getCurrentUserId()));
@@ -493,4 +490,5 @@ public class BrightnessController implements ToggleSlider.Listener {
             return new BrightnessController(mContext, toggleSlider, mBroadcastDispatcher);
         }
     }
+
 }
