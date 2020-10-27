@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
+import android.os.Build;
 
 import java.lang.annotation.Retention;
 
@@ -44,7 +45,7 @@ public final class FontConfig {
     /**
      * Returns the ordered list of families included in the system fonts.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @NonNull Family[] getFamilies() {
         return mFamilies;
     }
@@ -91,7 +92,7 @@ public final class FontConfig {
         /**
          * Returns the index to be used to access this font when accessing a TTC file.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int getTtcIndex() {
             return mTtcIndex;
         }
@@ -99,7 +100,7 @@ public final class FontConfig {
         /**
          * Returns the list of axes associated to this font.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public @NonNull FontVariationAxis[] getAxes() {
             return mAxes;
         }
@@ -107,7 +108,7 @@ public final class FontConfig {
         /**
          * Returns the weight value for this font.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int getWeight() {
             return mWeight;
         }
@@ -115,7 +116,7 @@ public final class FontConfig {
         /**
          * Returns whether this font is italic.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean isItalic() {
             return mIsItalic;
         }
@@ -231,7 +232,7 @@ public final class FontConfig {
         /**
          * Returns the name given by the system to this font family.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public @Nullable String getName() {
             return mName;
         }
@@ -239,7 +240,7 @@ public final class FontConfig {
         /**
          * Returns the list of fonts included in this family.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public @Nullable Font[] getFonts() {
             return mFonts;
         }
@@ -254,7 +255,7 @@ public final class FontConfig {
         /**
          * Returns the font variant for this family, e.g. "elegant" or "compact". May be null.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public @Variant int getVariant() {
             return mVariant;
         }

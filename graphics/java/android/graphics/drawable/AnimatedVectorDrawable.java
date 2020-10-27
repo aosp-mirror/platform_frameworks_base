@@ -315,7 +315,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      */
     private Resources mRes;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private AnimatedVectorDrawableState mAnimatedVectorState;
 
     /** The animator set that is parsed from the xml. */
@@ -1773,7 +1773,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         // onFinished: should be called from native
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private static void callOnFinished(VectorDrawableAnimatorRT set, int id) {
             set.mHandler.post(() -> set.onAnimationEnd(id));
         }

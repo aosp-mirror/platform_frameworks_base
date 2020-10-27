@@ -17,6 +17,7 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,7 +55,7 @@ public final class InputChannel implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mPtr; // used by native code
 
     private static native long[] nativeOpenInputChannelPair(String name);

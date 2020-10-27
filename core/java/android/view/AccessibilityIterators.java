@@ -18,6 +18,7 @@ package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
+import android.os.Build;
 
 import java.text.BreakIterator;
 import java.util.Locale;
@@ -46,11 +47,11 @@ public final class AccessibilityIterators {
      */
     public static abstract class AbstractTextSegmentIterator implements TextSegmentIterator {
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public AbstractTextSegmentIterator() {
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         protected String mText;
 
         private final int[] mSegment = new int[2];

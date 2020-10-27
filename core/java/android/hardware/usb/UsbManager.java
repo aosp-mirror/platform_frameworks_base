@@ -209,7 +209,7 @@ public class UsbManager {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String USB_DATA_UNLOCKED = "unlocked";
 
     /**
@@ -771,7 +771,7 @@ public class UsbManager {
      * {@hide}
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isFunctionEnabled(String function) {
         try {
             return mService.isFunctionEnabled(function);

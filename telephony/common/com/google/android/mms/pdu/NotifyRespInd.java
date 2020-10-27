@@ -18,6 +18,7 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import com.google.android.mms.InvalidHeaderValueException;
 
@@ -72,7 +73,7 @@ public class NotifyRespInd extends GenericPdu {
      * @throws InvalidHeaderValueException if the value is invalid.
      *         RuntimeException if an undeclared error occurs.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setReportAllowed(int value) throws InvalidHeaderValueException {
         mPduHeaders.setOctet(value, PduHeaders.REPORT_ALLOWED);
     }

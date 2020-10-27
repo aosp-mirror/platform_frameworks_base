@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioAttributes;
+import android.os.Build;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -109,11 +110,11 @@ public class AudioMixingRule {
 
     /** @hide */
     public static final class AudioMixMatchCriterion {
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         final AudioAttributes mAttr;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         final int mIntProp;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         final int mRule;
 
         /** input parameters must be valid */
@@ -199,13 +200,13 @@ public class AudioMixingRule {
 
     private final int mTargetMixType;
     int getTargetMixType() { return mTargetMixType; }
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     /** @hide */
     public ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean mAllowPrivilegedPlaybackCapture = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean mVoiceCommunicationCaptureAllowed = false;
 
     /** @hide */
