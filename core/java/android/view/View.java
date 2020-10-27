@@ -26443,7 +26443,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         surface.copyFrom(surfaceControl);
         IBinder token = null;
         try {
-            final Canvas canvas = surface.lockCanvas(null);
+            final Canvas canvas = isHardwareAccelerated()
+                    ? surface.lockHardwareCanvas()
+                    : surface.lockCanvas(null);
             try {
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 shadowBuilder.onDrawShadow(canvas);
@@ -26534,7 +26536,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if (mAttachInfo.mDragToken != null) {
             try {
-                Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
+                Canvas canvas = isHardwareAccelerated()
+                        ? mAttachInfo.mDragSurface.lockHardwareCanvas()
+                        : mAttachInfo.mDragSurface.lockCanvas(null);
                 try {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                     shadowBuilder.onDrawShadow(canvas);
