@@ -6205,6 +6205,7 @@ package android.net {
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
+    field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
   }
 
