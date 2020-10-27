@@ -31,6 +31,7 @@ import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CallForwardingInfo;
+import android.telephony.CarrierBandwidth;
 import android.telephony.CarrierRestrictionRules;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
@@ -2232,4 +2233,10 @@ interface ITelephony {
      * @return true if dual connectivity is enabled else false
      */
     boolean isNrDualConnectivityEnabled(int subId);
+
+    /**
+     * Get carrier bandwidth per primary and secondary carrier
+     * @return CarrierBandwidth with bandwidth of both primary and secondary carrier.
+     */
+    CarrierBandwidth getCarrierBandwidth(int subId);
 }
