@@ -73,9 +73,7 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -315,7 +313,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mRemoteInputs = remoteInputs;
         mRemoteInput = remoteInput;
         mEditText.setHint(mRemoteInput.getLabel());
-        mEditText.mSupportedMimeTypes = remoteInput.getAllowedDataTypes();
+        mEditText.mSupportedMimeTypes = (remoteInput.getAllowedDataTypes() == null) ? null
+                : remoteInput.getAllowedDataTypes().toArray(new String[0]);
 
         mEntry.editedSuggestionInfo = editedSuggestionInfo;
         if (editedSuggestionInfo != null) {
@@ -574,7 +573,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
         UserHandle mUser;
-        private Set<String> mSupportedMimeTypes;
+        private String[] mSupportedMimeTypes;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -585,35 +584,31 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         @Override
         protected void onFinishInflate() {
             super.onFinishInflate();
-            setOnReceiveContentCallback(new OnReceiveContentCallback<View>() {
-                @Override
-                public boolean onReceiveContent(@NonNull View view, @NonNull Payload payload) {
-                    ClipData clip = payload.getClip();
-                    if (clip.getItemCount() == 0) {
-                        return false;
-                    }
-                    Uri contentUri = clip.getItemAt(0).getUri();
-                    ClipDescription description = clip.getDescription();
-                    String mimeType = null;
-                    if (description.getMimeTypeCount() > 0) {
-                        mimeType = description.getMimeType(0);
-                    }
-                    if (mimeType != null) {
-                        Intent dataIntent = mRemoteInputView
-                                .prepareRemoteInputFromData(mimeType, contentUri);
-                        mRemoteInputView.sendRemoteInput(dataIntent);
-                    }
-                    return true;
-                }
-
-                @NonNull
-                @Override
-                public Set<String> getSupportedMimeTypes(@NonNull View view) {
-                    return mSupportedMimeTypes != null
-                            ? mSupportedMimeTypes
-                            : Collections.emptySet();
-                }
-            });
+            if (mSupportedMimeTypes != null && mSupportedMimeTypes.length > 0) {
+                setOnReceiveContentCallback(mSupportedMimeTypes,
+                        new OnReceiveContentCallback<View>() {
+                            @Override
+                            public boolean onReceiveContent(@NonNull View view,
+                                    @NonNull Payload payload) {
+                                ClipData clip = payload.getClip();
+                                if (clip.getItemCount() == 0) {
+                                    return false;
+                                }
+                                Uri contentUri = clip.getItemAt(0).getUri();
+                                ClipDescription description = clip.getDescription();
+                                String mimeType = null;
+                                if (description.getMimeTypeCount() > 0) {
+                                    mimeType = description.getMimeType(0);
+                                }
+                                if (mimeType != null) {
+                                    Intent dataIntent = mRemoteInputView
+                                            .prepareRemoteInputFromData(mimeType, contentUri);
+                                    mRemoteInputView.sendRemoteInput(dataIntent);
+                                }
+                                return true;
+                            }
+                        });
+            }
         }
 
         private void defocusIfNeeded(boolean animate) {

@@ -8747,12 +8747,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialSelEnd = getSelectionEnd();
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
-                // If a custom `OnReceiveContentCallback` is set, pass its supported MIME types.
-                OnReceiveContentCallback<TextView> receiver = getOnReceiveContentCallback();
-                if (receiver != null) {
-                    outAttrs.contentMimeTypes = receiver.getSupportedMimeTypes(this)
-                            .toArray(new String[0]);
-                }
+                outAttrs.contentMimeTypes = getOnReceiveContentMimeTypes();
                 return ic;
             }
         }
@@ -13735,20 +13730,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns the callback used for handling insertion of content into this view. See
-     * {@link #setOnReceiveContentCallback} for more info.
-     *
-     * @return The callback for handling insertion of content. Returns null if no callback has been
-     * {@link #setOnReceiveContentCallback set}.
-     */
-    @SuppressWarnings("unchecked")
-    @Nullable
-    @Override
-    public OnReceiveContentCallback<TextView> getOnReceiveContentCallback() {
-        return (OnReceiveContentCallback<TextView>) super.getOnReceiveContentCallback();
-    }
-
-    /**
      * Sets the callback to handle insertion of content into this view.
      *
      * <p>This callback will be invoked for the following scenarios:
@@ -13761,32 +13742,51 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *     <li>{@link Intent#ACTION_PROCESS_TEXT} replacement
      * </ol>
      *
-     * <p>The callback will only be invoked if the MIME type of the content is
-     * {@link OnReceiveContentCallback#getSupportedMimeTypes declared as supported} by the callback.
-     * If the content type is not supported by the callback, the default platform handling will be
-     * executed instead.
+     * <p>This callback is only invoked for content whose MIME type matches a type specified via
+     * the {code mimeTypes} parameter. If the MIME type is not supported by the callback, the
+     * default platform handling will be executed instead (no-op for the default {@link View}).
      *
+     * <p><em>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
+     * MIME types. As a result, you should always write your MIME types with lower case letters, or
+     * use {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to lower
+     * case.</em>
+     *
+     * @param mimeTypes The type of content for which the callback should be invoked. This may use
+     * wildcards such as "text/*", "image/*", etc. This must not be null or empty if a non-null
+     * callback is passed in.
      * @param callback The callback to use. This can be null to reset to the default behavior.
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public void setOnReceiveContentCallback(
-            @Nullable OnReceiveContentCallback<? extends View> callback) {
-        super.setOnReceiveContentCallback(callback);
+            @Nullable String[] mimeTypes,
+            @Nullable OnReceiveContentCallback callback) {
+        super.setOnReceiveContentCallback(mimeTypes, callback);
     }
 
     /**
-     * Handles the request to insert content using the configured callback or the default callback.
+     * Receives the given content. The default implementation invokes the callback set via
+     * {@link #setOnReceiveContentCallback}. If no callback is set or if the callback does not
+     * support the given content (based on the MIME type), executes the default platform handling
+     * (e.g. coerces content to text if the source is
+     * {@link OnReceiveContentCallback.Payload#SOURCE_CLIPBOARD} and this is an editable
+     * {@link TextView}).
      *
-     * @hide
+     * @param payload The content to insert and related metadata.
+     *
+     * @return Returns true if the content was handled in some way, false otherwise. Actual
+     * insertion may be processed asynchronously in the background and may or may not succeed even
+     * if this method returns true. For example, an app may not end up inserting an item if it
+     * exceeds the app's size limit for that type of content.
      */
-    void onReceiveContent(@NonNull OnReceiveContentCallback.Payload payload) {
-        OnReceiveContentCallback<TextView> receiver = getOnReceiveContentCallback();
-        ClipDescription description = payload.getClip().getDescription();
-        if (receiver != null && receiver.supports(this, description)) {
-            receiver.onReceiveContent(this, payload);
+    @Override
+    public boolean onReceiveContent(@NonNull OnReceiveContentCallback.Payload payload) {
+        if (super.onReceiveContent(payload)) {
+            return true;
         } else if (mEditor != null) {
-            mEditor.getDefaultOnReceiveContentCallback().onReceiveContent(this, payload);
+            return mEditor.getDefaultOnReceiveContentCallback().onReceiveContent(this, payload);
         }
+        return false;
     }
 
     private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {

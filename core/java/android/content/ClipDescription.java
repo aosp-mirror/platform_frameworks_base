@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -210,6 +211,24 @@ public class ClipDescription implements Parcelable {
         final int size = mMimeTypes.size();
         for (int i=0; i<size; i++) {
             if (compareMimeTypes(mMimeTypes.get(i), mimeType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether the clip description contains any of the given MIME types.
+     *
+     * @param targetMimeTypes The target MIME types. May use patterns.
+     * @return Returns true if at least one of the MIME types in the clip description matches at
+     * least one of the target MIME types, else false.
+     *
+     * @hide
+     */
+    public boolean hasMimeType(@NonNull String[] targetMimeTypes) {
+        for (String targetMimeType : targetMimeTypes) {
+            if (hasMimeType(targetMimeType)) {
                 return true;
             }
         }
