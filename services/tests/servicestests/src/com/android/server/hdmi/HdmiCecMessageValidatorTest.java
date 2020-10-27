@@ -130,6 +130,17 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_setTimerProgramTitle() {
+        assertMessageValidity("40:67:47:61:6D:65:20:6F:66:20:54:68:72:6F:6E:65:73").isEqualTo(OK);
+        assertMessageValidity("40:67:4A").isEqualTo(OK);
+
+        assertMessageValidity("4F:67:47:4F:54").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F4:67:47:4F:54").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:67").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:67:47:9A:54").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
     public void isValid_setMenuLanguage() {
         assertMessageValidity("4F:32:53:50:41").isEqualTo(OK);
         assertMessageValidity("0F:32:45:4E:47:8C:49:D3:48").isEqualTo(OK);
