@@ -28,6 +28,8 @@ import android.util.Size;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +40,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class PipBoundsStateTest extends PipTestCase {
+public class PipBoundsStateTest extends ShellTestCase {
 
     private static final Rect DEFAULT_BOUNDS = new Rect(0, 0, 10, 10);
     private static final float DEFAULT_SNAP_FRACTION = 1.0f;

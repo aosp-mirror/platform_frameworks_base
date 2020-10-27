@@ -63,7 +63,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name="com.android.systemui.bubbles.BubblesTestActivity"
+        <activity android:name=".wmshell.BubblesTestActivity"
             android:allowEmbedded="true"
             android:documentLaunchMode="always"
             android:excludeFromRecents="true"

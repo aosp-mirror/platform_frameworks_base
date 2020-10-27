@@ -40,6 +40,7 @@ import android.view.DisplayInfo;
 import android.window.WindowContainerToken;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -58,7 +59,7 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class PipTaskOrganizerTest extends PipTestCase {
+public class PipTaskOrganizerTest extends ShellTestCase {
     private PipTaskOrganizer mSpiedPipTaskOrganizer;
 
     @Mock private DisplayController mMockdDisplayController;

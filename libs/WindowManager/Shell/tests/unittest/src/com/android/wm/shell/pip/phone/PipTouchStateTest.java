@@ -35,8 +35,7 @@ import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.pip.PipTestCase;
-import com.android.wm.shell.pip.phone.PipTouchState;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +46,7 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 @RunWithLooper
-public class PipTouchStateTest extends PipTestCase {
+public class PipTouchStateTest extends ShellTestCase {
 
     private PipTouchState mTouchState;
     private CountDownLatch mDoubleTapCallbackTriggeredLatch;

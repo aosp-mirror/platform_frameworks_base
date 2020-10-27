@@ -30,8 +30,7 @@ import android.view.Gravity;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.pip.PipBoundsHandler;
-import com.android.wm.shell.pip.PipTestCase;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +45,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class PipBoundsHandlerTest extends PipTestCase {
+public class PipBoundsHandlerTest extends ShellTestCase {
     private static final int ROUNDING_ERROR_MARGIN = 16;
     private static final float ASPECT_RATIO_ERROR_MARGIN = 0.01f;
     private static final float DEFAULT_ASPECT_RATIO = 1f;

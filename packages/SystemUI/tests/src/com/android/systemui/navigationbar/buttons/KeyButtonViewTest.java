@@ -49,7 +49,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.recents.OverviewProxyService;
 
 import org.junit.Before;
@@ -66,7 +65,6 @@ public class KeyButtonViewTest extends SysuiTestCase {
 
     private KeyButtonView mKeyButtonView;
     private MetricsLogger mMetricsLogger;
-    private Bubbles mBubbles;
     private UiEventLogger mUiEventLogger;
     private InputManager mInputManager = mock(InputManager.class);
     @Captor
@@ -76,7 +74,6 @@ public class KeyButtonViewTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-        mBubbles = mDependency.injectMockDependency(Bubbles.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mUiEventLogger = mDependency.injectMockDependency(UiEventLogger.class);
 
