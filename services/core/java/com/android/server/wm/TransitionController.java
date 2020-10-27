@@ -109,10 +109,18 @@ class TransitionController {
         return mCollectingTransition != null;
     }
 
+    /**
+     * @return {@code true} if transition is actively playing. This is not necessarily {@code true}
+     * during collection.
+     */
+    boolean isPlaying() {
+        return !mPlayingTransitions.isEmpty();
+    }
+
     /** @return {@code true} if a transition is running */
     boolean inTransition() {
         // TODO(shell-transitions): eventually properly support multiple
-        return mCollectingTransition != null || !mPlayingTransitions.isEmpty();
+        return isCollecting() || isPlaying();
     }
 
     /** @return {@code true} if wc is in a participant subtree */
