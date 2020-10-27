@@ -11888,21 +11888,6 @@ public final class Settings {
         public static final String POWER_MANAGER_CONSTANTS = "power_manager_constants";
 
         /**
-         * Job scheduler QuotaController specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "max_job_count_working=5,max_job_count_rare=2"
-         *
-         * <p>
-         * Type: string
-         *
-         * @hide
-         * @see com.android.server.job.JobSchedulerService.Constants
-         */
-        public static final String JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS =
-                "job_scheduler_quota_controller_constants";
-
-        /**
          * ShortcutManager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
