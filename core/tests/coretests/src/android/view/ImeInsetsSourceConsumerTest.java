@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.ImeInsetsSourceConsumer.areEditorsSimilar;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -33,11 +32,9 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
-import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -49,8 +46,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-
-import java.util.ArrayList;
 
 /**
  * Test {@link InsetsSourceConsumer} with IME type.
@@ -132,51 +127,5 @@ public class ImeInsetsSourceConsumerTest {
             verify(mController, never()).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(true) /* fromIme */);
         });
-    }
-
-    @Test
-    public void testAreEditorsSimilar() {
-        EditorInfo info1 = new EditorInfo();
-        info1.privateImeOptions = "dummy";
-        EditorInfo info2 = new EditorInfo();
-
-        assertFalse(areEditorsSimilar(info1, info2));
-
-        info1.privateImeOptions = null;
-        assertTrue(areEditorsSimilar(info1, info2));
-
-        info1.inputType = info2.inputType = 3;
-        info1.imeOptions = info2.imeOptions = 0x4;
-        info1.packageName = info2.packageName = "dummy.package";
-        assertTrue(areEditorsSimilar(info1, info2));
-
-        Bundle extras1 = new Bundle();
-        extras1.putByteArray("key1", "value1".getBytes());
-        extras1.putChar("key2", 'c');
-        Bundle extras2 = new Bundle();
-        extras2.putByteArray("key1", "value1".getBytes());
-        extras2.putChar("key2", 'c');
-        info1.extras = extras1;
-        info2.extras = extras2;
-        assertTrue(areEditorsSimilar(info1, info2));
-
-        Bundle extraBundle = new Bundle();
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(2);
-        list.add(5);
-        extraBundle.putByteArray("key1", "value1".getBytes());
-        extraBundle.putChar("key2", 'c');
-        extraBundle.putIntegerArrayList("key3", list);
-
-        extras1.putAll(extraBundle);
-        extras2.putAll(extraBundle);
-        assertTrue(areEditorsSimilar(info1, info2));
-
-        extras2.putChar("key2", 'd');
-        assertFalse(areEditorsSimilar(info1, info2));
-
-        extras2.putChar("key2", 'c');
-        extras2.putInt("key4", 1);
-        assertFalse(areEditorsSimilar(info1, info2));
     }
 }

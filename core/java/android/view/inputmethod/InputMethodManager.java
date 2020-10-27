@@ -489,7 +489,6 @@ public final class InputMethodManager {
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
-    static final int MSG_REPORT_PRE_RENDERED = 15;
     static final int MSG_APPLY_IME_VISIBILITY = 20;
     static final int MSG_UPDATE_ACTIVITY_VIEW_TO_SCREEN_MATRIX = 30;
 
@@ -583,17 +582,6 @@ public final class InputMethodManager {
                 mCompletions = null;
                 mServedConnecting = true;
                 servedView = getServedViewLocked();
-            }
-            if (servedView != null && servedView.getHandler() != null) {
-                // Make sure View checks should be on the UI thread.
-                servedView.getHandler().post(() -> {
-                    if (!servedView.onCheckIsTextEditor()) {
-                        // servedView has changed and it's not editable.
-                        synchronized (mH) {
-                            maybeCallServedViewChangedLocked(null);
-                        }
-                    }
-                });
             }
             return startInputInner(startInputReason,
                     focusedView != null ? focusedView.getWindowToken() : null, startInputFlags,
@@ -919,15 +907,6 @@ public final class InputMethodManager {
                     }
                     return;
                 }
-                case MSG_REPORT_PRE_RENDERED: {
-                    synchronized (mH) {
-                        if (mImeInsetsConsumer != null) {
-                            mImeInsetsConsumer.onPreRendered((EditorInfo) msg.obj);
-                        }
-                    }
-                    return;
-
-                }
                 case MSG_APPLY_IME_VISIBILITY: {
                     synchronized (mH) {
                         if (mImeInsetsConsumer != null) {
@@ -1096,12 +1075,6 @@ public final class InputMethodManager {
         @Override
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
-                    .sendToTarget();
-        }
-
-        @Override
-        public void reportPreRendered(EditorInfo info) {
-            mH.obtainMessage(MSG_REPORT_PRE_RENDERED, 0, 0, info)
                     .sendToTarget();
         }
 
@@ -1981,7 +1954,7 @@ public final class InputMethodManager {
 
             // Hook 'em up and let 'er rip.
             mCurrentTextBoxAttribute = tba;
-            maybeCallServedViewChangedLocked(tba);
+
             mServedConnecting = false;
             if (mServedInputConnectionWrapper != null) {
                 mServedInputConnectionWrapper.deactivate();
@@ -3138,12 +3111,6 @@ public final class InputMethodManager {
             return mService.getLastInputMethodSubtype();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private void maybeCallServedViewChangedLocked(EditorInfo tba) {
-        if (mImeInsetsConsumer != null) {
-            mImeInsetsConsumer.onServedEditorChanged(tba);
         }
     }
 
