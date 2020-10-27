@@ -17,11 +17,9 @@
 package com.android.server.location.listeners;
 
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.listeners.ListenerExecutor;
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -31,11 +29,8 @@ import java.util.concurrent.Executor;
  * request, and an executor responsible for listener invocations.
  *
  * @param <TListener>          listener type
- * @param <TListenerOperation> listener operation type
  */
-public class ListenerRegistration<TListener,
-        TListenerOperation extends ListenerOperation<TListener>> implements
-        ListenerExecutor {
+public class ListenerRegistration<TListener> implements ListenerExecutor {
 
     private final Executor mExecutor;
 
@@ -70,18 +65,14 @@ public class ListenerRegistration<TListener,
      * returns a non-null operation, that operation will be invoked for the listener. Invoked
      * while holding the owning multiplexer's internal lock.
      */
-    protected @Nullable TListenerOperation onActive() {
-        return null;
-    }
+    protected void onActive() {}
 
     /**
      * May be overridden by subclasses. Invoked when registration becomes inactive. If this returns
      * a non-null operation, that operation will be invoked for the listener. Invoked while holding
      * the owning multiplexer's internal lock.
      */
-    protected @Nullable TListenerOperation onInactive() {
-        return null;
-    }
+    protected void onInactive() {}
 
     public final boolean isActive() {
         return mActive;
@@ -114,27 +105,20 @@ public class ListenerRegistration<TListener,
     protected void onListenerUnregister() {}
 
     /**
-     * May be overridden by subclasses, however should rarely be needed. Invoked whenever a listener
-     * operation is submitted for execution, and allows the registration a chance to replace the
-     * listener operation or perform related bookkeeping. There is no guarantee a listener operation
-     * submitted or returned here will ever be invoked. Will always be invoked on the calling
-     * thread.
-     */
-    protected TListenerOperation onExecuteOperation(@NonNull TListenerOperation operation) {
-        return operation;
-    }
-
-    /**
      * May be overridden by subclasses to handle listener operation failures. The default behavior
      * is to further propagate any exceptions. Will always be invoked on the executor thread.
      */
-    protected void onOperationFailure(TListenerOperation operation, Exception exception) {
-        throw new AssertionError(exception);
+    protected void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
+        throw new AssertionError(e);
     }
 
-    final void executeInternal(@NonNull TListenerOperation operation) {
-        executeSafely(mExecutor, () -> mListener,
-                onExecuteOperation(Objects.requireNonNull(operation)), this::onOperationFailure);
+    /**
+     * Executes the given listener operation, invoking
+     * {@link #onOperationFailure(ListenerOperation, Exception)} in case the listener operation
+     * fails.
+     */
+    protected final void executeOperation(@Nullable ListenerOperation<TListener> operation) {
+        executeSafely(mExecutor, () -> mListener, operation, this::onOperationFailure);
     }
 
     @Override
