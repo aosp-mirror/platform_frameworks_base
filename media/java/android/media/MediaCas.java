@@ -362,28 +362,34 @@ public final class MediaCas implements AutoCloseable {
         @Override
         public void onEvent(int event, int arg, @Nullable ArrayList<Byte> data)
                 throws RemoteException {
-            mEventHandler.sendMessage(mEventHandler.obtainMessage(
+            if (mEventHandler != null) {
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                     EventHandler.MSG_CAS_EVENT, event, arg, data));
+            }
         }
         @Override
         public void onSessionEvent(@NonNull ArrayList<Byte> sessionId,
                 int event, int arg, @Nullable ArrayList<Byte> data)
                 throws RemoteException {
-            Message msg = mEventHandler.obtainMessage();
-            msg.what = EventHandler.MSG_CAS_SESSION_EVENT;
-            msg.arg1 = event;
-            msg.arg2 = arg;
-            Bundle bundle = new Bundle();
-            bundle.putByteArray(EventHandler.SESSION_KEY, toBytes(sessionId));
-            bundle.putByteArray(EventHandler.DATA_KEY, toBytes(data));
-            msg.setData(bundle);
-            mEventHandler.sendMessage(msg);
+            if (mEventHandler != null) {
+                Message msg = mEventHandler.obtainMessage();
+                msg.what = EventHandler.MSG_CAS_SESSION_EVENT;
+                msg.arg1 = event;
+                msg.arg2 = arg;
+                Bundle bundle = new Bundle();
+                bundle.putByteArray(EventHandler.SESSION_KEY, toBytes(sessionId));
+                bundle.putByteArray(EventHandler.DATA_KEY, toBytes(data));
+                msg.setData(bundle);
+                mEventHandler.sendMessage(msg);
+            }
         }
         @Override
         public void onStatusUpdate(byte status, int arg)
                 throws RemoteException {
-            mEventHandler.sendMessage(mEventHandler.obtainMessage(
+            if (mEventHandler != null) {
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
                     EventHandler.MSG_CAS_STATUS_EVENT, status, arg));
+            }
         }
     };
 
