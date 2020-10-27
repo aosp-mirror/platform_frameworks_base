@@ -38,6 +38,7 @@ import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
@@ -98,7 +99,7 @@ public class RemoteAnimationTarget implements Parcelable {
      * The {@link SurfaceControl} for the starting state of a target if this transition is
      * MODE_CHANGING, {@code null)} otherwise. This is relative to the app window.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final SurfaceControl startLeash;
 
     /**
@@ -171,7 +172,7 @@ public class RemoteAnimationTarget implements Parcelable {
      * should be equivalent to the size of the starting thumbnail. Note that sourceContainerBounds
      * is the end bounds of a change transition.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final Rect startBounds;
 
     /**

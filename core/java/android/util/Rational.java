@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -77,9 +78,9 @@ public final class Rational extends Number implements Comparable<Rational> {
      * Do not change the order of these fields or add new instance fields to maintain the
      * Serializable compatibility across API revisions.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final int mNumerator;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final int mDenominator;
 
     /**

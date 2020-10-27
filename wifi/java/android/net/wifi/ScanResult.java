@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.wifi.WifiAnnotations.ChannelWidth;
 import android.net.wifi.WifiAnnotations.WifiStandard;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -381,7 +382,7 @@ public final class ScanResult implements Parcelable {
      * @deprecated use is80211mcResponder() instead
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean is80211McRTTResponder;
 
     /**
@@ -772,47 +773,47 @@ public final class ScanResult implements Parcelable {
      */
     public static class InformationElement {
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_SSID = 0;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_SUPPORTED_RATES = 1;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_TIM = 5;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_BSS_LOAD = 11;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_ERP = 42;
         /** @hide */
         public static final int EID_HT_CAPABILITIES = 45;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_RSN = 48;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_EXTENDED_SUPPORTED_RATES = 50;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_HT_OPERATION = 61;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_INTERWORKING = 107;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_ROAMING_CONSORTIUM = 111;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_EXTENDED_CAPS = 127;
         /** @hide */
         public static final int EID_VHT_CAPABILITIES = 191;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_VHT_OPERATION = 192;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int EID_VSA = 221;
         /** @hide */
         public static final int EID_EXTENSION_PRESENT = 255;

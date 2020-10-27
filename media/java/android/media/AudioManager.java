@@ -709,7 +709,7 @@ public class AudioManager {
      * @hide
      * For test purposes only, will throw NPE with some methods that require a Context.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public AudioManager() {
     }
 
@@ -959,7 +959,7 @@ public class AudioManager {
      * @see #setRingerMode(int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean isValidRingerMode(int ringerMode) {
         if (ringerMode < 0 || ringerMode > RINGER_MODE_MAX) {
             return false;
@@ -2478,7 +2478,7 @@ public class AudioManager {
      * @see #stopBluetoothSco()
      * @see #ACTION_SCO_AUDIO_STATE_UPDATED
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void startBluetoothScoVirtualCall() {
         final IAudioService service = getService();
         try {
@@ -2630,7 +2630,7 @@ public class AudioManager {
      * @param on set <var>true</var> to mute the microphone;
      *           <var>false</var> to turn mute off
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setMicrophoneMuteFromSwitch(boolean on) {
         final IAudioService service = getService();
         try {
@@ -2890,7 +2890,7 @@ public class AudioManager {
      *   display). Note that BT audio sinks are not considered remote devices.
      * @return true if {@link AudioManager#STREAM_MUSIC} is active on a remote device
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isMusicActiveRemotely() {
         return AudioSystem.isStreamActiveRemotely(STREAM_MUSIC, 0);
     }
@@ -3041,7 +3041,7 @@ public class AudioManager {
     /**
      * @hide Number of sound effects
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int NUM_SOUND_EFFECTS = 10;
 
     /**
@@ -3875,7 +3875,7 @@ public class AudioManager {
      * @param durationHint the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
      *    media applications resume after a call
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void requestAudioFocusForCall(int streamType, int durationHint) {
         final IAudioService service = getService();
         try {
@@ -3979,7 +3979,7 @@ public class AudioManager {
      * when ringing ends and the call is rejected or not answered.
      * Should match one or more calls to {@link #requestAudioFocusForCall(int, int)}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void abandonAudioFocusForCall() {
         final IAudioService service = getService();
         try {
@@ -4715,7 +4715,7 @@ public class AudioManager {
      *  agent when audio settings are restored and causes the AudioService
      *  to read and apply restored settings.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void reloadAudioSettings() {
         final IAudioService service = getService();
         try {

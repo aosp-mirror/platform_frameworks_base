@@ -19,6 +19,7 @@ package android.telephony.ims.compat.stub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
@@ -45,7 +46,7 @@ import com.android.ims.internal.IImsVideoCallProvider;
 
 public class ImsCallSessionImplBase extends IImsCallSession.Stub {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsCallSessionImplBase() {
     }
 

@@ -26,6 +26,7 @@ import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -650,7 +651,7 @@ public final class MediaMetadata implements Parcelable {
      * @return The key used by this class or null if no mapping exists
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String getKeyFromMetadataEditorKey(int editorKey) {
         return EDITOR_KEY_MAPPING.get(editorKey, null);
     }

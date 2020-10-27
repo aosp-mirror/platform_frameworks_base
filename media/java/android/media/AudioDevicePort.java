@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.util.Arrays;
 
@@ -41,7 +42,7 @@ public class AudioDevicePort extends AudioPort {
     private final int[] mEncapsulationModes;
     private final int[] mEncapsulationMetadataTypes;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     AudioDevicePort(AudioHandle handle, String deviceName,
             int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains, int type, String address, int[] encapsulationModes,

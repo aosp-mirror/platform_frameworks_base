@@ -17,6 +17,7 @@
 package android.app;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -217,7 +218,7 @@ public class QueuedWork {
      * @param work The new runnable to process
      * @param shouldDelay If the message should be delayed
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void queue(Runnable work, boolean shouldDelay) {
         Handler handler = getHandler();
 

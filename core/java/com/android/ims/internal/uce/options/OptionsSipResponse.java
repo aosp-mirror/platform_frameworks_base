@@ -17,6 +17,7 @@
 package com.android.ims.internal.uce.options;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,7 +43,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the Options command ID.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCmdId(OptionsCmdId cmdId) {
         this.mCmdId = cmdId;
     }
@@ -59,7 +60,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the request ID
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRequestId(int requestId) {
         this.mRequestId = requestId;
     }
@@ -76,7 +77,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the SIP response code.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setSipResponseCode(int sipResponseCode) {
         this.mSipResponseCode = sipResponseCode;
     }
@@ -93,7 +94,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the SIP response code reason phrase.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setReasonPhrase(String reasonPhrase) {
         this.mReasonPhrase = reasonPhrase;
     }
@@ -110,7 +111,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the SIP retryAfter sec value
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRetryAfter(int retryAfter) {
         this.mRetryAfter = retryAfter;
     }
@@ -119,7 +120,7 @@ public class OptionsSipResponse implements Parcelable {
      * Constructor for the OptionsSipResponse class.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public OptionsSipResponse() {
         mCmdId = new OptionsCmdId();
     };
