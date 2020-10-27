@@ -130,6 +130,7 @@ public final class PendingIntent implements Parcelable {
                     FLAG_UPDATE_CURRENT,
                     FLAG_IMMUTABLE,
                     FLAG_MUTABLE,
+                    FLAG_MUTABLE_UNAUDITED,
 
                     Intent.FILL_IN_ACTION,
                     Intent.FILL_IN_DATA,
@@ -203,6 +204,13 @@ public final class PendingIntent implements Parcelable {
      * PendingIntent that needs to be used with inline reply or bubbles.
      */
     public static final int FLAG_MUTABLE = 1<<25;
+
+    /**
+     * @deprecated Use {@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE} instead.
+     * @hide
+     */
+    @Deprecated
+    public static final int FLAG_MUTABLE_UNAUDITED = FLAG_MUTABLE;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
