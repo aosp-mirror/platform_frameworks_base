@@ -973,8 +973,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextStackId();
             if (mParentTask == null) {
                 task = mTaskDisplayArea.createStackUnchecked(
-                        mWindowingMode, mActivityType, taskId, mOnTop, mActivityInfo,
-                        mIntent, false /* createdByOrganizer */);
+                        mWindowingMode, mActivityType, taskId, mOnTop, mActivityInfo, mIntent,
+                        false /* createdByOrganizer */, false /* deferTaskAppear */,
+                        null /* launchCookie */);
             } else {
                 task = new Task(mSupervisor.mService, taskId, mActivityInfo,
                         mIntent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
@@ -1016,20 +1017,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // moves everything to secondary. Most tests expect this since sysui usually does it.
         boolean mMoveToSecondaryOnEnter = true;
         int mDisplayId;
-        TestSplitOrganizer(ActivityTaskManagerService service, int displayId) {
+        TestSplitOrganizer(ActivityTaskManagerService service, DisplayContent display) {
             mService = service;
-            mDisplayId = displayId;
+            mDisplayId = display.mDisplayId;
             mService.mTaskOrganizerController.registerTaskOrganizer(this);
-            WindowContainerToken primary = mService.mTaskOrganizerController.createRootTask(
-                    displayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).token;
-            mPrimary = WindowContainer.fromBinder(primary.asBinder()).asTask();
-            WindowContainerToken secondary = mService.mTaskOrganizerController.createRootTask(
-                    displayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token;
-            mSecondary = WindowContainer.fromBinder(secondary.asBinder()).asTask();
+            mPrimary = mService.mTaskOrganizerController.createRootTask(
+                    display, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+            mSecondary = mService.mTaskOrganizerController.createRootTask(
+                    display, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);;
         }
         TestSplitOrganizer(ActivityTaskManagerService service) {
-            this(service,
-                    service.mStackSupervisor.mRootWindowContainer.getDefaultDisplay().mDisplayId);
+            this(service, service.mStackSupervisor.mRootWindowContainer.getDefaultDisplay());
         }
         public void setMoveToSecondaryOnEnter(boolean move) {
             mMoveToSecondaryOnEnter = move;

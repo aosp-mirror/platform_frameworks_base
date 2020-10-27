@@ -23,25 +23,24 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_SPLIT_SCREEN;
-import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
+import static com.android.wm.shell.ShellTaskOrganizer.getWindowingMode;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.util.Log;
-import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 
 import java.io.PrintWriter;
 
-class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
-    private static final String TAG = "SplitScreenTaskOrg";
+class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
+    private static final String TAG = "SplitScreenTaskListener";
     private static final boolean DEBUG = SplitScreenController.DEBUG;
 
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -58,20 +57,19 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
 
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
-    SplitScreenTaskOrganizer(SplitScreenController splitScreenController,
+    SplitScreenTaskListener(SplitScreenController splitScreenController,
                     ShellTaskOrganizer shellTaskOrganizer) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
-        mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_SPLIT_SCREEN);
     }
 
-    void init() throws RemoteException {
+    void init() {
         synchronized (this) {
             try {
-                mPrimary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                        WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-                mSecondary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
-                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                mTaskOrganizer.createRootTask(
+                        DEFAULT_DISPLAY, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, this);
+                mTaskOrganizer.createRootTask(
+                        DEFAULT_DISPLAY, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, this);
             } catch (Exception e) {
                 // teardown to prevent callbacks
                 mTaskOrganizer.removeListener(this);
@@ -95,19 +93,26 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (this) {
-            if (mPrimary == null || mSecondary == null) {
-                Log.w(TAG, "Received onTaskAppeared before creating root tasks " + taskInfo);
-                return;
-            }
-
-            if (taskInfo.token.equals(mPrimary.token)) {
+            final int winMode = getWindowingMode(taskInfo);
+            if (winMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                ProtoLog.v(WM_SHELL_TASK_ORG,
+                        "%s onTaskAppeared Primary taskId=%d", TAG, taskInfo.taskId);
+                mPrimary = taskInfo;
                 mPrimarySurface = leash;
-            } else if (taskInfo.token.equals(mSecondary.token)) {
+            } else if (winMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                ProtoLog.v(WM_SHELL_TASK_ORG,
+                        "%s onTaskAppeared Secondary taskId=%d", TAG, taskInfo.taskId);
+                mSecondary = taskInfo;
                 mSecondarySurface = leash;
+            } else {
+                ProtoLog.v(WM_SHELL_TASK_ORG, "%s onTaskAppeared unknown taskId=%d winMode=%d",
+                        TAG, taskInfo.taskId, winMode);
             }
 
             if (!mSplitScreenSupported && mPrimarySurface != null && mSecondarySurface != null) {
                 mSplitScreenSupported = true;
+                mSplitScreenController.onSplitScreenSupported();
+                ProtoLog.v(WM_SHELL_TASK_ORG, "%s onTaskAppeared Supported", TAG);
 
                 // Initialize dim surfaces:
                 mPrimaryDim = new SurfaceControl.Builder(mSurfaceSession)
@@ -240,10 +245,13 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + this);
+        pw.println(innerPrefix + "mSplitScreenSupported=" + mSplitScreenSupported);
+        if (mPrimary != null) pw.println(innerPrefix + "mPrimary.taskId=" + mPrimary.taskId);
+        if (mSecondary != null) pw.println(innerPrefix + "mSecondary.taskId=" + mSecondary.taskId);
     }
 
     @Override
     public String toString() {
-        return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_SPLIT_SCREEN);
+        return TAG;
     }
 }

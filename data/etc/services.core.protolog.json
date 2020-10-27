@@ -2923,6 +2923,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
+    "1396893178": {
+      "message": "createRootTask unknown displayId=%d",
+      "level": "ERROR",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "1401295262": {
       "message": "Mode default, asking user",
       "level": "WARN",
