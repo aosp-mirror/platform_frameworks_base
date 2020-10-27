@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -1605,6 +1606,30 @@ public class TelecomManager {
     }
 
     /**
+     * Returns whether the caller has {@link InCallService} access for companion apps.
+     *
+     * A companion app is an app associated with a physical wearable device via the
+     * {@link android.companion.CompanionDeviceManager} API.
+     *
+     * @return {@code true} if the caller has {@link InCallService} access for
+     *      companion app; {@code false} otherwise.
+     */
+    public boolean hasCompanionInCallServiceAccess() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().hasCompanionInCallServiceAccess(
+                        mContext.getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling hasCompanionInCallServiceAccess().", e);
+            if (!isSystemProcess()) {
+                e.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns whether there is an ongoing call originating from a managed
      * {@link ConnectionService}.  An ongoing call can be in dialing, ringing, active or holding
      * states.
@@ -2414,6 +2439,10 @@ public class TelecomManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException handleCallIntent: " + e);
         }
+    }
+
+    private boolean isSystemProcess() {
+        return Process.myUid() == Process.SYSTEM_UID;
     }
 
     private ITelecomService getTelecomService() {
