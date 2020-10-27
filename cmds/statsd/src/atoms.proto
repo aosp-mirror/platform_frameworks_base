@@ -501,6 +501,7 @@ message Atom {
         DataStallRecoveryReported data_stall_recovery_reported = 315 [(module) = "telephony"];
         MediametricsMediaParserReported mediametrics_mediaparser_reported = 316;
         TlsHandshakeReported tls_handshake_reported = 317 [(module) = "conscrypt"];
+        TextClassifierApiUsageReported text_classifier_api_usage_reported = 318  [(module) = "textclassifier"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -11976,4 +11977,30 @@ message TlsHandshakeReported {
     optional android.stats.tls.CipherSuite cipher_suite = 3;
 
     optional int32 handshake_duration_millis = 4;
+}
+
+/**
+ * Logs when a TextClassifier API is invoked.
+ *
+ * See frameworks/base/core/java/android/view/textclassifier/TextClassifier.java
+ * Logged from: external/libtextclassifier/java/
+ */
+message TextClassifierApiUsageReported {
+    enum ApiType {
+        UNKNOWN_API = 0;
+        SUGGEST_SELECTION = 1;
+        CLASSIFY_TEXT = 2;
+        GENERATE_LINKS = 3;
+        DETECT_LANGUAGES = 4;
+        SUGGEST_CONVERSATION_ACTIONS = 5;
+    }
+    optional ApiType api_type = 1;
+
+    enum ResultType {
+        UNKNOWN_RESULT = 0;
+        SUCCESS = 1;
+        FAIL = 2;
+    }
+    optional ResultType result_type = 2;
+    optional int64 latency_millis = 3;
 }
