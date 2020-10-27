@@ -16,11 +16,14 @@
 
 package android.window;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
+
+import java.util.List;
 
 /**
  * Interface for WindowManager to delegate control of display areas.
@@ -84,10 +87,17 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
      */
     public static final int FEATURE_VENDOR_FIRST = FEATURE_SYSTEM_LAST + 1;
 
+    /**
+     * Registers a DisplayAreaOrganizer to manage display areas for a given feature.
+     *
+     * @return a list of display areas that should be managed by the organizer.
+     */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void registerOrganizer(int displayAreaFeature) {
+    @CallSuper
+    @NonNull
+    public List<DisplayAreaAppearedInfo> registerOrganizer(int displayAreaFeature) {
         try {
-            getController().registerOrganizer(mInterface, displayAreaFeature);
+            return getController().registerOrganizer(mInterface, displayAreaFeature).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -97,6 +107,7 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @CallSuper
     public void unregisterOrganizer() {
         try {
             getController().unregisterOrganizer(mInterface);
@@ -105,6 +116,11 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     }
 
+    /**
+     * Called when a DisplayArea of the registered window type can be controlled by this organizer.
+     * It will not be called for the DisplayAreas that exist when {@link #registerOrganizer(int)} is
+     * called.
+     */
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
             @NonNull SurfaceControl leash) {}
 
