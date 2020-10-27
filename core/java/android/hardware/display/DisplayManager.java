@@ -326,6 +326,15 @@ public final class DisplayManager {
     @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
+    /**
+     * Virtual display flags: Indicates that the display should not be a part of the default
+     * DisplayGroup and instead be part of a new DisplayGroup.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;

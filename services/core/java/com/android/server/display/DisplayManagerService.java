@@ -23,6 +23,7 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
@@ -2024,6 +2025,9 @@ public final class DisplayManagerService extends SystemService {
             if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
                 flags &= ~VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
             }
+            if ((flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                flags &= ~VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+            }
 
             if (projection != null) {
                 try {
@@ -2059,6 +2063,14 @@ public final class DisplayManagerService extends SystemService {
                             "Attempt to create a trusted display without holding permission!");
                     throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                             + "create a trusted virtual display.");
+                }
+            }
+
+            if (callingUid != Process.SYSTEM_UID
+                    && (flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
+                if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+                    throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
+                            + "create a virtual display which is not in the default DisplayGroup.");
                 }
             }
 
