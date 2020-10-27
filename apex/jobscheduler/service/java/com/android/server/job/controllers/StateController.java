@@ -18,7 +18,9 @@ package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.DEBUG;
 
+import android.annotation.NonNull;
 import android.content.Context;
+import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -83,6 +85,13 @@ public abstract class StateController {
      */
     public void rescheduleForFailureLocked(JobStatus newJob, JobStatus failureToReschedule) {
     }
+
+    /** Notice that updated configuration constants are about to be read. */
+    public void prepareForUpdatedConstantsLocked() {}
+
+    /** Process the specified constant and update internal constants if relevant. */
+    public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+            @NonNull String key) {}
 
     /**
      * Called when the JobScheduler.Constants are updated.

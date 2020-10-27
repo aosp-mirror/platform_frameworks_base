@@ -37,12 +37,9 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
@@ -50,10 +47,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -494,7 +490,7 @@ public final class QuotaController extends StateController {
         mChargeTracker.startTracking();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        mQcConstants = new QcConstants(mHandler);
+        mQcConstants = new QcConstants();
 
         final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         mContext.registerReceiverAsUser(mPackageAddedReceiver, UserHandle.ALL, filter, null, null);
@@ -510,11 +506,6 @@ public final class QuotaController extends StateController {
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
-    }
-
-    @Override
-    public void onSystemServicesReady() {
-        mQcConstants.start(mContext.getContentResolver());
     }
 
     @Override
@@ -2028,38 +2019,109 @@ public final class QuotaController extends StateController {
         }
     }
 
-    @VisibleForTesting
-    class QcConstants extends ContentObserver {
-        private ContentResolver mResolver;
-        private final KeyValueListParser mParser = new KeyValueListParser(',');
+    @Override
+    public void prepareForUpdatedConstantsLocked() {
+        mQcConstants.mShouldReevaluateConstraints = false;
+        mQcConstants.mRateLimitingConstantsUpdated = false;
+        mQcConstants.mExecutionPeriodConstantsUpdated = false;
+    }
 
-        private static final String KEY_ALLOWED_TIME_PER_PERIOD_MS = "allowed_time_per_period_ms";
-        private static final String KEY_IN_QUOTA_BUFFER_MS = "in_quota_buffer_ms";
-        private static final String KEY_WINDOW_SIZE_ACTIVE_MS = "window_size_active_ms";
-        private static final String KEY_WINDOW_SIZE_WORKING_MS = "window_size_working_ms";
-        private static final String KEY_WINDOW_SIZE_FREQUENT_MS = "window_size_frequent_ms";
-        private static final String KEY_WINDOW_SIZE_RARE_MS = "window_size_rare_ms";
-        private static final String KEY_WINDOW_SIZE_RESTRICTED_MS = "window_size_restricted_ms";
-        private static final String KEY_MAX_EXECUTION_TIME_MS = "max_execution_time_ms";
-        private static final String KEY_MAX_JOB_COUNT_ACTIVE = "max_job_count_active";
-        private static final String KEY_MAX_JOB_COUNT_WORKING = "max_job_count_working";
-        private static final String KEY_MAX_JOB_COUNT_FREQUENT = "max_job_count_frequent";
-        private static final String KEY_MAX_JOB_COUNT_RARE = "max_job_count_rare";
-        private static final String KEY_MAX_JOB_COUNT_RESTRICTED = "max_job_count_restricted";
-        private static final String KEY_RATE_LIMITING_WINDOW_MS = "rate_limiting_window_ms";
-        private static final String KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW =
-                "max_job_count_per_rate_limiting_window";
-        private static final String KEY_MAX_SESSION_COUNT_ACTIVE = "max_session_count_active";
-        private static final String KEY_MAX_SESSION_COUNT_WORKING = "max_session_count_working";
-        private static final String KEY_MAX_SESSION_COUNT_FREQUENT = "max_session_count_frequent";
-        private static final String KEY_MAX_SESSION_COUNT_RARE = "max_session_count_rare";
-        private static final String KEY_MAX_SESSION_COUNT_RESTRICTED =
-                "max_session_count_restricted";
-        private static final String KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW =
-                "max_session_count_per_rate_limiting_window";
-        private static final String KEY_TIMING_SESSION_COALESCING_DURATION_MS =
-                "timing_session_coalescing_duration_ms";
-        private static final String KEY_MIN_QUOTA_CHECK_DELAY_MS = "min_quota_check_delay_ms";
+    @Override
+    public void processConstantLocked(DeviceConfig.Properties properties, String key) {
+        mQcConstants.processConstantLocked(properties, key);
+    }
+
+    @Override
+    public void onConstantsUpdatedLocked() {
+        if (mQcConstants.mShouldReevaluateConstraints) {
+            // Update job bookkeeping out of band.
+            JobSchedulerBackgroundThread.getHandler().post(() -> {
+                synchronized (mLock) {
+                    invalidateAllExecutionStatsLocked();
+                    maybeUpdateAllConstraintsLocked();
+                }
+            });
+        }
+    }
+
+    @VisibleForTesting
+    class QcConstants {
+        private boolean mShouldReevaluateConstraints = false;
+        private boolean mRateLimitingConstantsUpdated = false;
+        private boolean mExecutionPeriodConstantsUpdated = false;
+
+        /** Prefix to use with all constant keys in order to "sub-namespace" the keys. */
+        private static final String QC_CONSTANT_PREFIX = "qc_";
+
+        @VisibleForTesting
+        static final String KEY_ALLOWED_TIME_PER_PERIOD_MS =
+                QC_CONSTANT_PREFIX + "allowed_time_per_period_ms";
+        @VisibleForTesting
+        static final String KEY_IN_QUOTA_BUFFER_MS =
+                QC_CONSTANT_PREFIX + "in_quota_buffer_ms";
+        @VisibleForTesting
+        static final String KEY_WINDOW_SIZE_ACTIVE_MS =
+                QC_CONSTANT_PREFIX + "window_size_active_ms";
+        @VisibleForTesting
+        static final String KEY_WINDOW_SIZE_WORKING_MS =
+                QC_CONSTANT_PREFIX + "window_size_working_ms";
+        @VisibleForTesting
+        static final String KEY_WINDOW_SIZE_FREQUENT_MS =
+                QC_CONSTANT_PREFIX + "window_size_frequent_ms";
+        @VisibleForTesting
+        static final String KEY_WINDOW_SIZE_RARE_MS =
+                QC_CONSTANT_PREFIX + "window_size_rare_ms";
+        @VisibleForTesting
+        static final String KEY_WINDOW_SIZE_RESTRICTED_MS =
+                QC_CONSTANT_PREFIX + "window_size_restricted_ms";
+        @VisibleForTesting
+        static final String KEY_MAX_EXECUTION_TIME_MS =
+                QC_CONSTANT_PREFIX + "max_execution_time_ms";
+        @VisibleForTesting
+        static final String KEY_MAX_JOB_COUNT_ACTIVE =
+                QC_CONSTANT_PREFIX + "max_job_count_active";
+        @VisibleForTesting
+        static final String KEY_MAX_JOB_COUNT_WORKING =
+                QC_CONSTANT_PREFIX + "max_job_count_working";
+        @VisibleForTesting
+        static final String KEY_MAX_JOB_COUNT_FREQUENT =
+                QC_CONSTANT_PREFIX + "max_job_count_frequent";
+        @VisibleForTesting
+        static final String KEY_MAX_JOB_COUNT_RARE =
+                QC_CONSTANT_PREFIX + "max_job_count_rare";
+        @VisibleForTesting
+        static final String KEY_MAX_JOB_COUNT_RESTRICTED =
+                QC_CONSTANT_PREFIX + "max_job_count_restricted";
+        @VisibleForTesting
+        static final String KEY_RATE_LIMITING_WINDOW_MS =
+                QC_CONSTANT_PREFIX + "rate_limiting_window_ms";
+        @VisibleForTesting
+        static final String KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW =
+                QC_CONSTANT_PREFIX + "max_job_count_per_rate_limiting_window";
+        @VisibleForTesting
+        static final String KEY_MAX_SESSION_COUNT_ACTIVE =
+                QC_CONSTANT_PREFIX + "max_session_count_active";
+        @VisibleForTesting
+        static final String KEY_MAX_SESSION_COUNT_WORKING =
+                QC_CONSTANT_PREFIX + "max_session_count_working";
+        @VisibleForTesting
+        static final String KEY_MAX_SESSION_COUNT_FREQUENT =
+                QC_CONSTANT_PREFIX + "max_session_count_frequent";
+        @VisibleForTesting
+        static final String KEY_MAX_SESSION_COUNT_RARE =
+                QC_CONSTANT_PREFIX + "max_session_count_rare";
+        @VisibleForTesting
+        static final String KEY_MAX_SESSION_COUNT_RESTRICTED =
+                QC_CONSTANT_PREFIX + "max_session_count_restricted";
+        @VisibleForTesting
+        static final String KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW =
+                QC_CONSTANT_PREFIX + "max_session_count_per_rate_limiting_window";
+        @VisibleForTesting
+        static final String KEY_TIMING_SESSION_COALESCING_DURATION_MS =
+                QC_CONSTANT_PREFIX + "timing_session_coalescing_duration_ms";
+        @VisibleForTesting
+        static final String KEY_MIN_QUOTA_CHECK_DELAY_MS =
+                QC_CONSTANT_PREFIX + "min_quota_check_delay_ms";
 
         private static final long DEFAULT_ALLOWED_TIME_PER_PERIOD_MS =
                 10 * 60 * 1000L; // 10 minutes
@@ -2260,238 +2322,273 @@ public final class QuotaController extends StateController {
         /** The minimum value that {@link #RATE_LIMITING_WINDOW_MS} can have. */
         private static final long MIN_RATE_LIMITING_WINDOW_MS = 30 * SECOND_IN_MILLIS;
 
-        QcConstants(Handler handler) {
-            super(handler);
-        }
+        public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+                @NonNull String key) {
+            switch (key) {
+                case KEY_ALLOWED_TIME_PER_PERIOD_MS:
+                case KEY_IN_QUOTA_BUFFER_MS:
+                case KEY_MAX_EXECUTION_TIME_MS:
+                case KEY_WINDOW_SIZE_ACTIVE_MS:
+                case KEY_WINDOW_SIZE_WORKING_MS:
+                case KEY_WINDOW_SIZE_FREQUENT_MS:
+                case KEY_WINDOW_SIZE_RARE_MS:
+                case KEY_WINDOW_SIZE_RESTRICTED_MS:
+                    updateExecutionPeriodConstantsLocked();
+                    break;
 
-        private void start(ContentResolver resolver) {
-            mResolver = resolver;
-            mResolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS), false, this);
-            onChange(true, null);
-        }
+                case KEY_RATE_LIMITING_WINDOW_MS:
+                case KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW:
+                case KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW:
+                    updateRateLimitingConstantsLocked();
+                    break;
 
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            final String constants = Settings.Global.getString(
-                    mResolver, Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS);
-
-            try {
-                mParser.setString(constants);
-            } catch (Exception e) {
-                // Failed to parse the settings string, log this and move on with defaults.
-                Slog.e(TAG, "Bad jobscheduler quota controller settings", e);
+                case KEY_MAX_JOB_COUNT_ACTIVE:
+                    MAX_JOB_COUNT_ACTIVE = properties.getInt(key, DEFAULT_MAX_JOB_COUNT_ACTIVE);
+                    int newActiveMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_ACTIVE);
+                    if (mMaxBucketJobCounts[ACTIVE_INDEX] != newActiveMaxJobCount) {
+                        mMaxBucketJobCounts[ACTIVE_INDEX] = newActiveMaxJobCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_JOB_COUNT_WORKING:
+                    MAX_JOB_COUNT_WORKING = properties.getInt(key, DEFAULT_MAX_JOB_COUNT_WORKING);
+                    int newWorkingMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT,
+                            MAX_JOB_COUNT_WORKING);
+                    if (mMaxBucketJobCounts[WORKING_INDEX] != newWorkingMaxJobCount) {
+                        mMaxBucketJobCounts[WORKING_INDEX] = newWorkingMaxJobCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_JOB_COUNT_FREQUENT:
+                    MAX_JOB_COUNT_FREQUENT = properties.getInt(key, DEFAULT_MAX_JOB_COUNT_FREQUENT);
+                    int newFrequentMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT,
+                            MAX_JOB_COUNT_FREQUENT);
+                    if (mMaxBucketJobCounts[FREQUENT_INDEX] != newFrequentMaxJobCount) {
+                        mMaxBucketJobCounts[FREQUENT_INDEX] = newFrequentMaxJobCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_JOB_COUNT_RARE:
+                    MAX_JOB_COUNT_RARE = properties.getInt(key, DEFAULT_MAX_JOB_COUNT_RARE);
+                    int newRareMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_RARE);
+                    if (mMaxBucketJobCounts[RARE_INDEX] != newRareMaxJobCount) {
+                        mMaxBucketJobCounts[RARE_INDEX] = newRareMaxJobCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_JOB_COUNT_RESTRICTED:
+                    MAX_JOB_COUNT_RESTRICTED =
+                            properties.getInt(key, DEFAULT_MAX_JOB_COUNT_RESTRICTED);
+                    int newRestrictedMaxJobCount =
+                            Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_RESTRICTED);
+                    if (mMaxBucketJobCounts[RESTRICTED_INDEX] != newRestrictedMaxJobCount) {
+                        mMaxBucketJobCounts[RESTRICTED_INDEX] = newRestrictedMaxJobCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_SESSION_COUNT_ACTIVE:
+                    MAX_SESSION_COUNT_ACTIVE =
+                            properties.getInt(key, DEFAULT_MAX_SESSION_COUNT_ACTIVE);
+                    int newActiveMaxSessionCount =
+                            Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_ACTIVE);
+                    if (mMaxBucketSessionCounts[ACTIVE_INDEX] != newActiveMaxSessionCount) {
+                        mMaxBucketSessionCounts[ACTIVE_INDEX] = newActiveMaxSessionCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_SESSION_COUNT_WORKING:
+                    MAX_SESSION_COUNT_WORKING =
+                            properties.getInt(key, DEFAULT_MAX_SESSION_COUNT_WORKING);
+                    int newWorkingMaxSessionCount =
+                            Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_WORKING);
+                    if (mMaxBucketSessionCounts[WORKING_INDEX] != newWorkingMaxSessionCount) {
+                        mMaxBucketSessionCounts[WORKING_INDEX] = newWorkingMaxSessionCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_SESSION_COUNT_FREQUENT:
+                    MAX_SESSION_COUNT_FREQUENT =
+                            properties.getInt(key, DEFAULT_MAX_SESSION_COUNT_FREQUENT);
+                    int newFrequentMaxSessionCount =
+                            Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_FREQUENT);
+                    if (mMaxBucketSessionCounts[FREQUENT_INDEX] != newFrequentMaxSessionCount) {
+                        mMaxBucketSessionCounts[FREQUENT_INDEX] = newFrequentMaxSessionCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_SESSION_COUNT_RARE:
+                    MAX_SESSION_COUNT_RARE = properties.getInt(key, DEFAULT_MAX_SESSION_COUNT_RARE);
+                    int newRareMaxSessionCount =
+                            Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_RARE);
+                    if (mMaxBucketSessionCounts[RARE_INDEX] != newRareMaxSessionCount) {
+                        mMaxBucketSessionCounts[RARE_INDEX] = newRareMaxSessionCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MAX_SESSION_COUNT_RESTRICTED:
+                    MAX_SESSION_COUNT_RESTRICTED =
+                            properties.getInt(key, DEFAULT_MAX_SESSION_COUNT_RESTRICTED);
+                    int newRestrictedMaxSessionCount = Math.max(0, MAX_SESSION_COUNT_RESTRICTED);
+                    if (mMaxBucketSessionCounts[RESTRICTED_INDEX] != newRestrictedMaxSessionCount) {
+                        mMaxBucketSessionCounts[RESTRICTED_INDEX] = newRestrictedMaxSessionCount;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_TIMING_SESSION_COALESCING_DURATION_MS:
+                    TIMING_SESSION_COALESCING_DURATION_MS =
+                            properties.getLong(key, DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS);
+                    long newSessionCoalescingDurationMs = Math.min(15 * MINUTE_IN_MILLIS,
+                            Math.max(0, TIMING_SESSION_COALESCING_DURATION_MS));
+                    if (mTimingSessionCoalescingDurationMs != newSessionCoalescingDurationMs) {
+                        mTimingSessionCoalescingDurationMs = newSessionCoalescingDurationMs;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_MIN_QUOTA_CHECK_DELAY_MS:
+                    MIN_QUOTA_CHECK_DELAY_MS =
+                            properties.getLong(key, DEFAULT_MIN_QUOTA_CHECK_DELAY_MS);
+                    // We don't need to re-evaluate execution stats or constraint status for this.
+                    // Limit the delay to the range [0, 15] minutes.
+                    mInQuotaAlarmListener.setMinQuotaCheckDelayMs(
+                            Math.min(15 * MINUTE_IN_MILLIS, Math.max(0, MIN_QUOTA_CHECK_DELAY_MS)));
+                    break;
             }
-
-            ALLOWED_TIME_PER_PERIOD_MS = mParser.getDurationMillis(
-                    KEY_ALLOWED_TIME_PER_PERIOD_MS, DEFAULT_ALLOWED_TIME_PER_PERIOD_MS);
-            IN_QUOTA_BUFFER_MS = mParser.getDurationMillis(
-                    KEY_IN_QUOTA_BUFFER_MS, DEFAULT_IN_QUOTA_BUFFER_MS);
-            WINDOW_SIZE_ACTIVE_MS = mParser.getDurationMillis(
-                    KEY_WINDOW_SIZE_ACTIVE_MS, DEFAULT_WINDOW_SIZE_ACTIVE_MS);
-            WINDOW_SIZE_WORKING_MS = mParser.getDurationMillis(
-                    KEY_WINDOW_SIZE_WORKING_MS, DEFAULT_WINDOW_SIZE_WORKING_MS);
-            WINDOW_SIZE_FREQUENT_MS = mParser.getDurationMillis(
-                    KEY_WINDOW_SIZE_FREQUENT_MS, DEFAULT_WINDOW_SIZE_FREQUENT_MS);
-            WINDOW_SIZE_RARE_MS = mParser.getDurationMillis(
-                    KEY_WINDOW_SIZE_RARE_MS, DEFAULT_WINDOW_SIZE_RARE_MS);
-            WINDOW_SIZE_RESTRICTED_MS = mParser.getDurationMillis(
-                    KEY_WINDOW_SIZE_RESTRICTED_MS, DEFAULT_WINDOW_SIZE_RESTRICTED_MS);
-            MAX_EXECUTION_TIME_MS = mParser.getDurationMillis(
-                    KEY_MAX_EXECUTION_TIME_MS, DEFAULT_MAX_EXECUTION_TIME_MS);
-            MAX_JOB_COUNT_ACTIVE = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_ACTIVE, DEFAULT_MAX_JOB_COUNT_ACTIVE);
-            MAX_JOB_COUNT_WORKING = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_WORKING, DEFAULT_MAX_JOB_COUNT_WORKING);
-            MAX_JOB_COUNT_FREQUENT = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_FREQUENT, DEFAULT_MAX_JOB_COUNT_FREQUENT);
-            MAX_JOB_COUNT_RARE = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_RARE, DEFAULT_MAX_JOB_COUNT_RARE);
-            MAX_JOB_COUNT_RESTRICTED = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_RESTRICTED, DEFAULT_MAX_JOB_COUNT_RESTRICTED);
-            RATE_LIMITING_WINDOW_MS = mParser.getLong(
-                    KEY_RATE_LIMITING_WINDOW_MS, DEFAULT_RATE_LIMITING_WINDOW_MS);
-            MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
-                    DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
-            MAX_SESSION_COUNT_ACTIVE = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_ACTIVE, DEFAULT_MAX_SESSION_COUNT_ACTIVE);
-            MAX_SESSION_COUNT_WORKING = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_WORKING, DEFAULT_MAX_SESSION_COUNT_WORKING);
-            MAX_SESSION_COUNT_FREQUENT = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_FREQUENT, DEFAULT_MAX_SESSION_COUNT_FREQUENT);
-            MAX_SESSION_COUNT_RARE = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_RARE, DEFAULT_MAX_SESSION_COUNT_RARE);
-            MAX_SESSION_COUNT_RESTRICTED = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_RESTRICTED, DEFAULT_MAX_SESSION_COUNT_RESTRICTED);
-            MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
-                    DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
-            TIMING_SESSION_COALESCING_DURATION_MS = mParser.getLong(
-                    KEY_TIMING_SESSION_COALESCING_DURATION_MS,
-                    DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS);
-            MIN_QUOTA_CHECK_DELAY_MS = mParser.getDurationMillis(KEY_MIN_QUOTA_CHECK_DELAY_MS,
-                    DEFAULT_MIN_QUOTA_CHECK_DELAY_MS);
-
-            updateConstants();
         }
 
-        @VisibleForTesting
-        void updateConstants() {
-            synchronized (mLock) {
-                boolean changed = false;
+        private void updateExecutionPeriodConstantsLocked() {
+            if (mExecutionPeriodConstantsUpdated) {
+                return;
+            }
+            mExecutionPeriodConstantsUpdated = true;
 
-                long newMaxExecutionTimeMs = Math.max(MIN_MAX_EXECUTION_TIME_MS,
-                        Math.min(MAX_PERIOD_MS, MAX_EXECUTION_TIME_MS));
-                if (mMaxExecutionTimeMs != newMaxExecutionTimeMs) {
-                    mMaxExecutionTimeMs = newMaxExecutionTimeMs;
-                    mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
-                    changed = true;
-                }
-                long newAllowedTimeMs = Math.min(mMaxExecutionTimeMs,
-                        Math.max(MINUTE_IN_MILLIS, ALLOWED_TIME_PER_PERIOD_MS));
-                if (mAllowedTimePerPeriodMs != newAllowedTimeMs) {
-                    mAllowedTimePerPeriodMs = newAllowedTimeMs;
-                    mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
-                    changed = true;
-                }
-                // Make sure quota buffer is non-negative, not greater than allowed time per period,
-                // and no more than 5 minutes.
-                long newQuotaBufferMs = Math.max(0, Math.min(mAllowedTimePerPeriodMs,
-                        Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS)));
-                if (mQuotaBufferMs != newQuotaBufferMs) {
-                    mQuotaBufferMs = newQuotaBufferMs;
-                    mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
-                    mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
-                    changed = true;
-                }
-                long newActivePeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_ACTIVE_MS));
-                if (mBucketPeriodsMs[ACTIVE_INDEX] != newActivePeriodMs) {
-                    mBucketPeriodsMs[ACTIVE_INDEX] = newActivePeriodMs;
-                    changed = true;
-                }
-                long newWorkingPeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_WORKING_MS));
-                if (mBucketPeriodsMs[WORKING_INDEX] != newWorkingPeriodMs) {
-                    mBucketPeriodsMs[WORKING_INDEX] = newWorkingPeriodMs;
-                    changed = true;
-                }
-                long newFrequentPeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_FREQUENT_MS));
-                if (mBucketPeriodsMs[FREQUENT_INDEX] != newFrequentPeriodMs) {
-                    mBucketPeriodsMs[FREQUENT_INDEX] = newFrequentPeriodMs;
-                    changed = true;
-                }
-                long newRarePeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_RARE_MS));
-                if (mBucketPeriodsMs[RARE_INDEX] != newRarePeriodMs) {
-                    mBucketPeriodsMs[RARE_INDEX] = newRarePeriodMs;
-                    changed = true;
-                }
-                // Fit in the range [allowed time (10 mins), 1 week].
-                long newRestrictedPeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                        Math.min(7 * 24 * 60 * MINUTE_IN_MILLIS, WINDOW_SIZE_RESTRICTED_MS));
-                if (mBucketPeriodsMs[RESTRICTED_INDEX] != newRestrictedPeriodMs) {
-                    mBucketPeriodsMs[RESTRICTED_INDEX] = newRestrictedPeriodMs;
-                    changed = true;
-                }
-                long newRateLimitingWindowMs = Math.min(MAX_PERIOD_MS,
-                        Math.max(MIN_RATE_LIMITING_WINDOW_MS, RATE_LIMITING_WINDOW_MS));
-                if (mRateLimitingWindowMs != newRateLimitingWindowMs) {
-                    mRateLimitingWindowMs = newRateLimitingWindowMs;
-                    changed = true;
-                }
-                int newMaxJobCountPerRateLimitingWindow = Math.max(
-                        MIN_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
-                        MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
-                if (mMaxJobCountPerRateLimitingWindow != newMaxJobCountPerRateLimitingWindow) {
-                    mMaxJobCountPerRateLimitingWindow = newMaxJobCountPerRateLimitingWindow;
-                    changed = true;
-                }
-                int newActiveMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_ACTIVE);
-                if (mMaxBucketJobCounts[ACTIVE_INDEX] != newActiveMaxJobCount) {
-                    mMaxBucketJobCounts[ACTIVE_INDEX] = newActiveMaxJobCount;
-                    changed = true;
-                }
-                int newWorkingMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_WORKING);
-                if (mMaxBucketJobCounts[WORKING_INDEX] != newWorkingMaxJobCount) {
-                    mMaxBucketJobCounts[WORKING_INDEX] = newWorkingMaxJobCount;
-                    changed = true;
-                }
-                int newFrequentMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_FREQUENT);
-                if (mMaxBucketJobCounts[FREQUENT_INDEX] != newFrequentMaxJobCount) {
-                    mMaxBucketJobCounts[FREQUENT_INDEX] = newFrequentMaxJobCount;
-                    changed = true;
-                }
-                int newRareMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_RARE);
-                if (mMaxBucketJobCounts[RARE_INDEX] != newRareMaxJobCount) {
-                    mMaxBucketJobCounts[RARE_INDEX] = newRareMaxJobCount;
-                    changed = true;
-                }
-                int newRestrictedMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT,
-                        MAX_JOB_COUNT_RESTRICTED);
-                if (mMaxBucketJobCounts[RESTRICTED_INDEX] != newRestrictedMaxJobCount) {
-                    mMaxBucketJobCounts[RESTRICTED_INDEX] = newRestrictedMaxJobCount;
-                    changed = true;
-                }
-                int newMaxSessionCountPerRateLimitPeriod = Math.max(
-                        MIN_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
-                        MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
-                if (mMaxSessionCountPerRateLimitingWindow != newMaxSessionCountPerRateLimitPeriod) {
-                    mMaxSessionCountPerRateLimitingWindow = newMaxSessionCountPerRateLimitPeriod;
-                    changed = true;
-                }
-                int newActiveMaxSessionCount =
-                        Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_ACTIVE);
-                if (mMaxBucketSessionCounts[ACTIVE_INDEX] != newActiveMaxSessionCount) {
-                    mMaxBucketSessionCounts[ACTIVE_INDEX] = newActiveMaxSessionCount;
-                    changed = true;
-                }
-                int newWorkingMaxSessionCount =
-                        Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_WORKING);
-                if (mMaxBucketSessionCounts[WORKING_INDEX] != newWorkingMaxSessionCount) {
-                    mMaxBucketSessionCounts[WORKING_INDEX] = newWorkingMaxSessionCount;
-                    changed = true;
-                }
-                int newFrequentMaxSessionCount =
-                        Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_FREQUENT);
-                if (mMaxBucketSessionCounts[FREQUENT_INDEX] != newFrequentMaxSessionCount) {
-                    mMaxBucketSessionCounts[FREQUENT_INDEX] = newFrequentMaxSessionCount;
-                    changed = true;
-                }
-                int newRareMaxSessionCount =
-                        Math.max(MIN_BUCKET_SESSION_COUNT, MAX_SESSION_COUNT_RARE);
-                if (mMaxBucketSessionCounts[RARE_INDEX] != newRareMaxSessionCount) {
-                    mMaxBucketSessionCounts[RARE_INDEX] = newRareMaxSessionCount;
-                    changed = true;
-                }
-                int newRestrictedMaxSessionCount = Math.max(0, MAX_SESSION_COUNT_RESTRICTED);
-                if (mMaxBucketSessionCounts[RESTRICTED_INDEX] != newRestrictedMaxSessionCount) {
-                    mMaxBucketSessionCounts[RESTRICTED_INDEX] = newRestrictedMaxSessionCount;
-                    changed = true;
-                }
-                long newSessionCoalescingDurationMs = Math.min(15 * MINUTE_IN_MILLIS,
-                        Math.max(0, TIMING_SESSION_COALESCING_DURATION_MS));
-                if (mTimingSessionCoalescingDurationMs != newSessionCoalescingDurationMs) {
-                    mTimingSessionCoalescingDurationMs = newSessionCoalescingDurationMs;
-                    changed = true;
-                }
-                // Don't set changed to true for this one since we don't need to re-evaluate
-                // execution stats or constraint status. Limit the delay to the range [0, 15]
-                // minutes.
-                mInQuotaAlarmListener.setMinQuotaCheckDelayMs(
-                        Math.min(15 * MINUTE_IN_MILLIS, Math.max(0, MIN_QUOTA_CHECK_DELAY_MS)));
+            // Query the values as an atomic set.
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_ALLOWED_TIME_PER_PERIOD_MS, KEY_IN_QUOTA_BUFFER_MS,
+                    KEY_MAX_EXECUTION_TIME_MS, KEY_WINDOW_SIZE_ACTIVE_MS,
+                    KEY_WINDOW_SIZE_WORKING_MS,
+                    KEY_WINDOW_SIZE_FREQUENT_MS, KEY_WINDOW_SIZE_RARE_MS,
+                    KEY_WINDOW_SIZE_RESTRICTED_MS);
+            ALLOWED_TIME_PER_PERIOD_MS =
+                    properties.getLong(KEY_ALLOWED_TIME_PER_PERIOD_MS,
+                            DEFAULT_ALLOWED_TIME_PER_PERIOD_MS);
+            IN_QUOTA_BUFFER_MS = properties.getLong(KEY_IN_QUOTA_BUFFER_MS,
+                    DEFAULT_IN_QUOTA_BUFFER_MS);
+            MAX_EXECUTION_TIME_MS = properties.getLong(KEY_MAX_EXECUTION_TIME_MS,
+                    DEFAULT_MAX_EXECUTION_TIME_MS);
+            WINDOW_SIZE_ACTIVE_MS = properties.getLong(KEY_WINDOW_SIZE_ACTIVE_MS,
+                    DEFAULT_WINDOW_SIZE_ACTIVE_MS);
+            WINDOW_SIZE_WORKING_MS =
+                    properties.getLong(KEY_WINDOW_SIZE_WORKING_MS, DEFAULT_WINDOW_SIZE_WORKING_MS);
+            WINDOW_SIZE_FREQUENT_MS =
+                    properties.getLong(KEY_WINDOW_SIZE_FREQUENT_MS,
+                            DEFAULT_WINDOW_SIZE_FREQUENT_MS);
+            WINDOW_SIZE_RARE_MS = properties.getLong(KEY_WINDOW_SIZE_RARE_MS,
+                    DEFAULT_WINDOW_SIZE_RARE_MS);
+            WINDOW_SIZE_RESTRICTED_MS =
+                    properties.getLong(KEY_WINDOW_SIZE_RESTRICTED_MS,
+                            DEFAULT_WINDOW_SIZE_RESTRICTED_MS);
 
-                if (changed) {
-                    // Update job bookkeeping out of band.
-                    JobSchedulerBackgroundThread.getHandler().post(() -> {
-                        synchronized (mLock) {
-                            invalidateAllExecutionStatsLocked();
-                            maybeUpdateAllConstraintsLocked();
-                        }
-                    });
-                }
+            long newMaxExecutionTimeMs = Math.max(MIN_MAX_EXECUTION_TIME_MS,
+                    Math.min(MAX_PERIOD_MS, MAX_EXECUTION_TIME_MS));
+            if (mMaxExecutionTimeMs != newMaxExecutionTimeMs) {
+                mMaxExecutionTimeMs = newMaxExecutionTimeMs;
+                mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
+                mShouldReevaluateConstraints = true;
+            }
+            long newAllowedTimeMs = Math.min(mMaxExecutionTimeMs,
+                    Math.max(MINUTE_IN_MILLIS, ALLOWED_TIME_PER_PERIOD_MS));
+            if (mAllowedTimePerPeriodMs != newAllowedTimeMs) {
+                mAllowedTimePerPeriodMs = newAllowedTimeMs;
+                mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // Make sure quota buffer is non-negative, not greater than allowed time per period,
+            // and no more than 5 minutes.
+            long newQuotaBufferMs = Math.max(0, Math.min(mAllowedTimePerPeriodMs,
+                    Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS)));
+            if (mQuotaBufferMs != newQuotaBufferMs) {
+                mQuotaBufferMs = newQuotaBufferMs;
+                mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
+                mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
+                mShouldReevaluateConstraints = true;
+            }
+            long newActivePeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_ACTIVE_MS));
+            if (mBucketPeriodsMs[ACTIVE_INDEX] != newActivePeriodMs) {
+                mBucketPeriodsMs[ACTIVE_INDEX] = newActivePeriodMs;
+                mShouldReevaluateConstraints = true;
+            }
+            long newWorkingPeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_WORKING_MS));
+            if (mBucketPeriodsMs[WORKING_INDEX] != newWorkingPeriodMs) {
+                mBucketPeriodsMs[WORKING_INDEX] = newWorkingPeriodMs;
+                mShouldReevaluateConstraints = true;
+            }
+            long newFrequentPeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_FREQUENT_MS));
+            if (mBucketPeriodsMs[FREQUENT_INDEX] != newFrequentPeriodMs) {
+                mBucketPeriodsMs[FREQUENT_INDEX] = newFrequentPeriodMs;
+                mShouldReevaluateConstraints = true;
+            }
+            long newRarePeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                    Math.min(MAX_PERIOD_MS, WINDOW_SIZE_RARE_MS));
+            if (mBucketPeriodsMs[RARE_INDEX] != newRarePeriodMs) {
+                mBucketPeriodsMs[RARE_INDEX] = newRarePeriodMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // Fit in the range [allowed time (10 mins), 1 week].
+            long newRestrictedPeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                    Math.min(7 * 24 * 60 * MINUTE_IN_MILLIS, WINDOW_SIZE_RESTRICTED_MS));
+            if (mBucketPeriodsMs[RESTRICTED_INDEX] != newRestrictedPeriodMs) {
+                mBucketPeriodsMs[RESTRICTED_INDEX] = newRestrictedPeriodMs;
+                mShouldReevaluateConstraints = true;
+            }
+        }
+
+        private void updateRateLimitingConstantsLocked() {
+            if (mRateLimitingConstantsUpdated) {
+                return;
+            }
+            mRateLimitingConstantsUpdated = true;
+
+            // Query the values as an atomic set.
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_RATE_LIMITING_WINDOW_MS, KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                    KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
+
+            RATE_LIMITING_WINDOW_MS =
+                    properties.getLong(KEY_RATE_LIMITING_WINDOW_MS,
+                            DEFAULT_RATE_LIMITING_WINDOW_MS);
+
+            MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW =
+                    properties.getInt(KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                            DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
+
+            MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW =
+                    properties.getInt(KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+                            DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
+
+            long newRateLimitingWindowMs = Math.min(MAX_PERIOD_MS,
+                    Math.max(MIN_RATE_LIMITING_WINDOW_MS, RATE_LIMITING_WINDOW_MS));
+            if (mRateLimitingWindowMs != newRateLimitingWindowMs) {
+                mRateLimitingWindowMs = newRateLimitingWindowMs;
+                mShouldReevaluateConstraints = true;
+            }
+            int newMaxJobCountPerRateLimitingWindow = Math.max(
+                    MIN_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                    MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
+            if (mMaxJobCountPerRateLimitingWindow != newMaxJobCountPerRateLimitingWindow) {
+                mMaxJobCountPerRateLimitingWindow = newMaxJobCountPerRateLimitingWindow;
+                mShouldReevaluateConstraints = true;
+            }
+            int newMaxSessionCountPerRateLimitPeriod = Math.max(
+                    MIN_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+                    MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
+            if (mMaxSessionCountPerRateLimitingWindow != newMaxSessionCountPerRateLimitPeriod) {
+                mMaxSessionCountPerRateLimitingWindow = newMaxSessionCountPerRateLimitPeriod;
+                mShouldReevaluateConstraints = true;
             }
         }
 
@@ -2631,6 +2728,11 @@ public final class QuotaController extends StateController {
     @VisibleForTesting
     int getMaxSessionCountPerRateLimitingWindow() {
         return mMaxSessionCountPerRateLimitingWindow;
+    }
+
+    @VisibleForTesting
+    long getMinQuotaCheckDelayMs() {
+        return mInQuotaAlarmListener.mMinQuotaCheckDelayMs;
     }
 
     @VisibleForTesting
