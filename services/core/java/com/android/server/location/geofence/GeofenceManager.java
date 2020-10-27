@@ -41,7 +41,6 @@ import android.stats.location.LocationStatsEnums;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.listeners.ListenerMultiplexer;
@@ -60,8 +59,8 @@ import java.util.Objects;
  * Manages all geofences.
  */
 public class GeofenceManager extends
-        ListenerMultiplexer<GeofenceKey, PendingIntent, ListenerOperation<PendingIntent>,
-                        GeofenceManager.GeofenceRegistration, LocationRequest> implements
+        ListenerMultiplexer<GeofenceKey, PendingIntent, GeofenceManager.GeofenceRegistration,
+                LocationRequest> implements
         LocationListener {
 
     private static final String TAG = "GeofenceManager";
@@ -121,12 +120,10 @@ public class GeofenceManager extends
         }
 
         @Override
-        protected ListenerOperation<PendingIntent> onActive() {
+        protected void onActive() {
             Location location = getLastLocation();
             if (location != null) {
-                return onLocationChanged(location);
-            } else {
-                return null;
+                executeOperation(onLocationChanged(location));
             }
         }
 
@@ -304,7 +301,7 @@ public class GeofenceManager extends
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            addRegistration(new GeofenceKey(pendingIntent, geofence),
+            putRegistration(new GeofenceKey(pendingIntent, geofence),
                     new GeofenceRegistration(geofence, callerIdentity, pendingIntent));
         } finally {
             Binder.restoreCallingIdentity(identity);

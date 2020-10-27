@@ -19,12 +19,11 @@ package android.location;
 import android.annotation.NonNull;
 import android.os.Bundle;
 
+import java.util.concurrent.Executor;
+
 /**
- * Used for receiving notifications from the LocationManager when
- * the location has changed. These methods are called if the
- * LocationListener has been registered with the location manager service
- * using the {@link LocationManager#requestLocationUpdates(String, long, float, LocationListener)}
- * method.
+ * Used for receiving notifications when the device location has changed. These methods are called
+ * when the listener has been registered with the LocationManager.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -32,6 +31,8 @@ import android.os.Bundle;
  * <a href="{@docRoot}guide/topics/location/obtaining-user-location.html">Obtaining User
  * Location</a> developer guide.</p>
  * </div>
+ *
+ * @see LocationManager#requestLocationUpdates(String, LocationRequest, Executor, LocationListener)
  */
 public interface LocationListener {
 

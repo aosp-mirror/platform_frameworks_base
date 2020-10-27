@@ -171,7 +171,9 @@ public abstract class LocationProviderBase {
         if (manager != null) {
             try {
                 manager.onSetAllowed(mAllowed);
-            } catch (RemoteException | RuntimeException e) {
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
                 Log.w(mTag, e);
             }
         }
@@ -191,7 +193,9 @@ public abstract class LocationProviderBase {
         if (manager != null) {
             try {
                 manager.onSetProperties(mProperties);
-            } catch (RemoteException | RuntimeException e) {
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
                 Log.w(mTag, e);
             }
         }
@@ -248,7 +252,9 @@ public abstract class LocationProviderBase {
 
             try {
                 manager.onReportLocation(location);
-            } catch (RemoteException | RuntimeException e) {
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
                 Log.w(mTag, e);
             }
         }
@@ -339,6 +345,8 @@ public abstract class LocationProviderBase {
                     manager.onSetProperties(mProperties);
                     manager.onSetAllowed(mAllowed);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } catch (RuntimeException e) {
                     Log.w(mTag, e);
                 }
 

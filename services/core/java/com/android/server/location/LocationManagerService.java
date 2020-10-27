@@ -556,8 +556,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerLocationListener(String provider, LocationRequest request,
-            ILocationListener listener, String packageName, String attributionTag,
-            String listenerId) {
+            ILocationListener listener, String packageName, @Nullable String attributionTag,
+            @Nullable String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -582,7 +582,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerLocationPendingIntent(String provider, LocationRequest request,
-            PendingIntent pendingIntent, String packageName, String attributionTag) {
+            PendingIntent pendingIntent, String packageName, @Nullable String attributionTag) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 AppOpsManager.toReceiverId(pendingIntent));
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),

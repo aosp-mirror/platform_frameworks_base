@@ -216,15 +216,15 @@ public class LocationManager {
      * Key used for an extra holding a boolean enabled/disabled status value when a provider
      * enabled/disabled event is broadcast using a PendingIntent.
      *
-     * @see #requestLocationUpdates(String, long, float, PendingIntent)
+     * @see #requestLocationUpdates(String, LocationRequest, PendingIntent)
      */
     public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
 
     /**
-     * Key used for an extra holding a {@link Location} value when a location change is broadcast
-     * using a PendingIntent.
+     * Key used for an extra holding a {@link Location} value when a location change is sent using
+     * a PendingIntent.
      *
-     * @see #requestLocationUpdates(String, long, float, PendingIntent)
+     * @see #requestLocationUpdates(String, LocationRequest, PendingIntent)
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
@@ -1322,27 +1322,26 @@ public class LocationManager {
         Preconditions.checkArgument(provider != null, "invalid null provider");
         Preconditions.checkArgument(locationRequest != null, "invalid null location request");
 
-        synchronized (sLocationListeners) {
-            WeakReference<LocationListenerTransport> reference = sLocationListeners.get(listener);
-            LocationListenerTransport transport = reference != null ? reference.get() : null;
-            if (transport == null) {
-                transport = new LocationListenerTransport(listener, executor);
-                sLocationListeners.put(listener, new WeakReference<>(transport));
-            } else {
-                transport.setExecutor(executor);
-            }
+        try {
+            synchronized (sLocationListeners) {
+                WeakReference<LocationListenerTransport> reference = sLocationListeners.get(
+                        listener);
+                LocationListenerTransport transport = reference != null ? reference.get() : null;
+                if (transport == null) {
+                    transport = new LocationListenerTransport(listener, executor);
+                } else {
+                    Preconditions.checkState(transport.isRegistered());
+                    transport.setExecutor(executor);
+                }
 
-            try {
-                // making the service call while under lock is less than ideal since LMS must
-                // make sure that callbacks are not made on the same thread - however it is the
-                // easiest way to guarantee that clients will not receive callbacks after
-                // unregistration is complete.
                 mService.registerLocationListener(provider, locationRequest, transport,
                         mContext.getPackageName(), mContext.getAttributionTag(),
                         AppOpsManager.toReceiverId(listener));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+
+                sLocationListeners.put(listener, new WeakReference<>(transport));
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1429,23 +1428,17 @@ public class LocationManager {
     public void removeUpdates(@NonNull LocationListener listener) {
         Preconditions.checkArgument(listener != null, "invalid null listener");
 
-        synchronized (sLocationListeners) {
-            WeakReference<LocationListenerTransport> reference = sLocationListeners.remove(
-                    listener);
-            LocationListenerTransport transport = reference != null ? reference.get() : null;
-            if (transport != null) {
-                transport.unregister();
-
-                try {
-                    // making the service call while under lock is less than ideal since LMS must
-                    // make sure that callbacks are not made on the same thread - however it is the
-                    // easiest way to guarantee that clients will not receive callbacks after
-                    // unregistration is complete.
+        try {
+            synchronized (sLocationListeners) {
+                WeakReference<LocationListenerTransport> ref = sLocationListeners.remove(listener);
+                LocationListenerTransport transport = ref != null ? ref.get() : null;
+                if (transport != null) {
+                    transport.unregister();
                     mService.unregisterLocationListener(transport);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
                 }
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2568,7 +2561,7 @@ public class LocationManager {
         @Nullable private volatile LocationListener mListener;
 
         LocationListenerTransport(LocationListener listener, Executor executor) {
-            Preconditions.checkArgument(listener != null, "invalid null listener/callback");
+            Preconditions.checkArgument(listener != null, "invalid null listener");
             mListener = listener;
             setExecutor(executor);
         }
@@ -2576,6 +2569,10 @@ public class LocationManager {
         void setExecutor(Executor executor) {
             Preconditions.checkArgument(executor != null, "invalid null executor");
             mExecutor = executor;
+        }
+
+        boolean isRegistered() {
+            return mListener != null;
         }
 
         void unregister() {

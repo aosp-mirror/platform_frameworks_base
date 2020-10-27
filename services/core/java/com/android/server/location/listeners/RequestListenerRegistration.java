@@ -16,8 +16,6 @@
 
 package com.android.server.location.listeners;
 
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
-
 import java.util.concurrent.Executor;
 
 /**
@@ -25,11 +23,9 @@ import java.util.concurrent.Executor;
  *
  * @param <TRequest>           request type
  * @param <TListener>          listener type
- * @param <TListenerOperation> listener operation type
  */
-public class RequestListenerRegistration<TRequest, TListener,
-        TListenerOperation extends ListenerOperation<TListener>> extends
-        ListenerRegistration<TListener, TListenerOperation> {
+public class RequestListenerRegistration<TRequest, TListener> extends
+        ListenerRegistration<TListener> {
 
     private final TRequest mRequest;
 
