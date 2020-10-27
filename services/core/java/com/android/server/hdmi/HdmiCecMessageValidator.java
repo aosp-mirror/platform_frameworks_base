@@ -137,6 +137,10 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_SET_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
         addValidationInfo(
                 Constants.MESSAGE_SET_TIMER_PROGRAM_TITLE, new AsciiValidator(1, 14), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_TIMER_CLEARED_STATUS,
+                new TimerClearedStatusValidator(),
+                DEST_DIRECT);
 
         // Messages for the System Information.
         FixedLengthValidator oneByteValidator = new FixedLengthValidator(1);
@@ -788,6 +792,21 @@ public class HdmiCecMessageValidator {
                             && isValidMinute(params[5]) // Duration - Minute
                             && isValidRecordingSequence(params[6]) // Recording Sequence
                             && isValidExternalSource(params, 7)); // External Source
+        }
+    }
+
+    /**
+     * Check if the given timer cleared status parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     */
+    private class TimerClearedStatusValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isWithinRange(params[0], 0x00, 0x02) || (params[0] & 0xFF) == 0x80);
         }
     }
 }
