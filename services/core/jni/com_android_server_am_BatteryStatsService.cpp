@@ -17,7 +17,6 @@
 #define LOG_TAG "BatteryStatsService"
 //#define LOG_NDEBUG 0
 
-#include <climits>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -28,6 +27,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <climits>
 #include <unordered_map>
 #include <utility>
 
@@ -66,10 +66,9 @@ using IPowerV1_0 = android::hardware::power::V1_0::IPower;
 namespace android
 {
 
-#define LAST_RESUME_REASON "/sys/kernel/wakeup_reasons/last_resume_reason"
-#define MAX_REASON_SIZE 512
-
 static bool wakeup_init = false;
+static std::mutex mReasonsMutex;
+static std::vector<std::string> mWakeupReasons;
 static sem_t wakeup_sem;
 extern sp<ISuspendControlService> getSuspendControl();
 
@@ -115,9 +114,25 @@ struct PowerHalDeathRecipient : virtual public hardware::hidl_death_recipient {
 sp<PowerHalDeathRecipient> gDeathRecipient = new PowerHalDeathRecipient();
 
 class WakeupCallback : public BnSuspendCallback {
-   public:
-    binder::Status notifyWakeup(bool success) override {
+public:
+    binder::Status notifyWakeup(bool success,
+                                const std::vector<std::string>& wakeupReasons) override {
         ALOGI("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
+        bool reasonsCaptured = false;
+        {
+            std::unique_lock<std::mutex> reasonsLock(mReasonsMutex, std::defer_lock);
+            if (reasonsLock.try_lock() && mWakeupReasons.empty()) {
+                mWakeupReasons = std::move(wakeupReasons);
+                reasonsCaptured = true;
+            }
+        }
+        if (!reasonsCaptured) {
+            ALOGE("Failed to write wakeup reasons. Reasons dropped:");
+            for (auto wakeupReason : wakeupReasons) {
+                ALOGE("\t%s", wakeupReason.c_str());
+            }
+        }
+
         int ret = sem_post(&wakeup_sem);
         if (ret < 0) {
             char buf[80];
@@ -157,8 +172,6 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
 
     // Wait for wakeup.
     ALOGV("Waiting for wakeup...");
-    // TODO(b/116747600): device can suspend and wakeup after sem_wait() finishes and before wakeup
-    // reason is recorded, i.e. BatteryStats might occasionally miss wakeup events.
     int ret = sem_wait(&wakeup_sem);
     if (ret < 0) {
         char buf[80];
@@ -168,20 +181,27 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
         return 0;
     }
 
-    FILE *fp = fopen(LAST_RESUME_REASON, "r");
-    if (fp == NULL) {
-        ALOGE("Failed to open %s", LAST_RESUME_REASON);
-        return -1;
-    }
-
     char* mergedreason = (char*)env->GetDirectBufferAddress(outBuf);
     int remainreasonlen = (int)env->GetDirectBufferCapacity(outBuf);
 
     ALOGV("Reading wakeup reasons");
+    std::vector<std::string> wakeupReasons;
+    {
+        std::unique_lock<std::mutex> reasonsLock(mReasonsMutex, std::defer_lock);
+        if (reasonsLock.try_lock() && !mWakeupReasons.empty()) {
+            wakeupReasons = std::move(mWakeupReasons);
+            mWakeupReasons.clear();
+        }
+    }
+
+    if (wakeupReasons.empty()) {
+        return 0;
+    }
+
     char* mergedreasonpos = mergedreason;
-    char reasonline[128];
     int i = 0;
-    while (fgets(reasonline, sizeof(reasonline), fp) != NULL) {
+    for (auto wakeupReason : wakeupReasons) {
+        auto reasonline = const_cast<char*>(wakeupReason.c_str());
         char* pos = reasonline;
         char* endPos;
         int len;
@@ -238,10 +258,6 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
         *mergedreasonpos = 0;
     }
 
-    if (fclose(fp) != 0) {
-        ALOGE("Failed to close %s", LAST_RESUME_REASON);
-        return -1;
-    }
     return mergedreasonpos - mergedreason;
 }
 
