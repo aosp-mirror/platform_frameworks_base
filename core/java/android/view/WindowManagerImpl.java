@@ -280,9 +280,9 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
-    public void holdLock(int durationMs) {
+    public void holdLock(IBinder token, int durationMs) {
         try {
-            WindowManagerGlobal.getWindowManagerService().holdLock(durationMs);
+            WindowManagerGlobal.getWindowManagerService().holdLock(token, durationMs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
