@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -242,6 +243,7 @@ class HdmiCecNetwork {
      * Returns null if no logical address matched
      */
     @ServiceThreadOnly
+    @Nullable
     HdmiDeviceInfo getCecDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         return mDeviceInfos.get(HdmiDeviceInfo.idForCecDevice(logicalAddress));
@@ -517,6 +519,10 @@ class HdmiCecNetwork {
             case Constants.MESSAGE_SET_OSD_NAME:
                 handleSetOsdName(message);
                 break;
+            case Constants.MESSAGE_DEVICE_VENDOR_ID:
+                handleDeviceVendorId(message);
+                break;
+
         }
     }
 
@@ -580,6 +586,24 @@ class HdmiCecNetwork {
                 deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
                 deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName,
                 deviceInfo.getDevicePowerStatus()));
+    }
+
+    @ServiceThreadOnly
+    private void handleDeviceVendorId(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int logicalAddress = message.getSource();
+        int vendorId = HdmiUtils.threeBytesToInt(message.getParams());
+
+        HdmiDeviceInfo deviceInfo = getCecDeviceInfo(logicalAddress);
+        if (deviceInfo == null) {
+            Slog.i(TAG, "Unknown source device info for <Device Vendor ID> " + message);
+        } else {
+            HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
+                    deviceInfo.getPhysicalAddress(),
+                    deviceInfo.getPortId(), deviceInfo.getDeviceType(), vendorId,
+                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus());
+            updateCecDevice(updatedDeviceInfo);
+        }
     }
 
     void addCecSwitch(int physicalAddress) {
