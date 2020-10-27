@@ -23,6 +23,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -181,17 +182,27 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSwitchUser() {
+    public void testEnsureActivitiesVisible() {
         final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task childTask = createTaskInStack(rootTask, 0 /* userId */);
-        final Task leafTask1 = createTaskInStack(childTask, 10 /* userId */);
-        final Task leafTask2 = createTaskInStack(childTask, 0 /* userId */);
-        assertEquals(1, rootTask.getChildCount());
-        assertEquals(leafTask2, childTask.getTopChild());
+        final Task leafTask1 = createTaskInStack(rootTask, 0 /* userId */);
+        final Task leafTask2 = createTaskInStack(rootTask, 0 /* userId */);
+        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, leafTask1);
+        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, leafTask2);
 
-        doReturn(true).when(leafTask1).showToCurrentUser();
-        rootTask.switchUser(10);
-        assertEquals(1, rootTask.getChildCount());
-        assertEquals(leafTask1, childTask.getTopChild());
+        // Check visibility of occluded tasks
+        doReturn(false).when(leafTask1).shouldBeVisible(any());
+        doReturn(true).when(leafTask2).shouldBeVisible(any());
+        rootTask.ensureActivitiesVisible(
+                null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
+        assertFalse(activity1.isVisible());
+        assertTrue(activity2.isVisible());
+
+        // Check visibility of not occluded tasks
+        doReturn(true).when(leafTask1).shouldBeVisible(any());
+        doReturn(true).when(leafTask2).shouldBeVisible(any());
+        rootTask.ensureActivitiesVisible(
+                null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
+        assertTrue(activity1.isVisible());
+        assertTrue(activity2.isVisible());
     }
 }
