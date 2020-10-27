@@ -226,8 +226,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private boolean mHasCallback;
 
     /**
-     * Extras sent by service on {@code onFillRequest()} calls; the first non-null extra is saved
-     * and used on subsequent {@code onFillRequest()} and {@code onSaveRequest()} calls.
+     * Extras sent by service on {@code onFillRequest()} calls; the most recent non-null extra is
+     * saved and used on subsequent {@code onFillRequest()} and {@code onSaveRequest()} calls.
      */
     @GuardedBy("mLock")
     private Bundle mClientState;
@@ -1085,7 +1085,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (showMessage) {
             getUiForShowing().showError(message, this);
         }
-        removeSelf();
+        removeFromService();
     }
 
     // FillServiceCallbacks
@@ -1110,7 +1110,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         // Nothing left to do...
-        removeSelf();
+        removeFromService();
     }
 
     // FillServiceCallbacks
@@ -1146,7 +1146,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (showMessage) {
             getUiForShowing().showError(message, this);
         }
-        removeSelf();
+        removeFromService();
     }
 
     /**
@@ -1178,7 +1178,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onServiceDied(@NonNull RemoteFillService service) {
         Slog.w(TAG, "removing session because service died");
-        forceRemoveSelfLocked();
+        forceRemoveFromServiceLocked();
     }
 
     // AutoFillUiCallback
@@ -1198,7 +1198,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             fillInIntent = createAuthFillInIntentLocked(requestId, extras);
             if (fillInIntent == null) {
-                forceRemoveSelfLocked();
+                forceRemoveFromServiceLocked();
                 return;
             }
         }
@@ -1254,7 +1254,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         mHandler.sendMessage(obtainMessage(
-                Session::removeSelf, this));
+                Session::removeFromService, this));
     }
 
     // AutoFillUiCallback
@@ -1326,7 +1326,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void cancelSession() {
         synchronized (mLock) {
-            removeSelfLocked();
+            removeFromServiceLocked();
         }
     }
 
@@ -1346,7 +1346,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
             if (intent == null) {
-                removeSelfLocked();
+                removeFromServiceLocked();
             }
         }
         mHandler.sendMessage(obtainMessage(
@@ -1400,13 +1400,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // Typically happens when app explicitly called cancel() while the service was showing
             // the auth UI.
             Slog.w(TAG, "setAuthenticationResultLocked(" + authenticationId + "): no responses");
-            removeSelf();
+            removeFromService();
             return;
         }
         final FillResponse authenticatedResponse = mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
             Slog.w(TAG, "no authenticated response");
-            removeSelf();
+            removeFromService();
             return;
         }
 
@@ -1417,7 +1417,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final Dataset dataset = authenticatedResponse.getDatasets().get(datasetIdx);
             if (dataset == null) {
                 Slog.w(TAG, "no dataset with index " + datasetIdx + " on fill response");
-                removeSelf();
+                removeFromService();
                 return;
             }
         }
@@ -1502,7 +1502,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.d(TAG, "Rejecting empty/invalid auth result");
             }
             mService.resetLastAugmentedAutofillResponse();
-            removeSelfLocked();
+            removeFromServiceLocked();
             return;
         }
         final List<AutofillId> fieldIds = dataset.getFieldIds();
@@ -2712,7 +2712,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         return;
                     }
                     if (sDebug) Slog.d(TAG, "Finishing session because URL bar changed");
-                    forceRemoveSelfLocked(AutofillManager.STATE_UNKNOWN_COMPAT_MODE);
+                    forceRemoveFromServiceLocked(AutofillManager.STATE_UNKNOWN_COMPAT_MODE);
                     return;
                 }
                 if (!Objects.equals(value, viewState.getCurrentValue())) {
@@ -3223,7 +3223,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             // Nothing to be done, but need to notify client.
             notifyUnavailableToClient(AutofillManager.STATE_FINISHED, autofillableIds);
-            removeSelf();
+            removeFromService();
         } else {
             if ((flags & FLAG_PASSWORD_INPUT_TYPE) != 0) {
                 if (sVerbose) {
@@ -3387,20 +3387,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mAugmentedAutofillDestroyer = remoteService::onDestroyAutofillWindowsRequest;
         }
         return mAugmentedAutofillDestroyer;
-    }
-
-    @GuardedBy("mLock")
-    private void logAugmentedAutofillRequestLocked(int mode,
-            ComponentName augmentedRemoteServiceName, AutofillId focusedId, boolean isWhitelisted,
-            Boolean isInline) {
-        final String historyItem =
-                "aug:id=" + id + " u=" + uid + " m=" + mode
-                        + " a=" + ComponentName.flattenToShortString(mComponentName)
-                        + " f=" + focusedId
-                        + " s=" + augmentedRemoteServiceName
-                        + " w=" + isWhitelisted
-                        + " i=" + isInline;
-        mService.getMaster().logRequestLocked(historyItem);
     }
 
     @GuardedBy("mLock")
@@ -3571,7 +3557,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntentLocked(requestId, mClientState);
             if (fillInIntent == null) {
-                forceRemoveSelfLocked();
+                forceRemoveFromServiceLocked();
                 return;
             }
             final int authenticationId = AutofillManager.makeAuthenticationId(requestId,
@@ -3920,12 +3906,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Cleans up this session.
+     * Destroy this session and perform any clean up work.
      *
      * <p>Typically called in 2 scenarios:
      *
      * <ul>
-     *   <li>When the session naturally finishes (i.e., from {@link #removeSelfLocked()}.
+     *   <li>When the session naturally finishes (i.e., from {@link #removeFromServiceLocked()}.
      *   <li>When the service hosting the session is finished (for example, because the user
      *       disabled it).
      * </ul>
@@ -3987,32 +3973,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Cleans up this session and remove it from the service always, even if it does have a pending
+     * Destroy this session and remove it from the service always, even if it does have a pending
      * Save UI.
      */
     @GuardedBy("mLock")
-    void forceRemoveSelfLocked() {
-        forceRemoveSelfLocked(AutofillManager.STATE_UNKNOWN);
+    void forceRemoveFromServiceLocked() {
+        forceRemoveFromServiceLocked(AutofillManager.STATE_UNKNOWN);
     }
 
     @GuardedBy("mLock")
-    void forceRemoveSelfIfForAugmentedAutofillOnlyLocked() {
+    void forceRemoveFromServiceIfForAugmentedOnlyLocked() {
         if (sVerbose) {
-            Slog.v(TAG, "forceRemoveSelfIfForAugmentedAutofillOnly(" + this.id + "): "
+            Slog.v(TAG, "forceRemoveFromServiceIfForAugmentedOnlyLocked(" + this.id + "): "
                     + mForAugmentedAutofillOnly);
         }
         if (!mForAugmentedAutofillOnly) return;
 
-        forceRemoveSelfLocked();
+        forceRemoveFromServiceLocked();
     }
 
     @GuardedBy("mLock")
-    void forceRemoveSelfLocked(int clientState) {
-        if (sVerbose) Slog.v(TAG, "forceRemoveSelfLocked(): " + mPendingSaveUi);
+    void forceRemoveFromServiceLocked(int clientState) {
+        if (sVerbose) Slog.v(TAG, "forceRemoveFromServiceLocked(): " + mPendingSaveUi);
 
         final boolean isPendingSaveUi = isSaveUiPendingLocked();
         mPendingSaveUi = null;
-        removeSelfLocked();
+        removeFromServiceLocked();
         mUi.destroyAll(mPendingSaveUi, this, false);
         if (!isPendingSaveUi) {
             try {
@@ -4033,28 +4019,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Thread-safe version of {@link #removeSelfLocked()}.
+     * Thread-safe version of {@link #removeFromServiceLocked()}.
      */
-    private void removeSelf() {
+    private void removeFromService() {
         synchronized (mLock) {
-            removeSelfLocked();
+            removeFromServiceLocked();
         }
     }
 
     /**
-     * Cleans up this session and remove it from the service, but but only if it does not have a
+     * Destroy this session and remove it from the service, but but only if it does not have a
      * pending Save UI.
      */
     @GuardedBy("mLock")
-    void removeSelfLocked() {
-        if (sVerbose) Slog.v(TAG, "removeSelfLocked(" + this.id + "): " + mPendingSaveUi);
+    void removeFromServiceLocked() {
+        if (sVerbose) Slog.v(TAG, "removeFromServiceLocked(" + this.id + "): " + mPendingSaveUi);
         if (mDestroyed) {
-            Slog.w(TAG, "Call to Session#removeSelfLocked() rejected - session: "
+            Slog.w(TAG, "Call to Session#removeFromServiceLocked() rejected - session: "
                     + id + " destroyed");
             return;
         }
         if (isSaveUiPendingLocked()) {
-            Slog.i(TAG, "removeSelfLocked() ignored, waiting for pending save ui");
+            Slog.i(TAG, "removeFromServiceLocked() ignored, waiting for pending save ui");
             return;
         }
 
@@ -4134,6 +4120,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         requestLog.addTaggedData(tag, value);
+    }
+
+    @GuardedBy("mLock")
+    private void logAugmentedAutofillRequestLocked(int mode,
+            ComponentName augmentedRemoteServiceName, AutofillId focusedId, boolean isWhitelisted,
+            Boolean isInline) {
+        final String historyItem =
+                "aug:id=" + id + " u=" + uid + " m=" + mode
+                        + " a=" + ComponentName.flattenToShortString(mComponentName)
+                        + " f=" + focusedId
+                        + " s=" + augmentedRemoteServiceName
+                        + " w=" + isWhitelisted
+                        + " i=" + isInline;
+        mService.getMaster().logRequestLocked(historyItem);
     }
 
     private void wtf(@Nullable Exception e, String fmt, Object...args) {
