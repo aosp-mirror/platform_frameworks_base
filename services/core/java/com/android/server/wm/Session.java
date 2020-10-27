@@ -20,7 +20,12 @@ import static android.Manifest.permission.DEVICE_POWER;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+import static android.content.Intent.EXTRA_SHORTCUT_ID;
+import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -49,6 +54,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -297,18 +303,25 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
      */
     @VisibleForTesting
     public void validateAndResolveDragMimeTypeExtras(ClipData data, int callingUid) {
+        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+            throw new IllegalStateException("Need to validate before calling identify is cleared");
+        }
         final ClipDescription desc = data != null ? data.getDescription() : null;
         if (desc == null) {
             return;
         }
         // Ensure that only one of the app mime types are set
         final boolean hasActivity = desc.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY);
-        int appMimeTypeCount = (hasActivity ? 1 : 0);
+        final boolean hasShortcut = desc.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
+        final boolean hasTask = desc.hasMimeType(MIMETYPE_APPLICATION_TASK);
+        int appMimeTypeCount = (hasActivity ? 1 : 0)
+                + (hasShortcut ? 1 : 0)
+                + (hasTask ? 1 : 0);
         if (appMimeTypeCount == 0) {
             return;
         } else if (appMimeTypeCount > 1) {
             throw new IllegalArgumentException("Can not specify more than one of activity, "
-                    + "or task mime types");
+                    + "shortcut, or task mime types");
         }
         // Ensure that data is provided and that they are intents
         if (data.getItemCount() == 0) {
@@ -343,6 +356,28 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);
+            }
+        } else if (hasShortcut) {
+            mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
+                    "performDrag");
+            for (int i = 0; i < data.getItemCount(); i++) {
+                final Intent intent = data.getItemAt(i).getIntent();
+                final UserHandle user = intent.getParcelableExtra(Intent.EXTRA_USER);
+                if (!intent.hasExtra(EXTRA_SHORTCUT_ID)
+                        || TextUtils.isEmpty(intent.getStringExtra(EXTRA_SHORTCUT_ID))
+                        || user == null) {
+                    throw new IllegalArgumentException("Clip item must include the shortcut id and "
+                            + "the user to launch for.");
+                }
+            }
+        } else if (hasTask) {
+            mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
+                    "performDrag");
+            for (int i = 0; i < data.getItemCount(); i++) {
+                final Intent intent = data.getItemAt(i).getIntent();
+                if (intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID) == INVALID_TASK_ID) {
+                    throw new IllegalArgumentException("Clip item must include the task id.");
+                }
             }
         }
     }

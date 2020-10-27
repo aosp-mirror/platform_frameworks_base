@@ -169,6 +169,12 @@
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragLayout.java"
     },
+    "1842752748": {
+      "message": "Clip description: handlingDrag=%b mimeTypes=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_DRAG_AND_DROP",
+      "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
+    },
     "1862198614": {
       "message": "Drag event: action=%s x=%f y=%f xOffset=%f yOffset=%f",
       "level": "VERBOSE",
