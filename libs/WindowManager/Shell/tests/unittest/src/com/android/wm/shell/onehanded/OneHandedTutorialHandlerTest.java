@@ -45,6 +45,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     @Mock
     DisplayController mMockDisplayController;
     @Mock
+    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
+    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
     IOverlayManager mMockOverlayManager;
@@ -59,6 +61,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         mOneHandedController = new OneHandedController(
                 getContext(),
                 mMockDisplayController,
+                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
                 mTutorialHandler,

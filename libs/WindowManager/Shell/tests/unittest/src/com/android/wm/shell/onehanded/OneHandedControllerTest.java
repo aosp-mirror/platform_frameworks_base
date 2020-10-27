@@ -54,6 +54,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     DisplayController mMockDisplayController;
     @Mock
+    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
+    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
     OneHandedTouchHandler mMockTouchHandler;
@@ -75,6 +77,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         OneHandedController oneHandedController = new OneHandedController(
                 mContext,
                 mMockDisplayController,
+                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
@@ -94,7 +97,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mContext);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
                 mContext, mMockDisplayController, animationController, mMockTutorialHandler,
-                Runnable::run);
+                Runnable::run, mMockBackgroundOrganizer);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }

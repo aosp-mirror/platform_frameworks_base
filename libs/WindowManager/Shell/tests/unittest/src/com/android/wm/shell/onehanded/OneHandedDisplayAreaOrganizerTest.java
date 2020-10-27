@@ -80,6 +80,8 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     SurfaceControl mMockLeash;
     @Mock
     WindowContainerTransaction mMockWindowContainerTransaction;
+    @Mock
+    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
 
     Handler mSpyUpdateHandler;
     Handler.Callback mUpdateCallback = (msg) -> false;
@@ -103,7 +105,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockSurfaceTransactionHelper);
         when(mMockAnimator.isRunning()).thenReturn(true);
         when(mMockAnimator.setDuration(anyInt())).thenReturn(mFakeAnimator);
-        when(mMockAnimator.setOneHandedAnimationCallbacks(any())).thenReturn(mFakeAnimator);
+        when(mMockAnimator.addOneHandedAnimationCallback(any())).thenReturn(mFakeAnimator);
         when(mMockAnimator.setTransitionDirection(anyInt())).thenReturn(mFakeAnimator);
         when(mMockLeash.getWidth()).thenReturn(DISPLAY_WIDTH);
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
@@ -112,7 +114,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockDisplayController,
                 mMockAnimationController,
                 mTutorialHandler,
-                Runnable::run);
+                Runnable::run, mMockBackgroundOrganizer);
         mSpyUpdateHandler = spy(new Handler(OneHandedThread.get().getLooper(), mUpdateCallback));
         mDisplayAreaOrganizer.setUpdateHandler(mSpyUpdateHandler);
     }

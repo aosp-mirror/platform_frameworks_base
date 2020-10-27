@@ -203,7 +203,7 @@ public class OneHandedAnimationController {
             mSurfaceTransactionHelper = helper;
         }
 
-        OneHandedTransitionAnimator<T> setOneHandedAnimationCallbacks(
+        OneHandedTransitionAnimator<T> addOneHandedAnimationCallback(
                 OneHandedAnimationCallback callback) {
             mOneHandedAnimationCallbacks.add(callback);
             return this;
