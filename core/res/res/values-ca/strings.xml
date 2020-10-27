@@ -327,7 +327,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el nivell i la posició del zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Fer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes dactilars"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes digitals"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes dactilars del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fes una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pots fer una captura de la pantalla."</string>
@@ -1129,10 +1129,8 @@
     <string name="capital_off" msgid="7443704171014626777">"NO"</string>
     <string name="checked" msgid="9179896827054513119">"seleccionat"</string>
     <string name="not_checked" msgid="7972320087569023342">"no seleccionat"</string>
-    <!-- no translation found for selected (6614607926197755875) -->
-    <skip />
-    <!-- no translation found for not_selected (410652016565864475) -->
-    <skip />
+    <string name="selected" msgid="6614607926197755875">"seleccionat"</string>
+    <string name="not_selected" msgid="410652016565864475">"no seleccionat"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'acció mitjançant"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completa l\'acció amb %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Completa l\'acció"</string>

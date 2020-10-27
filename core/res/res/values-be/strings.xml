@@ -1169,10 +1169,8 @@
     <string name="capital_off" msgid="7443704171014626777">"Выключана"</string>
     <string name="checked" msgid="9179896827054513119">"пазначана"</string>
     <string name="not_checked" msgid="7972320087569023342">"не пазначана"</string>
-    <!-- no translation found for selected (6614607926197755875) -->
-    <skip />
-    <!-- no translation found for not_selected (410652016565864475) -->
-    <skip />
+    <string name="selected" msgid="6614607926197755875">"выбраны"</string>
+    <string name="not_selected" msgid="410652016565864475">"не выбраны"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Завяршыць дзеянне з дапамогай"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завяршыць дзеянне з дапамогай %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Завяршыць дзеянне"</string>
