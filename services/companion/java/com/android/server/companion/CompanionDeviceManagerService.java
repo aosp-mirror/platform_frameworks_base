@@ -309,6 +309,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             mFindDeviceCallback = callback;
             mRequest = request;
             mCallingPackage = callingPackage;
+            request.setCallingPackage(callingPackage);
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
             final long callingIdentity = Binder.clearCallingIdentity();
