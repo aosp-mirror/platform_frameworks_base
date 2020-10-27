@@ -1374,6 +1374,11 @@ package android.media {
     method public static int xsdStringToUsage(@NonNull String);
   }
 
+  public final class AudioDeviceInfo {
+    method public static void enforceValidAudioDeviceTypeIn(int);
+    method public static void enforceValidAudioDeviceTypeOut(int);
+  }
+
   public final class AudioFocusRequest {
     method @Nullable public android.media.AudioManager.OnAudioFocusChangeListener getOnAudioFocusChangeListener();
   }

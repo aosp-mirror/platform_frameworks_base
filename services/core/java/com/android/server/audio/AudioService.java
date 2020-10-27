@@ -562,6 +562,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_HDMI_ARC,
+            AudioSystem.DEVICE_OUT_HDMI_EARC,
             AudioSystem.DEVICE_OUT_AUX_LINE));
     // Devices for which the volume is always max, no volume panel
     Set<Integer> mFullVolumeDevices = new HashSet<>();
@@ -5841,6 +5842,9 @@ public class AudioService extends IAudioService.Stub
             if ((device & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
                 device = AudioSystem.DEVICE_OUT_SPEAKER;
             } else if ((device & AudioSystem.DEVICE_OUT_HDMI_ARC) != 0) {
+                // FIXME(b/184944421): DEVICE_OUT_HDMI_EARC has two bits set,
+                // so it must be handled correctly as it aliases
+                // with DEVICE_OUT_HDMI_ARC | DEVICE_OUT_EARPIECE.
                 device = AudioSystem.DEVICE_OUT_HDMI_ARC;
             } else if ((device & AudioSystem.DEVICE_OUT_SPDIF) != 0) {
                 device = AudioSystem.DEVICE_OUT_SPDIF;
