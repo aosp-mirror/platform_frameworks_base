@@ -129,6 +129,8 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         mCallback = callback;
         mPresenter = new ToastPresenter(context, mIAccessibilityManager, mNotificationManager,
                 packageName);
+        // Set as trusted overlay so touches can pass through toasts
+        mPresenter.getLayoutParams().setTrustedOverlay();
         mToastLogger.logOnShowToast(uid, packageName, text.toString(), token.toString());
         mPresenter.show(mToast.getView(), token, windowToken, duration, mToast.getGravity(),
                 mToast.getXOffset(), mToast.getYOffset(), mToast.getHorizontalMargin(),
