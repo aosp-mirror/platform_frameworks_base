@@ -5770,8 +5770,9 @@ class Task extends WindowContainer<WindowContainer> {
             boolean preserveWindows, boolean notifyClients) {
         mStackSupervisor.beginActivityVisibilityUpdate();
         try {
-            mEnsureActivitiesVisibleHelper.process(starting, configChanges, preserveWindows,
-                    notifyClients);
+            forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
+                    starting, configChanges, preserveWindows, notifyClients),
+                    true /* traverseTopToBottom */);
 
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
