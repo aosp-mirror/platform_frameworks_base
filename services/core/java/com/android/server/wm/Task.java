@@ -528,6 +528,11 @@ class Task extends WindowContainer<WindowContainer> {
     // {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag of the root activity.
     boolean mSupportsPictureInPicture;
 
+    // Activity bounds if this task or its top activity is presented in letterbox mode and
+    // {@code null} otherwise.
+    @Nullable
+    private Rect mLetterboxActivityBounds;
+
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
     private int mDragResizeMode;
@@ -2921,13 +2926,27 @@ class Task extends WindowContainer<WindowContainer> {
 
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
-        final float aspect = ((float) parentHeight) / parentWidth;
+        float aspect = Math.max(parentWidth, parentHeight)
+                / (float) Math.min(parentWidth, parentHeight);
+
+        // Adjust the Task letterbox bounds to fit the app request aspect ratio in order to use the
+        // extra available space.
+        if (refActivity != null) {
+            final float maxAspectRatio = refActivity.info.maxAspectRatio;
+            final float minAspectRatio = refActivity.info.minAspectRatio;
+            if (aspect > maxAspectRatio && maxAspectRatio != 0) {
+                aspect = maxAspectRatio;
+            } else if (aspect < minAspectRatio) {
+                aspect = minAspectRatio;
+            }
+        }
+
         if (forcedOrientation == ORIENTATION_LANDSCAPE) {
-            final int height = (int) (parentWidth / aspect);
+            final int height = (int) Math.rint(parentWidth / aspect);
             final int top = parentBounds.centerY() - height / 2;
             outBounds.set(parentBounds.left, top, parentBounds.right, top + height);
         } else {
-            final int width = (int) (parentHeight * aspect);
+            final int width = (int) Math.rint(parentHeight / aspect);
             final int left = parentBounds.centerX() - width / 2;
             outBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
         }
@@ -3283,7 +3302,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
-            ConfigurationContainer requestingContainer) {
+            WindowContainer requestingContainer) {
         if (super.onDescendantOrientationChanged(freezeDisplayToken, requestingContainer)) {
             return true;
         }
@@ -3291,6 +3310,18 @@ class Task extends WindowContainer<WindowContainer> {
         // No one in higher hierarchy handles this request, let's adjust our bounds to fulfill
         // it if possible.
         if (getParent() != null) {
+            final ActivityRecord activity = requestingContainer.asActivityRecord();
+            if (activity != null) {
+                // Clear the size compat cache to recompute the bounds for requested orientation;
+                // otherwise when Task#computeFullscreenBounds(), it will not try to do Task level
+                // letterboxing because app may prefer to keep its original size (size compat).
+                //
+                // Normally, ActivityRecord#clearSizeCompatMode() recomputes from its parent Task,
+                // which is the leaf Task. However, because this orientation request is new to all
+                // Tasks, pass false to clearSizeCompatMode, and trigger onConfigurationChanged from
+                // here (root Task) to make sure all Tasks are up-to-date.
+                activity.clearSizeCompatMode(false /* recomputeTask */);
+            }
             onConfigurationChanged(getParent().getConfiguration());
             return true;
         }
@@ -4046,6 +4077,12 @@ class Task extends WindowContainer<WindowContainer> {
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
         info.isResizeable = isResizeable();
+        // Don't query getTopNonFinishingActivity().getBounds() directly because when fillTaskInfo
+        // is triggered for the first time after activities change, getBounds() may return non final
+        // bounds, e.g. fullscreen bounds instead of letterboxed bounds. To work around this,
+        // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
+        info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
+        info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
@@ -4062,6 +4099,21 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityRecord rootActivity = top.getRootActivity();
         return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
                 ? null : rootActivity.pictureInPictureArgs;
+    }
+
+    void maybeUpdateLetterboxBounds(
+                ActivityRecord activityRecord, @Nullable Rect letterboxActivityBounds) {
+        if (isOrganized()
+                && mReuseActivitiesReport.top == activityRecord
+                // Want to force update only if letterbox bounds have changed.
+                && !Objects.equals(
+                    mLetterboxActivityBounds,
+                    letterboxActivityBounds)) {
+            mLetterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
+            // Forcing update to reduce visual jank during the transition.
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                        this, /* force= */ true);
+        }
     }
 
     /**
@@ -7439,6 +7491,12 @@ class Task extends WindowContainer<WindowContainer> {
         final int outset = getTaskOutset();
         outPos.x -= outset;
         outPos.y -= outset;
+    }
+
+    private Point getRelativePosition() {
+        Point position = new Point();
+        getRelativePosition(position);
+        return position;
     }
 
     boolean shouldIgnoreInput() {

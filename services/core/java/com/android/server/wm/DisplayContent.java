@@ -1303,7 +1303,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
-            ConfigurationContainer requestingContainer) {
+            WindowContainer requestingContainer) {
         final Configuration config = updateOrientation(
                 getRequestedOverrideConfiguration(), freezeDisplayToken, false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,

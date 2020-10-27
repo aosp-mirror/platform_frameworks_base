@@ -159,9 +159,11 @@ public class LingerMonitor {
 
     @VisibleForTesting
     protected PendingIntent createNotificationIntent() {
-        return PendingIntent.getActivityAsUser(mContext, 0 /* requestCode */, CELLULAR_SETTINGS,
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                null /* options */, UserHandle.CURRENT);
+        return PendingIntent.getActivity(
+                mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
+                0 /* requestCode */,
+                CELLULAR_SETTINGS,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     // Removes any notification that was put up as a result of switching to nai.

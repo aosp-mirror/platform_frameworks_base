@@ -1144,7 +1144,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@code true} if handled; {@code false} otherwise.
      */
     boolean onDescendantOrientationChanged(@Nullable IBinder freezeDisplayToken,
-            @Nullable ConfigurationContainer requestingContainer) {
+            @Nullable WindowContainer requestingContainer) {
         final WindowContainer parent = getParent();
         if (parent == null) {
             return false;
@@ -1156,7 +1156,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * Check if this container or its parent will handle orientation changes from descendants. It's
      * different from the return value of {@link #onDescendantOrientationChanged(IBinder,
-     * ConfigurationContainer)} in the sense that the return value of this method tells if this
+     * WindowContainer)} in the sense that the return value of this method tells if this
      * container or its parent will handle the request eventually, while the return value of the
      * other method is if it handled the request synchronously.
      *
@@ -1230,7 +1230,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *                            to ensure it gets correct configuration.
      */
     void setOrientation(int orientation, @Nullable IBinder freezeDisplayToken,
-            @Nullable ConfigurationContainer requestingContainer) {
+            @Nullable WindowContainer requestingContainer) {
         if (mOrientation == orientation) {
             return;
         }

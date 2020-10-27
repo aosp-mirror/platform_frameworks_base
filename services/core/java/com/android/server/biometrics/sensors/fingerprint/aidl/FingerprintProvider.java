@@ -24,6 +24,7 @@ import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
@@ -38,6 +39,7 @@ import android.os.ServiceManager;
 import android.os.UserManager;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.server.biometrics.Utils;
@@ -61,6 +63,8 @@ import java.util.List;
  */
 @SuppressWarnings("deprecation")
 public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvider {
+
+    private boolean mTestHalEnabled;
 
     @NonNull private final Context mContext;
     @NonNull private final String mHalInstanceName;
@@ -132,7 +136,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.commonProps.maxEnrollmentsPerUser,
                             prop.sensorType,
                             true /* resetLockoutRequiresHardwareAuthToken */);
-            final Sensor sensor = new Sensor(getTag() + "/" + sensorId, mContext, mHandler,
+            final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp, gestureAvailabilityDispatcher);
 
             mSensors.put(sensorId, sensor);
@@ -146,6 +150,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Nullable
     private synchronized IFingerprint getHalInstance() {
+        if (mTestHalEnabled) {
+            // Enabling the test HAL for a single sensor in a multi-sensor HAL currently enables
+            // the test HAL for all sensors under that HAL. This can be updated in the future if
+            // necessary.
+            return new TestHal();
+        }
+
         if (mDaemon != null) {
             return mDaemon;
         }
@@ -153,7 +164,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         Slog.d(getTag(), "Daemon was null, reconnecting");
 
         mDaemon = IFingerprint.Stub.asInterface(
-                ServiceManager.waitForDeclaredService(mHalInstanceName));
+                ServiceManager.waitForDeclaredService(IFingerprint.DESCRIPTOR
+                        + "/" + mHalInstanceName));
         if (mDaemon == null) {
             Slog.e(getTag(), "Unable to get daemon");
             return null;
@@ -561,13 +573,26 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void dumpProto(int sensorId, @NonNull FileDescriptor fd) {
+    public void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
+        if (mSensors.contains(sensorId)) {
+            mSensors.get(sensorId).dumpProtoState(sensorId, proto);
+        }
+    }
+
+    @Override
+    public void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd) {
 
     }
 
     @Override
     public void dumpInternal(int sensorId, @NonNull PrintWriter pw) {
 
+    }
+
+    @NonNull
+    @Override
+    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        return mSensors.get(sensorId).createTestSession();
     }
 
     @Override
@@ -581,5 +606,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
             }
         });
+    }
+
+    void setTestHalEnabled(boolean enabled) {
+        mTestHalEnabled = enabled;
     }
 }

@@ -200,21 +200,21 @@ public abstract class SystemService {
         /**
          * @hide
          */
-        public void dump(@NonNull StringBuilder builder) {
-            builder.append(getUserIdentifier());
+        public void dump(@NonNull PrintWriter pw) {
+            pw.print(getUserIdentifier());
 
             if (!isFull() && !isManagedProfile()) return;
 
-            builder.append('(');
+            pw.print('(');
             boolean addComma = false;
             if (isFull()) {
-                builder.append("full");
+                pw.print("full");
             }
             if (isManagedProfile()) {
-                if (addComma) builder.append(',');
-                builder.append("mp");
+                if (addComma) pw.print(',');
+                pw.print("mp");
             }
-            builder.append(')');
+            pw.print(')');
         }
     }
 

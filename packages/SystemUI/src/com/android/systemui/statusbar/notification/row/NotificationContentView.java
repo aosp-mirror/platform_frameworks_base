@@ -336,7 +336,6 @@ public class NotificationContentView extends FrameLayout {
                                     ? contractedHeader.getPaddingLeft()
                                     : paddingEnd,
                             contractedHeader.getPaddingBottom());
-                    contractedHeader.setShowWorkBadgeAtEnd(false);
                     return true;
                 }
             }

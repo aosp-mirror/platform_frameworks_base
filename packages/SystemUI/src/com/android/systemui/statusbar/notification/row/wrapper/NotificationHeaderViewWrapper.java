@@ -22,8 +22,10 @@ import android.app.Notification;
 import android.content.Context;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
+import android.view.NotificationTopLineView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -44,7 +46,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import java.util.Stack;
 
 /**
- * Wraps a notification header view.
+ * Wraps a notification view which may or may not include a header.
  */
 public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
@@ -56,6 +58,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private CachingIconView mIcon;
     private NotificationExpandButton mExpandButton;
     protected NotificationHeaderView mNotificationHeader;
+    protected NotificationTopLineView mNotificationTopLine;
     private TextView mHeaderText;
     private TextView mAppNameText;
     private ImageView mWorkProfileImage;
@@ -107,14 +110,15 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
+        mNotificationTopLine = mView.findViewById(com.android.internal.R.id.notification_top_line);
         mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
         mFeedbackIcon = mView.findViewById(com.android.internal.R.id.feedback);
     }
 
     private void addFeedbackOnClickListener(ExpandableNotificationRow row) {
         View.OnClickListener listener = row.getFeedbackOnClickListener();
-        if (mNotificationHeader != null) {
-            mNotificationHeader.setFeedbackOnClickListener(listener);
+        if (mNotificationTopLine != null) {
+            mNotificationTopLine.setFeedbackOnClickListener(listener);
         }
         if (mFeedbackIcon != null) {
             mFeedbackIcon.setOnClickListener(listener);
@@ -158,13 +162,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             mAppNameText.setTextAppearance(
                     com.android.internal.R.style
                             .TextAppearance_DeviceDefault_Notification_Conversation_AppName);
-            ViewGroup.MarginLayoutParams layoutParams =
-                    (ViewGroup.MarginLayoutParams) mAppNameText.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             layoutParams.setMarginStart(0);
         }
         if (mIconContainer != null) {
-            ViewGroup.MarginLayoutParams layoutParams =
-                    (ViewGroup.MarginLayoutParams) mIconContainer.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mIconContainer.getLayoutParams();
             layoutParams.width =
                     mIconContainer.getContext().getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.conversation_content_start);
@@ -174,8 +176,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             layoutParams.setMarginStart(marginStart * -1);
         }
         if (mIcon != null) {
-            ViewGroup.MarginLayoutParams layoutParams =
-                    (ViewGroup.MarginLayoutParams) mIcon.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mIcon.getLayoutParams();
             layoutParams.setMarginEnd(0);
         }
     }
@@ -187,21 +188,18 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                     com.android.internal.R.attr.notificationHeaderTextAppearance,
                     com.android.internal.R.style.TextAppearance_DeviceDefault_Notification_Info);
             mAppNameText.setTextAppearance(textAppearance);
-            ViewGroup.MarginLayoutParams layoutParams =
-                    (ViewGroup.MarginLayoutParams) mAppNameText.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             final int marginStart = mAppNameText.getContext().getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_header_app_name_margin_start);
             layoutParams.setMarginStart(marginStart);
         }
         if (mIconContainer != null) {
-            ViewGroup.MarginLayoutParams layoutParams =
-                    (ViewGroup.MarginLayoutParams) mIconContainer.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mIconContainer.getLayoutParams();
             layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
             layoutParams.setMarginStart(0);
         }
         if (mIcon != null) {
-            ViewGroup.MarginLayoutParams layoutParams =
-                    (ViewGroup.MarginLayoutParams) mIcon.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mIcon.getLayoutParams();
             final int marginEnd = mIcon.getContext().getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_header_icon_margin_end);
             layoutParams.setMarginEnd(marginEnd);
@@ -261,6 +259,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
+        mExpandButton.setOnClickListener(expandable ? onClickListener : null);
         if (mNotificationHeader != null) {
             mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
         }

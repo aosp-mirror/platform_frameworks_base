@@ -46,7 +46,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -158,16 +157,16 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
-    public void testIsPanicButtonGestureEnabled_settingDisabled() {
-        withPanicGestureEnabledSettingValue(false);
-        assertFalse(mGestureLauncherService.isPanicButtonGestureEnabled(
+    public void testIsEmergencyGestureEnabled_settingDisabled() {
+        withEmergencyGestureEnabledSettingValue(false);
+        assertFalse(mGestureLauncherService.isEmergencyGestureEnabled(
                 mContext, FAKE_USER_ID));
     }
 
     @Test
-    public void testIsPanicButtonGestureEnabled_settingEnabled() {
-        withPanicGestureEnabledSettingValue(true);
-        assertTrue(mGestureLauncherService.isPanicButtonGestureEnabled(
+    public void testIsEmergencyGestureEnabled_settingEnabled() {
+        withEmergencyGestureEnabledSettingValue(true);
+        assertTrue(mGestureLauncherService.isEmergencyGestureEnabled(
                 mContext, FAKE_USER_ID));
     }
 
@@ -181,10 +180,10 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
-    public void testHandlePanicGesture_userSetupComplete() {
+    public void testHandleEmergencyGesture_userSetupComplete() {
         withUserSetupCompleteValue(true);
 
-        assertTrue(mGestureLauncherService.handlePanicButtonGesture());
+        assertTrue(mGestureLauncherService.handleEmergencyGesture());
     }
 
     @Test
@@ -196,10 +195,10 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
-    public void testHandlePanicGesture_userSetupNotComplete() {
+    public void testHandleEmergencyGesture_userSetupNotComplete() {
         withUserSetupCompleteValue(false);
 
-        assertFalse(mGestureLauncherService.handlePanicButtonGesture());
+        assertFalse(mGestureLauncherService.handleEmergencyGesture());
     }
 
     @Test
@@ -223,9 +222,9 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
-    public void testInterceptPowerKeyDown_firstPowerDown_panicGestureNotLaunched() {
-        withPanicGestureEnabledSettingValue(true);
-        mGestureLauncherService.updatePanicButtonGestureEnabled();
+    public void testInterceptPowerKeyDown_firstPowerDown_emergencyGestureNotLaunched() {
+        withEmergencyGestureEnabledSettingValue(true);
+        mGestureLauncherService.updateEmergencyGestureEnabled();
 
         long eventTime = INITIAL_EVENT_TIME_MILLIS
                 + GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS - 1;
@@ -425,12 +424,12 @@ public class GestureLauncherServiceTest {
 
     @Test
     public void
-            testInterceptPowerKeyDown_fiveInboundPresses_cameraAndPanicEnabled_bothLaunch() {
+            testInterceptPowerKeyDown_fiveInboundPresses_cameraAndEmergencyEnabled_bothLaunch() {
         withCameraDoubleTapPowerEnableConfigValue(true);
         withCameraDoubleTapPowerDisableSettingValue(0);
-        withPanicGestureEnabledSettingValue(true);
+        withEmergencyGestureEnabledSettingValue(true);
         mGestureLauncherService.updateCameraDoubleTapPowerEnabled();
-        mGestureLauncherService.updatePanicButtonGestureEnabled();
+        mGestureLauncherService.updateEmergencyGestureEnabled();
         withUserSetupCompleteValue(true);
 
         // First button press does nothing
@@ -476,7 +475,7 @@ public class GestureLauncherServiceTest {
         assertEquals(1, tapCounts.get(0).intValue());
         assertEquals(2, tapCounts.get(1).intValue());
 
-        // Continue the button presses for the panic gesture.
+        // Continue the button presses for the emergency gesture.
 
         // Presses 3 and 4 should not trigger any gesture
         for (int i = 0; i < 2; i++) {
@@ -490,7 +489,7 @@ public class GestureLauncherServiceTest {
             assertFalse(outLaunched.value);
         }
 
-        // Fifth button press should trigger the panic flow
+        // Fifth button press should trigger the emergency flow
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -513,9 +512,9 @@ public class GestureLauncherServiceTest {
 
     @Test
     public void
-            testInterceptPowerKeyDown_fiveInboundPresses_panicGestureEnabled_launchesPanicFlow() {
-        withPanicGestureEnabledSettingValue(true);
-        mGestureLauncherService.updatePanicButtonGestureEnabled();
+            testInterceptPowerKeyDown_fiveInboundPresses_emergencyGestureEnabled_launchesFlow() {
+        withEmergencyGestureEnabledSettingValue(true);
+        mGestureLauncherService.updateEmergencyGestureEnabled();
         withUserSetupCompleteValue(true);
 
         // First button press does nothing
@@ -542,7 +541,7 @@ public class GestureLauncherServiceTest {
             assertFalse(outLaunched.value);
         }
 
-        // Fifth button press should trigger the panic flow
+        // Fifth button press should trigger the emergency flow
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -565,9 +564,9 @@ public class GestureLauncherServiceTest {
 
     @Test
     public void
-            testInterceptPowerKeyDown_tenInboundPresses_panicGestureEnabled_pressesIntercepted() {
-        withPanicGestureEnabledSettingValue(true);
-        mGestureLauncherService.updatePanicButtonGestureEnabled();
+            testInterceptPowerKeyDown_tenInboundPresses_emergencyGestureEnabled_keyIntercepted() {
+        withEmergencyGestureEnabledSettingValue(true);
+        mGestureLauncherService.updateEmergencyGestureEnabled();
         withUserSetupCompleteValue(true);
 
         // First button press does nothing
@@ -594,7 +593,7 @@ public class GestureLauncherServiceTest {
             assertFalse(outLaunched.value);
         }
 
-        // Fifth button press should trigger the panic flow
+        // Fifth button press should trigger the emergency flow
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -1128,10 +1127,10 @@ public class GestureLauncherServiceTest {
                 UserHandle.USER_CURRENT);
     }
 
-    private void withPanicGestureEnabledSettingValue(boolean enable) {
+    private void withEmergencyGestureEnabledSettingValue(boolean enable) {
         Settings.Secure.putIntForUser(
                 mContentResolver,
-                Settings.Secure.PANIC_GESTURE_ENABLED,
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED,
                 enable ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }

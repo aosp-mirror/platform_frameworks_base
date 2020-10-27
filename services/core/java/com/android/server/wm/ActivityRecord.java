@@ -1364,6 +1364,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+        task.maybeUpdateLetterboxBounds(this, getLetterboxParams(w));
     }
 
     void updateLetterboxSurface(WindowState winHint) {
@@ -1375,6 +1376,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
             mLetterbox.applySurfaceChanges(getPendingTransaction());
         }
+    }
+
+    @Nullable
+    private Rect getLetterboxParams(WindowState w) {
+        boolean isLetterboxed = w.isLetterboxedAppWindow() && fillsParent();
+        return isLetterboxed ? getBounds() : null;
     }
 
     Rect getLetterboxInsets() {
@@ -6552,14 +6559,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mCompatDisplayInsets = new CompatDisplayInsets(mDisplayContent, this);
     }
 
-    @VisibleForTesting
-    void clearSizeCompatMode() {
+    void clearSizeCompatMode(boolean recomputeTask) {
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
 
-        // Recompute from Task because letterbox can also happen on Task level.
-        task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
+        if (recomputeTask) {
+            // Recompute from Task because letterbox can also happen on Task level.
+            task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
+        }
+    }
+
+    @VisibleForTesting
+    void clearSizeCompatMode() {
+        clearSizeCompatMode(true /* recomputeTask */);
     }
 
     @Override

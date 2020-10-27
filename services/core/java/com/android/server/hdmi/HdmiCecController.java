@@ -32,7 +32,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.stats.hdmi.HdmiStatsEnums;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
@@ -97,7 +96,7 @@ final class HdmiCecController {
     private final Predicate<Integer> mRemoteDeviceAddressPredicate = new Predicate<Integer>() {
         @Override
         public boolean test(Integer address) {
-            return !isAllocatedLocalDeviceAddress(address);
+            return !mService.getHdmiCecNetwork().isAllocatedLocalDeviceAddress(address);
         }
     };
 
@@ -117,9 +116,6 @@ final class HdmiCecController {
     private Handler mControlHandler;
 
     private final HdmiControlService mService;
-
-    // Stores the local CEC devices in the system. Device type is used for key.
-    private final SparseArray<HdmiCecLocalDevice> mLocalDevices = new SparseArray<>();
 
     // Stores recent CEC messages and HDMI Hotplug event history for debugging purpose.
     private final ArrayBlockingQueue<Dumpable> mMessageHistory =
@@ -171,12 +167,6 @@ final class HdmiCecController {
         mIoHandler = new Handler(mService.getIoLooper());
         mControlHandler = new Handler(mService.getServiceLooper());
         nativeWrapper.setCallback(new HdmiCecCallback());
-    }
-
-    @ServiceThreadOnly
-    void addLocalDevice(int deviceType, HdmiCecLocalDevice device) {
-        assertRunOnServiceThread();
-        mLocalDevices.put(deviceType, device);
     }
 
     /**
@@ -269,17 +259,6 @@ final class HdmiCecController {
     }
 
     /**
-     * Return the locally hosted logical device of a given type.
-     *
-     * @param deviceType logical device type
-     * @return {@link HdmiCecLocalDevice} instance if the instance of the type is available;
-     *          otherwise null.
-     */
-    HdmiCecLocalDevice getLocalDevice(int deviceType) {
-        return mLocalDevices.get(deviceType);
-    }
-
-    /**
      * Add a new logical address to the device. Device's HW should be notified
      * when a new logical address is assigned to a device, so that it can accept
      * a command having available destinations.
@@ -307,16 +286,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void clearLogicalAddress() {
         assertRunOnServiceThread();
-        for (int i = 0; i < mLocalDevices.size(); ++i) {
-            mLocalDevices.valueAt(i).clearAddress();
-        }
         mNativeWrapperImpl.nativeClearLogicalAddress();
-    }
-
-    @ServiceThreadOnly
-    void clearLocalDevices() {
-        assertRunOnServiceThread();
-        mLocalDevices.clear();
     }
 
     /**
@@ -428,17 +398,6 @@ final class HdmiCecController {
         runDevicePolling(sourceAddress, pollingCandidates, retryCount, callback, allocated);
     }
 
-    /**
-     * Return a list of all {@link HdmiCecLocalDevice}s.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     */
-    @ServiceThreadOnly
-    List<HdmiCecLocalDevice> getLocalDeviceList() {
-        assertRunOnServiceThread();
-        return HdmiUtils.sparseArrayToList(mLocalDevices);
-    }
-
     private List<Integer> pickPollCandidates(int pickStrategy) {
         int strategy = pickStrategy & Constants.POLL_STRATEGY_MASK;
         Predicate<Integer> pickPredicate = null;
@@ -472,17 +431,6 @@ final class HdmiCecController {
                 break;
         }
         return pollingCandidates;
-    }
-
-    @ServiceThreadOnly
-    private boolean isAllocatedLocalDeviceAddress(int address) {
-        assertRunOnServiceThread();
-        for (int i = 0; i < mLocalDevices.size(); ++i) {
-            if (mLocalDevices.valueAt(i).isAddressOf(address)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @ServiceThreadOnly
@@ -578,7 +526,7 @@ final class HdmiCecController {
         if (address == Constants.ADDR_BROADCAST) {
             return true;
         }
-        return isAllocatedLocalDeviceAddress(address);
+        return mService.getHdmiCecNetwork().isAllocatedLocalDeviceAddress(address);
     }
 
     @ServiceThreadOnly
@@ -682,7 +630,7 @@ final class HdmiCecController {
     private int incomingMessageDirection(int srcAddress, int dstAddress) {
         boolean sourceIsLocal = false;
         boolean destinationIsLocal = false;
-        for (HdmiCecLocalDevice localDevice : getLocalDeviceList()) {
+        for (HdmiCecLocalDevice localDevice : mService.getHdmiCecNetwork().getLocalDeviceList()) {
             int logicalAddress = localDevice.getDeviceInfo().getLogicalAddress();
             if (logicalAddress == srcAddress) {
                 sourceIsLocal = true;
@@ -731,24 +679,9 @@ final class HdmiCecController {
     }
 
     void dump(final IndentingPrintWriter pw) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        for (int i = 0; i < mLocalDevices.size(); ++i) {
-            pw.println("HdmiCecLocalDevice #" + mLocalDevices.keyAt(i) + ":");
-            pw.increaseIndent();
-            mLocalDevices.valueAt(i).dump(pw);
-
-            pw.println("Active Source history:");
-            pw.increaseIndent();
-            for (Dumpable activeSourceEvent : mLocalDevices.valueAt(i).getActiveSourceHistory()) {
-                activeSourceEvent.dump(pw, sdf);
-            }
-            pw.decreaseIndent();
-            pw.decreaseIndent();
-        }
-
         pw.println("CEC message history:");
         pw.increaseIndent();
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (Dumpable record : mMessageHistory) {
             record.dump(pw, sdf);
         }

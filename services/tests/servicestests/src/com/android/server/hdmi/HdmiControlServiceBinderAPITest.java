@@ -21,11 +21,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 
+import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.Looper;
 import android.os.test.TestLooper;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -43,6 +45,8 @@ import java.util.ArrayList;
 @SmallTest
 @RunWith(JUnit4.class)
 public class HdmiControlServiceBinderAPITest {
+
+    private Context mContext;
 
     private class HdmiCecLocalDeviceMyDevice extends HdmiCecLocalDevice {
 
@@ -111,8 +115,12 @@ public class HdmiControlServiceBinderAPITest {
 
     @Before
     public void SetUp() {
+        mContext = InstrumentationRegistry.getTargetContext();
+        // Some tests expect no logical addresses being allocated at the beginning of the test.
+        setHdmiControlEnabled(false);
+
         mHdmiControlService =
-            new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+            new HdmiControlService(mContext) {
                 @Override
                 void sendCecCommand(HdmiCecMessage command) {
                     switch (command.getOpcode()) {
@@ -164,7 +172,7 @@ public class HdmiControlServiceBinderAPITest {
         mHdmiPortInfo[0] =
             new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
-        mHdmiControlService.initPortInfo();
+        mHdmiControlService.initService();
         mResult = -1;
         mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
 
@@ -183,6 +191,7 @@ public class HdmiControlServiceBinderAPITest {
         assertEquals(mResult, -1);
         assertThat(mPlaybackDevice.isActiveSource()).isFalse();
 
+        setHdmiControlEnabled(true);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlService.isAddressAllocated()).isTrue();
@@ -192,6 +201,8 @@ public class HdmiControlServiceBinderAPITest {
 
     @Test
     public void oneTouchPlay_addressAllocated() {
+        setHdmiControlEnabled(true);
+
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlService.isAddressAllocated()).isTrue();
@@ -203,5 +214,11 @@ public class HdmiControlServiceBinderAPITest {
         });
         assertEquals(mResult, HdmiControlManager.RESULT_SUCCESS);
         assertThat(mPlaybackDevice.isActiveSource()).isTrue();
+    }
+
+    private void setHdmiControlEnabled(boolean enabled) {
+        int value = enabled ? 1 : 0;
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.HDMI_CONTROL_ENABLED,
+                value);
     }
 }
