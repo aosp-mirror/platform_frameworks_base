@@ -1931,7 +1931,7 @@ public class ActivityManager {
         ArrayList<AppTask> tasks = new ArrayList<AppTask>();
         List<IBinder> appTasks;
         try {
-            appTasks = getTaskService().getAppTasks(mContext.getPackageName());
+            appTasks = getTaskService().getAppTasks(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2466,7 +2466,7 @@ public class ActivityManager {
         try {
             ActivityThread thread = ActivityThread.currentActivityThread();
             IApplicationThread appThread = thread.getApplicationThread();
-            String packageName = mContext.getPackageName();
+            String packageName = mContext.getOpPackageName();
             getTaskService().moveTaskToFront(appThread, packageName, taskId, flags, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
