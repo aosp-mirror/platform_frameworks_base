@@ -16,7 +16,7 @@
 
 package android.util.imetracing;
 
-import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
@@ -66,8 +66,27 @@ class ImeTracingClientImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerServiceDump(String where, InputMethodService service) {
-        // TODO (b/154348613)
+    public void triggerServiceDump(String where, AbstractInputMethodService service) {
+        if (!isEnabled() || !isAvailable()) {
+            return;
+        }
+
+        synchronized (mDumpInProgressLock) {
+            if (mDumpInProgress) {
+                return;
+            }
+            mDumpInProgress = true;
+        }
+
+        try {
+            ProtoOutputStream proto = new ProtoOutputStream();
+            service.dumpProtoInternal(proto);
+            sendToService(proto.getBytes(), IME_TRACING_FROM_IMS, where);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while sending ime-related service dump to server", e);
+        } finally {
+            mDumpInProgress = false;
+        }
     }
 
     @Override

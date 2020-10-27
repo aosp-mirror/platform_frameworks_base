@@ -18,7 +18,7 @@ package android.util.imetracing;
 
 import android.app.ActivityThread;
 import android.content.Context;
-import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -113,7 +113,7 @@ public abstract class ImeTracing {
      *
      * @param where Place where the trace was triggered.
      */
-    public abstract void triggerServiceDump(String where, InputMethodService service);
+    public abstract void triggerServiceDump(String where, AbstractInputMethodService service);
 
     /**
      * Starts a proto dump of the InputMethodManagerService information.

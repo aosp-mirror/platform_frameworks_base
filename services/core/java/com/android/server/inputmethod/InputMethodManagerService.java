@@ -141,6 +141,8 @@ import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceFileProto;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceProto;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -4031,7 +4033,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 proto.end(client_token);
                 break;
             case ImeTracing.IME_TRACING_FROM_IMS:
-                // TODO (b/154348613)
+                final long service_token = proto.start(InputMethodServiceTraceFileProto.ENTRY);
+                proto.write(InputMethodServiceTraceProto.ELAPSED_REALTIME_NANOS,
+                        SystemClock.elapsedRealtimeNanos());
+                proto.write(InputMethodServiceTraceProto.WHERE, where);
+                proto.write(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE, protoDump);
+                proto.end(service_token);
+                break;
             default:
                 // Dump triggered by a source not recognised.
                 return;

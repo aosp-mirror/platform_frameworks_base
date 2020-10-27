@@ -16,8 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.util.imetracing.ImeTracing.PROTO_ARG;
-
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
@@ -157,20 +155,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                     return;
                 }
                 SomeArgs args = (SomeArgs)msg.obj;
-                String[] dumpArgs = (String[]) args.arg3;
-                boolean protoDumpRequested = false;
-                for (String arg : dumpArgs) {
-                    if (arg.equals(PROTO_ARG)) {
-                        protoDumpRequested = true;
-                        break;
-                    }
-                }
                 try {
-                    if (protoDumpRequested) {
-                        target.dumpProtoInternal((FileDescriptor) args.arg1, dumpArgs);
-                    } else {
-                        target.dump((FileDescriptor) args.arg1, (PrintWriter) args.arg2, dumpArgs);
-                    }
+                    target.dump((FileDescriptor) args.arg1,
+                            (PrintWriter) args.arg2, (String[]) args.arg3);
                 } catch (RuntimeException e) {
                     ((PrintWriter)args.arg2).println("Exception: " + e);
                 }

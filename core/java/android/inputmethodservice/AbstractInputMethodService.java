@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputConnection;
@@ -195,15 +196,13 @@ public abstract class AbstractInputMethodService extends Service
     public abstract AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
 
     /**
-     * Dumps the internal state of IME to a protocol buffer output stream initialized using the
-     * given {@link FileDescriptor}.
+     * Dumps the internal state of IME to a protocol buffer output stream.
      *
-     * @param fd The file descriptor to which proto dump should be written.
-     * @param args The arguments passed to the dump method.
+     * @param proto ProtoOutputStream to dump data to.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
-    abstract void dumpProtoInternal(FileDescriptor fd, String[] args);
+    public abstract void dumpProtoInternal(ProtoOutputStream proto);
 
     /**
      * Implement this to handle {@link android.os.Binder#dump Binder.dump()}
