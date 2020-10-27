@@ -4280,8 +4280,15 @@ message NotificationChannelModified {
     optional android.stats.sysui.NotificationImportance old_importance = 5;
     // New importance setting
     optional android.stats.sysui.NotificationImportance importance = 6;
+    // whether or not this channel represents a conversation
+    optional bool is_conversation = 7;
+    // Hash of app-assigned notification conversation id
+    optional int32 conversation_id_hash = 8;
+    // whether or not the user demoted this channel out of the conversation space
+    optional bool is_conversation_demoted = 9;
+    // whether this conversation is marked as being a priority
+    optional bool is_conversation_priority = 10;
 }
-
 
 /**
  * Logs when a biometric acquire event occurs.
