@@ -64,10 +64,27 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
 
     /**
-     * The MIME type for an activity.
+     * The MIME type for an activity. The ClipData must include intents with required extras
+     * {@link #EXTRA_PENDING_INTENT} and {@link Intent#EXTRA_USER}, and an optional
+     * {@link #EXTRA_ACTIVITY_OPTIONS}.
      * @hide
      */
     public static final String MIMETYPE_APPLICATION_ACTIVITY = "application/vnd.android.activity";
+
+    /**
+     * The MIME type for a shortcut. The ClipData must include intents with required extras
+     * {@link #EXTRA_PENDING_INTENT} and {@link Intent#EXTRA_USER}, and an optional
+     * {@link #EXTRA_ACTIVITY_OPTIONS}.
+     * @hide
+     */
+    public static final String MIMETYPE_APPLICATION_SHORTCUT = "application/vnd.android.shortcut";
+
+    /**
+     * The MIME type for a task. The ClipData must include an intent with a required extra
+     * {@link Intent#EXTRA_TASK_ID} of the task to launch.
+     * @hide
+     */
+    public static final String MIMETYPE_APPLICATION_TASK = "application/vnd.android.task";
 
     /**
      * The MIME type for data whose type is otherwise unknown.

@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.app.IApplicationThread;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -55,6 +56,8 @@ interface ILauncherApps {
     void startActivityAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
+    PendingIntent getActivityLaunchIntent(in ComponentName component, in Bundle opts,
+            in UserHandle user);
     void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
