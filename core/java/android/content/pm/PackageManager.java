@@ -63,6 +63,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -8462,15 +8463,30 @@ public abstract class PackageManager {
     }
 
     /**
+     * Returns the token to be used by the subsequent calls to holdLock().
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
+    @TestApi
+    public IBinder getHoldLockToken() {
+        try {
+            return ActivityThread.getPackageManager().getHoldLockToken();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Holds the PM lock for the specified amount of milliseconds.
      * Intended for use by the tests that need to imitate lock contention.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
-    public void holdLock(int durationMs) {
+    public void holdLock(IBinder token, int durationMs) {
         try {
-            ActivityThread.getPackageManager().holdLock(durationMs);
+            ActivityThread.getPackageManager().holdLock(token, durationMs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
