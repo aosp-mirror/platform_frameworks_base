@@ -267,7 +267,6 @@ class RollbackStore {
             dataJson.put("timestamp", rollback.getTimestamp().toString());
             dataJson.put("stagedSessionId", rollback.getStagedSessionId());
             dataJson.put("state", rollback.getStateAsString());
-            dataJson.put("apkSessionId", rollback.getApkSessionId());
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
             dataJson.put("userId", rollback.getUserId());
             dataJson.putOpt("installerPackageName", rollback.getInstallerPackageName());
@@ -319,7 +318,6 @@ class RollbackStore {
                 Instant.parse(dataJson.getString("timestamp")),
                 dataJson.getInt("stagedSessionId"),
                 rollbackStateFromString(dataJson.getString("state")),
-                dataJson.getInt("apkSessionId"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
                 dataJson.optInt("userId", UserHandle.SYSTEM.getIdentifier()),
                 dataJson.optString("installerPackageName", ""),

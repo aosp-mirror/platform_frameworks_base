@@ -49,10 +49,6 @@ interface IRollbackManager {
     // NOTE: This call is synchronous.
     int notifyStagedSession(int sessionId);
 
-    // Used by the staging manager to notify the RollbackManager of the apk
-    // session for a staged session.
-    void notifyStagedApkSession(int originalSessionId, int apkSessionId);
-
     // For test purposes only.
     void blockRollbackManager(long millis);
 }

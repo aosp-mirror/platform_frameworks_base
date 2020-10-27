@@ -679,20 +679,6 @@ public class StagingManager {
             return;
         }
 
-        if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
-            // If rollback is available for this session, notify the rollback
-            // manager of the apk session so it can properly enable rollback.
-            final RollbackManagerInternal rm =
-                    LocalServices.getService(RollbackManagerInternal.class);
-            try {
-                // TODO(b/136257624): extra apk session id in rollback is now redundant.
-                rm.notifyStagedApkSession(session.sessionId, session.sessionId);
-            } catch (RuntimeException re) {
-                Slog.e(TAG, "Failed to notifyStagedApkSession for session: "
-                        + session.sessionId, re);
-            }
-        }
-
         final LocalIntentReceiverSync receiver = new LocalIntentReceiverSync();
         session.installStagedSession(receiver.getIntentSender());
         final Intent result = receiver.getResult();
