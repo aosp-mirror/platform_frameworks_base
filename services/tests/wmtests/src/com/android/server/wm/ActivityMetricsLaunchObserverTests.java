@@ -35,6 +35,7 @@ import static org.mockito.Mockito.timeout;
 
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
+import android.app.WaitResult;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -167,10 +168,15 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityLaunchFinished() {
+        // Assume that the process is started (ActivityBuilder has mocked the returned value of
+        // ATMS#getProcessController) but the activity has not attached process.
+        mTopActivity.app = null;
         onActivityLaunched(mTopActivity);
 
         notifyTransitionStarting(mTopActivity);
-        notifyWindowsDrawn(mTopActivity);
+        final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
+        assertWithMessage("Warm launch").that(info.getLaunchState())
+                .isEqualTo(WaitResult.LAUNCH_STATE_WARM);
 
         verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
@@ -204,7 +210,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         notifyActivityLaunching(noDrawnActivity.intent);
         notifyActivityLaunched(START_SUCCESS, noDrawnActivity);
 
-        noDrawnActivity.destroyIfPossible("test");
+        noDrawnActivity.mVisibleRequested = false;
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(noDrawnActivity));
@@ -225,6 +231,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         assertWithMessage("Record start source").that(info.sourceType)
                 .isEqualTo(SourceInfo.TYPE_LAUNCHER);
         assertWithMessage("Record event time").that(info.sourceEventDelayMs).isAtLeast(10);
+        assertWithMessage("Hot launch").that(info.getLaunchState())
+                .isEqualTo(WaitResult.LAUNCH_STATE_HOT);
 
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
         verifyOnActivityLaunchFinished(mTopActivity);
