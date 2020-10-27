@@ -81,6 +81,7 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -128,9 +129,12 @@ public class ActivityManagerServiceTest {
         sPackageManagerInternal = mock(PackageManagerInternal.class);
         doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
                 .getSystemUiServiceComponent();
-        // Remove stale instance of PackageManagerInternal if there is any
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 
     @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
