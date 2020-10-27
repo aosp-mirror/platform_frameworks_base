@@ -103,12 +103,14 @@ public class NotificationTopLineView extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int givenWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
+        final boolean wrapHeight = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST;
         int wrapContentWidthSpec = MeasureSpec.makeMeasureSpec(givenWidth,
                 MeasureSpec.AT_MOST);
         int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
                 MeasureSpec.AT_MOST);
         int totalWidth = getPaddingStart();
         int iconWidth = getPaddingEnd();
+        int maxChildHeight = -1;
         mMaxAscent = -1;
         mMaxDescent = -1;
         for (int i = 0; i < getChildCount(); i++) {
@@ -130,10 +132,12 @@ public class NotificationTopLineView extends ViewGroup {
                 totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             }
             int childBaseline = child.getBaseline();
+            int childHeight = child.getMeasuredHeight();
             if (childBaseline != -1) {
                 mMaxAscent = Math.max(mMaxAscent, childBaseline);
-                mMaxDescent = Math.max(mMaxDescent, child.getMeasuredHeight() - childBaseline);
+                mMaxDescent = Math.max(mMaxDescent, childHeight - childBaseline);
             }
+            maxChildHeight = Math.max(maxChildHeight, childHeight);
         }
 
         // Ensure that there is at least enough space for the icons
@@ -151,7 +155,7 @@ public class NotificationTopLineView extends ViewGroup {
             shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
                     0);
         }
-        setMeasuredDimension(givenWidth, givenHeight);
+        setMeasuredDimension(givenWidth, wrapHeight ? maxChildHeight : givenHeight);
     }
 
     private int shrinkViewForOverflow(int heightSpec, int overFlow, View targetView,
