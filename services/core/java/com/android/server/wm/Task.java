@@ -5414,8 +5414,6 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void awakeFromSleepingLocked() {
-        // Ensure activities are no longer sleeping.
-        forAllActivities((Consumer<ActivityRecord>) (r) -> r.setSleeping(false));
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             mPausingActivity.activityPaused(true);
@@ -5469,25 +5467,11 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (shouldSleep) {
-            goToSleep();
+            ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                    !PRESERVE_WINDOWS);
         }
 
         return shouldSleep;
-    }
-
-    void goToSleep() {
-        // Make sure all visible activities are now sleeping. This will update the activity's
-        // visibility and onStop() will be called.
-        forAllActivities((r) -> {
-            if (r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING, STOPPED)) {
-                r.setSleeping(true);
-            }
-        });
-
-        // Ensure visibility after updating sleep states without updating configuration,
-        // as activities are about to be sent to sleep.
-        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                !PRESERVE_WINDOWS);
     }
 
     private boolean containsActivityFromStack(List<ActivityRecord> rs) {
@@ -6022,7 +6006,6 @@ class Task extends WindowContainer<WindowContainer> {
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStackSupervisor.mStoppingActivities.remove(next);
-        next.setSleeping(false);
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
@@ -6295,7 +6278,6 @@ class Task extends WindowContainer<WindowContainer> {
                 EventLogTags.writeWmResumeActivity(next.mUserId, System.identityHashCode(next),
                         next.getTask().mTaskId, next.shortComponentName);
 
-                next.setSleeping(false);
                 mAtmService.getAppWarningsLocked().onResumeActivity(next);
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
                 next.clearOptionsLocked();
