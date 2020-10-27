@@ -69,6 +69,7 @@ import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallba
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,6 +93,9 @@ final class AccessibilityController {
     private SparseArray<WindowsForAccessibilityObserver> mWindowsForAccessibilityObserver =
             new SparseArray<>();
 
+    // Set to true if initializing window population complete.
+    private boolean mAllObserversInitialized = true;
+
     public boolean setMagnificationCallbacksLocked(int displayId,
             MagnificationCallbacks callbacks) {
         boolean result = false;
@@ -110,7 +114,7 @@ final class AccessibilityController {
             }
         } else {
             final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
-            if  (displayMagnifier == null) {
+            if (displayMagnifier == null) {
                 throw new IllegalStateException("Magnification callbacks already cleared!");
             }
             displayMagnifier.destroyLocked();
@@ -150,8 +154,10 @@ final class AccessibilityController {
                         "Windows for accessibility callback of display "
                                 + displayId + " already set!");
             }
-            mWindowsForAccessibilityObserver.put(displayId,
-                    new WindowsForAccessibilityObserver(mService, displayId, callback));
+            final WindowsForAccessibilityObserver observer =
+                    new WindowsForAccessibilityObserver(mService, displayId, callback);
+            mWindowsForAccessibilityObserver.put(displayId, observer);
+            mAllObserversInitialized &= observer.mInitialized;
         } else {
             if (isEmbeddedDisplay(dc)) {
                 // If this display is an embedded one, its window observer should be removed along
@@ -275,6 +281,41 @@ final class AccessibilityController {
         if (observer != null) {
             observer.performComputeChangedWindowsNotLocked(false);
         }
+        // Since we abandon initializing observers if no window has focus, make sure all observers
+        // are initialized.
+        sendCallbackToUninitializedObserversIfNeeded();
+    }
+
+    private void sendCallbackToUninitializedObserversIfNeeded() {
+        List<WindowsForAccessibilityObserver> unInitializedObservers;
+        synchronized (mService.mGlobalLock) {
+            if (mAllObserversInitialized) {
+                return;
+            }
+            if (mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus == null) {
+                return;
+            }
+            unInitializedObservers = new ArrayList<>();
+            for (int i = mWindowsForAccessibilityObserver.size() - 1; i >= 0; --i) {
+                final WindowsForAccessibilityObserver observer =
+                        mWindowsForAccessibilityObserver.valueAt(i);
+                if (!observer.mInitialized) {
+                    unInitializedObservers.add(observer);
+                }
+            }
+            // Reset the flag to record the new added observer.
+            mAllObserversInitialized = true;
+        }
+
+        boolean areAllObserversInitialized = true;
+        for (int i = unInitializedObservers.size() - 1; i >= 0; --i) {
+            final  WindowsForAccessibilityObserver observer = unInitializedObservers.get(i);
+            observer.performComputeChangedWindowsNotLocked(true);
+            areAllObserversInitialized &= observer.mInitialized;
+        }
+        synchronized (mService.mGlobalLock) {
+            mAllObserversInitialized &= areAllObserversInitialized;
+        }
     }
 
     /**
@@ -361,6 +402,8 @@ final class AccessibilityController {
                         + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
             }
         }
+        pw.println(prefix
+                + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
     }
 
     private void removeObserverOfEmbeddedDisplay(WindowsForAccessibilityObserver
@@ -1214,6 +1257,9 @@ final class AccessibilityController {
 
         private final IntArray mEmbeddedDisplayIdList = new IntArray(0);
 
+        // Set to true if initializing window population complete.
+        private boolean mInitialized;
+
         public WindowsForAccessibilityObserver(WindowManagerService windowManagerService,
                 int displayId,
                 WindowsForAccessibilityCallback callback) {
@@ -1272,10 +1318,17 @@ final class AccessibilityController {
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
                 final WindowState topFocusedWindowState = getTopFocusWindow();
-                if (topFocusedWindowState == null) return;
+                if (topFocusedWindowState == null) {
+                    if (DEBUG) {
+                        Slog.d(LOG_TAG, "top focused window is null, compute it again later");
+                    }
+                    return;
+                }
 
                 final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
                 if (dc == null) {
+                    //It should not happen because it is created while adding the callback.
+                    Slog.w(LOG_TAG, "display content is null, should be created later");
                     return;
                 }
                 final Display display = dc.getDisplay();
@@ -1362,6 +1415,7 @@ final class AccessibilityController {
 
             // Recycle the windows as we do not need them.
             clearAndRecycleWindows(windows);
+            mInitialized = true;
         }
 
         private boolean windowMattersToAccessibility(WindowState windowState,
@@ -1545,6 +1599,16 @@ final class AccessibilityController {
 
         private WindowState getTopFocusWindow() {
             return mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus;
+        }
+
+        @Override
+        public String toString() {
+            return "WindowsForAccessibilityObserver{"
+                    + "mDisplayId=" + mDisplayId
+                    + ", mEmbeddedDisplayIdList="
+                    + Arrays.toString(mEmbeddedDisplayIdList.toArray())
+                    + ", mInitialized=" + mInitialized
+                    + '}';
         }
 
         private class MyHandler extends Handler {
