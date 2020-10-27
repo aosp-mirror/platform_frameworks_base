@@ -170,7 +170,7 @@ public class NotificationHeaderUtil {
     private void sanitizeChild(View child) {
         if (child != null) {
             ViewGroup header = child.findViewById(
-                    com.android.internal.R.id.notification_header);
+                    com.android.internal.R.id.notification_top_line);
             sanitizeHeader(header);
         }
     }
