@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 
@@ -118,6 +116,10 @@ class DragState {
      * without having a WM lock.
      */
     volatile boolean mAnimationCompleted = false;
+    /**
+     * The display on which the drag is happening. If it goes into a different display this will
+     * be updated.
+     */
     DisplayContent mDisplayContent;
 
     @Nullable private ValueAnimator mAnimator;
@@ -308,7 +310,9 @@ class DragState {
 
             // Pause rotations before a drag.
             ProtoLog.d(WM_DEBUG_ORIENTATION, "Pausing rotation during drag");
-            mDisplayContent.getDisplayRotation().pause();
+            mService.mRoot.forAllDisplays(dc -> {
+                dc.getDisplayRotation().pause();
+            });
         }
 
         void tearDown() {
@@ -323,7 +327,9 @@ class DragState {
 
             // Resume rotations after a drag.
             ProtoLog.d(WM_DEBUG_ORIENTATION, "Resuming rotation after drag");
-            mDisplayContent.getDisplayRotation().resume();
+            mService.mRoot.forAllDisplays(dc -> {
+                dc.getDisplayRotation().resume();
+            });
         }
     }
 
@@ -371,9 +377,9 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        mDisplayContent.forAllWindows(w -> {
+        mService.mRoot.forAllWindows(w -> {
             sendDragStartedLocked(w, touchX, touchY, mDataDescription, mData);
-        }, false /* traverseTopToBottom */ );
+        }, false /* traverseTopToBottom */);
     }
 
     /* helper - send a ACTION_DRAG_STARTED event, if the
