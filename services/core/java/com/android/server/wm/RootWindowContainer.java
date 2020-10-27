@@ -55,6 +55,7 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_L
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
@@ -2779,7 +2780,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (allowDelay) {
                     result &= stack.goToSleepIfPossible(shuttingDown);
                 } else {
-                    stack.goToSleep();
+                    stack.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                            !PRESERVE_WINDOWS);
                 }
             }
             return result;
