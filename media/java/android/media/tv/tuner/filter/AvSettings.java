@@ -199,6 +199,7 @@ public class AvSettings extends Settings {
     /**
      * Get the Audio Stream Type.
      */
+    @AudioStreamType
     public int getAudioStreamType() {
         return mAudioStreamType;
     }
@@ -206,6 +207,7 @@ public class AvSettings extends Settings {
     /**
      * Get the Video Stream Type.
      */
+    @VideoStreamType
     public int getVideoStreamType() {
         return mVideoStreamType;
     }
