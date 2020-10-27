@@ -277,6 +277,8 @@ public final class Parcel {
     private static final int EX_TRANSACTION_FAILED = -129;
 
     @CriticalNative
+    private static native void nativeMarkSensitive(long nativePtr);
+    @CriticalNative
     private static native int nativeDataSize(long nativePtr);
     @CriticalNative
     private static native int nativeDataAvail(long nativePtr);
@@ -489,6 +491,14 @@ public final class Parcel {
     /** @hide */
     @UnsupportedAppUsage
     public static native long getGlobalAllocCount();
+
+    /**
+     * Parcel data should be zero'd before realloc'd or deleted.
+     * @hide
+     */
+    public final void markSensitive() {
+        nativeMarkSensitive(mNativePtr);
+    }
 
     /**
      * Returns the total amount of data contained in the parcel.
