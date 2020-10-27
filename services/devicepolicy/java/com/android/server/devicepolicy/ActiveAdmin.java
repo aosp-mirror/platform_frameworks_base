@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -130,6 +131,7 @@ class ActiveAdmin {
     private static final String TAG_ALWAYS_ON_VPN_PACKAGE = "vpn-package";
     private static final String TAG_ALWAYS_ON_VPN_LOCKDOWN = "vpn-lockdown";
     private static final String TAG_COMMON_CRITERIA_MODE = "common-criteria-mode";
+    private static final String TAG_PASSWORD_COMPLEXITY = "password-complexity";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
@@ -141,6 +143,9 @@ class ActiveAdmin {
 
     @NonNull
     PasswordPolicy mPasswordPolicy = new PasswordPolicy();
+
+    @DevicePolicyManager.PasswordComplexity
+    int mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
 
     @Nullable
     FactoryResetProtectionPolicy mFactoryResetProtectionPolicy = null;
@@ -518,6 +523,10 @@ class ActiveAdmin {
         if (mCommonCriteriaMode) {
             writeAttributeValueToXml(out, TAG_COMMON_CRITERIA_MODE, mCommonCriteriaMode);
         }
+
+        if (mPasswordComplexity != PASSWORD_COMPLEXITY_NONE) {
+            writeAttributeValueToXml(out, TAG_PASSWORD_COMPLEXITY, mPasswordComplexity);
+        }
     }
 
     void writeTextToXml(XmlSerializer out, String tag, String text) throws IOException {
@@ -777,6 +786,8 @@ class ActiveAdmin {
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
                 mCommonCriteriaMode = Boolean.parseBoolean(
                         parser.getAttributeValue(null, ATTR_VALUE));
+            } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
+                mPasswordComplexity = Integer.parseInt(parser.getAttributeValue(null, ATTR_VALUE));
             } else {
                 Slog.w(DevicePolicyManagerService.LOG_TAG, "Unknown admin tag: " + tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1112,5 +1123,8 @@ class ActiveAdmin {
 
         pw.print("mCommonCriteriaMode=");
         pw.println(mCommonCriteriaMode);
+
+        pw.print("mPasswordComplexity=");
+        pw.println(mPasswordComplexity);
     }
 }
