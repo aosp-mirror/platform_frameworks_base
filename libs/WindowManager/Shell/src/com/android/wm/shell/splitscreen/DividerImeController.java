@@ -40,7 +40,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
 
     private static final float ADJUSTED_NONFOCUS_DIM = 0.3f;
 
-    private final SplitScreenTaskOrganizer mSplits;
+    private final SplitScreenTaskListener mSplits;
     private final TransactionPool mTransactionPool;
     private final Handler mHandler;
     private final TaskOrganizer mTaskOrganizer;
@@ -92,7 +92,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     private boolean mPausedTargetAdjusted = false;
     private boolean mAdjustedWhileHidden = false;
 
-    DividerImeController(SplitScreenTaskOrganizer splits, TransactionPool pool, Handler handler,
+    DividerImeController(SplitScreenTaskListener splits, TransactionPool pool, Handler handler,
             TaskOrganizer taskOrganizer) {
         mSplits = splits;
         mTransactionPool = pool;

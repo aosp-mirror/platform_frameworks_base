@@ -750,17 +750,15 @@ public class SizeCompatTests extends WindowTestsBase {
         final Rect taskBounds = mTask.getBounds();
         final Rect newActivityBounds = newActivity.getBounds();
 
-        // Task bounds should be 700x1400 with the ratio as the display.
+        // Task bounds should be (1400 / 1.3 = 1076)x1400 with the app requested ratio.
         assertTrue(mTask.isTaskLetterboxed());
         assertEquals(displayBounds.height(), taskBounds.height());
-        assertEquals(displayBounds.height() * displayBounds.height() / displayBounds.width(),
+        assertEquals((long) Math.rint(taskBounds.height() / newActivity.info.maxAspectRatio),
                 taskBounds.width());
 
-        // App bounds should be 700x(710 x 1.3 = 910)
+        // App bounds should be fullscreen in Task bounds.
         assertFalse(newActivity.inSizeCompatMode());
-        assertEquals(taskBounds.width(), newActivityBounds.width());
-        assertEquals((long) Math.rint(taskBounds.width() * newActivity.info.maxAspectRatio),
-                newActivityBounds.height());
+        assertEquals(taskBounds, newActivityBounds);
     }
 
     private static WindowState addWindowToActivity(ActivityRecord activity) {

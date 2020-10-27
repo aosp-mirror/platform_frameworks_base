@@ -30,6 +30,7 @@ import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Fake {@link NativeWrapper} useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
@@ -55,6 +56,7 @@ final class FakeNativeWrapper implements NativeWrapper {
             };
 
     private final List<HdmiCecMessage> mResultMessages = new ArrayList<>();
+    private final Map<Integer, Boolean> mPortConnectionStatus = new HashMap<>();
     private final HashMap<Integer, Integer> mMessageSendResult = new HashMap<>();
     private int mMyPhysicalAddress = 0;
     private HdmiPortInfo[] mHdmiPortInfo = null;
@@ -125,7 +127,12 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public boolean nativeIsConnected(int port) {
-        return false;
+        Boolean isConnected = mPortConnectionStatus.get(port);
+        return isConnected == null ? false : isConnected;
+    }
+
+    public void setPortConnectionStatus(int port, boolean connected) {
+        mPortConnectionStatus.put(port, connected);
     }
 
     public void onCecMessage(HdmiCecMessage hdmiCecMessage) {

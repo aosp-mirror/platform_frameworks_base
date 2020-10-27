@@ -75,9 +75,9 @@ public class GestureLauncherService extends SystemService {
     @VisibleForTesting static final long POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS = 500;
 
     /**
-     * Number of taps required to launch panic ui.
+     * Number of taps required to launch emergency gesture ui.
      */
-    private static final int PANIC_POWER_TAP_COUNT_THRESHOLD = 5;
+    private static final int EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD = 5;
 
     /**
      * Number of taps required to launch camera shortcut.
@@ -138,9 +138,9 @@ public class GestureLauncherService extends SystemService {
     private boolean mCameraDoubleTapPowerEnabled;
 
     /**
-     * Whether panic button gesture is currently enabled
+     * Whether emergency gesture is currently enabled
      */
-    private boolean mPanicButtonGestureEnabled;
+    private boolean mEmergencyGestureEnabled;
 
     private long mLastPowerDown;
     private int mPowerButtonConsecutiveTaps;
@@ -178,7 +178,7 @@ public class GestureLauncherService extends SystemService {
                     "GestureLauncherService");
             updateCameraRegistered();
             updateCameraDoubleTapPowerEnabled();
-            updatePanicButtonGestureEnabled();
+            updateEmergencyGestureEnabled();
 
             mUserId = ActivityManager.getCurrentUser();
             mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
@@ -197,7 +197,7 @@ public class GestureLauncherService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED),
                 false, mSettingObserver, mUserId);
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.PANIC_GESTURE_ENABLED),
+                Settings.Secure.getUriFor(Settings.Secure.EMERGENCY_GESTURE_ENABLED),
                 false, mSettingObserver, mUserId);
     }
 
@@ -225,10 +225,10 @@ public class GestureLauncherService extends SystemService {
     }
 
     @VisibleForTesting
-    void updatePanicButtonGestureEnabled() {
-        boolean enabled = isPanicButtonGestureEnabled(mContext, mUserId);
+    void updateEmergencyGestureEnabled() {
+        boolean enabled = isEmergencyGestureEnabled(mContext, mUserId);
         synchronized (this) {
-            mPanicButtonGestureEnabled = enabled;
+            mEmergencyGestureEnabled = enabled;
         }
     }
 
@@ -357,11 +357,11 @@ public class GestureLauncherService extends SystemService {
     }
 
     /**
-     * Whether to enable panic button gesture.
+     * Whether to enable emergency gesture.
      */
-    public static boolean isPanicButtonGestureEnabled(Context context, int userId) {
+    public static boolean isEmergencyGestureEnabled(Context context, int userId) {
         return Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.PANIC_GESTURE_ENABLED, 0, userId) != 0;
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED, 0, userId) != 0;
     }
 
     /**
@@ -409,7 +409,7 @@ public class GestureLauncherService extends SystemService {
             return false;
         }
         boolean launchCamera = false;
-        boolean launchPanic = false;
+        boolean launchEmergencyGesture = false;
         boolean intercept = false;
         long powerTapInterval;
         synchronized (this) {
@@ -428,15 +428,15 @@ public class GestureLauncherService extends SystemService {
                 mPowerButtonConsecutiveTaps++;
                 mPowerButtonSlowConsecutiveTaps++;
             }
-            // Check if we need to launch camera or panic flows
-            if (mPanicButtonGestureEnabled) {
+            // Check if we need to launch camera or emergency gesture flows
+            if (mEmergencyGestureEnabled) {
                 // Commit to intercepting the powerkey event after the second "quick" tap to avoid
-                // lockscreen changes between launching camera and the panic flow.
+                // lockscreen changes between launching camera and the emergency gesture flow.
                 if (mPowerButtonConsecutiveTaps > 1) {
                     intercept = interactive;
                 }
-                if (mPowerButtonConsecutiveTaps == PANIC_POWER_TAP_COUNT_THRESHOLD) {
-                    launchPanic = true;
+                if (mPowerButtonConsecutiveTaps == EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD) {
+                    launchEmergencyGesture = true;
                 }
             }
             if (mCameraDoubleTapPowerEnabled
@@ -461,18 +461,18 @@ public class GestureLauncherService extends SystemService {
                 mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
                         (int) powerTapInterval);
             }
-        } else if (launchPanic) {
-            Slog.i(TAG, "Panic gesture detected, launching panic.");
-            launchPanic = handlePanicButtonGesture();
+        } else if (launchEmergencyGesture) {
+            Slog.i(TAG, "Emergency gesture detected, launching.");
+            launchEmergencyGesture = handleEmergencyGesture();
             // TODO(b/160006048): Add logging
         }
         mMetricsLogger.histogram("power_consecutive_short_tap_count",
                 mPowerButtonSlowConsecutiveTaps);
         mMetricsLogger.histogram("power_double_tap_interval", (int) powerTapInterval);
 
-        outLaunched.value = launchCamera || launchPanic;
-        // Intercept power key event if the press is part of a gesture (camera, panic) and the user
-        // has completed setup.
+        outLaunched.value = launchCamera || launchEmergencyGesture;
+        // Intercept power key event if the press is part of a gesture (camera, eGesture) and the
+        // user has completed setup.
         return intercept && isUserSetupComplete();
     }
 
@@ -512,27 +512,25 @@ public class GestureLauncherService extends SystemService {
     }
 
     /**
-     * @return true if panic ui was launched, false otherwise.
+     * @return true if emergency gesture UI was launched, false otherwise.
      */
     @VisibleForTesting
-    boolean handlePanicButtonGesture() {
-        // TODO(b/160006048): This is the wrong way to launch panic ui. Rewrite this to go
-        //  through SysUI
+    boolean handleEmergencyGesture() {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                "GestureLauncher:handlePanicButtonGesture");
+                "GestureLauncher:handleEmergencyGesture");
         try {
             boolean userSetupComplete = isUserSetupComplete();
             if (!userSetupComplete) {
                 if (DBG) {
                     Slog.d(TAG, String.format(
-                            "userSetupComplete = %s, ignoring panic gesture.",
+                            "userSetupComplete = %s, ignoring emergency gesture.",
                             userSetupComplete));
                 }
                 return false;
             }
             if (DBG) {
                 Slog.d(TAG, String.format(
-                        "userSetupComplete = %s, performing panic gesture.",
+                        "userSetupComplete = %s, performing emergency gesture.",
                         userSetupComplete));
             }
             StatusBarManagerInternal service = LocalServices.getService(
@@ -558,7 +556,7 @@ public class GestureLauncherService extends SystemService {
                 registerContentObservers();
                 updateCameraRegistered();
                 updateCameraDoubleTapPowerEnabled();
-                updatePanicButtonGestureEnabled();
+                updateEmergencyGestureEnabled();
             }
         }
     };
@@ -568,7 +566,7 @@ public class GestureLauncherService extends SystemService {
             if (userId == mUserId) {
                 updateCameraRegistered();
                 updateCameraDoubleTapPowerEnabled();
-                updatePanicButtonGestureEnabled();
+                updateEmergencyGestureEnabled();
             }
         }
     };

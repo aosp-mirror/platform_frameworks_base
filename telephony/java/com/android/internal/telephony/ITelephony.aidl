@@ -2216,4 +2216,20 @@ interface ITelephony {
      * does not exist on the SIM card.
      */
     List<String> getEquivalentHomePlmns(int subId, String callingPackage, String callingFeatureId);
+
+    /**
+     * Enable/Disable E-UTRA-NR Dual Connectivity
+     * @return operation result. See TelephonyManager.EnableNrDualConnectivityResult for
+     * details
+     * @param subId the id of the subscription
+     * @param enable enable/disable dual connectivity
+     */
+    int setNrDualConnectivityState(int subId, int nrDualConnectivityState);
+
+    /**
+     * Is E-UTRA-NR Dual Connectivity enabled
+     * @param subId the id of the subscription
+     * @return true if dual connectivity is enabled else false
+     */
+    boolean isNrDualConnectivityEnabled(int subId);
 }

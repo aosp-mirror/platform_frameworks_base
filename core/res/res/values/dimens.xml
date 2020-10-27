@@ -207,6 +207,9 @@
     <!-- Default padding for dialogs. -->
     <dimen name="dialog_padding">16dp</dimen>
 
+    <!-- The horizontal margin of the content in the notification shade -->
+    <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
+
     <!-- The margin on the start of the content view -->
     <dimen name="notification_content_margin_start">16dp</dimen>
 
@@ -857,4 +860,9 @@
     <dimen name="waterfall_display_top_edge_size">0px</dimen>
     <dimen name="waterfall_display_right_edge_size">0px</dimen>
     <dimen name="waterfall_display_bottom_edge_size">0px</dimen>
+
+    <!-- The maximum height of a thumbnail in a ThumbnailTemplate. The image will be reduced to that height in case they are bigger. -->
+    <dimen name="controls_thumbnail_image_max_height">140dp</dimen>
+    <!-- The maximum width of a thumbnail in a ThumbnailTemplate. The image will be reduced to that width in case they are bigger.-->
+    <dimen name="controls_thumbnail_image_max_width">280dp</dimen>
 </resources>

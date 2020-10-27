@@ -79,6 +79,7 @@ android_test {
         // For NetworkStackUtils included in NetworkStackBase
         "libnetworkstackutilsjni",
     ],
+    jarjar_rules: ":TetheringTestsJarJarRules",
     compile_multilib: "both",
     manifest: "AndroidManifest_coverage.xml",
 }

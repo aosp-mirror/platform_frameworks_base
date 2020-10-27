@@ -32,7 +32,6 @@ import android.os.IInterface;
 import android.os.Process;
 import android.util.ArraySet;
 
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.listeners.BinderListenerRegistration;
@@ -60,7 +59,7 @@ import java.util.Objects;
  */
 public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInterface,
         TMergedRegistration> extends
-        ListenerMultiplexer<IBinder, TListener, ListenerOperation<TListener>,
+        ListenerMultiplexer<IBinder, TListener,
                 GnssListenerMultiplexer<TRequest, TListener, TMergedRegistration>
                         .GnssListenerRegistration, TMergedRegistration> {
 
@@ -231,7 +230,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             TListener listener) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            addRegistration(listener.asBinder(),
+            putRegistration(listener.asBinder(),
                     createRegistration(request, callerIdentity, listener));
         } finally {
             Binder.restoreCallingIdentity(identity);

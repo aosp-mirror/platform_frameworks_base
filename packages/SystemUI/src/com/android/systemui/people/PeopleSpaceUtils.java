@@ -69,16 +69,29 @@ public class PeopleSpaceUtils {
 
     /** Converts {@code drawable} to a {@link Bitmap}. */
     public static Bitmap convertDrawableToBitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
+        if (drawable == null) {
+            return null;
         }
-        // We use max below because the drawable might have no intrinsic width/height (e.g. if the
-        // drawable is a solid color).
-        Bitmap bitmap =
-                Bitmap.createBitmap(
-                        Math.max(drawable.getIntrinsicWidth(), 1),
-                        Math.max(drawable.getIntrinsicHeight(), 1),
-                        Bitmap.Config.ARGB_8888);
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        Bitmap bitmap;
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(
+                    drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(),
+                    Bitmap.Config.ARGB_8888
+            );
+        }
+
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);

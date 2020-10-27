@@ -580,7 +580,6 @@ bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
             return false;
         }
     }
-    // TODO: determine update status for value metrics.
     return true;
 }
 
@@ -644,7 +643,7 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                    set<int64_t>& noReportMetricIds,
                    unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
                    unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
-                   vector<int>& metricsWithActivation) {
+                   vector<int>& metricsWithActivation, set<int64_t>& replacedMetrics) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     sp<EventMatcherWizard> matcherWizard = new EventMatcherWizard(allAtomMatchingTrackers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
@@ -690,6 +689,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createCountMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, metric, metricIndex,
@@ -727,6 +728,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createDurationMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, metric, metricIndex,
@@ -749,8 +752,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         newMetricProducers.push_back(producer.value());
     }
     for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
-        newMetricProducerMap[config.event_metric(i).id()] = metricIndex;
         const EventMetric& metric = config.event_metric(i);
+        newMetricProducerMap[metric.id()] = metricIndex;
         optional<sp<MetricProducer>> producer;
         switch (metricsToUpdate[metricIndex]) {
             case UPDATE_PRESERVE: {
@@ -764,6 +767,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createEventMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, metric, metricIndex, allAtomMatchingTrackers,
@@ -784,6 +789,47 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         }
         newMetricProducers.push_back(producer.value());
     }
+
+    for (int i = 0; i < config.value_metric_size(); i++, metricIndex++) {
+        const ValueMetric& metric = config.value_metric(i);
+        newMetricProducerMap[metric.id()] = metricIndex;
+        optional<sp<MetricProducer>> producer;
+        switch (metricsToUpdate[metricIndex]) {
+            case UPDATE_PRESERVE: {
+                producer = updateMetric(
+                        config, i, metricIndex, metric.id(), allAtomMatchingTrackers,
+                        oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, matcherWizard,
+                        allConditionTrackers, conditionTrackerMap, wizard, oldMetricProducerMap,
+                        oldMetricProducers, metricToActivationMap, trackerToMetricMap,
+                        conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                break;
+            }
+            case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
+            case UPDATE_NEW: {
+                producer = createValueMetricProducerAndUpdateMetadata(
+                        key, config, timeBaseNs, currentTimeNs, pullerManager, metric, metricIndex,
+                        allAtomMatchingTrackers, newAtomMatchingTrackerMap, allConditionTrackers,
+                        conditionTrackerMap, initialConditionCache, wizard, matcherWizard,
+                        stateAtomIdMap, allStateGroupMaps, metricToActivationMap,
+                        trackerToMetricMap, conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                break;
+            }
+            default: {
+                ALOGE("Metric \"%lld\" update state is unknown. This should never happen",
+                      (long long)metric.id());
+                return false;
+            }
+        }
+        if (!producer) {
+            return false;
+        }
+        newMetricProducers.push_back(producer.value());
+    }
+
     for (int i = 0; i < config.gauge_metric_size(); i++, metricIndex++) {
         const GaugeMetric& metric = config.gauge_metric(i);
         newMetricProducerMap[metric.id()] = metricIndex;
@@ -800,6 +846,8 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
                 break;
             }
             case UPDATE_REPLACE:
+                replacedMetrics.insert(metric.id());
+                [[fallthrough]];  // Intentionally fallthrough to create the new metric producer.
             case UPDATE_NEW: {
                 producer = createGaugeMetricProducerAndUpdateMetadata(
                         key, config, timeBaseNs, currentTimeNs, pullerManager, metric, metricIndex,
@@ -821,7 +869,6 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         }
         newMetricProducers.push_back(producer.value());
     }
-    // TODO: perform update for value metric.
 
     const set<int> atomsAllowedFromAnyUid(config.whitelisted_atom_ids().begin(),
                                           config.whitelisted_atom_ids().end());
@@ -872,6 +919,7 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         set<int64_t>& noReportMetricIds) {
     set<int64_t> replacedMatchers;
     set<int64_t> replacedConditions;
+    set<int64_t> replacedMetrics;
     vector<ConditionState> conditionCache;
     unordered_map<int64_t, int> stateAtomIdMap;
     unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
@@ -913,7 +961,7 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                        replacedStates, oldMetricProducerMap, oldMetricProducers,
                        newMetricProducerMap, newMetricProducers, conditionToMetricMap,
                        trackerToMetricMap, noReportMetricIds, activationTrackerToMetricMap,
-                       deactivationTrackerToMetricMap, metricsWithActivation)) {
+                       deactivationTrackerToMetricMap, metricsWithActivation, replacedMetrics)) {
         ALOGE("initMetricProducers failed");
         return false;
     }

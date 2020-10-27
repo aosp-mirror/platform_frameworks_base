@@ -70,10 +70,10 @@ public final class TotalCaptureResult extends CaptureResult {
      * @param partials a list of partial results; {@code null} will be substituted for an empty list
      * @hide
      */
-    public TotalCaptureResult(CameraMetadataNative results, CaptureRequest parent,
-            CaptureResultExtras extras, List<CaptureResult> partials, int sessionId,
-            PhysicalCaptureResultInfo physicalResults[]) {
-        super(results, parent, extras);
+    public TotalCaptureResult(String logicalCameraId, CameraMetadataNative results,
+            CaptureRequest parent, CaptureResultExtras extras, List<CaptureResult> partials,
+            int sessionId, PhysicalCaptureResultInfo[] physicalResults) {
+        super(logicalCameraId, results, parent, extras);
 
         if (partials == null) {
             mPartialResults = new ArrayList<>();
@@ -85,7 +85,7 @@ public final class TotalCaptureResult extends CaptureResult {
 
         mPhysicalCaptureResults = new HashMap<String, CaptureResult>();
         for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
-            CaptureResult physicalResult = new CaptureResult(
+            CaptureResult physicalResult = new CaptureResult(onePhysicalResult.getCameraId(),
                     onePhysicalResult.getCameraMetadata(), parent, extras);
             mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),
                     physicalResult);

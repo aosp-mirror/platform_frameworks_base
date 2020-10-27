@@ -47,7 +47,7 @@ public class SplitDisplayLayout {
 
     private static final int DIVIDER_WIDTH_INACTIVE_DP = 4;
 
-    SplitScreenTaskOrganizer mTiles;
+    SplitScreenTaskListener mTiles;
     DisplayLayout mDisplayLayout;
     Context mContext;
 
@@ -62,7 +62,7 @@ public class SplitDisplayLayout {
     Rect mAdjustedPrimary = null;
     Rect mAdjustedSecondary = null;
 
-    public SplitDisplayLayout(Context ctx, DisplayLayout dl, SplitScreenTaskOrganizer taskTiles) {
+    public SplitDisplayLayout(Context ctx, DisplayLayout dl, SplitScreenTaskListener taskTiles) {
         mTiles = taskTiles;
         mDisplayLayout = dl;
         mContext = ctx;

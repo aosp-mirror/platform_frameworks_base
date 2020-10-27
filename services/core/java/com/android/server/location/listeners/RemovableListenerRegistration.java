@@ -18,8 +18,6 @@ package com.android.server.location.listeners;
 
 import android.annotation.Nullable;
 
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
-
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -29,11 +27,9 @@ import java.util.concurrent.Executor;
  *
  * @param <TRequest>           request type
  * @param <TListener>          listener type
- * @param <TListenerOperation> listener operation type
  */
-public abstract class RemovableListenerRegistration<TRequest, TListener,
-        TListenerOperation extends ListenerOperation<TListener>> extends
-        RequestListenerRegistration<TRequest, TListener, TListenerOperation> {
+public abstract class RemovableListenerRegistration<TRequest, TListener> extends
+        RequestListenerRegistration<TRequest, TListener> {
 
     private volatile @Nullable Object mKey;
 
@@ -47,8 +43,7 @@ public abstract class RemovableListenerRegistration<TRequest, TListener,
      * with. Often this is easiest to accomplish by defining registration subclasses as non-static
      * inner classes of the multiplexer they are to be used with.
      */
-    protected abstract ListenerMultiplexer<?, ? super TListener, ?
-            super TListenerOperation, ?, ?> getOwner();
+    protected abstract ListenerMultiplexer<?, ? super TListener, ?, ?> getOwner();
 
     /**
      * Returns the key associated with this registration. May not be invoked before

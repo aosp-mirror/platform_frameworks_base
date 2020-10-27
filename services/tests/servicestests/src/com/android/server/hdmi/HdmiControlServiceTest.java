@@ -176,7 +176,7 @@ public class HdmiControlServiceTest {
         mHdmiPortInfo[3] =
             new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
-        mHdmiControlService.initPortInfo();
+        mHdmiControlService.initService();
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
         mTestLooper.dispatchAll();
@@ -203,29 +203,6 @@ public class HdmiControlServiceTest {
         assertTrue(mMyAudioSystemDevice.isStandby());
         assertTrue(mMyPlaybackDevice.isDisabled());
         assertTrue(mMyAudioSystemDevice.isDisabled());
-    }
-
-    @Test
-    public void pathToPort_pathExists_weAreNonTv() {
-        mNativeWrapper.setPhysicalAddress(0x2000);
-        mHdmiControlService.initPortInfo();
-        assertThat(mHdmiControlService.pathToPortId(0x2120)).isEqualTo(1);
-        assertThat(mHdmiControlService.pathToPortId(0x2234)).isEqualTo(2);
-    }
-
-    @Test
-    public void pathToPort_pathExists_weAreTv() {
-        mNativeWrapper.setPhysicalAddress(0x0000);
-        mHdmiControlService.initPortInfo();
-        assertThat(mHdmiControlService.pathToPortId(0x2120)).isEqualTo(3);
-        assertThat(mHdmiControlService.pathToPortId(0x3234)).isEqualTo(4);
-    }
-
-    @Test
-    public void pathToPort_pathInvalid() {
-        mNativeWrapper.setPhysicalAddress(0x2000);
-        mHdmiControlService.initPortInfo();
-        assertThat(mHdmiControlService.pathToPortId(0x1000)).isEqualTo(Constants.INVALID_PORT_ID);
     }
 
     @Test

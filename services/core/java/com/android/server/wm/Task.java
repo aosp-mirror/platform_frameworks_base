@@ -528,6 +528,11 @@ class Task extends WindowContainer<WindowContainer> {
     // {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag of the root activity.
     boolean mSupportsPictureInPicture;
 
+    // Activity bounds if this task or its top activity is presented in letterbox mode and
+    // {@code null} otherwise.
+    @Nullable
+    private Rect mLetterboxActivityBounds;
+
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
     private int mDragResizeMode;
@@ -790,6 +795,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean mTaskAppearedSent;
 
+    // If the sending of the task appear signal should be deferred until this flag is set back to
+    // false.
+    private boolean mDeferTaskAppear;
+
     /**
      * This task was created by the task organizer which has the following implementations.
      * <ul>
@@ -802,14 +811,20 @@ class Task extends WindowContainer<WindowContainer> {
     @VisibleForTesting
     boolean mCreatedByOrganizer;
 
+    // Tracking cookie for the creation of this task.
+    IBinder mLaunchCookie;
+
     /**
      * Don't use constructor directly. Use {@link TaskDisplayArea#createStackUnchecked()} instead.
      */
-    Task(ActivityTaskManagerService atmService, int id, int activityType,
-            ActivityInfo info, Intent intent, boolean createdByOrganizer) {
+    Task(ActivityTaskManagerService atmService, int id, int activityType, ActivityInfo info,
+            Intent intent, boolean createdByOrganizer, boolean deferTaskAppear,
+            IBinder launchCookie) {
         this(atmService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 null /*taskDescription*/, null /*stack*/);
         mCreatedByOrganizer = createdByOrganizer;
+        mLaunchCookie = launchCookie;
+        mDeferTaskAppear = deferTaskAppear;
         setActivityType(activityType);
     }
 
@@ -2921,13 +2936,27 @@ class Task extends WindowContainer<WindowContainer> {
 
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
-        final float aspect = ((float) parentHeight) / parentWidth;
+        float aspect = Math.max(parentWidth, parentHeight)
+                / (float) Math.min(parentWidth, parentHeight);
+
+        // Adjust the Task letterbox bounds to fit the app request aspect ratio in order to use the
+        // extra available space.
+        if (refActivity != null) {
+            final float maxAspectRatio = refActivity.info.maxAspectRatio;
+            final float minAspectRatio = refActivity.info.minAspectRatio;
+            if (aspect > maxAspectRatio && maxAspectRatio != 0) {
+                aspect = maxAspectRatio;
+            } else if (aspect < minAspectRatio) {
+                aspect = minAspectRatio;
+            }
+        }
+
         if (forcedOrientation == ORIENTATION_LANDSCAPE) {
-            final int height = (int) (parentWidth / aspect);
+            final int height = (int) Math.rint(parentWidth / aspect);
             final int top = parentBounds.centerY() - height / 2;
             outBounds.set(parentBounds.left, top, parentBounds.right, top + height);
         } else {
-            final int width = (int) (parentHeight * aspect);
+            final int width = (int) Math.rint(parentHeight / aspect);
             final int left = parentBounds.centerX() - width / 2;
             outBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
         }
@@ -4058,11 +4087,18 @@ class Task extends WindowContainer<WindowContainer> {
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
         info.isResizeable = isResizeable();
+        // Don't query getTopNonFinishingActivity().getBounds() directly because when fillTaskInfo
+        // is triggered for the first time after activities change, getBounds() may return non final
+        // bounds, e.g. fullscreen bounds instead of letterboxed bounds. To work around this,
+        // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
+        info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
+        info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
             info.addLaunchCookie(r.mLaunchCookie);
         });
@@ -4074,6 +4110,21 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityRecord rootActivity = top.getRootActivity();
         return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
                 ? null : rootActivity.pictureInPictureArgs;
+    }
+
+    void maybeUpdateLetterboxBounds(
+                ActivityRecord activityRecord, @Nullable Rect letterboxActivityBounds) {
+        if (isOrganized()
+                && mReuseActivitiesReport.top == activityRecord
+                // Want to force update only if letterbox bounds have changed.
+                && !Objects.equals(
+                    mLetterboxActivityBounds,
+                    letterboxActivityBounds)) {
+            mLetterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
+            // Forcing update to reduce visual jank during the transition.
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                        this, /* force= */ true);
+        }
     }
 
     /**
@@ -4817,6 +4868,13 @@ class Task extends WindowContainer<WindowContainer> {
         return mHasBeenVisible;
     }
 
+    void setDeferTaskAppear(boolean deferTaskAppear) {
+        mDeferTaskAppear = deferTaskAppear;
+        if (!mDeferTaskAppear) {
+            sendTaskAppeared();
+        }
+    }
+
     /** In the case that these conditions are true, we want to send the Task to the organizer:
      *     1. An organizer has been set
      *     2. The Task was created by the organizer
@@ -4828,6 +4886,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean taskAppearedReady() {
         if (mTaskOrganizer == null) {
+            return false;
+        }
+
+        if (mDeferTaskAppear) {
             return false;
         }
 
@@ -7451,6 +7513,12 @@ class Task extends WindowContainer<WindowContainer> {
         final int outset = getTaskOutset();
         outPos.x -= outset;
         outPos.y -= outset;
+    }
+
+    private Point getRelativePosition() {
+        Point position = new Point();
+        getRelativePosition(position);
+        return position;
     }
 
     boolean shouldIgnoreInput() {

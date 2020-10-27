@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
 
@@ -101,12 +102,18 @@ public class TaskOrganizer extends WindowOrganizer {
     @BinderThread
     public void onBackPressedOnTaskRoot(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
-    /** Creates a persistent root task in WM for a particular windowing-mode. */
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param launchCookie Launch cookie to associate with the task so that is can be identified
+     *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
+     */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
-    public ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode) {
+    public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
         try {
-            return mTaskOrganizerController.createRootTask(displayId, windowingMode);
+            mTaskOrganizerController.createRootTask(displayId, windowingMode, launchCookie);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

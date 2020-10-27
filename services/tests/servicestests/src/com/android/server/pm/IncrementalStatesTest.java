@@ -222,4 +222,18 @@ public class IncrementalStatesTest {
         assertTrue(mFullyLoadedCalled.block(WAIT_TIMEOUT_MILLIS));
         assertFalse(mIncrementalStates.isLoading());
     }
+
+    /**
+     * Test startability transitions if app crashes or anrs
+     */
+    @Test
+    public void testStartableTransition_AppCrashOrAnr() {
+        mIncrementalStates.onCrashOrAnr();
+        assertFalse(mIncrementalStates.isStartable());
+        mIncrementalStates.setProgress(1.0f);
+        assertTrue(mIncrementalStates.isStartable());
+        mIncrementalStates.onCrashOrAnr();
+        // Test that if fully loaded, app remains startable even if it has crashed
+        assertTrue(mIncrementalStates.isStartable());
+    }
 }

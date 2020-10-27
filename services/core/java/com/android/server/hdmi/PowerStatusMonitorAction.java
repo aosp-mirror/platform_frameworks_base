@@ -20,7 +20,9 @@ import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_UNKNOWN;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.SparseIntArray;
+
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+
 import java.util.List;
 
 /**
@@ -111,7 +113,8 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
     }
 
     private void queryPowerStatus() {
-        List<HdmiDeviceInfo> deviceInfos = tv().getDeviceInfoList(false);
+        List<HdmiDeviceInfo> deviceInfos =
+                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false);
         resetPowerStatus(deviceInfos);
         for (HdmiDeviceInfo info : deviceInfos) {
             final int logicalAddress = info.getLogicalAddress();
@@ -137,7 +140,8 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
     }
 
     private void updatePowerStatus(int logicalAddress, int newStatus, boolean remove) {
-        tv().updateDevicePowerStatus(logicalAddress, newStatus);
+        localDevice().mService.getHdmiCecNetwork().updateDevicePowerStatus(logicalAddress,
+                newStatus);
 
         if (remove) {
             mPowerStatus.delete(logicalAddress);

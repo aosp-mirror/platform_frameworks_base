@@ -15,12 +15,12 @@
   ~ limitations under the License.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <LinearLayout
         android:background="@drawable/people_space_tile_view_card"
+        android:id="@+id/item"
         android:orientation="vertical"
         android:padding="6dp"
         android:layout_marginBottom="6dp"

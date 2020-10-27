@@ -24,6 +24,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -181,6 +183,20 @@ public class TaskInfo {
     public boolean isResizeable;
 
     /**
+     * Activity bounds if this task or its top activity is presented in letterbox mode and
+     * {@code null} otherwise.
+     * @hide
+     */
+    @Nullable
+    public Rect letterboxActivityBounds;
+
+    /**
+     * Relative position of the task's top left corner in the parent container.
+     * @hide
+     */
+    public Point positionInParent;
+
+    /**
      * The launch cookies associated with activities in this task if any.
      * @see ActivityOptions#setLaunchCookie(IBinder)
      * @hide
@@ -225,6 +241,7 @@ public class TaskInfo {
 
     /** @hide */
     public void addLaunchCookie(IBinder cookie) {
+        if (cookie == null || launchCookies.contains(cookie)) return;
         launchCookies.add(cookie);
     }
 
@@ -256,6 +273,8 @@ public class TaskInfo {
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
         source.readBinderList(launchCookies);
+        letterboxActivityBounds = source.readTypedObject(Rect.CREATOR);
+        positionInParent = source.readTypedObject(Point.CREATOR);
     }
 
     /**
@@ -287,6 +306,8 @@ public class TaskInfo {
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
         dest.writeBinderList(launchCookies);
+        dest.writeTypedObject(letterboxActivityBounds, flags);
+        dest.writeTypedObject(positionInParent, flags);
     }
 
     @Override
@@ -306,6 +327,9 @@ public class TaskInfo {
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
                 + " topActivityInfo=" + topActivityInfo
-                + " launchCookies" + launchCookies;
+                + " launchCookies" + launchCookies
+                + " letterboxActivityBounds=" + letterboxActivityBounds
+                + " positionInParent=" + positionInParent
+                + "}";
     }
 }

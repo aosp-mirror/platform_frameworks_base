@@ -8380,18 +8380,19 @@ public final class Settings {
         public static final String CAMERA_GESTURE_DISABLED = "camera_gesture_disabled";
 
         /**
-         * Whether the panic button (emergency sos) gesture should be enabled.
+         * Whether the emergency gesture should be enabled.
          *
          * @hide
          */
-        public static final String PANIC_GESTURE_ENABLED = "panic_gesture_enabled";
+        public static final String EMERGENCY_GESTURE_ENABLED = "emergency_gesture_enabled";
 
         /**
-         * Whether the panic button (emergency sos) sound should be enabled.
+         * Whether the emergency gesture sound should be enabled.
          *
          * @hide
          */
-        public static final String PANIC_SOUND_ENABLED = "panic_sound_enabled";
+        public static final String EMERGENCY_GESTURE_SOUND_ENABLED =
+                "emergency_gesture_sound_enabled";
 
         /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
@@ -9914,13 +9915,19 @@ public final class Settings {
                 "hdmi_control_auto_device_off_enabled";
 
         /**
-         * Property to decide which devices the playback device can send a <Standby> message to upon
-         * going to sleep. Supported values are:
+         * Property to decide which devices the playback device can send a <Standby> message to
+         * upon going to sleep. It additionally controls whether a playback device attempts to turn
+         * on the connected Audio system when waking up. Supported values are:
          * <ul>
-         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_TO_TV} to TV only.</li>
-         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_BROADCAST} to all devices in the
-         * network.</li>
-         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_NONE} no <Standby> message sent.</li>
+         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_TO_TV} Upon going to sleep, device
+         * sends {@code <Standby>} to TV only. Upon waking up, device does not turn on the Audio
+         * system via {@code <System Audio Mode Request>}.</li>
+         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_BROADCAST} Upon going to sleep,
+         * device sends {@code <Standby>} to all devices in the network. Upon waking up, device
+         * attempts to turn on the Audio system via {@code <System Audio Mode Request>}.</li>
+         * <li>{@link HdmiControlManager#SEND_STANDBY_ON_SLEEP_NONE} Upon going to sleep, device
+         * does not send any {@code <Standby>} message. Upon waking up, device does not turn on the
+         * Audio system via {@code <System Audio Mode Request>}.</li>
          * </ul>
          *
          * @hide

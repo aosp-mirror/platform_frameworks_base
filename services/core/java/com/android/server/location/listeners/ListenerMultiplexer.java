@@ -75,13 +75,11 @@ import java.util.function.Predicate;
  *
  * @param <TKey>                key type
  * @param <TListener>           listener type
- * @param <TListenerOperation>  listener operation type
  * @param <TRegistration>       registration type
  * @param <TMergedRegistration> merged registration type
  */
 public abstract class ListenerMultiplexer<TKey, TListener,
-        TListenerOperation extends ListenerOperation<TListener>,
-        TRegistration extends ListenerRegistration<TListener, TListenerOperation>,
+        TRegistration extends ListenerRegistration<TListener>,
         TMergedRegistration> {
 
     @GuardedBy("mRegistrations")
@@ -218,16 +216,35 @@ public abstract class ListenerMultiplexer<TKey, TListener,
     protected void onInactive() {}
 
     /**
-     * Adds a new registration with the given key. This method cannot be called to add a
-     * registration re-entrantly.
+     * Puts a new registration with the given key, replacing any previous registration under the
+     * same key. This method cannot be called to put a registration re-entrantly.
      */
-    protected final void addRegistration(@NonNull TKey key, @NonNull TRegistration registration) {
+    protected final void putRegistration(@NonNull TKey key, @NonNull TRegistration registration) {
+        replaceRegistration(key, key, registration);
+    }
+
+    /**
+     * Atomically removes the registration with the old key and adds a new registration with the
+     * given key. If there was a registration for the old key,
+     * {@link #onRegistrationReplaced(Object, ListenerRegistration, ListenerRegistration)} will be
+     * invoked for the new registration and key instead of
+     * {@link #onRegistrationAdded(Object, ListenerRegistration)}, even though they may not share
+     * the same key. The old key may be the same value as the new key, in which case this function
+     * is equivalent to {@link #putRegistration(Object, ListenerRegistration)}. This method cannot
+     * be called to add a registration re-entrantly.
+     */
+    protected final void replaceRegistration(@NonNull TKey oldKey, @NonNull TKey key,
+            @NonNull TRegistration registration) {
+        Objects.requireNonNull(oldKey);
         Objects.requireNonNull(key);
         Objects.requireNonNull(registration);
 
         synchronized (mRegistrations) {
             // adding listeners reentrantly is not supported
             Preconditions.checkState(!mReentrancyGuard.isReentrant());
+
+            // new key may only have a prior registration if the oldKey is the same as the key
+            Preconditions.checkArgument(oldKey == key || !mRegistrations.containsKey(key));
 
             // since adding a registration can invoke a variety of callbacks, we need to ensure
             // those callbacks themselves do not re-enter, as this could lead to out-of-order
@@ -241,9 +258,11 @@ public abstract class ListenerMultiplexer<TKey, TListener,
                 boolean wasEmpty = mRegistrations.isEmpty();
 
                 TRegistration oldRegistration = null;
-                int index = mRegistrations.indexOfKey(key);
+                int index = mRegistrations.indexOfKey(oldKey);
                 if (index >= 0) {
-                    oldRegistration = removeRegistration(index, false);
+                    oldRegistration = removeRegistration(index, oldKey != key);
+                }
+                if (oldKey == key && index >= 0) {
                     mRegistrations.setValueAt(index, registration);
                 } else {
                     mRegistrations.put(key, registration);
@@ -316,7 +335,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
      * re-entrancy, and may be called to remove a registration re-entrantly.
      */
     protected final void removeRegistration(@NonNull Object key,
-            @NonNull ListenerRegistration<?, ?> registration) {
+            @NonNull ListenerRegistration<?> registration) {
         synchronized (mRegistrations) {
             int index = mRegistrations.indexOfKey(key);
             if (index < 0) {
@@ -478,15 +497,9 @@ public abstract class ListenerMultiplexer<TKey, TListener,
                 if (++mActiveRegistrationsCount == 1) {
                     onActive();
                 }
-                TListenerOperation operation = registration.onActive();
-                if (operation != null) {
-                    execute(registration, operation);
-                }
+                registration.onActive();
             } else {
-                TListenerOperation operation = registration.onInactive();
-                if (operation != null) {
-                    execute(registration, operation);
-                }
+                registration.onInactive();
                 if (--mActiveRegistrationsCount == 0) {
                     onInactive();
                 }
@@ -502,16 +515,16 @@ public abstract class ListenerMultiplexer<TKey, TListener,
      * change the active state of the registration.
      */
     protected final void deliverToListeners(
-            @NonNull Function<TRegistration, TListenerOperation> function) {
+            @NonNull Function<TRegistration, ListenerOperation<TListener>> function) {
         synchronized (mRegistrations) {
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
                 final int size = mRegistrations.size();
                 for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     if (registration.isActive()) {
-                        TListenerOperation operation = function.apply(registration);
+                        ListenerOperation<TListener> operation = function.apply(registration);
                         if (operation != null) {
-                            execute(registration, operation);
+                            registration.executeOperation(operation);
                         }
                     }
                 }
@@ -526,14 +539,14 @@ public abstract class ListenerMultiplexer<TKey, TListener,
      * deliverToListeners(registration -> operation);
      * </pre>
      */
-    protected final void deliverToListeners(@NonNull TListenerOperation operation) {
+    protected final void deliverToListeners(@NonNull ListenerOperation<TListener> operation) {
         synchronized (mRegistrations) {
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
                 final int size = mRegistrations.size();
                 for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     if (registration.isActive()) {
-                        execute(registration, operation);
+                        registration.executeOperation(operation);
                     }
                 }
             }
@@ -543,10 +556,6 @@ public abstract class ListenerMultiplexer<TKey, TListener,
     private void unregister(TRegistration registration) {
         registration.unregisterInternal();
         onRegistrationActiveChanged(registration);
-    }
-
-    private void execute(TRegistration registration, TListenerOperation operation) {
-        registration.executeInternal(operation);
     }
 
     /**
@@ -606,7 +615,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
         @GuardedBy("mRegistrations")
         private int mGuardCount;
         @GuardedBy("mRegistrations")
-        private @Nullable ArraySet<Entry<Object, ListenerRegistration<?, ?>>> mScheduledRemovals;
+        private @Nullable ArraySet<Entry<Object, ListenerRegistration<?>>> mScheduledRemovals;
 
         ReentrancyGuard() {
             mGuardCount = 0;
@@ -622,7 +631,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
         }
 
         @GuardedBy("mRegistrations")
-        void markForRemoval(Object key, ListenerRegistration<?, ?> registration) {
+        void markForRemoval(Object key, ListenerRegistration<?> registration) {
             if (Build.IS_DEBUGGABLE) {
                 Preconditions.checkState(Thread.holdsLock(mRegistrations));
             }
@@ -641,7 +650,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
 
         @Override
         public void close() {
-            ArraySet<Entry<Object, ListenerRegistration<?, ?>>> scheduledRemovals = null;
+            ArraySet<Entry<Object, ListenerRegistration<?>>> scheduledRemovals = null;
 
             Preconditions.checkState(mGuardCount > 0);
             if (--mGuardCount == 0) {
@@ -656,7 +665,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
             try (UpdateServiceBuffer ignored = mUpdateServiceBuffer.acquire()) {
                 final int size = scheduledRemovals.size();
                 for (int i = 0; i < size; i++) {
-                    Entry<Object, ListenerRegistration<?, ?>> entry = scheduledRemovals.valueAt(i);
+                    Entry<Object, ListenerRegistration<?>> entry = scheduledRemovals.valueAt(i);
                     removeRegistration(entry.getKey(), entry.getValue());
                 }
             }

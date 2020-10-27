@@ -52,8 +52,10 @@ interface ILocationManager
     void registerLocationListener(String provider, in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
     void unregisterLocationListener(in ILocationListener listener);
 
-    void registerLocationPendingIntent(String provider, in LocationRequest request, in PendingIntent intent, String packageName, String attributionTag);
+    void registerLocationPendingIntent(String provider, in LocationRequest request, in PendingIntent pendingIntent, String packageName, String attributionTag);
     void unregisterLocationPendingIntent(in PendingIntent intent);
+
+    void injectLocation(in Location location);
 
     void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
     void removeGeofence(in PendingIntent intent);
@@ -89,7 +91,6 @@ interface ILocationManager
     void startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String attributionTag);
     void flushGnssBatch();
     void stopGnssBatch();
-    void injectLocation(in Location location);
 
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);

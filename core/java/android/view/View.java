@@ -80,7 +80,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26444,7 +26443,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         surface.copyFrom(surfaceControl);
         IBinder token = null;
         try {
-            final Canvas canvas = surface.lockCanvas(null);
+            final Canvas canvas = isHardwareAccelerated()
+                    ? surface.lockHardwareCanvas()
+                    : surface.lockCanvas(null);
             try {
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 shadowBuilder.onDrawShadow(canvas);
@@ -26535,7 +26536,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if (mAttachInfo.mDragToken != null) {
             try {
-                Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
+                Canvas canvas = isHardwareAccelerated()
+                        ? mAttachInfo.mDragSurface.lockHardwareCanvas()
+                        : mAttachInfo.mDragSurface.lockCanvas(null);
                 try {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                     shadowBuilder.onDrawShadow(canvas);
@@ -28911,33 +28914,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Indicates whether views need to use 32-bit drawing caches
          */
         boolean mUse32BitDrawingCache;
-
-        /**
-         * For windows that are full-screen but using insets to layout inside
-         * of the screen decorations, these are the current insets for the
-         * content of the window.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
-                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
-        final Rect mContentInsets = new Rect();
-
-        /**
-         * For windows that are full-screen but using insets to layout inside
-         * of the screen decorations, these are the current insets for the
-         * actual visible parts of the window.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
-                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
-        final Rect mVisibleInsets = new Rect();
-
-        /**
-         * For windows that are full-screen but using insets to layout inside
-         * of the screen decorations, these are the current insets for the
-         * stable system windows.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
-                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
-        final Rect mStableInsets = new Rect();
 
         /**
          * Current caption insets to the display coordinate.
