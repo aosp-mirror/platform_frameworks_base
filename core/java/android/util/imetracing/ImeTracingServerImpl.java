@@ -19,11 +19,13 @@ package android.util.imetracing;
 import static android.os.Build.IS_USER;
 
 import android.inputmethodservice.AbstractInputMethodService;
+import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodManagerServiceTraceFileProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceFileProto;
 
 import com.android.internal.annotations.GuardedBy;
@@ -40,6 +42,7 @@ class ImeTracingServerImpl extends ImeTracing {
     private static final String TRACE_DIRNAME = "/data/misc/wmtrace/";
     private static final String TRACE_FILENAME_CLIENTS = "ime_trace_clients.pb";
     private static final String TRACE_FILENAME_IMS = "ime_trace_service.pb";
+    private static final String TRACE_FILENAME_IMMS = "ime_trace_managerservice.pb";
     private static final int BUFFER_CAPACITY = 4096 * 1024;
 
     // Needed for winscope to auto-detect the dump type. Explained further in
@@ -52,11 +55,17 @@ class ImeTracingServerImpl extends ImeTracing {
     private static final long MAGIC_NUMBER_IMS_VALUE =
             ((long) InputMethodServiceTraceFileProto.MAGIC_NUMBER_H << 32)
                 | InputMethodServiceTraceFileProto.MAGIC_NUMBER_L;
+    // This magic number corresponds to InputMethodManagerServiceTraceFileProto.
+    private static final long MAGIC_NUMBER_IMMS_VALUE =
+            ((long) InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER_H << 32)
+                | InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER_L;
 
     private final TraceBuffer mBufferClients;
     private final File mTraceFileClients;
     private final TraceBuffer mBufferIms;
     private final File mTraceFileIms;
+    private final TraceBuffer mBufferImms;
+    private final File mTraceFileImms;
 
     private final Object mEnabledLock = new Object();
 
@@ -65,6 +74,8 @@ class ImeTracingServerImpl extends ImeTracing {
         mTraceFileClients = new File(TRACE_DIRNAME + TRACE_FILENAME_CLIENTS);
         mBufferIms = new TraceBuffer<>(BUFFER_CAPACITY);
         mTraceFileIms = new File(TRACE_DIRNAME + TRACE_FILENAME_IMS);
+        mBufferImms = new TraceBuffer<>(BUFFER_CAPACITY);
+        mTraceFileImms = new File(TRACE_DIRNAME + TRACE_FILENAME_IMMS);
     }
 
     /**
@@ -84,9 +95,11 @@ class ImeTracingServerImpl extends ImeTracing {
                     mBufferIms.add(proto);
                     return;
                 case IME_TRACING_FROM_IMMS:
-                    // TODO (b/154348613)
+                    mBufferImms.add(proto);
+                    return;
                 default:
                     // Source not recognised.
+                    Log.w(TAG, "Request to add to buffer, but source not recognised.");
             }
         }
     }
@@ -129,7 +142,24 @@ class ImeTracingServerImpl extends ImeTracing {
 
     @Override
     public void triggerManagerServiceDump(String where) {
-        // TODO (b/154348613)
+        if (!isEnabled() || !isAvailable()) {
+            return;
+        }
+
+        synchronized (mDumpInProgressLock) {
+            if (mDumpInProgress) {
+                return;
+            }
+            mDumpInProgress = true;
+        }
+
+        try {
+            sendToService(null, IME_TRACING_FROM_IMMS, where);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while sending ime-related manager service dump to server", e);
+        } finally {
+            mDumpInProgress = false;
+        }
     }
 
     private void writeTracesToFilesLocked() {
@@ -142,6 +172,11 @@ class ImeTracingServerImpl extends ImeTracing {
             ProtoOutputStream imsProto = new ProtoOutputStream();
             imsProto.write(InputMethodServiceTraceFileProto.MAGIC_NUMBER, MAGIC_NUMBER_IMS_VALUE);
             mBufferIms.writeTraceToFile(mTraceFileIms, imsProto);
+
+            ProtoOutputStream immsProto = new ProtoOutputStream();
+            immsProto.write(InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER,
+                    MAGIC_NUMBER_IMMS_VALUE);
+            mBufferImms.writeTraceToFile(mTraceFileImms, immsProto);
         } catch (IOException e) {
             Log.e(TAG, "Unable to write buffer to file", e);
         }
@@ -161,10 +196,9 @@ class ImeTracingServerImpl extends ImeTracing {
             }
 
             pw.println("Starting tracing in " + TRACE_DIRNAME + ": " + TRACE_FILENAME_CLIENTS
-                    + ", " + TRACE_FILENAME_IMS);
+                    + ", " + TRACE_FILENAME_IMS + ", " + TRACE_FILENAME_IMMS);
             sEnabled = true;
-            mBufferClients.resetBuffer();
-            mBufferIms.resetBuffer();
+            resetBuffers();
         }
     }
 
@@ -182,11 +216,17 @@ class ImeTracingServerImpl extends ImeTracing {
             }
 
             pw.println("Stopping tracing and writing traces in " + TRACE_DIRNAME + ": "
-                    + TRACE_FILENAME_CLIENTS + ", " + TRACE_FILENAME_IMS);
+                    + TRACE_FILENAME_CLIENTS + ", " + TRACE_FILENAME_IMS + ", "
+                    + TRACE_FILENAME_IMMS);
             sEnabled = false;
             writeTracesToFilesLocked();
-            mBufferClients.resetBuffer();
-            mBufferIms.resetBuffer();
+            resetBuffers();
         }
+    }
+
+    private void resetBuffers() {
+        mBufferClients.resetBuffer();
+        mBufferIms.resetBuffer();
+        mBufferImms.resetBuffer();
     }
 }

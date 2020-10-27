@@ -40,6 +40,7 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FOR
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_IME_WITH_HARD_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_REQUESTED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_READY;
+import static android.util.imetracing.ImeTracing.IME_TRACING_FROM_IMMS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -141,6 +142,8 @@ import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodManagerServiceTraceFileProto;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodManagerServiceTraceProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceFileProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceProto;
 import android.view.inputmethod.InputMethodInfo;
@@ -3103,6 +3106,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         int uid = Binder.getCallingUid();
+        ImeTracing.getInstance().triggerManagerServiceDump(
+                "InputMethodManagerService#showSoftInput");
         synchronized (mMethodMap) {
             if (!calledFromValidUserLocked()) {
                 return false;
@@ -3216,6 +3221,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
+        ImeTracing.getInstance().triggerManagerServiceDump(
+                "InputMethodManagerService#hideSoftInput");
         synchronized (mMethodMap) {
             if (!calledFromValidUserLocked()) {
                 return false;
@@ -3312,6 +3319,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "IMMS.startInputOrWindowGainedFocus");
+            ImeTracing.getInstance().triggerManagerServiceDump(
+                    "InputMethodManagerService#startInputOrWindowGainedFocus");
             final int callingUserId = UserHandle.getCallingUserId();
             final int userId;
             if (attribute != null && attribute.targetInputMethodUser != null
@@ -4013,7 +4022,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     @GuardedBy("mMethodMap")
     public void startProtoDump(byte[] protoDump, int source, String where) {
-        if (protoDump == null) {
+        if (protoDump == null && source != IME_TRACING_FROM_IMMS) {
             // Dump not triggered from IMMS, but no proto information provided.
             return;
         }
@@ -4039,6 +4048,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 proto.write(InputMethodServiceTraceProto.WHERE, where);
                 proto.write(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE, protoDump);
                 proto.end(service_token);
+                break;
+            case IME_TRACING_FROM_IMMS:
+                final long managerservice_token =
+                        proto.start(InputMethodManagerServiceTraceFileProto.ENTRY);
+                proto.write(InputMethodManagerServiceTraceProto.ELAPSED_REALTIME_NANOS,
+                        SystemClock.elapsedRealtimeNanos());
+                proto.write(InputMethodManagerServiceTraceProto.WHERE, where);
+                dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
+                proto.end(managerservice_token);
                 break;
             default:
                 // Dump triggered by a source not recognised.
