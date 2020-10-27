@@ -52,7 +52,6 @@ public class DataConnectionStats extends BroadcastReceiver {
     private SignalStrength mSignalStrength;
     private ServiceState mServiceState;
     private int mDataState = TelephonyManager.DATA_DISCONNECTED;
-    private int mNrState = NetworkRegistrationInfo.NR_STATE_NONE;
 
     public DataConnectionStats(Context context, Handler listenerHandler) {
         mContext = context;
@@ -100,7 +99,7 @@ public class DataConnectionStats extends BroadcastReceiver {
                 : regInfo.getAccessNetworkTechnology();
         // If the device is in NSA NR connection the networkType will report as LTE.
         // For cell dwell rate metrics, this should report NR instead.
-        if (mNrState == NetworkRegistrationInfo.NR_STATE_CONNECTED) {
+        if (regInfo != null && regInfo.getNrState() == NetworkRegistrationInfo.NR_STATE_CONNECTED) {
             networkType = TelephonyManager.NETWORK_TYPE_NR;
         }
         if (DEBUG) Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
@@ -172,7 +171,6 @@ public class DataConnectionStats extends BroadcastReceiver {
         @Override
         public void onServiceStateChanged(ServiceState state) {
             mServiceState = state;
-            mNrState = state.getNrState();
             notePhoneDataConnectionState();
         }
 
