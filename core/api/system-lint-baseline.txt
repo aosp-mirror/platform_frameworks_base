@@ -6,7 +6,8 @@ ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
 BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
     Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
 
-ExecutorRegistration: android.media.MediaPlayer#setOnImsRxNoticeListener(android.media.MediaPlayer.OnImsRxNoticeListener, android.os.Handler):
+ExecutorRegistration: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
+    Registration methods should have overload that accepts delivery Executor: `setOnRtpRxNoticeListener`
     
 GenericException: android.app.prediction.AppPredictor#finalize():
     
@@ -182,7 +183,8 @@ SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallb
     
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
-SamShouldBeLast: android.media.MediaPlayer#setOnImsRxNoticeListener(android.media.MediaPlayer.OnImsRxNoticeListener, android.os.Handler):
+SamShouldBeLast: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.media.MediaPlayer.setOnRtpRxNoticeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
     
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
