@@ -1145,6 +1145,18 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * Check if this PendingIntent is marked with {@link #FLAG_IMMUTABLE}.
+     */
+    public boolean isImmutable() {
+        try {
+            return ActivityManager.getService()
+                    .isIntentSenderImmutable(mTarget);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      * Check whether this PendingIntent will launch an Activity.
      */
