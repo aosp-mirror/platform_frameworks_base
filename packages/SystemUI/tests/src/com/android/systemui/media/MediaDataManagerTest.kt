@@ -217,6 +217,20 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(data.actions).hasSize(1)
     }
 
+    @Test
+    fun testDismissMedia_listenerCalled() {
+        val listener = mock(MediaDataManager.Listener::class.java)
+        mediaDataManager.addListener(listener)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = mock(MediaData::class.java))
+        mediaDataManager.dismissMediaData(KEY, 0L)
+
+        foregroundExecutor.advanceClockToLast()
+        foregroundExecutor.runAllReady()
+
+        verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
     /**
      * Simple implementation of [MediaDataManager.Listener] for the test.
      *

@@ -150,7 +150,7 @@ class MediaCarouselController @Inject constructor(
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
         mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
                 executor, mediaManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
-                falsingManager)
+                this::closeGuts, falsingManager)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -466,6 +466,12 @@ class MediaCarouselController @Inject constructor(
                 }
             }
             updateCarouselSize()
+        }
+    }
+
+    fun closeGuts() {
+        mediaPlayers.values.forEach {
+            it.closeGuts(true)
         }
     }
 

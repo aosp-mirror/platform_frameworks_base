@@ -48,6 +48,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
@@ -1927,24 +1928,29 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean attachApplication(WindowProcessController app) throws RemoteException {
-        final String processName = app.mName;
         boolean didSomething = false;
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent display = getChildAt(displayNdx);
-            final ActivityStack stack = display.getFocusedStack();
-            if (stack == null) {
-                continue;
-            }
-
             mTmpRemoteException = null;
             mTmpBoolean = false; // Set to true if an activity was started.
-            final PooledFunction c = PooledLambda.obtainFunction(
-                    RootWindowContainer::startActivityForAttachedApplicationIfNeeded, this,
-                    PooledLambda.__(ActivityRecord.class), app, stack.topRunningActivity());
-            stack.forAllActivities(c);
-            c.recycle();
-            if (mTmpRemoteException != null) {
-                throw mTmpRemoteException;
+
+            final DisplayContent display = getChildAt(displayNdx);
+            for (int areaNdx = display.getTaskDisplayAreaCount() - 1; areaNdx >= 0; --areaNdx) {
+                final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(areaNdx);
+                for (int taskNdx = taskDisplayArea.getStackCount() - 1; taskNdx >= 0; --taskNdx) {
+                    final ActivityStack rootTask = taskDisplayArea.getStackAt(taskNdx);
+                    if (rootTask.getVisibility(null /*starting*/) == STACK_VISIBILITY_INVISIBLE) {
+                        break;
+                    }
+                    final PooledFunction c = PooledLambda.obtainFunction(
+                            RootWindowContainer::startActivityForAttachedApplicationIfNeeded, this,
+                            PooledLambda.__(ActivityRecord.class), app,
+                            rootTask.topRunningActivity());
+                    rootTask.forAllActivities(c);
+                    c.recycle();
+                    if (mTmpRemoteException != null) {
+                        throw mTmpRemoteException;
+                    }
+                }
             }
             didSomething |= mTmpBoolean;
         }
@@ -1962,8 +1968,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         try {
-            if (mStackSupervisor.realStartActivityLocked(r, app, top == r /*andResume*/,
-                    true /*checkConfig*/)) {
+            if (mStackSupervisor.realStartActivityLocked(r, app,
+                    top == r && r.isFocusable() /*andResume*/, true /*checkConfig*/)) {
                 mTmpBoolean = true;
             }
         } catch (RemoteException e) {

@@ -3649,6 +3649,10 @@ class Task extends WindowContainer<WindowContainer> {
             return STACK_VISIBILITY_INVISIBLE;
         }
 
+        if (isTopActivityLaunchedBehind()) {
+            return STACK_VISIBILITY_VISIBLE;
+        }
+
         boolean gotSplitScreenStack = false;
         boolean gotOpaqueSplitScreenPrimary = false;
         boolean gotOpaqueSplitScreenSecondary = false;
@@ -3764,6 +3768,14 @@ class Task extends WindowContainer<WindowContainer> {
         // Lastly - check if there is a translucent fullscreen stack on top.
         return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
                 : STACK_VISIBILITY_VISIBLE;
+    }
+
+    private boolean isTopActivityLaunchedBehind() {
+        final ActivityRecord top = topRunningActivity();
+        if (top != null && top.mLaunchTaskBehind) {
+            return true;
+        }
+        return false;
     }
 
     ActivityRecord isInTask(ActivityRecord r) {
