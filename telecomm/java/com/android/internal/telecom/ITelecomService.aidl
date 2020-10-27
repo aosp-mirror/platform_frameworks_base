@@ -179,6 +179,11 @@ interface ITelecomService {
     boolean isInCall(String callingPackage, String callingFeatureId);
 
     /**
+     * @see TelecomServiceImpl#hasCompanionInCallServiceAccess
+     */
+    boolean hasCompanionInCallServiceAccess(String callingPackage);
+
+    /**
      * @see TelecomServiceImpl#isInManagedCall
      */
     boolean isInManagedCall(String callingPackage, String callingFeatureId);
