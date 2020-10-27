@@ -20,12 +20,12 @@ import static android.content.ContentResolver.SCHEME_CONTENT;
 import static android.view.OnReceiveContentCallback.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
 import static android.view.OnReceiveContentCallback.Payload.SOURCE_AUTOFILL;
 import static android.view.OnReceiveContentCallback.Payload.SOURCE_DRAG_AND_DROP;
+import static android.view.OnReceiveContentCallback.Payload.SOURCE_INPUT_METHOD;
 
 import static java.util.Collections.singleton;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -72,16 +72,6 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
     @Nullable private InputConnectionInfo mInputConnectionInfo;
     @Nullable private ArraySet<String> mCachedSupportedMimeTypes;
 
-    @SuppressLint("CallbackMethodName")
-    @NonNull
-    @Override
-    public Set<String> getSupportedMimeTypes(@NonNull TextView view) {
-        if (!isUsageOfImeCommitContentEnabled(view)) {
-            return MIME_TYPES_ALL_TEXT;
-        }
-        return getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes();
-    }
-
     @Override
     public boolean onReceiveContent(@NonNull TextView view, @NonNull Payload payload) {
         if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
@@ -90,6 +80,11 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
         ClipData clip = payload.getClip();
         @Source int source = payload.getSource();
         @Flags int flags = payload.getFlags();
+        if (source == SOURCE_INPUT_METHOD) {
+            // InputConnection.commitContent() should only be used for non-text input which is not
+            // supported by the default implementation.
+            return false;
+        }
         if (source == SOURCE_AUTOFILL) {
             return onReceiveForAutofill(view, clip, flags);
         }
@@ -123,7 +118,7 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
                 }
             }
         }
-        return true;
+        return didFirst;
     }
 
     private static void replaceSelection(@NonNull Editable editable,
@@ -160,7 +155,7 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
             @NonNull ClipData clip, @Flags int flags) {
         final CharSequence text = coerceToText(clip, textView.getContext(), flags);
         if (text.length() == 0) {
-            return true;
+            return false;
         }
         replaceSelection((Editable) textView.getText(), text);
         return true;
@@ -205,7 +200,7 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
      * non-text content.
      */
     private static boolean isUsageOfImeCommitContentEnabled(@NonNull View view) {
-        if (view.getOnReceiveContentCallback() != null) {
+        if (view.getOnReceiveContentMimeTypes() != null) {
             if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
                 Log.v(LOG_TAG, "Fallback to commitContent disabled (custom callback is set)");
             }
@@ -267,6 +262,17 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
         mInputConnectionInfo = null;
     }
 
+    // TODO(b/168253885): Use this to populate the assist structure for Autofill
+
+    /** @hide */
+    @VisibleForTesting
+    public Set<String> getMimeTypes(TextView view) {
+        if (!isUsageOfImeCommitContentEnabled(view)) {
+            return MIME_TYPES_ALL_TEXT;
+        }
+        return getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes();
+    }
+
     private Set<String> getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes() {
         InputConnectionInfo icInfo = mInputConnectionInfo;
         if (icInfo == null) {
@@ -291,7 +297,8 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
     }
 
     /**
-     * We want to avoid creating a new set on every invocation of {@link #getSupportedMimeTypes}.
+     * We want to avoid creating a new set on every invocation of
+     * {@link #getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes()}.
      * This method will check if the cached set of MIME types matches the data in the given array
      * from {@link EditorInfo} or if a new set should be created. The custom logic is needed for
      * comparing the data because the set contains the additional "text/*" MIME type.
