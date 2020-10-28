@@ -252,6 +252,46 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
+    public void testAfterDisplayChange_ActiveModeIsUpdated() throws Exception {
+        SurfaceControl.DisplayConfig[] configs = new SurfaceControl.DisplayConfig[]{
+                createFakeDisplayConfig(1920, 1080, 60f),
+                createFakeDisplayConfig(1920, 1080, 50f)
+        };
+        FakeDisplay display = new FakeDisplay(PORT_A, configs, /* activeConfig */ 0);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(0)
+                .getDisplayDeviceInfoLocked();
+
+        Display.Mode activeMode = getModeById(displayDeviceInfo, displayDeviceInfo.modeId);
+        assertThat(activeMode.matches(1920, 1080, 60f)).isTrue();
+
+        // Change the display
+        display.activeConfig = 1;
+        setUpDisplay(display);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(SurfaceControl.getActiveConfig(display.token)).isEqualTo(1);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
+
+        activeMode = getModeById(displayDeviceInfo, displayDeviceInfo.modeId);
+        assertThat(activeMode.matches(1920, 1080, 50f)).isTrue();
+    }
+
+    @Test
     public void testAfterDisplayChange_HdrCapabilitiesAreUpdated() throws Exception {
         FakeDisplay display = new FakeDisplay(PORT_A);
         Display.HdrCapabilities initialHdrCapabilities = new Display.HdrCapabilities(new int[0],
