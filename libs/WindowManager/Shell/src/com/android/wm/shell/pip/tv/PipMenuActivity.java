@@ -56,8 +56,7 @@ public class PipMenuActivity extends Activity implements PipController.Listener 
         }
         setContentView(R.layout.tv_pip_menu);
         mPipControlsViewController = new PipControlsViewController(
-                findViewById(R.id.pip_controls), sPipController,
-                getLayoutInflater(), getApplicationContext().getMainThreadHandler());
+                findViewById(R.id.pip_controls), sPipController);
         sPipController.addListener(this);
         mRestorePipSizeWhenClose = true;
         mFadeInAnimation = AnimatorInflater.loadAnimator(
@@ -141,7 +140,7 @@ public class PipMenuActivity extends Activity implements PipController.Listener 
         if (DEBUG) Log.d(TAG, "onPipMenuActionsChanged()");
 
         boolean hasCustomActions = actions != null && !actions.getList().isEmpty();
-        mPipControlsViewController.setActions(
+        mPipControlsViewController.setCustomActions(
                 hasCustomActions ? actions.getList() : Collections.emptyList());
     }
 

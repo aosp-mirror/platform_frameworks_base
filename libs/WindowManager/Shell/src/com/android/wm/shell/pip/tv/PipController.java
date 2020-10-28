@@ -38,9 +38,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.media.session.MediaController;
-import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -55,6 +52,7 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.util.ArrayList;
@@ -110,22 +108,19 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private final PipBoundsState mPipBoundsState;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipTaskOrganizer mPipTaskOrganizer;
+    private final PipMediaController mPipMediaController;
 
     private IActivityTaskManager mActivityTaskManager;
-    private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
     private int mResumeResizePinnedStackRunnableState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
-    private List<MediaListener> mMediaListeners = new ArrayList<>();
     private Rect mPipBounds;
     private Rect mDefaultPipBounds = new Rect();
     private Rect mMenuModePipBounds;
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private int mPinnedStackId = INVALID_STACK_ID;
-    private ComponentName mPipComponentName;
-    private MediaController mPipMediaController;
     private String[] mLastPackagesResourceGranted;
     private PipNotification mPipNotification;
     private ParceledListSlice<RemoteAction> mCustomActions;
@@ -168,17 +163,13 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             }
         }
     };
-    private final MediaSessionManager.OnActiveSessionsChangedListener mActiveMediaSessionListener =
-            controllers -> updateMediaController(controllers);
+
     private final PinnedStackListenerForwarder.PinnedStackListener mPinnedStackListener =
             new PipControllerPinnedStackListener();
 
     @Override
     public void registerSessionListenerForCurrentUser() {
-        // TODO Need confirm if TV have to re-registers when switch user
-        mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
-        mMediaSessionManager.addOnActiveSessionsChangedListener(mActiveMediaSessionListener, null,
-                UserHandle.USER_CURRENT, null);
+        mPipMediaController.registerSessionListenerForCurrentUser();
     }
 
     /**
@@ -232,12 +223,13 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipBoundsState pipBoundsState,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
-            WindowManagerShellWrapper windowManagerShellWrapper
-    ) {
+            PipMediaController pipMediaController,
+            WindowManagerShellWrapper windowManagerShellWrapper) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mPipNotification = new PipNotification(context, this);
         mPipBoundsHandler = pipBoundsHandler;
+        mPipMediaController = pipMediaController;
         // Ensure that we have the display info in case we get calls to update the bounds
         // before the listener calls back
         final DisplayInfo displayInfo = new DisplayInfo();
@@ -261,7 +253,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mLastOrientation = initialConfig.orientation;
         loadConfigurationsAndApply(initialConfig);
 
-        mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
@@ -329,8 +320,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
-        mPipMediaController = null;
-        mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
         if (removePipStack) {
             try {
                 mActivityTaskManager.removeTask(mPinnedStackId);
@@ -371,13 +360,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         if (DEBUG) Log.d(TAG, "PINNED_STACK:" + taskInfo);
         mPinnedStackId = taskInfo.taskId;
         mPipTaskId = taskInfo.childTaskIds[taskInfo.childTaskIds.length - 1];
-        mPipComponentName = ComponentName.unflattenFromString(
-                taskInfo.childTaskNames[taskInfo.childTaskNames.length - 1]);
         // Set state to STATE_PIP so we show it when the pinned stack animation ends.
         mState = STATE_PIP;
-        mMediaSessionManager.addOnActiveSessionsChangedListener(
-                mActiveMediaSessionListener, null);
-        updateMediaController(mMediaSessionManager.getActiveSessions(null));
+        mPipMediaController.onActivityPinned();
         for (int i = mListeners.size() - 1; i >= 0; i--) {
             mListeners.get(i).onPipEntered(packageName);
         }
@@ -554,20 +539,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     }
 
     /**
-     * Adds a {@link MediaListener} to PipController.
-     */
-    public void addMediaListener(MediaListener listener) {
-        mMediaListeners.add(listener);
-    }
-
-    /**
-     * Removes a {@link MediaListener} from PipController.
-     */
-    public void removeMediaListener(MediaListener listener) {
-        mMediaListeners.remove(listener);
-    }
-
-    /**
      * Returns {@code true} if PIP is shown.
      */
     public boolean isPipShown() {
@@ -608,69 +579,12 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
     }
 
-    private void updateMediaController(List<MediaController> controllers) {
-        MediaController mediaController = null;
-        if (controllers != null && getState() != STATE_NO_PIP && mPipComponentName != null) {
-            for (int i = controllers.size() - 1; i >= 0; i--) {
-                MediaController controller = controllers.get(i);
-                // We assumes that an app with PIPable activity
-                // keeps the single instance of media controller especially when PIP is on.
-                if (controller.getPackageName().equals(mPipComponentName.getPackageName())) {
-                    mediaController = controller;
-                    break;
-                }
-            }
-        }
-        if (mPipMediaController != mediaController) {
-            mPipMediaController = mediaController;
-            for (int i = mMediaListeners.size() - 1; i >= 0; i--) {
-                mMediaListeners.get(i).onMediaControllerChanged();
-            }
-            if (mPipMediaController == null) {
-                mHandler.postDelayed(mClosePipRunnable,
-                        CLOSE_PIP_WHEN_MEDIA_SESSION_GONE_TIMEOUT_MS);
-            } else {
-                mHandler.removeCallbacks(mClosePipRunnable);
-            }
-        }
-    }
-
-    /**
-     * Gets the {@link android.media.session.MediaController} for the PIPed activity.
-     */
-    MediaController getMediaController() {
-        return mPipMediaController;
-    }
-
     @Override
     public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
-
     }
 
-    /**
-     * Returns the PIPed activity's playback state.
-     * This returns one of {@link #PLAYBACK_STATE_PLAYING}, {@link #PLAYBACK_STATE_PAUSED},
-     * or {@link #PLAYBACK_STATE_UNAVAILABLE}.
-     */
-    int getPlaybackState() {
-        if (mPipMediaController == null || mPipMediaController.getPlaybackState() == null) {
-            return PLAYBACK_STATE_UNAVAILABLE;
-        }
-        int state = mPipMediaController.getPlaybackState().getState();
-        boolean isPlaying = (state == PlaybackState.STATE_BUFFERING
-                || state == PlaybackState.STATE_CONNECTING
-                || state == PlaybackState.STATE_PLAYING
-                || state == PlaybackState.STATE_FAST_FORWARDING
-                || state == PlaybackState.STATE_REWINDING
-                || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
-                || state == PlaybackState.STATE_SKIPPING_TO_NEXT);
-        long actions = mPipMediaController.getPlaybackState().getActions();
-        if (!isPlaying && ((actions & PlaybackState.ACTION_PLAY) != 0)) {
-            return PLAYBACK_STATE_PAUSED;
-        } else if (isPlaying && ((actions & PlaybackState.ACTION_PAUSE) != 0)) {
-            return PLAYBACK_STATE_PLAYING;
-        }
-        return PLAYBACK_STATE_UNAVAILABLE;
+    PipMediaController getPipMediaController() {
+        return mPipMediaController;
     }
 
     @Override
@@ -716,14 +630,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */
         void onPipResizeAboutToStart();
-    }
-
-    /**
-     * A listener interface to receive change in PIP's media controller
-     */
-    public interface MediaListener {
-        /** Invoked when the MediaController on PIPed activity is changed. */
-        void onMediaControllerChanged();
     }
 
     private String getStateDescription() {
