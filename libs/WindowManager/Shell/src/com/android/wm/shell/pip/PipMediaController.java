@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.pip;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -46,10 +46,10 @@ import java.util.List;
  */
 public class PipMediaController {
 
-    private static final String ACTION_PLAY = "com.android.wm.shell.pip.phone.PLAY";
-    private static final String ACTION_PAUSE = "com.android.wm.shell.pip.phone.PAUSE";
-    private static final String ACTION_NEXT = "com.android.wm.shell.pip.phone.NEXT";
-    private static final String ACTION_PREV = "com.android.wm.shell.pip.phone.PREV";
+    private static final String ACTION_PLAY = "com.android.wm.shell.pip.PLAY";
+    private static final String ACTION_PAUSE = "com.android.wm.shell.pip.PAUSE";
+    private static final String ACTION_NEXT = "com.android.wm.shell.pip.NEXT";
+    private static final String ACTION_PREV = "com.android.wm.shell.pip.PREV";
 
     /**
      * A listener interface to receive notification on changes to the media actions.
@@ -113,8 +113,7 @@ public class PipMediaController {
                 UserHandle.USER_ALL);
 
         createMediaActions();
-        mMediaSessionManager =
-                (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mMediaSessionManager = context.getSystemService(MediaSessionManager.class);
     }
 
     /**
@@ -140,7 +139,7 @@ public class PipMediaController {
      * Removes a media action listener.
      */
     public void removeListener(ActionListener listener) {
-        listener.onMediaActionsChanged(Collections.EMPTY_LIST);
+        listener.onMediaActionsChanged(Collections.emptyList());
         mListeners.remove(listener);
     }
 
@@ -149,7 +148,7 @@ public class PipMediaController {
      */
     private List<RemoteAction> getMediaActions() {
         if (mMediaController == null || mMediaController.getPlaybackState() == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         ArrayList<RemoteAction> mediaActions = new ArrayList<>();
@@ -216,8 +215,7 @@ public class PipMediaController {
      */
     private void resolveActiveMediaController(List<MediaController> controllers) {
         if (controllers != null) {
-            final ComponentName topActivity = PipUtils.getTopPipActivity(mContext,
-                    mActivityManager).first;
+            final ComponentName topActivity = PipUtils.getTopPipActivity(mContext).first;
             if (topActivity != null) {
                 for (int i = 0; i < controllers.size(); i++) {
                     final MediaController controller = controllers.get(i);

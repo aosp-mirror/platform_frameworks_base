@@ -71,7 +71,7 @@ import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.phone.PipUtils;
+import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -211,8 +211,7 @@ public final class WMShell extends SystemUI
                     @Override
                     public void onActivityUnpinned() {
                         final Pair<ComponentName, Integer> topPipActivityInfo =
-                                PipUtils.getTopPipActivity(
-                                        mContext, ActivityManager.getService());
+                                PipUtils.getTopPipActivity(mContext);
                         final ComponentName topActivity = topPipActivityInfo.first;
                         pip.onActivityUnpinned(topActivity);
                         mInputConsumerController.unregisterInputConsumer();

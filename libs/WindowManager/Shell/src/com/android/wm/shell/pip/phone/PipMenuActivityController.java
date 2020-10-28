@@ -34,8 +34,9 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.phone.PipMediaController.ActionListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

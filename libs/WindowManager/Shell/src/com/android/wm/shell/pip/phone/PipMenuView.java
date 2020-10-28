@@ -32,7 +32,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.ActivityManager;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.ComponentName;
@@ -61,6 +60,7 @@ import android.widget.LinearLayout;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.pip.PipUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -452,7 +452,7 @@ public class PipMenuView extends FrameLayout {
 
     private void showSettings() {
         final Pair<ComponentName, Integer> topPipActivityInfo =
-                PipUtils.getTopPipActivity(mContext, ActivityManager.getService());
+                PipUtils.getTopPipActivity(mContext);
         if (topPipActivityInfo.first != null) {
             final Intent settingsIntent = new Intent(ACTION_PICTURE_IN_PICTURE_SETTINGS,
                     Uri.fromParts("package", topPipActivityInfo.first.getPackageName(), null));
