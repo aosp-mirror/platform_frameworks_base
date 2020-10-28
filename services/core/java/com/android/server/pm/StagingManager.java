@@ -1059,19 +1059,26 @@ public class StagingManager {
                 onPreRebootVerificationComplete(session);
                 return;
             }
-            switch (msg.what) {
-                case MSG_PRE_REBOOT_VERIFICATION_START:
-                    handlePreRebootVerification_Start(session);
-                    break;
-                case MSG_PRE_REBOOT_VERIFICATION_APEX:
-                    handlePreRebootVerification_Apex(session, rollbackId);
-                    break;
-                case MSG_PRE_REBOOT_VERIFICATION_APK:
-                    handlePreRebootVerification_Apk(session);
-                    break;
-                case MSG_PRE_REBOOT_VERIFICATION_END:
-                    handlePreRebootVerification_End(session);
-                    break;
+            try {
+                switch (msg.what) {
+                    case MSG_PRE_REBOOT_VERIFICATION_START:
+                        handlePreRebootVerification_Start(session);
+                        break;
+                    case MSG_PRE_REBOOT_VERIFICATION_APEX:
+                        handlePreRebootVerification_Apex(session, rollbackId);
+                        break;
+                    case MSG_PRE_REBOOT_VERIFICATION_APK:
+                        handlePreRebootVerification_Apk(session);
+                        break;
+                    case MSG_PRE_REBOOT_VERIFICATION_END:
+                        handlePreRebootVerification_End(session);
+                        break;
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Pre-reboot verification failed due to unhandled exception", e);
+                onPreRebootVerificationFailure(session,
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Pre-reboot verification failed due to unhandled exception: " + e);
             }
         }
 
