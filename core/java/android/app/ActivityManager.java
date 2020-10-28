@@ -4812,13 +4812,14 @@ public class ActivityManager {
     /**
      * Holds the AM lock for the specified amount of milliseconds.
      * This is intended for use by the tests that need to imitate lock contention.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
-    public void holdLock(int durationMs) {
+    public void holdLock(IBinder token, int durationMs) {
         try {
-            getService().holdLock(durationMs);
+            getService().holdLock(token, durationMs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

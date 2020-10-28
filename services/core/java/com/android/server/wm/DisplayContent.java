@@ -5018,6 +5018,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 || windowingMode == WINDOWING_MODE_MULTI_WINDOW);
     }
 
+    static boolean canReuseExistingTask(int windowingMode, int activityType) {
+        // Existing Tasks can be reused if a new stack will be created anyway, or for the Dream -
+        // because there can only ever be one DreamActivity.
+        return alwaysCreateStack(windowingMode, activityType)
+                || activityType == ACTIVITY_TYPE_DREAM;
+    }
+
     @Nullable
     Task getFocusedStack() {
         return getItemFromTaskDisplayAreas(TaskDisplayArea::getFocusedStack);

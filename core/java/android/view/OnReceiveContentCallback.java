@@ -19,9 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -30,11 +28,10 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
-import java.util.Set;
 
 /**
- * Callback for apps to implement handling for insertion of content. "Content" here refers to both
- * text and non-text (plain/styled text, HTML, images, videos, audio files, etc).
+ * Callback for apps to implement handling for insertion of content. Content may be both text and
+ * non-text (plain/styled text, HTML, images, videos, audio files, etc).
  *
  * <p>This callback can be attached to different types of UI components using
  * {@link View#setOnReceiveContentCallback}.
@@ -45,32 +42,38 @@ import java.util.Set;
  *
  * <p>Example implementation:<br>
  * <pre class="prettyprint">
+ * // (1) Define the callback
  * public class MyOnReceiveContentCallback implements OnReceiveContentCallback&lt;TextView&gt; {
- *
- *     private static final Set&lt;String&gt; SUPPORTED_MIME_TYPES = Collections.unmodifiableSet(
+ *     public static final Set&lt;String&gt; MIME_TYPES = Collections.unmodifiableSet(
  *         Set.of("image/*", "video/*"));
- *
- *     &#64;NonNull
- *     &#64;Override
- *     public Set&lt;String&gt; getSupportedMimeTypes() {
- *         return SUPPORTED_MIME_TYPES;
- *     }
  *
  *     &#64;Override
  *     public boolean onReceiveContent(@NonNull TextView view, @NonNull Payload payload) {
  *         // ... app-specific logic to handle the content in the payload ...
  *     }
  * }
+ *
+ * // (2) Register the callback
+ * public class MyActivity extends Activity {
+ *     &#64;Override
+ *     public void onCreate(Bundle savedInstanceState) {
+ *         // ...
+ *
+ *         EditText myInput = findViewById(R.id.my_input);
+ *         myInput.setOnReceiveContentCallback(
+ *                 MyOnReceiveContentCallback.MIME_TYPES,
+ *                 new MyOnReceiveContentCallback());
+ *     }
  * </pre>
  *
- * @param <T> The type of {@link View} with which this receiver can be associated.
+ * @param <T> The type of {@link View} with which this callback can be associated.
  */
 public interface OnReceiveContentCallback<T extends View> {
     /**
      * Receive the given content.
      *
-     * <p>This function will only be invoked if the MIME type of the content is in the set of
-     * types returned by {@link #getSupportedMimeTypes}.
+     * <p>This method is only invoked for content whose MIME type matches a type specified via
+     * {@link View#setOnReceiveContentCallback}.
      *
      * <p>For text, if the view has a selection, the selection should be overwritten by the clip; if
      * there's no selection, this method should insert the content at the current cursor position.
@@ -81,52 +84,12 @@ public interface OnReceiveContentCallback<T extends View> {
      * @param view The view where the content insertion was requested.
      * @param payload The content to insert and related metadata.
      *
-     * @return Returns true if some or all of the content is accepted for insertion. If accepted,
-     * actual insertion may be handled asynchronously in the background and may or may not result in
-     * successful insertion. For example, the app may not end up inserting an accepted item if it
+     * @return Returns true if the content was handled in some way, false otherwise. Actual
+     * insertion may be processed asynchronously in the background and may or may not succeed even
+     * if this method returns true. For example, an app may not end up inserting an item if it
      * exceeds the app's size limit for that type of content.
      */
     boolean onReceiveContent(@NonNull T view, @NonNull Payload payload);
-
-    /**
-     * Returns the MIME types that can be handled by this callback.
-     *
-     * <p>The {@link #onReceiveContent} callback method will only be invoked if the MIME type of the
-     * content is in the set of supported types returned here.
-     *
-     * <p>Different platform features (e.g. pasting from the clipboard, inserting stickers from the
-     * keyboard, etc) may use this function to conditionally alter their behavior. For example, the
-     * keyboard may choose to hide its UI for inserting GIFs if the input field that has focus has
-     * a {@link OnReceiveContentCallback} set and the MIME types returned from this function don't
-     * include "image/gif".
-     *
-     * <p><em>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
-     * MIME types. As a result, you should always write your MIME types with lower case letters, or
-     * use {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to lower
-     * case.</em>
-     *
-     * @param view The target view.
-     * @return An immutable set with the MIME types supported by this callback. The returned MIME
-     * types may contain wildcards such as "text/*", "image/*", etc.
-     */
-    @SuppressLint("CallbackMethodName")
-    @NonNull
-    Set<String> getSupportedMimeTypes(@NonNull T view);
-
-    /**
-     * Returns true if at least one of the MIME types of the given clip is
-     * {@link #getSupportedMimeTypes supported} by this receiver.
-     *
-     * @hide
-     */
-    default boolean supports(@NonNull T view, @NonNull ClipDescription description) {
-        for (String supportedMimeType : getSupportedMimeTypes(view)) {
-            if (description.hasMimeType(supportedMimeType)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Holds all the relevant data for a request to {@link OnReceiveContentCallback}.

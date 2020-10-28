@@ -22,6 +22,7 @@ import android.annotation.CallSuper;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -918,23 +919,18 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation which invokes the target view's {@link OnReceiveContentCallback} if
-     * it is {@link View#setOnReceiveContentCallback set} and supports the MIME type of the given
-     * content; otherwise, simply returns false.
+     * Default implementation which invokes {@link View#onReceiveContent} on the target view if the
+     * MIME type of the content matches one of the MIME types returned by
+     * {@link View#getOnReceiveContentMimeTypes()}. If the MIME type of the content is not matched,
+     * returns false without any side effects.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
-        @SuppressWarnings("unchecked") final OnReceiveContentCallback<View> receiver =
-                (OnReceiveContentCallback<View>) mTargetView.getOnReceiveContentCallback();
-        if (receiver == null) {
+        ClipDescription description = inputContentInfo.getDescription();
+        final String[] viewMimeTypes = mTargetView.getOnReceiveContentMimeTypes();
+        if (viewMimeTypes == null || !description.hasMimeType(viewMimeTypes)) {
             if (DEBUG) {
-                Log.d(TAG, "Can't insert content from IME; no callback");
-            }
-            return false;
-        }
-        if (!receiver.supports(mTargetView, inputContentInfo.getDescription())) {
-            if (DEBUG) {
-                Log.d(TAG, "Can't insert content from IME; callback doesn't support MIME type: "
-                        + inputContentInfo.getDescription());
+                Log.d(TAG, "Can't insert content from IME; unsupported MIME type: content="
+                        + description + ", viewMimeTypes=" + viewMimeTypes);
             }
             return false;
         }
@@ -946,13 +942,13 @@ public class BaseInputConnection implements InputConnection {
                 return false;
             }
         }
-        final ClipData clip = new ClipData(inputContentInfo.getDescription(),
+        final ClipData clip = new ClipData(description,
                 new ClipData.Item(inputContentInfo.getContentUri()));
         final OnReceiveContentCallback.Payload payload =
                 new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_INPUT_METHOD)
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
                 .build();
-        return receiver.onReceiveContent(mTargetView, payload);
+        return mTargetView.onReceiveContent(payload);
     }
 }

@@ -22,7 +22,6 @@ import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
-import android.media.session.MediaController;
 
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.pip.tv.PipController;
@@ -34,13 +33,6 @@ import java.util.function.Consumer;
  * Interface to engage picture in picture feature.
  */
 public interface Pip {
-    /**
-     * Registers {@link com.android.wm.shell.pip.tv.PipController.Listener} that gets called.
-     * whenever receiving notification on changes in PIP.
-     */
-    default void addListener(PipController.Listener listener) {
-    }
-
     /**
      * Registers a {@link PipController.MediaListener} to PipController.
      */
@@ -68,30 +60,12 @@ public interface Pip {
     }
 
     /**
-     * Get current play back state. (e.g: Used in TV)
-     *
-     * @return The state of defined in PipController.
-     */
-    default int getPlaybackState() {
-        return -1;
-    }
-
-    /**
      * Get the touch handler which manages all the touch handling for PIP on the Phone,
-     * including moving, dismissing and expanding the PIP. (Do not used in TV)
+     * including moving, dismissing and expanding the PIP. (Do not use in TV)
      *
      * @return
      */
     default @Nullable PipTouchHandler getPipTouchHandler() {
-        return null;
-    }
-
-    /**
-     * Get MediaController.
-     *
-     * @return The MediaController instance.
-     */
-    default MediaController getMediaController() {
         return null;
     }
 
@@ -168,12 +142,6 @@ public interface Pip {
      * Called when task stack changed.
      */
     default void onTaskStackChanged() {
-    }
-
-    /**
-     * Removes a {@link PipController.Listener} from PipController.
-     */
-    default void removeListener(PipController.Listener listener) {
     }
 
     /**

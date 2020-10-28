@@ -47,6 +47,7 @@ import android.annotation.UiThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -143,6 +144,7 @@ import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 import com.android.internal.view.ScrollCaptureInternal;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
@@ -5243,7 +5245,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mUnbufferedInputSource = InputDevice.SOURCE_CLASS_NONE;
 
     @Nullable
-    private OnReceiveContentCallback<? extends View> mOnReceiveContentCallback;
+    private String[] mOnReceiveContentMimeTypes;
+    @Nullable
+    private OnReceiveContentCallback mOnReceiveContentCallback;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -9001,33 +9005,75 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns the callback used for handling insertion of content into this view. See
-     * {@link #setOnReceiveContentCallback} for more info.
-     *
-     * @return The callback for handling insertion of content. Returns null if no callback has been
-     * {@link #setOnReceiveContentCallback set}.
-     */
-    @Nullable
-    public OnReceiveContentCallback<? extends View> getOnReceiveContentCallback() {
-        return mOnReceiveContentCallback;
-    }
-
-    /**
      * Sets the callback to handle insertion of content into this view.
      *
      * <p>Depending on the view, this callback may be invoked for scenarios such as content
      * insertion from the IME, Autofill, etc.
      *
-     * <p>The callback will only be invoked if the MIME type of the content is
-     * {@link OnReceiveContentCallback#getSupportedMimeTypes declared as supported} by the callback.
-     * If the content type is not supported by the callback, the default platform handling will be
-     * executed instead.
+     * <p>This callback is only invoked for content whose MIME type matches a type specified via
+     * the {code mimeTypes} parameter. If the MIME type is not supported by the callback, the
+     * default platform handling will be executed instead (no-op for the default {@link View}).
      *
+     * <p><em>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
+     * MIME types. As a result, you should always write your MIME types with lower case letters, or
+     * use {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to lower
+     * case.</em>
+     *
+     * @param mimeTypes The type of content for which the callback should be invoked. This may use
+     * wildcards such as "text/*", "image/*", etc. This must not be null or empty if a non-null
+     * callback is passed in.
      * @param callback The callback to use. This can be null to reset to the default behavior.
      */
-    public void setOnReceiveContentCallback(
-            @Nullable OnReceiveContentCallback<? extends View> callback) {
+    @SuppressWarnings("rawtypes")
+    public void setOnReceiveContentCallback(@Nullable String[] mimeTypes,
+            @Nullable OnReceiveContentCallback callback) {
+        if (callback != null) {
+            Preconditions.checkArgument(mimeTypes != null && mimeTypes.length > 0,
+                    "When the callback is set, MIME types must also be set");
+        }
+        mOnReceiveContentMimeTypes = mimeTypes;
         mOnReceiveContentCallback = callback;
+    }
+
+    /**
+     * Receives the given content. The default implementation invokes the callback set via
+     * {@link #setOnReceiveContentCallback}. If no callback is set or if the callback does not
+     * support the given content (based on the MIME type), returns false.
+     *
+     * @param payload The content to insert and related metadata.
+     *
+     * @return Returns true if the content was handled in some way, false otherwise. Actual
+     * insertion may be processed asynchronously in the background and may or may not succeed even
+     * if this method returns true. For example, an app may not end up inserting an item if it
+     * exceeds the app's size limit for that type of content.
+     */
+    public boolean onReceiveContent(@NonNull OnReceiveContentCallback.Payload payload) {
+        ClipDescription description = payload.getClip().getDescription();
+        if (mOnReceiveContentCallback != null && mOnReceiveContentMimeTypes != null
+                && description.hasMimeType(mOnReceiveContentMimeTypes)) {
+            return mOnReceiveContentCallback.onReceiveContent(this, payload);
+        }
+        return false;
+    }
+
+    /**
+     * Returns the MIME types that can be handled by {@link #onReceiveContent} for this view, as
+     * configured via {@link #setOnReceiveContentCallback}. By default returns null.
+     *
+     * <p>Different platform features (e.g. pasting from the clipboard, inserting stickers from the
+     * keyboard, etc) may use this function to conditionally alter their behavior. For example, the
+     * soft keyboard may choose to hide its UI for inserting GIFs for a particular input field if
+     * the MIME types returned here for that field don't include "image/gif".
+     *
+     * <p>Note: Comparisons of MIME types should be performed using utilities such as
+     * {@link ClipDescription#compareMimeTypes} rather than simple string equality, in order to
+     * correctly handle patterns (e.g. "text/*").
+     *
+     * @return The MIME types supported by {@link #onReceiveContent} for this view. The returned
+     * MIME types may contain wildcards such as "text/*", "image/*", etc.
+     */
+    public @Nullable String[] getOnReceiveContentMimeTypes() {
+        return mOnReceiveContentMimeTypes;
     }
 
     /**

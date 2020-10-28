@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
@@ -32,6 +33,7 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1018,6 +1020,32 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public PendingIntent getActivityLaunchIntent(ComponentName component, Bundle opts,
+                UserHandle user) {
+            if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
+                throw new ActivityNotFoundException("Activity could not be found");
+            }
+
+            final Intent launchIntent = getMainActivityLaunchIntent(component, user);
+            if (launchIntent == null) {
+                throw new SecurityException("Attempt to launch activity without "
+                        + " category Intent.CATEGORY_LAUNCHER " + component);
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                // If we reach here, we've verified that the caller has access to the profile and
+                // is launching an exported activity with CATEGORY_LAUNCHER so we can clear the
+                // calling identity to mirror the startActivityAsUser() call which does not validate
+                // the calling user
+                return PendingIntent.getActivityAsUser(mContext, 0 /* requestCode */, launchIntent,
+                        FLAG_IMMUTABLE, opts, user);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public void startActivityAsUser(IApplicationThread caller, String callingPackage,
                 String callingFeatureId, ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
@@ -1025,9 +1053,24 @@ public class LauncherAppsService extends SystemService {
                 return;
             }
 
+            Intent launchIntent = getMainActivityLaunchIntent(component, user);
+            if (launchIntent == null) {
+                throw new SecurityException("Attempt to launch activity without "
+                        + " category Intent.CATEGORY_LAUNCHER " + component);
+            }
+            launchIntent.setSourceBounds(sourceBounds);
+
+            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
+                    callingFeatureId, launchIntent, /* resultTo= */ null,
+                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
+        }
+
+        /**
+         * Returns the main activity launch intent for the given component package.
+         */
+        private Intent getMainActivityLaunchIntent(ComponentName component, UserHandle user) {
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            launchIntent.setSourceBounds(sourceBounds);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launchIntent.setPackage(component.getPackageName());
@@ -1066,15 +1109,12 @@ public class LauncherAppsService extends SystemService {
                     }
                 }
                 if (!canLaunch) {
-                    throw new SecurityException("Attempt to launch activity without "
-                            + " category Intent.CATEGORY_LAUNCHER " + component);
+                    return null;
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, launchIntent, /* resultTo= */ null,
-                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
+            return launchIntent;
         }
 
         @Override

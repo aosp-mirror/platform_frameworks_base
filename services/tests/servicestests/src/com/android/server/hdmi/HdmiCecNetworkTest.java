@@ -285,12 +285,34 @@ public class HdmiCecNetworkTest {
     }
 
     @Test
+    public void cecDevices_tracking_reportVendorId() {
+        int logicalAddress = Constants.ADDR_PLAYBACK_1;
+        int vendorId = 1234;
+        mHdmiCecNetwork.handleCecMessage(
+                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(logicalAddress, vendorId));
+
+        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+
+        HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
+        assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
+                Constants.INVALID_PHYSICAL_ADDRESS);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
+        assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
+                HdmiUtils.getDefaultDeviceName(logicalAddress));
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(vendorId);
+        assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_UNKNOWN);
+    }
+
+    @Test
     public void cecDevices_tracking_updatesDeviceInfo() {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int physicalAddress = 0x1000;
         int type = HdmiDeviceInfo.DEVICE_PLAYBACK;
         int powerStatus = HdmiControlManager.POWER_STATUS_ON;
         String osdName = "Test Device";
+        int vendorId = 1234;
 
         mHdmiCecNetwork.handleCecMessage(
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(logicalAddress,
@@ -301,6 +323,8 @@ public class HdmiCecNetworkTest {
         mHdmiCecNetwork.handleCecMessage(
                 HdmiCecMessageBuilder.buildSetOsdNameCommand(logicalAddress,
                         Constants.ADDR_BROADCAST, osdName));
+        mHdmiCecNetwork.handleCecMessage(
+                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(logicalAddress, vendorId));
 
         assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
 
@@ -309,6 +333,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(physicalAddress);
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(type);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(osdName);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(vendorId);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(powerStatus);
     }
 
@@ -379,6 +404,30 @@ public class HdmiCecNetworkTest {
         HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(updatedOsdName);
+    }
+
+    @Test
+    public void cecDevices_tracking_updatesVendorId() {
+        int logicalAddress = Constants.ADDR_PLAYBACK_1;
+        int vendorId = 1234;
+        int updatedVendorId = 12345;
+        mHdmiCecNetwork.handleCecMessage(
+                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(logicalAddress, vendorId));
+        mHdmiCecNetwork.handleCecMessage(
+                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(logicalAddress, updatedVendorId));
+
+        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+
+        HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
+        assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
+                Constants.INVALID_PHYSICAL_ADDRESS);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
+        assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
+                HdmiUtils.getDefaultDeviceName(logicalAddress));
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(updatedVendorId);
+        assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_UNKNOWN);
     }
 
     @Test

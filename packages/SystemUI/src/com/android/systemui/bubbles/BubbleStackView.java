@@ -90,6 +90,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
@@ -1479,12 +1480,24 @@ public class BubbleStackView extends FrameLayout
         logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
     }
 
+    /**
+     * Update bubble order and pointer position.
+     */
     public void updateBubbleOrder(List<Bubble> bubbles) {
-        for (int i = 0; i < bubbles.size(); i++) {
-            Bubble bubble = bubbles.get(i);
-            mBubbleContainer.reorderView(bubble.getIconView(), i);
+        final Runnable reorder = () -> {
+            for (int i = 0; i < bubbles.size(); i++) {
+                Bubble bubble = bubbles.get(i);
+                mBubbleContainer.reorderView(bubble.getIconView(), i);
+            }
+        };
+        if (mIsExpanded) {
+            reorder.run();
+            updateBubbleIcons();
+        } else {
+            List<View> bubbleViews = bubbles.stream()
+                    .map(b -> b.getIconView()).collect(Collectors.toList());
+            mStackAnimationController.animateReorder(bubbleViews, reorder);
         }
-        updateBubbleIcons();
         updatePointerPosition();
     }
 
@@ -2595,17 +2608,11 @@ public class BubbleStackView extends FrameLayout
             bv.setZ((mMaxBubbles * mBubbleElevation) - i);
 
             if (mIsExpanded) {
-                bv.removeDotSuppressionFlag(
-                        BadgedImageView.SuppressionFlag.BEHIND_STACK);
-                bv.animateDotBadgePositions(false /* onLeft */);
+                bv.showDotAndBadge(false /* onLeft */);
             } else if (i == 0) {
-                bv.removeDotSuppressionFlag(
-                        BadgedImageView.SuppressionFlag.BEHIND_STACK);
-                bv.animateDotBadgePositions(!mStackOnLeftOrWillBe);
+                bv.showDotAndBadge(!mStackOnLeftOrWillBe);
             } else {
-                bv.addDotSuppressionFlag(
-                        BadgedImageView.SuppressionFlag.BEHIND_STACK);
-                bv.hideBadge();
+                bv.hideDotAndBadge(!mStackOnLeftOrWillBe);
             }
         }
     }

@@ -3202,10 +3202,23 @@
         <attr name="minHeight" />
 
         <!-- Window layout affinity of this activity. Activities with the same window layout
-          affinity will share the same layout record. If an activity is launched in freeform window,
-          the activity will be launched to the latest position and size where any task, if the root
-          activity of that task shares the same window layout affinity with the activity being
-          launched. Window layout affinity is shared only among activities with the same UID.
+          affinity will share the same layout record. That is, if a user is opening an activity in
+          a new task on a display that can host freeform windows, and the user had opened a task
+          before and that task had a root activity who had the same window layout affinity, the
+          new task's window will be created in the same window mode and around the location which
+          the previously opened task was in.
+
+          <p>For example, if a user maximizes a task with root activity A and opens another
+          activity B that has the same window layout affinity as activity A has, activity B will
+          be created in fullscreen window mode. Similarly, if they move/resize a task with root
+          activity C and open another activity D that has the same window layout affinity as
+          activity C has, activity D will be in freeform window mode and as close to the position
+          of activity C as conditions permit. It doesn't require the user to keep the task with
+          activity A or activity C open. It won't, however, put any task into split-screen or PIP
+          window mode on launch.
+
+          <p>If the user is opening an activity with its window layout affinity for the first time,
+          the window mode and position is OEM defined.
 
           <p>By default activity doesn't share any affinity with other activities. -->
         <attr name="windowLayoutAffinity" format="string" />
