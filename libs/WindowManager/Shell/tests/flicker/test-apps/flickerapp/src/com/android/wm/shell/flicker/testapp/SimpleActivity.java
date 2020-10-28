@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.testapp;
+package com.android.wm.shell.flicker.testapp;
 
 import android.app.Activity;
-import android.app.PictureInPictureParams;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Rational;
 import android.view.WindowManager;
-import android.widget.Button;
 
-public class PipActivity extends Activity {
+public class SimpleActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,14 +28,6 @@ public class PipActivity extends Activity {
         p.layoutInDisplayCutoutMode = WindowManager.LayoutParams
                 .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         getWindow().setAttributes(p);
-        setContentView(R.layout.activity_pip);
-        Button enterPip = (Button) findViewById(R.id.enter_pip);
-
-        PictureInPictureParams params = new PictureInPictureParams.Builder()
-                .setAspectRatio(new Rational(1, 1))
-                .setSourceRectHint(new Rect(0, 0, 100, 100))
-                .build();
-
-        enterPip.setOnClickListener((v) -> enterPictureInPictureMode(params));
+        setContentView(R.layout.activity_simple);
     }
 }

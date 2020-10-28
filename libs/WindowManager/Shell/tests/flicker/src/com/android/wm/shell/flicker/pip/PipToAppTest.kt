@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.pip
+package com.android.wm.shell.flicker.pip
 
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -24,9 +24,9 @@ import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.focusChanges
-import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.closePipWindow
+import com.android.server.wm.flicker.helpers.expandPipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
@@ -39,6 +39,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.helpers.PipAppHelper
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -46,13 +47,13 @@ import org.junit.runners.Parameterized
 
 /**
  * Test Pip launch.
- * To run this test: `atest FlickerTests:PipToHomeTest`
+ * To run this test: `atest WMShellFlickerTests:PipToAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)
-class PipToHomeTest(
+class PipToAppTest(
     testName: String,
     flickerSpec: Flicker
 ) : FlickerTestRunner(testName, flickerSpec) {
@@ -70,20 +71,17 @@ class PipToHomeTest(
                         test {
                             device.wakeUpAndGoToHomeScreen()
                             device.pressHome()
+                            testApp.open()
                         }
                         eachRun {
-                            testApp.open()
                             this.setRotation(configuration.startRotation)
-                            testApp.clickEnterPipButton(device)
+                            testApp.clickEnterPipButton()
                             device.hasPipWindow()
                         }
                     }
                     teardown {
                         eachRun {
                             this.setRotation(Surface.ROTATION_0)
-                            if (device.hasPipWindow()) {
-                                device.closePipWindow()
-                            }
                         }
                         test {
                             if (device.hasPipWindow()) {
@@ -93,17 +91,18 @@ class PipToHomeTest(
                         }
                     }
                     transitions {
-                        testApp.closePipWindow(device)
+                        device.expandPipWindow()
+                        device.waitForIdle()
                     }
                     assertions {
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
 
-                            all("pipWindowBecomesInvisible") {
+                            all("appReplacesPipWindow") {
                                 this.showsAppWindow(PIP_WINDOW_TITLE)
                                     .then()
-                                    .hidesAppWindow(PIP_WINDOW_TITLE)
+                                    .showsAppWindowOnTop(testApp.launcherName)
                             }
                         }
 
@@ -117,16 +116,17 @@ class PipToHomeTest(
                             statusBarLayerRotatesScales(configuration.startRotation,
                                 Surface.ROTATION_0)
 
-                            all("pipLayerBecomesInvisible") {
+                            all("appReplacesPipLayer") {
                                 this.showsLayer(PIP_WINDOW_TITLE)
                                     .then()
-                                    .hidesLayer(PIP_WINDOW_TITLE)
+                                    .showsLayer(testApp.launcherName)
                             }
                         }
 
                         eventLog {
-                            focusChanges(testApp.launcherName, "NexusLauncherActivity",
-                                bugId = 151179149)
+                            focusChanges(
+                                "NexusLauncherActivity", testApp.launcherName,
+                                "NexusLauncherActivity", bugId = 151179149)
                         }
                     }
                 }

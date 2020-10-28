@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.splitscreen
+package com.android.wm.shell.flicker.splitscreen
 
 import android.graphics.Region
 import android.util.Rational
@@ -29,8 +29,8 @@ import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.exitSplitScreen
@@ -55,7 +55,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test split screen resizing window transitions.
- * To run this test: `atest FlickerTests:ResizeSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:ResizeSplitScreenTest`
  *
  * Currently it runs only in 0 degrees because of b/156100803
  */
@@ -78,7 +78,7 @@ class ResizeSplitScreenTest(
         fun getParams(): Collection<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testAppTop = StandardAppHelper(instrumentation,
-                "com.android.server.wm.flicker.testapp", "SimpleApp")
+                "com.android.wm.shell.flicker.testapp", "SimpleApp")
             val testAppBottom = ImeAppHelper(instrumentation)
 
             return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
