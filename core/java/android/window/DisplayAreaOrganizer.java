@@ -84,7 +84,7 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
      */
     public static final int FEATURE_VENDOR_FIRST = FEATURE_SYSTEM_LAST + 1;
 
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void registerOrganizer(int displayAreaFeature) {
         try {
             getController().registerOrganizer(mInterface, displayAreaFeature);
@@ -96,7 +96,7 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     /**
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void unregisterOrganizer() {
         try {
             getController().unregisterOrganizer(mInterface);

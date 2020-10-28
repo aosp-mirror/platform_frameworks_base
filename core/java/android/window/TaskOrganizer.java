@@ -62,7 +62,7 @@ public class TaskOrganizer extends WindowOrganizer {
      * @return a list of the tasks that should be managed by the organizer, not including tasks
      *         created via {@link #createRootTask}.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @CallSuper
     @NonNull
     public List<TaskAppearedInfo> registerOrganizer() {
@@ -74,7 +74,7 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /** Unregisters a previously registered task organizer. */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @CallSuper
     public void unregisterOrganizer() {
         try {
@@ -109,7 +109,7 @@ public class TaskOrganizer extends WindowOrganizer {
      * @param launchCookie Launch cookie to associate with the task so that is can be identified
      *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
         try {
@@ -120,7 +120,7 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /** Deletes a persistent root task in WM */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public boolean deleteRootTask(@NonNull WindowContainerToken task) {
         try {
             return mTaskOrganizerController.deleteRootTask(task);
@@ -130,7 +130,7 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /** Gets direct child tasks (ordered from top-to-bottom) */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public List<ActivityManager.RunningTaskInfo> getChildTasks(
             @NonNull WindowContainerToken parent, @NonNull int[] activityTypes) {
@@ -142,7 +142,7 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /** Gets all root tasks on a display (ordered from top-to-bottom) */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public List<ActivityManager.RunningTaskInfo> getRootTasks(
             int displayId, @NonNull int[] activityTypes) {
@@ -154,7 +154,7 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /** Get the root task which contains the current ime target */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public WindowContainerToken getImeTarget(int display) {
         try {
@@ -168,7 +168,7 @@ public class TaskOrganizer extends WindowOrganizer {
      * Set's the root task to launch new tasks into on a display. {@code null} means no launch
      * root and thus new tasks just end up directly on the display.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void setLaunchRoot(int displayId, @NonNull WindowContainerToken root) {
         try {
             mTaskOrganizerController.setLaunchRoot(displayId, root);
@@ -181,7 +181,7 @@ public class TaskOrganizer extends WindowOrganizer {
      * Requests that the given task organizer is notified when back is pressed on the root activity
      * of one of its controlled tasks.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void setInterceptBackPressedOnTaskRoot(@NonNull WindowContainerToken task,
             boolean interceptBackPressed) {
         try {

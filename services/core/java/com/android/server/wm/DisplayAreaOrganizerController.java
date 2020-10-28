@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
-
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 
 import android.os.Binder;
@@ -62,13 +59,13 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         mGlobalLock = atm.mGlobalLock;
     }
 
-    private void enforceStackPermission(String func) {
-        mService.mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, func);
+    private void enforceTaskPermission(String func) {
+        mService.enforceTaskPermission(func);
     }
 
     @Override
     public void registerOrganizer(IDisplayAreaOrganizer organizer, int feature) {
-        enforceStackPermission("registerOrganizer()");
+        enforceTaskPermission("registerOrganizer()");
         final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -100,7 +97,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     @Override
     public void unregisterOrganizer(IDisplayAreaOrganizer organizer) {
-        enforceStackPermission("unregisterTaskOrganizer()");
+        enforceTaskPermission("unregisterTaskOrganizer()");
         final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {

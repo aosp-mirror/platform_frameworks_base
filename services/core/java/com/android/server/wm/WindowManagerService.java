@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
@@ -3956,10 +3955,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setDisplayWindowRotationController(IDisplayWindowRotationController controller) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
-        }
+        mAtmService.enforceTaskPermission("setDisplayWindowRotationController");
         try {
             synchronized (mGlobalLock) {
                 if (mDisplayRotationController != null) {
@@ -4228,10 +4224,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Registers a hierarchy listener that gets callbacks when the hierarchy changes. */
     @Override
     public void registerDisplayWindowListener(IDisplayWindowListener listener) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
-        }
+        mAtmService.enforceTaskPermission("registerDisplayWindowListener");
         final long ident = Binder.clearCallingIdentity();
         try {
             mDisplayNotificationController.registerListener(listener);
@@ -4243,10 +4236,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Unregister a hierarchy listener so that it stops receiving callbacks. */
     @Override
     public void unregisterDisplayWindowListener(IDisplayWindowListener listener) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
-        }
+        mAtmService.enforceTaskPermission("unregisterDisplayWindowListener");
         mDisplayNotificationController.unregisterListener(listener);
     }
 

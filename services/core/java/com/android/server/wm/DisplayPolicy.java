@@ -55,7 +55,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -991,9 +990,7 @@ public class DisplayPolicy {
                     "DisplayPolicy");
         }
         if ((attrs.privateFlags & PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP) != 0) {
-            mContext.enforcePermission(
-                    android.Manifest.permission.MANAGE_ACTIVITY_STACKS, callingPid, callingUid,
-                    "DisplayPolicy");
+            ActivityTaskManagerService.enforceTaskPermission("DisplayPolicy");
         }
 
         switch (attrs.type) {
