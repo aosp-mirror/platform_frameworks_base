@@ -6928,9 +6928,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestScrollCapture()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
-        if (behindClient != null && !isWindowToken(behindClient)) {
-            throw new IllegalArgumentException("behindClient must be a window token");
-        }
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
