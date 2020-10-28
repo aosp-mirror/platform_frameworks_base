@@ -42,7 +42,10 @@ public final class PipBoundsState {
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final DisplayLayout mDisplayLayout = new DisplayLayout();
 
-    void setBounds(@NonNull Rect bounds) {
+    /**
+     * Set the current PIP bounds.
+     */
+    public void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
     }
 
