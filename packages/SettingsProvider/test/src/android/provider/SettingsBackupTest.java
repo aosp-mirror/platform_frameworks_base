@@ -443,6 +443,7 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_LOCKSCREEN,
+                    Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
