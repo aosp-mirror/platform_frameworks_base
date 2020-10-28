@@ -394,6 +394,21 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // The rotation transform should be cleared after updating orientation with display.
         assertFalse(activity.hasFixedRotationTransform());
         assertFalse(mDefaultDisplay.hasTopFixedRotationLaunchingApp());
+
+        // Simulate swiping up recents (home) in different rotation.
+        final ActivityRecord home = mDefaultDisplay.getDefaultTaskDisplayArea().getHomeActivity();
+        mDefaultDisplay.setFixedRotationLaunchingApp(home, (mDefaultDisplay.getRotation() + 1) % 4);
+        mController = new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
+                mDefaultDisplay.getDisplayId());
+        initializeRecentsAnimationController(mController, home);
+        assertTrue(home.hasFixedRotationTransform());
+
+        // Assume recents activity becomes invisible for some reason (e.g. screen off).
+        home.setVisible(false);
+        mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        // Although there won't be a transition finish callback, the fixed rotation must be cleared.
+        assertFalse(home.hasFixedRotationTransform());
+        assertFalse(mDefaultDisplay.hasTopFixedRotationLaunchingApp());
     }
 
     @Test
