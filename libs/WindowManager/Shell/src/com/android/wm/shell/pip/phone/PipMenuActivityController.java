@@ -343,11 +343,11 @@ public class PipMenuActivityController {
             if (menuState == MENU_STATE_FULL) {
                 // Once visible, start listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
-                mMediaController.addListener(mMediaActionListener);
+                mMediaController.addActionListener(mMediaActionListener);
             } else {
                 // Once hidden, stop listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
-                mMediaController.removeListener(mMediaActionListener);
+                mMediaController.removeActionListener(mMediaActionListener);
             }
 
             try {
