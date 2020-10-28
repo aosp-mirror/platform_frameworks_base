@@ -22,11 +22,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.util.SparseIntArray;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.Test;
 
@@ -84,7 +85,7 @@ public class SoftApConfigurationTest {
         assertThat(original.getChannel()).isEqualTo(0);
         assertThat(original.isHiddenSsid()).isEqualTo(false);
         assertThat(original.getMaxNumberOfClients()).isEqualTo(0);
-        if (SdkLevelUtil.isAtLeastS()) {
+        if (SdkLevel.isAtLeastS()) {
             assertThat(original.getMacRandomizationSetting())
                     .isEqualTo(SoftApConfiguration.RANDOMIZATION_PERSISTENT);
         }
@@ -140,7 +141,7 @@ public class SoftApConfigurationTest {
                 .setClientControlByUserEnabled(true)
                 .setBlockedClientList(testBlockedClientList)
                 .setAllowedClientList(testAllowedClientList);
-        if (SdkLevelUtil.isAtLeastS()) {
+        if (SdkLevel.isAtLeastS()) {
             originalBuilder.setMacRandomizationSetting(SoftApConfiguration.RANDOMIZATION_NONE);
         }
         SoftApConfiguration original = originalBuilder.build();
@@ -156,7 +157,7 @@ public class SoftApConfigurationTest {
         assertThat(original.isClientControlByUserEnabled()).isEqualTo(true);
         assertThat(original.getBlockedClientList()).isEqualTo(testBlockedClientList);
         assertThat(original.getAllowedClientList()).isEqualTo(testAllowedClientList);
-        if (SdkLevelUtil.isAtLeastS()) {
+        if (SdkLevel.isAtLeastS()) {
             assertThat(original.getMacRandomizationSetting())
                     .isEqualTo(SoftApConfiguration.RANDOMIZATION_NONE);
         }

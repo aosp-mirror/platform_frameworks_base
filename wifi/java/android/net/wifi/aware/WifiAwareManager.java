@@ -29,7 +29,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.wifi.util.HexEncoding;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,6 +37,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -210,7 +211,7 @@ public class WifiAwareManager {
      *         or not (false).
      */
     public boolean isDeviceAttached() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -229,7 +230,7 @@ public class WifiAwareManager {
      */
     @SystemApi
     public void enableInstantCommunicationMode(boolean enable) {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -246,7 +247,7 @@ public class WifiAwareManager {
      * @return true if it is enabled, false otherwise.
      */
     public boolean isInstantCommunicationModeEnabled() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         try {

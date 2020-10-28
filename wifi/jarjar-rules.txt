@@ -123,3 +123,4 @@ rule com.android.internal.util.Preconditions* com.android.wifi.x.@0
 rule com.android.internal.util.Protocol* com.android.wifi.x.@0
 
 rule com.android.net.module.util.** com.android.wifi.x.@0
+rule com.android.modules.utils.** com.android.wifi.x.@0
