@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -919,7 +920,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
-        wc.getDisplayContent().prepareAppTransitionOld(TRANSIT_OLD_TASK_OPEN, false);
+        wc.getDisplayContent().prepareAppTransition(TRANSIT_OPEN);
         wc.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(adapter);
         spyOn(wc);
         doReturn(true).when(wc).okToAnimate();

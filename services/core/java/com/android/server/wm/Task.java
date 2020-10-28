@@ -64,16 +64,10 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -209,6 +203,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
@@ -2356,8 +2351,6 @@ class Task extends WindowContainer<WindowContainer> {
      * Initializes a change transition. See {@link SurfaceFreezer} for more information.
      */
     private void initializeChangeTransition(Rect startBounds) {
-        mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
-                false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE_WINDOWING_MODE);
         mDisplayContent.mChangingContainers.add(this);
 
@@ -2442,16 +2435,9 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public SurfaceControl getFreezeSnapshotTarget() {
-        if (WindowManagerService.sUseNewAppTransit) {
-            if (!mDisplayContent.mAppTransition.containsTransitRequest(
-                    TRANSIT_CHANGE_WINDOWING_MODE)) {
-                return null;
-            }
-        } else {
-            if (!AppTransition.isChangeTransitOld(
-                    mDisplayContent.mAppTransition.getAppTransitionOld())) {
-                return null;
-            }
+        if (!mDisplayContent.mAppTransition.containsTransitRequest(
+                TRANSIT_CHANGE_WINDOWING_MODE)) {
+            return null;
         }
         // Skip creating snapshot if this transition is controlled by a remote animator which
         // doesn't need it.
@@ -3987,7 +3973,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
-            int transit, boolean isVoiceInteraction,
+            @TransitionOldType int transit, boolean isVoiceInteraction,
             @Nullable ArrayList<WindowContainer> sources) {
         final RecentsAnimationController control = mWmService.getRecentsAnimationController();
         if (control != null) {
@@ -6155,12 +6141,8 @@ class Task extends WindowContainer<WindowContainer> {
                         "Prepare close transition: prev=" + prev);
                 if (mTaskSupervisor.mNoAnimActivities.contains(prev)) {
                     anim = false;
-                    dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, false);
                     dc.prepareAppTransition(TRANSIT_NONE);
                 } else {
-                    dc.prepareAppTransitionOld(
-                            prev.getTask() == next.getTask() ? TRANSIT_OLD_ACTIVITY_CLOSE
-                                    : TRANSIT_OLD_TASK_CLOSE, false);
                     dc.prepareAppTransition(TRANSIT_CLOSE);
                 }
                 prev.setVisibility(false);
@@ -6169,13 +6151,8 @@ class Task extends WindowContainer<WindowContainer> {
                         "Prepare open transition: prev=" + prev);
                 if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
                     anim = false;
-                    dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, false);
                     dc.prepareAppTransition(TRANSIT_NONE);
                 } else {
-                    dc.prepareAppTransitionOld(
-                            prev.getTask() == next.getTask() ? TRANSIT_OLD_ACTIVITY_OPEN
-                                    : next.mLaunchTaskBehind ? TRANSIT_OLD_TASK_OPEN_BEHIND
-                                    : TRANSIT_OLD_TASK_OPEN, /* alwaysKeepCurrent */false);
                     dc.prepareAppTransition(TRANSIT_OPEN,
                             next.mLaunchTaskBehind ? TRANSIT_FLAG_OPEN_BEHIND : 0);
                 }
@@ -6184,10 +6161,8 @@ class Task extends WindowContainer<WindowContainer> {
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: no previous");
             if (mTaskSupervisor.mNoAnimActivities.contains(next)) {
                 anim = false;
-                dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, false);
                 dc.prepareAppTransition(TRANSIT_NONE);
             } else {
-                dc.prepareAppTransitionOld(TRANSIT_OLD_ACTIVITY_OPEN, false);
                 dc.prepareAppTransition(TRANSIT_OPEN);
             }
         }
@@ -6447,7 +6422,6 @@ class Task extends WindowContainer<WindowContainer> {
                     "Prepare open transition: starting " + r);
             // TODO(shell-transitions): record NO_ANIMATION flag somewhere.
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-                dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, keepCurTransition);
                 dc.prepareAppTransition(TRANSIT_NONE);
                 mTaskSupervisor.mNoAnimActivities.add(r);
             } else {
@@ -6467,7 +6441,6 @@ class Task extends WindowContainer<WindowContainer> {
                         transit = TRANSIT_OLD_TASK_OPEN;
                     }
                 }
-                dc.prepareAppTransitionOld(transit, keepCurTransition);
                 dc.prepareAppTransition(TRANSIT_OPEN);
                 mTaskSupervisor.mNoAnimActivities.remove(r);
             }
@@ -6606,8 +6579,7 @@ class Task extends WindowContainer<WindowContainer> {
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         Task finishedTask = r.getTask();
-        mDisplayContent.prepareAppTransitionOld(
-                TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.finishIfPossible(reason, false /* oomAdj */);
 
@@ -6839,9 +6811,8 @@ class Task extends WindowContainer<WindowContainer> {
         forAllActivities(ActivityRecord::removeLaunchTickRunnable);
     }
 
-    private void updateTransitLocked(@WindowManager.TransitionOldType int transitOld,
-            @WindowManager.TransitionType int transit, ActivityOptions options,
-            boolean forceOverride) {
+    private void updateTransitLocked(@WindowManager.TransitionType int transit,
+            ActivityOptions options) {
         if (options != null) {
             ActivityRecord r = topRunningActivity();
             if (r != null && !r.isState(RESUMED)) {
@@ -6850,8 +6821,6 @@ class Task extends WindowContainer<WindowContainer> {
                 ActivityOptions.abort(options);
             }
         }
-        mDisplayContent.prepareAppTransitionOld(transitOld, false,
-                0 /* flags */, forceOverride);
         mDisplayContent.prepareAppTransition(transit);
     }
 
@@ -6873,8 +6842,7 @@ class Task extends WindowContainer<WindowContainer> {
             if (noAnimation) {
                 ActivityOptions.abort(options);
             } else {
-                updateTransitLocked(TRANSIT_OLD_TASK_TO_FRONT, TRANSIT_TO_FRONT, options,
-                        false /* forceOverride */);
+                updateTransitLocked(TRANSIT_TO_FRONT, options);
             }
             return;
         }
@@ -6909,14 +6877,11 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
-                mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_NONE,
-                        false /* alwaysKeepCurrent */);
                 mDisplayContent.prepareAppTransition(TRANSIT_NONE);
                 mTaskSupervisor.mNoAnimActivities.add(top);
                 ActivityOptions.abort(options);
             } else {
-                updateTransitLocked(TRANSIT_OLD_TASK_TO_FRONT, TRANSIT_TO_FRONT,
-                        options, false /* forceOverride */);
+                updateTransitLocked(TRANSIT_TO_FRONT, options);
             }
 
             // If a new task is moved to the front, then mark the existing top activity as
@@ -6984,8 +6949,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task="
                 + tr.mTaskId);
 
-        mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_TASK_TO_BACK,
-                false /* alwaysKeepCurrent */);
+        mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
         mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
         moveToBack("moveTaskToBackLocked", tr);
 

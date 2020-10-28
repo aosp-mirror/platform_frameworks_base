@@ -26,10 +26,6 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_W
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
-import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
@@ -211,11 +207,7 @@ class KeyguardController {
                     1 /* keyguardGoingAway */,
                     "keyguardGoingAway");
             mRootWindowContainer.getDefaultDisplay()
-                    .prepareAppTransitionOld(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
-                            false /* alwaysKeepCurrent */, convertTransitFlags(flags),
-                            false /* forceOverride */);
-            mRootWindowContainer.getDefaultDisplay()
-                    .requestTransitionAndLegacyPrepare(TRANSIT_KEYGUARD_GOING_AWAY,
+                    .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                             convertTransitFlags(flags));
             updateKeyguardSleepToken();
 
@@ -363,10 +355,6 @@ class KeyguardController {
             mService.deferWindowLayout();
             try {
                 mRootWindowContainer.getDefaultDisplay()
-                        .prepareAppTransitionOld(resolveOccludeTransit(),
-                                false /* alwaysKeepCurrent */, 0 /* flags */,
-                                true /* forceOverride */);
-                mRootWindowContainer.getDefaultDisplay()
                         .prepareAppTransition(
                                 isDisplayOccluded(DEFAULT_DISPLAY)
                                         ? TRANSIT_KEYGUARD_OCCLUDE
@@ -397,10 +385,7 @@ class KeyguardController {
         // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
         final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
         if (mKeyguardShowing && canDismissKeyguard()
-                && (dc.mAppTransition.getAppTransitionOld() == TRANSIT_OLD_KEYGUARD_UNOCCLUDE
-                || dc.mAppTransition.containsTransitRequest(TRANSIT_KEYGUARD_UNOCCLUDE))) {
-            dc.prepareAppTransitionOld(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
-                    0 /* flags */, true /* forceOverride */);
+                && dc.mAppTransition.containsTransitRequest(TRANSIT_KEYGUARD_UNOCCLUDE)) {
             mWindowManager.executeAppTransition();
         }
     }
@@ -430,28 +415,6 @@ class KeyguardController {
     boolean canDismissKeyguard() {
         return mWindowManager.mPolicy.isKeyguardTrustedLw()
                 || !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
-    }
-
-    private int resolveOccludeTransit() {
-        // TODO(new-app-transition): Remove after migrating to the enw transit system.
-        final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
-        if (mBeforeUnoccludeTransit != TRANSIT_OLD_UNSET
-                && dc.mAppTransition.getAppTransitionOld() == TRANSIT_OLD_KEYGUARD_UNOCCLUDE
-                // TODO(b/113840485): Handle app transition for individual display.
-                && isDisplayOccluded(DEFAULT_DISPLAY)) {
-
-            // Reuse old transit in case we are occluding Keyguard again, meaning that we never
-            // actually occclude/unocclude Keyguard, but just run a normal transition.
-            return mBeforeUnoccludeTransit;
-            // TODO(b/113840485): Handle app transition for individual display.
-        } else if (!isDisplayOccluded(DEFAULT_DISPLAY)) {
-
-            // Save transit in case we dismiss/occlude Keyguard shortly after.
-            mBeforeUnoccludeTransit = dc.mAppTransition.getAppTransitionOld();
-            return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
-        } else {
-            return TRANSIT_OLD_KEYGUARD_OCCLUDE;
-        }
     }
 
     private void dismissMultiWindowModeForTaskIfNeeded(

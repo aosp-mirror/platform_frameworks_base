@@ -184,7 +184,6 @@ public class AppTransition implements Dump {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
 
-    private @TransitionOldType int mNextAppTransitionOld = TRANSIT_OLD_UNSET;
     private @TransitionFlags int mNextAppTransitionFlags = 0;
     private final ArrayList<Integer> mNextAppTransitionRequests = new ArrayList<>();
     private @TransitionOldType int mLastUsedAppTransition = TRANSIT_OLD_UNSET;
@@ -330,46 +329,20 @@ public class AppTransition implements Dump {
     }
 
     boolean isTransitionSet() {
-        return mNextAppTransitionOld != TRANSIT_OLD_UNSET || !mNextAppTransitionRequests.isEmpty();
-    }
-
-    // TODO(new-app-tranistion): Remove this after migrating to new app transition system.
-    boolean isTransitionOldEqual(@TransitionOldType int transit) {
-        return mNextAppTransitionOld == transit;
+        return !mNextAppTransitionRequests.isEmpty();
     }
 
     boolean isUnoccluding() {
-        return WindowManagerService.sUseNewAppTransit
-                ? mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_UNOCCLUDE)
-                : mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+        return mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_UNOCCLUDE);
     }
 
-    @TransitionOldType
-    int getAppTransitionOld() {
-        return mNextAppTransitionOld;
-     }
-
     boolean transferFrom(AppTransition other) {
-        prepareAppTransitionOld(other.getAppTransitionOld(), true /* alwaysKeepCurrent */,
-                0 /* flags */, false /* forceOverride */);
         mNextAppTransitionRequests.addAll(other.mNextAppTransitionRequests);
         return prepare();
     }
 
-    private void setAppTransitionOld(@TransitionOldType int transit, int flags) {
-        mNextAppTransitionOld = transit;
-        mNextAppTransitionFlags |= flags;
-        setLastAppTransition(TRANSIT_OLD_UNSET, null, null, null);
-        updateBooster();
-        if (isTransitionSet()) {
-            removeAppTransitionTimeoutCallbacks();
-            mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable,
-                    APP_TRANSITION_TIMEOUT_MS);
-        }
-    }
-
-    void setLastAppTransition(int transit, ActivityRecord openingApp, ActivityRecord closingApp,
-            ActivityRecord changingApp) {
+    void setLastAppTransition(@TransitionOldType int transit, ActivityRecord openingApp,
+            ActivityRecord closingApp, ActivityRecord changingApp) {
         mLastUsedAppTransition = transit;
         mLastOpeningApp = "" + openingApp;
         mLastClosingApp = "" + closingApp;
@@ -461,7 +434,6 @@ public class AppTransition implements Dump {
      *         layout pass needs to be done
      */
     int goodToGo(@TransitionOldType int transit, ActivityRecord topOpeningApp) {
-        mNextAppTransitionOld = TRANSIT_OLD_UNSET;
         mNextAppTransitionFlags = 0;
         mNextAppTransitionRequests.clear();
         setAppTransitionState(APP_STATE_RUNNING);
@@ -495,9 +467,8 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final boolean keyguardGoingAway = WindowManagerService.sUseNewAppTransit
-                ? mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY)
-                : isKeyguardGoingAwayTransitOld(mNextAppTransitionOld);
+        final boolean keyguardGoingAway = mNextAppTransitionRequests.contains(
+                TRANSIT_KEYGUARD_GOING_AWAY);
 
         // The RemoteAnimationControl didn't register AppTransitionListener and
         // only initialized the finish and timeout callback when goodToGo().
@@ -506,7 +477,6 @@ public class AppTransition implements Dump {
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.cancelAnimation("freeze");
         }
-        setAppTransitionOld(TRANSIT_OLD_UNSET, 0 /* flags */);
         mNextAppTransitionRequests.clear();
         clear();
         setReady();
@@ -529,8 +499,7 @@ public class AppTransition implements Dump {
 
     private boolean needsBoosting() {
         final boolean recentsAnimRunning = mService.getRecentsAnimationController() != null;
-        return mNextAppTransitionOld != TRANSIT_OLD_UNSET
-                || !mNextAppTransitionRequests.isEmpty()
+        return !mNextAppTransitionRequests.isEmpty()
                 || mAppTransitionState == APP_STATE_READY
                 || mAppTransitionState == APP_STATE_RUNNING
                 || recentsAnimRunning;
@@ -1584,7 +1553,6 @@ public class AppTransition implements Dump {
                 && !mNextAppTransitionOverrideRequested
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CLIP_REVEAL
-                && mNextAppTransitionOld != TRANSIT_OLD_KEYGUARD_GOING_AWAY
                 && !mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY);
     }
 
@@ -1652,9 +1620,8 @@ public class AppTransition implements Dump {
         } else if (transit == TRANSIT_OLD_ACTIVITY_RELAUNCH) {
             a = createRelaunchAnimation(frame, insets);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
-                    "applyAnimation: anim=%s nextAppTransition=%d transit=%s Callers=%s", a,
-                    mNextAppTransitionOld, appTransitionOldToString(transit),
-                    Debug.getCallers(3));
+                    "applyAnimation: anim=%s transit=%s Callers=%s", a,
+                    appTransitionOldToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimationRes(mNextAppTransitionPackage, enter ?
                     mNextAppTransitionEnter : mNextAppTransitionExit);
@@ -1806,10 +1773,7 @@ public class AppTransition implements Dump {
     int getAppStackClipMode() {
         return mNextAppTransitionRequests.contains(TRANSIT_RELAUNCH)
                 || mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY)
-                || mNextAppTransitionOld == TRANSIT_OLD_ACTIVITY_RELAUNCH
                 || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
-                || mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                 ? STACK_CLIP_NONE
                 : STACK_CLIP_AFTER_ANIM;
     }
@@ -2009,9 +1973,7 @@ public class AppTransition implements Dump {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("mNextAppTransition=");
-        sb.append(appTransitionOldToString(mNextAppTransitionOld));
-        sb.append(", mNextAppTransitionRequests=[");
+        sb.append("mNextAppTransitionRequests=[");
 
         boolean separator = false;
         for (Integer transit : mNextAppTransitionRequests) {
@@ -2299,47 +2261,6 @@ public class AppTransition implements Dump {
 
     public void setCurrentUser(int newUserId) {
         mCurrentUserId = newUserId;
-    }
-
-    /**
-     * @return true if transition is not running and should not be skipped, false if transition is
-     *         already running
-     */
-    boolean prepareAppTransitionOld(@TransitionOldType int transit, boolean alwaysKeepCurrent,
-            @TransitionFlags int flags, boolean forceOverride) {
-        if (mService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
-            return false;
-        }
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d "
-                        + "Callers=%s",
-                appTransitionOldToString(transit), this, alwaysKeepCurrent,
-                mDisplayContent.getDisplayId(), Debug.getCallers(5));
-        final boolean allowSetCrashing = !isKeyguardTransitOld(mNextAppTransitionOld)
-                && transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
-        if (forceOverride || isKeyguardTransitOld(transit) || !isTransitionSet()
-                || mNextAppTransitionOld == TRANSIT_OLD_NONE || allowSetCrashing) {
-            setAppTransitionOld(transit, flags);
-        }
-        // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
-        // relies on the fact that we always execute a Keyguard transition after preparing one. We
-        // also don't want to change away from a crashing transition.
-        else if (!alwaysKeepCurrent && !isKeyguardTransitOld(mNextAppTransitionOld)
-                && mNextAppTransitionOld != TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
-            if (transit == TRANSIT_OLD_TASK_OPEN && isTransitionOldEqual(TRANSIT_OLD_TASK_CLOSE)) {
-                // Opening a new task always supersedes a close for the anim.
-                setAppTransitionOld(transit, flags);
-            } else if (transit == TRANSIT_OLD_ACTIVITY_OPEN
-                    && isTransitionOldEqual(TRANSIT_OLD_ACTIVITY_CLOSE)) {
-                // Opening a new activity always supersedes a close for the anim.
-                setAppTransitionOld(transit, flags);
-            } else if (isTaskTransitOld(transit) && isActivityTransitOld(mNextAppTransitionOld)) {
-                // Task animations always supersede activity animations, because if we have both, it
-                // usually means that activity transition were just trampoline activities.
-                setAppTransitionOld(transit, flags);
-            }
-        }
-        return prepare();
     }
 
     boolean prepareAppTransition(@TransitionType int transit, @TransitionFlags int flags) {

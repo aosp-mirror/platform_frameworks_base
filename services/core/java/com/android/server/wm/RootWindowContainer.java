@@ -39,9 +39,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
@@ -2182,7 +2179,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
             // Set a transition to ensure that we don't immediately try and update the visibility
             // of the activity entering PIP
-            r.getDisplayContent().prepareAppTransitionOld(TRANSIT_OLD_NONE, false);
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
             final boolean singleActivity = task.getChildCount() == 1;
@@ -2214,10 +2210,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // to the list of apps being closed, and request its transition to be ran.
                 final ActivityRecord oldTopActivity = task.getTopMostActivity();
                 if (oldTopActivity != null && oldTopActivity.isState(STOPPED)
-                        && (task.getDisplayContent().mAppTransition.getAppTransitionOld()
-                        == TRANSIT_OLD_TASK_TO_BACK
-                        || task.getDisplayContent().mAppTransition.containsTransitRequest(
-                                TRANSIT_TO_BACK))) {
+                        && task.getDisplayContent().mAppTransition.containsTransitRequest(
+                                TRANSIT_TO_BACK)) {
                     task.getDisplayContent().mClosingApps.add(oldTopActivity);
                     oldTopActivity.mRequestForceTransition = true;
                 }
@@ -2804,8 +2798,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         r.detachFromProcess();
-        r.mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
-                false /* alwaysKeepCurrent */);
+        r.mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
                 TRANSIT_FLAG_APP_CRASHED);
         r.destroyIfPossible("handleAppCrashed");

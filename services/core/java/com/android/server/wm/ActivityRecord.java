@@ -106,7 +106,6 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TransitionOldType;
 
@@ -2609,7 +2608,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 if (DEBUG_VISIBILITY || DEBUG_TRANSITION) {
                     Slog.v(TAG_TRANSITION, "Prepare close transition: finishing " + this);
                 }
-                mDisplayContent.prepareAppTransitionOld(transit, false);
                 mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
 
                 // When finishing the activity preemptively take the snapshot before the app window
@@ -2693,7 +2691,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void prepareActivityHideTransitionAnimation(@TransitionOldType int transit) {
         final DisplayContent dc = mDisplayContent;
-        dc.prepareAppTransitionOld(transit, false);
         dc.prepareAppTransition(TRANSIT_CLOSE);
         setVisibility(false);
         dc.executeAppTransition();
@@ -4274,8 +4271,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 displayContent.mClosingApps.add(this);
                 mEnteringAnimation = false;
             }
-            if (appTransition.getAppTransitionOld() == TRANSIT_OLD_TASK_OPEN_BEHIND
-                    || (appTransition.getTransitFlags() & TRANSIT_FLAG_OPEN_BEHIND) != 0) {
+            if ((appTransition.getTransitFlags() & TRANSIT_FLAG_OPEN_BEHIND) != 0) {
                 // We're launchingBehind, add the launching activity to mOpeningApps.
                 final WindowState win = getDisplayContent().findFocusedWindow();
                 if (win != null) {
@@ -4298,7 +4294,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean applyAnimation(LayoutParams lp, int transit, boolean enter,
+    boolean applyAnimation(LayoutParams lp, @TransitionOldType int transit, boolean enter,
             boolean isVoiceInteraction, @Nullable ArrayList<WindowContainer> sources) {
         if (mUseTransferredAnimation) {
             return false;
@@ -6305,7 +6301,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mThumbnail = null;
     }
 
-    public int getTransit() {
+    public @TransitionOldType int getTransit() {
         return mTransit;
     }
 
