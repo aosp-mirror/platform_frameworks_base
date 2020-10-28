@@ -7492,8 +7492,10 @@ package android.net.wifi {
   public final class SoftApConfiguration implements android.os.Parcelable {
     method @NonNull public java.util.List<android.net.MacAddress> getAllowedClientList();
     method public int getBand();
+    method @NonNull public int[] getBands();
     method @NonNull public java.util.List<android.net.MacAddress> getBlockedClientList();
     method public int getChannel();
+    method @NonNull public android.util.SparseIntArray getChannels();
     method public int getMacRandomizationSetting();
     method public int getMaxNumberOfClients();
     method public long getShutdownTimeoutMillis();
@@ -7515,9 +7517,11 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAllowedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAutoShutdownEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBand(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBands(@NonNull int[]);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBlockedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannels(@NonNull android.util.SparseIntArray);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientControlByUserEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMacRandomizationSetting(int);
