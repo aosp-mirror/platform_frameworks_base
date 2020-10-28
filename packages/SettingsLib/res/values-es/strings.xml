@@ -510,7 +510,7 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altavoz del teléfono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"No se ha podido conectar; reinicia el dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
-    <string name="help_label" msgid="3528360748637781274">"Ayuda y sugerencias"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ayuda y comentarios"</string>
     <string name="storage_category" msgid="2287342585424631813">"Almacenamiento"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Datos compartidos"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ver y modificar los datos compartidos"</string>
