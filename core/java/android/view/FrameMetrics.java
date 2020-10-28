@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -258,7 +259,7 @@ public final class FrameMetrics {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final long[] mTimingData;
 
     /**

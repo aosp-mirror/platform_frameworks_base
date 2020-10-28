@@ -58,9 +58,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     private int mConnState;
     private final Object mStateLock = new Object();
     private final Object mDeviceBusyLock = new Object();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Boolean mDeviceBusy = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mTransport;
     private int mPhy;
     private boolean mOpportunistic;
@@ -881,7 +881,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * automatically connect as soon as the remote device becomes available (true).
      * @return true, if the connection attempt was initiated successfully
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     /*package*/ boolean connect(Boolean autoConnect, BluetoothGattCallback callback,
             Handler handler) {
         if (DBG) {

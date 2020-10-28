@@ -27,6 +27,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -112,7 +113,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.headset.profile.action.ACTIVE_DEVICE_CHANGED";
 
@@ -635,7 +636,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
@@ -782,7 +783,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
         final IBluetoothHeadset service = mService;
@@ -1030,7 +1031,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void phoneStateChanged(int numActive, int numHeld, int callState, String number,
             int type, String name) {
         final IBluetoothHeadset service = mService;
@@ -1129,7 +1130,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) {
             Log.d(TAG, "setActiveDevice: " + device);
@@ -1155,7 +1156,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * is active.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothDevice getActiveDevice() {

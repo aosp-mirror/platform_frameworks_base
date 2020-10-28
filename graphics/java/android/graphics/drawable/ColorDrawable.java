@@ -34,6 +34,7 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Xfermode;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ViewDebug;
 
@@ -53,7 +54,7 @@ import java.io.IOException;
  * @attr ref android.R.styleable#ColorDrawable_color
  */
 public class ColorDrawable extends Drawable {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "state_")

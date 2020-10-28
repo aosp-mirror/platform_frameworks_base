@@ -31,6 +31,7 @@ import android.database.DatabaseUtils;
 import android.database.DefaultDatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDebug.DbStats;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.OperationCanceledException;
@@ -103,7 +104,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
     // Thread-local for database sessions that belong to this database.
     // Each thread has its own database session.
     // INVARIANT: Immutable.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final ThreadLocal<SQLiteSession> mThreadSession = ThreadLocal
             .withInitial(this::createSession);
 

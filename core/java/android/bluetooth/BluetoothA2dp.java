@@ -118,7 +118,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED";
 
@@ -139,7 +139,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_CODEC_CONFIG_CHANGED =
             "android.bluetooth.a2dp.profile.action.CODEC_CONFIG_CHANGED";
 
@@ -409,7 +409,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
         try {
@@ -433,7 +433,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * is active
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothDevice getActiveDevice() {
@@ -651,7 +651,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return the current codec status
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothCodecStatus getCodecStatus(@NonNull BluetoothDevice device) {
@@ -680,7 +680,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @param codecConfig the codec configuration preference
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void setCodecConfigPreference(@NonNull BluetoothDevice device,
                                          @NonNull BluetoothCodecConfig codecConfig) {
@@ -710,7 +710,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * active A2DP Bluetooth device.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void enableOptionalCodecs(@NonNull BluetoothDevice device) {
         if (DBG) Log.d(TAG, "enableOptionalCodecs(" + device + ")");
@@ -725,7 +725,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * active A2DP Bluetooth device.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void disableOptionalCodecs(@NonNull BluetoothDevice device) {
         if (DBG) Log.d(TAG, "disableOptionalCodecs(" + device + ")");
@@ -766,7 +766,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_SUPPORTED.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     @OptionalCodecsSupportStatus
     public int isOptionalCodecsSupported(@NonNull BluetoothDevice device) {
@@ -792,7 +792,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_PREF_DISABLED.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     @OptionalCodecsPreferenceStatus
     public int isOptionalCodecsEnabled(@NonNull BluetoothDevice device) {
@@ -819,7 +819,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_PREF_DISABLED.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void setOptionalCodecsEnabled(@NonNull BluetoothDevice device,
             @OptionalCodecsPreferenceStatus int value) {

@@ -363,7 +363,7 @@ public class TimeUtils {
      * @return String representation of the time.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String logTimeOfDay(long millis) {
         Calendar c = Calendar.getInstance();
         if (millis >= 0) {

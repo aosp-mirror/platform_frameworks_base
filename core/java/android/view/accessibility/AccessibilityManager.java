@@ -111,7 +111,7 @@ public final class AccessibilityManager {
     public static final int DALTONIZER_DISABLED = -1;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int DALTONIZER_SIMULATE_MONOCHROMACY = 0;
 
     /** @hide */
