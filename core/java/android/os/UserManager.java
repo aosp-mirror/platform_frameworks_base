@@ -67,7 +67,7 @@ import java.util.Set;
 
 /**
  * Manages users and user details on a multi-user system. There are two major categories of
- * users: fully customizable users with their own login, and managed profiles that share a workspace
+ * users: fully customizable users with their own login, and profiles that share a workspace
  * with a related user.
  * <p>
  * Users are different from accounts, which are managed by
@@ -2298,7 +2298,7 @@ public class UserManager {
      * private app data storage is available.
      * <p>Requires {@code android.permission.MANAGE_USERS} or
      * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
-     * must be the calling user or a managed profile associated with it.
+     * must be the calling user or a profile associated with it.
      *
      * @param user to retrieve the unlocked state for.
      * @see Intent#ACTION_USER_UNLOCKED
@@ -2496,7 +2496,7 @@ public class UserManager {
      *
      * <p>Requires {@code android.permission.MANAGE_USERS} or
      * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
-     * must be the calling user or a managed profile associated with it.
+     * must be the calling user or a profile associated with it.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
@@ -2620,7 +2620,7 @@ public class UserManager {
      *
      * <p>Requires {@code android.permission.MANAGE_USERS} or
      * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
-     * must be the calling user or a managed profile associated with it.
+     * must be the calling user or a profile associated with it.
      *
      * @hide
      */
@@ -3429,6 +3429,7 @@ public class UserManager {
      * Returns list of the profiles of userId including userId itself.
      * Note that this returns both enabled and not enabled profiles. See
      * {@link #getEnabledProfiles(int)} if you need only the enabled ones.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
      * {@link android.Manifest.permission#CREATE_USERS} suffices if userId is the calling user.
@@ -3481,6 +3482,7 @@ public class UserManager {
     /**
      * Returns list of the profiles of userId including userId itself.
      * Note that this returns only enabled.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
      * {@link android.Manifest.permission#CREATE_USERS} suffices if userId is the calling user.
@@ -3502,6 +3504,7 @@ public class UserManager {
     /**
      * Returns a list of UserHandles for profiles associated with the user that the calling process
      * is running on, including the user itself.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @return A non-empty list of UserHandles associated with the calling user.
      */
@@ -3517,6 +3520,7 @@ public class UserManager {
     /**
      * Returns a list of ids for enabled profiles associated with the context user including the
      * user itself.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @return A non-empty list of UserHandles associated with the calling user.
      * @hide
@@ -3532,6 +3536,7 @@ public class UserManager {
     /**
      * Returns a list of ids for all profiles associated with the context user including the user
      * itself.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @return A non-empty list of UserHandles associated with the calling user.
      * @hide
@@ -3547,6 +3552,7 @@ public class UserManager {
     /**
      * Returns a list of ids for profiles associated with the context user including the user
      * itself.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param enabledOnly whether to return only {@link UserInfo#isEnabled() enabled} profiles
      * @return A non-empty list of UserHandles associated with the calling user.
@@ -3566,6 +3572,7 @@ public class UserManager {
     /**
      * Returns a list of ids for profiles associated with the specified user including the user
      * itself.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * @param userId      id of the user to return profiles for
      * @param enabledOnly whether return only {@link UserInfo#isEnabled() enabled} profiles
@@ -4355,8 +4362,9 @@ public class UserManager {
     }
 
     /**
-     * Returns creation time of the user or of a managed profile associated with the calling user.
-     * @param userHandle user handle of the user or a managed profile associated with the
+     * Returns creation time of the given user. The given user must be the calling user or
+     * a profile associated with it.
+     * @param userHandle user handle of the calling user or a profile associated with the
      *                   calling user.
      * @return creation time in milliseconds since Epoch time.
      */
