@@ -16,12 +16,11 @@
 
 package android.widget;
 
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_AUTOFILL;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_CLIPBOARD;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_DRAG_AND_DROP;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_INPUT_METHOD;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_PROCESS_TEXT;
-import static android.widget.TextViewOnReceiveContentCallback.canReuse;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_CLIPBOARD;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_DRAG_AND_DROP;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_INPUT_METHOD;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_PROCESS_TEXT;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 
 import static androidx.test.espresso.Espresso.onView;
@@ -42,8 +41,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.ArraySet;
-import android.view.OnReceiveContentCallback;
+import android.view.OnReceiveContentListener;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputContentInfo;
@@ -62,7 +60,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /**
- * Tests for {@link TextViewOnReceiveContentCallback}. Most of the test cases are in the CTS test
+ * Tests for {@link TextViewOnReceiveContentListener}. Most of the test cases are in the CTS test
  * {@link android.widget.cts.TextViewOnReceiveContentTest}. This class tests some internal
  * implementation details, e.g. fallback to the keyboard image API.
  */
@@ -78,35 +76,34 @@ public class TextViewOnReceiveContentTest {
     private Instrumentation mInstrumentation;
     private Activity mActivity;
     private CustomInputConnectionEditText mEditText;
-    private TextViewOnReceiveContentCallback mDefaultCallback;
+    private TextViewOnReceiveContentListener mDefaultReceiver;
 
     @Before
     public void before() {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mActivity = mActivityRule.getActivity();
         mEditText = mActivity.findViewById(R.id.edittext2);
-        mDefaultCallback = mEditText.getEditorForTesting().getDefaultOnReceiveContentCallback();
+        mDefaultReceiver = mEditText.getEditorForTesting().getDefaultOnReceiveContentListener();
     }
 
     @Test
-    public void testGetSupportedMimeTypes_fallbackToCommitContent() throws Throwable {
+    public void testGetEditorInfoMimeTypes_fallbackToCommitContent() throws Throwable {
         // Configure the EditText with an EditorInfo/InputConnection that supports some image MIME
         // types.
-        mEditText.setContentMimeTypes(new String[] {"image/gif", "image/png"});
+        String[] mimeTypes = {"image/gif", "image/png"};
+        mEditText.setContentMimeTypes(mimeTypes);
         MyInputConnection ic = new MyInputConnection();
         mEditText.setInputConnectionWrapper(ic);
 
         // Focus into the EditText.
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
-        // Assert that the callback returns the MIME types declared in the EditorInfo in addition to
-        // the default.
-        assertThat(mDefaultCallback.getMimeTypes(mEditText)).containsExactly(
-                "text/*", "image/gif", "image/png");
+        // Assert that the default listener returns the MIME types declared in the EditorInfo.
+        assertThat(mDefaultReceiver.getEditorInfoMimeTypes(mEditText)).isEqualTo(mimeTypes);
     }
 
     @Test
-    public void testGetSupportedMimeTypes_fallbackToCommitContent_noMimeTypesInEditorInfo()
+    public void testGetEditorInfoMimeTypes_fallbackToCommitContent_noMimeTypesInEditorInfo()
             throws Throwable {
         // Configure the EditText with an EditorInfo/InputConnection that doesn't declare any MIME
         // types.
@@ -117,8 +114,8 @@ public class TextViewOnReceiveContentTest {
         // Focus into the EditText.
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
-        // Assert that the callback returns the default MIME types.
-        assertThat(mDefaultCallback.getMimeTypes(mEditText)).containsExactly("text/*");
+        // Assert that the default listener returns null as the MIME types.
+        assertThat(mDefaultReceiver.getEditorInfoMimeTypes(mEditText)).isNull();
     }
 
     @Test
@@ -132,13 +129,13 @@ public class TextViewOnReceiveContentTest {
         // Focus into the EditText.
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
-        // Invoke the callback with SOURCE_AUTOFILL and assert that it triggers a call to
+        // Invoke the listener with SOURCE_AUTOFILL and assert that it triggers a call to
         // InputConnection.commitContent.
         ClipDescription description = new ClipDescription("", new String[] {"image/gif"});
         ClipData clip = new ClipData(description, new ClipData.Item(SAMPLE_CONTENT_URI));
-        OnReceiveContentCallback.Payload payload =
-                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_AUTOFILL).build();
-        mDefaultCallback.onReceiveContent(mEditText, payload);
+        OnReceiveContentListener.Payload payload =
+                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        mDefaultReceiver.onReceiveContent(mEditText, payload);
         verify(ic.mMock, times(1))
                 .commitContent(any(InputContentInfo.class), eq(0), eq(null));
         verifyNoMoreInteractions(ic.mMock);
@@ -155,12 +152,12 @@ public class TextViewOnReceiveContentTest {
         // Focus into the EditText.
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
-        // Invoke the callback and assert that the InputConnection is not invoked.
+        // Invoke the listener and assert that the InputConnection is not invoked.
         ClipDescription description = new ClipDescription("", new String[] {"image/gif"});
         ClipData clip = new ClipData(description, new ClipData.Item(SAMPLE_CONTENT_URI));
-        OnReceiveContentCallback.Payload payload =
-                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_AUTOFILL).build();
-        mDefaultCallback.onReceiveContent(mEditText, payload);
+        OnReceiveContentListener.Payload payload =
+                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
     }
 
@@ -175,69 +172,26 @@ public class TextViewOnReceiveContentTest {
         // Focus into the EditText.
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
-        // Invoke the callback with sources other than SOURCE_AUTOFILL and assert that it does NOT
+        // Invoke the listener with sources other than SOURCE_AUTOFILL and assert that it does NOT
         // trigger calls to InputConnection.commitContent.
         ClipDescription description = new ClipDescription("", new String[] {"image/gif"});
         ClipData clip = new ClipData(description, new ClipData.Item(SAMPLE_CONTENT_URI));
-        OnReceiveContentCallback.Payload payload =
-                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_CLIPBOARD).build();
-        mDefaultCallback.onReceiveContent(mEditText, payload);
+        OnReceiveContentListener.Payload payload =
+                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_CLIPBOARD).build();
+        mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
 
-        payload = new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_INPUT_METHOD).build();
-        mDefaultCallback.onReceiveContent(mEditText, payload);
+        payload = new OnReceiveContentListener.Payload.Builder(clip, SOURCE_INPUT_METHOD).build();
+        mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
 
-        payload = new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_DRAG_AND_DROP).build();
-        mDefaultCallback.onReceiveContent(mEditText, payload);
+        payload = new OnReceiveContentListener.Payload.Builder(clip, SOURCE_DRAG_AND_DROP).build();
+        mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
 
-        payload = new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_PROCESS_TEXT).build();
-        mDefaultCallback.onReceiveContent(mEditText, payload);
+        payload = new OnReceiveContentListener.Payload.Builder(clip, SOURCE_PROCESS_TEXT).build();
+        mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
-    }
-
-    @Test
-    public void testCanReuse() throws Throwable {
-        ArraySet<String> mimeTypes = null;
-        String[] editorContentMimeTypes = new String[0];
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isFalse();
-
-        mimeTypes = new ArraySet<>();
-        editorContentMimeTypes = new String[0];
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isTrue();
-
-        mimeTypes = newArraySet("text/*");
-        editorContentMimeTypes = new String[0];
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isTrue();
-
-        mimeTypes = newArraySet("text/*");
-        editorContentMimeTypes = new String[] {"text/*"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isTrue();
-
-        mimeTypes = newArraySet("image/gif", "image/png", "text/*");
-        editorContentMimeTypes = new String[] {"image/gif", "image/png"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isTrue();
-
-        mimeTypes = newArraySet("image/gif", "image/png", "text/*");
-        editorContentMimeTypes = new String[] {"image/gif", "image/png", "text/*"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isTrue();
-
-        mimeTypes = newArraySet("image/gif", "image/png", "text/*");
-        editorContentMimeTypes = new String[] {"image/gif"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isFalse();
-
-        mimeTypes = newArraySet("image/gif", "image/png", "text/*");
-        editorContentMimeTypes = new String[] {"image/gif", "image/png", "image/jpg"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isFalse();
-
-        mimeTypes = newArraySet("image/gif", "image/png", "text/*");
-        editorContentMimeTypes = new String[] {"image/gif", "image/jpg"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isFalse();
-
-        mimeTypes = newArraySet("image/gif", "image/png", "text/*");
-        editorContentMimeTypes = new String[] {"image/gif", "image/jpg", "text/*"};
-        assertThat(canReuse(mimeTypes, editorContentMimeTypes)).isFalse();
     }
 
     private static class MyInputConnection extends InputConnectionWrapper {
@@ -253,10 +207,5 @@ public class TextViewOnReceiveContentTest {
             mMock.commitContent(inputContentInfo, flags, opts);
             return true;
         }
-    }
-
-    @SafeVarargs
-    private static <T> ArraySet<T> newArraySet(T ... elements) {
-        return new ArraySet<>(elements);
     }
 }
