@@ -2193,6 +2193,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final DisplayContent dc = getDisplayContent();
         if (isInputMethodTarget()) {
+            // Make sure to set mInputMethodTarget as null when the removed window is the IME
+            // target, in case computeImeTarget may use the outdated target.
+            dc.mInputMethodTarget = null;
             dc.computeImeTarget(true /* updateImeTarget */);
         }
         if (dc.mInputMethodInputTarget == this) {

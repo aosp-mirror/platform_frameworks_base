@@ -36,6 +36,7 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -1604,6 +1605,29 @@ public class DisplayContentTests extends WindowTestsBase {
         // Ensure overridden size and denisty match the most up-to-date values in settings for the
         // display.
         verifySizes(dc, forcedWidth, forcedHeight, forcedDensity);
+    }
+
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
+    @Test
+    public void testComputeImeTarget_shouldNotCheckOutdatedImeTargetLayerWhenRemoved() {
+        final WindowState child1 = createWindow(mAppWindow, FIRST_SUB_WINDOW, "child1");
+        final WindowState nextImeTargetApp = createWindow(null /* parent */,
+                TYPE_BASE_APPLICATION, "nextImeTargetApp");
+        spyOn(child1);
+        doReturn(true).when(child1).inSplitScreenWindowingMode();
+        mDisplayContent.mInputMethodTarget = child1;
+
+        spyOn(nextImeTargetApp);
+        spyOn(mAppWindow);
+        doReturn(true).when(nextImeTargetApp).canBeImeTarget();
+        doReturn(true).when(nextImeTargetApp).isActivityTypeHome();
+        doReturn(false).when(mAppWindow).canBeImeTarget();
+
+        child1.removeImmediately();
+
+        verify(mDisplayContent).computeImeTarget(true);
+        assertNull(mDisplayContent.mInputMethodInputTarget);
+        verify(child1, never()).needsRelativeLayeringToIme();
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {
