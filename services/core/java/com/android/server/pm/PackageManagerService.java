@@ -13326,12 +13326,20 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
         final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("setSystemAppHiddenUntilInstalled", callingUid);
+        final boolean calledFromSystemOrPhone = callingUid == Process.PHONE_UID
+                || callingUid == Process.SYSTEM_UID;
+        if (!calledFromSystemOrPhone) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
+                    "setSystemAppHiddenUntilInstalled");
+        }
+
         synchronized (mLock) {
             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null || !pkgSetting.isSystem()) {
                 return;
+            }
+            if (pkgSetting.getPkg().isCoreApp() && !calledFromSystemOrPhone) {
+                throw new SecurityException("Only system or phone callers can modify core apps");
             }
             pkgSetting.getPkgState().setHiddenUntilInstalled(hidden);
             final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(packageName);
@@ -13345,13 +13353,21 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
         final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("setSystemAppInstallState", callingUid);
+        final boolean calledFromSystemOrPhone = callingUid == Process.PHONE_UID
+                || callingUid == Process.SYSTEM_UID;
+        if (!calledFromSystemOrPhone) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
+                    "setSystemAppHiddenUntilInstalled");
+        }
+
         synchronized (mLock) {
             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
             // The target app should always be in system
             if (pkgSetting == null || !pkgSetting.isSystem()) {
                 return false;
+            }
+            if (pkgSetting.getPkg().isCoreApp() && !calledFromSystemOrPhone) {
+                throw new SecurityException("Only system or phone callers can modify core apps");
             }
             // Check if the install state is the same
             if (pkgSetting.getInstalled(userId) == installed) {
