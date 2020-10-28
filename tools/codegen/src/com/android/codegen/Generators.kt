@@ -16,10 +16,7 @@ import java.io.File
 fun ClassPrinter.generateConstDefs() {
     val consts = classAst.fields.filter {
         it.isStatic && it.isFinal && it.variables.all { variable ->
-            val initializer = variable.initializer.orElse(null)
-            val isLiteral = initializer is LiteralExpr
-                    || (initializer is UnaryExpr && initializer.expression is LiteralExpr)
-            isLiteral && variable.type.asString() in listOf("int", "String")
+            variable.type.asString() in listOf("int", "String")
         } && it.annotations.none { it.nameAsString == DataClassSuppressConstDefs }
     }.flatMap { field -> field.variables.map { it to field } }
     val intConsts = consts.filter { it.first.type.asString() == "int" }
