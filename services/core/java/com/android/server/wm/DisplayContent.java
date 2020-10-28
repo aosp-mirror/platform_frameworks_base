@@ -5467,7 +5467,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return;
             }
 
-            if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp) {
+            if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp
+                    && animatingRecents.isVisible()) {
                 // The recents activity should be going to be invisible (switch to another app or
                 // return to original top). Only clear the top launching record without finishing
                 // the transform immediately because it won't affect display orientation. And before
