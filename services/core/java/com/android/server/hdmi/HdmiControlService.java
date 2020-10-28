@@ -1527,61 +1527,8 @@ public class HdmiControlService extends SystemService {
         @Nullable
         public HdmiDeviceInfo getActiveSource() {
             enforceAccessPermission();
-            HdmiCecLocalDeviceTv tv = tv();
-            if (tv == null) {
-                if (isTvDevice()) {
-                    Slog.e(TAG, "Local tv device not available.");
-                    return null;
-                }
-                if (isPlaybackDevice()) {
-                    // if playback device itself is the active source,
-                    // return its own device info.
-                    if (playback() != null && playback().isActiveSource()) {
-                        return playback().getDeviceInfo();
-                    }
-                    // Otherwise get the active source and look for it from the device list
-                    ActiveSource activeSource = getLocalActiveSource();
-                    // If the physical address is not set yet, return null
-                    if (activeSource.physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
-                        return null;
-                    }
-                    if (audioSystem() != null) {
-                        for (HdmiDeviceInfo info : mHdmiCecNetwork.getSafeCecDevicesLocked()) {
-                            if (info.getPhysicalAddress() == activeSource.physicalAddress) {
-                                return info;
-                            }
-                        }
-                    }
-                    // If the device info is not in the list yet, return a device info with minimum
-                    // information from mActiveSource.
-                    // If the Active Source has unregistered logical address, return with an
-                    // HdmiDeviceInfo built from physical address information only.
-                    return HdmiUtils.isValidAddress(activeSource.logicalAddress)
-                        ?
-                        new HdmiDeviceInfo(activeSource.logicalAddress,
-                            activeSource.physicalAddress,
-                            pathToPortId(activeSource.physicalAddress),
-                            HdmiUtils.getTypeFromAddress(activeSource.logicalAddress).get(0), 0,
-                            HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress))
-                        :
-                            new HdmiDeviceInfo(activeSource.physicalAddress,
-                                pathToPortId(activeSource.physicalAddress));
 
-                }
-                return null;
-            }
-            ActiveSource activeSource = tv.getActiveSource();
-            if (activeSource.isValid()) {
-                return new HdmiDeviceInfo(activeSource.logicalAddress,
-                        activeSource.physicalAddress, HdmiDeviceInfo.PORT_INVALID,
-                        HdmiDeviceInfo.DEVICE_INACTIVE, 0, "");
-            }
-            int activePath = tv.getActivePath();
-            if (activePath != HdmiDeviceInfo.PATH_INVALID) {
-                HdmiDeviceInfo info = mHdmiCecNetwork.getSafeDeviceInfoByPath(activePath);
-                return (info != null) ? info : new HdmiDeviceInfo(activePath, tv.getActivePortId());
-            }
-            return null;
+            return HdmiControlService.this.getActiveSource();
         }
 
         @Override
@@ -2370,6 +2317,39 @@ public class HdmiControlService extends SystemService {
             return;
         }
         source.queryDisplayStatus(callback);
+    }
+
+    protected HdmiDeviceInfo getActiveSource() {
+        // If a the device is a playback device that is the current active source, return the
+        // local device info
+        if (playback() != null && playback().isActiveSource()) {
+            return playback().getDeviceInfo();
+        }
+
+        // Otherwise get the active source and look for it from the device list
+        ActiveSource activeSource = getLocalActiveSource();
+
+        if (activeSource.isValid()) {
+            HdmiDeviceInfo activeSourceInfo = mHdmiCecNetwork.getSafeCecDeviceInfo(
+                    activeSource.logicalAddress);
+            if (activeSourceInfo != null) {
+                return activeSourceInfo;
+            }
+
+            return new HdmiDeviceInfo(activeSource.physicalAddress,
+                    pathToPortId(activeSource.physicalAddress));
+        }
+
+        if (tv() != null) {
+            int activePath = tv().getActivePath();
+            if (activePath != HdmiDeviceInfo.PATH_INVALID) {
+                HdmiDeviceInfo info = mHdmiCecNetwork.getSafeDeviceInfoByPath(activePath);
+                return (info != null) ? info : new HdmiDeviceInfo(activePath,
+                        tv().getActivePortId());
+            }
+        }
+
+        return null;
     }
 
     private void addHdmiControlStatusChangeListener(
