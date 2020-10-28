@@ -503,8 +503,7 @@ public class ActivityManager {
     @UnsupportedAppUsage
     public static final int PROCESS_STATE_TOP = 2;
 
-    /** @hide Process is bound to a TOP app. This is ranked below SERVICE_LOCATION so that
-     * it doesn't get the capability of location access while-in-use. */
+    /** @hide Process is bound to a TOP app. */
     public static final int PROCESS_STATE_BOUND_TOP = 3;
 
     /** @hide Process is hosting a foreground service. */
