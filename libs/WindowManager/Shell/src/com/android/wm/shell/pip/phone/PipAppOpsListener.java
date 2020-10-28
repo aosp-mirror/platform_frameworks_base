@@ -29,6 +29,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.util.Pair;
 
+import com.android.wm.shell.pip.PipUtils;
+
 public class PipAppOpsListener {
     private static final String TAG = PipAppOpsListener.class.getSimpleName();
 
@@ -44,7 +46,7 @@ public class PipAppOpsListener {
             try {
                 // Dismiss the PiP once the user disables the app ops setting for that package
                 final Pair<ComponentName, Integer> topPipActivityInfo =
-                        PipUtils.getTopPipActivity(mContext, mActivityManager);
+                        PipUtils.getTopPipActivity(mContext);
                 if (topPipActivityInfo.first != null) {
                     final ApplicationInfo appInfo = mContext.getPackageManager()
                             .getApplicationInfoAsUser(packageName, 0, topPipActivityInfo.second);

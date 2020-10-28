@@ -36,6 +36,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTestCase;
 

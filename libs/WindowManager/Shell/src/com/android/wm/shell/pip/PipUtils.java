@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
-import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
 
+/** A class that includes convenience methods. */
 public class PipUtils {
     private static final String TAG = "PipUtils";
 
@@ -35,8 +35,7 @@ public class PipUtils {
      * @return the ComponentName and user id of the top non-SystemUI activity in the pinned stack.
      * The component name may be null if no such activity exists.
      */
-    public static Pair<ComponentName, Integer> getTopPipActivity(Context context,
-            IActivityManager activityManager) {
+    public static Pair<ComponentName, Integer> getTopPipActivity(Context context) {
         try {
             final String sysUiPackageName = context.getPackageName();
             final RootTaskInfo pinnedTaskInfo = ActivityTaskManager.getService().getRootTaskInfo(
