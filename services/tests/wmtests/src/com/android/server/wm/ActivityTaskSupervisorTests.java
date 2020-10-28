@@ -19,8 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -44,7 +42,6 @@ import android.view.Display;
 
 import androidx.test.filters.MediumTest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -58,13 +55,6 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskSupervisorTests extends WindowTestsBase {
-    private Task mFullscreenTask;
-
-    @Before
-    public void setUp() throws Exception {
-        mFullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-    }
 
     /**
      * Ensures that an activity is removed from the stopping activities list once it is resumed.
@@ -72,7 +62,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     @Test
     public void testStoppingActivityRemovedWhenResumed() {
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenTask).build();
+                .setCreateTask(true).build();
         mSupervisor.mStoppingActivities.add(firstActivity);
 
         firstActivity.completeResumeLocked();
@@ -86,7 +76,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     @Test
     public void testReportWaitingActivityLaunchedIfNeeded() {
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenTask).build();
+                .setCreateTask(true).build();
 
         final WaitResult taskToFrontWait = new WaitResult();
         mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
@@ -153,7 +143,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     @Test
     public void testNotifyTaskFocusChanged() {
         final ActivityRecord fullScreenActivityA = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setParentTask(mFullscreenTask).build();
+                .build();
         final Task taskA = fullScreenActivityA.getTask();
 
         final TaskChangeNotificationController taskChangeNotifier =
@@ -166,7 +156,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         reset(taskChangeNotifier);
 
         final ActivityRecord fullScreenActivityB = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setParentTask(mFullscreenTask).build();
+                .build();
         final Task taskB = fullScreenActivityB.getTask();
 
         mAtm.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");

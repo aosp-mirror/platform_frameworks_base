@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -52,8 +50,6 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
 
     private DisplayAreaGroup mDisplayAreaGroup;
     private TaskDisplayArea mTaskDisplayArea;
-    private Task mStack;
-    private ActivityRecord mActivity;
 
     @Before
     public void setUp() {
@@ -65,9 +61,6 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
         mTaskDisplayArea = new TaskDisplayArea(
                 mDisplayContent, mWm, "TDA1", FEATURE_VENDOR_FIRST + 1);
         mDisplayAreaGroup.addChild(mTaskDisplayArea, POSITION_TOP);
-        mStack = mTaskDisplayArea.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mActivity = new ActivityBuilder(mAtm).setTask(mStack).build();
         mDisplayContent.setLastFocusedTaskDisplayArea(mTaskDisplayArea);
     }
 
@@ -91,28 +84,31 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
 
     @Test
     public void testGetRequestedOrientationForDisplay() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setTaskDisplayArea(mTaskDisplayArea).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopNonFinishingActivity();
         doReturn(true).when(mDisplayContent).onDescendantOrientationChanged(any(), any());
-        mActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
         // Display is portrait, DisplayAreaGroup inherits that
         mDisplayContent.setBounds(0, 0, 600, 900);
 
         assertThat(mDisplayAreaGroup.getOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
-        assertThat(mActivity.getRequestedConfigurationOrientation(true /* forDisplay */))
+        assertThat(activity.getRequestedConfigurationOrientation(true /* forDisplay */))
                 .isEqualTo(ORIENTATION_PORTRAIT);
 
         // DisplayAreaGroup is landscape, different from Display
         mDisplayAreaGroup.setBounds(0, 0, 600, 450);
 
         assertThat(mDisplayAreaGroup.getOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
-        assertThat(mActivity.getRequestedConfigurationOrientation(true /* forDisplay */))
+        assertThat(activity.getRequestedConfigurationOrientation(true /* forDisplay */))
                 .isEqualTo(ORIENTATION_LANDSCAPE);
 
         // DisplayAreaGroup is portrait, same as Display
         mDisplayAreaGroup.setBounds(0, 0, 300, 900);
 
         assertThat(mDisplayAreaGroup.getOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
-        assertThat(mActivity.getRequestedConfigurationOrientation(true /* forDisplay */))
+        assertThat(activity.getRequestedConfigurationOrientation(true /* forDisplay */))
                 .isEqualTo(ORIENTATION_PORTRAIT);
     }
 
