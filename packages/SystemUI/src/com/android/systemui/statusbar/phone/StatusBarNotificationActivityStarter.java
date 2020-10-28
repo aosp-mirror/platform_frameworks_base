@@ -360,15 +360,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             collapseOnMainThread();
         }
 
-        final int count = getVisibleNotificationsCount();
-        final int rank = entry.getRanking().getRank();
         NotificationVisibility.NotificationLocation location =
                 NotificationLogger.getNotificationLocation(entry);
-        final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
-                rank, count, true, location);
+        final NotificationVisibility nv = NotificationVisibility.obtain(entry.getKey(),
+                entry.getRanking().getRank(), getVisibleNotificationsCount(), true, location);
 
-        // NMS will officially remove notification if the notification has FLAG_AUTO_CANCEL:
-        mClickNotifier.onNotificationClick(notificationKey, nv);
 
         // TODO (b/162832756): delete these notification removals when migrating to the new
         //  pipeline; this is taken care of in {@link NotifCollection#tryRemoveNotification}
@@ -378,9 +374,25 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             if (shouldAutoCancel(entry.getSbn())
                     || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
                     notificationKey)) {
-                // manually call notification removal in order to cancel any lifetime extenders
-                removeNotification(row.getEntry());
+                // Immediately remove notification from visually showing.
+                // We have to post the removal to the UI thread for synchronization.
+                mMainThreadHandler.post(() -> {
+                    final Runnable removeNotification = () -> {
+                        mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK);
+                        mClickNotifier.onNotificationClick(entry.getKey(), nv);
+                    };
+                    if (mPresenter.isCollapsing()) {
+                        // To avoid lags we're only performing the remove
+                        // after the shade is collapsed
+                        mShadeController.addPostCollapseAction(removeNotification);
+                    } else {
+                        removeNotification.run();
+                    }
+                });
             }
+        } else {
+            // inform NMS that the notification was clicked
+            mClickNotifier.onNotificationClick(notificationKey, nv);
         }
 
         mIsCollapsingToShowActivityOverLockscreen = false;
@@ -563,21 +575,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
 
         return entry.shouldSuppressFullScreenIntent();
-    }
-
-    private void removeNotification(NotificationEntry entry) {
-        // We have to post it to the UI thread for synchronization
-        mMainThreadHandler.post(() -> {
-            if (mPresenter.isCollapsing()) {
-                // To avoid lags we're only performing the remove
-                // after the shade was collapsed
-                mShadeController.addPostCollapseAction(
-                        () -> mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK)
-                );
-            } else {
-                mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK);
-            }
-        });
     }
 
     // --------------------- NotificationEntryManager/NotifPipeline methods ------------------------
