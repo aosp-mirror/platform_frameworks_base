@@ -453,6 +453,14 @@ public class WindowManagerService extends IWindowManager.Stub
     /** System UI can create more window context... */
     private static final int SYSTEM_UI_MULTIPLIER = 2;
 
+    /**
+     * Override of task letterbox aspect ratio that is set via ADB with
+     * set-task-letterbox-aspect-ratio or via {@link
+     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio} will be ignored
+     * if it is <= this value.
+     */
+    static final float MIN_TASK_LETTERBOX_ASPECT_RATIO = 1.0f;
+
     final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
@@ -961,6 +969,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
+    // Aspect ratio of task level letterboxing, values <= MIN_TASK_LETTERBOX_ASPECT_RATIO will be
+    // ignored.
+    private float mTaskLetterboxAspectRatio;
+
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
@@ -1189,6 +1201,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
+        mTaskLetterboxAspectRatio = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
@@ -3751,6 +3765,53 @@ public class WindowManagerService extends IWindowManager.Stub
                 return -1;
             }
             return display.getDisplayRotation().getFixedToUserRotationMode();
+        }
+    }
+
+    /**
+     * Overrides the aspect ratio of task level letterboxing. If given value is <= {@link
+     * #MIN_TASK_LETTERBOX_ASPECT_RATIO}, both it and a value of {@link
+     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio} will be ignored and
+     * the framework implementation will be used to determine the aspect ratio.
+     */
+    void setTaskLetterboxAspectRatio(float aspectRatio) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTaskLetterboxAspectRatio = aspectRatio;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Resets the aspect ratio of task level letterboxing to {@link
+     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio}.
+     */
+    void resetTaskLetterboxAspectRatio() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
+                            com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Gets the aspect ratio of task level letterboxing.
+     */
+    float getTaskLetterboxAspectRatio() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mTaskLetterboxAspectRatio;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
