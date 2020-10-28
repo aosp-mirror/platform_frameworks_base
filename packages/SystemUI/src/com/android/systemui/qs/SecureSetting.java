@@ -16,18 +16,17 @@
 
 package com.android.systemui.qs;
 
-import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
-import android.provider.Settings.Secure;
 
 import com.android.systemui.statusbar.policy.Listenable;
+import com.android.systemui.util.settings.SecureSettings;
 
 /** Helper for managing a secure setting. **/
 public abstract class SecureSetting extends ContentObserver implements Listenable {
     private static final int DEFAULT = 0;
 
-    private final Context mContext;
+    private SecureSettings mSecureSettings;
     private final String mSettingName;
 
     private boolean mListening;
@@ -36,19 +35,20 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
-    public SecureSetting(Context context, Handler handler, String settingName, int userId) {
+    public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
+            int userId) {
         super(handler);
-        mContext = context;
+        mSecureSettings = secureSettings;
         mSettingName = settingName;
         mUserId = userId;
     }
 
     public int getValue() {
-        return Secure.getIntForUser(mContext.getContentResolver(), mSettingName, DEFAULT, mUserId);
+        return mSecureSettings.getIntForUser(mSettingName, DEFAULT, mUserId);
     }
 
     public void setValue(int value) {
-        Secure.putIntForUser(mContext.getContentResolver(), mSettingName, value, mUserId);
+        mSecureSettings.putIntForUser(mSettingName, value, mUserId);
     }
 
     @Override
@@ -57,10 +57,10 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
         mListening = listening;
         if (listening) {
             mObservedValue = getValue();
-            mContext.getContentResolver().registerContentObserver(
-                    Secure.getUriFor(mSettingName), false, this, mUserId);
+            mSecureSettings.registerContentObserverForUser(
+                    mSecureSettings.getUriFor(mSettingName), false, this, mUserId);
         } else {
-            mContext.getContentResolver().unregisterContentObserver(this);
+            mSecureSettings.unregisterContentObserver(this);
             mObservedValue = DEFAULT;
         }
     }
