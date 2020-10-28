@@ -287,7 +287,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         StringBuilder buffer = new StringBuilder(automaticRules.size() * 28);
-        buffer.append('{');
+        buffer.append("{\n");
         for (int i = 0; i < automaticRules.size(); i++) {
             if (i > 0) {
                 buffer.append(",\n");
@@ -1831,12 +1831,13 @@ public class ZenModeConfig implements Parcelable {
         public String toString() {
             return new StringBuilder(ZenRule.class.getSimpleName()).append('[')
                     .append("id=").append(id)
+                    .append(",state=").append(condition == null ? "STATE_FALSE"
+                            : Condition.stateToString(condition.state))
                     .append(",enabled=").append(String.valueOf(enabled).toUpperCase())
                     .append(",snoozing=").append(snoozing)
                     .append(",name=").append(name)
                     .append(",zenMode=").append(Global.zenModeToString(zenMode))
                     .append(",conditionId=").append(conditionId)
-                    .append(",condition=").append(condition)
                     .append(",pkg=").append(pkg)
                     .append(",component=").append(component)
                     .append(",configActivity=").append(configurationActivity)
@@ -1844,6 +1845,7 @@ public class ZenModeConfig implements Parcelable {
                     .append(",enabler=").append(enabler)
                     .append(",zenPolicy=").append(zenPolicy)
                     .append(",modified=").append(modified)
+                    .append(",condition=").append(condition)
                     .append(']').toString();
         }
 
@@ -2010,6 +2012,10 @@ public class ZenModeConfig implements Parcelable {
 
         public Diff addLine(String item, Object from, Object to) {
             return addLine(item, from + "->" + to);
+        }
+
+        public boolean isEmpty() {
+            return lines.isEmpty();
         }
     }
 
