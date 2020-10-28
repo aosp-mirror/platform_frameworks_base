@@ -24,6 +24,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
 import android.view.Gravity;
@@ -232,8 +233,11 @@ class MagnificationModeSwitch {
                 mMagnificationMode ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
         mMagnificationMode = newMode;
         mImageView.setImageResource(getIconResId(newMode));
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, newMode);
+        Settings.Secure.putIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
+                newMode,
+                UserHandle.USER_CURRENT);
     }
 
     private void handleSingleTap() {
