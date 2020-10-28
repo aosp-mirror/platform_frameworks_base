@@ -24,7 +24,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -141,7 +140,7 @@ public abstract class VrListenerService extends Service {
      * @see android.R.attr#enableVrMode
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onCurrentVrActivityChanged(
             ComponentName component, boolean running2dInVr, int pid) {
         // Override to implement. Default to old behaviour of sending null for 2D.

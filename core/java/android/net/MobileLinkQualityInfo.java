@@ -17,7 +17,6 @@
 package android.net;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 
 /**
@@ -41,7 +40,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     private int mLteRssnr = UNKNOWN_INT;
     private int mLteCqi = UNKNOWN_INT;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public MobileLinkQualityInfo() {
     }
 
@@ -99,7 +98,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
      * returns mobile network type as defined by {@link android.telephony.TelephonyManager}
      * @return network type or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getMobileNetworkType() {
         return mMobileNetworkType;
     }
@@ -107,7 +106,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setMobileNetworkType(int mobileNetworkType) {
         mMobileNetworkType = mobileNetworkType;
     }
@@ -123,7 +122,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setRssi(int Rssi) {
         mRssi = Rssi;
     }
@@ -139,7 +138,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setGsmErrorRate(int gsmErrorRate) {
         mGsmErrorRate = gsmErrorRate;
     }
@@ -155,7 +154,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setCdmaDbm(int cdmaDbm) {
         mCdmaDbm = cdmaDbm;
     }
@@ -171,7 +170,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setCdmaEcio(int cdmaEcio) {
         mCdmaEcio = cdmaEcio;
     }
@@ -187,7 +186,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setEvdoDbm(int evdoDbm) {
         mEvdoDbm = evdoDbm;
     }
@@ -203,7 +202,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setEvdoEcio(int evdoEcio) {
         mEvdoEcio = evdoEcio;
     }
@@ -219,7 +218,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setEvdoSnr(int evdoSnr) {
         mEvdoSnr = evdoSnr;
     }
@@ -235,7 +234,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setLteSignalStrength(int lteSignalStrength) {
         mLteSignalStrength = lteSignalStrength;
     }
@@ -251,7 +250,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setLteRsrp(int lteRsrp) {
         mLteRsrp = lteRsrp;
     }
@@ -267,7 +266,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setLteRsrq(int lteRsrq) {
         mLteRsrq = lteRsrq;
     }
@@ -283,7 +282,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setLteRssnr(int lteRssnr) {
         mLteRssnr = lteRssnr;
     }
@@ -299,7 +298,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setLteCqi(int lteCqi) {
         mLteCqi = lteCqi;
     }

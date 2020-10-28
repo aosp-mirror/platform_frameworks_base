@@ -20,7 +20,6 @@ package android.companion;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
@@ -46,11 +45,11 @@ public interface DeviceFilter<D extends Parcelable> extends Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean matches(D device);
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String getDeviceDisplayName(D device);
 
     /**  @hide */

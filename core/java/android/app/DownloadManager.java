@@ -351,7 +351,7 @@ public class DownloadManager {
      * columns to request from DownloadProvider.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String[] UNDERLYING_COLUMNS = new String[] {
         DownloadManager.COLUMN_ID,
         DownloadManager.COLUMN_LOCAL_FILENAME,
@@ -1646,7 +1646,7 @@ public class DownloadManager {
     /**
      * Get a parameterized SQL WHERE clause to select a bunch of IDs.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static String getWhereClauseForIds(long[] ids) {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("(");
@@ -1664,7 +1664,7 @@ public class DownloadManager {
     /**
      * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static String[] getWhereArgsForIds(long[] ids) {
         String[] whereArgs = new String[ids.length];
         return getWhereArgsForIds(ids, whereArgs);

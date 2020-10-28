@@ -19,7 +19,6 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -231,7 +230,7 @@ public class FuseAppLoop implements Handler.Callback {
 
     // Called by JNI.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void onCommand(int command, long unique, long inode, long offset, int size,
             byte[] data) {
         synchronized (mLock) {
@@ -260,7 +259,7 @@ public class FuseAppLoop implements Handler.Callback {
 
     // Called by JNI.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private byte[] onOpen(long unique, long inode) {
         synchronized (mLock) {
             try {

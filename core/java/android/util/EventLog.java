@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -86,7 +85,7 @@ public class EventLog {
         private static final byte FLOAT_TYPE = 4;
 
         /** @param data containing event, read from the system */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         /*package*/ Event(byte[] data) {
             mBuffer = ByteBuffer.wrap(data);
             mBuffer.order(ByteOrder.nativeOrder());

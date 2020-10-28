@@ -20,7 +20,6 @@ package com.google.android.mms.util;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.drm.DrmManagerClient;
-import android.os.Build;
 import android.util.Log;
 
 public class DownloadDrmHelper {
@@ -74,7 +73,7 @@ public class DownloadDrmHelper {
      * Modifies the file extension for a DRM Forward Lock file NOTE: This
      * function shouldn't be called if the file shouldn't be DRM converted
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static String modifyDrmFwLockFileExtension(String filename) {
         if (filename != null) {
             int extensionIndex;

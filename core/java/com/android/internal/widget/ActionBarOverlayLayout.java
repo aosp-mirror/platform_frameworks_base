@@ -170,7 +170,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         init(context);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ActionBarOverlayLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);

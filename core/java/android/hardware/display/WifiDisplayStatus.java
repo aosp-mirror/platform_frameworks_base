@@ -17,7 +17,6 @@
 package android.hardware.display;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,9 +35,9 @@ public final class WifiDisplayStatus implements Parcelable {
     private final int mFeatureState;
     private final int mScanState;
     private final int mActiveDisplayState;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final WifiDisplay mActiveDisplay;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final WifiDisplay[] mDisplays;
 
     /** Session info needed for Miracast Certification */
@@ -51,23 +50,23 @@ public final class WifiDisplayStatus implements Parcelable {
     /** Feature state: Wifi display is turned off in settings. */
     public static final int FEATURE_STATE_OFF = 2;
     /** Feature state: Wifi display is turned on in settings. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int FEATURE_STATE_ON = 3;
 
     /** Scan state: Not currently scanning. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int SCAN_STATE_NOT_SCANNING = 0;
     /** Scan state: Currently scanning. */
     public static final int SCAN_STATE_SCANNING = 1;
 
     /** Display state: Not connected. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int DISPLAY_STATE_NOT_CONNECTED = 0;
     /** Display state: Connecting to active display. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int DISPLAY_STATE_CONNECTING = 1;
     /** Display state: Connected to active display. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int DISPLAY_STATE_CONNECTED = 2;
 
     public static final @android.annotation.NonNull Creator<WifiDisplayStatus> CREATOR = new Creator<WifiDisplayStatus>() {

@@ -159,7 +159,7 @@ public abstract class HwBinder implements IHwBinder {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
     }

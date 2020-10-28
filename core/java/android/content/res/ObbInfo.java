@@ -17,7 +17,6 @@
 package android.content.res;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -55,7 +54,7 @@ public class ObbInfo implements Parcelable {
      * 
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public byte[] salt;
 
     // Only allow things in this package to instantiate.

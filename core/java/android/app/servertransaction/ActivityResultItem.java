@@ -24,7 +24,6 @@ import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
@@ -38,7 +37,7 @@ import java.util.Objects;
  */
 public class ActivityResultItem extends ActivityTransactionItem {
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private List<ResultInfo> mResultInfoList;
 
     /* TODO(b/78294732)

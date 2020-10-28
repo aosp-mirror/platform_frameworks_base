@@ -33,7 +33,6 @@ import android.media.VolumeProvider;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.net.Uri;
 import android.os.BadParcelableException;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1391,7 +1390,7 @@ public final class MediaSession {
         public static final int UNKNOWN_ID = -1;
 
         private final MediaDescription mDescription;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private final long mId;
 
         /**

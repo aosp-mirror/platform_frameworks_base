@@ -17,7 +17,6 @@
 package android.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * Interface that provides trusted time information, possibly coming from an NTP
@@ -53,7 +52,7 @@ public interface TrustedTime {
      * @deprecated Only kept for UnsupportedAppUsage. Do not use. See {@link NtpTrustedTime}
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public long getCacheAge();
 
     /**

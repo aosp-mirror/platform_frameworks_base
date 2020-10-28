@@ -18,7 +18,6 @@
 package com.google.android.mms;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.util.ArrayList;
 
@@ -177,17 +176,17 @@ public class ContentType {
         return (null != contentType) && sSupportedContentTypes.contains(contentType);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean isSupportedImageType(String contentType) {
         return isImageType(contentType) && isSupportedType(contentType);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean isSupportedAudioType(String contentType) {
         return isAudioType(contentType) && isSupportedType(contentType);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean isSupportedVideoType(String contentType) {
         return isVideoType(contentType) && isSupportedType(contentType);
     }

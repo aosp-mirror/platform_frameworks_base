@@ -26,7 +26,7 @@ import android.system.StructStatVfs;
  * wrapper for Unix statvfs().
  */
 public class StatFs {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private StructStatVfs mStat;
 
     /**

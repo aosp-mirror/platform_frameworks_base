@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
-import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
@@ -84,7 +83,7 @@ public class AudioSystem
     public static final int STREAM_BLUETOOTH_SCO = 6;
     /** @hide Used to identify the volume of audio streams for enforced system sounds in certain
      * countries (e.g camera in Japan) */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int STREAM_SYSTEM_ENFORCED = 7;
     /** @hide Used to identify the volume of audio streams for DTMF tones */
     public static final int STREAM_DTMF = 8;
@@ -597,7 +596,7 @@ public class AudioSystem
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static void dynamicPolicyCallbackFromNative(int event, String regId, int val)
     {
         DynamicPolicyCallback cb;
@@ -674,7 +673,7 @@ public class AudioSystem
      * @param effects
      * @param activeSource
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static void recordingCallbackFromNative(int event, int riid, int uid, int session,
                           int source, int portId, boolean silenced, int[] recordingFormat,
                           AudioEffect.Descriptor[] clientEffects, AudioEffect.Descriptor[] effects,
@@ -1499,7 +1498,7 @@ public class AudioSystem
     @UnsupportedAppUsage
     public static native int setMasterMute(boolean mute);
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static native boolean getMasterMute();
     /** @hide */
     @UnsupportedAppUsage

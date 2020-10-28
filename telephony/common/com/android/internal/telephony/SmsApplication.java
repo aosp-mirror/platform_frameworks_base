@@ -35,7 +35,6 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Telephony;
@@ -90,7 +89,7 @@ public final class SmsApplication {
         /**
          * Name of this SMS app for display.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private String mApplicationName;
 
         /**
@@ -581,7 +580,7 @@ public final class SmsApplication {
      * Sets the specified package as the default SMS/MMS application. The caller of this method
      * needs to have permission to set AppOps and write to secure settings.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void setDefaultApplication(String packageName, Context context) {
         setDefaultApplicationAsUser(packageName, context, getIncomingUserId(context));
     }
@@ -850,7 +849,7 @@ public final class SmsApplication {
         sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static void configurePreferredActivity(PackageManager packageManager,
             ComponentName componentName) {
         // Add the four activity preferences we want to direct to this app.
@@ -888,7 +887,7 @@ public final class SmsApplication {
      * Returns SmsApplicationData for this package if this package is capable of being set as the
      * default SMS application.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static SmsApplicationData getSmsApplicationData(String packageName, Context context) {
         Collection<SmsApplicationData> applications = getApplicationCollection(context);
         return getApplicationForPackage(applications, packageName);
@@ -960,7 +959,7 @@ public final class SmsApplication {
      * @param updateIfNeeded update the default app if there is no valid default app configured.
      * @return component name of the app and class to direct Respond Via Message intent to
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static ComponentName getDefaultRespondViaMessageApplication(Context context,
             boolean updateIfNeeded) {
         int userId = getIncomingUserId(context);
@@ -1061,7 +1060,7 @@ public final class SmsApplication {
      * <p>
      * Caller must pass in the correct user context if calling from a singleton service.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean shouldWriteMessageForPackage(String packageName, Context context) {
         return !isDefaultSmsApplication(context, packageName);
     }

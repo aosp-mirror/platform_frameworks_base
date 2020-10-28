@@ -27,7 +27,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.RemoteException;
 import android.util.Pair;
 
@@ -48,7 +47,7 @@ public class BrowserContract {
     public static final String AUTHORITY = "com.android.browser";
 
     /** A content:// style uri to the authority for the browser provider */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
@@ -304,7 +303,7 @@ public class BrowserContract {
          * The content:// style URI for the default folder
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI_DEFAULT_FOLDER =
                 Uri.withAppendedPath(CONTENT_URI, "folder");
 
@@ -325,7 +324,7 @@ public class BrowserContract {
          * @param folderId the ID of the folder to point to
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final Uri buildFolderUri(long folderId) {
             return ContentUris.withAppendedId(CONTENT_URI_DEFAULT_FOLDER, folderId);
         }
@@ -413,7 +412,7 @@ public class BrowserContract {
         /**
          * Directory under {@link Bookmarks#CONTENT_URI}
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI =
                 AUTHORITY_URI.buildUpon().appendPath("accounts").build();
 
@@ -451,7 +450,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "history");
 
         /**
@@ -581,7 +580,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "images");
 
         /**
@@ -682,7 +681,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "combined");
 
         /**

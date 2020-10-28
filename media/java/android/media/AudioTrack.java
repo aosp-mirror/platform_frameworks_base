@@ -27,7 +27,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -580,7 +579,7 @@ public class AudioTrack extends PlayerBase
      * the native AudioTrack object, but not stored in it).
      */
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mJniData;
 
 
@@ -876,7 +875,7 @@ public class AudioTrack extends PlayerBase
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     /* package */ void deferred_connect(long nativeTrackInJavaObj) {
         if (mState != STATE_INITIALIZED) {
             // Note that for this native_setup, we are providing an already created/initialized
@@ -4013,7 +4012,7 @@ public class AudioTrack extends PlayerBase
     // Java methods called from the native side
     //--------------------
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static void postEventFromNative(Object audiotrack_ref,
             int what, int arg1, int arg2, Object obj) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);

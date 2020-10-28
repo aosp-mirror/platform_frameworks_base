@@ -771,7 +771,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #setDozeScreenBrightness
      * @hide For use by system UI components only.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getDozeScreenBrightness() {
         return mDozeScreenBrightness;
     }

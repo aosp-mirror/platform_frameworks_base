@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.IVold;
 import android.os.Parcel;
@@ -180,7 +179,7 @@ public class VolumeInfo implements Parcelable {
         this.partGuid = partGuid;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public VolumeInfo(Parcel parcel) {
         id = parcel.readString8();
         type = parcel.readInt();
@@ -313,7 +312,7 @@ public class VolumeInfo implements Parcelable {
      * Returns {@code true} if this volume is the primary emulated volume for {@code userId},
      * {@code false} otherwise.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isPrimaryEmulatedForUser(int userId) {
         return id.equals(ID_EMULATED_INTERNAL + ";" + userId);
     }
@@ -322,7 +321,7 @@ public class VolumeInfo implements Parcelable {
         return isVisibleForUser(userId);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isVisibleForWrite(int userId) {
         return isVisibleForUser(userId);
     }
@@ -332,7 +331,7 @@ public class VolumeInfo implements Parcelable {
         return (path != null) ? new File(path) : null;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public File getInternalPath() {
         return (internalPath != null) ? new File(internalPath) : null;
     }
@@ -534,7 +533,7 @@ public class VolumeInfo implements Parcelable {
         return id.hashCode();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final @android.annotation.NonNull Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
         @Override
         public VolumeInfo createFromParcel(Parcel in) {

@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.util.MacAddressUtils;
 import android.net.wifi.WifiInfo;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -59,7 +58,7 @@ public final class MacAddress implements Parcelable {
      * <p>Not publicly exposed or treated specially since the OUI 00:00:00 is registered.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final MacAddress ALL_ZEROS_ADDRESS = new MacAddress(0);
 
     /** @hide */

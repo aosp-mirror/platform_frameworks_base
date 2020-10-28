@@ -47,7 +47,7 @@ public class UsbDeviceConnection {
     private Context mContext;
 
     // used by the JNI code
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeContext;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();

@@ -17,7 +17,6 @@
 package android.text;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ public class SpanSet<E> {
     private final Class<? extends E> classType;
 
     int numberOfSpans;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     E[] spans;
     int[] spanStarts;
     int[] spanEnds;

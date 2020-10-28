@@ -18,7 +18,6 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -238,7 +237,7 @@ public class EncodedStringValue implements Cloneable {
     /**
      * Extract an EncodedStringValue[] from a given String.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static EncodedStringValue[] extract(String src) {
         String[] values = src.split(";");
 

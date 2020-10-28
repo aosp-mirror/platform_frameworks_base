@@ -73,7 +73,7 @@ interface IConnectivityManager
 
     NetworkCapabilities getNetworkCapabilities(in Network network, String callingPackageName);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     NetworkState[] getAllNetworkState();
 
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
@@ -134,7 +134,7 @@ interface IConnectivityManager
 
     VpnConfig getVpnConfig(int userId);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo(int userId);

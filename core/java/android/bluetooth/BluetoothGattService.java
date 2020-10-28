@@ -16,7 +16,6 @@
 package android.bluetooth;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -386,7 +385,7 @@ public class BluetoothGattService implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setAdvertisePreferred(boolean advertisePreferred) {
         mAdvertisePreferred = advertisePreferred;
     }

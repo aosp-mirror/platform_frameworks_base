@@ -26,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Layout;
@@ -980,7 +979,7 @@ public class AlertController {
 
         boolean mRecycleOnMeasure = true;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public RecycleListView(Context context) {
             this(context, null);
         }

@@ -29,7 +29,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -858,7 +857,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     /**
      * Draw the thumb.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void drawThumb(Canvas canvas) {
         if (mThumb != null) {
             final int saveCount = canvas.save();

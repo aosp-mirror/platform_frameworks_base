@@ -364,7 +364,7 @@ public class PerformanceCollector {
      * @param label description of code block between startTiming and
      *        stopTiming, used to label output
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void startTiming(String label) {
         if (mPerfWriter != null)
             mPerfWriter.writeStartTiming(label);
@@ -414,7 +414,7 @@ public class PerformanceCollector {
      *         between calls to startTiming and stopTiming. List of iterations
      *         is keyed by {@link #METRIC_KEY_ITERATIONS iterations}.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Bundle stopTiming(String label) {
         addIteration(label);
         if (mPerfWriter != null)

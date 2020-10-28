@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -588,7 +587,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
      * Dismiss all popup menus - overflow and submenus.
      * @return true if popups were dismissed, false otherwise. (This can be because none were open.)
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean dismissPopupMenus() {
         boolean result = hideOverflowMenu();
         result |= hideSubMenus();
@@ -611,7 +610,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     /**
      * @return true if the overflow menu is currently showing
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isOverflowMenuShowing() {
         return mOverflowPopup != null && mOverflowPopup.isShowing();
     }
@@ -770,7 +769,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Parcelable onSaveInstanceState() {
         SavedState state = new SavedState();
         state.openSubMenuId = mOpenSubMenuId;
@@ -778,7 +777,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onRestoreInstanceState(Parcelable state) {
         SavedState saved = (SavedState) state;
         if (saved.openSubMenuId > 0) {

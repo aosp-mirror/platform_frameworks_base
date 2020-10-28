@@ -18,7 +18,6 @@ package android.graphics;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
-import android.os.Build;
 import android.text.FontConfig;
 import android.util.Xml;
 
@@ -39,7 +38,7 @@ import java.util.regex.Pattern;
 public class FontListParser {
 
     /* Parse fallback list (no names) */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static FontConfig parse(InputStream in) throws XmlPullParserException, IOException {
         return parse(in, "/system/fonts");
     }

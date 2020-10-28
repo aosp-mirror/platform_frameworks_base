@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -156,10 +155,10 @@ public final class ImsSsInfo implements Parcelable {
 
     // 0: disabled, 1: enabled
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int mStatus;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String mIcbNum;
     /** @hide */
     public int mProvisionStatus = SERVICE_PROVISIONING_UNKNOWN;
@@ -167,7 +166,7 @@ public final class ImsSsInfo implements Parcelable {
     private int mClirOutgoingState = CLIR_OUTGOING_DEFAULT;
 
     /**@hide*/
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ImsSsInfo() {
     }
 

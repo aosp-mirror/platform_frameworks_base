@@ -327,7 +327,7 @@ public final class StorageVolume implements Parcelable {
      * parse or UUID is unknown.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getFatVolumeId() {
         if (mFsUuid == null || mFsUuid.length() != 9) {
             return -1;

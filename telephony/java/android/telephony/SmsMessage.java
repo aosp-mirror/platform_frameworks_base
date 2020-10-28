@@ -29,7 +29,6 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Binder;
-import android.os.Build;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
@@ -134,7 +133,7 @@ public class SmsMessage {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mSubId = 0;
 
     /** set Subscription information
@@ -1055,7 +1054,7 @@ public class SmsMessage {
      *
      * @return true if Cdma format should be used for MO SMS, false otherwise.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static boolean useCdmaFormatForMoSms(int subId) {
         SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
         if (!smsManager.isImsSmsSupported()) {

@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.TextureLayer;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -118,7 +117,7 @@ public class TextureView extends View {
     private SurfaceTextureListener mListener;
     private boolean mHadSurface;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private boolean mOpaque = true;
 
     private final Matrix mMatrix = new Matrix();
@@ -126,7 +125,7 @@ public class TextureView extends View {
 
     private final Object[] mLock = new Object[0];
     private boolean mUpdateLayer;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private boolean mUpdateSurface;
 
     private Canvas mCanvas;
@@ -134,7 +133,7 @@ public class TextureView extends View {
 
     private final Object[] mNativeWindowLock = new Object[0];
     // Set by native code, do not write!
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeWindow;
 
     /**
@@ -228,7 +227,7 @@ public class TextureView extends View {
 
     /** @hide */
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void onDetachedFromWindowInternal() {
         destroyHardwareLayer();
         releaseSurfaceTexture();
@@ -245,7 +244,7 @@ public class TextureView extends View {
         destroyHardwareLayer();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void destroyHardwareLayer() {
         if (mLayer != null) {
             mLayer.detachSurfaceTexture();
@@ -854,9 +853,9 @@ public class TextureView extends View {
         void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private native void nCreateNativeWindow(SurfaceTexture surface);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private native void nDestroyNativeWindow();
 
     private static native boolean nLockCanvas(long nativeWindow, Canvas canvas, Rect dirty);

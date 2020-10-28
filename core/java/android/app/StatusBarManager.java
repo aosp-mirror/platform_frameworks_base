@@ -26,7 +26,6 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -55,7 +54,7 @@ public class StatusBarManager {
 
     /** @hide */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int DISABLE_NOTIFICATION_TICKER
             = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
     /** @hide */
@@ -314,7 +313,7 @@ public class StatusBarManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void expandSettingsPanel(@Nullable String subPanel) {
         try {
             final IStatusBarService svc = getService();
@@ -327,7 +326,7 @@ public class StatusBarManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIcon(String slot, int iconId, int iconLevel, String contentDescription) {
         try {
             final IStatusBarService svc = getService();
@@ -341,7 +340,7 @@ public class StatusBarManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void removeIcon(String slot) {
         try {
             final IStatusBarService svc = getService();
@@ -354,7 +353,7 @@ public class StatusBarManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIconVisibility(String slot, boolean visible) {
         try {
             final IStatusBarService svc = getService();

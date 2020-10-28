@@ -20,7 +20,6 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -154,7 +153,7 @@ public interface BiometricConstants {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int BIOMETRIC_ERROR_VENDOR_BASE = 1000;
 
     @IntDef({BIOMETRIC_SUCCESS,

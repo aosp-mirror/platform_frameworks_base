@@ -24,6 +24,6 @@ import android.hardware.location.IGeofenceHardware;
  * {@hide}
  */
 oneway interface IGeofenceProvider {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setGeofenceHardware(in IGeofenceHardware proxy);
 }

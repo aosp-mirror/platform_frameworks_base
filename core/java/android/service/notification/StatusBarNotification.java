@@ -430,7 +430,7 @@ public class StatusBarNotification implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Context getPackageContext(Context context) {
         if (mContext == null) {
             try {

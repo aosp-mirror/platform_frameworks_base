@@ -17,7 +17,6 @@
 package com.android.ims.internal.uce.presence;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -62,7 +61,7 @@ public class PresResInstanceInfo implements Parcelable{
      * Sets the resource instance state.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setResInstanceState(int nResInstanceState) {
         this.mResInstanceState = nResInstanceState;
     }
@@ -79,7 +78,7 @@ public class PresResInstanceInfo implements Parcelable{
      * Sets the resource ID.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setResId(String resourceId) {
         this.mId = resourceId;
     }
@@ -98,7 +97,7 @@ public class PresResInstanceInfo implements Parcelable{
      * code.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setReason(String reason) {
         this.mReason = reason;
     }
@@ -115,7 +114,7 @@ public class PresResInstanceInfo implements Parcelable{
      * Sets the entity URI.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setPresentityUri(String presentityUri) {
         this.mPresentityUri = presentityUri;
     }
@@ -132,7 +131,7 @@ public class PresResInstanceInfo implements Parcelable{
      * Sets the tuple information.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setTupleInfo(PresTupleInfo[] tupleInfo) {
         this.mTupleInfoArray = new PresTupleInfo[tupleInfo.length];
         this.mTupleInfoArray = tupleInfo;
@@ -143,7 +142,7 @@ public class PresResInstanceInfo implements Parcelable{
     * Constructor for the PresResInstanceInfo class.
     * @hide
     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PresResInstanceInfo(){
 
     };

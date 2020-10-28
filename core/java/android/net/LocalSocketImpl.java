@@ -17,7 +17,6 @@
 package android.net;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Int32Ref;
 import android.system.Os;
@@ -52,7 +51,7 @@ class LocalSocketImpl
     @UnsupportedAppUsage
     FileDescriptor[] inboundFileDescriptors;
     /** file descriptor array that should be written during next write */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     FileDescriptor[] outboundFileDescriptors;
 
     /**

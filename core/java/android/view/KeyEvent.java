@@ -849,7 +849,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
     // Accordingly there are exactly 32 values in this table.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final String[] META_SYMBOLIC_NAMES = new String[] {
         "META_SHIFT_ON",
         "META_ALT_ON",
@@ -920,7 +920,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int META_CAP_LOCKED = 0x100;
 
     /**
@@ -928,7 +928,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int META_ALT_LOCKED = 0x200;
 
     /**
@@ -936,7 +936,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int META_SYM_LOCKED = 0x400;
 
     /**
@@ -945,7 +945,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * in its API that is currently being retained for legacy reasons.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int META_SELECTING = 0x800;
 
     /**
@@ -1266,29 +1266,29 @@ public class KeyEvent extends InputEvent implements Parcelable {
     private KeyEvent mNext;
 
     private int mId;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mDeviceId;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSource;
     private int mDisplayId;
     private @Nullable byte[] mHmac;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mMetaState;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mAction;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mKeyCode;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mScanCode;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mRepeatCount;
     @UnsupportedAppUsage
     private int mFlags;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mDownTime;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mEventTime;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private String mCharacters;
 
     public interface Callback {
@@ -1651,7 +1651,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static KeyEvent obtain(long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
             int deviceId, int scancode, int flags, int source, String characters) {
@@ -2103,7 +2103,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     // Mask of all modifier key meta states.  Specifically excludes locked keys like caps lock.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int META_MODIFIER_MASK =
             META_SHIFT_ON | META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON
             | META_ALT_ON | META_ALT_LEFT_ON | META_ALT_RIGHT_ON
@@ -2112,23 +2112,23 @@ public class KeyEvent extends InputEvent implements Parcelable {
             | META_SYM_ON | META_FUNCTION_ON;
 
     // Mask of all lock key meta states.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int META_LOCK_MASK =
             META_CAPS_LOCK_ON | META_NUM_LOCK_ON | META_SCROLL_LOCK_ON;
 
     // Mask of all valid meta states.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int META_ALL_MASK = META_MODIFIER_MASK | META_LOCK_MASK;
 
     // Mask of all synthetic meta states that are reserved for API compatibility with
     // historical uses in MetaKeyKeyListener.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int META_SYNTHETIC_MASK =
             META_CAP_LOCKED | META_ALT_LOCKED | META_SYM_LOCKED | META_SELECTING;
 
     // Mask of all meta states that are not valid use in specifying a modifier key.
     // These bits are known to be used for purposes other than specifying modifiers.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int META_INVALID_MODIFIER_MASK =
             META_LOCK_MASK | META_SYNTHETIC_MASK;
 

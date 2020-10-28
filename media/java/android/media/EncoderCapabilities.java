@@ -17,7 +17,6 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,19 +44,19 @@ public class EncoderCapabilities
      */
     static public class VideoEncoderCap {
         // These are not modifiable externally, thus are public accessible
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final int mCodec;                // @see android.media.MediaRecorder.VideoEncoder
         public final int mMinBitRate;           // min bit rate (bps)
         public final int mMaxBitRate;           // max bit rate (bps)
         public final int mMinFrameRate;         // min frame rate (fps)
         public final int mMaxFrameRate;         // max frame rate (fps)
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final int mMinFrameWidth;        // min frame width (pixel)
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final int mMaxFrameWidth;        // max frame width (pixel)
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final int mMinFrameHeight;       // min frame height (pixel)
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final int mMaxFrameHeight;       // max frame height (pixel)
 
         // Private constructor called by JNI
@@ -135,7 +134,7 @@ public class EncoderCapabilities
      * Returns the capabilities of the supported video encoders.
      * @see android.media.EncoderCapabilities.VideoEncoderCap
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static List<VideoEncoderCap> getVideoEncoders() {
         int nEncoders = native_get_num_video_encoders();
         if (nEncoders == 0) return null;

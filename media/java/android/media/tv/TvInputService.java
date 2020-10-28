@@ -34,7 +34,6 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -407,7 +406,7 @@ public abstract class TvInputService extends Service {
         private OverlayViewCleanUpTask mOverlayViewCleanUpTask;
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private Rect mOverlayFrame;
         private long mStartPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
         private long mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;

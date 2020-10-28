@@ -18,7 +18,6 @@ package android.os.health;
 
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,7 +38,7 @@ public class HealthStatsParceler implements Parcelable {
     private HealthStatsWriter mWriter;
     private HealthStats mHealthStats;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final @android.annotation.NonNull Parcelable.Creator<HealthStatsParceler> CREATOR
             = new Parcelable.Creator<HealthStatsParceler>() {
         public HealthStatsParceler createFromParcel(Parcel in) {

@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -62,7 +61,7 @@ public final class WindowContentFrameStats extends FrameStats implements Parcela
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void init(long refreshPeriodNano, long[] framesPostedTimeNano,
             long[] framesPresentedTimeNano, long[] framesReadyTimeNano) {
         mRefreshPeriodNano = refreshPeriodNano;

@@ -28,7 +28,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
@@ -55,7 +54,7 @@ public class CachingIconView extends ImageView {
     private int mBackgroundColor;
     private boolean mWillBeForceHidden;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public CachingIconView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }

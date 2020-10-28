@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.util.Pair;
 
 import java.lang.annotation.Retention;
@@ -165,7 +164,7 @@ public final class MicrophoneInfo {
     private int mType;
     private int mDirectionality;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     MicrophoneInfo(String deviceId, int type, String address, int location,
             int group, int indexInTheGroup, Coordinate3F position,
             Coordinate3F orientation, List<Pair<Float, Float>> frequencyResponse,

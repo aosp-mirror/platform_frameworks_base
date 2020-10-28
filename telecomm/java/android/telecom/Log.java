@@ -102,7 +102,7 @@ public class Log {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void i(String prefix, String format, Object... args) {
         if (INFO) {
             android.util.Slog.i(TAG, buildMessage(prefix, format, args));
@@ -133,7 +133,7 @@ public class Log {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void w(String prefix, String format, Object... args) {
         if (WARN) {
             android.util.Slog.w(TAG, buildMessage(prefix, format, args));

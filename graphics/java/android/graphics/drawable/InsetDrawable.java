@@ -27,7 +27,6 @@ import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -59,7 +58,7 @@ public class InsetDrawable extends DrawableWrapper {
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpInsetRect = new Rect();
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private InsetState mState;
 
     /**

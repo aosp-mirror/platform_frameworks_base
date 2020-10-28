@@ -17,7 +17,6 @@
 package android.security.keymaster;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,7 +33,7 @@ public class ExportResult implements Parcelable {
         this.exportData = new byte[0];
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final @android.annotation.NonNull Parcelable.Creator<ExportResult> CREATOR = new
             Parcelable.Creator<ExportResult>() {
                 public ExportResult createFromParcel(Parcel in) {

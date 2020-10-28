@@ -38,7 +38,6 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiUtils;
 import android.hardware.hdmi.HdmiUtils.HdmiAddressRelativePosition;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -327,7 +326,7 @@ public final class TvInputInfo implements Parcelable {
      * Returns the component of the service that implements this TV input.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName, mService.serviceInfo.name);
     }
