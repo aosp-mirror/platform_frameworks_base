@@ -9380,11 +9380,22 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
      *
-     * @return one of {@link #CDMA_ROAMING_MODE_RADIO_DEFAULT}, {@link #CDMA_ROAMING_MODE_HOME},
-     * {@link #CDMA_ROAMING_MODE_AFFILIATED}, {@link #CDMA_ROAMING_MODE_ANY}.
+     * @return the CDMA roaming mode.
+     * @throws SecurityException if the caller does not have the permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @see #CDMA_ROAMING_MODE_RADIO_DEFAULT
+     * @see #CDMA_ROAMING_MODE_HOME
+     * @see #CDMA_ROAMING_MODE_AFFILIATED
+     * @see #CDMA_ROAMING_MODE_ANY
+     *
+     * <p>Requires permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CdmaRoamingMode int getCdmaRoamingMode() {
         int mode = CDMA_ROAMING_MODE_RADIO_DEFAULT;
@@ -9392,9 +9403,12 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 mode = telephony.getCdmaRoamingMode(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "Error calling ITelephony#getCdmaRoamingMode", ex);
+            ex.rethrowFromSystemServer();
         }
         return mode;
     }
@@ -9405,25 +9419,36 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
      *
-     * @param mode should be one of {@link #CDMA_ROAMING_MODE_RADIO_DEFAULT},
-     * {@link #CDMA_ROAMING_MODE_HOME}, {@link #CDMA_ROAMING_MODE_AFFILIATED},
-     * {@link #CDMA_ROAMING_MODE_ANY}.
+     * @param mode CDMA roaming mode.
+     * @throws SecurityException if the caller does not have the permission.
+     * @throws IllegalStateException if the Telephony process or radio is not currently available.
      *
-     * @return {@code true} if successed.
+     * @see #CDMA_ROAMING_MODE_RADIO_DEFAULT
+     * @see #CDMA_ROAMING_MODE_HOME
+     * @see #CDMA_ROAMING_MODE_AFFILIATED
+     * @see #CDMA_ROAMING_MODE_ANY
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setCdmaRoamingMode(@CdmaRoamingMode int mode) {
+    public void setCdmaRoamingMode(@CdmaRoamingMode int mode) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.setCdmaRoamingMode(getSubId(), mode);
+                boolean result = telephony.setCdmaRoamingMode(getSubId(), mode);
+                if (!result) throw new IllegalStateException("radio is unavailable.");
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "Error calling ITelephony#setCdmaRoamingMode", ex);
+            ex.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /** @hide */
@@ -9435,48 +9460,94 @@ public class TelephonyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CdmaSubscription{}
 
-    /** Used for CDMA subscription mode, it'll be UNKNOWN if there is no Subscription source.
+    /**
+     * Used for CDMA subscription mode, it'll be UNKNOWN if there is no Subscription source.
      * @hide
      */
+    @SystemApi
     public static final int CDMA_SUBSCRIPTION_UNKNOWN  = -1;
 
-    /** Used for CDMA subscription mode: RUIM/SIM (default)
+    /**
+     * Used for CDMA subscription mode: RUIM/SIM (default)
      * @hide
      */
+    @SystemApi
     public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0;
 
-    /** Used for CDMA subscription mode: NV -> non-volatile memory
+    /**
+     * Used for CDMA subscription mode: NV -> non-volatile memory
      * @hide
      */
+    @SystemApi
     public static final int CDMA_SUBSCRIPTION_NV       = 1;
 
-    /** @hide */
-    public static final int PREFERRED_CDMA_SUBSCRIPTION = CDMA_SUBSCRIPTION_RUIM_SIM;
-
     /**
-     * Sets the subscription mode for CDMA phone to the given mode {@code mode}.
+     * Gets the subscription mode for CDMA phone.
      *
-     * @param mode CDMA subscription mode
-     *
-     * @return {@code true} if successed.
+     * @return the CDMA subscription mode.
+     * @throws SecurityException if the caller does not have the permission.
+     * @throws IllegalStateException if the Telephony process or radio is not currently available.
      *
      * @see #CDMA_SUBSCRIPTION_UNKNOWN
      * @see #CDMA_SUBSCRIPTION_RUIM_SIM
      * @see #CDMA_SUBSCRIPTION_NV
      *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setCdmaSubscriptionMode(@CdmaSubscription int mode) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @CdmaSubscription int getCdmaSubscriptionMode() {
+        int mode = CDMA_SUBSCRIPTION_RUIM_SIM;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.setCdmaSubscriptionMode(getSubId(), mode);
+                mode = telephony.getCdmaSubscriptionMode(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error calling ITelephony#getCdmaSubscriptionMode", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return mode;
+    }
+
+    /**
+     * Sets the subscription mode for CDMA phone to the given mode {@code mode}.
+     *
+     * @param mode CDMA subscription mode.
+     * @throws SecurityException if the caller does not have the permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @see #CDMA_SUBSCRIPTION_UNKNOWN
+     * @see #CDMA_SUBSCRIPTION_RUIM_SIM
+     * @see #CDMA_SUBSCRIPTION_NV
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setCdmaSubscriptionMode(@CdmaSubscription int mode) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                boolean result = telephony.setCdmaSubscriptionMode(getSubId(), mode);
+                if (!result) throw new IllegalStateException("radio is unavailable.");
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "Error calling ITelephony#setCdmaSubscriptionMode", ex);
+            ex.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
