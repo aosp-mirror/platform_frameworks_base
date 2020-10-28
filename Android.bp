@@ -1174,22 +1174,6 @@ filegroup {
 }
 
 // Avoid including Parcelable classes as we don't want to have two copies of
-// Parcelable cross the process. This is used by framework-telephony (frameworks/base/telephony).
-filegroup {
-    name: "framework-telephony-shared-srcs",
-    srcs: [
-        "core/java/android/util/RecurrenceRule.java",
-        "core/java/com/android/internal/os/SomeArgs.java",
-        "core/java/com/android/internal/util/BitwiseInputStream.java",
-        "core/java/com/android/internal/util/BitwiseOutputStream.java",
-        "core/java/com/android/internal/util/FunctionalUtils.java",
-        "core/java/com/android/internal/util/HexDump.java",
-        "core/java/com/android/internal/util/IndentingPrintWriter.java",
-        "core/java/com/android/internal/util/Preconditions.java",
-    ],
-}
-
-// Avoid including Parcelable classes as we don't want to have two copies of
 // Parcelable cross the process.
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
@@ -1285,43 +1269,3 @@ build = [
     "StubLibraries.bp",
     "ApiDocs.bp",
 ]
-
-java_library {
-    name: "framework-telephony",
-    srcs: [
-        //":framework-telephony-sources",
-        //":framework-telephony-shared-srcs",
-    ],
-    // TODO: change to framework-system-stub to build against system APIs.
-    libs: [
-        "framework-minus-apex",
-        "unsupportedappusage",
-    ],
-    static_libs: [
-        "libphonenumber-platform",
-        "app-compat-annotations",
-    ],
-    sdk_version: "core_platform",
-    aidl: {
-        export_include_dirs: ["telephony/java"],
-        include_dirs: [
-            "frameworks/native/aidl/binder",
-            "frameworks/native/aidl/gui",
-        ]
-    },
-    jarjar_rules: ":framework-telephony-jarjar-rules",
-    dxflags: [
-        "--core-library",
-        "--multi-dex",
-    ],
-    // This is to break the dependency from boot jars.
-    dex_preopt: {
-        enabled: false,
-    },
-    installable: true,
-}
-
-filegroup {
-    name: "framework-telephony-jarjar-rules",
-    srcs: ["telephony/framework-telephony-jarjar-rules.txt"],
-}
