@@ -46,7 +46,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.NativeHandle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -56,7 +55,6 @@ import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
@@ -156,8 +154,7 @@ public class FingerprintService extends SystemService {
 
         @Override // Binder call
         public void enroll(final IBinder token, final byte[] hardwareAuthToken, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName,
-                Surface surface) {
+                final IFingerprintServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -167,7 +164,7 @@ public class FingerprintService extends SystemService {
             }
 
             provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName, surface);
+                    receiver, opPackageName);
         }
 
         @Override // Binder call
@@ -185,8 +182,7 @@ public class FingerprintService extends SystemService {
 
         @Override // Binder call
         public void authenticate(final IBinder token, final long operationId, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName,
-                final Surface surface) {
+                final IFingerprintServiceReceiver receiver, final String opPackageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -233,8 +229,7 @@ public class FingerprintService extends SystemService {
 
         @Override
         public void detectFingerprint(final IBinder token, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName,
-                final Surface surface) {
+                final IFingerprintServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "detectFingerprint called from non-sysui package: " + opPackageName);
@@ -255,15 +250,14 @@ public class FingerprintService extends SystemService {
             }
 
             provider.second.scheduleFingerDetect(provider.first, token, userId,
-                    new ClientMonitorCallbackConverter(receiver), opPackageName, surface,
+                    new ClientMonitorCallbackConverter(receiver), opPackageName,
                     BiometricsProtoEnums.CLIENT_KEYGUARD);
         }
 
         @Override // Binder call
         public void prepareForAuthentication(IBinder token, long operationId, int userId,
                 IBiometricSensorReceiver sensorReceiver, String opPackageName,
-                int cookie, int callingUid, int callingPid, int callingUserId,
-                Surface surface) {
+                int cookie, int callingUid, int callingPid, int callingUserId) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -729,6 +723,4 @@ public class FingerprintService extends SystemService {
         }
         return appOpsOk;
     }
-
-    private native NativeHandle convertSurfaceToNativeHandle(Surface surface);
 }

@@ -439,7 +439,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt());
-        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt(), any());
+        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
     }
 
     @Test
@@ -466,7 +466,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt());
-        verify(mFingerprintManager).detectFingerprint(any(), any(), anyInt(), any());
+        verify(mFingerprintManager).detectFingerprint(any(), any(), anyInt());
     }
 
     @Test
