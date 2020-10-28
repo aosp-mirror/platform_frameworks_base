@@ -1226,7 +1226,7 @@ public final class SystemServer {
             mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
 
-            if (Build.IS_DEBUGGABLE) {
+            if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {
                 t.traceBegin("ProfcollectForwardingService");
                 mSystemServiceManager.startService(ProfcollectForwardingService.class);
                 t.traceEnd();
