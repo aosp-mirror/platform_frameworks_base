@@ -16,10 +16,12 @@
 
 package com.android.systemui.media.dialog;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.MediaRoute2Info;
 import android.media.RoutingSessionInfo;
@@ -221,9 +223,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         }
         for (NotificationEntry entry
                 : mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
-            if (entry.getSbn().getNotification().hasMediaSession()
+            final Notification notification = entry.getSbn().getNotification();
+            if (notification.hasMediaSession()
                     && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
-                return IconCompat.createFromIcon(entry.getSbn().getNotification().getLargeIcon());
+                final Icon icon = notification.getLargeIcon();
+                if (icon == null) {
+                    break;
+                }
+                return IconCompat.createFromIcon(icon);
             }
         }
         return null;

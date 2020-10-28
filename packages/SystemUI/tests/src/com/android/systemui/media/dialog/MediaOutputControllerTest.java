@@ -447,6 +447,25 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void getNotificationLargeIcon_withoutLargeIcon_returnsNull() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        entryList.add(entry);
+
+        when(mNotificationEntryManager.getActiveNotificationsForCurrentUser())
+                .thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.hasMediaSession()).thenReturn(true);
+        when(notification.getLargeIcon()).thenReturn(null);
+
+        assertThat(mMediaOutputController.getNotificationIcon()).isNull();
+    }
+
+    @Test
     public void getNotificationLargeIcon_withPackageNameAndMediaSession_returnsIconCompat() {
         final List<NotificationEntry> entryList = new ArrayList<>();
         final NotificationEntry entry = mock(NotificationEntry.class);
