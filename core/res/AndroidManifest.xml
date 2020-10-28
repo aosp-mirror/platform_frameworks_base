@@ -5167,6 +5167,13 @@
     <permission android:name="android.permission.CONTROL_DEVICE_STATE"
                 android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.service.attestation.ImpressionAttestationService}
+         to ensure that only the system can bind to it.
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_IMPRESSION_ATTESTATION_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
