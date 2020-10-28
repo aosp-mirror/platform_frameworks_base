@@ -17,8 +17,6 @@
 package com.android.systemui.wmshell;
 
 import android.content.Context;
-import android.os.Handler;
-import android.view.LayoutInflater;
 
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -27,6 +25,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
@@ -53,6 +52,7 @@ public abstract class TvPipModule {
             PipBoundsState pipBoundsState,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
+            PipMediaController pipMediaController,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         return Optional.of(
                 new PipController(
@@ -60,16 +60,15 @@ public abstract class TvPipModule {
                         pipBoundsState,
                         pipBoundsHandler,
                         pipTaskOrganizer,
+                        pipMediaController,
                         windowManagerShellWrapper));
     }
 
     @WMSingleton
     @Provides
     static PipControlsViewController providePipControlsViewController(
-            PipControlsView pipControlsView, PipController pipController,
-            LayoutInflater layoutInflater, Handler handler) {
-        return new PipControlsViewController(pipControlsView, pipController, layoutInflater,
-                handler);
+            PipControlsView pipControlsView, PipController pipController) {
+        return new PipControlsViewController(pipControlsView, pipController);
     }
 
     @WMSingleton

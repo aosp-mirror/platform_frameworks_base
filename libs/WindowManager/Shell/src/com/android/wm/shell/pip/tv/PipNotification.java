@@ -28,12 +28,12 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
-import android.media.session.MediaController;
-import android.media.session.PlaybackState;
 import android.text.TextUtils;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.wm.shell.R;
+
+import java.util.Objects;
 
 /**
  * A notification that informs users that PIP is running and also provides PIP controls.
@@ -41,23 +41,19 @@ import com.android.wm.shell.R;
  * configuration changes.
  */
 public class PipNotification {
-    private static final String TAG = "PipNotification";
-    private static final String NOTIFICATION_TAG = PipNotification.class.getSimpleName();
     private static final boolean DEBUG = PipController.DEBUG;
+    private static final String TAG = "PipNotification";
+
+    private static final String NOTIFICATION_TAG = PipNotification.class.getSimpleName();
+    public static final String NOTIFICATION_CHANNEL_TVPIP = "TPP";
 
     static final String ACTION_MENU = "PipNotification.menu";
     static final String ACTION_CLOSE = "PipNotification.close";
 
-    public static final String NOTIFICATION_CHANNEL_TVPIP = "TPP";
-
     private final PackageManager mPackageManager;
-
-    private final PipController mPipController;
-
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
 
-    private MediaController mMediaController;
     private String mDefaultTitle;
     private int mDefaultIconResId;
 
@@ -71,7 +67,6 @@ public class PipNotification {
         @Override
         public void onPipEntered(String packageName) {
             mPackageName = packageName;
-            updateMediaControllerMetadata();
             notifyPipNotification();
         }
 
@@ -103,51 +98,9 @@ public class PipNotification {
         }
     };
 
-    private MediaController.Callback mMediaControllerCallback = new MediaController.Callback() {
-        @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
-            if (updateMediaControllerMetadata() && mNotified) {
-                // update notification
-                notifyPipNotification();
-            }
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadata metadata) {
-            if (updateMediaControllerMetadata() && mNotified) {
-                // update notification
-                notifyPipNotification();
-            }
-        }
-    };
-
-    private final PipController.MediaListener mPipMediaListener =
-            new PipController.MediaListener() {
-                @Override
-                public void onMediaControllerChanged() {
-                    MediaController newController = mPipController.getMediaController();
-                    if (newController == null || mMediaController == newController) {
-                        return;
-                    }
-                    if (mMediaController != null) {
-                        mMediaController.unregisterCallback(mMediaControllerCallback);
-                    }
-                    mMediaController = newController;
-                    if (mMediaController != null) {
-                        mMediaController.registerCallback(mMediaControllerCallback);
-                    }
-                    if (updateMediaControllerMetadata() && mNotified) {
-                        // update notification
-                        notifyPipNotification();
-                    }
-                }
-            };
-
     public PipNotification(Context context, PipController pipController) {
         mPackageManager = context.getPackageManager();
-
-        mNotificationManager = (NotificationManager) context.getSystemService(
-                Context.NOTIFICATION_SERVICE);
+        mNotificationManager = context.getSystemService(NotificationManager.class);
 
         mNotificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL_TVPIP)
                 .setLocalOnly(true)
@@ -157,11 +110,17 @@ public class PipNotification {
                         .setContentIntent(createPendingIntent(context, ACTION_MENU))
                         .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE)));
 
-        mPipController = pipController;
         pipController.addListener(mPipListener);
-        pipController.addMediaListener(mPipMediaListener);
+        pipController.getPipMediaController().addMetadataListener(this::onMediaMetadataChanged);
 
         onConfigurationChanged(context);
+    }
+
+    private void onMediaMetadataChanged(MediaMetadata metadata) {
+        if (updateMediaControllerMetadata(metadata) && mNotified) {
+            // update notification
+            notifyPipNotification();
+        }
     }
 
     /**
@@ -199,28 +158,28 @@ public class PipNotification {
         mNotificationManager.cancel(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP);
     }
 
-    private boolean updateMediaControllerMetadata() {
+    private boolean updateMediaControllerMetadata(MediaMetadata metadata) {
         String title = null;
         Bitmap art = null;
-        if (mPipController.getMediaController() != null) {
-            MediaMetadata metadata = mPipController.getMediaController().getMetadata();
-            if (metadata != null) {
-                title = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
-                if (TextUtils.isEmpty(title)) {
-                    title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-                }
-                art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-                if (art == null) {
-                    art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
-                }
+        if (metadata != null) {
+            title = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
+            if (TextUtils.isEmpty(title)) {
+                title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+            }
+            art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            if (art == null) {
+                art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             }
         }
-        if (!TextUtils.equals(title, mMediaTitle) || art != mArt) {
-            mMediaTitle = title;
-            mArt = art;
-            return true;
+
+        if (TextUtils.equals(title, mMediaTitle) && Objects.equals(art, mArt)) {
+            return false;
         }
-        return false;
+
+        mMediaTitle = title;
+        mArt = art;
+
+        return true;
     }
 
 
