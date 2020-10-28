@@ -39,10 +39,6 @@
             android:layout_height="@dimen/notification_progress_bar_height"
             android:layout_marginTop="@dimen/notification_progress_margin_top"
             layout="@layout/notification_template_progress" />
-        <include layout="@layout/notification_template_smart_reply_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/notification_content_margin" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>
