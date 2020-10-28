@@ -24,7 +24,6 @@ import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.utils.TypeReference;
-import android.os.Build;
 import android.util.Log;
 import android.util.Rational;
 
@@ -80,7 +79,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
          *
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public Key(String name, Class<T> type, long vendorId) {
             mKey = new CameraMetadataNative.Key<T>(name, type, vendorId);
         }

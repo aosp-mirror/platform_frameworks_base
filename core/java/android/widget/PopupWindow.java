@@ -183,7 +183,7 @@ public class PopupWindow {
     private boolean mClipToScreen;
     private boolean mAllowScrollingAnchorParent = true;
     private boolean mLayoutInsetDecor = false;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private boolean mNotTouchModal;
     private boolean mAttachedInDecor = true;
     private boolean mAttachedInDecorSet = false;

@@ -27,9 +27,9 @@ interface IDreamManager {
     void dream();
     @UnsupportedAppUsage
     void awaken();
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setDreamComponents(in ComponentName[] componentNames);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     ComponentName[] getDreamComponents();
     ComponentName getDefaultDreamComponentForUser(int userId);
     void testDream(int userId, in ComponentName componentName);

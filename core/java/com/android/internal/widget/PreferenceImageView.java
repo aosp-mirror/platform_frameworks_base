@@ -18,7 +18,6 @@ package com.android.internal.widget;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -31,7 +30,7 @@ public class PreferenceImageView extends ImageView {
         this(context, null);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PreferenceImageView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }

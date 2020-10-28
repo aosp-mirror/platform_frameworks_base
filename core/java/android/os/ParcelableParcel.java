@@ -27,7 +27,7 @@ public class ParcelableParcel implements Parcelable {
     final Parcel mParcel;
     final ClassLoader mClassLoader;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ParcelableParcel(ClassLoader loader) {
         mParcel = Parcel.obtain();
         mClassLoader = loader;
@@ -46,13 +46,13 @@ public class ParcelableParcel implements Parcelable {
         mParcel.appendFrom(src, pos, size);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Parcel getParcel() {
         mParcel.setDataPosition(0);
         return mParcel;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ClassLoader getClassLoader() {
         return mClassLoader;
     }
@@ -68,7 +68,7 @@ public class ParcelableParcel implements Parcelable {
         dest.appendFrom(mParcel, 0, mParcel.dataSize());
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final Parcelable.ClassLoaderCreator<ParcelableParcel> CREATOR
             = new Parcelable.ClassLoaderCreator<ParcelableParcel>() {
         public ParcelableParcel createFromParcel(Parcel in) {

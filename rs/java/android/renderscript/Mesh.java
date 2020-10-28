@@ -17,7 +17,6 @@
 package android.renderscript;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.util.Vector;
 
@@ -607,7 +606,7 @@ public class Mesh extends BaseObj {
         *              channels are present in the mesh
         *
         **/
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public TriangleMeshBuilder(RenderScript rs, int vtxSize, int flags) {
             mRS = rs;
             mVtxCount = 0;
@@ -664,7 +663,7 @@ public class Mesh extends BaseObj {
         * @return this
         *
         **/
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public TriangleMeshBuilder addVertex(float x, float y) {
             if (mVtxSize != 2) {
                 throw new IllegalStateException("add mistmatch with declared components.");
@@ -770,7 +769,7 @@ public class Mesh extends BaseObj {
         *
         * @return this
         **/
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public TriangleMeshBuilder addTriangle(int idx1, int idx2, int idx3) {
             if((idx1 >= mMaxIndex) || (idx1 < 0) ||
                (idx2 >= mMaxIndex) || (idx2 < 0) ||
@@ -803,7 +802,7 @@ public class Mesh extends BaseObj {
         *                             accessible memory
         *
         **/
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public Mesh create(boolean uploadToBufferObject) {
             Element.Builder b = new Element.Builder(mRS);
             b.add(Element.createVector(mRS,

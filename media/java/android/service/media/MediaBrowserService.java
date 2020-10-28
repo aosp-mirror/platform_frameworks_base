@@ -32,7 +32,6 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -88,7 +87,7 @@ public abstract class MediaBrowserService extends Service {
      * A key for passing the MediaItem to the ResultReceiver in getItem.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String KEY_MEDIA_ITEM = "media_item";
 
     private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 1 << 0;

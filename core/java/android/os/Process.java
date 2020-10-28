@@ -71,7 +71,7 @@ public class Process {
      * Defines the UID/GID for the log group.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int LOG_UID = 1007;
 
     /**
@@ -84,14 +84,14 @@ public class Process {
      * Defines the UID/GID for the mediaserver process.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int MEDIA_UID = 1013;
 
     /**
      * Defines the UID/GID for the DRM process.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int DRM_UID = 1019;
 
     /**
@@ -104,7 +104,7 @@ public class Process {
      * Defines the UID/GID for the group that controls VPN services.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int VPN_UID = 1016;
 
     /**
@@ -123,7 +123,7 @@ public class Process {
      * Defines the UID/GID for the NFC service process.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int NFC_UID = 1027;
 
     /**
@@ -277,7 +277,7 @@ public class Process {
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public static final int FIRST_ISOLATED_UID = 99000;
 
@@ -285,7 +285,7 @@ public class Process {
      * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public static final int LAST_ISOLATED_UID = 99999;
 
@@ -725,7 +725,7 @@ public class Process {
      * Returns the identifier of this process' parent.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int myPpid() {
         return Os.getppid();
     }
@@ -1165,38 +1165,38 @@ public class Process {
     public static final native int[] getPids(String path, int[] lastArray);
     
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_TERM_MASK = 0xff;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_ZERO_TERM = 0;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_SPACE_TERM = (int)' ';
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_TAB_TERM = (int)'\t';
     /** @hide */
     public static final int PROC_NEWLINE_TERM = (int) '\n';
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_PARENS = 0x200;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_QUOTES = 0x400;
     /** @hide */
     public static final int PROC_CHAR = 0x800;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_OUT_STRING = 0x1000;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_OUT_LONG = 0x2000;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int PROC_OUT_FLOAT = 0x4000;
 
     /**

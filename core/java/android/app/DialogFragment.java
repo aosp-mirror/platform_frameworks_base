@@ -19,7 +19,6 @@ package android.app;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -184,11 +183,11 @@ public class DialogFragment extends Fragment
     int mTheme = 0;
     boolean mCancelable = true;
     boolean mShowsDialog = true;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int mBackStackId = -1;
 
     Dialog mDialog;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean mViewDestroyed;
     @UnsupportedAppUsage
     boolean mDismissed;

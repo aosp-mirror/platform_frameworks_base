@@ -288,7 +288,7 @@ public class PackageParser {
     public String[] mSeparateProcesses;
     private boolean mOnlyCoreApps;
     private DisplayMetrics mMetrics;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Callback mCallback;
     private File mCacheDir;
 
@@ -1364,7 +1364,7 @@ public class PackageParser {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static void collectCertificates(Package pkg, File apkFile, boolean skipVerify)
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
@@ -6539,7 +6539,7 @@ public class PackageParser {
             }
 
             /** set the signing certificates by which the APK proved it can be authenticated */
-            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+            @UnsupportedAppUsage
             public Builder setPastSigningCertificates(Signature[] pastSigningCertificates) {
                 mPastSigningCertificates = pastSigningCertificates;
                 return this;
@@ -6753,9 +6753,9 @@ public class PackageParser {
         /**
          * Data used to feed the KeySetManagerService
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public ArraySet<String> mUpgradeKeySets;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public ArrayMap<String, ArraySet<PublicKey>> mKeySetMapping;
 
         /**

@@ -133,7 +133,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Represents the network's capabilities.  If any are specified they will be satisfied
      * by any Network that matches all of them.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNetworkCapabilities;
 
     /**
@@ -1279,7 +1279,7 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean hasSignalStrength() {
         return mSignalStrength > SIGNAL_STRENGTH_UNSPECIFIED;
     }
@@ -1917,7 +1917,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static @NonNull String transportNamesOf(@Nullable @Transport int[] types) {
         StringJoiner joiner = new StringJoiner("|");
         if (types != null) {

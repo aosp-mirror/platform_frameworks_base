@@ -45,7 +45,6 @@ import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.media.soundtrigger_middleware.Status;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1175,7 +1174,7 @@ public class SoundTrigger {
 
         /** @hide */
         @TestApi
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs,
                 boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
@@ -1381,7 +1380,7 @@ public class SoundTrigger {
     public static class RecognitionConfig implements Parcelable {
         /** True if the DSP should capture the trigger sound and make it available for further
          * capture. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final boolean captureRequested;
         /**
          * True if the service should restart listening after the DSP triggers.
@@ -1390,12 +1389,12 @@ public class SoundTrigger {
         public final boolean allowMultipleTriggers;
         /** List of all keyphrases in the sound model for which recognition should be performed with
          * options for each keyphrase. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         @NonNull
         public final KeyphraseRecognitionExtra keyphrases[];
         /** Opaque data for use by system applications who know about voice engine internals,
          * typically during enrollment. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         @NonNull
         public final byte[] data;
 
@@ -1561,7 +1560,7 @@ public class SoundTrigger {
         public final int id;
 
         /** Recognition modes matched for this event */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final int recognitionModes;
 
         /** Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
@@ -1668,7 +1667,7 @@ public class SoundTrigger {
         @NonNull
         public final KeyphraseRecognitionExtra[] keyphraseExtras;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                int captureSession, int captureDelayMs, int capturePreambleMs,
                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
@@ -1790,7 +1789,7 @@ public class SoundTrigger {
      * @hide
      */
     public static class GenericRecognitionEvent extends RecognitionEvent implements Parcelable {
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public GenericRecognitionEvent(int status, int soundModelHandle,
                 boolean captureAvailable, int captureSession, int captureDelayMs,
                 int capturePreambleMs, boolean triggerInData, @NonNull AudioFormat captureFormat,
@@ -1861,7 +1860,7 @@ public class SoundTrigger {
         @NonNull
         public final byte[] data;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         SoundModelEvent(int status, int soundModelHandle, @Nullable byte[] data) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;

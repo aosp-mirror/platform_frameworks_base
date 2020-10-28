@@ -24,7 +24,6 @@ import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.CpuUsageProto;
 import android.os.Process;
 import android.os.StrictMode;
@@ -201,7 +200,7 @@ public class ProcessCpuTracker {
         public boolean interesting;
 
         public String baseName;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public String name;
         public int nameWidth;
 
@@ -217,7 +216,7 @@ public class ProcessCpuTracker {
         /**
          * Time in milliseconds.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public long rel_uptime;
 
         /**
@@ -233,13 +232,13 @@ public class ProcessCpuTracker {
         /**
          * Time in milliseconds.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int rel_utime;
 
         /**
          * Time in milliseconds.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int rel_stime;
 
         public long base_minfaults;
@@ -733,13 +732,13 @@ public class ProcessCpuTracker {
         return statses;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     final public int countWorkingStats() {
         buildWorkingProcs();
         return mWorkingProcs.size();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     final public Stats getWorkingStats(int index) {
         return mWorkingProcs.get(index);
     }

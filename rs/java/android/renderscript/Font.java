@@ -19,7 +19,6 @@ package android.renderscript;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Environment;
 
 import java.io.File;
@@ -238,7 +237,7 @@ public class Font extends BaseObj {
      *
      * Returns default font if no match could be found.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static public Font create(RenderScript rs, Resources res, String familyName, Style fontStyle, float pointSize) {
         String fileName = getFontFileName(familyName, fontStyle);
         String fontPath = Environment.getRootDirectory().getAbsolutePath();

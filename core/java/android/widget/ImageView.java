@@ -127,7 +127,7 @@ public class ImageView extends View {
 
     @UnsupportedAppUsage
     private Drawable mDrawable = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private BitmapDrawable mRecycleableBitmapDrawable = null;
     private ColorStateList mDrawableTintList = null;
     private BlendMode mDrawableBlendMode = null;

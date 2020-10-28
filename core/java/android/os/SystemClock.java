@@ -247,7 +247,7 @@ public final class SystemClock {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @CriticalNative
     public static native long currentThreadTimeMicro();
 

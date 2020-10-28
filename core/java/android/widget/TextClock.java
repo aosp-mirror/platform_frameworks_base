@@ -32,7 +32,6 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.icu.text.DateTimePatternGenerator;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -495,7 +494,7 @@ public class TextClock extends TextView {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public CharSequence getFormat() {
         return mFormat;
     }

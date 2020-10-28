@@ -399,7 +399,7 @@ public class WifiP2pManager {
     public static final int CANCEL_CONNECT_SUCCEEDED                = BASE + 12;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int CREATE_GROUP                            = BASE + 13;
     /** @hide */
     public static final int CREATE_GROUP_FAILED                     = BASE + 14;
@@ -1105,7 +1105,7 @@ public class WifiP2pManager {
             }
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private int putListener(Object listener) {
             if (listener == null) return INVALID_LISTENER_KEY;
             int key;
@@ -1417,7 +1417,7 @@ public class WifiP2pManager {
      * {@link ActionListener#onSuccess} or {@link ActionListener#onFailure}.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void startWps(Channel c, WpsInfo wps, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(START_WPS, 0, c.putListener(listener), wps);
@@ -1698,7 +1698,7 @@ public class WifiP2pManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @RequiresPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
     public void setWFDInfo(@NonNull Channel c, @NonNull WifiP2pWfdInfo wfdInfo,
             @Nullable ActionListener listener) {

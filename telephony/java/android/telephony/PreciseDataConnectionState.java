@@ -73,7 +73,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      */
     @TestApi
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553) // (maxTargetSdk = Build.VERSION_CODES.Q)
+    @UnsupportedAppUsage // (maxTargetSdk = Build.VERSION_CODES.Q)
     // FIXME: figure out how to remove the UnsupportedAppUsage and delete this constructor
     public PreciseDataConnectionState(@DataState int state,
                                       @NetworkType int networkType,

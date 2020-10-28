@@ -459,7 +459,7 @@ public final class DeviceAdminInfo implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ArrayList<PolicyInfo> getUsedPolicies() {
         ArrayList<PolicyInfo> res = new ArrayList<PolicyInfo>();
         for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {

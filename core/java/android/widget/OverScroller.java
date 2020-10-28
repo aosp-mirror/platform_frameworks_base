@@ -19,7 +19,6 @@ package android.widget;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.SensorManager;
-import android.os.Build;
 import android.util.Log;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
@@ -37,7 +36,7 @@ public class OverScroller {
     @UnsupportedAppUsage
     private final SplineOverScroller mScrollerY;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private Interpolator mInterpolator;
 
     private final boolean mFlywheel;

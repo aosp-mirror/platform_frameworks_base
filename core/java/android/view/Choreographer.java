@@ -854,7 +854,7 @@ public final class Choreographer {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void scheduleVsyncLocked() {
         mDisplayEventReceiver.scheduleVsync();
     }
@@ -994,7 +994,7 @@ public final class Choreographer {
         public Object action; // Runnable or FrameCallback
         public Object token;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void run(long frameTimeNanos) {
             if (token == FRAME_CALLBACK_TOKEN) {
                 ((FrameCallback)action).doFrame(frameTimeNanos);

@@ -17,7 +17,6 @@ package android.telephony.euicc;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -45,7 +44,7 @@ public final class EuiccInfo implements Parcelable {
             };
 
     @Nullable
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final String osVersion;
 
     /**

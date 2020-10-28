@@ -18,7 +18,6 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
@@ -437,25 +436,25 @@ public final class VelocityTracker {
         /**
          * Polynomial coefficients describing motion in X.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final float[] xCoeff = new float[MAX_DEGREE + 1];
 
         /**
          * Polynomial coefficients describing motion in Y.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public final float[] yCoeff = new float[MAX_DEGREE + 1];
 
         /**
          * Polynomial degree, or zero if only position information is available.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int degree;
 
         /**
          * Confidence (coefficient of determination), between 0 (no fit) and 1 (perfect fit).
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public float confidence;
 
         /**

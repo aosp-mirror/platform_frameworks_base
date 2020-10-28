@@ -39,18 +39,18 @@ public abstract class SmsMessageBase {
             Pattern.compile("\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*");
 
     /** {@hide} The address of the SMSC. May be null */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected String mScAddress;
 
     /** {@hide} The address of the sender */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected SmsAddress mOriginatingAddress;
 
     /** {@hide} The address of the receiver */
     protected SmsAddress mRecipientAddress;
 
     /** {@hide} The message body as a string. May be null if the message isn't text */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected String mMessageBody;
 
     /** {@hide} */
@@ -76,21 +76,21 @@ public abstract class SmsMessageBase {
     protected byte[] mUserData;
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected SmsHeader mUserDataHeader;
 
     // "Message Waiting Indication Group"
     // 23.038 Section 4
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected boolean mIsMwi;
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected boolean mMwiSense;
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected boolean mMwiDontStore;
 
     /**
@@ -104,7 +104,7 @@ public abstract class SmsMessageBase {
     protected int mIndexOnIcc = -1;
 
     /** TP-Message-Reference - Message Reference of sent message. @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int mMessageRef;
 
     @UnsupportedAppUsage

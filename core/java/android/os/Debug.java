@@ -88,7 +88,7 @@ public final class Debug
     // set/cleared by waitForDebugger()
     private static volatile boolean mWaiting = false;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private Debug() {}
 
     /*
@@ -120,7 +120,7 @@ public final class Debug
         @UnsupportedAppUsage
         public int dalvikSwappablePss;
         /** @hide The resident set size for dalvik heap.  (Without other Dalvik overhead.) */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int dalvikRss;
         /** The private dirty pages used by dalvik heap. */
         public int dalvikPrivateDirty;
@@ -140,7 +140,7 @@ public final class Debug
         public int dalvikSwappedOut;
         /** The dirty dalvik pages that have been swapped out, proportional. */
         /** @hide We may want to expose this, eventually. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int dalvikSwappedOutPss;
 
         /** The proportional set size for the native heap. */
@@ -150,7 +150,7 @@ public final class Debug
         @UnsupportedAppUsage
         public int nativeSwappablePss;
         /** @hide The resident set size for the native heap. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int nativeRss;
         /** The private dirty pages used by the native heap. */
         public int nativePrivateDirty;
@@ -170,7 +170,7 @@ public final class Debug
         public int nativeSwappedOut;
         /** The dirty native pages that have been swapped out, proportional. */
         /** @hide We may want to expose this, eventually. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int nativeSwappedOutPss;
 
         /** The proportional set size for everything else. */
@@ -180,7 +180,7 @@ public final class Debug
         @UnsupportedAppUsage
         public int otherSwappablePss;
         /** @hide The resident set size for everything else. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int otherRss;
         /** The private dirty pages used by everything else. */
         public int otherPrivateDirty;
@@ -200,12 +200,12 @@ public final class Debug
         public int otherSwappedOut;
         /** The dirty pages used by anyting else that have been swapped out, proportional. */
         /** @hide We may want to expose this, eventually. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int otherSwappedOutPss;
 
         /** Whether the kernel reports proportional swap usage */
         /** @hide */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public boolean hasSwappedOutPss;
 
         /** @hide */
@@ -2042,7 +2042,7 @@ public final class Debug
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static native void dumpNativeHeap(FileDescriptor fd);
 
     /**

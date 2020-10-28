@@ -30,7 +30,6 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.provider.OneTimeUseBuilder;
 import android.text.TextUtils;
@@ -95,7 +94,7 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     /** @hide */
     @NonNull
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ScanFilter getScanFilter() {
         return mScanFilter;
     }

@@ -514,11 +514,11 @@ public final class Parcel {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static native long getGlobalAllocSize();
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static native long getGlobalAllocCount();
 
     /**
@@ -742,7 +742,7 @@ public final class Parcel {
      * {@hide}
      * {@SystemApi}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final void writeBlob(@Nullable byte[] b) {
         writeBlob(b, 0, (b != null) ? b.length : 0);
     }
@@ -1014,7 +1014,7 @@ public final class Parcel {
     /**
      * @hide For testing only.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void writeArrayMap(@Nullable ArrayMap<String, Object> val) {
         writeArrayMapInternal(val);
     }
@@ -1053,7 +1053,7 @@ public final class Parcel {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void writeArraySet(@Nullable ArraySet<? extends Object> val) {
         final int size = (val != null) ? val.size() : -1;
         writeInt(size);
@@ -2719,7 +2719,7 @@ public final class Parcel {
      * {@hide}
      * {@SystemApi}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Nullable
     public final byte[] readBlob() {
         return nativeReadBlob(mNativePtr);
@@ -3633,7 +3633,7 @@ public final class Parcel {
     /**
      * @hide For testing only.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void readArrayMap(@NonNull ArrayMap outVal, @Nullable ClassLoader loader) {
         final int N = readInt();
         if (N < 0) {

@@ -187,7 +187,7 @@ interface IWifiManager
 
     void factoryReset(String packageName);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     Network getCurrentNetwork();
 
     byte[] retrieveBackupData();

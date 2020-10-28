@@ -182,7 +182,7 @@ public class SSLSocketFactory implements LayeredSocketFactory {
     private final SSLContext sslcontext;
     @UnsupportedAppUsage
     private final javax.net.ssl.SSLSocketFactory socketfactory;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final HostNameResolver nameResolver;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private X509HostnameVerifier hostnameVerifier = BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
@@ -262,7 +262,7 @@ public class SSLSocketFactory implements LayeredSocketFactory {
         this.nameResolver = null;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static KeyManager[] createKeyManagers(final KeyStore keystore, final String password)
         throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         if (keystore == null) {
@@ -274,7 +274,7 @@ public class SSLSocketFactory implements LayeredSocketFactory {
         return kmfactory.getKeyManagers(); 
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static TrustManager[] createTrustManagers(final KeyStore keystore)
         throws KeyStoreException, NoSuchAlgorithmException { 
         if (keystore == null) {

@@ -27,7 +27,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.RemoteException;
@@ -79,7 +78,7 @@ public class LocalePicker extends ListFragment {
             return label;
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public Locale getLocale() {
             return locale;
         }

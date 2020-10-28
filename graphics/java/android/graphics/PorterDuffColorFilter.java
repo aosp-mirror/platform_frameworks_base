@@ -19,7 +19,6 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * A color filter that can be used to tint the source pixels using a single
@@ -65,7 +64,7 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PorterDuff.Mode getMode() {
         return mMode;
     }

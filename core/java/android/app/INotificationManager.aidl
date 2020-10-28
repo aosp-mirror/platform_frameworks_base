@@ -126,7 +126,7 @@ interface INotificationManager
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
     StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag, int count, boolean includeSnoozed);

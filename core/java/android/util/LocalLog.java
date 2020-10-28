@@ -17,7 +17,6 @@
 package android.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.SystemClock;
 
 import java.io.FileDescriptor;
@@ -113,7 +112,7 @@ public final class LocalLog {
         ReadOnlyLocalLog(LocalLog log) {
             mLog = log;
         }
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             mLog.dump(pw);
         }
@@ -128,7 +127,7 @@ public final class LocalLog {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ReadOnlyLocalLog readOnlyLocalLog() {
         return new ReadOnlyLocalLog(this);
     }

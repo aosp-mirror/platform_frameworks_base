@@ -19,7 +19,6 @@ package android.content.pm;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Parcel;
 import android.util.Printer;
 
@@ -159,7 +158,7 @@ public class ComponentInfo extends PackageItemInfo {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ComponentName getComponentName() {
         return new ComponentName(packageName, name);
     }

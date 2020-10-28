@@ -757,7 +757,7 @@ public class Activity extends ContextThemeWrapper
      */
     public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static final String FRAGMENTS_TAG = "android:fragments";
     private static final String LAST_AUTOFILL_ID = "android:lastAutofillId";
 
@@ -2941,7 +2941,7 @@ public class Activity extends ContextThemeWrapper
      * @see View#onMovedToDisplay(int, Configuration)
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public void onMovedToDisplay(int displayId, Configuration config) {
     }
@@ -3211,7 +3211,7 @@ public class Activity extends ContextThemeWrapper
      * @deprecated Use {@link CursorLoader} instead.
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final Cursor managedQuery(Uri uri, String[] projection, String selection,
             String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, null, sortOrder);
@@ -6019,7 +6019,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void startActivityForResult(
             String who, Intent intent, int requestCode, @Nullable Bundle options) {
         Uri referrer = onProvideReferrer();
@@ -6351,7 +6351,7 @@ public class Activity extends ContextThemeWrapper
      * Finishes the current activity and specifies whether to remove the task associated with this
      * activity.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void finish(int finishTask) {
         if (mParent == null) {
             int resultCode;
@@ -7881,7 +7881,7 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
@@ -7977,7 +7977,7 @@ public class Activity extends ContextThemeWrapper
         performCreate(icicle, null);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         dispatchActivityPreCreated(icicle);
         mCanEnterPictureInPicture = true;
@@ -8292,7 +8292,7 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void dispatchActivityResult(String who, int requestCode, int resultCode, Intent data,
             String reason) {
         if (false) Log.v(

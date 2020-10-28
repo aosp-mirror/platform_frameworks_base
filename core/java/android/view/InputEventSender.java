@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -139,7 +138,7 @@ public abstract class InputEventSender {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void dispatchInputEventFinished(int seq, boolean handled) {
         onInputEventFinished(seq, handled);
     }

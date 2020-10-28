@@ -115,20 +115,20 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory mInsecureFactory = null;
     @UnsupportedAppUsage
     private SSLSocketFactory mSecureFactory = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private TrustManager[] mTrustManagers = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private KeyManager[] mKeyManagers = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private byte[] mNpnProtocols = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private byte[] mAlpnProtocols = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private PrivateKey mChannelIdPrivateKey = null;
 
     @UnsupportedAppUsage
     private final int mHandshakeTimeoutMillis;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final SSLClientSessionCache mSessionCache;
     @UnsupportedAppUsage
     private final boolean mSecure;
@@ -249,7 +249,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
@@ -343,7 +343,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *     must be non-empty and of length less than 256.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setAlpnProtocols(byte[][] protocols) {
         this.mAlpnProtocols = toLengthPrefixedList(protocols);
     }
@@ -464,13 +464,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setSoWriteTimeout(Socket socket, int writeTimeoutMilliseconds)
             throws SocketException {
         castToOpenSSLSocket(socket).setSoWriteTimeout(writeTimeoutMilliseconds);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static OpenSSLSocketImpl castToOpenSSLSocket(Socket socket) {
         if (!(socket instanceof OpenSSLSocketImpl)) {
             throw new IllegalArgumentException("Socket not created by this factory: "

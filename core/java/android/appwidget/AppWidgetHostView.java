@@ -30,7 +30,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
@@ -287,7 +286,7 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight, boolean ignorePadding) {
         if (newOptions == null) {

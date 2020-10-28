@@ -17,7 +17,6 @@
 package com.android.internal.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Message;
 
 /**
@@ -45,7 +44,7 @@ public class State implements IState {
     /* (non-Javadoc)
      * @see com.android.internal.util.IState#exit()
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Override
     public void exit() {
     }

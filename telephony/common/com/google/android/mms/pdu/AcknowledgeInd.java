@@ -18,7 +18,6 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import com.google.android.mms.InvalidHeaderValueException;
 
@@ -69,7 +68,7 @@ public class AcknowledgeInd extends GenericPdu {
      * @param value the value
      * @throws InvalidHeaderValueException if the value is invalid.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setReportAllowed(int value) throws InvalidHeaderValueException {
         mPduHeaders.setOctet(value, PduHeaders.REPORT_ALLOWED);
     }

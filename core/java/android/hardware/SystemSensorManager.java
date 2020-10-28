@@ -21,7 +21,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MemoryFile;
@@ -760,13 +759,13 @@ public class SystemSensorManager extends SensorManager {
             if (sensor == null) throw new NullPointerException();
             return nativeDisableSensor(mNativeSensorEventQueue, sensor.getHandle());
         }
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         protected abstract void dispatchSensorEvent(int handle, float[] values, int accuracy,
                 long timestamp);
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         protected abstract void dispatchFlushCompleteEvent(int handle);
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         protected void dispatchAdditionalInfoEvent(
                 int handle, int type, int serial, float[] floatValues, int[] intValues) {
             // default implementation is do nothing

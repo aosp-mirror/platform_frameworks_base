@@ -25,7 +25,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -122,7 +121,7 @@ public final class PdfRenderer implements AutoCloseable {
 
     private ParcelFileDescriptor mInput;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private Page mCurrentPage;
 
     /** @hide */
@@ -247,7 +246,7 @@ public final class PdfRenderer implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void doClose() {
         if (mCurrentPage != null) {
             mCurrentPage.close();

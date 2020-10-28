@@ -212,9 +212,9 @@ public class LinearLayout extends ViewGroup {
     private static final int VERTICAL_GRAVITY_COUNT = 4;
 
     private static final int INDEX_CENTER_VERTICAL = 0;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int INDEX_TOP = 1;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final int INDEX_BOTTOM = 2;
     private static final int INDEX_FILL = 3;
 

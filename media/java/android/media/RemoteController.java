@@ -26,7 +26,6 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -79,7 +78,7 @@ import java.util.List;
     private int mArtworkHeight = -1;
     private boolean mEnabled = true;
     // synchronized on mInfoLock, for USE_SESSION apis.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private MediaController mCurrentSession;
 
     /**

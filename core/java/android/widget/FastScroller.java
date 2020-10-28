@@ -140,7 +140,7 @@ class FastScroller {
 
     @UnsupportedAppUsage
     private Drawable mThumbDrawable;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private Drawable mTrackDrawable;
     private int mTextAppearance;
     private int mThumbPosition;

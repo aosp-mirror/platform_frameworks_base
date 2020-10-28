@@ -987,7 +987,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getIndexFirstChangedBlock() {
         return mIndexFirstChangedBlock;
     }
@@ -995,7 +995,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIndexFirstChangedBlock(int i) {
         mIndexFirstChangedBlock = i;
     }

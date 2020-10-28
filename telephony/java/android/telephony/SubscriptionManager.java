@@ -127,7 +127,7 @@ public class SubscriptionManager {
     public static final int MAX_SUBSCRIPTION_ID_VALUE = DEFAULT_SUBSCRIPTION_ID - 1;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final Uri CONTENT_URI = SimInfo.CONTENT_URI;
 
     /** @hide */
@@ -1826,7 +1826,7 @@ public class SubscriptionManager {
      * @return the number of records updated
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int setDisplayNumber(String number, int subId) {
         if (number == null) {
             logd("[setDisplayNumber]- fail");
@@ -1844,7 +1844,7 @@ public class SubscriptionManager {
      * @return the number of records updated
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int setDataRoaming(int roaming, int subId) {
         if (VDBG) logd("[setDataRoaming]+ roaming:" + roaming + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setDataRoaming",
@@ -1989,13 +1989,13 @@ public class SubscriptionManager {
      * @return the SubscriptionInfo for the default voice subscription.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public SubscriptionInfo getDefaultVoiceSubscriptionInfo() {
         return getActiveSubscriptionInfo(getDefaultVoiceSubscriptionId());
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int getDefaultVoicePhoneId() {
         return getPhoneId(getDefaultVoiceSubscriptionId());
     }
@@ -2047,7 +2047,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getDefaultSmsPhoneId() {
         return getPhoneId(getDefaultSmsSubscriptionId());
     }
@@ -2181,7 +2181,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
         return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getActiveModemCount();
     }
@@ -2200,7 +2200,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, int subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(EXTRA_SLOT_INDEX, phoneId);

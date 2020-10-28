@@ -129,7 +129,7 @@ public class Location implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mProvider;
     private long mTime = 0;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mElapsedRealtimeNanos = 0;
     // Estimate of the relative precision of the alignment of this SystemClock
     // timestamp, with the reported measurements in nanoseconds (68% confidence).

@@ -48,7 +48,7 @@ interface IPackageInstaller {
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void uninstall(in VersionedPackage versionedPackage, String callerPackageName, int flags,
             in IntentSender statusReceiver, int userId);
 

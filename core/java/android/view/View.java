@@ -809,7 +809,7 @@ import java.util.function.Predicate;
 @UiThread
 public class View implements Drawable.Callback, KeyEvent.Callback,
         AccessibilityEventSource {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final boolean DBG = false;
 
     /** @hide */
@@ -2409,7 +2409,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mAutofillViewId = NO_ID;
 
     // ID for accessibility purposes. This ID must be unique for every window
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mAccessibilityViewId = NO_ID;
 
     private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
@@ -2421,7 +2421,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setTag(Object)
      * @see #getTag()
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected Object mTag = null;
 
     /*
@@ -3888,7 +3888,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag to make the status bar not expandable.  Unless you also
      * set {@link #STATUS_BAR_DISABLE_NOTIFICATION_ICONS}, new notifications will continue to show.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int STATUS_BAR_DISABLE_EXPAND = 0x00010000;
 
     /**
@@ -4551,7 +4551,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private LongSparseLongArray mMeasureCache;
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "bg_")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private Drawable mBackground;
     private TintInfo mBackgroundTint;
 
@@ -4669,7 +4669,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * This field should be made private, so it is hidden from the SDK.
          * {@hide}
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         protected OnCreateContextMenuListener mOnCreateContextMenuListener;
 
         @UnsupportedAppUsage
@@ -4678,13 +4678,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @UnsupportedAppUsage
         private OnTouchListener mOnTouchListener;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private OnHoverListener mOnHoverListener;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private OnGenericMotionListener mOnGenericMotionListener;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private OnDragListener mOnDragListener;
 
         private OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener;
@@ -5113,7 +5113,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean mCachingFailed;
     @UnsupportedAppUsage
     private Bitmap mDrawingCache;
@@ -6850,7 +6850,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private ScrollabilityCache getScrollCache() {
         initScrollCache();
         return mScrollCache;
@@ -10368,7 +10368,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected boolean isVisibleToUser(Rect boundInView) {
         if (mAttachInfo != null) {
             // Attached to invisible window means this view is not visible.
@@ -10756,7 +10756,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide pending API council approval
      */
     @CallSuper
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void onFocusLost() {
         resetPressedState();
     }
@@ -11648,7 +11648,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean fitsSystemWindows() {
         return getFitsSystemWindows();
     }
@@ -13709,7 +13709,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void notifyViewAccessibilityStateChangedIfNeeded(int changeType) {
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
@@ -14129,7 +14129,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public TextSegmentIterator getIteratorForGranularity(int granularity) {
         switch (granularity) {
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER: {
@@ -14596,7 +14596,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was handled by the view, false otherwise.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final boolean dispatchPointerEvent(MotionEvent event) {
         if (event.isTouchEvent()) {
             return dispatchTouchEvent(event);
@@ -15916,7 +15916,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isInScrollingContainer() {
         ViewParent p = getParent();
         while (p != null && p instanceof ViewGroup) {
@@ -16646,7 +16646,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The inverse of the current matrix of this view.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final Matrix getInverseMatrix() {
         ensureTransformationInfo();
         if (mTransformationInfo.mInverseMatrix == null) {
@@ -18688,7 +18688,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void invalidateParentIfNeeded() {
         if (isHardwareAccelerated() && mParent instanceof View) {
             ((View) mParent).invalidate(true);
@@ -18795,7 +18795,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ThreadedRenderer getThreadedRenderer() {
         return mAttachInfo != null ? mAttachInfo.mThreadedRenderer : null;
     }
@@ -19932,7 +19932,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #computeHorizontalScrollOffset()
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void onDrawHorizontalScrollBar(Canvas canvas, Drawable scrollBar,
             int l, int t, int r, int b) {
         scrollBar.setBounds(l, t, r, b);
@@ -20115,7 +20115,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Return true if the application tag in the AndroidManifest has set "supportRtl" to true
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private boolean hasRtlSupport() {
         return mContext.getApplicationInfo().hasRtlSupport();
     }
@@ -20273,7 +20273,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void resolvePadding() {
         final int resolvedLayoutDirection = getLayoutDirection();
 
@@ -20371,7 +20371,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @CallSuper
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void onDetachedFromWindowInternal() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
         mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
@@ -21088,7 +21088,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @CallSuper
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void destroyHardwareResources() {
         if (mOverlay != null) {
             mOverlay.getOverlayView().destroyHardwareResources();
@@ -21224,7 +21224,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @NonNull
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public RenderNode updateDisplayListIfDirty() {
         final RenderNode renderNode = mRenderNode;
         if (!canHaveDisplayList()) {
@@ -21295,7 +21295,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return renderNode;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void resetDisplayList() {
         mRenderNode.discardDisplayList();
         if (mBackgroundRenderNode != null) {
@@ -24749,7 +24749,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return false if the transformation could not be applied
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean toGlobalMotionEvent(MotionEvent ev) {
         final AttachInfo info = mAttachInfo;
         if (info == null) {
@@ -24771,7 +24771,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return false if the transformation could not be applied
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean toLocalMotionEvent(MotionEvent ev) {
         final AttachInfo info = mAttachInfo;
         if (info == null) {
@@ -26193,7 +26193,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setDisabledSystemUiVisibility(int flags) {
         if (mAttachInfo != null) {
             if (mAttachInfo.mDisabledSystemUiVisibility != flags) {
@@ -26242,7 +26242,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </div>
      */
     public static class DragShadowBuilder {
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         private final WeakReference<View> mView;
 
         /**
@@ -26710,7 +26710,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Drawable that are not transparent.
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void applyDrawableToTransparentRegion(Drawable dr, Region region) {
         if (DBG) {
             Log.i("View", "Getting transparent region for: " + this);
@@ -27278,7 +27278,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG_LTR, name = "firstStrongLtr"),
             @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG_RTL, name = "firstStrongRtl"),
     })
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getRawTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_MASK) >> PFLAG2_TEXT_DIRECTION_MASK_SHIFT;
     }
@@ -27535,7 +27535,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @EnumEntry(value = TEXT_ALIGNMENT_VIEW_END, name = "viewEnd")
     })
     @TextAlignment
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getRawTextAlignment() {
         return (mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_MASK) >> PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT;
     }
@@ -28885,7 +28885,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * constants declared by {@link View} (there are more display states than
          * screen states).
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         int mDisplayState = Display.STATE_UNKNOWN;
 
         /**
@@ -29365,7 +29365,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * The current state of the scrollbars: ON, OFF, or FADING
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int state = OFF;
 
         private int mLastColor;
@@ -29817,7 +29817,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public AccessibilityNodeInfo createAccessibilityNodeInfo(View host) {
             return host.createAccessibilityNodeInfoInternal();
         }
@@ -30235,7 +30235,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return true;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void hideTooltip() {
         if (mTooltipInfo == null) {
             return;

@@ -41,7 +41,7 @@ public class MemoryFile {
     private static String TAG = "MemoryFile";
 
     // Returns 'true' if purged, 'false' otherwise
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static native boolean native_pin(FileDescriptor fd, boolean pin) throws IOException;
     @UnsupportedAppUsage
     private static native int native_get_size(FileDescriptor fd) throws IOException;

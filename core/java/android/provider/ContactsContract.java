@@ -46,7 +46,6 @@ import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Build;
 import android.os.RemoteException;
 import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
@@ -130,7 +129,7 @@ public final class ContactsContract {
      * Prefix for column names that are not visible to client apps.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public static final String HIDDEN_COLUMN_PREFIX = "x_";
 
@@ -6141,7 +6140,7 @@ public final class ContactsContract {
             *
             * @hide
             */
-            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+            @UnsupportedAppUsage
             @TestApi
             public static final Uri ENTERPRISE_CONTENT_URI =
                     Uri.withAppendedPath(Data.ENTERPRISE_CONTENT_URI, "phones");

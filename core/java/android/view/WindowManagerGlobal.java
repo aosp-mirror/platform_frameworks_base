@@ -259,7 +259,7 @@ public final class WindowManagerGlobal {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ArrayList<ViewRootImpl> getRootViews(IBinder token) {
         ArrayList<ViewRootImpl> views = new ArrayList<>();
         synchronized (mLock) {
@@ -438,7 +438,7 @@ public final class WindowManagerGlobal {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void removeView(View view, boolean immediate) {
         if (view == null) {
             throw new IllegalArgumentException("view must not be null");

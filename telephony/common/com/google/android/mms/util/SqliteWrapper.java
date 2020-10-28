@@ -25,7 +25,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -80,7 +79,7 @@ public final class SqliteWrapper {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean requery(Context context, Cursor cursor) {
         try {
             return cursor.requery();

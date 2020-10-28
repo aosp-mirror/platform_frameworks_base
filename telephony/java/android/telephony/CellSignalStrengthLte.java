@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.IntRange;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -108,7 +107,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     private int mParametersUseForLevel;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public CellSignalStrengthLte() {
         setDefaultValues();
     }

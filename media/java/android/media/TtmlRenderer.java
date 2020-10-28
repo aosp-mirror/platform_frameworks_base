@@ -18,7 +18,6 @@ package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -50,7 +49,7 @@ public class TtmlRenderer extends SubtitleController.Renderer {
 
     private TtmlRenderingWidget mRenderingWidget;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public TtmlRenderer(Context context) {
         mContext = context;
     }

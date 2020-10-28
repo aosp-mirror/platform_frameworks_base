@@ -191,7 +191,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallState
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int getCallState();
 
     /**

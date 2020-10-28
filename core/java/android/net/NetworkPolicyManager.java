@@ -253,7 +253,7 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getUidPolicy(int uid) {
         try {
             return mService.getUidPolicy(uid);
@@ -339,7 +339,7 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setRestrictBackground(boolean restrictBackground) {
         try {
             mService.setRestrictBackground(restrictBackground);
@@ -349,7 +349,7 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean getRestrictBackground() {
         try {
             return mService.getRestrictBackground();

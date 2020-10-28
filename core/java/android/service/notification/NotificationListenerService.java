@@ -311,7 +311,7 @@ public abstract class NotificationListenerService extends Service {
     private Handler mHandler;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected NotificationListenerWrapper mWrapper = null;
     private boolean isConnected = false;
 

@@ -236,7 +236,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
      *
      * <p>See {@link #encode()}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static VpnProfile decode(String key, byte[] value) {
         try {
             if (key == null) {

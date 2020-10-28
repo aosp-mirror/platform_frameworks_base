@@ -846,7 +846,7 @@ public class MediaRouter {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public RouteInfo getSelectedRoute() {
         return getSelectedRoute(ROUTE_TYPE_ANY);
     }
@@ -1776,7 +1776,7 @@ public class MediaRouter {
             return getName(context.getResources());
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         CharSequence getName(Resources res) {
             if (mNameResId != 0) {
                 return res.getText(mNameResId);

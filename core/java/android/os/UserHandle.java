@@ -100,7 +100,7 @@ public final class UserHandle implements Parcelable {
     public static final @UserIdInt int USER_SYSTEM = 0;
 
     /** @hide A user serial constant to indicate the "system" user of the device */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int USER_SERIAL_SYSTEM = 0;
 
     /** @hide A user handle to indicate the "system" user of the device */
@@ -136,22 +136,22 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int ERR_GID = -1;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int AID_ROOT = android.os.Process.ROOT_UID;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int AID_APP_START = android.os.Process.FIRST_APPLICATION_UID;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int AID_APP_END = android.os.Process.LAST_APPLICATION_UID;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int AID_SHARED_GID_START = android.os.Process.FIRST_SHARED_APPLICATION_GID;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int AID_CACHE_GID_START = android.os.Process.FIRST_APPLICATION_CACHE_GID;
 
     /** The userId represented by this UserHandle. */

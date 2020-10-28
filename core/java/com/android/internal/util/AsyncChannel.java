@@ -401,7 +401,7 @@ public class AsyncChannel {
      * @param srcHandler
      * @param dstMessenger
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void connected(Context srcContext, Handler srcHandler, Messenger dstMessenger) {
         if (DBG) log("connected srcHandler to the dstMessenger  E");
 
@@ -514,7 +514,7 @@ public class AsyncChannel {
      * @param what
      * @param arg1
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void sendMessage(int what, int arg1) {
         Message msg = Message.obtain();
         msg.what = what;
@@ -606,7 +606,7 @@ public class AsyncChannel {
      * @param what
      * @param arg1
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void replyToMessage(Message srcMsg, int what, int arg1) {
         Message msg = Message.obtain();
         msg.what = what;
@@ -639,7 +639,7 @@ public class AsyncChannel {
      * @param arg2
      * @param obj
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void replyToMessage(Message srcMsg, int what, int arg1, int arg2, Object obj) {
         Message msg = Message.obtain();
         msg.what = what;
@@ -656,7 +656,7 @@ public class AsyncChannel {
      * @param what
      * @param obj
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void replyToMessage(Message srcMsg, int what, Object obj) {
         Message msg = Message.obtain();
         msg.what = what;
@@ -670,7 +670,7 @@ public class AsyncChannel {
      * @param msg to send
      * @return reply message or null if an error.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Message sendMessageSynchronously(Message msg) {
         Message resultMsg = SyncMessenger.sendMessageSynchronously(mDstMessenger, msg);
         return resultMsg;
@@ -712,7 +712,7 @@ public class AsyncChannel {
      * @param arg2
      * @return reply message or null if an error.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Message sendMessageSynchronously(int what, int arg1, int arg2) {
         Message msg = Message.obtain();
         msg.what = what;

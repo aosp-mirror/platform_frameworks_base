@@ -250,7 +250,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The min height of this widget.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final int mMinHeight;
 
     /**
@@ -261,7 +261,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The max width of this widget.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final int mMinWidth;
 
     /**
@@ -277,7 +277,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The height of the text.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final int mTextSize;
 
     /**
@@ -298,7 +298,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Upper value of the range of numbers allowed for the NumberPicker
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mMaxValue;
 
     /**
@@ -309,7 +309,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Listener to be notified upon current value change.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private OnValueChangeListener mOnValueChangeListener;
 
     /**
@@ -367,7 +367,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The {@link Scroller} responsible for flinging the selector.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final Scroller mFlingScroller;
 
     /**
@@ -429,7 +429,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * @see ViewConfiguration#getScaledMaximumFlingVelocity()
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mMaximumFlingVelocity;
 
     /**

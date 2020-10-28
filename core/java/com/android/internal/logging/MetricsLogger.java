@@ -63,7 +63,7 @@ public class MetricsLogger {
     public static final int LOGTAG = EventLogTags.SYSUI_MULTI_ACTION;
 
     /** Write an event log record, consisting of content.serialize(). */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void write(LogMaker content) {
         if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
             content.setType(MetricsEvent.TYPE_ACTION);

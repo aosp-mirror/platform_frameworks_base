@@ -17,7 +17,6 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * The AudioGain describes a gain controller. Gain controllers are exposed by
@@ -72,7 +71,7 @@ public class AudioGain {
 
     // The channel mask passed to the constructor is as specified in AudioFormat
     // (e.g. AudioFormat.CHANNEL_OUT_STEREO)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     AudioGain(int index, int mode, int channelMask,
                         int minValue, int maxValue, int defaultValue, int stepValue,
                         int rampDurationMinMs, int rampDurationMaxMs) {

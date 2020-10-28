@@ -27,7 +27,7 @@ import android.os.Build;
 public final class SQLiteCustomFunction {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final String name;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int numArgs;
     public final SQLiteDatabase.CustomFunction callback;
 
@@ -52,7 +52,7 @@ public final class SQLiteCustomFunction {
 
     // Called from native.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void dispatchCallback(String[] args) {
         callback.callback(args);
     }

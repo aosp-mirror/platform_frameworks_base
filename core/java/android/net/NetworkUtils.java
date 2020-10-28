@@ -98,7 +98,7 @@ public class NetworkUtils {
      * this socket will go directly to the underlying network, so its traffic will not be
      * forwarded through the VPN.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean protectFromVpn(FileDescriptor fd) {
         return protectFromVpn(fd.getInt$());
     }
@@ -223,7 +223,7 @@ public class NetworkUtils {
      * @hide
      * @deprecated use {@link Inet4AddressUtils#netmaskToPrefixLength(Inet4Address)}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Deprecated
     public static int netmaskToPrefixLength(Inet4Address netmask) {
         // This is only here because some apps seem to be using it (@UnsupportedAppUsage).
@@ -290,7 +290,7 @@ public class NetworkUtils {
     /**
      * Returns the implicit netmask of an IPv4 address, as was the custom before 1993.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int getImplicitNetmask(Inet4Address address) {
         // Only here because it seems to be used by apps
         return Inet4AddressUtils.getImplicitNetmask(address);

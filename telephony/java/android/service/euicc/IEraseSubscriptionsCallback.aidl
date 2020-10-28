@@ -18,6 +18,6 @@ package android.service.euicc;
 
 /** @hide */
 oneway interface IEraseSubscriptionsCallback {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void onComplete(int result);
 }

@@ -17,7 +17,6 @@
 package com.android.ims.internal.uce.presence;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -40,7 +39,7 @@ public class PresResInfo implements Parcelable {
      * Sets the Presence service resource instance information.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setInstanceInfo(PresResInstanceInfo instanceInfo) {
         this.mInstanceInfo = instanceInfo;
     }
@@ -57,7 +56,7 @@ public class PresResInfo implements Parcelable {
      * Sets the resource URI.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setResUri(String resUri) {
         this.mResUri = resUri;
     }
@@ -74,7 +73,7 @@ public class PresResInfo implements Parcelable {
      * Sets the display name.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setDisplayName(String displayName) {
         this.mDisplayName = displayName;
     }
@@ -84,7 +83,7 @@ public class PresResInfo implements Parcelable {
     * Constructor for the PresResInstanceInfo class.
     * @hide
     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PresResInfo() {
         mInstanceInfo = new PresResInstanceInfo();
     };

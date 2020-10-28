@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -39,7 +38,7 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
     /** @hide */
     public final int durationMs;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private DhcpClientEvent(String msg, int durationMs) {
         this.msg = msg;
         this.durationMs = durationMs;
