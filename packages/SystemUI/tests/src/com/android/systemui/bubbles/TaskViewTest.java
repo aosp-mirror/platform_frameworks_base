@@ -36,7 +36,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
@@ -101,7 +100,8 @@ public class TaskViewTest extends SysuiTestCase {
             return null;
         }).when(mExecutor).execute(any());
 
-        mTaskView = new TaskView(mContext, mOrganizer, mExecutor);
+        mTaskView = new TaskView(mContext, mOrganizer);
+        mTaskView.setExecutor(mExecutor);
         mTaskView.setListener(mViewListener);
     }
 
@@ -114,7 +114,8 @@ public class TaskViewTest extends SysuiTestCase {
 
     @Test
     public void testSetPendingListener_throwsException() {
-        TaskView taskView = new TaskView(mContext, mOrganizer, mExecutor);
+        TaskView taskView = new TaskView(mContext, mOrganizer);
+        mTaskView.setExecutor(mExecutor);
         taskView.setListener(mViewListener);
         try {
             taskView.setListener(mViewListener);

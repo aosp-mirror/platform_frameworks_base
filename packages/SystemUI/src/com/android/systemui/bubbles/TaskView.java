@@ -30,7 +30,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Handler;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -82,19 +81,23 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private boolean mSurfaceCreated;
     private boolean mIsInitialized;
     private Listener mListener;
-    private final Executor mExecutor;
+    private Executor mExecutor;
 
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
 
-    public TaskView(Context context, ShellTaskOrganizer organizer, Executor executor) {
+    public TaskView(Context context, ShellTaskOrganizer organizer) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
 
-        mExecutor = executor;
         mTaskOrganizer = organizer;
         setUseAlpha();
         getHolder().addCallback(this);
         mGuard.open("release");
+    }
+
+    // TODO: Use TaskOrganizer executor when part of wmshell proper
+    public void setExecutor(Executor executor) {
+        mExecutor = executor;
     }
 
     /**
@@ -225,6 +228,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl leash) {
+        if (mExecutor == null) return;
         mExecutor.execute(() -> {
             mTaskInfo = taskInfo;
             mTaskToken = taskInfo.token;
@@ -253,6 +257,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mExecutor == null) return;
         mExecutor.execute(() -> {
             if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
 
@@ -268,6 +273,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mExecutor == null) return;
         mExecutor.execute(() -> {
             mTaskInfo.taskDescription = taskInfo.taskDescription;
             setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
@@ -276,6 +282,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mExecutor == null) return;
         mExecutor.execute(() -> {
             if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
             if (mListener != null) {
