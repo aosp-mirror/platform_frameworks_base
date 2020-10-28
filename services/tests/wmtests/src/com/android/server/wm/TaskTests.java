@@ -17,10 +17,14 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,6 +37,8 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 
+import android.app.WindowConfiguration;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -219,5 +225,36 @@ public class TaskTests extends WindowTestsBase {
                 null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
         assertTrue(activity1.isVisible());
         assertTrue(activity2.isVisible());
+    }
+
+    @Test
+    public void testResolveNonResizableTaskWindowingMode() {
+        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        Configuration parentConfig = task.getParent().getConfiguration();
+        parentConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        doReturn(false).when(task).isResizeable();
+        WindowConfiguration requestedOverride =
+                task.getRequestedOverrideConfiguration().windowConfiguration;
+        WindowConfiguration resolvedOverride =
+                task.getResolvedOverrideConfiguration().windowConfiguration;
+
+        // The resolved override windowing mode of a non-resizeable task should be resolved as
+        // fullscreen even as a child of a freeform display.
+        requestedOverride.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        task.resolveOverrideConfiguration(parentConfig);
+        assertThat(resolvedOverride.getWindowingMode()).isEqualTo(WINDOWING_MODE_FULLSCREEN);
+
+        // The resolved override windowing mode of a non-resizeable task should be resolved as
+        // fullscreen, even when requested as freeform windowing mode
+        requestedOverride.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.resolveOverrideConfiguration(parentConfig);
+        assertThat(resolvedOverride.getWindowingMode()).isEqualTo(WINDOWING_MODE_FULLSCREEN);
+
+        // The resolved override windowing mode of a non-resizeable task can be undefined as long
+        // as its parents is not in multi-window mode.
+        parentConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        requestedOverride.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        task.resolveOverrideConfiguration(parentConfig);
+        assertThat(resolvedOverride.getWindowingMode()).isEqualTo(WINDOWING_MODE_UNDEFINED);
     }
 }
