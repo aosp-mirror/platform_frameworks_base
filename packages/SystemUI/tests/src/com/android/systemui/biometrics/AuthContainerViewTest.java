@@ -32,10 +32,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.UserManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -57,6 +62,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -222,18 +230,28 @@ public class AuthContainerViewTest extends SysuiTestCase {
         AuthContainerView.Config config = new AuthContainerView.Config();
         config.mContext = mContext;
         config.mCallback = mCallback;
-        config.mModalityMask |= BiometricAuthenticator.TYPE_FINGERPRINT;
+        config.mSensorIds = new int[] {0};
+        config.mCredentialAllowed = false;
 
         PromptInfo promptInfo = new PromptInfo();
         promptInfo.setAuthenticators(authenticators);
         config.mPromptInfo = promptInfo;
 
-        mAuthContainer = new TestableAuthContainer(config);
+        final List<FingerprintSensorPropertiesInternal> fpProps = new ArrayList<>();
+        fpProps.add(new FingerprintSensorPropertiesInternal(0,
+                SensorProperties.STRENGTH_STRONG,
+                5 /* maxEnrollmentsPerUser */,
+                FingerprintSensorProperties.TYPE_REAR,
+                false /* resetLockoutRequiresHardwareAuthToken */));
+        mAuthContainer = new TestableAuthContainer(config, fpProps, null /* faceProps */);
     }
 
     private class TestableAuthContainer extends AuthContainerView {
-        TestableAuthContainer(AuthContainerView.Config config) {
-            super(config, new MockInjector());
+        TestableAuthContainer(AuthContainerView.Config config,
+                @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
+                @Nullable List<FaceSensorPropertiesInternal> faceProps) {
+
+            super(config, new MockInjector(), fpProps, faceProps);
         }
 
         @Override
