@@ -4458,7 +4458,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (userInfo == null) {
-            throw new SecurityException("userId can only be the calling user or a managed "
+            throw new SecurityException("userId can only be the calling user or a "
                     + "profile associated with this user");
         }
         return userInfo.creationTime;
