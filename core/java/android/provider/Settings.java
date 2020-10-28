@@ -14525,6 +14525,15 @@ public final class Settings {
         public static final String SHOW_NEW_LOCKSCREEN = "show_new_lockscreen";
 
         /**
+         * Whether to show new notification dismissal.
+         * Values are:
+         * 0: Disabled
+         * 1: Enabled
+         * @hide
+         */
+        public static final String SHOW_NEW_NOTIF_DISMISS = "show_new_notif_dismiss";
+
+        /**
          * Block untrusted touches mode.
          *
          * Can be one of:
