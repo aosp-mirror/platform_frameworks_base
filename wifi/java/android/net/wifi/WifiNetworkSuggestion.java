@@ -26,13 +26,14 @@ import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.NetworkCapabilities;
 import android.net.wifi.hotspot2.PasspointConfiguration;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
@@ -451,7 +452,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
         public @NonNull Builder setSubscriptionId(int subId) {
-            if (!SdkLevelUtil.isAtLeastS()) {
+            if (!SdkLevel.isAtLeastS()) {
                 throw new UnsupportedOperationException();
             }
             mSubscriptionId = subId;
@@ -466,7 +467,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
         public @NonNull Builder setPriorityGroup(int priorityGroup) {
-            if (!SdkLevelUtil.isAtLeastS()) {
+            if (!SdkLevel.isAtLeastS()) {
                 throw new UnsupportedOperationException();
             }
             mPriorityGroup = priorityGroup;
@@ -707,7 +708,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         @SystemApi
         public @NonNull Builder setOemPaid(boolean isOemPaid) {
-            if (!SdkLevelUtil.isAtLeastS()) {
+            if (!SdkLevel.isAtLeastS()) {
                 throw new UnsupportedOperationException();
             }
             mIsNetworkOemPaid = isOemPaid;
@@ -1204,7 +1205,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
      */
     @SystemApi
     public boolean isOemPaid() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return wifiConfiguration.oemPaid;
@@ -1242,7 +1243,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * @see Builder#setPriorityGroup(int)
      */
     public int getPriorityGroup() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return priorityGroup;
@@ -1252,7 +1253,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * @see Builder#setSubscriptionId(int)
      */
     public int getSubscriptionId() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return wifiConfiguration.subscriptionId;

@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -31,6 +30,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -499,7 +499,7 @@ public final class SoftApConfiguration implements Parcelable {
      */
     @SystemApi
     public @NonNull int[] getBands() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         int[] bands = new int[mChannels.size()];
@@ -535,7 +535,7 @@ public final class SoftApConfiguration implements Parcelable {
      */
     @SystemApi
     public @NonNull SparseIntArray getChannels() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return mChannels;
@@ -635,7 +635,7 @@ public final class SoftApConfiguration implements Parcelable {
     @SystemApi
     @MacRandomizationSetting
     public int getMacRandomizationSetting() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return mMacRandomizationSetting;
@@ -1219,7 +1219,7 @@ public final class SoftApConfiguration implements Parcelable {
         @NonNull
         public Builder setMacRandomizationSetting(
                 @MacRandomizationSetting int macRandomizationSetting) {
-            if (!SdkLevelUtil.isAtLeastS()) {
+            if (!SdkLevel.isAtLeastS()) {
                 throw new UnsupportedOperationException();
             }
             mMacRandomizationSetting = macRandomizationSetting;

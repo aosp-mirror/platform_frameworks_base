@@ -75,25 +75,34 @@ test_access_hidden_api_whitelist = [
     "//external/sl4a:__subpackages__",
 ]
 
-// wifi-service needs pre-jarjared version of framework-wifi so it can reference copied utility
-// classes before they are renamed.
-java_library {
-    name: "framework-wifi-pre-jarjar",
+// defaults shared between `framework-wifi` & `framework-wifi-pre-jarjar`
+// java_sdk_library `framework-wifi` needs sources to generate stubs, so it cannot reuse
+// `framework-wifi-pre-jarjar`
+java_defaults {
+    name: "framework-wifi-defaults",
     defaults: ["wifi-module-sdk-version-defaults"],
-    sdk_version: "module_current",
     static_libs: [
         "framework-wifi-util-lib",
         "android.hardware.wifi-V1.0-java-constants",
+        "modules-utils-build",
     ],
     libs: [
-        "framework-annotations-lib",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
     ],
     srcs: [
         ":framework-wifi-updatable-sources",
         ":framework-wifi-util-lib-aidls",
     ],
-    // java_api_finder must accompany `srcs`
+}
+
+// wifi-service needs pre-jarjared version of framework-wifi so it can reference copied utility
+// classes before they are renamed.
+java_library {
+    name: "framework-wifi-pre-jarjar",
+    defaults: ["framework-wifi-defaults"],
+    sdk_version: "module_current",
+    libs: ["framework-annotations-lib"],
+    // java_api_finder must accompany `srcs` (`srcs` defined in `framework-wifi-defaults`)
     plugins: ["java_api_finder"],
     installable: false,
     visibility: [
@@ -107,18 +116,7 @@ java_sdk_library {
     name: "framework-wifi",
     defaults: [
         "framework-module-defaults",
-        "wifi-module-sdk-version-defaults",
-    ],
-    static_libs: [
-        "framework-wifi-util-lib",
-        "android.hardware.wifi-V1.0-java-constants",
-    ],
-    libs: [
-        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
-    ],
-    srcs: [
-        ":framework-wifi-updatable-sources",
-        ":framework-wifi-util-lib-aidls",
+        "framework-wifi-defaults",
     ],
 
     jarjar_rules: ":wifi-jarjar-rules",

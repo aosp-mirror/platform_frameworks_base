@@ -39,7 +39,6 @@ import android.content.pm.PackageManager;
 import android.net.MacAddress;
 import android.net.wifi.RttManager;
 import android.net.wifi.util.HexEncoding;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -47,6 +46,8 @@ import android.os.Parcel;
 import android.os.test.TestLooper;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -164,7 +165,7 @@ public class WifiAwareManagerTest {
      */
     @Test
     public void testEnableInstantCommunicationMode() throws Exception {
-        assumeTrue(SdkLevelUtil.isAtLeastS());
+        assumeTrue(SdkLevel.isAtLeastS());
         mDut.isInstantCommunicationModeEnabled();
         verify(mockAwareService).isInstantCommunicationModeEnabled();
         mDut.enableInstantCommunicationMode(true);
