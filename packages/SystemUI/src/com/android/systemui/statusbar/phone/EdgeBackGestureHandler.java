@@ -137,7 +137,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                             && (properties.getKeyset().contains(
                                     SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD)
                             || properties.getKeyset().contains(
-                                    SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL))) {
+                                    SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL)
+                            || properties.getKeyset().contains(
+                                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_NAME))) {
                         updateMLModelState();
                     }
                 }
@@ -478,8 +480,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         }
 
         if (newState) {
+            String mlModelName = DeviceConfig.getString(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_NAME, "backgesture");
             mBackGestureTfClassifierProvider = SystemUIFactory.getInstance()
-                    .createBackGestureTfClassifierProvider(mContext.getAssets());
+                    .createBackGestureTfClassifierProvider(mContext.getAssets(), mlModelName);
             mMLModelThreshold = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD, 0.9f);
             if (mBackGestureTfClassifierProvider.isActive()) {
@@ -529,21 +533,22 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         boolean withinRange = false;
         float results = -1;
 
+        // Disallow if we are in the bottom gesture area
+        if (y >= (mDisplaySize.y - mBottomGestureHeight)) {
+            return false;
+        }
+        // If the point is way too far (twice the margin), it is
+        // not interesting to us for logging purposes, nor we
+        // should process it.  Simply return false and keep
+        // mLogGesture = false.
+        if (x > 2 * (mEdgeWidthLeft + mLeftInset)
+                && x < (mDisplaySize.x - 2 * (mEdgeWidthRight + mRightInset))) {
+            return false;
+        }
+
         if (mUseMLModel &&  (results = getBackGesturePredictionsCategory(x, y)) != -1) {
             withinRange = results == 1 ? true : false;
         } else {
-            // Disallow if we are in the bottom gesture area
-            if (y >= (mDisplaySize.y - mBottomGestureHeight)) {
-                return false;
-            }
-            // If the point is way too far (twice the margin), it is
-            // not interesting to us for logging purposes, nor we
-            // should process it.  Simply return false and keep
-            // mLogGesture = false.
-            if (x > 2 * (mEdgeWidthLeft + mLeftInset)
-                    && x < (mDisplaySize.x - 2 * (mEdgeWidthRight + mRightInset))) {
-                return false;
-            }
             // Denotes whether we should proceed with the gesture.
             // Even if it is false, we may want to log it assuming
             // it is not invalid due to exclusion.
