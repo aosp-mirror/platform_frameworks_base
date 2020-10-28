@@ -1970,7 +1970,7 @@ public final class ActiveServices {
         }
 
         if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
-            mAm.enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+            mAm.enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
                     "BIND_TREAT_LIKE_ACTIVITY");
         }
 

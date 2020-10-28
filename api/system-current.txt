@@ -109,7 +109,8 @@ package android {
     field public static final String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
     field public static final String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
-    field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";

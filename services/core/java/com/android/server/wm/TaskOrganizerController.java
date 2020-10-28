@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -293,8 +292,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         mGlobalLock = atm.mGlobalLock;
     }
 
-    private void enforceStackPermission(String func) {
-        mService.mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, func);
+    private void enforceTaskPermission(String func) {
+        mService.enforceTaskPermission(func);
     }
 
     /**
@@ -310,7 +309,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      */
     @Override
     public ParceledListSlice<TaskAppearedInfo> registerTaskOrganizer(ITaskOrganizer organizer) {
-        enforceStackPermission("registerTaskOrganizer()");
+        enforceTaskPermission("registerTaskOrganizer()");
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -355,7 +354,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public void unregisterTaskOrganizer(ITaskOrganizer organizer) {
-        enforceStackPermission("unregisterTaskOrganizer()");
+        enforceTaskPermission("unregisterTaskOrganizer()");
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -401,7 +400,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
-        enforceStackPermission("createRootTask()");
+        enforceTaskPermission("createRootTask()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -435,7 +434,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public boolean deleteRootTask(WindowContainerToken token) {
-        enforceStackPermission("deleteRootTask()");
+        enforceTaskPermission("deleteRootTask()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -529,7 +528,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public WindowContainerToken getImeTarget(int displayId) {
-        enforceStackPermission("getImeTarget()");
+        enforceTaskPermission("getImeTarget()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -552,7 +551,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public void setLaunchRoot(int displayId, @Nullable WindowContainerToken token) {
-        enforceStackPermission("setLaunchRoot()");
+        enforceTaskPermission("setLaunchRoot()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -586,7 +585,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     @Override
     public List<RunningTaskInfo> getChildTasks(WindowContainerToken parent,
             @Nullable int[] activityTypes) {
-        enforceStackPermission("getChildTasks()");
+        enforceTaskPermission("getChildTasks()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -627,7 +626,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public List<RunningTaskInfo> getRootTasks(int displayId, @Nullable int[] activityTypes) {
-        enforceStackPermission("getRootTasks()");
+        enforceTaskPermission("getRootTasks()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -657,7 +656,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     @Override
     public void setInterceptBackPressedOnTaskRoot(WindowContainerToken token,
             boolean interceptBackPressed) {
-        enforceStackPermission("setInterceptBackPressedOnTaskRoot()");
+        enforceTaskPermission("setInterceptBackPressedOnTaskRoot()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
