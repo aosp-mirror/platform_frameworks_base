@@ -330,30 +330,45 @@ public class ClipDescription implements Parcelable {
         StringBuilder b = new StringBuilder(128);
 
         b.append("ClipDescription { ");
-        toShortString(b);
+        toShortString(b, true);
         b.append(" }");
 
         return b.toString();
     }
 
-    /** @hide */
-    public boolean toShortString(StringBuilder b) {
+    /**
+     * Appends this description to the given builder.
+     * @param redactContent If true, redacts common forms of PII; otherwise appends full details.
+     * @hide
+     */
+    public boolean toShortString(StringBuilder b, boolean redactContent) {
         boolean first = !toShortStringTypesOnly(b);
         if (mLabel != null) {
             if (!first) {
                 b.append(' ');
             }
             first = false;
-            b.append('"');
-            b.append(mLabel);
-            b.append('"');
+            if (redactContent) {
+                b.append("hasLabel(").append(mLabel.length()).append(')');
+            } else {
+                b.append('"').append(mLabel).append('"');
+            }
         }
         if (mExtras != null) {
             if (!first) {
                 b.append(' ');
             }
             first = false;
-            b.append(mExtras.toString());
+            if (redactContent) {
+                if (mExtras.isParcelled()) {
+                    // We don't want this toString function to trigger un-parcelling.
+                    b.append("hasExtras");
+                } else {
+                    b.append("hasExtras(").append(mExtras.size()).append(')');
+                }
+            } else {
+                b.append(mExtras.toString());
+            }
         }
         if (mTimeStamp > 0) {
             if (!first) {

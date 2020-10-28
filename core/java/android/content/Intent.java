@@ -10485,17 +10485,6 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
-    public String toInsecureStringWithClip() {
-        StringBuilder b = new StringBuilder(128);
-
-        b.append("Intent { ");
-        toShortString(b, false, true, true, true);
-        b.append(" }");
-
-        return b.toString();
-    }
-
-    /** @hide */
     public String toShortString(boolean secure, boolean comp, boolean extras, boolean clip) {
         StringBuilder b = new StringBuilder(128);
         toShortString(b, secure, comp, extras, clip);
@@ -10581,16 +10570,7 @@ public class Intent implements Parcelable, Cloneable {
                 b.append(' ');
             }
             b.append("clip={");
-            if (clip) {
-                mClipData.toShortString(b);
-            } else {
-                if (mClipData.getDescription() != null) {
-                    first = !mClipData.getDescription().toShortStringTypesOnly(b);
-                } else {
-                    first = true;
-                }
-                mClipData.toShortStringShortItems(b, first);
-            }
+            mClipData.toShortString(b, !clip || secure);
             first = false;
             b.append('}');
         }
@@ -10668,11 +10648,7 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mClipData != null) {
             StringBuilder b = new StringBuilder();
-            if (clip) {
-                mClipData.toShortString(b);
-            } else {
-                mClipData.toShortStringShortItems(b, false);
-            }
+            mClipData.toShortString(b, !clip || secure);
             proto.write(IntentProto.CLIP_DATA, b.toString());
         }
         if (extras && mExtras != null) {
