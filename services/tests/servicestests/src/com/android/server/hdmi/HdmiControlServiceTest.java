@@ -383,6 +383,41 @@ public class HdmiControlServiceTest {
     }
 
 
+    @Test
+    public void getCecVersion_default() {
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_1_4);
+    }
+
+    @Test
+    public void getCecVersion_1_4() {
+        Settings.Global.putInt(mContextSpy.getContentResolver(), Settings.Global.HDMI_CEC_VERSION,
+                Constants.VERSION_1_4);
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_1_4);
+    }
+
+    @Test
+    public void getCecVersion_2_0() {
+        Settings.Global.putInt(mContextSpy.getContentResolver(), Settings.Global.HDMI_CEC_VERSION,
+                Constants.VERSION_2_0);
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_2_0);
+    }
+
+    @Test
+    public void getCecVersion_change() {
+        Settings.Global.putInt(mContextSpy.getContentResolver(), Settings.Global.HDMI_CEC_VERSION,
+                Constants.VERSION_1_4);
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_1_4);
+
+        Settings.Global.putInt(mContextSpy.getContentResolver(), Settings.Global.HDMI_CEC_VERSION,
+                Constants.VERSION_2_0);
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_2_0);
+    }
+
+
     private static class VolumeControlFeatureCallback extends
             IHdmiCecVolumeControlFeatureListener.Stub {
         boolean mCallbackReceived = false;
