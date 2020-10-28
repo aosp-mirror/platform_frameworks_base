@@ -108,7 +108,7 @@ public class ScreenshotController {
         abstract void onActionsReady(ScreenshotController.SavedImageData imageData);
     }
 
-    private static final String TAG = "GlobalScreenshotController";
+    private static final String TAG = "ScreenshotController";
 
     // These strings are used for communicating the action invoked to
     // ScreenshotNotificationSmartActionsProvider.
