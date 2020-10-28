@@ -28,10 +28,39 @@ import android.os.Parcel;
  * @hide
  */
 public class FingerprintSensorPropertiesInternal extends SensorPropertiesInternal {
+    /**
+     * See {@link FingerprintSensorProperties.SensorType}.
+     */
     public final @FingerprintSensorProperties.SensorType int sensorType;
-    // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
-    // cannot be checked
+
+    /**
+     * IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
+     * cannot be checked
+     */
     public final boolean resetLockoutRequiresHardwareAuthToken;
+
+    /**
+     * The location of the center of the sensor if applicable. For example, sensors of type
+     * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
+     * distance in pixels, measured from the left edge of the screen.
+     * TODO: Value should be provided from the HAL
+     */
+    public final int sensorLocationX = 540;
+
+    /**
+     * The location of the center of the sensor if applicable. For example, sensors of type
+     * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
+     * distance in pixels, measured from the top edge of the screen.
+     * TODO: Value should be provided from the HAL
+     */
+    public final int sensorLocationY = 1636;
+
+    /**
+     * The radius of the sensor if applicable. For example, sensors of type
+     * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the radius
+     * of the sensor, in pixels.
+     */
+    public final int sensorRadius = 130;
 
     /**
      * Initializes SensorProperties with specified values
