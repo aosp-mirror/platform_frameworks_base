@@ -16,22 +16,17 @@
 
 package com.android.systemui.media.dialog;
 
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 
-import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 
@@ -155,34 +150,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
             }
         }
 
-        private void initSessionSeekbar() {
-            mSeekBar.setMax(mController.getSessionVolumeMax());
-            mSeekBar.setMin(0);
-            final int currentVolume = mController.getSessionVolume();
-            if (mSeekBar.getProgress() != currentVolume) {
-                mSeekBar.setProgress(currentVolume);
-            }
-            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (!fromUser) {
-                        return;
-                    }
-                    mController.adjustSessionVolume(progress);
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                    mIsDragging = true;
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    mIsDragging = false;
-                }
-            });
-        }
-
         private Drawable getDisabledCheckboxDrawable() {
             final Drawable drawable = mContext.getDrawable(R.drawable.ic_check_box_blue_24dp)
                     .mutate();
@@ -196,16 +163,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
             drawable.draw(canvas);
 
             return drawable;
-        }
-
-        private Drawable getSpeakerDrawable() {
-            final Drawable drawable = mContext.getDrawable(R.drawable.ic_speaker_group_black_24dp)
-                    .mutate();
-            final ColorStateList list = mContext.getResources().getColorStateList(
-                            R.color.advanced_icon_color, mContext.getTheme());
-            drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
-                    PorterDuff.Mode.SRC_IN));
-            return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
         }
 
         private boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {

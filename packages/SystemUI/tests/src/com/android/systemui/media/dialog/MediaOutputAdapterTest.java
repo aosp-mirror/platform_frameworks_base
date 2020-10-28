@@ -50,6 +50,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     private static final String TEST_DEVICE_NAME_2 = "test_device_name_2";
     private static final String TEST_DEVICE_ID_1 = "test_device_id_1";
     private static final String TEST_DEVICE_ID_2 = "test_device_id_2";
+    private static final String TEST_SESSION_NAME = "test_session_name";
 
     // Mock
     private MediaOutputController mMediaOutputController = mock(MediaOutputController.class);
@@ -102,6 +103,14 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void getItemCount_withDynamicGroup_containExtraOneForGroup() {
+        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
+        when(mMediaOutputController.isZeroMode()).thenReturn(false);
+
+        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size() + 1);
+    }
+
+    @Test
     public void onBindViewHolder_zeroMode_bindPairNew_verifyView() {
         when(mMediaOutputController.isZeroMode()).thenReturn(true);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
@@ -115,6 +124,45 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTitleText.getText()).isEqualTo(mContext.getText(
                 R.string.media_output_dialog_pairing_new));
+    }
+
+    @Test
+    public void onBindViewHolder_bindGroup_withSessionName_verifyView() {
+        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
+        when(mMediaOutputController.isZeroMode()).thenReturn(false);
+        when(mMediaOutputController.getSessionName()).thenReturn(TEST_SESSION_NAME);
+        mMediaOutputAdapter.getItemCount();
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_SESSION_NAME);
+    }
+
+    @Test
+    public void onBindViewHolder_bindGroup_noSessionName_verifyView() {
+        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
+        when(mMediaOutputController.isZeroMode()).thenReturn(false);
+        when(mMediaOutputController.getSessionName()).thenReturn(null);
+        mMediaOutputAdapter.getItemCount();
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mDivider.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mAddIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mBottomDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(mContext.getString(
+                R.string.media_output_dialog_group));
     }
 
     @Test

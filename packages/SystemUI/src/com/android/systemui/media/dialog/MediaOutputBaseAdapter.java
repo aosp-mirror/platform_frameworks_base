@@ -19,7 +19,11 @@ package com.android.systemui.media.dialog;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +39,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -47,6 +52,7 @@ public abstract class MediaOutputBaseAdapter extends
 
     static final int CUSTOMIZED_ITEM_PAIR_NEW = 1;
     static final int CUSTOMIZED_ITEM_GROUP = 2;
+    static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
     final MediaOutputController mController;
 
@@ -223,6 +229,34 @@ public abstract class MediaOutputBaseAdapter extends
             });
         }
 
+        void initSessionSeekbar() {
+            mSeekBar.setMax(mController.getSessionVolumeMax());
+            mSeekBar.setMin(0);
+            final int currentVolume = mController.getSessionVolume();
+            if (mSeekBar.getProgress() != currentVolume) {
+                mSeekBar.setProgress(currentVolume);
+            }
+            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) {
+                        return;
+                    }
+                    mController.adjustSessionVolume(progress);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    mIsDragging = true;
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    mIsDragging = false;
+                }
+            });
+        }
+
         void playSwitchingAnim(@NonNull View from, @NonNull View to) {
             final float delta = (float) (mContext.getResources().getDimensionPixelSize(
                     R.dimen.media_output_dialog_title_anim_y_delta));
@@ -273,6 +307,16 @@ public abstract class MediaOutputBaseAdapter extends
                                     });
                         }
                     });
+        }
+
+        Drawable getSpeakerDrawable() {
+            final Drawable drawable = mContext.getDrawable(R.drawable.ic_speaker_group_black_24dp)
+                    .mutate();
+            final ColorStateList list = mContext.getResources().getColorStateList(
+                    R.color.advanced_icon_color, mContext.getTheme());
+            drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
+                    PorterDuff.Mode.SRC_IN));
+            return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
         }
     }
 }
