@@ -16,6 +16,11 @@
 
 package android.util;
 
+import android.annotation.NonNull;
+
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
+
 import libcore.util.XmlObjectFactory;
 
 import org.xml.sax.ContentHandler;
@@ -26,11 +31,15 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * XML utility methods.
@@ -99,10 +108,84 @@ public class Xml {
     }
 
     /**
+     * Creates a new {@link TypedXmlPullParser} which is optimized for use
+     * inside the system, typically by supporting only a basic set of features.
+     * <p>
+     * In particular, the returned parser does not support namespaces, prefixes,
+     * properties, or options.
+     *
+     * @hide
+     */
+    public static @NonNull TypedXmlPullParser newFastPullParser() {
+        return XmlUtils.makeTyped(newPullParser());
+    }
+
+    /**
+     * Creates a new {@link XmlPullParser} which is optimized for use inside the
+     * system, typically by supporting only a basic set of features.
+     * <p>
+     * This returned instance may be configured to read using an efficient
+     * binary format instead of a human-readable text format, depending on
+     * device feature flags.
+     * <p>
+     * To ensure that both formats are detected and transparently handled
+     * correctly, you must shift to using both {@link #resolveSerializer} and
+     * {@link #resolvePullParser}.
+     *
+     * @hide
+     */
+    public static @NonNull TypedXmlPullParser resolvePullParser(@NonNull InputStream in)
+            throws IOException {
+        // TODO: add support for binary format
+        final TypedXmlPullParser xml = newFastPullParser();
+        try {
+            xml.setInput(in, StandardCharsets.UTF_8.name());
+        } catch (XmlPullParserException e) {
+            throw new IOException(e);
+        }
+        return xml;
+    }
+
+    /**
      * Creates a new xml serializer.
      */
     public static XmlSerializer newSerializer() {
         return XmlObjectFactory.newXmlSerializer();
+    }
+
+    /**
+     * Creates a new {@link XmlSerializer} which is optimized for use inside the
+     * system, typically by supporting only a basic set of features.
+     * <p>
+     * In particular, the returned parser does not support namespaces, prefixes,
+     * properties, or options.
+     *
+     * @hide
+     */
+    public static @NonNull TypedXmlSerializer newFastSerializer() {
+        return XmlUtils.makeTyped(new FastXmlSerializer());
+    }
+
+    /**
+     * Creates a new {@link XmlSerializer} which is optimized for use inside the
+     * system, typically by supporting only a basic set of features.
+     * <p>
+     * This returned instance may be configured to write using an efficient
+     * binary format instead of a human-readable text format, depending on
+     * device feature flags.
+     * <p>
+     * To ensure that both formats are detected and transparently handled
+     * correctly, you must shift to using both {@link #resolveSerializer} and
+     * {@link #resolvePullParser}.
+     *
+     * @hide
+     */
+    public static @NonNull TypedXmlSerializer resolveSerializer(@NonNull OutputStream out)
+            throws IOException {
+        // TODO: add support for binary format
+        final TypedXmlSerializer xml = newFastSerializer();
+        xml.setOutput(out, StandardCharsets.UTF_8.name());
+        return xml;
     }
 
     /**

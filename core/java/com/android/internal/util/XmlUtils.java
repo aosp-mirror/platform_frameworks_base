@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -24,6 +25,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Base64;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import libcore.util.HexEncoding;
@@ -48,8 +51,192 @@ import java.util.Set;
 
 /** {@hide} */
 public class XmlUtils {
-
     private static final String STRING_ARRAY_SEPARATOR = ":";
+
+    private static class ForcedTypedXmlSerializer extends XmlSerializerWrapper
+            implements TypedXmlSerializer {
+        public ForcedTypedXmlSerializer(XmlSerializer wrapped) {
+            super(wrapped);
+        }
+
+        @Override
+        public XmlSerializer attributeInterned(String namespace, String name, String value)
+                throws IOException {
+            return attribute(namespace, name, value);
+        }
+
+        @Override
+        public XmlSerializer attributeBytesHex(String namespace, String name, byte[] value)
+                throws IOException {
+            return attribute(namespace, name, HexDump.toHexString(value));
+        }
+
+        @Override
+        public XmlSerializer attributeBytesBase64(String namespace, String name, byte[] value)
+                throws IOException {
+            return attribute(namespace, name, Base64.encodeToString(value, Base64.NO_WRAP));
+        }
+
+        @Override
+        public XmlSerializer attributeInt(String namespace, String name, int value)
+                throws IOException {
+            return attribute(namespace, name, Integer.toString(value));
+        }
+
+        @Override
+        public XmlSerializer attributeIntHex(String namespace, String name, int value)
+                throws IOException {
+            return attribute(namespace, name, Integer.toString(value, 16));
+        }
+
+        @Override
+        public XmlSerializer attributeLong(String namespace, String name, long value)
+                throws IOException {
+            return attribute(namespace, name, Long.toString(value));
+        }
+
+        @Override
+        public XmlSerializer attributeLongHex(String namespace, String name, long value)
+                throws IOException {
+            return attribute(namespace, name, Long.toString(value, 16));
+        }
+
+        @Override
+        public XmlSerializer attributeFloat(String namespace, String name, float value)
+                throws IOException {
+            return attribute(namespace, name, Float.toString(value));
+        }
+
+        @Override
+        public XmlSerializer attributeDouble(String namespace, String name, double value)
+                throws IOException {
+            return attribute(namespace, name, Double.toString(value));
+        }
+
+        @Override
+        public XmlSerializer attributeBoolean(String namespace, String name, boolean value)
+                throws IOException {
+            return attribute(namespace, name, Boolean.toString(value));
+        }
+    }
+
+    /**
+     * Return a specialization of the given {@link XmlSerializer} which has
+     * explicit methods to support consistent and efficient conversion of
+     * primitive data types.
+     */
+    public static @NonNull TypedXmlSerializer makeTyped(@NonNull XmlSerializer xml) {
+        if (xml instanceof TypedXmlSerializer) {
+            return (TypedXmlSerializer) xml;
+        } else {
+            return new ForcedTypedXmlSerializer(xml);
+        }
+    }
+
+    private static class ForcedTypedXmlPullParser extends XmlPullParserWrapper
+            implements TypedXmlPullParser {
+        public ForcedTypedXmlPullParser(XmlPullParser wrapped) {
+            super(wrapped);
+        }
+
+        @Override
+        public byte[] getAttributeBytesHex(String namespace, String name) throws IOException {
+            try {
+                return HexDump.hexStringToByteArray(getAttributeValue(namespace, name));
+            } catch (Exception e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public byte[] getAttributeBytesBase64(String namespace, String name) throws IOException {
+            try {
+                return Base64.decode(getAttributeValue(namespace, name), Base64.NO_WRAP);
+            } catch (Exception e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public int getAttributeInt(String namespace, String name) throws IOException {
+            try {
+                return Integer.parseInt(getAttributeValue(namespace, name));
+            } catch (NumberFormatException e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public int getAttributeIntHex(String namespace, String name) throws IOException {
+            try {
+                return Integer.parseInt(getAttributeValue(namespace, name), 16);
+            } catch (NumberFormatException e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public long getAttributeLong(String namespace, String name) throws IOException {
+            try {
+                return Long.parseLong(getAttributeValue(namespace, name));
+            } catch (NumberFormatException e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public long getAttributeLongHex(String namespace, String name) throws IOException {
+            try {
+                return Long.parseLong(getAttributeValue(namespace, name), 16);
+            } catch (NumberFormatException e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public float getAttributeFloat(String namespace, String name) throws IOException {
+            try {
+                return Float.parseFloat(getAttributeValue(namespace, name));
+            } catch (NumberFormatException e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public double getAttributeDouble(String namespace, String name) throws IOException {
+            try {
+                return Double.parseDouble(getAttributeValue(namespace, name));
+            } catch (NumberFormatException e) {
+                throw new IOException("Invalid attribute " + name, e);
+            }
+        }
+
+        @Override
+        public boolean getAttributeBoolean(String namespace, String name) throws IOException {
+            final String value = getAttributeValue(namespace, name);
+            if ("true".equalsIgnoreCase(value)) {
+                return true;
+            } else if ("false".equalsIgnoreCase(value)) {
+                return false;
+            } else {
+                throw new IOException("Invalid attribute " + name,
+                        new IllegalArgumentException("For input string: \"" + value + "\""));
+            }
+        }
+    }
+
+    /**
+     * Return a specialization of the given {@link XmlPullParser} which has
+     * explicit methods to support consistent and efficient conversion of
+     * primitive data types.
+     */
+    public static @NonNull TypedXmlPullParser makeTyped(@NonNull XmlPullParser xml) {
+        if (xml instanceof TypedXmlPullParser) {
+            return (TypedXmlPullParser) xml;
+        } else {
+            return new ForcedTypedXmlPullParser(xml);
+        }
+    }
 
     @UnsupportedAppUsage
     public static void skipCurrentTag(XmlPullParser parser)
