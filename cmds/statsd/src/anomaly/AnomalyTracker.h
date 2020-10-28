@@ -16,15 +16,15 @@
 
 #pragma once
 
-#include <stdlib.h>
-
 #include <gtest/gtest_prod.h>
+#include <stdlib.h>
 #include <utils/RefBase.h>
 
 #include "AlarmMonitor.h"
 #include "config/ConfigKey.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"    // Alert
 #include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"  // AlertMetadata
+#include "hash.h"
 #include "stats_util.h"  // HashableDimensionKey and DimToValMap
 
 namespace android {
@@ -40,6 +40,9 @@ public:
     AnomalyTracker(const Alert& alert, const ConfigKey& configKey);
 
     virtual ~AnomalyTracker();
+
+    // Reset appropriate state on a config update. Clear subscriptions so they can be reset.
+    void onConfigUpdated();
 
     // Add subscriptions that depend on this alert.
     void addSubscription(const Subscription& subscription) {
@@ -104,6 +107,26 @@ public:
     // Returns the (constant) number of past buckets this anomaly tracker can store.
     inline int getNumOfPastBuckets() const {
         return mNumOfPastBuckets;
+    }
+
+    std::pair<bool, uint64_t> getProtoHash() const;
+
+    // Sets an alarm for the given timestamp.
+    // Replaces previous alarm if one already exists.
+    virtual void startAlarm(const MetricDimensionKey& dimensionKey, const int64_t& eventTime) {
+        return;  // The base AnomalyTracker class doesn't have alarms.
+    }
+
+    // Stops the alarm.
+    // If it should have already fired, but hasn't yet (e.g. because the AlarmManager is delayed),
+    // declare the anomaly now.
+    virtual void stopAlarm(const MetricDimensionKey& dimensionKey, const int64_t& timestampNs) {
+        return;  // The base AnomalyTracker class doesn't have alarms.
+    }
+
+    // Stop all the alarms owned by this tracker. Does not declare any anomalies.
+    virtual void cancelAllAlarms() {
+        return;  // The base AnomalyTracker class doesn't have alarms.
     }
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this AnomalyTracker,
@@ -197,6 +220,8 @@ protected:
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
+
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateAlerts);
 };
 
 }  // namespace statsd

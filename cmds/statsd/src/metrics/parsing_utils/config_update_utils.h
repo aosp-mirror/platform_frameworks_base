@@ -189,6 +189,45 @@ bool updateMetrics(
         std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
         std::vector<int>& metricsWithActivation, std::set<int64_t>& replacedMetrics);
 
+// Function to determine the update status (preserve/replace/new) of an alert.
+// [alert]: the input Alert
+// [oldAlertTrackerMap]: alert id to index mapping in the existing MetricsManager
+// [oldAnomalyTrackers]: stores the existing AnomalyTrackers
+// [replacedMetrics]: set of replaced metric ids. alerts using these metrics must be replaced
+// output:
+// [updateStatus]: update status of the alert. Will be changed from UPDATE_UNKNOWN
+// Returns whether the function was successful or not.
+bool determineAlertUpdateStatus(const Alert& alert,
+                                const std::unordered_map<int64_t, int>& oldAlertTrackerMap,
+                                const std::vector<sp<AnomalyTracker>>& oldAnomalyTrackers,
+                                const std::set<int64_t>& replacedMetrics,
+                                UpdateStatus& updateStatus);
+
+// Update MetricProducers.
+// input:
+// [config]: the input config
+// [metricProducerMap]: metric id to index mapping in the new config
+// [replacedMetrics]: set of metric ids that have changed and were replaced
+// [oldAlertTrackerMap]: alert id to index mapping in the existing MetricsManager.
+// [oldAnomalyTrackers]: stores the existing AnomalyTrackers
+// [anomalyAlarmMonitor]: AlarmMonitor used for duration metric anomaly detection
+// [allMetricProducers]: stores the sp of the metric producers, AnomalyTrackers need to be added.
+// [stateAtomIdMap]: contains the mapping from state ids to atom ids
+// [allStateGroupMaps]: contains the mapping from atom ids and state values to
+//                      state group ids for all states
+// output:
+// [newAlertTrackerMap]: mapping of alert id to index in the new config
+// [newAnomalyTrackers]: contains the list of sp to the AnomalyTrackers created.
+bool updateAlerts(const StatsdConfig& config,
+                  const std::unordered_map<int64_t, int>& metricProducerMap,
+                  const std::set<int64_t>& replacedMetrics,
+                  const std::unordered_map<int64_t, int>& oldAlertTrackerMap,
+                  const std::vector<sp<AnomalyTracker>>& oldAnomalyTrackers,
+                  const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                  std::vector<sp<MetricProducer>>& allMetricProducers,
+                  std::unordered_map<int64_t, int>& newAlertTrackerMap,
+                  std::vector<sp<AnomalyTracker>>& newAnomalyTrackers);
+
 // Updates the existing MetricsManager from a new StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
 bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp<UidMap>& uidMap,
@@ -202,6 +241,8 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         const std::unordered_map<int64_t, int>& oldConditionTrackerMap,
                         const std::vector<sp<MetricProducer>>& oldMetricProducers,
                         const std::unordered_map<int64_t, int>& oldMetricProducerMap,
+                        const std::vector<sp<AnomalyTracker>>& oldAnomalyTrackers,
+                        const std::unordered_map<int64_t, int>& oldAlertTrackerMap,
                         const std::map<int64_t, uint64_t>& oldStateProtoHashes,
                         std::set<int>& allTagIds,
                         std::vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
@@ -210,6 +251,8 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         std::unordered_map<int64_t, int>& newConditionTrackerMap,
                         std::vector<sp<MetricProducer>>& newMetricProducers,
                         std::unordered_map<int64_t, int>& newMetricProducerMap,
+                        std::vector<sp<AnomalyTracker>>& newAlertTrackers,
+                        std::unordered_map<int64_t, int>& newAlertTrackerMap,
                         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                         std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                         std::unordered_map<int, std::vector<int>>& trackerToConditionMap,

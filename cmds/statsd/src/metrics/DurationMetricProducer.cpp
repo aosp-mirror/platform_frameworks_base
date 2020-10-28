@@ -234,14 +234,26 @@ sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(
             return nullptr;
         }
     }
-    sp<DurationAnomalyTracker> anomalyTracker =
-        new DurationAnomalyTracker(alert, mConfigKey, anomalyAlarmMonitor);
-    if (anomalyTracker != nullptr) {
-        mAnomalyTrackers.push_back(anomalyTracker);
-    }
+    sp<AnomalyTracker> anomalyTracker =
+            new DurationAnomalyTracker(alert, mConfigKey, anomalyAlarmMonitor);
+    addAnomalyTrackerLocked(anomalyTracker);
     return anomalyTracker;
 }
 
+// Adds an AnomalyTracker that has already been created.
+// Note: this gets called on config updates, and will only get called if the metric and the
+// associated alert are preserved, which means the AnomalyTracker must be a DurationAnomalyTracker.
+void DurationMetricProducer::addAnomalyTracker(sp<AnomalyTracker>& anomalyTracker) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    addAnomalyTrackerLocked(anomalyTracker);
+}
+
+void DurationMetricProducer::addAnomalyTrackerLocked(sp<AnomalyTracker>& anomalyTracker) {
+    mAnomalyTrackers.push_back(anomalyTracker);
+    for (const auto& [_, durationTracker] : mCurrentSlicedDurationTrackerMap) {
+        durationTracker->addAnomalyTracker(anomalyTracker);
+    }
+}
 void DurationMetricProducer::onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
                                             const HashableDimensionKey& primaryKey,
                                             const FieldValue& oldState,

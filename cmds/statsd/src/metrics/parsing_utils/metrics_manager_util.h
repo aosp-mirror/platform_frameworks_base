@@ -188,6 +188,41 @@ optional<sp<MetricProducer>> createGaugeMetricProducerAndUpdateMetadata(
         std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
         std::vector<int>& metricsWithActivation);
 
+// Creates an AnomalyTracker and adds it to the appropriate metric.
+// Returns an sp to the AnomalyTracker, or nullopt if there was an error.
+optional<sp<AnomalyTracker>> createAnomalyTracker(
+        const Alert& alert, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+        const std::unordered_map<int64_t, int>& metricProducerMap,
+        std::vector<sp<MetricProducer>>& allMetricProducers);
+
+// Templated function for adding subscriptions to alarms or alerts. Returns true if successful.
+template <typename T>
+bool initSubscribersForSubscriptionType(const StatsdConfig& config,
+                                        const Subscription_RuleType ruleType,
+                                        const std::unordered_map<int64_t, int>& ruleMap,
+                                        std::vector<T>& allRules) {
+    for (int i = 0; i < config.subscription_size(); ++i) {
+        const Subscription& subscription = config.subscription(i);
+        if (subscription.rule_type() != ruleType) {
+            continue;
+        }
+        if (subscription.subscriber_information_case() ==
+            Subscription::SubscriberInformationCase::SUBSCRIBER_INFORMATION_NOT_SET) {
+            ALOGW("subscription \"%lld\" has no subscriber info.\"", (long long)subscription.id());
+            return false;
+        }
+        const auto& itr = ruleMap.find(subscription.rule_id());
+        if (itr == ruleMap.end()) {
+            ALOGW("subscription \"%lld\" has unknown rule id: \"%lld\"",
+                  (long long)subscription.id(), (long long)subscription.rule_id());
+            return false;
+        }
+        const int ruleIndex = itr->second;
+        allRules[ruleIndex]->addSubscription(subscription);
+    }
+    return true;
+}
+
 // Helper functions for MetricsManager to initialize from StatsdConfig.
 // *Note*: only initStatsdConfig() should be called from outside.
 // All other functions are intermediate
