@@ -351,10 +351,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (mDefaultModeId == NO_DISPLAY_MODE_ID) {
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultConfigGroup = configs[activeConfigId].configGroup;
-            } else if (modesAdded && mActiveModeId != activeRecord.mMode.getModeId()) {
+            } else if (modesAdded && activeModeChanged) {
                 Slog.d(TAG, "New display modes are added and the active mode has changed, "
                         + "use active mode as default mode.");
-                mActiveModeId = activeRecord.mMode.getModeId();
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultConfigGroup = configs[activeConfigId].configGroup;
             } else if (findDisplayConfigIdLocked(mDefaultModeId, mDefaultConfigGroup) < 0) {
