@@ -241,6 +241,7 @@ public class TaskInfo {
 
     /** @hide */
     public void addLaunchCookie(IBinder cookie) {
+        if (cookie == null || launchCookies.contains(cookie)) return;
         launchCookies.add(cookie);
     }
 

@@ -794,5 +794,7 @@ interface IPackageManager {
 
     void grantImplicitAccess(int queryingUid, String visibleAuthority);
 
-    void holdLock(in int durationMs);
+    IBinder getHoldLockToken();
+
+    void holdLock(in IBinder token, in int durationMs);
 }

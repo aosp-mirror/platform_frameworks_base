@@ -1195,7 +1195,12 @@ class ActivityStarter {
             }
         }
 
-        mService.onStartActivitySetDidAppSwitch();
+        // Only allow app switching to be resumed if activity is not a restricted background
+        // activity, otherwise any background activity started in background task can stop
+        // home button protection mode.
+        if (!restrictedBgActivity) {
+            mService.onStartActivitySetDidAppSwitch();
+        }
         mController.doPendingActivityLaunches(false);
 
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
@@ -1260,6 +1265,20 @@ class ActivityStarter {
             return false;
         }
 
+        // Always allow home application to start activities.
+        if (mService.mHomeProcess != null && callingUid == mService.mHomeProcess.mUid) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Activity start allowed for home app callingUid (" + callingUid + ")");
+            }
+            return false;
+        }
+
+        // App switching will be allowed if BAL app switching flag is not enabled, or if
+        // its app switching rule allows it.
+        // This is used to block background activity launch even if the app is still
+        // visible to user after user clicking home button.
+        final boolean appSwitchAllowed = mService.getBalAppSwitchesAllowed();
+
         // don't abort if the callingUid has a visible window or is a persistent system process
         final int callingUidProcState = mService.getUidState(callingUid);
         final boolean callingUidHasAnyVisibleWindow =
@@ -1269,7 +1288,8 @@ class ActivityStarter {
                 || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess =
                 callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
-        if (callingUidHasAnyVisibleWindow || isCallingUidPersistentSystemProcess) {
+        if ((appSwitchAllowed && callingUidHasAnyVisibleWindow)
+                || isCallingUidPersistentSystemProcess) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "Activity start allowed: callingUidHasAnyVisibleWindow = " + callingUid
                         + ", isCallingUidPersistentSystemProcess = "
@@ -1295,6 +1315,7 @@ class ActivityStarter {
                         || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (realCallingUid != callingUid) {
             // don't abort if the realCallingUid has a visible window
+            // TODO(b/171459802): We should check appSwitchAllowed also
             if (realCallingUidHasAnyVisibleWindow) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
@@ -1376,7 +1397,7 @@ class ActivityStarter {
         // don't abort if the callerApp or other processes of that uid are allowed in any way
         if (callerApp != null) {
             // first check the original calling process
-            if (callerApp.areBackgroundActivityStartsAllowed()) {
+            if (callerApp.areBackgroundActivityStartsAllowed(appSwitchAllowed)) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Background activity start allowed: callerApp process (pid = "
                             + callerApp.getPid() + ", uid = " + callerAppUid + ") is allowed");
@@ -1389,7 +1410,8 @@ class ActivityStarter {
             if (uidProcesses != null) {
                 for (int i = uidProcesses.size() - 1; i >= 0; i--) {
                     final WindowProcessController proc = uidProcesses.valueAt(i);
-                    if (proc != callerApp && proc.areBackgroundActivityStartsAllowed()) {
+                    if (proc != callerApp
+                            && proc.areBackgroundActivityStartsAllowed(appSwitchAllowed)) {
                         if (DEBUG_ACTIVITY_STARTS) {
                             Slog.d(TAG,
                                     "Background activity start allowed: process " + proc.getPid()
@@ -2546,6 +2568,10 @@ class ActivityStarter {
 
     private void resumeTargetStackIfNeeded() {
         if (mDoResume) {
+            final ActivityRecord next = mTargetStack.topRunningActivity(true /* focusableOnly */);
+            if (next != null) {
+                next.setCurrentLaunchCanTurnScreenOn(true);
+            }
             mRootWindowContainer.resumeFocusedStacksTopActivities(mTargetStack, null, mOptions);
         } else {
             ActivityOptions.abort(mOptions);

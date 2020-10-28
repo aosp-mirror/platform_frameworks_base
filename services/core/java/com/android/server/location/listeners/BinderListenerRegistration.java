@@ -23,8 +23,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
-
 /**
  * A registration that works with IBinder keys, and registers a DeathListener to automatically
  * remove the registration if the binder dies. The key for this registration must either be an
@@ -34,7 +32,7 @@ import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
  * @param <TListener> listener type
  */
 public abstract class BinderListenerRegistration<TRequest, TListener> extends
-        RemoteListenerRegistration<TRequest, TListener, ListenerOperation<TListener>> implements
+        RemoteListenerRegistration<TRequest, TListener> implements
         Binder.DeathRecipient {
 
     /**

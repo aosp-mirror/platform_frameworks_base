@@ -539,6 +539,8 @@ InternalField: android.telephony.ims.ImsConferenceState#mParticipants:
 
 KotlinOperator: android.os.WorkSource#get(int):
     
+KotlinOperator: android.util.SparseArrayMap#get(int, K):
+    
 KotlinOperator: android.util.SparseArrayMap#get(int, String):
     
 
@@ -594,17 +596,17 @@ MinMaxConstant: android.view.autofill.AutofillManager#MAX_TEMP_AUGMENTED_SERVICE
 
 
 MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setAttributeSet(android.util.AttributeSet):
-    android.app.ActivityView does not declare a `getAttributeSet()` method matching method android.app.ActivityView.Builder.setAttributeSet(android.util.AttributeSet)
+    
 MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setDefaultStyle(int):
-    android.app.ActivityView does not declare a `getDefaultStyle()` method matching method android.app.ActivityView.Builder.setDefaultStyle(int)
+    
 MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setDisableSurfaceViewBackgroundLayer(boolean):
-    android.app.ActivityView does not declare a `isDisableSurfaceViewBackgroundLayer()` method matching method android.app.ActivityView.Builder.setDisableSurfaceViewBackgroundLayer(boolean)
+    
 MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setSingleInstance(boolean):
-    android.app.ActivityView does not declare a `isSingleInstance()` method matching method android.app.ActivityView.Builder.setSingleInstance(boolean)
+    
 MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setUsePublicVirtualDisplay(boolean):
-    android.app.ActivityView does not declare a `isUsePublicVirtualDisplay()` method matching method android.app.ActivityView.Builder.setUsePublicVirtualDisplay(boolean)
+    
 MissingGetterMatchingBuilder: android.app.ActivityView.Builder#setUseTrustedDisplay(boolean):
-    android.app.ActivityView does not declare a `isUseTrustedDisplay()` method matching method android.app.ActivityView.Builder.setUseTrustedDisplay(boolean)
+    
 MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setAttributionTag(String):
     
 MissingGetterMatchingBuilder: android.app.AppOpsManager.HistoricalOpsRequest.Builder#setFlags(int):
@@ -750,6 +752,8 @@ MissingNullability: android.app.ActivityManager#alwaysShowUnsupportedCompileSdkW
 MissingNullability: android.app.ActivityManager#forceStopPackage(String) parameter #0:
     
 MissingNullability: android.app.ActivityManager#getPackageImportance(String) parameter #0:
+    
+MissingNullability: android.app.ActivityManager#holdLock(android.os.IBinder, int) parameter #0:
     
 MissingNullability: android.app.ActivityManager#removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener) parameter #0:
     
@@ -935,7 +939,11 @@ MissingNullability: android.content.pm.LauncherApps#LauncherApps(android.content
     
 MissingNullability: android.content.pm.PackageInstaller.SessionParams#setGrantedRuntimePermissions(String[]) parameter #0:
     
+MissingNullability: android.content.pm.PackageManager#getHoldLockToken():
+    Missing nullability on method `BINDER` return
 MissingNullability: android.content.pm.PackageManager#getNamesForUids(int[]) parameter #0:
+    
+MissingNullability: android.content.pm.PackageManager#holdLock(android.os.IBinder, int) parameter #0:
     
 MissingNullability: android.content.pm.ShortcutManager#ShortcutManager(android.content.Context) parameter #0:
     
@@ -2313,6 +2321,8 @@ MissingNullability: android.view.ViewDebug#startRenderingCommandsCapture(android
     
 MissingNullability: android.view.ViewDebug#startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.function.Function<android.graphics.Picture,java.lang.Boolean>) parameter #2:
     
+MissingNullability: android.view.WindowManager#holdLock(android.os.IBinder, int) parameter #0:
+    
 MissingNullability: android.view.WindowManager.LayoutParams#accessibilityTitle:
     
 MissingNullability: android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener#onAccessibilityServicesStateChanged(android.view.accessibility.AccessibilityManager) parameter #0:
@@ -2891,6 +2901,10 @@ SetterReturnsThis: android.media.audiopolicy.AudioPolicy.Builder#setAudioPolicyF
     
 SetterReturnsThis: android.media.audiopolicy.AudioPolicy.Builder#setAudioPolicyStatusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyStatusListener):
     
+
+
+StartWithLower: android.content.pm.PackageManager#BINDER():
+    Method name must start with lowercase char: BINDER
 
 
 StaticFinalBuilder: android.content.integrity.RuleSet.Builder:

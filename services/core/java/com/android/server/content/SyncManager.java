@@ -210,7 +210,7 @@ public class SyncManager {
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
 
-    private static final boolean USE_WTF_FOR_ACCOUNT_ERROR = false;
+    private static final boolean USE_WTF_FOR_ACCOUNT_ERROR = true;
 
     private static final int SYNC_OP_STATE_VALID = 0;
     // "1" used to include errors 3, 4 and 5 but now it's split up.
@@ -231,7 +231,7 @@ public class SyncManager {
 
     private static final AccountAndUser[] INITIAL_ACCOUNTS_ARRAY = new AccountAndUser[0];
 
-    // TODO: add better locking around mRunningAccounts
+    private final Object mAccountsLock = new Object();
     private volatile AccountAndUser[] mRunningAccounts = INITIAL_ACCOUNTS_ARRAY;
 
     volatile private PowerManager.WakeLock mSyncManagerWakeLock;
@@ -933,19 +933,21 @@ public class SyncManager {
         }
 
         AccountAndUser[] accounts = null;
-        if (requestedAccount != null) {
-            if (userId != UserHandle.USER_ALL) {
-                accounts = new AccountAndUser[]{new AccountAndUser(requestedAccount, userId)};
-            } else {
-                for (AccountAndUser runningAccount : mRunningAccounts) {
-                    if (requestedAccount.equals(runningAccount.account)) {
-                        accounts = ArrayUtils.appendElement(AccountAndUser.class,
-                                accounts, runningAccount);
+        synchronized (mAccountsLock) {
+            if (requestedAccount != null) {
+                if (userId != UserHandle.USER_ALL) {
+                    accounts = new AccountAndUser[]{new AccountAndUser(requestedAccount, userId)};
+                } else {
+                    for (AccountAndUser runningAccount : mRunningAccounts) {
+                        if (requestedAccount.equals(runningAccount.account)) {
+                            accounts = ArrayUtils.appendElement(AccountAndUser.class,
+                                    accounts, runningAccount);
+                        }
                     }
                 }
+            } else {
+                accounts = mRunningAccounts;
             }
-        } else {
-            accounts = mRunningAccounts;
         }
 
         if (ArrayUtils.isEmpty(accounts)) {
@@ -3228,40 +3230,43 @@ public class SyncManager {
         }
 
         private void updateRunningAccountsH(EndPoint syncTargets) {
-            AccountAndUser[] oldAccounts = mRunningAccounts;
-            mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Slog.v(TAG, "Accounts list: ");
-                for (AccountAndUser acc : mRunningAccounts) {
-                    Slog.v(TAG, acc.toString());
+            synchronized (mAccountsLock) {
+                AccountAndUser[] oldAccounts = mRunningAccounts;
+                mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Slog.v(TAG, "Accounts list: ");
+                    for (AccountAndUser acc : mRunningAccounts) {
+                        Slog.v(TAG, acc.toString());
+                    }
                 }
-            }
-            if (mLogger.enabled()) {
-                mLogger.log("updateRunningAccountsH: ", Arrays.toString(mRunningAccounts));
-            }
-            removeStaleAccounts();
-
-            AccountAndUser[] accounts = mRunningAccounts;
-            for (ActiveSyncContext currentSyncContext : mActiveSyncContexts) {
-                if (!containsAccountAndUser(accounts,
-                        currentSyncContext.mSyncOperation.target.account,
-                        currentSyncContext.mSyncOperation.target.userId)) {
-                    Log.d(TAG, "canceling sync since the account is no longer running");
-                    sendSyncFinishedOrCanceledMessage(currentSyncContext,
-                            null /* no result since this is a cancel */);
+                if (mLogger.enabled()) {
+                    mLogger.log("updateRunningAccountsH: ", Arrays.toString(mRunningAccounts));
                 }
-            }
+                removeStaleAccounts();
 
-            if (syncTargets != null) {
-                // On account add, check if there are any settings to be restored.
-                for (AccountAndUser aau : mRunningAccounts) {
-                    if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
-                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "Account " + aau.account
-                                    + " added, checking sync restore data");
+                AccountAndUser[] accounts = mRunningAccounts;
+                for (ActiveSyncContext currentSyncContext : mActiveSyncContexts) {
+                    if (!containsAccountAndUser(accounts,
+                            currentSyncContext.mSyncOperation.target.account,
+                            currentSyncContext.mSyncOperation.target.userId)) {
+                        Log.d(TAG, "canceling sync since the account is no longer running");
+                        sendSyncFinishedOrCanceledMessage(currentSyncContext,
+                                null /* no result since this is a cancel */);
+                    }
+                }
+
+                if (syncTargets != null) {
+                    // On account add, check if there are any settings to be restored.
+                    for (AccountAndUser aau : mRunningAccounts) {
+                        if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "Account " + aau.account
+                                        + " added, checking sync restore data");
+                            }
+                            AccountSyncSettingsBackupHelper.accountAdded(mContext,
+                                    syncTargets.userId);
+                            break;
                         }
-                        AccountSyncSettingsBackupHelper.accountAdded(mContext, syncTargets.userId);
-                        break;
                     }
                 }
             }
@@ -3442,13 +3447,15 @@ public class SyncManager {
             final EndPoint target = op.target;
 
             // Drop the sync if the account of this operation no longer exists.
-            AccountAndUser[] accounts = mRunningAccounts;
-            if (!containsAccountAndUser(accounts, target.account, target.userId)) {
-                if (isLoggable) {
-                    Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
+            synchronized (mAccountsLock) {
+                AccountAndUser[] accounts = mRunningAccounts;
+                if (!containsAccountAndUser(accounts, target.account, target.userId)) {
+                    if (isLoggable) {
+                        Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
+                    }
+                    logAccountError("SYNC_OP_STATE_INVALID: account doesn't exist.");
+                    return SYNC_OP_STATE_INVALID_NO_ACCOUNT;
                 }
-                logAccountError("SYNC_OP_STATE_INVALID: account doesn't exist.");
-                return SYNC_OP_STATE_INVALID_NO_ACCOUNT;
             }
             // Drop this sync request if it isn't syncable.
             state = computeSyncable(target.account, target.userId, target.provider, true);

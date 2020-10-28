@@ -545,14 +545,14 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     /**
      * Adds a {@link Listener} to PipController.
      */
-    public void addListener(Listener listener) {
+    void addListener(Listener listener) {
         mListeners.add(listener);
     }
 
     /**
      * Removes a {@link Listener} from PipController.
      */
-    public void removeListener(Listener listener) {
+    void removeListener(Listener listener) {
         mListeners.remove(listener);
     }
 
@@ -641,7 +641,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     /**
      * Gets the {@link android.media.session.MediaController} for the PIPed activity.
      */
-    public MediaController getMediaController() {
+    MediaController getMediaController() {
         return mPipMediaController;
     }
 
@@ -655,7 +655,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
      * This returns one of {@link #PLAYBACK_STATE_PLAYING}, {@link #PLAYBACK_STATE_PAUSED},
      * or {@link #PLAYBACK_STATE_UNAVAILABLE}.
      */
-    public int getPlaybackState() {
+    int getPlaybackState() {
         if (mPipMediaController == null || mPipMediaController.getPlaybackState() == null) {
             return PLAYBACK_STATE_UNAVAILABLE;
         }

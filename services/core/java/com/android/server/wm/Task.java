@@ -795,6 +795,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean mTaskAppearedSent;
 
+    // If the sending of the task appear signal should be deferred until this flag is set back to
+    // false.
+    private boolean mDeferTaskAppear;
+
     /**
      * This task was created by the task organizer which has the following implementations.
      * <ul>
@@ -807,14 +811,20 @@ class Task extends WindowContainer<WindowContainer> {
     @VisibleForTesting
     boolean mCreatedByOrganizer;
 
+    // Tracking cookie for the creation of this task.
+    IBinder mLaunchCookie;
+
     /**
      * Don't use constructor directly. Use {@link TaskDisplayArea#createStackUnchecked()} instead.
      */
-    Task(ActivityTaskManagerService atmService, int id, int activityType,
-            ActivityInfo info, Intent intent, boolean createdByOrganizer) {
+    Task(ActivityTaskManagerService atmService, int id, int activityType, ActivityInfo info,
+            Intent intent, boolean createdByOrganizer, boolean deferTaskAppear,
+            IBinder launchCookie) {
         this(atmService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 null /*taskDescription*/, null /*stack*/);
         mCreatedByOrganizer = createdByOrganizer;
+        mLaunchCookie = launchCookie;
+        mDeferTaskAppear = deferTaskAppear;
         setActivityType(activityType);
     }
 
@@ -2826,13 +2836,22 @@ class Task extends WindowContainer<WindowContainer> {
 
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+        final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
 
         // Resolve override windowing mode to fullscreen for home task (even on freeform
         // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
-            final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
             windowingMode = WindowConfiguration.isSplitScreenWindowingMode(parentWindowingMode)
                     ? parentWindowingMode : WINDOWING_MODE_FULLSCREEN;
+            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+        }
+
+        // Do not allow non-resizable non-pinned tasks to be in a multi-window mode - they should
+        // use their parent's windowing mode, or fullscreen.
+        if (!isResizeable() && windowingMode != WINDOWING_MODE_PINNED
+                && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+            windowingMode = WindowConfiguration.inMultiWindowMode(parentWindowingMode)
+                    ? WINDOWING_MODE_FULLSCREEN : parentWindowingMode;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
@@ -3352,7 +3371,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     boolean isResizeable(boolean checkSupportsPip) {
-        return (mAtmService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+        final boolean forceResizable = mAtmService.mForceResizableActivities
+                && getActivityType() == ACTIVITY_TYPE_STANDARD;
+        return (forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
                 || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
@@ -4088,6 +4109,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
             info.addLaunchCookie(r.mLaunchCookie);
         });
@@ -4857,6 +4879,13 @@ class Task extends WindowContainer<WindowContainer> {
         return mHasBeenVisible;
     }
 
+    void setDeferTaskAppear(boolean deferTaskAppear) {
+        mDeferTaskAppear = deferTaskAppear;
+        if (!mDeferTaskAppear) {
+            sendTaskAppeared();
+        }
+    }
+
     /** In the case that these conditions are true, we want to send the Task to the organizer:
      *     1. An organizer has been set
      *     2. The Task was created by the organizer
@@ -4868,6 +4897,10 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean taskAppearedReady() {
         if (mTaskOrganizer == null) {
+            return false;
+        }
+
+        if (mDeferTaskAppear) {
             return false;
         }
 
@@ -5304,14 +5337,12 @@ class Task extends WindowContainer<WindowContainer> {
             taskDisplayArea.moveHomeStackToFront(reason + " returnToHome");
         }
 
-        if (isRootTask()) {
-            taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */,
-                    reason);
-        }
+        final Task lastFocusedTask = isRootTask() ? taskDisplayArea.getFocusedStack() : null;
         if (task == null) {
             task = this;
         }
         task.getParent().positionChildAt(POSITION_TOP, task, true /* includingParents */);
+        taskDisplayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
     }
 
     /**
@@ -5334,8 +5365,9 @@ class Task extends WindowContainer<WindowContainer> {
             if (parentTask != null) {
                 parentTask.moveToBack(reason, this);
             } else {
-                displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/,
-                        reason);
+                final Task lastFocusedTask = displayArea.getFocusedStack();
+                displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/);
+                displayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
@@ -5382,8 +5414,6 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void awakeFromSleepingLocked() {
-        // Ensure activities are no longer sleeping.
-        forAllActivities((Consumer<ActivityRecord>) (r) -> r.setSleeping(false));
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             mPausingActivity.activityPaused(true);
@@ -5437,25 +5467,11 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (shouldSleep) {
-            goToSleep();
+            ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                    !PRESERVE_WINDOWS);
         }
 
         return shouldSleep;
-    }
-
-    void goToSleep() {
-        // Make sure all visible activities are now sleeping. This will update the activity's
-        // visibility and onStop() will be called.
-        forAllActivities((r) -> {
-            if (r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING, STOPPED)) {
-                r.setSleeping(true);
-            }
-        });
-
-        // Ensure visibility after updating sleep states without updating configuration,
-        // as activities are about to be sent to sleep.
-        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                !PRESERVE_WINDOWS);
     }
 
     private boolean containsActivityFromStack(List<ActivityRecord> rs) {
@@ -5754,8 +5770,9 @@ class Task extends WindowContainer<WindowContainer> {
             boolean preserveWindows, boolean notifyClients) {
         mStackSupervisor.beginActivityVisibilityUpdate();
         try {
-            mEnsureActivitiesVisibleHelper.process(starting, configChanges, preserveWindows,
-                    notifyClients);
+            forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
+                    starting, configChanges, preserveWindows, notifyClients),
+                    true /* traverseTopToBottom */);
 
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
@@ -5942,6 +5959,8 @@ class Task extends WindowContainer<WindowContainer> {
         if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.getWindowingMode() != WINDOWING_MODE_FREEFORM
                 && taskDisplayArea.allResumedActivitiesComplete()) {
+            // The activity may be waiting for stop, but that is no longer appropriate for it.
+            mStackSupervisor.mStoppingActivities.remove(next);
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
@@ -5988,7 +6007,6 @@ class Task extends WindowContainer<WindowContainer> {
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStackSupervisor.mStoppingActivities.remove(next);
-        next.setSleeping(false);
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
@@ -6261,7 +6279,6 @@ class Task extends WindowContainer<WindowContainer> {
                 EventLogTags.writeWmResumeActivity(next.mUserId, System.identityHashCode(next),
                         next.getTask().mTaskId, next.shortComponentName);
 
-                next.setSleeping(false);
                 mAtmService.getAppWarningsLocked().onResumeActivity(next);
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
                 next.clearOptionsLocked();
@@ -6862,13 +6879,10 @@ class Task extends WindowContainer<WindowContainer> {
             // get calculated incorrectly.
             mDisplayContent.deferUpdateImeTarget();
 
-            // Shift all activities with this task up to the top
-            // of the stack, keeping them in the same internal order.
-            positionChildAtTop(tr);
-
             // Don't refocus if invisible to current user
             final ActivityRecord top = tr.getTopNonFinishingActivity();
             if (top == null || !top.okToShowLocked()) {
+                positionChildAtTop(tr);
                 if (top != null) {
                     mStackSupervisor.mRecentTasks.add(top.getTask());
                 }
@@ -6876,20 +6890,15 @@ class Task extends WindowContainer<WindowContainer> {
                 return;
             }
 
-            // Set focus to the top running activity of this stack.
-            final ActivityRecord r = topRunningActivity();
-            if (r != null) {
-                r.moveFocusableActivityToTop(reason);
-            }
+            // Set focus to the top running activity of this task and move all its parents to top.
+            top.moveFocusableActivityToTop(reason);
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
                 mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_NONE,
                         false /* alwaysKeepCurrent */);
                 mDisplayContent.prepareAppTransition(TRANSIT_NONE);
-                if (r != null) {
-                    mStackSupervisor.mNoAnimActivities.add(r);
-                }
+                mStackSupervisor.mNoAnimActivities.add(top);
                 ActivityOptions.abort(options);
             } else {
                 updateTransitLocked(TRANSIT_OLD_TASK_TO_FRONT, TRANSIT_TO_FRONT,
@@ -7228,7 +7237,7 @@ class Task extends WindowContainer<WindowContainer> {
             ActivityRecord source, ActivityOptions options) {
 
         Task task;
-        if (DisplayContent.alwaysCreateStack(getWindowingMode(), getActivityType())) {
+        if (DisplayContent.canReuseExistingTask(getWindowingMode(), getActivityType())) {
             // This stack will only contain one task, so just return itself since all stacks ara now
             // tasks and all tasks are now stacks.
             task = reuseAsLeafTask(voiceSession, voiceInteractor, intent, info, activity);

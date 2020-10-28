@@ -153,6 +153,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.TestUtilityService;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
@@ -564,6 +565,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final AppOpsManager mAppOps;
     final PackageManagerInternal mPmInternal;
+    private final TestUtilityService mTestUtilityService;
 
     final DisplayWindowSettings mDisplayWindowSettings;
 
@@ -1265,6 +1267,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppOps.startWatchingMode(AppOpsManager.OP_TOAST_WINDOW, null, opListener);
 
         mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        mTestUtilityService = LocalServices.getService(TestUtilityService.class);
         final IntentFilter suspendPackagesFilter = new IntentFilter();
         suspendPackagesFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
         suspendPackagesFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
@@ -8352,9 +8355,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void holdLock(int durationMs) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.INJECT_EVENTS, "holdLock requires shell identity");
+    public void holdLock(IBinder token, int durationMs) {
+        mTestUtilityService.verifyHoldLockToken(token);
 
         synchronized (mGlobalLock) {
             SystemClock.sleep(durationMs);

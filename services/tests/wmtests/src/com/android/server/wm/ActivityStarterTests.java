@@ -1022,7 +1022,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertThat(outActivity[0].inSplitScreenWindowingMode()).isFalse();
 
         // Move activity to split-screen-primary stack and make sure it has the focus.
-        TestSplitOrganizer splitOrg = new TestSplitOrganizer(mAtm, top.getDisplayId());
+        TestSplitOrganizer splitOrg = new TestSplitOrganizer(mAtm, top.getDisplayContent());
         top.getRootTask().reparent(splitOrg.mPrimary, POSITION_BOTTOM);
         top.getRootTask().moveToFront("testWindowingModeOptionsLaunchAdjacent");
 

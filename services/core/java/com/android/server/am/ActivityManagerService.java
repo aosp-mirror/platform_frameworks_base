@@ -208,6 +208,7 @@ import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
+import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -339,6 +340,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
+import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
@@ -1311,6 +1313,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     PackageManagerInternal mPackageManagerInt;
     PermissionManagerServiceInternal mPermissionManagerInt;
+    private TestUtilityService mTestUtilityService;
 
     /**
      * Whether to force background check on all apps (for battery saver) or not.
@@ -5784,6 +5787,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mPermissionManagerInt;
     }
 
+    private TestUtilityService getTestUtilityServiceLocked() {
+        if (mTestUtilityService == null) {
+            mTestUtilityService =
+                    LocalServices.getService(TestUtilityService.class);
+        }
+        return mTestUtilityService;
+    }
+
     @Override
     public void appNotResponding(final String reason) {
         final int callingPid = Binder.getCallingPid();
@@ -8214,10 +8225,22 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int getMemoryTrimLevel() {
+    public @MemFactor int getMemoryTrimLevel() {
         enforceNotIsolatedCaller("getMyMemoryState");
         synchronized (this) {
             return mAppProfiler.getLastMemoryLevelLocked();
+        }
+    }
+
+    void setMemFactorOverride(@MemFactor int level) {
+        synchronized (this) {
+            if (level == mAppProfiler.getLastMemoryLevelLocked()) {
+                return;
+            }
+
+            mAppProfiler.setMemFactorOverrideLocked(level);
+            // Kick off an oom adj update since we forced a mem factor update.
+            updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
         }
     }
 
@@ -17343,11 +17366,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Holds the AM lock for the specified amount of milliseconds.
      * Intended for use by the tests that need to imitate lock contention.
-     * Requires permission identity of the shell UID.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
      */
     @Override
-    public void holdLock(int durationMs) {
-        enforceCallingPermission(Manifest.permission.INJECT_EVENTS, "holdLock");
+    public void holdLock(IBinder token, int durationMs) {
+        getTestUtilityServiceLocked().verifyHoldLockToken(token);
 
         synchronized (this) {
             SystemClock.sleep(durationMs);

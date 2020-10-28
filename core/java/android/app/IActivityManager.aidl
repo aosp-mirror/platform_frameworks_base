@@ -689,6 +689,8 @@ interface IActivityManager {
     /**
      * Holds the AM lock for the specified amount of milliseconds.
      * This is intended for use by the tests that need to imitate lock contention.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
      */
-    void holdLock(in int durationMs);
+    void holdLock(in IBinder token, in int durationMs);
 }

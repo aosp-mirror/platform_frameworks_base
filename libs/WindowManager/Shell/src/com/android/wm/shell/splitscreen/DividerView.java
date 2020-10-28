@@ -155,7 +155,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mAdjustedForIme;
     private DividerState mState;
 
-    private SplitScreenTaskOrganizer mTiles;
+    private SplitScreenTaskListener mTiles;
     boolean mFirstLayout = true;
     int mDividerPositionX;
     int mDividerPositionY;
@@ -354,7 +354,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     void injectDependencies(SplitScreenController splitScreenController,
             DividerWindowManager windowManager, DividerState dividerState,
-            DividerCallbacks callback, SplitScreenTaskOrganizer tiles, SplitDisplayLayout sdl,
+            DividerCallbacks callback, SplitScreenTaskListener tiles, SplitDisplayLayout sdl,
             DividerImeController imeController, WindowManagerProxy wmProxy) {
         mSplitScreenController = splitScreenController;
         mWindowManager = windowManager;

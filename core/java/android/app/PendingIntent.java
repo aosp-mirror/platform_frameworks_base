@@ -130,6 +130,7 @@ public final class PendingIntent implements Parcelable {
                     FLAG_UPDATE_CURRENT,
                     FLAG_IMMUTABLE,
                     FLAG_MUTABLE,
+                    FLAG_MUTABLE_UNAUDITED,
 
                     Intent.FILL_IN_ACTION,
                     Intent.FILL_IN_DATA,
@@ -203,6 +204,13 @@ public final class PendingIntent implements Parcelable {
      * PendingIntent that needs to be used with inline reply or bubbles.
      */
     public static final int FLAG_MUTABLE = 1<<25;
+
+    /**
+     * @deprecated Use {@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE} instead.
+     * @hide
+     */
+    @Deprecated
+    public static final int FLAG_MUTABLE_UNAUDITED = FLAG_MUTABLE;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -397,6 +405,7 @@ public final class PendingIntent implements Parcelable {
      * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
      * supplied.
      */
+    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public static PendingIntent getActivity(Context context, int requestCode,
             @NonNull Intent intent, @Flags int flags, @Nullable Bundle options) {
         // Some tests only mock Context.getUserId(), so fallback to the id Context.getUser() is null
@@ -528,6 +537,7 @@ public final class PendingIntent implements Parcelable {
      * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
      * supplied.
      */
+    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public static PendingIntent getActivities(Context context, int requestCode,
             @NonNull Intent[] intents, @Flags int flags, @Nullable Bundle options) {
         // Some tests only mock Context.getUserId(), so fallback to the id Context.getUser() is null
