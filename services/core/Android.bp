@@ -110,6 +110,7 @@ java_library_static {
     ],
 
     required: [
+        "cec_config.xml",
         "gps_debug.conf",
         "protolog.conf.json.gz",
     ],
@@ -169,6 +170,11 @@ java_library {
 java_library_host {
     name: "core_cts_test_resources",
     srcs: ["java/com/android/server/notification/SmallHash.java"]
+}
+
+prebuilt_etc {
+    name: "cec_config.xml",
+    src: "java/com/android/server/hdmi/cec_config.xml",
 }
 
 prebuilt_etc {
