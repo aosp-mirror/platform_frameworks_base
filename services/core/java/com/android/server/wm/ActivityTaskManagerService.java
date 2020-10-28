@@ -7362,20 +7362,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public WindowProcessController getHomeProcess() {
-            synchronized (mGlobalLock) {
-                return mHomeProcess;
-            }
-        }
-
-        @Override
-        public WindowProcessController getPreviousProcess() {
-            synchronized (mGlobalLock) {
-                return mPreviousProcess;
-            }
-        }
-
-        @Override
         public void clearLockedTasks(String reason) {
             synchronized (mGlobalLock) {
                 getLockTaskController().clearLockedTasks(reason);

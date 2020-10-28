@@ -533,9 +533,6 @@ public abstract class ActivityTaskManagerInternal {
     /** Flush recent tasks to disk. */
     public abstract void flushRecentTasks();
 
-    public abstract WindowProcessController getHomeProcess();
-    public abstract WindowProcessController getPreviousProcess();
-
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
     public abstract boolean canShowErrorDialogs();
