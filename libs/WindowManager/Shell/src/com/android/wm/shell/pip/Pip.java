@@ -24,7 +24,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.pip.tv.PipController;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -33,12 +32,6 @@ import java.util.function.Consumer;
  * Interface to engage picture in picture feature.
  */
 public interface Pip {
-    /**
-     * Registers a {@link PipController.MediaListener} to PipController.
-     */
-    default void addMediaListener(PipController.MediaListener listener) {
-    }
-
     /**
      * Closes PIP (PIPed activity and PIP system UI).
      */
@@ -142,12 +135,6 @@ public interface Pip {
      * Called when task stack changed.
      */
     default void onTaskStackChanged() {
-    }
-
-    /**
-     * Removes a {@link PipController.MediaListener} from PipController.
-     */
-    default void removeMediaListener(PipController.MediaListener listener) {
     }
 
     /**
