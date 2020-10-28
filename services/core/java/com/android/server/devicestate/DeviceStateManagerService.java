@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.devicestate.IDeviceStateManager;
+import android.os.Binder;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.IntArray;
@@ -30,10 +31,12 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.policy.DeviceStatePolicyImpl;
 
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
@@ -319,6 +322,21 @@ public final class DeviceStateManagerService extends SystemService {
         notifyPolicyIfNeeded();
     }
 
+    private void dumpInternal(PrintWriter pw) {
+        pw.println("DEVICE STATE MANAGER (dumpsys device_state)");
+
+        synchronized (mLock) {
+            pw.println("  mCommittedState=" + toString(mCommittedState));
+            pw.println("  mPendingState=" + toString(mPendingState));
+            pw.println("  mRequestedState=" + toString(mRequestedState));
+            pw.println("  mRequestedOverrideState=" + toString(mRequestedOverrideState));
+        }
+    }
+
+    private String toString(int state) {
+        return state == INVALID_DEVICE_STATE ? "(none)" : String.valueOf(state);
+    }
+
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
         @Override
         public void onSupportedDeviceStatesChanged(int[] newDeviceStates) {
@@ -349,6 +367,18 @@ public final class DeviceStateManagerService extends SystemService {
                 String[] args, ShellCallback callback, ResultReceiver result) {
             new DeviceStateManagerShellCommand(DeviceStateManagerService.this)
                     .exec(this, in, out, err, args, callback, result);
+        }
+
+        @Override // Binder call
+        public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }
