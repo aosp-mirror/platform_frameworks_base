@@ -280,6 +280,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TRUSTED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_TRUSTED;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_OWN_DISPLAY_GROUP;
+            }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;

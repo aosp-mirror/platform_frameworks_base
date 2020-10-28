@@ -262,6 +262,15 @@ public final class Display {
     public static final int FLAG_TRUSTED = 1 << 7;
 
     /**
+     * Flag: Indicates that the display should not be a part of the default DisplayGroup and
+     * instead be part of a new DisplayGroup.
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_OWN_DISPLAY_GROUP = 1 << 8;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.
