@@ -123,9 +123,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static PipMediaController providePipMediaController(Context context,
-            IActivityManager activityManager) {
-        return new PipMediaController(context, activityManager);
+    static PipMediaController providePipMediaController(Context context) {
+        return new PipMediaController(context);
     }
 
     @WMSingleton
