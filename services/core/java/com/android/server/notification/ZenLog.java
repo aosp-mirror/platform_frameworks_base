@@ -39,7 +39,7 @@ public class ZenLog {
     // the ZenLog is *very* verbose, so be careful about setting this to true
     private static final boolean DEBUG = false;
 
-    private static final int SIZE = Build.IS_DEBUGGABLE ? 100 : 20;
+    private static final int SIZE = Build.IS_DEBUGGABLE ? 200 : 100;
 
     private static final long[] TIMES = new long[SIZE];
     private static final int[] TYPES = new int[SIZE];
@@ -136,9 +136,14 @@ public class ZenLog {
 
     public static void traceConfig(String reason, ZenModeConfig oldConfig,
             ZenModeConfig newConfig) {
-        append(TYPE_CONFIG, reason
-                + "," + (newConfig != null ? newConfig.toString() : null)
-                + "," + ZenModeConfig.diff(oldConfig, newConfig));
+        ZenModeConfig.Diff diff = ZenModeConfig.diff(oldConfig, newConfig);
+        if (diff.isEmpty()) {
+            append(TYPE_CONFIG, reason + " no changes");
+        } else {
+            append(TYPE_CONFIG, reason
+                    + ",\n" + (newConfig != null ? newConfig.toString() : null)
+                    + ",\n" + ZenModeConfig.diff(oldConfig, newConfig));
+        }
     }
 
     public static void traceDisableEffects(NotificationRecord record, String reason) {
