@@ -1005,6 +1005,7 @@
     <dimen name="global_actions_grid_vertical_padding">3dp</dimen>
     <dimen name="global_actions_grid_horizontal_padding">3dp</dimen>
 
+    <dimen name="global_actions_grid_item_layout_height">98dp</dimen>
     <dimen name="global_actions_grid_item_side_margin">5dp</dimen>
     <dimen name="global_actions_grid_item_vertical_margin">4dp</dimen>
     <dimen name="global_actions_grid_item_width">64dp</dimen>

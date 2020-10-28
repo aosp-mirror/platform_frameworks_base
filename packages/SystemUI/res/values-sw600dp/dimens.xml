@@ -94,4 +94,11 @@
 
     <!-- Text size for user name in user switcher -->
     <dimen name="kg_user_switcher_text_size">18sp</dimen>
+
+    <!-- TODO(himanshujaju) - add comments -->
+    <dimen name="global_actions_wallet_top_margin">5dp</dimen>
+    <dimen name="controls_header_bottom_margin">12dp</dimen>
+    <dimen name="controls_top_margin">24dp</dimen>
+
+    <dimen name="global_actions_grid_item_layout_height">80dp</dimen>
 </resources>
