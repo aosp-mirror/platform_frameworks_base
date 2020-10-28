@@ -8524,6 +8524,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pw.print("mUserControlDisabledPackages=");
             pw.println(policy.mUserControlDisabledPackages);
             pw.print("mAppsSuspended="); pw.println(policy.mAppsSuspended);
+            pw.print("mUserSetupComplete="); pw.println(policy.mUserSetupComplete);
             pw.decreaseIndent();
         }
     }
