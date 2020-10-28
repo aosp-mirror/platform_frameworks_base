@@ -956,7 +956,7 @@ public abstract class LayoutInflater {
      * argument and should be used for everything except {@code &gt;include>}
      * tag parsing.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
         return createViewFromTag(parent, name, context, attrs, false);
     }
@@ -976,7 +976,7 @@ public abstract class LayoutInflater {
      *                        attribute (if set) for the view being inflated,
      *                        {@code false} otherwise
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
             boolean ignoreThemeAttr) {
         if (name.equals("view")) {

@@ -22,6 +22,7 @@ import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -217,7 +218,7 @@ public final class TextServicesManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
         try {
             final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers(mUserId);

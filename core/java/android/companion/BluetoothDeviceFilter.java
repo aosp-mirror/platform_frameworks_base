@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.provider.OneTimeUseBuilder;
@@ -100,7 +101,7 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
 
     /** @hide */
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public String getAddress() {
         return mAddress;
     }

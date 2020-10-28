@@ -1014,7 +1014,7 @@ public final class PowerManager {
      * Gets a float screen brightness setting.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public float getBrightnessConstraint(int constraint) {
         try {
             return mService.getBrightnessConstraint(constraint);
@@ -2304,7 +2304,7 @@ public final class PowerManager {
      * This broadcast is only sent to registered receivers.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED
             = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";

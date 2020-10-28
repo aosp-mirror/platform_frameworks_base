@@ -22,6 +22,7 @@
 package android.graphics;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * Xfermode is the base class for objects that are called to implement custom
@@ -32,6 +33,6 @@ import android.compat.annotation.UnsupportedAppUsage;
  */
 public class Xfermode {
     static final int DEFAULT = PorterDuff.Mode.SRC_OVER.nativeInt;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int porterDuffMode = DEFAULT;
 }

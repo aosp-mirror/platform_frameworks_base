@@ -17,6 +17,7 @@
 package android.net;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,17 +38,17 @@ public class NetworkQuotaInfo implements Parcelable {
     public NetworkQuotaInfo(Parcel in) {
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getEstimatedBytes() {
         return 0;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getSoftLimitBytes() {
         return NO_LIMIT;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getHardLimitBytes() {
         return NO_LIMIT;
     }

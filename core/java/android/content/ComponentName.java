@@ -19,6 +19,7 @@ package android.content;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -241,14 +242,14 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void appendShortString(StringBuilder sb, String packageName, String className) {
         sb.append(packageName).append('/');
         appendShortClassName(sb, packageName, className);
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void printShortString(PrintWriter pw, String packageName, String className) {
         pw.print(packageName);
         pw.print('/');

@@ -23,6 +23,7 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
 
@@ -51,7 +52,7 @@ public class IconDrawableFactory {
         return appInfo.isInstantApp() || mUm.hasBadge(userId);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Drawable getBadgedIcon(ApplicationInfo appInfo) {
         return getBadgedIcon(appInfo, UserHandle.getUserId(appInfo.uid));
     }

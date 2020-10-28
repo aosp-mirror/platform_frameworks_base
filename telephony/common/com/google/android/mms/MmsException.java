@@ -18,6 +18,7 @@
 package com.google.android.mms;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * A generic exception that is thrown by the Mms client.
@@ -59,7 +60,7 @@ public class MmsException extends Exception {
      * @param message the detail message.
      * @param cause the cause.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public MmsException(String message, Throwable cause) {
         super(message, cause);
     }

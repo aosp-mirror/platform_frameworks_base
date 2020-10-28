@@ -32,6 +32,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -107,7 +108,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private final Executor mAsyncViewLoadExecutor;
 
     private OnClickHandler mRemoteViewsOnClickHandler;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final FixedSizeRemoteViewsCache mCache;
     private int mVisibleWindowLowerBound;
     private int mVisibleWindowUpperBound;
@@ -116,7 +117,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     // loaded.
     private RemoteViewsFrameLayoutRefSet mRequestedViews;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final HandlerThread mWorkerThread;
     // items may be interrupted within the normally processed queues
     private final Handler mMainHandler;
@@ -896,17 +897,17 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isDataReady() {
         return mDataReady;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
         mRemoteViewsOnClickHandler = handler;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void saveRemoteViewsCache() {
         final RemoteViewsCacheKey key = new RemoteViewsCacheKey(
                 new Intent.FilterComparison(mIntent), mAppWidgetId);
@@ -1051,7 +1052,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Intent getRemoteViewsServiceIntent() {
         return mIntent;
     }
@@ -1098,7 +1099,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * views are currently being displayed. This allows for certain optimizations and preloading
      * which  wouldn't otherwise be possible.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setVisibleRangeHint(int lowerBound, int upperBound) {
         mVisibleWindowLowerBound = lowerBound;
         mVisibleWindowUpperBound = upperBound;

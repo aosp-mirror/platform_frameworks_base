@@ -1433,15 +1433,15 @@ public class StaticLayout extends Layout {
     // Unused, here because of gray list private API accesses.
     /*package*/ static class LineBreaks {
         private static final int INITIAL_SIZE = 16;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int[] breaks = new int[INITIAL_SIZE];
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public float[] widths = new float[INITIAL_SIZE];
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public float[] ascents = new float[INITIAL_SIZE];
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public float[] descents = new float[INITIAL_SIZE];
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int[] flags = new int[INITIAL_SIZE]; // hasTab
         // breaks, widths, and flags should all have the same length
     }
