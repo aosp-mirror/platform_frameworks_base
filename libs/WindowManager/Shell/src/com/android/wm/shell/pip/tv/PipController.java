@@ -106,10 +106,11 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     private int mSuspendPipResizingReason;
 
-    private Context mContext;
-    private PipBoundsState mPipBoundsState;
-    private PipBoundsHandler mPipBoundsHandler;
-    private PipTaskOrganizer mPipTaskOrganizer;
+    private final Context mContext;
+    private final PipBoundsState mPipBoundsState;
+    private final PipBoundsHandler mPipBoundsHandler;
+    private final PipTaskOrganizer mPipTaskOrganizer;
+
     private IActivityTaskManager mActivityTaskManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
@@ -121,7 +122,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private Rect mDefaultPipBounds = new Rect();
     private Rect mMenuModePipBounds;
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
-    private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private int mPinnedStackId = INVALID_STACK_ID;
     private ComponentName mPipComponentName;
@@ -234,46 +234,43 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipTaskOrganizer pipTaskOrganizer,
             WindowManagerShellWrapper windowManagerShellWrapper
     ) {
-        if (!mInitialized) {
-            mInitialized = true;
-            mContext = context;
-            mPipBoundsState = pipBoundsState;
-            mPipNotification = new PipNotification(context, this);
-            mPipBoundsHandler = pipBoundsHandler;
-            // Ensure that we have the display info in case we get calls to update the bounds
-            // before the listener calls back
-            final DisplayInfo displayInfo = new DisplayInfo();
-            context.getDisplay().getDisplayInfo(displayInfo);
-            mPipBoundsState.setDisplayInfo(displayInfo);
+        mContext = context;
+        mPipBoundsState = pipBoundsState;
+        mPipNotification = new PipNotification(context, this);
+        mPipBoundsHandler = pipBoundsHandler;
+        // Ensure that we have the display info in case we get calls to update the bounds
+        // before the listener calls back
+        final DisplayInfo displayInfo = new DisplayInfo();
+        context.getDisplay().getDisplayInfo(displayInfo);
+        mPipBoundsState.setDisplayInfo(displayInfo);
 
-            mResizeAnimationDuration = context.getResources()
-                    .getInteger(R.integer.config_pipResizeAnimationDuration);
-            mPipTaskOrganizer = pipTaskOrganizer;
-            mPipTaskOrganizer.registerPipTransitionCallback(this);
-            mActivityTaskManager = ActivityTaskManager.getService();
+        mResizeAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipResizeAnimationDuration);
+        mPipTaskOrganizer = pipTaskOrganizer;
+        mPipTaskOrganizer.registerPipTransitionCallback(this);
+        mActivityTaskManager = ActivityTaskManager.getService();
 
-            final IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(ACTION_CLOSE);
-            intentFilter.addAction(ACTION_MENU);
-            intentFilter.addAction(ACTION_MEDIA_RESOURCE_GRANTED);
-            mContext.registerReceiver(mBroadcastReceiver, intentFilter, UserHandle.USER_ALL);
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ACTION_CLOSE);
+        intentFilter.addAction(ACTION_MENU);
+        intentFilter.addAction(ACTION_MEDIA_RESOURCE_GRANTED);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter, UserHandle.USER_ALL);
 
-            // Initialize the last orientation and apply the current configuration
-            Configuration initialConfig = mContext.getResources().getConfiguration();
-            mLastOrientation = initialConfig.orientation;
-            loadConfigurationsAndApply(initialConfig);
+        // Initialize the last orientation and apply the current configuration
+        Configuration initialConfig = mContext.getResources().getConfiguration();
+        mLastOrientation = initialConfig.orientation;
+        loadConfigurationsAndApply(initialConfig);
 
-            mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
-            mWindowManagerShellWrapper = windowManagerShellWrapper;
-            try {
-                mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to register pinned stack listener", e);
-            }
-
-            // TODO(b/169395392) Refactor PipMenuActivity to PipMenuView
-            PipMenuActivity.setPipController(this);
+        mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+        mWindowManagerShellWrapper = windowManagerShellWrapper;
+        try {
+            mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register pinned stack listener", e);
         }
+
+        // TODO(b/169395392) Refactor PipMenuActivity to PipMenuView
+        PipMenuActivity.setPipController(this);
     }
 
     private void loadConfigurationsAndApply(Configuration newConfig) {
