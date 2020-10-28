@@ -1212,8 +1212,12 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Sets categories for a shortcut.  Launcher apps may use this information to
-         * categorize shortcuts.
+         * Sets categories for a shortcut.
+         * <ul>
+         *     <li>Launcher apps may use this information to categorize shortcuts
+         *     <li>Used to filter shortcuts that can handle share intents or actions
+         *         and required for shortcuts that are meant to be used as share targets.
+         * </ul>
          *
          * @see #SHORTCUT_CATEGORY_CONVERSATION
          * @see ShortcutInfo#getCategories()
