@@ -1286,6 +1286,9 @@
     <!-- Footer vpn present text [CHAR LIMIT=50] -->
     <string name="branded_vpn_footer">Network may be monitored</string>
 
+    <!-- Disclosure at the bottom of Quick Settings that indicates that parental controls are enabled. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_parental_controls">This device is managed by your parent</string>
+
     <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the organization can monitor network traffic on that device. [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_management_monitoring">Your organization owns this device and may monitor network traffic</string>
 
@@ -1359,6 +1362,9 @@
     <!-- Monitoring dialog label for button opening a page with more information on the admin's abilities [CHAR LIMIT=30] -->
     <string name="monitoring_button_view_policies">View Policies</string>
 
+    <!-- Monitoring dialog label for button opening a page with more information on parental controls [CHAR LIMIT=30] -->
+    <string name="monitoring_button_view_controls">View controls</string>
+
     <!-- Dialog that a user can access via Quick Settings. The dialog describes what the IT admin can monitor (and the changes they can make) on the user's device. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
 
@@ -1427,6 +1433,10 @@
 
     <!-- Monitoring dialog VPN with profile owner text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour admin is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your admin.\n\nYou\'re also connected to a VPN, which can monitor your network activity.</string>
+
+    <!-- Dialog that a user can access via Quick Settings. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_parental_controls">This device is managed by your parent. Your parent can see and manage information such as the apps you use, your location, and your screen time.</string>
+
 
     <!-- Name for a generic legacy VPN connection [CHAR LIMIT=20] -->
     <string name="legacy_vpn_name">VPN</string>
