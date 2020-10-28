@@ -551,6 +551,7 @@ public interface RILConstants {
     int RIL_UNSOL_CARRIER_INFO_IMSI_ENCRYPTION = 1048;
     int RIL_UNSOL_NETWORK_SCAN_RESULT = 1049;
     int RIL_UNSOL_KEEPALIVE_STATUS = 1050;
+    int RIL_UNSOL_UNTHROTTLE_APN = 1052;
 
     /* The following unsols are not defined in RIL.h */
     int RIL_UNSOL_HAL_NON_RIL_BASE = 1100;
