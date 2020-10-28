@@ -125,7 +125,7 @@ public final class UidPermissionState {
     }
 
     @NonNull
-    private PermissionState getOrCreatePermissionState(@NonNull BasePermission permission) {
+    private PermissionState getOrCreatePermissionState(@NonNull Permission permission) {
         if (mPermissions == null) {
             mPermissions = new ArrayMap<>();
         }
@@ -158,7 +158,7 @@ public final class UidPermissionState {
      * @param granted whether the permission is granted
      * @param flags the permission flags
      */
-    public void putPermissionState(@NonNull BasePermission permission, boolean granted, int flags) {
+    public void putPermissionState(@NonNull Permission permission, boolean granted, int flags) {
         final String name = permission.getName();
         if (mPermissions == null) {
             mPermissions = new ArrayMap<>();
@@ -230,7 +230,7 @@ public final class UidPermissionState {
      * @param permission the permission to grant
      * @return whether the permission grant state changed
      */
-    public boolean grantPermission(@NonNull BasePermission permission) {
+    public boolean grantPermission(@NonNull Permission permission) {
         final PermissionState permissionState = getOrCreatePermissionState(permission);
         return permissionState.grant();
     }
@@ -241,7 +241,7 @@ public final class UidPermissionState {
      * @param permission the permission to revoke
      * @return whether the permission grant state changed
      */
-    public boolean revokePermission(@NonNull BasePermission permission) {
+    public boolean revokePermission(@NonNull Permission permission) {
         final String name = permission.getName();
         final PermissionState permissionState = getPermissionState(name);
         if (permissionState == null) {
@@ -276,7 +276,7 @@ public final class UidPermissionState {
      * @param flagValues the new values for the masked flags
      * @return whether the permission flags changed
      */
-    public boolean updatePermissionFlags(@NonNull BasePermission permission, int flagMask,
+    public boolean updatePermissionFlags(@NonNull Permission permission, int flagMask,
             int flagValues) {
         if (flagMask == 0) {
             return false;

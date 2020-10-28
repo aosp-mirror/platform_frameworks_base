@@ -375,7 +375,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.permission.BasePermission;
+import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal;
@@ -2742,7 +2742,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         new UserDataPreparer(installer, installLock, context, onlyCore),
                         lock),
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
-                        i.getPermissionManagerServiceInternal().getPermissionSettings(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(), lock),
                 (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
@@ -3173,6 +3172,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     /* excludePreCreated= */ false));
             t.traceEnd();
 
+            mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
+
             // Clean up orphaned packages for which the code path doesn't exist
             // and they are an update to a system app - caused by bug/32321269
             final int packageSettingCount = mSettings.mPackages.size();
@@ -3597,7 +3598,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            mPermissionManager.readStateFromPackageSettingsTEMP();
+            mPermissionManager.readLegacyPermissionStateTEMP();
             // If the platform SDK has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
@@ -11433,7 +11434,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (verifyPackageUpdateLPr(orig, pkg)) {
                         Slog.i(TAG, "Adopting permissions from " + origName + " to "
                                 + pkg.getPackageName());
-                        mSettings.mPermissions.transferPermissions(origName, pkg.getPackageName());
+                        mPermissionManager.transferPermissions(origName, pkg.getPackageName());
                     }
                 }
             }
@@ -17928,7 +17929,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int N = ArrayUtils.size(parsedPackage.getPermissions());
             for (int i = N - 1; i >= 0; i--) {
                 final ParsedPermission perm = parsedPackage.getPermissions().get(i);
-                final BasePermission bp = mPermissionManager.getPermissionTEMP(perm.getName());
+                final Permission bp = mPermissionManager.getPermissionTEMP(perm.getName());
 
                 // Don't allow anyone but the system to define ephemeral permissions.
                 if ((perm.getProtectionLevel() & PermissionInfo.PROTECTION_FLAG_INSTANT) != 0
@@ -24216,9 +24217,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     boolean readPermissionStateForUser(@UserIdInt int userId) {
         synchronized (mPackages) {
-            mPermissionManager.writeStateToPackageSettingsTEMP();
+            mPermissionManager.writeLegacyPermissionStateTEMP();
             mSettings.readPermissionStateForUserSyncLPr(userId);
-            mPermissionManager.readStateFromPackageSettingsTEMP();
+            mPermissionManager.readLegacyPermissionStateTEMP();
             return mPmInternal.isPermissionUpgradeNeeded(userId);
         }
     }
@@ -26361,13 +26362,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Temporary method that wraps mSettings.writeLPr() and calls
-     * mPermissionManager.writeStateToPackageSettingsTEMP() beforehand.
+     * Temporary method that wraps mSettings.writeLPr() and calls mPermissionManager's
+     * writeLegacyPermissionsTEMP() and writeLegacyPermissionStateTEMP() beforehand.
      *
      * TODO(zhanghai): This should be removed once we finish migration of permission storage.
      */
     private void writeSettingsLPrTEMP() {
-        mPermissionManager.writeStateToPackageSettingsTEMP();
+        mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
+        mPermissionManager.writeLegacyPermissionStateTEMP();
         mSettings.writeLPr();
     }
 
