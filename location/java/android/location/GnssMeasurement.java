@@ -901,8 +901,59 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets 'Accumulated Delta Range' state.
      *
-     * <p>It indicates whether {@link #getAccumulatedDeltaRangeMeters()} is reset or there is a
-     * cycle slip (indicating 'loss of lock').
+     * <p>This indicates the state of the {@link #getAccumulatedDeltaRangeMeters()} measurement. See
+     * the table below for a detailed interpretation of each state.
+     *
+     * <table border="1">
+     * <thead>
+     * <tr>
+     * <th>ADR_STATE</th>
+     * <th>Time of relevance</th>
+     * <th>Interpretation</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td>UNKNOWN</td>
+     * <td>ADR(t)</td>
+     * <td>No valid carrier phase information is available at time t.</td>
+     * </tr>
+     * <tr>
+     * <td>VALID</td>
+     * <td>ADR(t)</td>
+     * <td>Valid carrier phase information is available at time t. This indicates that this
+     * measurement can be used as a reference for future measurements. However, to compare it to
+     * previous measurements to compute delta range, other bits should be checked. Specifically,
+     * it can be used for delta range computation if it is valid and has no reset or cycle  slip at
+     * this epoch i.e. if VALID_BIT == 1 && CYCLE_SLIP_BIT == 0 && RESET_BIT == 0.</td>
+     * </tr>
+     * <tr>
+     * <td>RESET</td>
+     * <td>ADR(t) - ADR(t-1)</td>
+     * <td>Carrier phase accumulation has been restarted between current time t and previous time
+     * t-1. This indicates that this measurement can be used as a reference for future measurements,
+     * but it should not be compared to previous measurements to compute delta range.</td>
+     * </tr>
+     * <tr>
+     * <td>CYCLE_SLIP</td>
+     * <td>ADR(t) - ADR(t-1)</td>
+     * <td>Cycle slip(s) have been detected between the current time t and previous time t-1. This
+     * indicates that this measurement can be used as a reference for future measurements. Clients
+     * can use a measurement with a cycle slip to compute delta range against previous measurements
+     * at their own risk.</td>
+     * </tr>
+     * <tr>
+     * <td>HALF_CYCLE_RESOLVED</td>
+     * <td>ADR(t)</td>
+     * <td>Half cycle ambiguity is resolved at time t.</td>
+     * </tr>
+     * <tr>
+     * <td>HALF_CYCLE_REPORTED</td>
+     * <td>ADR(t)</td>
+     * <td>Half cycle ambiguity is reported at time t.</td>
+     * </tr>
+     * </tbody>
+     * </table>
      */
     @AdrState
     public int getAccumulatedDeltaRangeState() {
