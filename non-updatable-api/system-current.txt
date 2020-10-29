@@ -109,7 +109,8 @@ package android {
     field public static final String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
     field public static final String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
-    field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
@@ -866,6 +867,7 @@ package android.app.admin {
     field public static final int PROVISIONING_TRIGGER_QR_CODE = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0; // 0x0
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
+    field public static final int STATE_USER_PROFILE_FINALIZED = 5; // 0x5
     field public static final int STATE_USER_SETUP_COMPLETE = 2; // 0x2
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
@@ -6635,6 +6637,7 @@ package android.net {
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
+    field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
   }
 
@@ -8880,6 +8883,7 @@ package android.service.autofill {
 
   public static final class Dataset.Builder {
     ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setContent(@NonNull android.view.autofill.AutofillId, @Nullable android.content.ClipData);
     method @NonNull public android.service.autofill.Dataset.Builder setFieldInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
   }
 

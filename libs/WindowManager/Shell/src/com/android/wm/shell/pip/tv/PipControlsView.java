@@ -51,15 +51,11 @@ public class PipControlsView extends LinearLayout {
         setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
     }
 
-    PipControlButtonView getFullButtonView() {
+    PipControlButtonView getFullscreenButton() {
         return findViewById(R.id.full_button);
     }
 
-    PipControlButtonView getCloseButtonView() {
+    PipControlButtonView getCloseButton() {
         return findViewById(R.id.close_button);
-    }
-
-    PipControlButtonView getPlayPauseButtonView() {
-        return findViewById(R.id.play_pause_button);
     }
 }

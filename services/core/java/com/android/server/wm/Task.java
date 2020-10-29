@@ -149,6 +149,7 @@ import static com.android.server.wm.WindowContainerChildProto.TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.MIN_TASK_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
@@ -2959,6 +2960,14 @@ class Task extends WindowContainer<WindowContainer> {
                 aspect = minAspectRatio;
             }
         }
+
+        // Override from config_letterboxAspectRatio or via ADB with set-letterbox-aspect-ratio.
+        final float letterboxAspectRatioOverride = mWmService.getTaskLetterboxAspectRatio();
+        // Activity min/max aspect ratio restrictions will be respected by the activity-level
+        // letterboxing (size-compat mode). Therefore this override can control the maximum screen
+        // area that can be occupied by the app in the letterbox mode.
+        aspect = letterboxAspectRatioOverride > MIN_TASK_LETTERBOX_ASPECT_RATIO
+                ? letterboxAspectRatioOverride : aspect;
 
         if (forcedOrientation == ORIENTATION_LANDSCAPE) {
             final int height = (int) Math.rint(parentWidth / aspect);

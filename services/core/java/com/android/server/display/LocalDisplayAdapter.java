@@ -300,10 +300,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             }
 
-            // Check whether surface flinger spontaneously changed modes out from under us.
-            // Schedule traversals to ensure that the correct state is reapplied if necessary.
+            boolean activeModeChanged = false;
+
+            // Check whether SurfaceFlinger or the display device changed the active mode out from
+            // under us.
             if (mActiveModeId != NO_DISPLAY_MODE_ID
                     && mActiveModeId != activeRecord.mMode.getModeId()) {
+                Slog.d(TAG, "The active mode was changed from SurfaceFlinger or the display"
+                        + "device.");
+                mActiveModeId = activeRecord.mMode.getModeId();
+                activeModeChanged = true;
                 sendTraversalRequestLocked();
             }
 
@@ -333,7 +339,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             boolean recordsChanged = records.size() != mSupportedModes.size() || modesAdded;
             // If the records haven't changed then we're done here.
             if (!recordsChanged) {
-                return false;
+                return activeModeChanged;
             }
 
             mSupportedModes.clear();

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -373,7 +374,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link android.R.attr#showForAllUsers} attribute.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int FLAG_SHOW_FOR_ALL_USERS = 0x0400;
     /**
      * Bit in {@link #flags} corresponding to an immersive activity
@@ -502,7 +503,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * this activity is launched into such a container a SecurityException will be
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
 
     /**
@@ -869,7 +870,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static @NativeConfig int activityInfoConfigJavaToNative(@Config int input) {
         int output = 0;
         for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {

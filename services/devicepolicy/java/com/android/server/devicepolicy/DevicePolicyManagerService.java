@@ -7894,7 +7894,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Current user has a managed-profile, but current user is not managed, so
                 // rather than moving to finalized state, go back to unmanaged once
                 // profile provisioning is complete.
-                if (newState == DevicePolicyManager.STATE_USER_UNMANAGED) {
+                if (newState == DevicePolicyManager.STATE_USER_PROFILE_FINALIZED) {
                     return;
                 }
                 break;

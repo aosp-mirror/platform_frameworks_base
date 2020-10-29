@@ -59,7 +59,6 @@ java_defaults {
         "ext",
         "framework-minus-apex",
         "framework-res",
-        "framework-telephony-stubs",
         "framework-tethering.impl",
         "framework-wifi.stubs.module_lib",
     ],

@@ -16,7 +16,6 @@
 -->
 <!-- Layout for {@link com.android.wm.shell.pip.tv.PipControlsView}. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-
     <com.android.wm.shell.pip.tv.PipControlButtonView
         android:id="@+id/full_button"
         android:layout_width="@dimen/picture_in_picture_button_width"
@@ -31,13 +30,4 @@
         android:layout_marginStart="@dimen/picture_in_picture_button_start_margin"
         android:src="@drawable/pip_ic_close_white"
         android:text="@string/pip_close" />
-
-    <com.android.wm.shell.pip.tv.PipControlButtonView
-        android:id="@+id/play_pause_button"
-        android:layout_width="@dimen/picture_in_picture_button_width"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/picture_in_picture_button_start_margin"
-        android:src="@drawable/pip_ic_pause_white"
-        android:text="@string/pip_pause"
-        android:visibility="gone" />
 </merge>

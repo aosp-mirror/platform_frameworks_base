@@ -14,6 +14,8 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.app.admin.DeviceAdminInfo;
+import android.graphics.drawable.Drawable;
 import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -108,5 +110,25 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     @Override
     public void onUserSwitched(int newUserId) {
 
+    }
+
+    @Override
+    public boolean isParentalControlsEnabled() {
+        return false;
+    }
+
+    @Override
+    public DeviceAdminInfo getDeviceAdminInfo() {
+        return null;
+    }
+
+    @Override
+    public Drawable getIcon(DeviceAdminInfo info) {
+        return null;
+    }
+
+    @Override
+    public CharSequence getLabel(DeviceAdminInfo info) {
+        return null;
     }
 }

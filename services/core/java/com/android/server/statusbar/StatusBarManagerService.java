@@ -706,12 +706,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
-            @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
+            int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
             int userId, String opPackageName, long operationId) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.showAuthenticationDialog(promptInfo, receiver, biometricModality,
+                mBar.showAuthenticationDialog(promptInfo, receiver, sensorIds, credentialAllowed,
                         requireConfirmation, userId, opPackageName, operationId);
             } catch (RemoteException ex) {
             }

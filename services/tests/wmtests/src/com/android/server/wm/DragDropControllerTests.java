@@ -27,7 +27,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -35,7 +34,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 
 import android.app.PendingIntent;
@@ -199,8 +197,7 @@ public class DragDropControllerTests extends WindowTestsBase {
         attrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
         policy.validateAddingWindowLw(attrs, Binder.getCallingPid(), Binder.getCallingUid());
 
-        verify(mWm.mContext).enforcePermission(
-                eq(android.Manifest.permission.MANAGE_ACTIVITY_STACKS), anyInt(), anyInt(), any());
+        verify(mWm.mAtmService).enforceTaskPermission(any());
     }
 
     @Test

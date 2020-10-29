@@ -21,6 +21,7 @@ import static android.content.res.Resources.ID_NULL;
 import android.annotation.AnyRes;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -480,7 +481,7 @@ public final class XmlBlock implements AutoCloseable {
             return mStrings.get(id);
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /*package*/ long mParseState;
         @UnsupportedAppUsage
         private final XmlBlock mBlock;

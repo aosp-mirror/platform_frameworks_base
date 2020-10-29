@@ -1396,7 +1396,7 @@ public class DevicePolicyManager {
      * sent to the parent user.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
             = "android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED";
 
@@ -1830,6 +1830,15 @@ public class DevicePolicyManager {
     public static final int STATE_USER_PROFILE_COMPLETE = 4;
 
     /**
+     * Management setup on a managed profile.
+     * <p>This is used as an intermediate state after {@link #STATE_USER_PROFILE_COMPLETE} once the
+     * work profile has been created.
+     * @hide
+     */
+    @SystemApi
+    public static final int STATE_USER_PROFILE_FINALIZED = 5;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "STATE_USER_" }, value = {
@@ -1837,7 +1846,8 @@ public class DevicePolicyManager {
             STATE_USER_SETUP_INCOMPLETE,
             STATE_USER_SETUP_COMPLETE,
             STATE_USER_SETUP_FINALIZED,
-            STATE_USER_PROFILE_COMPLETE
+            STATE_USER_PROFILE_COMPLETE,
+            STATE_USER_PROFILE_FINALIZED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserProvisioningState {}
@@ -4122,7 +4132,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getMaximumTimeToLock(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -4204,7 +4214,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin, @UserIdInt int userId) {
         if (mService != null) {
@@ -4506,7 +4516,7 @@ public class DevicePolicyManager {
      *            of the device admin that sets the proxy.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @Nullable ComponentName setGlobalProxy(@NonNull ComponentName admin, Proxy proxySpec,
             List<String> exclusionList ) {
         throwIfParentInstance("setGlobalProxy");
@@ -6308,7 +6318,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
         if (mService != null) {
@@ -7022,7 +7032,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @Nullable ComponentName getProfileOwnerAsUser(final int userId) {
         if (mService != null) {
             try {
@@ -7437,7 +7447,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public @Nullable List<PersistableBundle> getTrustAgentConfiguration(
             @Nullable ComponentName admin, @NonNull ComponentName agent, int userHandle) {
@@ -10623,7 +10633,7 @@ public class DevicePolicyManager {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");

@@ -17,6 +17,7 @@ package com.android.systemui.qs;
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -66,6 +67,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private final String DEVICE_OWNER_PACKAGE = "TestDPC";
     private final String VPN_PACKAGE = "TestVPN";
     private final String VPN_PACKAGE_2 = "TestVPN 2";
+    private static final String PARENTAL_CONTROLS_LABEL = "Parental Control App";
 
     private ViewGroup mRootView;
     private TextView mFooterText;
@@ -523,6 +525,27 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         // Proxy for dialog being created
         verify(mockHost, never()).collapsePanels();
+    }
+
+    @Test
+    public void testParentalControls() {
+        when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+
+        assertEquals(mContext.getString(R.string.quick_settings_disclosure_parental_controls),
+                mFooterText.getText());
+    }
+
+    @Test
+    public void testParentalControlsDialog() {
+        when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
+        when(mSecurityController.getLabel(any())).thenReturn(PARENTAL_CONTROLS_LABEL);
+
+        View view = mFooter.createDialogView();
+        TextView textView = (TextView) view.findViewById(R.id.parental_controls_title);
+        assertEquals(PARENTAL_CONTROLS_LABEL, textView.getText());
     }
 
     private CharSequence addLink(CharSequence description) {

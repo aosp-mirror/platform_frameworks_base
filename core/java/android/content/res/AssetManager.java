@@ -28,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.loader.ResourcesLoader;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.ArraySet;
 import android.util.Log;
@@ -955,7 +956,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #open(String, int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @NonNull InputStream openNonAsset(@NonNull String fileName, int accessMode)
             throws IOException {
         return openNonAsset(0, fileName, accessMode);
@@ -968,7 +969,7 @@ public final class AssetManager implements AutoCloseable {
      * @param fileName Name of the asset to retrieve.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName)
             throws IOException {
         return openNonAsset(cookie, fileName, ACCESS_STREAMING);
@@ -1105,7 +1106,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
             long outIndicesAddress) {
@@ -1128,7 +1129,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
             @NonNull int[] outIndices) {
@@ -1144,7 +1145,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean retrieveAttributes(@NonNull XmlBlock.Parser parser, @NonNull int[] inAttrs,
             @NonNull int[] outValues, @NonNull int[] outIndices) {
         Objects.requireNonNull(parser, "parser");
@@ -1186,7 +1187,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void setThemeTo(long dstThemePtr, @NonNull AssetManager srcAssetManager, long srcThemePtr) {
         synchronized (this) {
             ensureValidLocked();

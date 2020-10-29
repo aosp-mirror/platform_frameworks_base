@@ -17,6 +17,7 @@ package com.android.internal.os;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.BatteryStats.Uid;
+import android.os.Build;
 
 import java.util.List;
 
@@ -120,7 +121,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double audioPowerMah;
     public double bluetoothPowerMah;
     public double cameraPowerMah;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public double cpuPowerMah;
     public double flashlightPowerMah;
     public double gpsPowerMah;

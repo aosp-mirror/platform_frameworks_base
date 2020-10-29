@@ -20,9 +20,11 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
@@ -33,6 +35,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 public class Utils {
 
@@ -97,5 +100,20 @@ public class Utils {
     static boolean isManagedProfile(Context context, int userId) {
         final UserManager userManager = context.getSystemService(UserManager.class);
         return userManager.isManagedProfile(userId);
+    }
+
+    static boolean containsSensorId(@Nullable List<? extends SensorPropertiesInternal> properties,
+            int sensorId) {
+        if (properties == null) {
+            return false;
+        }
+
+        for (SensorPropertiesInternal prop : properties) {
+            if (prop.sensorId == sensorId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

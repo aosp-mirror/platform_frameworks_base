@@ -57,7 +57,7 @@ public class TextLine {
     private static final char TAB_CHAR = '\t';
 
     private TextPaint mPaint;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private CharSequence mText;
     private int mStart;
     private int mLen;
@@ -83,13 +83,13 @@ public class TextLine {
 
     private final TextPaint mWorkPaint = new TextPaint();
     private final TextPaint mActivePaint = new TextPaint();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SpanSet<MetricAffectingSpan> mMetricAffectingSpanSpanSet =
             new SpanSet<MetricAffectingSpan>(MetricAffectingSpan.class);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SpanSet<CharacterStyle> mCharacterStyleSpanSet =
             new SpanSet<CharacterStyle>(CharacterStyle.class);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SpanSet<ReplacementSpan> mReplacementSpanSpanSet =
             new SpanSet<ReplacementSpan>(ReplacementSpan.class);
 

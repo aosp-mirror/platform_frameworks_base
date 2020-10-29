@@ -16,15 +16,19 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
+import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
@@ -53,7 +57,10 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.CurrentUserTracker;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -304,6 +311,50 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             mVpnUserId = mCurrentUserId;
         }
         fireCallbacks();
+    }
+
+    @Override
+    public boolean isParentalControlsEnabled() {
+        return getProfileOwnerOrDeviceOwnerSupervisionComponent() != null;
+    }
+
+    @Override
+    public DeviceAdminInfo getDeviceAdminInfo() {
+        return getDeviceAdminInfo(getProfileOwnerOrDeviceOwnerComponent());
+    }
+
+    @Override
+    public Drawable getIcon(DeviceAdminInfo info) {
+        return (info == null) ? null : info.loadIcon(mPackageManager);
+    }
+
+    @Override
+    public CharSequence getLabel(DeviceAdminInfo info) {
+        return (info == null) ? null : info.loadLabel(mPackageManager);
+    }
+
+    private ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent() {
+        UserHandle currentUser = new UserHandle(mCurrentUserId);
+        return mDevicePolicyManager
+               .getProfileOwnerOrDeviceOwnerSupervisionComponent(currentUser);
+    }
+
+    // Returns the ComponentName of the current DO/PO. Right now it only checks the supervision
+    // component but can be changed to check for other DO/POs. This change would make getIcon()
+    // and getLabel() work for all admins.
+    private ComponentName getProfileOwnerOrDeviceOwnerComponent() {
+        return getProfileOwnerOrDeviceOwnerSupervisionComponent();
+    }
+
+    private DeviceAdminInfo getDeviceAdminInfo(ComponentName componentName) {
+        try {
+            ResolveInfo resolveInfo = new ResolveInfo();
+            resolveInfo.activityInfo = mPackageManager.getReceiverInfo(componentName,
+                    PackageManager.GET_META_DATA);
+            return new DeviceAdminInfo(mContext, resolveInfo);
+        } catch (NameNotFoundException | XmlPullParserException | IOException e) {
+            return null;
+        }
     }
 
     private void refreshCACerts(int userId) {

@@ -284,7 +284,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
         default void showAuthenticationDialog(PromptInfo promptInfo,
                 IBiometricSysuiReceiver receiver,
-                @BiometricAuthenticator.Modality int biometricModality,
+                int[] sensorIds, boolean credentialAllowed,
                 boolean requireConfirmation, int userId, String opPackageName,
                 long operationId) { }
         default void onBiometricAuthenticated() { }
@@ -829,17 +829,18 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
-            @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
+            int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
             int userId, String opPackageName, long operationId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = promptInfo;
             args.arg2 = receiver;
-            args.argi1 = biometricModality;
-            args.arg3 = requireConfirmation;
-            args.argi2 = userId;
-            args.arg4 = opPackageName;
-            args.arg5 = operationId;
+            args.arg3 = sensorIds; //
+            args.arg4 = credentialAllowed; //
+            args.arg5 = requireConfirmation;
+            args.argi1 = userId;
+            args.arg6 = opPackageName;
+            args.arg7 = operationId;
             mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
         }
@@ -1264,11 +1265,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                         mCallbacks.get(i).showAuthenticationDialog(
                                 (PromptInfo) someArgs.arg1,
                                 (IBiometricSysuiReceiver) someArgs.arg2,
-                                someArgs.argi1 /* biometricModality */,
-                                (boolean) someArgs.arg3 /* requireConfirmation */,
-                                someArgs.argi2 /* userId */,
-                                (String) someArgs.arg4 /* opPackageName */,
-                                (long) someArgs.arg5 /* operationId */);
+                                (int[]) someArgs.arg3 /* sensorIds */,
+                                (boolean) someArgs.arg4 /* credentialAllowed */,
+                                (boolean) someArgs.arg5 /* requireConfirmation */,
+                                someArgs.argi1 /* userId */,
+                                (String) someArgs.arg6 /* opPackageName */,
+                                (long) someArgs.arg7 /* operationId */);
                     }
                     someArgs.recycle();
                     break;

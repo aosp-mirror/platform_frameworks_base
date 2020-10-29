@@ -1927,7 +1927,7 @@ public abstract class Context {
      * {@link #startActivityForResult(String, Intent, int, Bundle)}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean canStartActivityForResult() {
         return false;
     }
@@ -2427,7 +2427,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission, int appOp);
 
@@ -2473,7 +2473,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -5272,7 +5272,7 @@ public abstract class Context {
 
     /** @hide */
     @PackageManager.PermissionResult
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract int checkPermission(@NonNull String permission, int pid, int uid,
             IBinder callerToken);
 

@@ -4476,4 +4476,10 @@
          TODO: b/170470621 - remove once we can have multiple Internal displays in DMS as
                well as a notification from DisplayStateManager. -->
     <string-array name="config_internalFoldedPhysicalDisplayIds" translatable="false" />
+
+    <!-- Aspect ratio of task level letterboxing. Values <= 1.0 will be ignored.
+         Note: Activity min/max aspect ratio restrictions will still be respected by the
+         activity-level letterboxing (size-compat mode). Therefore this override can control the
+         maximum screen area that can be occupied by the app in the letterbox mode. -->
+    <item name="config_taskLetterboxAspectRatio" format="float" type="dimen">0.0</item>
 </resources>

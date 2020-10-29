@@ -12,7 +12,8 @@ package android {
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String CONTROL_DEVICE_LIGHTS = "android.permission.CONTROL_DEVICE_LIGHTS";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
-    field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
@@ -128,19 +129,19 @@ package android.app {
   }
 
   public class ActivityTaskManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
     method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void moveTaskToRootTask(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void requestPictureInPictureMode(@NonNull android.os.IBinder);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeTask(int, android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void startSystemLockTaskMode(int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void stopSystemLockTaskMode();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void moveTaskToRootTask(int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void requestPictureInPictureMode(@NonNull android.os.IBinder);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizeTask(int, android.graphics.Rect);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void startSystemLockTaskMode(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void stopSystemLockTaskMode();
     method public static boolean supportsMultiWindow(android.content.Context);
     method public static boolean supportsSplitScreenMultiWindow(android.content.Context);
     field public static final int DEFAULT_MINIMAL_SPLIT_SCREEN_DISPLAY_SIZE_DP = 440; // 0x1b8
@@ -1555,6 +1556,19 @@ package android.service.autofill {
     method @Nullable public android.util.SparseArray<android.service.autofill.InternalOnClickAction> getActions();
   }
 
+  public final class Dataset implements android.os.Parcelable {
+    method @Nullable public android.content.IntentSender getAuthentication();
+    method @Nullable public android.content.ClipData getFieldContent();
+    method @Nullable public java.util.ArrayList<android.view.autofill.AutofillId> getFieldIds();
+    method @Nullable public java.util.ArrayList<android.view.autofill.AutofillValue> getFieldValues();
+    method @Nullable public String getId();
+    method public boolean isEmpty();
+  }
+
+  public static final class Dataset.Builder {
+    method @NonNull public android.service.autofill.Dataset.Builder setContent(@NonNull android.view.autofill.AutofillId, @Nullable android.content.ClipData);
+  }
+
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(@NonNull android.service.autofill.ValueFinder, @NonNull android.widget.RemoteViews, int) throws java.lang.Exception;
   }
@@ -2353,7 +2367,7 @@ package android.window {
     ctor public DisplayAreaOrganizer();
     method public void onDisplayAreaAppeared(@NonNull android.window.DisplayAreaInfo, @NonNull android.view.SurfaceControl);
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void registerOrganizer(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
     field public static final int FEATURE_ONE_HANDED = 3; // 0x3
     field public static final int FEATURE_ROOT = 0; // 0x0
@@ -2376,19 +2390,19 @@ package android.window {
 
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void createRootTask(int, int, @Nullable android.os.IBinder);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public android.window.WindowContainerToken getImeTarget(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getRootTasks(int, @NonNull int[]);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void createRootTask(int, int, @Nullable android.os.IBinder);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public android.window.WindowContainerToken getImeTarget(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getRootTasks(int, @NonNull int[]);
     method @BinderThread public void onBackPressedOnTaskRoot(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
-    method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void unregisterOrganizer();
+    method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
+    method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void unregisterOrganizer();
   }
 
   public final class WindowContainerToken implements android.os.Parcelable {
@@ -2423,8 +2437,8 @@ package android.window {
 
   public class WindowOrganizer {
     ctor public WindowOrganizer();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
   }
 
 }

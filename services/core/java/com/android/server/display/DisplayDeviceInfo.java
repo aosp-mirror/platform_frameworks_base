@@ -130,6 +130,14 @@ final class DisplayDeviceInfo {
     public static final int FLAG_TRUSTED = 1 << 13;
 
     /**
+     * Flag: Indicates that the display should not be a part of the default {@link DisplayGroup} and
+     * instead be part of a new {@link DisplayGroup}.
+     *
+     * @hide
+     */
+    public static final int FLAG_OWN_DISPLAY_GROUP = 1 << 14;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;

@@ -34,8 +34,9 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.phone.PipMediaController.ActionListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -342,11 +343,11 @@ public class PipMenuActivityController {
             if (menuState == MENU_STATE_FULL) {
                 // Once visible, start listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
-                mMediaController.addListener(mMediaActionListener);
+                mMediaController.addActionListener(mMediaActionListener);
             } else {
                 // Once hidden, stop listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
-                mMediaController.removeListener(mMediaActionListener);
+                mMediaController.removeActionListener(mMediaActionListener);
             }
 
             try {

@@ -44,6 +44,8 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -241,7 +243,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             mStatusBarService.showAuthenticationDialog(
                     mPromptInfo,
                     mSysuiReceiver,
-                    0 /* biometricModality */,
+                    new int[0] /* sensorIds */,
+                    true /* credentialAllowed */,
                     false /* requireConfirmation */,
                     mUserId,
                     mOpPackageName,
@@ -271,11 +274,16 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 try {
                     // If any sensor requires confirmation, request it to be shown.
                     final boolean requireConfirmation = isConfirmationRequiredByAnyEligibleSensor();
-                    final @BiometricAuthenticator.Modality int modality =
-                            getEligibleModalities();
+
+                    final int[] sensorIds = new int[mPreAuthInfo.eligibleSensors.size()];
+                    for (int i = 0; i < mPreAuthInfo.eligibleSensors.size(); i++) {
+                        sensorIds[i] = mPreAuthInfo.eligibleSensors.get(i).id;
+                    }
+
                     mStatusBarService.showAuthenticationDialog(mPromptInfo,
                             mSysuiReceiver,
-                            modality,
+                            sensorIds,
+                            mPreAuthInfo.shouldShowCredential(),
                             requireConfirmation,
                             mUserId,
                             mOpPackageName,
@@ -369,7 +377,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mStatusBarService.showAuthenticationDialog(
                             mPromptInfo,
                             mSysuiReceiver,
-                            0 /* biometricModality */,
+                            new int[0] /* sensorIds */,
+                            true /* credentialAllowed */,
                             false /* requireConfirmation */,
                             mUserId,
                             mOpPackageName,

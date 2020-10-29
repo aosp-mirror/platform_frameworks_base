@@ -22,6 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.StateSet;
 
@@ -130,7 +131,7 @@ public class StateListDrawable extends DrawableContainer {
     /**
      * Updates the constant state from the values in the typed array.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void updateStateFromTypedArray(TypedArray a) {
         final StateListState state = mStateListState;
 
@@ -208,7 +209,7 @@ public class StateListDrawable extends DrawableContainer {
      * @param attrs The attribute set.
      * @return An array of state_ attributes.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int[] extractStateSet(AttributeSet attrs) {
         int j = 0;
         final int numAttrs = attrs.getAttributeCount();

@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="com.google.android.test.activityview">
     <uses-permission android:name="android.permission.INJECT_EVENTS"/>
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS"/>
     <uses-permission android:name="android.permission.ACTIVITY_EMBEDDING"/>
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
 

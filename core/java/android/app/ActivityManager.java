@@ -503,23 +503,22 @@ public class ActivityManager {
     @UnsupportedAppUsage
     public static final int PROCESS_STATE_TOP = 2;
 
-    /** @hide Process is bound to a TOP app. This is ranked below SERVICE_LOCATION so that
-     * it doesn't get the capability of location access while-in-use. */
+    /** @hide Process is bound to a TOP app. */
     public static final int PROCESS_STATE_BOUND_TOP = 3;
 
     /** @hide Process is hosting a foreground service. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4;
 
     /** @hide Process is hosting a foreground service due to a system binding. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 5;
 
     /** @hide Process is important to the user, and something they are aware of. */
     public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 6;
 
     /** @hide Process is important to the user, but not something they are aware of. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 7;
 
     /** @hide Process is in the background transient so we will try to keep running. */
@@ -531,14 +530,14 @@ public class ActivityManager {
     /** @hide Process is in the background running a service.  Unlike oom_adj, this level
      * is used for both the normal running in background state and the executing
      * operations state. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_SERVICE = 10;
 
     /** @hide Process is in the background running a receiver.   Note that from the
      * perspective of oom_adj, receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_RECEIVER = 11;
 
     /** @hide Same as {@link #PROCESS_STATE_TOP} but while device is sleeping. */
@@ -549,14 +548,14 @@ public class ActivityManager {
     public static final int PROCESS_STATE_HEAVY_WEIGHT = 13;
 
     /** @hide Process is in the background but hosts the home activity. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_HOME = 14;
 
     /** @hide Process is in the background but hosts the last shown activity. */
     public static final int PROCESS_STATE_LAST_ACTIVITY = 15;
 
     /** @hide Process is being cached for later use and contains activities. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PROCESS_STATE_CACHED_ACTIVITY = 16;
 
     /** @hide Process is being cached for later use and is a client of another cached
@@ -2198,7 +2197,7 @@ public class ActivityManager {
         /**
          * @return The size of the task at the point this snapshot was taken.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Point getTaskSize() {
             return mTaskSize;
         }
@@ -2740,13 +2739,13 @@ public class ActivityManager {
         public boolean lowMemory;
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long hiddenAppThreshold;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long secondaryServerThreshold;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long visibleAppThreshold;
         /** @hide */
         @UnsupportedAppUsage
@@ -3037,7 +3036,7 @@ public class ActivityManager {
          * persistent system app.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int FLAG_PERSISTENT = 1<<1;
 
         /**
@@ -3045,7 +3044,7 @@ public class ActivityManager {
          * persistent system app.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int FLAG_HAS_ACTIVITIES = 1<<2;
 
         /**
@@ -3149,7 +3148,7 @@ public class ActivityManager {
          *
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         @TestApi
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
@@ -3209,7 +3208,7 @@ public class ActivityManager {
          * will be passed to a client, use {@link #procStateToImportanceForClient}.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static @Importance int procStateToImportance(int procState) {
             if (procState == PROCESS_STATE_NONEXISTENT) {
                 return IMPORTANCE_GONE;
@@ -4168,7 +4167,7 @@ public class ActivityManager {
      * @param userid the user's id. Zero indicates the default user.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean switchUser(int userid) {
         try {
             return getService().switchUser(userid);

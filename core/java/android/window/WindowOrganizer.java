@@ -39,7 +39,7 @@ public class WindowOrganizer {
      * Apply multiple WindowContainer operations at once.
      * @param t The transaction to apply.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void applyTransaction(@NonNull WindowContainerTransaction t) {
         try {
             getWindowOrganizerController().applyTransaction(t);
@@ -57,7 +57,7 @@ public class WindowOrganizer {
      * @return An ID for the sync operation which will later be passed to transactionReady callback.
      *         This lets the caller differentiate overlapping sync operations.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public int applySyncTransaction(@NonNull WindowContainerTransaction t,
             @NonNull WindowContainerTransactionCallback callback) {
         try {
@@ -76,7 +76,7 @@ public class WindowOrganizer {
      *         was provided.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @NonNull
     public IBinder startTransition(int type, @Nullable IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
@@ -97,7 +97,7 @@ public class WindowOrganizer {
      * @hide
      */
     @SuppressLint("ExecutorRegistration")
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public int finishTransition(@NonNull IBinder transitionToken,
             @Nullable WindowContainerTransaction t,
             @Nullable WindowContainerTransactionCallback callback) {
@@ -135,7 +135,7 @@ public class WindowOrganizer {
      * Register an ITransitionPlayer to handle transition animations.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void registerTransitionPlayer(@Nullable ITransitionPlayer player) {
         try {
             getWindowOrganizerController().registerTransitionPlayer(player);
@@ -144,7 +144,7 @@ public class WindowOrganizer {
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     IWindowOrganizerController getWindowOrganizerController() {
         return IWindowOrganizerControllerSingleton.get();
     }

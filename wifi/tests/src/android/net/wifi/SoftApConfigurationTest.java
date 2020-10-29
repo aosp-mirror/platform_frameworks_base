@@ -19,16 +19,19 @@ package android.net.wifi;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
 import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
+import android.util.SparseIntArray;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -363,5 +366,136 @@ public class SoftApConfigurationTest {
         assertThat(wifiConfig_sae_transition.getAuthType())
                 .isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
         assertThat(wifiConfig_sae_transition.preSharedKey).isEqualTo("secretsecret");
+    }
+
+    @Test
+    public void testDualBands() {
+        int[] dual_bands = new int[2];
+        dual_bands[0] = SoftApConfiguration.BAND_2GHZ;
+        dual_bands[1] = SoftApConfiguration.BAND_5GHZ;
+        SoftApConfiguration dual_bands_config = new SoftApConfiguration.Builder()
+                .setSsid("ssid")
+                .setBands(dual_bands)
+                .build();
+        assertTrue(Arrays.equals(dual_bands, dual_bands_config.getBands()));
+        assertThat(dual_bands_config.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
+    }
+
+    @Test
+    public void testDualChannels() {
+        int[] expected_dual_bands = new int[2];
+        expected_dual_bands[0] = SoftApConfiguration.BAND_2GHZ;
+        expected_dual_bands[1] = SoftApConfiguration.BAND_5GHZ;
+        SparseIntArray dual_channels = new SparseIntArray(2);
+        dual_channels.put(SoftApConfiguration.BAND_5GHZ, 149);
+        dual_channels.put(SoftApConfiguration.BAND_2GHZ, 2);
+        SoftApConfiguration dual_channels_config = new SoftApConfiguration.Builder()
+                .setSsid("ssid")
+                .setChannels(dual_channels)
+                .build();
+        assertTrue(Arrays.equals(expected_dual_bands, dual_channels_config.getBands()));
+        assertThat(dual_channels_config.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
+        assertTrue(dual_channels.toString().equals(dual_channels_config.getChannels().toString()));
+        assertThat(dual_channels_config.getChannel()).isEqualTo(2);
+    }
+
+    @Test
+    public void testInvalidBandWhenSetBands() {
+        boolean isIllegalArgumentExceptionHappened = false;
+        int[] dual_bands = new int[2];
+        dual_bands[0] = SoftApConfiguration.BAND_2GHZ;
+        dual_bands[1] = -1;
+        try {
+            SoftApConfiguration dual_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setBands(dual_bands)
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
+
+        try {
+            SoftApConfiguration dual_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setBands(new int[0])
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
+
+        try {
+            SoftApConfiguration dual_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setBands(new int[3])
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
+    }
+
+    @Test
+    public void testInvalidConfigWhenSetChannels() {
+        boolean isIllegalArgumentExceptionHappened = false;
+        SparseIntArray invalid_channels = new SparseIntArray();
+        try {
+            SoftApConfiguration zero_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setChannels(invalid_channels)
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
+
+        try {
+            invalid_channels.clear();
+            invalid_channels.put(SoftApConfiguration.BAND_2GHZ, 2);
+            invalid_channels.put(SoftApConfiguration.BAND_5GHZ, 11);
+            SoftApConfiguration invalid_band_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setChannels(invalid_channels)
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
+
+        try {
+            invalid_channels.clear();
+            invalid_channels.put(SoftApConfiguration.BAND_2GHZ, 2);
+            invalid_channels.put(SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ,
+                    149);
+            SoftApConfiguration invalid_dual_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setChannels(invalid_channels)
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
+
+        try {
+            invalid_channels.clear();
+            invalid_channels.put(SoftApConfiguration.BAND_2GHZ, 2);
+            invalid_channels.put(SoftApConfiguration.BAND_5GHZ, 149);
+            invalid_channels.put(SoftApConfiguration.BAND_6GHZ, 2);
+            SoftApConfiguration three_channels_config = new SoftApConfiguration.Builder()
+                    .setSsid("ssid")
+                    .setChannels(invalid_channels)
+                    .build();
+            isIllegalArgumentExceptionHappened = false;
+        } catch (IllegalArgumentException iae) {
+            isIllegalArgumentExceptionHappened = true;
+        }
+        assertTrue(isIllegalArgumentExceptionHappened);
     }
 }

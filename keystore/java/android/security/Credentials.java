@@ -17,6 +17,7 @@
 package android.security;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import com.android.org.bouncycastle.util.io.pem.PemObject;
 import com.android.org.bouncycastle.util.io.pem.PemReader;
@@ -137,7 +138,7 @@ public class Credentials {
      * Convert objects to a PEM format which is used for
      * CA_CERTIFICATE and USER_CERTIFICATE entries.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static byte[] convertToPem(Certificate... objects)
             throws IOException, CertificateEncodingException {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();

@@ -26,6 +26,7 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.hardware.camera2.utils.TypeReference;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -108,7 +109,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Key(String name, Class<T> type, long vendorId) {
             mKey = new CameraMetadataNative.Key<T>(name, type, vendorId);
         }
@@ -229,7 +230,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private static final ArraySet<Surface> mEmptySurfaceSet = new ArraySet<Surface>();
 
     private String mLogicalCameraId;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private CameraMetadataNative mLogicalCameraSettings;
     private final HashMap<String, CameraMetadataNative> mPhysicalCameraSettings =
             new HashMap<String, CameraMetadataNative>();
