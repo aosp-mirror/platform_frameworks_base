@@ -66,5 +66,8 @@ filegroup {
         ":framework-annotations",
         "java/android/net/util/NetworkConstants.java",
     ],
-    visibility: ["//frameworks/base/packages/Tethering"],
+    visibility: [
+        "//frameworks/base/packages/Tethering",
+        "//packages/modules/Connectivity/Tethering"
+    ],
 }

@@ -77,6 +77,7 @@ android_library {
     defaults: ["TetheringTestsDefaults"],
     visibility: [
         "//frameworks/base/packages/Tethering/tests/integration",
+        "//packages/modules/Connectivity/Tethering/tests/integration",
     ]
 }
 
