@@ -5703,14 +5703,14 @@ public class TelephonyManager {
     public static final int ERI_ICON_MODE_FLASH = 1;
 
     /**
-     * Returns the CDMA ERI icon index to display. The number is assigned by
-     * 3GPP2 C.R1001-H v1.0 Table 8.1-1. Additionally carriers define their own ERI icon index.
+     * Returns the CDMA ERI icon display number. The number is assigned by
+     * 3GPP2 C.R1001-H v1.0 Table 8.1-1. Additionally carriers define their own ERI display numbers.
      * Defined values are {@link #ERI_ON}, {@link #ERI_OFF}, and {@link #ERI_FLASH}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public @EriIconIndex int getCdmaEnhancedRoamingIndicatorIconIndex() {
+    public @EriIconIndex int getCdmaEnhancedRoamingIndicatorDisplayNumber() {
         return getCdmaEriIconIndex(getSubId());
     }
 
