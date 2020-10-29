@@ -421,6 +421,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     // Current transformation being applied.
     float mGlobalScale=1;
+    float mLastGlobalScale=1;
     float mInvGlobalScale=1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
@@ -5301,6 +5302,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    private void updateGlobalScaleIfNeeded() {
+        if (mLastGlobalScale != mGlobalScale) {
+            getPendingTransaction().setMatrix(getSurfaceControl(),
+                mGlobalScale, 0, 0, mGlobalScale);
+            mLastGlobalScale = mGlobalScale;
+        }
+    }
+
     @Override
     void prepareSurfaces() {
         mIsDimming = false;
@@ -5308,6 +5317,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateSurfacePositionNonOrganized();
         // Send information to SufaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();
+        updateGlobalScaleIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(SurfaceControl.getGlobalTransaction(), true);
         super.prepareSurfaces();
