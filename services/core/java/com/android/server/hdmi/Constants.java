@@ -66,10 +66,10 @@ final class Constants {
     public static final int ADDR_PLAYBACK_3 = 11;
 
     /** Logical address reserved for future usage */
-    public static final int ADDR_RESERVED_1 = 12;
+    public static final int ADDR_BACKUP_1 = 12;
 
     /** Logical address reserved for future usage */
-    public static final int ADDR_RESERVED_2 = 13;
+    public static final int ADDR_BACKUP_2 = 13;
 
     /** Logical address for TV other than the one assigned with {@link #ADDR_TV} */
     public static final int ADDR_SPECIFIC_USE = 14;

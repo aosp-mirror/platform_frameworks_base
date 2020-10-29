@@ -259,7 +259,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void mayDisableSystemAudioAndARC(int address) {
-        if (HdmiUtils.getTypeFromAddress(address) != HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+        if (HdmiUtils.isEligibleAddressForDevice(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM, address)) {
             return;
         }
 
