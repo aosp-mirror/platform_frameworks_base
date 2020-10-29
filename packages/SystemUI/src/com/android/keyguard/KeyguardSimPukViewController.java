@@ -267,8 +267,8 @@ public class KeyguardSimPukViewController
                         }
                         mView.resetPasswordText(true /* animate */,
                                 /* announce */
-                                result.getType() != PinResult.PIN_RESULT_TYPE_SUCCESS);
-                        if (result.getType() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
+                                result.getResult() != PinResult.PIN_RESULT_TYPE_SUCCESS);
+                        if (result.getResult() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
                             mKeyguardUpdateMonitor.reportSimUnlocked(mSubId);
                             mRemainingAttempts = -1;
                             mShowDefaultMessage = true;
@@ -277,7 +277,7 @@ public class KeyguardSimPukViewController
                                     true, KeyguardUpdateMonitor.getCurrentUser());
                         } else {
                             mShowDefaultMessage = false;
-                            if (result.getType() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
+                            if (result.getResult() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
                                 // show message
                                 mMessageAreaController.setMessage(mView.getPukPasswordErrorMessage(
                                         result.getAttemptsRemaining(), false,
@@ -390,23 +390,15 @@ public class KeyguardSimPukViewController
 
         @Override
         public void run() {
-            if (DEBUG) Log.v(TAG, "call supplyPukReportResult()");
-            TelephonyManager telephonyManager = mTelephonyManager.createForSubscriptionId(mSubId);
-            final PinResult result = telephonyManager.supplyPukReportPinResult(mPuk, mPin);
-            if (result == null) {
-                Log.e(TAG, "Error result for supplyPukReportResult.");
-                mView.post(() -> onSimLockChangedResponse(PinResult.getDefaultFailedResult()));
-            } else {
-                if (DEBUG) {
-                    Log.v(TAG, "supplyPukReportResult returned: " + result.toString());
-                }
-                mView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimLockChangedResponse(result);
-                    }
-                });
+            if (DEBUG) {
+                Log.v(TAG, "call supplyIccLockPuk(subid=" + mSubId + ")");
             }
+            TelephonyManager telephonyManager = mTelephonyManager.createForSubscriptionId(mSubId);
+            final PinResult result = telephonyManager.supplyIccLockPuk(mPuk, mPin);
+            if (DEBUG) {
+                Log.v(TAG, "supplyIccLockPuk returned: " + result.toString());
+            }
+            mView.post(() -> onSimLockChangedResponse(result));
         }
     }
 
