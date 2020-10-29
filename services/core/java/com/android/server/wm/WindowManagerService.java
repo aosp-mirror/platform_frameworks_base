@@ -1216,7 +1216,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
-        mUseBLAST = true;
+        mUseBLAST = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
+                    WM_USE_BLAST_ADAPTER_FLAG, false);
 
         mSyncEngine = new BLASTSyncEngine(this);
 
