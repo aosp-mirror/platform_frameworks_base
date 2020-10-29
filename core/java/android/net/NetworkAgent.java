@@ -353,10 +353,11 @@ public abstract class NetworkAgent {
 
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         // The subtype can be changed with (TODO) setLegacySubtype, but it starts
-        // with the type and an empty description.
+        // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
         final NetworkInfo ni = new NetworkInfo(config.legacyType, 0, config.legacyTypeName, "");
         ni.setIsAvailable(true);
-        ni.setExtraInfo(config.getLegacyExtraInfo());
+        ni.setDetailedState(NetworkInfo.DetailedState.CONNECTING, null /* reason */,
+                config.getLegacyExtraInfo());
         return ni;
     }
 
