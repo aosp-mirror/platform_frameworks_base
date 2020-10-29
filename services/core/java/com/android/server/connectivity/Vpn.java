@@ -201,7 +201,7 @@ public class Vpn {
     private final Context mContext;
     @VisibleForTesting final Dependencies mDeps;
     private final NetworkInfo mNetworkInfo;
-    private int mLegacyState = LegacyVpnInfo.STATE_DISCONNECTED;
+    private int mLegacyState;
     @VisibleForTesting protected String mPackage;
     private int mOwnerUID;
     private boolean mIsPackageTargetingAtLeastQ;
@@ -416,6 +416,7 @@ public class Vpn {
             Log.wtf(TAG, "Problem registering observer", e);
         }
 
+        mLegacyState = LegacyVpnInfo.STATE_DISCONNECTED;
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_VPN, 0 /* subtype */, NETWORKTYPE,
                 "" /* subtypeName */);
         mNetworkCapabilities = new NetworkCapabilities();
@@ -1245,6 +1246,7 @@ public class Vpn {
         // behaves the same as when it uses the default network.
         mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
 
+        mLegacyState = LegacyVpnInfo.STATE_CONNECTING;
         mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
 
         NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig();
