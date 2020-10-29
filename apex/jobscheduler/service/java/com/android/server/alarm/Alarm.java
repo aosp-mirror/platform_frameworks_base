@@ -31,6 +31,8 @@ import android.util.IndentingPrintWriter;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -39,17 +41,23 @@ import java.util.Date;
  * expires. The timer will wake up the device if the alarm is a "wakeup" alarm.
  */
 class Alarm {
-    private static final int NUM_POLICIES = 2;
+    @VisibleForTesting
+    public static final int NUM_POLICIES = 3;
     /**
      * Index used to store the time the alarm was requested to expire. To be used with
-     * {@link #setPolicyElapsed(int, long)}
+     * {@link #setPolicyElapsed(int, long)}.
      */
     public static final int REQUESTER_POLICY_INDEX = 0;
     /**
      * Index used to store the earliest time the alarm can expire based on app-standby policy.
-     * To be used with {@link #setPolicyElapsed(int, long)}
+     * To be used with {@link #setPolicyElapsed(int, long)}.
      */
     public static final int APP_STANDBY_POLICY_INDEX = 1;
+    /**
+     * Index used to store the earliest time the alarm can expire based on the device's doze policy.
+     * To be used with {@link #setPolicyElapsed(int, long)}.
+     */
+    public static final int DEVICE_IDLE_POLICY_INDEX = 2;
 
     public final int type;
     /**
@@ -128,8 +136,16 @@ class Alarm {
      * @param policyIndex The index of the policy. One of [{@link #REQUESTER_POLICY_INDEX},
      *                    {@link #APP_STANDBY_POLICY_INDEX}].
      */
-    public long getPolicyElapsed(int policyIndex) {
+    @VisibleForTesting
+    long getPolicyElapsed(int policyIndex) {
         return mPolicyWhenElapsed[policyIndex];
+    }
+
+    /**
+     * @return the time this alarm was requested to go off in the elapsed time base.
+     */
+    public long getRequestedElapsed() {
+        return mPolicyWhenElapsed[REQUESTER_POLICY_INDEX];
     }
 
     /**
@@ -205,8 +221,10 @@ class Alarm {
                 return "requester";
             case APP_STANDBY_POLICY_INDEX:
                 return "app_standby";
+            case DEVICE_IDLE_POLICY_INDEX:
+                return "device_idle";
             default:
-                return "unknown";
+                return "--unknown--";
         }
     }
 
