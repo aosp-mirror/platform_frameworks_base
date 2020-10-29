@@ -117,11 +117,6 @@ interface INetworkManagementService
     void removeRoute(int netId, in RouteInfo route);
 
     /**
-     * Set the specified MTU size
-     */
-    void setMtu(String iface, int mtu);
-
-    /**
      * Shuts down the service
      */
     void shutdown();
@@ -351,9 +346,6 @@ interface INetworkManagementService
     boolean isNetworkActive();
 
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
-
-    void setDefaultNetId(int netId);
-    void clearDefaultNetId();
 
     /**
      * Set permission for a network.

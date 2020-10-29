@@ -945,17 +945,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setMtu(String iface, int mtu) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.interfaceSetMtu(iface, mtu);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void shutdown() {
         // TODO: remove from aidl if nobody calls externally
         mContext.enforceCallingOrSelfPermission(SHUTDOWN, TAG);
@@ -2014,28 +2003,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
         try {
             mNetdService.networkAddLegacyRoute(netId, ifName, dst, nextHop, uid);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void setDefaultNetId(int netId) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkSetDefault(netId);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void clearDefaultNetId() {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkClearDefault();
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
