@@ -19,5 +19,6 @@ filegroup {
     srcs: ["jarjar-rules.txt"],
     visibility: [
         "//frameworks/base/packages/Tethering/tests:__subpackages__",
+        "//packages/modules/Connectivity/Tethering/tests:__subpackages__",
     ]
 }
