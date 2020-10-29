@@ -2181,6 +2181,10 @@
              the decor view. -->
         <attr name="windowLightNavigationBar" format="boolean" />
 
+        <!-- @hide -->
+        <attr name="windowBackgroundBlurRadius" format="dimension"/>
+
+
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
         <p>
         Defaults to {@code default}.
