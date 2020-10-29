@@ -263,9 +263,26 @@ public class WifiAwareManager {
      *
      * @return An object specifying configuration limitations of Aware.
      */
-    public Characteristics getCharacteristics() {
+    public @Nullable Characteristics getCharacteristics() {
         try {
             return mService.getCharacteristics();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the available resources of the Wi-Fi aware service: a set of parameters which specify
+     * limitations on service usage, e.g the number of data-paths which could be created..
+     *
+     * @return An object specifying the currently available resource of the Wi-Fi Aware service.
+     */
+    public @Nullable AwareResources getAvailableAwareResources() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return mService.getAvailableAwareResources();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
