@@ -257,31 +257,16 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         @Override
         public void run() {
             if (DEBUG) {
-                Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
+                Log.v(TAG, "call supplyIccLockPin(subid=" + mSubId + ")");
             }
             TelephonyManager telephonyManager =
                     ((TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE))
                             .createForSubscriptionId(mSubId);
-            final PinResult result = telephonyManager.supplyPinReportPinResult(mPin);
-            if (result == null) {
-                Log.e(TAG, "Error result for supplyPinReportResult.");
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimCheckResponse(PinResult.getDefaultFailedResult());
-                    }
-                });
-            } else {
-                if (DEBUG) {
-                    Log.v(TAG, "supplyPinReportResult returned: " + result.toString());
-                }
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimCheckResponse(result);
-                    }
-                });
+            final PinResult result = telephonyManager.supplyIccLockPin(mPin);
+            if (DEBUG) {
+                Log.v(TAG, "supplyIccLockPin returned: " + result.toString());
             }
+            post(() -> onSimCheckResponse(result));
         }
     }
 
@@ -341,8 +326,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                             }
                             resetPasswordText(true /* animate */,
                                     /* announce */
-                                    result.getType() != PinResult.PIN_RESULT_TYPE_SUCCESS);
-                            if (result.getType() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
+                                    result.getResult() != PinResult.PIN_RESULT_TYPE_SUCCESS);
+                            if (result.getResult() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
                                 Dependency.get(KeyguardUpdateMonitor.class)
                                         .reportSimUnlocked(mSubId);
                                 mRemainingAttempts = -1;
@@ -352,7 +337,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                 }
                             } else {
                                 mShowDefaultMessage = false;
-                                if (result.getType() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
+                                if (result.getResult() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
                                     if (result.getAttemptsRemaining() <= 2) {
                                         // this is getting critical - show dialog
                                         getSimRemainingAttemptsDialog(
