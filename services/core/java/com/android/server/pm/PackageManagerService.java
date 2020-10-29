@@ -2737,7 +2737,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
                 backgroundHandler,
                 (i, pm) -> new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
-                (i, pm) -> PermissionManagerService.create(context, lock),
+                (i, pm) -> PermissionManagerService.create(context),
                 (i, pm) -> new UserManagerService(context, pm,
                         new UserDataPreparer(installer, installLock, context, onlyCore),
                         lock),

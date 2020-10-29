@@ -208,7 +208,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /** Lock to protect internal data access */
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     /** Internal connection to the package manager */
     private final PackageManagerInternal mPackageManagerInt;
@@ -365,14 +365,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     };
 
-    PermissionManagerService(Context context,
-            @NonNull Object externalLock) {
-        this(context, externalLock, new Injector(context));
+    PermissionManagerService(@NonNull Context context) {
+        this(context, new Injector(context));
     }
 
     @VisibleForTesting
-    PermissionManagerService(Context context, @NonNull Object externalLock,
-            @NonNull Injector injector) {
+    PermissionManagerService(@NonNull Context context, @NonNull Injector injector) {
         mInjector = injector;
         // The package info cache is the cache for package and permission information.
         // Disable the package info and package permission caches locally but leave the
@@ -381,7 +379,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mInjector.disablePackageNamePermissionCache();
 
         mContext = context;
-        mLock = externalLock;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
@@ -440,8 +437,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * NOTE: The external lock is temporary and should be removed. This needs to be a
      * lock created by the permission manager itself.
      */
-    public static PermissionManagerServiceInternal create(Context context,
-            @NonNull Object externalLock) {
+    @NonNull
+    public static PermissionManagerServiceInternal create(@NonNull Context context) {
         final PermissionManagerServiceInternal permMgrInt =
                 LocalServices.getService(PermissionManagerServiceInternal.class);
         if (permMgrInt != null) {
@@ -450,8 +447,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         PermissionManagerService permissionService =
                 (PermissionManagerService) ServiceManager.getService("permissionmgr");
         if (permissionService == null) {
-            permissionService =
-                    new PermissionManagerService(context, externalLock);
+            permissionService = new PermissionManagerService(context);
             ServiceManager.addService("permissionmgr", permissionService);
         }
         return LocalServices.getService(PermissionManagerServiceInternal.class);
