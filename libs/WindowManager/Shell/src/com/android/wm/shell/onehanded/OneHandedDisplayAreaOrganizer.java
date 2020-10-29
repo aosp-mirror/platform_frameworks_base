@@ -30,6 +30,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
 import android.window.WindowContainerTransaction;
@@ -186,6 +187,17 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             }
             mDisplayAreaMap.remove(displayAreaInfo);
         }
+    }
+
+    @Override
+    public List<DisplayAreaAppearedInfo> registerOrganizer(int displayAreaFeature) {
+        final List<DisplayAreaAppearedInfo> displayAreaInfos =
+                super.registerOrganizer(displayAreaFeature);
+        for (int i = 0; i < displayAreaInfos.size(); i++) {
+            final DisplayAreaAppearedInfo info = displayAreaInfos.get(i);
+            onDisplayAreaAppeared(info.getDisplayAreaInfo(), info.getLeash());
+        }
+        return displayAreaInfos;
     }
 
     @Override
