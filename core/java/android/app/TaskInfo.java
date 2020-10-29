@@ -241,6 +241,13 @@ public class TaskInfo {
     }
 
     /** @hide */
+    @Nullable
+    @TestApi
+    public PictureInPictureParams getPictureInPictureParams() {
+        return pictureInPictureParams;
+    }
+
+    /** @hide */
     public void addLaunchCookie(IBinder cookie) {
         if (cookie == null || launchCookies.contains(cookie)) return;
         launchCookies.add(cookie);
