@@ -1713,7 +1713,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
 
-        mTracingThread = new HandlerThread("android.tracing", Process.THREAD_PRIORITY_BACKGROUND);
+        mTracingThread = new HandlerThread("android.tracing", Process.THREAD_PRIORITY_FOREGROUND);
         mTracingThread.start();
     }
 
