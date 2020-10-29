@@ -30,6 +30,8 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -101,9 +103,8 @@ public final class SensorPrivacyService extends SystemService {
                 mEnabled = enable;
                 FileOutputStream outputStream = null;
                 try {
-                    XmlSerializer serializer = new FastXmlSerializer();
                     outputStream = mAtomicFile.startWrite();
-                    serializer.setOutput(outputStream, StandardCharsets.UTF_8.name());
+                    TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
                     serializer.startDocument(null, true);
                     serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
                     serializer.attribute(null, XML_ATTRIBUTE_ENABLED, String.valueOf(enable));
@@ -153,8 +154,7 @@ public final class SensorPrivacyService extends SystemService {
             }
             boolean enabled;
             try (FileInputStream inputStream = mAtomicFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
                 XmlUtils.beginDocument(parser, XML_TAG_SENSOR_PRIVACY);
                 parser.next();
                 String tagName = parser.getName();
@@ -176,9 +176,8 @@ public final class SensorPrivacyService extends SystemService {
             synchronized (mLock) {
                 FileOutputStream outputStream = null;
                 try {
-                    XmlSerializer serializer = new FastXmlSerializer();
                     outputStream = mAtomicFile.startWrite();
-                    serializer.setOutput(outputStream, StandardCharsets.UTF_8.name());
+                    TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
                     serializer.startDocument(null, true);
                     serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
                     serializer.attribute(null, XML_ATTRIBUTE_ENABLED, String.valueOf(mEnabled));

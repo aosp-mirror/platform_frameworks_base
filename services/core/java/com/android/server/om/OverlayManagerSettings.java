@@ -25,6 +25,8 @@ import android.content.om.OverlayInfo;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -405,10 +407,9 @@ final class OverlayManagerSettings {
         public static void restore(@NonNull final ArrayList<SettingsItem> table,
                 @NonNull final InputStream is) throws IOException, XmlPullParserException {
 
-            try (InputStreamReader reader = new InputStreamReader(is)) {
+            {
                 table.clear();
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(reader);
+                final TypedXmlPullParser parser = Xml.resolvePullParser(is);
                 XmlUtils.beginDocument(parser, TAG_OVERLAYS);
                 int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION);
                 if (version != CURRENT_VERSION) {
@@ -465,8 +466,7 @@ final class OverlayManagerSettings {
 
         public static void persist(@NonNull final ArrayList<SettingsItem> table,
                 @NonNull final OutputStream os) throws IOException, XmlPullParserException {
-            final FastXmlSerializer xml = new FastXmlSerializer();
-            xml.setOutput(os, "utf-8");
+            final TypedXmlSerializer xml = Xml.resolveSerializer(os);
             xml.startDocument(null, true);
             xml.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             xml.startTag(null, TAG_OVERLAYS);
@@ -481,7 +481,7 @@ final class OverlayManagerSettings {
             xml.endDocument();
         }
 
-        private static void persistRow(@NonNull final FastXmlSerializer xml,
+        private static void persistRow(@NonNull final TypedXmlSerializer xml,
                 @NonNull final SettingsItem item) throws IOException {
             xml.startTag(null, TAG_ITEM);
             XmlUtils.writeStringAttribute(xml, ATTR_PACKAGE_NAME, item.mPackageName);

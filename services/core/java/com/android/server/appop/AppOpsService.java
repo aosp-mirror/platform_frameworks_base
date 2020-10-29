@@ -141,6 +141,8 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -4292,8 +4294,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 boolean success = false;
                 mUidStates.clear();
                 try {
-                    XmlPullParser parser = Xml.newPullParser();
-                    parser.setInput(stream, StandardCharsets.UTF_8.name());
+                    TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                     int type;
                     while ((type = parser.next()) != XmlPullParser.START_TAG
                             && type != XmlPullParser.END_DOCUMENT) {
@@ -4551,8 +4552,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
 
             try {
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer out = Xml.resolveSerializer(stream);
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
                 out.attribute(null, "v", String.valueOf(CURRENT_VERSION));

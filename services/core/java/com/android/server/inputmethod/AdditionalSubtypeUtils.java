@@ -25,6 +25,8 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -139,8 +141,7 @@ final class AdditionalSubtypeUtils {
         final AtomicFile subtypesFile = getAdditionalSubtypeFile(inputMethodDir);
         try {
             fos = subtypesFile.startWrite();
-            final XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, NODE_SUBTYPES);
@@ -207,8 +208,7 @@ final class AdditionalSubtypeUtils {
             return;
         }
         try (FileInputStream fis = subtypesFile.openRead()) {
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int type = parser.getEventType();
             // Skip parsing until START_TAG
             while (true) {

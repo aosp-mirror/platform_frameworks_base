@@ -47,6 +47,8 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -355,8 +357,7 @@ class UsbUserPermissionManager {
         mAccessoryPersistentPermissionMap.clear();
 
         try (FileInputStream in = mPermissionsFile.openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
 
             XmlUtils.nextElement(parser);
             while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -440,8 +441,7 @@ class UsbUserPermissionManager {
                 FileOutputStream out = null;
                 try {
                     out = mPermissionsFile.startWrite();
-                    FastXmlSerializer serializer = new FastXmlSerializer();
-                    serializer.setOutput(out, StandardCharsets.UTF_8.name());
+                    TypedXmlSerializer serializer = Xml.resolveSerializer(out);
                     serializer.startDocument(null, true);
                     serializer.startTag(null, "permissions");
 

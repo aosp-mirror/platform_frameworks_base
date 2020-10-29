@@ -95,6 +95,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -3075,8 +3077,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         int N;
 
         try {
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
             out.startTag(null, "gs");
             out.attribute(null, "version", String.valueOf(CURRENT_VERSION));
@@ -3138,8 +3139,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             List<LoadedWidgetState> outLoadedWidgets) {
         int version = -1;
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
             int legacyProviderIndex = -1;
             int legacyHostIndex = -1;

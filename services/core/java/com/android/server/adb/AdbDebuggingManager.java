@@ -64,6 +64,8 @@ import android.service.adb.AdbDebuggingManagerProto;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -1935,8 +1937,7 @@ public class AdbDebuggingManager {
                 return keyMap;
             }
             try (FileInputStream keyStream = mAtomicKeyFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(keyStream);
                 // Check for supported keystore version.
                 XmlUtils.beginDocument(parser, XML_KEYSTORE_START_TAG);
                 if (parser.next() != XmlPullParser.END_DOCUMENT) {
@@ -2007,8 +2008,7 @@ public class AdbDebuggingManager {
                 return keyMap;
             }
             try (FileInputStream keyStream = mAtomicKeyFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(keyStream);
                 XmlUtils.beginDocument(parser, XML_TAG_ADB_KEY);
                 while (parser.next() != XmlPullParser.END_DOCUMENT) {
                     String tagName = parser.getName();
@@ -2058,8 +2058,7 @@ public class AdbDebuggingManager {
                 return trustedNetworks;
             }
             try (FileInputStream keyStream = mAtomicKeyFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(keyStream);
                 // Check for supported keystore version.
                 XmlUtils.beginDocument(parser, XML_KEYSTORE_START_TAG);
                 if (parser.next() != XmlPullParser.END_DOCUMENT) {
@@ -2144,9 +2143,8 @@ public class AdbDebuggingManager {
             }
             FileOutputStream keyStream = null;
             try {
-                XmlSerializer serializer = new FastXmlSerializer();
                 keyStream = mAtomicKeyFile.startWrite();
-                serializer.setOutput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer serializer = Xml.resolveSerializer(keyStream);
                 serializer.startDocument(null, true);
 
                 serializer.startTag(null, XML_KEYSTORE_START_TAG);

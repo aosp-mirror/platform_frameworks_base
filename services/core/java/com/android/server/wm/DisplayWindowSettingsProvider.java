@@ -28,6 +28,8 @@ import android.app.WindowConfiguration;
 import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
@@ -280,8 +282,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         FileData fileData = new FileData();
         boolean success = false;
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -419,8 +420,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
 
         boolean success = false;
         try {
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
 
             out.startTag(null, "display-settings");
