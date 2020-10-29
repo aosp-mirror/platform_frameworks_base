@@ -19,6 +19,8 @@ package android.net.ipmemorystore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.net.quirks.IPv6ProvisioningLossQuirk;
+import android.net.quirks.IPv6ProvisioningLossQuirkParcelable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -46,7 +48,7 @@ public class ParcelableTests {
         builder.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
         // lease will expire in two hours
         builder.setAssignedV4AddressExpiry(System.currentTimeMillis() + 7_200_000);
-        // groupHint stays null this time around
+        // cluster stays null this time around
         builder.setDnsAddresses(Collections.emptyList());
         builder.setMtu(18);
         in = builder.build();
@@ -69,7 +71,7 @@ public class ParcelableTests {
         // Verify that this test does not miss any new field added later.
         // If any field is added to NetworkAttributes it must be tested here for parceling
         // roundtrip.
-        assertEquals(5, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
+        assertEquals(6, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
                 .filter(f -> !Modifier.isStatic(f.getModifiers())).count());
     }
 
@@ -102,6 +104,22 @@ public class ParcelableTests {
         assertEquals(in.l2Key1, out.l2Key1);
         assertEquals(in.l2Key2, out.l2Key2);
         assertEquals(in.confidence, out.confidence, 0.01f /* delta */);
+    }
+
+    @Test
+    public void testIPv6ProvisioningLossQuirkParceling() throws Exception {
+        final NetworkAttributes.Builder builder = new NetworkAttributes.Builder();
+        final IPv6ProvisioningLossQuirkParcelable parcelable =
+                new IPv6ProvisioningLossQuirkParcelable();
+        final long expiry = System.currentTimeMillis() + 7_200_000;
+
+        parcelable.detectionCount = 3;
+        parcelable.quirkExpiry = expiry; // quirk info will expire in two hours
+        builder.setIpv6ProvLossQuirk(IPv6ProvisioningLossQuirk.fromStableParcelable(parcelable));
+        final NetworkAttributes in = builder.build();
+
+        final NetworkAttributes out = new NetworkAttributes(parcelingRoundTrip(in.toParcelable()));
+        assertEquals(out.ipv6ProvLossQuirk, in.ipv6ProvLossQuirk);
     }
 
     private <T extends Parcelable> T parcelingRoundTrip(final T in) throws Exception {
