@@ -255,7 +255,7 @@ class IconManager @Inject constructor(
     private fun createPeopleAvatar(entry: NotificationEntry): Icon? {
         var ic: Icon? = null
 
-        val shortcut = entry.ranking.shortcutInfo
+        val shortcut = entry.ranking.conversationShortcutInfo
         if (shortcut != null) {
             ic = launcherApps.getShortcutIcon(shortcut)
         }
