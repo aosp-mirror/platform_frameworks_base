@@ -16,13 +16,20 @@
 
 package android.window;
 
+import android.content.pm.ParceledListSlice;
+import android.window.DisplayAreaAppearedInfo;
 import android.window.IDisplayAreaOrganizer;
 
 /** @hide */
 interface IDisplayAreaOrganizerController {
 
-    /** Register a DisplayAreaOrganizer to manage display areas for a given feature. */
-    void registerOrganizer(in IDisplayAreaOrganizer organizer, int displayAreaFeature);
+    /**
+     * Registers a DisplayAreaOrganizer to manage display areas for a given feature.
+     *
+     * @return a list of display areas that should be managed by the organizer.
+     */
+    ParceledListSlice<DisplayAreaAppearedInfo> registerOrganizer(in IDisplayAreaOrganizer organizer,
+        int displayAreaFeature);
 
     /**
      * Unregisters a previously registered display area organizer.
