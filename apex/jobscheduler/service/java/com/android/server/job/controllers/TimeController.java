@@ -50,6 +50,9 @@ public final class TimeController extends StateController {
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
+    @VisibleForTesting
+    static final long DELAY_COALESCE_TIME_MS = 30_000L;
+
     /** Deadline alarm tag for logging purposes */
     private final String DEADLINE_TAG = "*job.deadline*";
     /** Delay alarm tag for logging purposes */
@@ -57,6 +60,7 @@ public final class TimeController extends StateController {
 
     private long mNextJobExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;
+    private volatile long mLastFiredDelayExpiredElapsedMillis;
 
     private final boolean mChainedAttributionEnabled;
 
@@ -273,7 +277,6 @@ public final class TimeController extends StateController {
     @VisibleForTesting
     void checkExpiredDelaysAndResetAlarm() {
         synchronized (mLock) {
-            final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             long nextDelayTime = Long.MAX_VALUE;
             int nextDelayUid = 0;
             String nextDelayPackageName = null;
@@ -284,7 +287,7 @@ public final class TimeController extends StateController {
                 if (!job.hasTimingDelayConstraint()) {
                     continue;
                 }
-                if (evaluateTimingDelayConstraint(job, nowElapsedMillis)) {
+                if (evaluateTimingDelayConstraint(job, sElapsedRealtimeClock.millis())) {
                     if (canStopTrackingJobLocked(job)) {
                         it.remove();
                     }
@@ -356,7 +359,11 @@ public final class TimeController extends StateController {
      * This alarm <b>will not</b> wake up the phone.
      */
     private void setDelayExpiredAlarmLocked(long alarmTimeElapsedMillis, WorkSource ws) {
-        alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
+        // To avoid spamming AlarmManager in the case where many delay times are a few milliseconds
+        // apart, make sure the alarm is set no earlier than DELAY_COALESCE_TIME_MS since the last
+        // time a delay alarm went off and that the alarm is not scheduled for the past.
+        alarmTimeElapsedMillis = maybeAdjustAlarmTime(Math.max(alarmTimeElapsedMillis,
+                mLastFiredDelayExpiredElapsedMillis + DELAY_COALESCE_TIME_MS));
         if (mNextDelayExpiredElapsedMillis == alarmTimeElapsedMillis) {
             return;
         }
@@ -416,6 +423,7 @@ public final class TimeController extends StateController {
             if (DEBUG) {
                 Slog.d(TAG, "Delay-expired alarm fired");
             }
+            mLastFiredDelayExpiredElapsedMillis = sElapsedRealtimeClock.millis();
             checkExpiredDelaysAndResetAlarm();
         }
     };
@@ -428,6 +436,9 @@ public final class TimeController extends StateController {
 
         pw.print("Next delay alarm in ");
         TimeUtils.formatDuration(mNextDelayExpiredElapsedMillis, nowElapsed, pw);
+        pw.println();
+        pw.print("Last delay alarm fired @ ");
+        TimeUtils.formatDuration(nowElapsed, mLastFiredDelayExpiredElapsedMillis, pw);
         pw.println();
         pw.print("Next deadline alarm in ");
         TimeUtils.formatDuration(mNextJobExpiredElapsedMillis, nowElapsed, pw);
