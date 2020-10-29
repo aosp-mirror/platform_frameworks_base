@@ -646,8 +646,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public boolean isHardwareDetected(int sensorId) {
-        final IBiometricsFingerprint daemon = getDaemon();
-        return daemon != null;
+        return getDaemon() != null;
     }
 
     @Override

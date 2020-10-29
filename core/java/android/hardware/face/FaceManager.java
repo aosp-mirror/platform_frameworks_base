@@ -419,6 +419,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      *
      * @see com.android.server.locksettings.LockSettingsService
      *
+     * TODO(b/171335732): should take userId
+     *
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
@@ -426,7 +428,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mGenerateChallengeCallback = callback;
-                mService.generateChallenge(mToken, sensorId, mServiceReceiver,
+                mService.generateChallenge(mToken, sensorId, 0 /* userId */, mServiceReceiver,
                         mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -470,13 +472,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     /**
      * Invalidates the current challenge.
      *
+     * TODO(b/171335732): should take userId and challenge
+     *
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void revokeChallenge(int sensorId) {
         if (mService != null) {
             try {
-                mService.revokeChallenge(mToken, sensorId, mContext.getOpPackageName());
+                mService.revokeChallenge(mToken, sensorId, 0 /* userId */,
+                        mContext.getOpPackageName(), 0 /* challenge */);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
