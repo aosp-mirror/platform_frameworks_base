@@ -2431,9 +2431,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         try {
             if (VDBG || DDBG) log("Setting MTU size: " + iface + ", " + mtu);
-            mNMS.setMtu(iface, mtu);
-        } catch (Exception e) {
-            Slog.e(TAG, "exception in setMtu()" + e);
+            mNetd.interfaceSetMtu(iface, mtu);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "exception in interfaceSetMtu()" + e);
         }
     }
 
@@ -6700,11 +6700,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         try {
             if (null != newNetwork) {
-                mNMS.setDefaultNetId(newNetwork.network.netId);
+                mNetd.networkSetDefault(newNetwork.network.netId);
             } else {
-                mNMS.clearDefaultNetId();
+                mNetd.networkClearDefault();
             }
-        } catch (Exception e) {
+        } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception setting default network :" + e);
         }
 
