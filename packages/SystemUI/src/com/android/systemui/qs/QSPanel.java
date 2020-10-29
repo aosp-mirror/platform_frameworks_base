@@ -480,7 +480,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
                 }
             }
             mTileLayout = newLayout;
-            newLayout.setListening(mListening);
             if (needsDynamicRowsAndColumns()) {
                 newLayout.setMinRows(horizontal ? 2 : 1);
                 // Let's use 3 columns to match the current layout
@@ -496,6 +495,14 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
             return true;
         }
         return false;
+    }
+
+    /**
+     * Sets the listening state of the current layout to the state of the view. Used after
+     * switching layouts.
+     */
+    public void reSetLayoutListening() {
+        mTileLayout.setListening(mListening);
     }
 
     private void updateHorizontalLinearLayoutMargins() {
