@@ -252,7 +252,7 @@ public final class LegacyPermissionState {
      */
     public static final class PermissionState {
         @NonNull
-        private final BasePermission mPermission;
+        private final String mName;
 
         private final boolean mGranted;
 
@@ -261,30 +261,20 @@ public final class LegacyPermissionState {
         /**
          * Create a new instance of this class.
          *
-         * @param permission the {@link BasePermission} for the permission
+         * @param name the name of the permission
          * @param granted whether the permission is granted
          * @param flags the permission flags
          */
-        public PermissionState(@NonNull BasePermission permission, boolean granted, int flags) {
-            mPermission = permission;
+        public PermissionState(@NonNull String name, boolean granted, int flags) {
+            mName = name;
             mGranted = granted;
             mFlags = flags;
         }
 
         private PermissionState(@NonNull PermissionState other) {
-            mPermission = other.mPermission;
+            mName = other.mName;
             mGranted = other.mGranted;
             mFlags = other.mFlags;
-        }
-
-        /**
-         * Get the {@link BasePermission} for the permission.
-         *
-         * @return the {@link BasePermission}
-         */
-        @NonNull
-        public BasePermission getPermission() {
-            return mPermission;
         }
 
         /**
@@ -294,7 +284,7 @@ public final class LegacyPermissionState {
          */
         @NonNull
         public String getName() {
-            return mPermission.getName();
+            return mName;
         }
 
         /**
