@@ -18,6 +18,7 @@ package android.util.imetracing;
 
 import static android.os.Build.IS_USER;
 
+import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -163,6 +164,14 @@ class ImeTracingServerImpl extends ImeTracing {
         }
     }
 
+    @GuardedBy("mEnabledLock")
+    @Override
+    public void writeTracesToFiles() {
+        synchronized (mEnabledLock) {
+            writeTracesToFilesLocked();
+        }
+    }
+
     private void writeTracesToFilesLocked() {
         try {
             ProtoOutputStream clientsProto = new ProtoOutputStream();
@@ -178,13 +187,16 @@ class ImeTracingServerImpl extends ImeTracing {
             immsProto.write(InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER,
                     MAGIC_NUMBER_IMMS_VALUE);
             mBufferImms.writeTraceToFile(mTraceFileImms, immsProto);
+
+            resetBuffers();
         } catch (IOException e) {
             Log.e(TAG, "Unable to write buffer to file", e);
         }
     }
 
     @GuardedBy("mEnabledLock")
-    private void startTrace(PrintWriter pw) {
+    @Override
+    public void startTrace(@Nullable PrintWriter pw) {
         if (IS_USER) {
             Log.w(TAG, "Warn: Tracing is not supported on user builds.");
             return;
@@ -196,15 +208,21 @@ class ImeTracingServerImpl extends ImeTracing {
                 return;
             }
 
-            pw.println("Starting tracing in " + TRACE_DIRNAME + ": " + TRACE_FILENAME_CLIENTS
+            logAndPrintln(pw, "Starting tracing in " + TRACE_DIRNAME + ": " + TRACE_FILENAME_CLIENTS
                     + ", " + TRACE_FILENAME_IMS + ", " + TRACE_FILENAME_IMMS);
             sEnabled = true;
             resetBuffers();
         }
     }
 
+    @Override
+    public void stopTrace(@Nullable PrintWriter pw) {
+        stopTrace(pw, true /* writeToFile */);
+    }
+
     @GuardedBy("mEnabledLock")
-    private void stopTrace(PrintWriter pw) {
+    @Override
+    public void stopTrace(@Nullable PrintWriter pw, boolean writeToFile) {
         if (IS_USER) {
             Log.w(TAG, "Warn: Tracing is not supported on user builds.");
             return;
@@ -216,12 +234,13 @@ class ImeTracingServerImpl extends ImeTracing {
                 return;
             }
 
-            pw.println("Stopping tracing and writing traces in " + TRACE_DIRNAME + ": "
+            logAndPrintln(pw, "Stopping tracing and writing traces in " + TRACE_DIRNAME + ": "
                     + TRACE_FILENAME_CLIENTS + ", " + TRACE_FILENAME_IMS + ", "
                     + TRACE_FILENAME_IMMS);
             sEnabled = false;
-            writeTracesToFilesLocked();
-            resetBuffers();
+            if (writeToFile) {
+                writeTracesToFilesLocked();
+            }
         }
     }
 
