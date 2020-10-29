@@ -639,10 +639,12 @@ jobjectArray FilterCallback::getMmtpRecordEvent(
         jlong firstMbInSlice = (eventsExt.size() > i)
                 ? static_cast<jint>(eventsExt[i].mmtpRecord().firstMbInSlice)
                 : static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
+        jlong tsIndexMask = (eventsExt.size() > i)
+                ? static_cast<jint>(eventsExt[i].mmtpRecord().tsIndexMask) : 0;
 
         jobject obj =
                 env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
-                        mpuSequenceNumber, pts, firstMbInSlice);
+                        mpuSequenceNumber, pts, firstMbInSlice, tsIndexMask);
         env->SetObjectArrayElement(arr, i, obj);
     }
     return arr;
