@@ -16,6 +16,7 @@ cc_binary_host {
 
     static_libs: [
         "libbase",
+        "libbinder",
         "libinput",
         "libutils",
         "libcutils",
