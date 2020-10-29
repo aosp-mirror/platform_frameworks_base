@@ -20,6 +20,9 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEV
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -32,16 +35,17 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
-import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
 import android.view.inputmethod.InputMethodInfo;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -51,18 +55,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class OverlayPackagesProviderTest extends AndroidTestCase {
+/**
+ * Run this test with:
+ *
+ * {@code atest FrameworksServicesTests:com.android.server.devicepolicy.OwnersTest}
+ *
+ */
+@RunWith(AndroidJUnit4.class)
+public class OverlayPackagesProviderTest {
     private static final String TEST_DPC_PACKAGE_NAME = "dpc.package.name";
     private static final ComponentName TEST_MDM_COMPONENT_NAME = new ComponentName(
             TEST_DPC_PACKAGE_NAME, "pc.package.name.DeviceAdmin");
     private static final int TEST_USER_ID = 123;
 
-    private @Mock
-    Resources mResources;
-    @Mock
-    private OverlayPackagesProvider.Injector mInjector;
-    private @Mock
-    Context mTestContext;
+    private @Mock Resources mResources;
+
+    private @Mock OverlayPackagesProvider.Injector mInjector;
+    private @Mock Context mTestContext;
     private Resources mRealResources;
 
     private FakePackageManager mPackageManager;
@@ -256,12 +265,12 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
         ArrayList<String> required = getStringArrayInRealResources(requiredId);
         ArrayList<String> disallowed = getStringArrayInRealResources(disallowedId);
         required.retainAll(disallowed);
-        assertTrue(required.isEmpty());
+        assertThat(required.isEmpty()).isTrue();
     }
 
     private void verifyAppsAreNonRequired(String action, String... appArray) {
-        assertEquals(setFromArray(appArray),
-                mHelper.getNonRequiredApps(TEST_MDM_COMPONENT_NAME, TEST_USER_ID, action));
+        assertThat(mHelper.getNonRequiredApps(TEST_MDM_COMPONENT_NAME, TEST_USER_ID, action))
+                .containsExactlyElementsIn(setFromArray(appArray));
     }
 
     private void setRequiredAppsManagedDevice(String... apps) {
@@ -348,19 +357,19 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
     class FakePackageManager extends MockPackageManager {
         @Override
         public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int flags, int userId) {
-            assertTrue("Expected an intent with action ACTION_MAIN",
-                    Intent.ACTION_MAIN.equals(intent.getAction()));
-            assertEquals("Expected an intent with category CATEGORY_LAUNCHER",
-                    setFromArray(Intent.CATEGORY_LAUNCHER), intent.getCategories());
-            assertTrue("Expected the flag MATCH_UNINSTALLED_PACKAGES",
-                    (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0);
-            assertTrue("Expected the flag MATCH_DISABLED_COMPONENTS",
-                    (flags & PackageManager.MATCH_DISABLED_COMPONENTS) != 0);
-            assertTrue("Expected the flag MATCH_DIRECT_BOOT_AWARE",
-                    (flags & PackageManager.MATCH_DIRECT_BOOT_AWARE) != 0);
-            assertTrue("Expected the flag MATCH_DIRECT_BOOT_UNAWARE",
-                    (flags & PackageManager.MATCH_DIRECT_BOOT_UNAWARE) != 0);
-            assertEquals(userId, TEST_USER_ID);
+            assertWithMessage("Expected an intent with action ACTION_MAIN")
+                    .that(Intent.ACTION_MAIN.equals(intent.getAction())).isTrue();
+            assertWithMessage("Expected an intent with category CATEGORY_LAUNCHER")
+                    .that(intent.getCategories()).containsExactly(Intent.CATEGORY_LAUNCHER);
+            assertWithMessage("Expected the flag MATCH_UNINSTALLED_PACKAGES")
+                    .that((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES)).isNotEqualTo(0);
+            assertWithMessage("Expected the flag MATCH_DISABLED_COMPONENTS")
+                    .that((flags & PackageManager.MATCH_DISABLED_COMPONENTS)).isNotEqualTo(0);
+            assertWithMessage("Expected the flag MATCH_DIRECT_BOOT_AWARE")
+                    .that((flags & PackageManager.MATCH_DIRECT_BOOT_AWARE)).isNotEqualTo(0);
+            assertWithMessage("Expected the flag MATCH_DIRECT_BOOT_UNAWARE")
+                    .that((flags & PackageManager.MATCH_DIRECT_BOOT_UNAWARE)).isNotEqualTo(0);
+            assertThat(TEST_USER_ID).isEqualTo(userId);
             List<ResolveInfo> result = new ArrayList<>();
             if (mSystemAppsWithLauncher == null) {
                 return result;

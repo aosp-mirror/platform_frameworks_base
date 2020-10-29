@@ -16,8 +16,8 @@
 
 package com.android.server.devicepolicy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -100,7 +100,7 @@ public class FactoryResetProtectionPolicyTest {
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new InputStreamReader(inStream));
-        assertEquals(XmlPullParser.START_TAG, parser.next());
+        assertThat(parser.next()).isEqualTo(XmlPullParser.START_TAG);
 
         assertPoliciesAreEqual(policy, policy.readFromXml(parser));
     }
@@ -114,7 +114,7 @@ public class FactoryResetProtectionPolicyTest {
         parser.setInput(new InputStreamReader(inStream));
 
         // If deserialization fails, then null is returned.
-        assertNull(policy.readFromXml(parser));
+        assertThat(policy.readFromXml(parser)).isNull();
     }
 
     private ByteArrayOutputStream serialize(FactoryResetProtectionPolicy policy)
@@ -133,17 +133,17 @@ public class FactoryResetProtectionPolicyTest {
 
     private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
             FactoryResetProtectionPolicy actualPolicy) {
-        assertEquals(expectedPolicy.isFactoryResetProtectionEnabled(),
-                actualPolicy.isFactoryResetProtectionEnabled());
+        assertThat(actualPolicy.isFactoryResetProtectionEnabled())
+                .isEqualTo(expectedPolicy.isFactoryResetProtectionEnabled());
         assertAccountsAreEqual(expectedPolicy.getFactoryResetProtectionAccounts(),
                 actualPolicy.getFactoryResetProtectionAccounts());
     }
 
     private void assertAccountsAreEqual(List<String> expectedAccounts,
             List<String> actualAccounts) {
-        assertEquals(expectedAccounts.size(), actualAccounts.size());
+        assertThat(actualAccounts.size()).isEqualTo(expectedAccounts.size());
         for (int i = 0; i < expectedAccounts.size(); i++) {
-            assertEquals(expectedAccounts.get(i), actualAccounts.get(i));
+            assertThat(actualAccounts.get(i)).isEqualTo(expectedAccounts.get(i));
         }
     }
 
