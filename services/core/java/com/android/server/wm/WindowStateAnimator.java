@@ -420,7 +420,7 @@ class WindowStateAnimator {
         }
     }
 
-    WindowSurfaceController createSurfaceLocked(int windowType, int ownerUid) {
+    WindowSurfaceController createSurfaceLocked(int windowType) {
         final WindowState w = mWin;
 
         if (mSurfaceController != null) {
@@ -480,7 +480,7 @@ class WindowStateAnimator {
             }
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
-                    height, format, flags, this, windowType, ownerUid);
+                    height, format, flags, this, windowType);
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 
