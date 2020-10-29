@@ -27,6 +27,8 @@ import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -186,13 +188,15 @@ public interface InputConnection {
      * the current line, and specifically do not return 0 characters unless
      * the cursor is really at the start of the text.</p>
      *
-     * @param n The expected length of the text.
+     * @param n The expected length of the text. This must be non-negative.
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text before the cursor position; the length of the
      * returned text might be less than <var>n</var>.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
-    CharSequence getTextBeforeCursor(int n, int flags);
+    @Nullable
+    CharSequence getTextBeforeCursor(@IntRange(from = 0) int n, int flags);
 
     /**
      * Get <var>n</var> characters of text after the current cursor
@@ -228,14 +232,16 @@ public interface InputConnection {
      * the current line, and specifically do not return 0 characters unless
      * the cursor is really at the end of the text.</p>
      *
-     * @param n The expected length of the text.
+     * @param n The expected length of the text. This must be non-negative.
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      *
      * @return the text after the cursor position; the length of the
      * returned text might be less than <var>n</var>.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
-    CharSequence getTextAfterCursor(int n, int flags);
+    @Nullable
+    CharSequence getTextAfterCursor(@IntRange(from = 0) int n, int flags);
 
     /**
      * Gets the selected text, if any.
@@ -307,11 +313,15 @@ public interface InputConnection {
      * editor can't comply with the request for some reason, or the application does not implement
      * this method. The length of the returned text might be less than the sum of
      * <var>beforeLength</var> and <var>afterLength</var> .
+     * @throws IllegalArgumentException if {@code beforeLength} or {@code afterLength} is negative.
      */
     @Nullable
     default SurroundingText getSurroundingText(
             @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength,
             @GetTextType int flags) {
+        Preconditions.checkArgumentNonnegative(beforeLength);
+        Preconditions.checkArgumentNonnegative(afterLength);
+
         CharSequence textBeforeCursor = getTextBeforeCursor(beforeLength, flags);
         if (textBeforeCursor == null) {
             textBeforeCursor = "";
