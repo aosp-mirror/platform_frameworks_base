@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
@@ -1732,11 +1734,6 @@ public class ActivityManager {
          * @hide
          */
         public void dump(PrintWriter pw, String indent) {
-            final String activityType = WindowConfiguration.activityTypeToString(
-                    configuration.windowConfiguration.getActivityType());
-            final String windowingMode = WindowConfiguration.activityTypeToString(
-                    configuration.windowConfiguration.getActivityType());
-
             pw.println(); pw.print("   ");
             pw.print(" id="); pw.print(persistentId);
             pw.print(" stackId="); pw.print(stackId);
@@ -1762,8 +1759,8 @@ public class ActivityManager {
             pw.print("   ");
             pw.print(" isExcluded=");
             pw.print(((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
-            pw.print(" activityType="); pw.print(activityType);
-            pw.print(" windowingMode="); pw.print(windowingMode);
+            pw.print(" activityType="); pw.print(activityTypeToString(getActivityType()));
+            pw.print(" windowingMode="); pw.print(windowingModeToString(getWindowingMode()));
             pw.print(" supportsSplitScreenMultiWindow=");
             pw.println(supportsSplitScreenMultiWindow);
             if (taskDescription != null) {

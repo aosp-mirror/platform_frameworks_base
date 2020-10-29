@@ -369,15 +369,24 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                     throw new IllegalArgumentException("Clip item must include the shortcut id and "
                             + "the user to launch for.");
                 }
+                // TODO(b/169894807): Validate and get activity info for shortcut as well
             }
         } else if (hasTask) {
             mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
                     "performDrag");
             for (int i = 0; i < data.getItemCount(); i++) {
+                final ClipData.Item item = data.getItemAt(i);
                 final Intent intent = data.getItemAt(i).getIntent();
-                if (intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID) == INVALID_TASK_ID) {
+                final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
+                if (taskId == INVALID_TASK_ID) {
                     throw new IllegalArgumentException("Clip item must include the task id.");
                 }
+                final Task task = mService.mRoot.anyTaskForId(taskId);
+                final ActivityRecord rootActivity = task != null ? task.getRootActivity() : null;
+                if (rootActivity == null) {
+                    throw new IllegalArgumentException("Invalid task id.");
+                }
+                item.setActivityInfo(rootActivity.info);
             }
         }
     }

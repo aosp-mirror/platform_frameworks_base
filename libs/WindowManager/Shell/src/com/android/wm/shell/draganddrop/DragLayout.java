@@ -24,6 +24,7 @@ import static com.android.wm.shell.animation.Interpolators.LINEAR_OUT_SLOW_IN;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Insets;
@@ -52,20 +53,19 @@ import java.util.function.Consumer;
  */
 public class DragLayout extends View {
 
-    private final DisplayLayout mDisplayLayout;
-    private final SplitScreen mSplitScreen;
+    private final DragAndDropPolicy mPolicy;
 
-    private final ArrayList<Target> mTargets = new ArrayList<>();
-    private Target mCurrentTarget = null;
+    private DragAndDropPolicy.Target mCurrentTarget = null;
     private DropOutlineDrawable mDropOutline;
     private int mDisplayMargin;
     private Insets mInsets = Insets.NONE;
+
+    private boolean mIsShowing;
     private boolean mHasDropped;
 
-    public DragLayout(Context context, DisplayLayout displayLayout, SplitScreen splitscreen) {
+    public DragLayout(Context context, SplitScreen splitscreen) {
         super(context);
-        mDisplayLayout = displayLayout;
-        mSplitScreen = splitscreen;
+        mPolicy = new DragAndDropPolicy(context, splitscreen);
         mDisplayMargin = context.getResources().getDimensionPixelSize(
                 R.dimen.drop_layout_display_margin);
         mDropOutline = new DropOutlineDrawable(context);
@@ -76,7 +76,7 @@ public class DragLayout extends View {
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mInsets = insets.getInsets(Type.systemBars() | Type.displayCutout());
-        calculateDropTargets();
+        recomputeDropTargets();
         return super.onApplyWindowInsets(insets);
     }
 
@@ -100,66 +100,41 @@ public class DragLayout extends View {
         return mHasDropped;
     }
 
-    public void show(DragEvent event) {
-        calculateDropTargets();
+    public void prepare(DisplayLayout displayLayout, ClipData initialData) {
+        mPolicy.start(displayLayout, initialData);
         mHasDropped = false;
+        mCurrentTarget = null;
     }
 
-    private void calculateDropTargets() {
-        // Calculate all the regions based on split and landscape portrait
-        // TODO: Filter based on clip data
-        final float SIDE_MARGIN_PCT = 0.3f;
-        final int w = mDisplayLayout.width();
-        final int h = mDisplayLayout.height();
-        final int iw = w - mInsets.left - mInsets.right;
-        final int ih = h - mInsets.top - mInsets.bottom;
-        final int l = mInsets.left;
-        final int t = mInsets.top;
-        final int r = mInsets.right;
-        final int b = mInsets.bottom;
-        mTargets.clear();
-
-        // Left split
-        addTarget(new Target(
-                new Rect(0, 0,
-                        (int) (w * SIDE_MARGIN_PCT), h),
-                new Rect(l + mDisplayMargin, t + mDisplayMargin,
-                        l + iw / 2 - mDisplayMargin, t + ih - mDisplayMargin),
-                new Rect(0, 0, w / 2, h)));
-
-        // Fullscreen
-        addTarget(new Target(
-                new Rect((int) (w * SIDE_MARGIN_PCT), 0,
-                        w - (int) (w * SIDE_MARGIN_PCT), h),
-                new Rect(l + mDisplayMargin, t + mDisplayMargin,
-                        l + iw - mDisplayMargin, t + ih - mDisplayMargin),
-                new Rect(0, 0, w, h)));
-
-        // Right split
-        addTarget(new Target(
-                new Rect(w - (int) (w * SIDE_MARGIN_PCT), 0,
-                        w, h),
-                new Rect(l + iw / 2 + mDisplayMargin, t + mDisplayMargin,
-                        l + iw - mDisplayMargin, t + ih - mDisplayMargin),
-                new Rect(w / 2, 0, w, h)));
+    public void show() {
+        mIsShowing = true;
+        recomputeDropTargets();
     }
 
-    private void addTarget(Target t) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Add target: %s", t);
-        mTargets.add(t);
+    /**
+     * Recalculates the drop targets based on the current policy.
+     */
+    private void recomputeDropTargets() {
+        if (!mIsShowing) {
+            return;
+        }
+        final ArrayList<DragAndDropPolicy.Target> targets = mPolicy.getTargets(mInsets);
+        for (int i = 0; i < targets.size(); i++) {
+            final DragAndDropPolicy.Target target = targets.get(i);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Add target: %s", target);
+            // Inset the draw region by a little bit
+            target.drawRegion.inset(mDisplayMargin, mDisplayMargin);
+        }
     }
 
+    /**
+     * Updates the visible drop target as the user drags.
+     */
     public void update(DragEvent event) {
         // Find containing region, if the same as mCurrentRegion, then skip, otherwise, animate the
         // visibility of the current region
-        Target target = null;
-        for (int i = mTargets.size() - 1; i >= 0; i--) {
-            Target t = mTargets.get(i);
-            if (t.hitRegion.contains((int) event.getX(), (int) event.getY())) {
-                target = t;
-                break;
-            }
-        }
+        DragAndDropPolicy.Target target = mPolicy.getTargetAtLocation(
+                (int) event.getX(), (int) event.getY());
         if (target != null && mCurrentTarget != target) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Current target: %s", target);
             Interpolator boundsInterpolator = FAST_OUT_SLOW_IN;
@@ -175,7 +150,11 @@ public class DragLayout extends View {
         }
     }
 
+    /**
+     * Hides the drag layout and animates out the visible drop targets.
+     */
     public void hide(DragEvent event, Runnable hideCompleteCallback) {
+        mIsShowing = false;
         ObjectAnimator alphaAnimator = mDropOutline.startVisibilityAnimation(false, LINEAR);
         ObjectAnimator boundsAnimator = null;
         if (mCurrentTarget != null) {
@@ -199,50 +178,19 @@ public class DragLayout extends View {
         mCurrentTarget = null;
     }
 
+    /**
+     * Handles the drop onto a target and animates out the visible drop targets.
+     */
     public boolean drop(DragEvent event, SurfaceControl dragSurface,
-            Consumer<Rect> dropCompleteCallback) {
+            Runnable dropCompleteCallback) {
+        final boolean handledDrop = mCurrentTarget != null;
         mHasDropped = true;
+
+        // Process the drop
+        mPolicy.handleDrop(mCurrentTarget, event.getClipData());
+
         // TODO(b/169894807): Coordinate with dragSurface
-        final Rect dropRegion = mCurrentTarget != null
-                ? mCurrentTarget.dropTargetBounds
-                : null;
-
-        ObjectAnimator alphaAnimator = mDropOutline.startVisibilityAnimation(false, LINEAR);
-        ObjectAnimator boundsAnimator = null;
-        if (dropRegion != null) {
-            Rect finalBounds = new Rect(mCurrentTarget.drawRegion);
-            finalBounds.inset(mDisplayMargin, mDisplayMargin);
-            mDropOutline.startBoundsAnimation(finalBounds, FAST_OUT_LINEAR_IN);
-        }
-
-        if (dropCompleteCallback != null) {
-            ObjectAnimator lastAnim = boundsAnimator != null
-                    ? boundsAnimator
-                    : alphaAnimator;
-            lastAnim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    dropCompleteCallback.accept(dropRegion);
-                }
-            });
-        }
-        return dropRegion != null;
-    }
-
-    private static class Target {
-        final Rect hitRegion;
-        final Rect drawRegion;
-        final Rect dropTargetBounds;
-
-        public Target(Rect hit, Rect draw, Rect drop) {
-            hitRegion = hit;
-            drawRegion = draw;
-            dropTargetBounds = drop;
-        }
-
-        @Override
-        public String toString() {
-            return "Target {hit=" + hitRegion + " drop=" + dropTargetBounds + "}";
-        }
+        hide(event, dropCompleteCallback);
+        return handledDrop;
     }
 }

@@ -489,8 +489,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                         mTmpTaskInfo.positionInParent,
                         lastInfo.positionInParent)
                 || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams
-                || mTmpTaskInfo.getConfiguration().windowConfiguration.getWindowingMode()
-                        != lastInfo.getConfiguration().windowConfiguration.getWindowingMode()
+                || mTmpTaskInfo.getWindowingMode() != lastInfo.getWindowingMode()
                 || !TaskDescription.equals(mTmpTaskInfo.taskDescription, lastInfo.taskDescription);
         if (!changed) {
             int cfgChanges = mTmpTaskInfo.configuration.diff(lastInfo.configuration);
