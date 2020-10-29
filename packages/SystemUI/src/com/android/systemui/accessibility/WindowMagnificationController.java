@@ -16,7 +16,7 @@
 
 package com.android.systemui.accessibility;
 
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+import static android.view.WindowManager.LayoutParams;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -254,7 +254,16 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             }
         } else if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
             onRotate();
+        } else if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
+            updateAccessibilityWindowTitleIfNeeded();
         }
+    }
+
+    private void updateAccessibilityWindowTitleIfNeeded() {
+        if (!isWindowVisible()) return;
+        LayoutParams params = (LayoutParams) mMirrorView.getLayoutParams();
+        params.accessibilityTitle = getAccessibilityWindowTitle();
+        mWm.updateViewLayout(mMirrorView, params);
     }
 
     /** Handles MirrorWindow position when the navigation bar mode changed. */
@@ -290,8 +299,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return;
         }
         // The rect of MirrorView is going to be transformed.
-        WindowManager.LayoutParams params =
-                (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
+        LayoutParams params =
+                (LayoutParams) mMirrorView.getLayoutParams();
         mTmpRect.set(params.x, params.y, params.x + params.width, params.y + params.height);
         final RectF transformedRect = new RectF(mTmpRect);
         matrix.mapRect(transformedRect);
@@ -313,17 +322,18 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         int windowWidth = mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin;
         int windowHeight = mMagnificationFrame.height() + 2 * mMirrorSurfaceMargin;
 
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        LayoutParams params = new LayoutParams(
                 windowWidth, windowHeight,
-                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.LEFT;
         params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
         params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
-        params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        params.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         params.setTitle(mContext.getString(R.string.magnification_window_title));
+        params.accessibilityTitle = getAccessibilityWindowTitle();
 
         mMirrorView = LayoutInflater.from(mContext).inflate(R.layout.window_magnifier_view, null);
         mMirrorSurfaceView = mMirrorView.findViewById(R.id.surface_view);
@@ -367,6 +377,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 mMirrorView.getWidth(), mMirrorView.getHeight());
         regionInsideDragBorder.op(dragArea, Region.Op.DIFFERENCE);
         return regionInsideDragBorder;
+    }
+
+    private String getAccessibilityWindowTitle() {
+        return mResources.getString(com.android.internal.R.string.android_system_label);
     }
 
     private void showControls() {
@@ -432,8 +446,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
         final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();
         final int maxMirrorViewY = mDisplaySize.y - mMirrorView.getHeight() - mNavGestureHeight;
-        WindowManager.LayoutParams params =
-                (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
+        LayoutParams params =
+                (LayoutParams) mMirrorView.getLayoutParams();
         params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
         params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
         // If nav bar mode supports swipe-up gesture, the Y position of mirror view should not

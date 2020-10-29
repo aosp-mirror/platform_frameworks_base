@@ -53,7 +53,8 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";
     private static final int CONFIG_MASK =
-            ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_ORIENTATION;
+            ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_ORIENTATION
+                    | ActivityInfo.CONFIG_LOCALE;
 
     @VisibleForTesting
     protected WindowMagnificationAnimationController mWindowMagnificationAnimationController;

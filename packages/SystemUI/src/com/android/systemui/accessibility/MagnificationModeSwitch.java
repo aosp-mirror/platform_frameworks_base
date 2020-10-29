@@ -31,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -66,7 +67,7 @@ class MagnificationModeSwitch {
     private final int mTapTimeout = ViewConfiguration.getTapTimeout();
     private final int mTouchSlop;
     private int mMagnificationMode = Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-    private final WindowManager.LayoutParams mParams;
+    private final LayoutParams mParams;
     private boolean mIsVisible = false;
 
     MagnificationModeSwitch(Context context) {
@@ -79,7 +80,7 @@ class MagnificationModeSwitch {
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
-        mParams = createLayoutParams();
+        mParams = createLayoutParams(context);
         mImageView = imageView;
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         applyResourcesValues();
@@ -220,11 +221,22 @@ class MagnificationModeSwitch {
     }
 
     void onConfigurationChanged(int configDiff) {
-        if ((configDiff & ActivityInfo.CONFIG_DENSITY) == 0) {
+        if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            applyResourcesValues();
+            mImageView.setImageResource(getIconResId(mMagnificationMode));
             return;
         }
-        applyResourcesValues();
-        mImageView.setImageResource(getIconResId(mMagnificationMode));
+        if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
+            updateAccessibilityWindowTitle();
+            return;
+        }
+    }
+
+    private void updateAccessibilityWindowTitle() {
+        mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
+        if (mIsVisible) {
+            mWindowManager.updateViewLayout(mImageView, mParams);
+        }
     }
 
     private void toggleMagnificationMode() {
@@ -257,14 +269,19 @@ class MagnificationModeSwitch {
                 : R.drawable.ic_open_in_new_fullscreen;
     }
 
-    private static WindowManager.LayoutParams createLayoutParams() {
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+    private static LayoutParams createLayoutParams(Context context) {
+        final LayoutParams params = new LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        params.accessibilityTitle = getAccessibilityWindowTitle(context);
         return params;
+    }
+
+    private static String getAccessibilityWindowTitle(Context context) {
+        return context.getString(com.android.internal.R.string.android_system_label);
     }
 }

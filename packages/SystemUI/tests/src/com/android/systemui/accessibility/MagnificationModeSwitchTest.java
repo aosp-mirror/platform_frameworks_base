@@ -286,6 +286,33 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
+    @Test
+    public void showButton_hasAccessibilityWindowTitle() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        ArgumentCaptor<WindowManager.LayoutParams> paramsArgumentCaptor = ArgumentCaptor.forClass(
+                WindowManager.LayoutParams.class);
+        verify(mWindowManager).addView(eq(mSpyImageView), paramsArgumentCaptor.capture());
+        assertEquals(getContext().getResources().getString(
+                com.android.internal.R.string.android_system_label),
+                paramsArgumentCaptor.getValue().accessibilityTitle);
+    }
+
+    @Test
+    public void onLocaleChanged_buttonIsShowing_updateA11yWindowTitle() {
+        final String newA11yWindowTitle = "new a11y window title";
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        getContext().getOrCreateTestableResources().addOverride(
+                com.android.internal.R.string.android_system_label, newA11yWindowTitle);
+        mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_LOCALE);
+
+        ArgumentCaptor<WindowManager.LayoutParams> paramsArgumentCaptor = ArgumentCaptor.forClass(
+                WindowManager.LayoutParams.class);
+        verify(mWindowManager).updateViewLayout(eq(mSpyImageView), paramsArgumentCaptor.capture());
+        assertEquals(newA11yWindowTitle, paramsArgumentCaptor.getValue().accessibilityTitle);
+    }
+
     private void assertModeUnchanged(int expectedMode) {
         final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
