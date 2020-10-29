@@ -2009,17 +2009,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setNetworkPermission(int netId, int permission) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkSetPermissionForNetwork(netId, permission);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void allowProtect(int uid) {
         NetworkStack.checkNetworkStackPermission(mContext);
 
