@@ -2212,15 +2212,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs, pid, uid);
                 win.mToken.adjustWindowParams(win, attrs);
-                int systemUiVisibility = attrs.systemUiVisibility
-                        | attrs.subtreeSystemUiVisibility;
-                if ((systemUiVisibility & DISABLE_MASK) != 0) {
-                    // if they don't have the permission, mask out the status bar bits
-                    if (!hasStatusBarPermission(pid, uid)) {
-                        systemUiVisibility &= ~DISABLE_MASK;
-                    }
+                int disableFlags =
+                        (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility) & DISABLE_MASK;
+                if (disableFlags != 0 && !hasStatusBarPermission(pid, uid)) {
+                    disableFlags = 0;
                 }
-                win.mSystemUiVisibility = systemUiVisibility;
+                win.mDisableFlags = disableFlags;
                 if (win.mAttrs.type != attrs.type) {
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");

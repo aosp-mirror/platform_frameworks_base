@@ -382,7 +382,7 @@ class TaskSnapshotPersister {
             proto.insetBottom = mSnapshot.getContentInsets().bottom;
             proto.isRealSnapshot = mSnapshot.isRealSnapshot();
             proto.windowingMode = mSnapshot.getWindowingMode();
-            proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
+            proto.appearance = mSnapshot.getAppearance();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
             proto.id = mSnapshot.getId();

@@ -118,7 +118,6 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.LoadedApk;
 import android.app.ResourcesManager;
-import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -2746,7 +2745,7 @@ public class DisplayPolicy {
         final int dockedAppearance = updateLightStatusBarLw(0 /* appearance */,
                 mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState,
                 mDockedStackBounds);
-        final int disableFlags = win.getSystemUiVisibility() & StatusBarManager.DISABLE_MASK;
+        final int disableFlags = win.getDisableFlags();
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
         final WindowState navColorWin = chooseNavigationColorWindowLw(
                 mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,

@@ -41,6 +41,7 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.WindowInsets.Type;
+import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -333,7 +334,7 @@ class TaskSnapshotController {
         builder.setOrientation(activity.getTask().getConfiguration().orientation);
         builder.setRotation(activity.getTask().getDisplayContent().getRotation());
         builder.setWindowingMode(task.getWindowingMode());
-        builder.setSystemUiVisibility(getSystemUiVisibility(task));
+        builder.setAppearance(getAppearance(task));
         return true;
     }
 
@@ -507,7 +508,7 @@ class TaskSnapshotController {
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
                 contentInsets, false /* isLowResolution */, false /* isRealSnapshot */,
-                task.getWindowingMode(), getSystemUiVisibility(task), false);
+                task.getWindowingMode(), getAppearance(task), false);
     }
 
     /**
@@ -584,16 +585,16 @@ class TaskSnapshotController {
     }
 
     /**
-     * @return The SystemUI visibility flags for the top fullscreen opaque window in the given
+     * @return The {@link Appearance} flags for the top fullscreen opaque window in the given
      *         {@param task}.
      */
-    private int getSystemUiVisibility(Task task) {
+    private @Appearance int getAppearance(Task task) {
         final ActivityRecord topFullscreenActivity = task.getTopFullscreenActivity();
         final WindowState topFullscreenOpaqueWindow = topFullscreenActivity != null
                 ? topFullscreenActivity.getTopFullscreenOpaqueWindow()
                 : null;
         if (topFullscreenOpaqueWindow != null) {
-            return topFullscreenOpaqueWindow.getSystemUiVisibility();
+            return topFullscreenOpaqueWindow.mAttrs.insetsFlags.appearance;
         }
         return 0;
     }

@@ -29,6 +29,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.util.Log;
+import android.view.WindowInsetsController.Appearance;
 
 /**
  * Data for a single thumbnail.
@@ -43,7 +44,7 @@ public class ThumbnailData {
     public boolean isRealSnapshot;
     public boolean isTranslucent;
     public int windowingMode;
-    public int systemUiVisibility;
+    public @Appearance int appearance;
     public float scale;
     public long snapshotId;
 
@@ -57,7 +58,6 @@ public class ThumbnailData {
         isRealSnapshot = true;
         isTranslucent = false;
         windowingMode = WINDOWING_MODE_UNDEFINED;
-        systemUiVisibility = 0;
         snapshotId = 0;
     }
 
@@ -93,7 +93,7 @@ public class ThumbnailData {
         isRealSnapshot = snapshot.isRealSnapshot();
         isTranslucent = snapshot.isTranslucent();
         windowingMode = snapshot.getWindowingMode();
-        systemUiVisibility = snapshot.getSystemUiVisibility();
+        appearance = snapshot.getAppearance();
         snapshotId = snapshot.getId();
     }
 }
