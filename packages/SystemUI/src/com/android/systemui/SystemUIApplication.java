@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
@@ -69,6 +70,8 @@ public class SystemUIApplication extends Application implements
     public SystemUIApplication() {
         super();
         Log.v(TAG, "SystemUIApplication constructed.");
+        // SysUI may be building without protolog preprocessing in some cases
+        ProtoLog.REQUIRE_PROTOLOGTOOL = false;
     }
 
     @Override
