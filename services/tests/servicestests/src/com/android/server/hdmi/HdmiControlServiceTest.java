@@ -382,9 +382,13 @@ public class HdmiControlServiceTest {
         assertThat(callback2.mVolumeControlEnabled).isTrue();
     }
 
-
     @Test
     public void getCecVersion_default() {
+        // Set the Settings value to "null" to emulate it being empty and force the default value.
+        Settings.Global.putString(mContextSpy.getContentResolver(),
+                Settings.Global.HDMI_CEC_VERSION,
+                null);
+        mHdmiControlService.setControlEnabled(true);
         assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_1_4);
     }
 
