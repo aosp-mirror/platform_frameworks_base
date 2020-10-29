@@ -630,7 +630,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_SYSTEM_KEY_PRESS = 21;
     private static final int MSG_HANDLE_ALL_APPS = 22;
     private static final int MSG_LAUNCH_ASSIST = 23;
-    private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 24;
     private static final int MSG_POWER_VERY_LONG_PRESS = 25;
     private static final int MSG_RINGER_TOGGLE_CHORD = 26;
 
@@ -669,9 +668,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     final int deviceId = msg.arg1;
                     final String hint = (String) msg.obj;
                     launchAssistAction(hint, deviceId);
-                    break;
-                case MSG_LAUNCH_ASSIST_LONG_PRESS:
-                    launchAssistLongPressAction();
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock();
@@ -3249,28 +3245,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // There are several different flavors of "assistant" that can be launched from
     // various parts of the UI.
 
-    /** starts ACTION_SEARCH_LONG_PRESS, usually a voice search prompt */
-    private void launchAssistLongPressAction() {
-        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
-                "Assist - Long Press");
-        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
-
-        // launch the search activity
-        Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            // TODO: This only stops the factory-installed search manager.
-            // Need to formalize an API to handle others
-            SearchManager searchManager = getSearchManager();
-            if (searchManager != null) {
-                searchManager.stopSearch();
-            }
-            startActivityAsUser(intent, UserHandle.CURRENT);
-        } catch (ActivityNotFoundException e) {
-            Slog.w(TAG, "No activity to handle assist long press action.", e);
-        }
-    }
-
     /** Asks the status bar to startAssist(), usually a full "assistant" interface */
     private void launchAssistAction(String hint, int deviceId) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
@@ -3958,12 +3932,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             case KeyEvent.KEYCODE_ASSIST: {
                 final boolean longPressed = event.getRepeatCount() > 0;
-                if (down && longPressed) {
-                    Message msg = mHandler.obtainMessage(MSG_LAUNCH_ASSIST_LONG_PRESS);
-                    msg.setAsynchronous(true);
-                    msg.sendToTarget();
-                }
-                if (!down && !longPressed) {
+                if (down && !longPressed) {
                     Message msg = mHandler.obtainMessage(MSG_LAUNCH_ASSIST, event.getDeviceId(),
                             0 /* unused */, null /* hint */);
                     msg.setAsynchronous(true);
