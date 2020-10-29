@@ -24,6 +24,7 @@ import android.graphics.RectF;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -782,11 +783,11 @@ public class StackAnimationController extends
         }
     }
 
-    public void animateReorder(List<View> bubbleViews, Runnable after)  {
+    public void animateReorder(List<View> bubbleViews, Runnable after) {
         for (int newIndex = 0; newIndex < bubbleViews.size(); newIndex++) {
             View view = bubbleViews.get(newIndex);
-            final int oldIndex= mLayout.indexOfChild(view);
-            animateSwap(view, oldIndex,  newIndex, after);
+            final int oldIndex = mLayout.indexOfChild(view);
+            animateSwap(view, oldIndex, newIndex, after);
         }
     }
 
@@ -795,12 +796,15 @@ public class StackAnimationController extends
         final float swapY = newIndex == 0
                 ? newY - mSwapAnimationOffset  // Above top of stack
                 : newY + mSwapAnimationOffset;  // Below where bubble will be
-        view.animate()
+        final ViewPropertyAnimator animator = view.animate()
                 .scaleX(BUBBLE_SWAP_SCALE)
                 .scaleY(BUBBLE_SWAP_SCALE)
                 .translationY(swapY)
                 .setDuration(BUBBLE_SWAP_DURATION)
-                .withEndAction(() -> finishSwapAnimation(view, oldIndex, newIndex, finishReorder));
+                .withEndAction(() -> {
+                    finishSwapAnimation(view, oldIndex, newIndex, finishReorder);
+                });
+        view.setTag(R.id.reorder_animator_tag, animator);
     }
 
     private void finishSwapAnimation(View view, int oldIndex, int newIndex,
@@ -818,12 +822,16 @@ public class StackAnimationController extends
 
         // Animate bubble back into stack, at new index and original size.
         final float newY = getStackPosition().y + newIndex * mStackOffset;
-        view.animate()
+        final ViewPropertyAnimator animator = view.animate()
                 .scaleX(1f)
                 .scaleY(1f)
                 .translationY(newY)
                 .setDuration(BUBBLE_SWAP_DURATION)
-                .withEndAction(() -> finishReorder.run());
+                .withEndAction(() -> {
+                    view.setTag(R.id.reorder_animator_tag, null);
+                    finishReorder.run();
+                });
+        view.setTag(R.id.reorder_animator_tag, animator);
     }
 
     @Override
