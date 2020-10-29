@@ -94,6 +94,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -235,6 +236,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final Context mContext;
     private final boolean mIsPrimaryUser;
     private final boolean mIsAutomotive;
+    private final AuthController mAuthController;
     private final StatusBarStateController mStatusBarStateController;
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
@@ -1581,7 +1583,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             RingerModeTracker ringerModeTracker,
             @Background Executor backgroundExecutor,
             StatusBarStateController statusBarStateController,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils,
+            AuthController authController) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
@@ -1591,6 +1594,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mRingerModeTracker = ringerModeTracker;
         mStatusBarStateController = statusBarStateController;
         mLockPatternUtils = lockPatternUtils;
+        mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
 
         mHandler = new Handler(mainLooper) {
@@ -1853,7 +1857,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void updateLockScreenMode() {
         mLockScreenMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_LOCKSCREEN, 0);
+                Settings.Global.SHOW_NEW_LOCKSCREEN, mAuthController.isUdfpsEnrolled() ? 1 : 0);
     }
 
     private final UserSwitchObserver mUserSwitchObserver = new UserSwitchObserver() {

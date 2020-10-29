@@ -77,6 +77,7 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -263,6 +264,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final ConversationNotificationManager mConversationNotificationManager;
+    private final AuthController mAuthController;
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
@@ -516,7 +518,8 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             NotificationGroupManagerLegacy groupManager,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            AuthController authController) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -581,6 +584,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mLockscreenUserManager = notificationLockscreenUserManager;
         mEntryManager = notificationEntryManager;
         mConversationNotificationManager = conversationNotificationManager;
+        mAuthController = authController;
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -868,7 +872,8 @@ public class NotificationPanelViewController extends PanelViewController {
                             - mShelfHeight / 2.0f - mDarkIconSize / 2.0f),
                     clockPreferredY, hasCustomClock(),
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
-                    bypassEnabled, getUnlockedStackScrollerPadding());
+                    bypassEnabled, getUnlockedStackScrollerPadding(),
+                    mAuthController.isUdfpsEnrolled());
             mClockPositionAlgorithm.run(mClockPositionResult);
             mKeyguardStatusViewController.updatePosition(
                     mClockPositionResult.clockX, mClockPositionResult.clockY, animateClock);
@@ -908,6 +913,13 @@ public class NotificationPanelViewController extends PanelViewController {
                 mNotificationStackScrollLayoutController.getHeight() - minPadding - shelfSize
                         - Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding)
                         - mKeyguardStatusViewController.getLogoutButtonHeight();
+
+        if (mAuthController.isUdfpsEnrolled()) {
+            availableSpace = mNotificationStackScrollLayoutController.getHeight()
+                    - minPadding - shelfSize
+                    - (mStatusBar.getDisplayHeight() - mAuthController.getUdfpsRegion().top);
+        }
+
         int count = 0;
         ExpandableView previousView = null;
         for (int i = 0; i < mNotificationStackScrollLayoutController.getChildCount(); i++) {

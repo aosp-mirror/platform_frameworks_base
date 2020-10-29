@@ -79,6 +79,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -156,6 +157,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private LiveData<Integer> mRingerModeLiveData;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private AuthController mAuthController;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private TestableLooper mTestableLooper;
@@ -198,6 +201,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mTelephonyManager.getServiceStateForSubscriber(anyInt()))
                 .thenReturn(new ServiceState());
         when(mLockPatternUtils.getLockSettings()).thenReturn(mLockSettings);
+        when(mAuthController.isUdfpsEnrolled()).thenReturn(false);
         mSpiedContext.addMockSystemService(TrustManager.class, mTrustManager);
         mSpiedContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mSpiedContext.addMockSystemService(BiometricManager.class, mBiometricManager);
@@ -796,7 +800,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
-                    mStatusBarStateController, mLockPatternUtils);
+                    mStatusBarStateController, mLockPatternUtils,
+                    mAuthController);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

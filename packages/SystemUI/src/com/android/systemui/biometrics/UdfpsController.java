@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -242,6 +243,13 @@ class UdfpsController implements DozeReceiver {
     @Override
     public void dozeTimeTick() {
         mView.dozeTimeTick();
+    }
+
+    /**
+     * @return where the UDFPS exists on the screen in pixels.
+     */
+    public RectF getSensorLocation() {
+        return mView.getSensorRect();
     }
 
     private void setShowOverlay(boolean show) {
