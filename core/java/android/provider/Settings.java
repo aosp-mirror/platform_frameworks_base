@@ -9053,12 +9053,6 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RESUME_BLOCKED = "qs_media_resumption_blocked";
 
         /**
-         * Controls if window magnification is enabled.
-         * @hide
-         */
-        public static final String WINDOW_MAGNIFICATION = "window_magnification";
-
-        /**
          * Controls magnification mode when magnification is enabled via a system-wide triple tap
          * gesture or the accessibility shortcut.
          *
