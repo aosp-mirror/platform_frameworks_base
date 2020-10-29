@@ -134,7 +134,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         verify(mNm, never()).setDefaultAssistantForUser(anyInt());
         verify(mAssistants, times(1)).addApprovedList(
-                new ComponentName("b", "b").flattenToString(),10, true);
+                new ComponentName("b", "b").flattenToString(), 10, true, null);
     }
 
     @Test

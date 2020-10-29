@@ -177,9 +177,9 @@ interface INotificationManager
     boolean isNotificationListenerAccessGranted(in ComponentName listener);
     boolean isNotificationListenerAccessGrantedForUser(in ComponentName listener, int userId);
     boolean isNotificationAssistantAccessGranted(in ComponentName assistant);
-    void setNotificationListenerAccessGranted(in ComponentName listener, boolean enabled);
+    void setNotificationListenerAccessGranted(in ComponentName listener, boolean enabled, boolean userSet);
     void setNotificationAssistantAccessGranted(in ComponentName assistant, boolean enabled);
-    void setNotificationListenerAccessGrantedForUser(in ComponentName listener, int userId, boolean enabled);
+    void setNotificationListenerAccessGrantedForUser(in ComponentName listener, int userId, boolean enabled, boolean userSet);
     void setNotificationAssistantAccessGrantedForUser(in ComponentName assistant, int userId, boolean enabled);
     List<String> getEnabledNotificationListenerPackages();
     List<ComponentName> getEnabledNotificationListeners(int userId);
