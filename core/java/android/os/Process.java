@@ -724,7 +724,7 @@ public class Process {
      * Returns the identifier of this process' parent.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 171962076)
     public static final int myPpid() {
         return Os.getppid();
     }
