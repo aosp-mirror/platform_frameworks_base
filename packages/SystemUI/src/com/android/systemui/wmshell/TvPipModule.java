@@ -53,6 +53,7 @@ public abstract class TvPipModule {
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             PipMediaController pipMediaController,
+            PipNotification pipNotification,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         return Optional.of(
                 new PipController(
@@ -61,6 +62,7 @@ public abstract class TvPipModule {
                         pipBoundsHandler,
                         pipTaskOrganizer,
                         pipMediaController,
+                        pipNotification,
                         windowManagerShellWrapper));
     }
 
@@ -80,8 +82,8 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static PipNotification providePipNotification(Context context,
-            PipController pipController) {
-        return new PipNotification(context, pipController);
+            PipMediaController pipMediaController) {
+        return new PipNotification(context, pipMediaController);
     }
 
     @WMSingleton
