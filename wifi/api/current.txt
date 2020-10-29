@@ -561,15 +561,6 @@ package android.net.wifi.aware {
     method public void onAttached(android.net.wifi.aware.WifiAwareSession);
   }
 
-  public final class AwareResources implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getNumOfAvailableDataPaths();
-    method public int getNumOfAvailablePublishSessions();
-    method public int getNumOfAvailableSubscribeSessions();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.aware.AwareResources> CREATOR;
-  }
-
   public final class Characteristics implements android.os.Parcelable {
     method public int describeContents();
     method public int getMaxMatchFilterLength();
@@ -672,8 +663,7 @@ package android.net.wifi.aware {
   public class WifiAwareManager {
     method public void attach(@NonNull android.net.wifi.aware.AttachCallback, @Nullable android.os.Handler);
     method public void attach(@NonNull android.net.wifi.aware.AttachCallback, @NonNull android.net.wifi.aware.IdentityChangedListener, @Nullable android.os.Handler);
-    method @Nullable public android.net.wifi.aware.AwareResources getAvailableAwareResources();
-    method @Nullable public android.net.wifi.aware.Characteristics getCharacteristics();
+    method public android.net.wifi.aware.Characteristics getCharacteristics();
     method public boolean isAvailable();
     method public boolean isDeviceAttached();
     method public boolean isInstantCommunicationModeEnabled();
