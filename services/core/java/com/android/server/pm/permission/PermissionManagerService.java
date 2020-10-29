@@ -252,7 +252,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     /** Internal storage for permissions and related settings */
     @GuardedBy("mLock")
-    private final PermissionRegistry mRegistry;
+    private final PermissionRegistry mRegistry = new PermissionRegistry();
 
     /** Injector that can be used to facilitate testing. */
     private final Injector mInjector;
@@ -387,7 +387,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mLock = externalLock;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
-        mRegistry = new PermissionRegistry(mLock);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         mHandlerThread = new ServiceThread(TAG,
@@ -409,10 +408,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         synchronized (mLock) {
             for (int i=0; i<permConfig.size(); i++) {
                 final SystemConfig.PermissionEntry perm = permConfig.valueAt(i);
-                Permission bp = mRegistry.getPermissionLocked(perm.name);
+                Permission bp = mRegistry.getPermission(perm.name);
                 if (bp == null) {
                     bp = new Permission(perm.name, "android", Permission.TYPE_CONFIG);
-                    mRegistry.addPermissionLocked(bp);
+                    mRegistry.addPermission(bp);
                 }
                 if (perm.gids != null) {
                     bp.setGids(perm.gids, perm.perUser);
@@ -484,13 +483,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    @Nullable
-    Permission getPermission(String permName) {
-        synchronized (mLock) {
-            return mRegistry.getPermissionLocked(permName);
-        }
-    }
-
     @Override
     public String[] getAppOpPermissionPackages(String permName) {
         return getAppOpPermissionPackagesInternal(permName, getCallingUid());
@@ -501,7 +493,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return null;
         }
         synchronized (mLock) {
-            final ArraySet<String> pkgs = mRegistry.getAppOpPermissionPackagesLocked(permName);
+            final ArraySet<String> pkgs = mRegistry.getAppOpPermissionPackages(permName);
             if (pkgs == null) {
                 return null;
             }
@@ -519,7 +511,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         synchronized (mLock) {
             final List<PermissionGroupInfo> out = new ArrayList<>();
-            for (ParsedPermissionGroup pg : mRegistry.getPermissionGroupsLocked()) {
+            for (ParsedPermissionGroup pg : mRegistry.getPermissionGroups()) {
                 out.add(PackageInfoUtils.generatePermissionGroupInfo(pg, flags));
             }
             return new ParceledListSlice<>(out);
@@ -537,7 +529,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         synchronized (mLock) {
             return PackageInfoUtils.generatePermissionGroupInfo(
-                    mRegistry.getPermissionGroupLocked(groupName), flags);
+                    mRegistry.getPermissionGroup(groupName), flags);
         }
     }
 
@@ -554,7 +546,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int targetSdkVersion = getPermissionInfoCallingTargetSdkVersion(opPackage,
                 callingUid);
         synchronized (mLock) {
-            final Permission bp = mRegistry.getPermissionLocked(permName);
+            final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
                 return null;
             }
@@ -584,11 +576,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return null;
         }
         synchronized (mLock) {
-            if (groupName != null && mRegistry.getPermissionGroupLocked(groupName) == null) {
+            if (groupName != null && mRegistry.getPermissionGroup(groupName) == null) {
                 return null;
             }
             final ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
-            for (Permission bp : mRegistry.getPermissionsLocked()) {
+            for (Permission bp : mRegistry.getPermissions()) {
                 if (Objects.equals(bp.getGroup(), groupName)) {
                     out.add(bp.generatePermissionInfo(flags));
                 }
@@ -606,24 +598,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (info.labelRes == 0 && info.nonLocalizedLabel == null) {
             throw new SecurityException("Label must be specified in permission");
         }
-        final Permission tree = mRegistry.enforcePermissionTree(info.name, callingUid);
         final boolean added;
         final boolean changed;
         synchronized (mLock) {
-            Permission bp = mRegistry.getPermissionLocked(info.name);
+            final Permission tree = mRegistry.enforcePermissionTree(info.name, callingUid);
+            Permission bp = mRegistry.getPermission(info.name);
             added = bp == null;
             int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
             if (added) {
                 enforcePermissionCapLocked(info, tree);
-                bp = new Permission(info.name, tree.getPackageName(),
-                        Permission.TYPE_DYNAMIC);
+                bp = new Permission(info.name, tree.getPackageName(), Permission.TYPE_DYNAMIC);
             } else if (!bp.isDynamic()) {
                 throw new SecurityException("Not allowed to modify non-dynamic permission "
                         + info.name);
             }
             changed = bp.addToTree(fixedLevel, info, tree);
             if (added) {
-                mRegistry.addPermissionLocked(bp);
+                mRegistry.addPermission(bp);
             }
         }
         if (changed) {
@@ -638,9 +629,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             throw new SecurityException("Instant applications don't have access to this method");
         }
-        final Permission tree = mRegistry.enforcePermissionTree(permName, callingUid);
         synchronized (mLock) {
-            final Permission bp = mRegistry.getPermissionLocked(permName);
+            mRegistry.enforcePermissionTree(permName, callingUid);
+            final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
                 return;
             }
@@ -649,7 +640,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
                         + permName);
             }
-            mRegistry.removePermissionLocked(permName);
+            mRegistry.removePermission(permName);
             mPackageManagerInt.writeSettings(false);
         }
     }
@@ -682,7 +673,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         synchronized (mLock) {
-            if (mRegistry.getPermissionLocked(permName) == null) {
+            if (mRegistry.getPermission(permName) == null) {
                 return 0;
             }
 
@@ -807,13 +798,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        final Permission bp;
+        final boolean isRuntimePermission;
         final boolean permissionUpdated;
         synchronized (mLock) {
-            bp = mRegistry.getPermissionLocked(permName);
+            final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
                 throw new IllegalArgumentException("Unknown permission: " + permName);
             }
+
+            isRuntimePermission = bp.isRuntime();
 
             if (bp.isInstallerExemptIgnored()) {
                 flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
@@ -833,14 +826,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             permissionUpdated = uidState.updatePermissionFlags(bp, flagMask, flagValues);
         }
 
-        if (permissionUpdated && bp.isRuntime()) {
+        if (permissionUpdated && isRuntimePermission) {
             notifyRuntimePermissionStateChanged(packageName, userId);
         }
         if (permissionUpdated && callback != null) {
             // Install and runtime permissions are stored in different places,
             // so figure out what permission changed and persist the change.
-            if (!bp.isRuntime()) {
-                int userUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
+            if (!isRuntimePermission) {
+                int userUid = UserHandle.getUid(userId, pkg.getUid());
                 callback.onInstallPermissionUpdatedNotifyListener(userUid);
             } else {
                 callback.onPermissionUpdatedNotifyListener(new int[]{userId}, false, pkg.getUid());
@@ -969,7 +962,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (isInstantApp) {
-            return mRegistry.isPermissionInstant(permissionName);
+            synchronized (mLock) {
+                final Permission permission = mRegistry.getPermission(permissionName);
+                return permission != null && permission.isInstant();
+            }
         }
 
         return true;
@@ -1231,7 +1227,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private boolean checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(
             @NonNull String permName) {
         synchronized (mLock) {
-            final Permission bp = mRegistry.getPermissionLocked(permName);
+            final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
                 Slog.w(TAG, "No such permissions: " + permName);
                 return false;
@@ -1472,36 +1468,33 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
-        final Permission bp;
+        final boolean isSoftRestrictedPermission;
         synchronized (mLock) {
-            bp = mRegistry.getPermissionLocked(permName);
+            final Permission permission = mRegistry.getPermission(permName);
+            isSoftRestrictedPermission = permission != null && permission.isSoftRestricted();
         }
-        if (bp == null) {
-            throw new IllegalArgumentException("Unknown permission: " + permName);
-        }
+        final boolean mayGrantSoftRestrictedPermission = isSoftRestrictedPermission
+                && SoftRestrictedPermissionPolicy.forPermission(mContext,
+                        pkg.toAppInfoWithoutState(), pkg, UserHandle.of(userId), permName)
+                        .mayGrantPermission();
 
-        if (!(bp.isRuntime() || bp.isDevelopment())) {
-            throw new SecurityException("Permission " + permName + " requested by "
-                    + pkg.getPackageName() + " is not a changeable permission type");
-        }
-
-        // If a permission review is required for legacy apps we represent
-        // their permissions as always granted runtime ones since we need
-        // to keep the review required permission flag per user while an
-        // install permission's state is shared across all users.
-        if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M && bp.isRuntime()) {
-            return;
-        }
-
-        if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
-                pkg.toAppInfoWithoutState(), pkg, UserHandle.of(userId), permName)
-                .mayGrantPermission()) {
-            Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
-                    + packageName);
-            return;
-        }
-
+        final boolean isRuntimePermission;
+        final boolean isDevelopmentPermission;
+        final boolean permissionHasGids;
         synchronized (mLock) {
+            final Permission bp = mRegistry.getPermission(permName);
+            if (bp == null) {
+                throw new IllegalArgumentException("Unknown permission: " + permName);
+            }
+
+            isRuntimePermission = bp.isRuntime();
+            isDevelopmentPermission = bp.isDevelopment();
+            permissionHasGids = bp.hasGids();
+            if (!(isRuntimePermission || isDevelopmentPermission)) {
+                throw new SecurityException("Permission " + permName + " requested by "
+                        + pkg.getPackageName() + " is not a changeable permission type");
+            }
+
             final UidPermissionState uidState = getUidStateLocked(pkg, userId);
             if (uidState == null) {
                 Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName() + " and user "
@@ -1513,6 +1506,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     || pkg.getRequestedPermissions().contains(permName))) {
                 throw new SecurityException("Package " + pkg.getPackageName()
                         + " has not requested permission " + permName);
+            }
+
+            // If a permission review is required for legacy apps we represent
+            // their permissions as always granted runtime ones since we need
+            // to keep the review required permission flag per user while an
+            // install permission's state is shared across all users.
+            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M && bp.isRuntime()) {
+                return;
             }
 
             final int flags = uidState.getPermissionFlags(permName);
@@ -1531,6 +1532,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
                 Log.e(TAG, "Cannot grant hard restricted non-exempt permission "
                         + permName + " for package " + packageName);
+                return;
+            }
+
+            if (bp.isSoftRestricted() && !mayGrantSoftRestrictedPermission) {
+                Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
+                        + packageName);
                 return;
             }
 
@@ -1559,23 +1566,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        if (bp.isRuntime()) {
+        if (isRuntimePermission) {
             logPermission(MetricsEvent.ACTION_PERMISSION_GRANTED, permName, packageName);
         }
 
-        final int uid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
+        final int uid = UserHandle.getUid(userId, pkg.getUid());
         if (callback != null) {
-            if (bp.isDevelopment()) {
+            if (isDevelopmentPermission) {
                 callback.onInstallPermissionGranted();
             } else {
                 callback.onPermissionGranted(uid, userId);
             }
-            if (bp.hasGids()) {
+            if (permissionHasGids) {
                 callback.onGidsChanged(UserHandle.getAppId(pkg.getUid()), userId);
             }
         }
 
-        if (bp.isRuntime()) {
+        if (isRuntimePermission) {
             notifyRuntimePermissionStateChanged(packageName, userId);
         }
     }
@@ -1626,17 +1633,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        final Permission bp = mRegistry.getPermission(permName);
-        if (bp == null) {
-            throw new IllegalArgumentException("Unknown permission: " + permName);
-        }
 
-        if (!(bp.isRuntime() || bp.isDevelopment())) {
-            throw new SecurityException("Permission " + permName + " requested by "
-                    + pkg.getPackageName() + " is not a changeable permission type");
-        }
-
+        final boolean isRuntimePermission;
+        final boolean isDevelopmentPermission;
         synchronized (mLock) {
+            final Permission bp = mRegistry.getPermission(permName);
+            if (bp == null) {
+                throw new IllegalArgumentException("Unknown permission: " + permName);
+            }
+
+            isRuntimePermission = bp.isRuntime();
+            isDevelopmentPermission = bp.isDevelopment();
+            if (!(isRuntimePermission || isDevelopmentPermission)) {
+                throw new SecurityException("Permission " + permName + " requested by "
+                        + pkg.getPackageName() + " is not a changeable permission type");
+            }
+
             final UidPermissionState uidState = getUidStateLocked(pkg, userId);
             if (uidState == null) {
                 Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName() + " and user "
@@ -1679,20 +1691,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        if (bp.isRuntime()) {
+        if (isRuntimePermission) {
             logPermission(MetricsEvent.ACTION_PERMISSION_REVOKED, permName, packageName);
         }
 
         if (callback != null) {
-            if (bp.isDevelopment()) {
+            if (isDevelopmentPermission) {
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             } else {
-                callback.onPermissionRevoked(UserHandle.getUid(userId,
-                        UserHandle.getAppId(pkg.getUid())), userId, reason);
+                callback.onPermissionRevoked(UserHandle.getUid(userId, pkg.getUid()), userId,
+                        reason);
             }
         }
 
-        if (bp.isRuntime()) {
+        if (isRuntimePermission) {
             notifyRuntimePermissionStateChanged(packageName, userId);
         }
     }
@@ -1807,16 +1819,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         for (int i = 0; i < permissionCount; i++) {
             final String permName = pkg.getRequestedPermissions().get(i);
-            final Permission bp;
-            synchronized (mLock) {
-                bp = mRegistry.getPermissionLocked(permName);
-            }
-            if (bp == null) {
-                continue;
-            }
 
-            if (bp.isRemoved()) {
-                continue;
+            final boolean isRuntimePermission;
+            synchronized (mLock) {
+                final Permission permission = mRegistry.getPermission(permName);
+                if (permission == null) {
+                    continue;
+                }
+
+                if (permission.isRemoved()) {
+                    continue;
+                }
+                isRuntimePermission = permission.isRuntime();
             }
 
             // If shared user we just reset the state to which only this app contributed.
@@ -1846,7 +1860,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // permission as requiring a review as this is the initial state.
             final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
             final int targetSdk = mPackageManagerInt.getUidTargetSdkVersion(uid);
-            final int flags = (targetSdk < Build.VERSION_CODES.M && bp.isRuntime())
+            final int flags = (targetSdk < Build.VERSION_CODES.M && isRuntimePermission)
                     ? FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKED_COMPAT
                     : 0;
 
@@ -1855,7 +1869,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     false, delayingPermCallback);
 
             // Below is only runtime permission handling.
-            if (!bp.isRuntime()) {
+            if (!isRuntimePermission) {
                 continue;
             }
 
@@ -2092,13 +2106,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return false;
         }
 
-        Permission permission = getPermission(permName);
-        if (permission == null) {
-            return false;
-        }
-        if (permission.isHardRestricted()
-                && (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
-            return false;
+        synchronized (mLock) {
+            final Permission permission = mRegistry.getPermission(permName);
+            if (permission == null) {
+                return false;
+            }
+            if (permission.isHardRestricted()
+                    && (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
+                return false;
+            }
         }
 
         final long token = Binder.clearCallingIdentity();
@@ -2346,10 +2362,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int callingUid = Binder.getCallingUid();
 
         for (int permNum = 0; permNum < numPermissions; permNum++) {
-            String permName = permissionsToRevoke.get(permNum);
-            Permission bp = mRegistry.getPermission(permName);
-            if (bp == null || !bp.isRuntime()) {
-                continue;
+            final String permName = permissionsToRevoke.get(permNum);
+            synchronized (mLock) {
+                final Permission bp = mRegistry.getPermission(permName);
+                if (bp == null || !bp.isRuntime()) {
+                    continue;
+                }
             }
             for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
                 final int userId = userIds[userIdNum];
@@ -2387,7 +2405,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 }
             }
-            bp.setDefinitionChanged(false);
         }
     }
 
@@ -2406,7 +2423,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // permissions for one app being granted to someone just because they happen
                 // to be in a group defined by another app (before this had no implications).
                 if (pkg.getTargetSdkVersion() > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    p.setParsedPermissionGroup(mRegistry.getPermissionGroupLocked(p.getGroup()));
+                    p.setParsedPermissionGroup(mRegistry.getPermissionGroup(p.getGroup()));
                     // Warn for a permission in an unknown group.
                     if (DEBUG_PERMISSIONS
                             && p.getGroup() != null && p.getParsedPermissionGroup() == null) {
@@ -2421,21 +2438,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (p.isTree()) {
                     bp = Permission.createOrUpdate(
                             mPackageManagerInt,
-                            mRegistry.getPermissionTreeLocked(p.getName()), permissionInfo, pkg,
-                            mRegistry.getPermissionTreesLocked(), chatty);
-                    mRegistry.addPermissionTreeLocked(bp);
+                            mRegistry.getPermissionTree(p.getName()), permissionInfo, pkg,
+                            mRegistry.getPermissionTrees(), chatty);
+                    mRegistry.addPermissionTree(bp);
                 } else {
                     bp = Permission.createOrUpdate(
                             mPackageManagerInt,
-                            mRegistry.getPermissionLocked(p.getName()),
-                            permissionInfo, pkg, mRegistry.getPermissionTreesLocked(), chatty);
-                    mRegistry.addPermissionLocked(bp);
+                            mRegistry.getPermission(p.getName()),
+                            permissionInfo, pkg, mRegistry.getPermissionTrees(), chatty);
+                    mRegistry.addPermission(bp);
                 }
                 if (bp.isInstalled()) {
                     p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
                 }
                 if (bp.isDefinitionChanged()) {
                     definitionChangedPermissions.add(p.getName());
+                    bp.setDefinitionChanged(false);
                 }
             }
         }
@@ -2448,11 +2466,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             StringBuilder r = null;
             for (int i = 0; i < N; i++) {
                 final ParsedPermissionGroup pg = pkg.getPermissionGroups().get(i);
-                final ParsedPermissionGroup cur = mRegistry.getPermissionGroupLocked(pg.getName());
+                final ParsedPermissionGroup cur = mRegistry.getPermissionGroup(pg.getName());
                 final String curPackageName = (cur == null) ? null : cur.getPackageName();
                 final boolean isPackageUpdate = pg.getPackageName().equals(curPackageName);
                 if (cur == null || isPackageUpdate) {
-                    mRegistry.addPermissionGroupLocked(pg);
+                    mRegistry.addPermissionGroup(pg);
                     if (chatty && DEBUG_PACKAGE_SCANNING) {
                         if (r == null) {
                             r = new StringBuilder(256);
@@ -2491,9 +2509,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             StringBuilder r = null;
             for (int i=0; i<N; i++) {
                 ParsedPermission p = pkg.getPermissions().get(i);
-                Permission bp = mRegistry.getPermissionLocked(p.getName());
+                Permission bp = mRegistry.getPermission(p.getName());
                 if (bp == null) {
-                    bp = mRegistry.getPermissionTreeLocked(p.getName());
+                    bp = mRegistry.getPermissionTree(p.getName());
                 }
                 if (bp != null && bp.isPermission(p)) {
                     bp.setPermissionInfo(null);
@@ -2508,7 +2526,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
                 if (p.isAppOp()) {
                     // TODO(zhanghai): Should we just remove the entry for this permission directly?
-                    mRegistry.removeAppOpPermissionPackageLocked(p.getName(), pkg.getPackageName());
+                    mRegistry.removeAppOpPermissionPackage(p.getName(), pkg.getPackageName());
                 }
             }
             if (r != null) {
@@ -2518,9 +2536,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             N = pkg.getRequestedPermissions().size();
             r = null;
             for (int i=0; i<N; i++) {
-                String perm = pkg.getRequestedPermissions().get(i);
-                if (mRegistry.isPermissionAppOp(perm)) {
-                    mRegistry.removeAppOpPermissionPackageLocked(perm, pkg.getPackageName());
+                final String permissionName = pkg.getRequestedPermissions().get(i);
+                final Permission permission = mRegistry.getPermission(permissionName);
+                if (permission != null && permission.isAppOp()) {
+                    mRegistry.removeAppOpPermissionPackage(permissionName,
+                            pkg.getPackageName());
                 }
             }
             if (r != null) {
@@ -2576,11 +2596,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @NonNull
     private int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
-        Permission permission = mRegistry.getPermission(permissionName);
-        if (permission == null) {
-            return EmptyArray.INT;
+        synchronized (mLock) {
+            Permission permission = mRegistry.getPermission(permissionName);
+            if (permission == null) {
+                return EmptyArray.INT;
+            }
+            return permission.computeGids(userId);
         }
-        return permission.computeGids(userId);
     }
 
     /**
@@ -2629,12 +2651,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0; i < requestedPermissionsSize; i++) {
             final String permissionName = pkg.getRequestedPermissions().get(i);
 
-            final Permission permission = mRegistry.getPermission(permissionName);
+            final Permission permission;
+            synchronized (mLock) {
+                permission = mRegistry.getPermission(permissionName);
+            }
             if (permission == null) {
                 continue;
             }
-            if (permission.isSignature() && shouldGrantSignaturePermission(pkg, ps,
-                    permission)) {
+            if (permission.isSignature() && shouldGrantSignaturePermission(pkg, ps, permission)) {
                 shouldGrantSignaturePermission.add(permissionName);
             }
         }
@@ -2825,7 +2849,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                     // Keep track of app op permissions.
                     if (bp.isAppOp()) {
-                        mRegistry.addAppOpPermissionPackageLocked(perm, pkg.getPackageName());
+                        mRegistry.addAppOpPermissionPackage(perm, pkg.getPackageName());
                     }
 
                     boolean shouldGrantNormalPermission = true;
@@ -3048,7 +3072,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         for (String permission : ps.getGrantedPermissions()) {
             if (!pkg.getImplicitPermissions().contains(permission)) {
-                Permission bp = mRegistry.getPermissionLocked(permission);
+                Permission bp = mRegistry.getPermission(permission);
                 if (bp != null && bp.isRuntime()) {
                     int flags = ps.getPermissionFlags(permission);
 
@@ -3122,7 +3146,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         + " for " + pkgName);
             }
 
-            ps.grantPermission(mRegistry.getPermissionLocked(newPerm));
+            ps.grantPermission(mRegistry.getPermission(newPerm));
         }
 
         // Add permission flags
@@ -3197,7 +3221,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ArraySet<String> sourcePerms = newToSplitPerms.get(newPerm);
 
             if (sourcePerms != null) {
-                Permission bp = mRegistry.getPermissionLocked(newPerm);
+                Permission bp = mRegistry.getPermission(newPerm);
                 if (bp.isRuntime()) {
 
                     if (!newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)) {
@@ -3212,7 +3236,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         for (int sourcePermNum = 0; sourcePermNum < sourcePerms.size();
                                 sourcePermNum++) {
                             final String sourcePerm = sourcePerms.valueAt(sourcePermNum);
-                            Permission sourceBp = mRegistry.getPermissionLocked(sourcePerm);
+                            Permission sourceBp = mRegistry.getPermission(sourcePerm);
                             if (!sourceBp.isRuntime()) {
                                 inheritsFromInstallPerm = true;
                                 break;
@@ -3662,15 +3686,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final boolean instantApp = mPackageManagerInt.isInstantApp(pkg.getPackageName(), userId);
 
         for (String permission : pkg.getRequestedPermissions()) {
-            final Permission bp;
+            final boolean shouldGrantPermission;
             synchronized (mLock) {
-                bp = mRegistry.getPermissionLocked(permission);
+                final Permission bp = mRegistry.getPermission(permission);
+                shouldGrantPermission = bp != null && (bp.isRuntime() || bp.isDevelopment())
+                        && (!instantApp || bp.isInstant())
+                        && (supportsRuntimePermissions || !bp.isRuntimeOnly())
+                        && (grantedPermissions == null
+                                || ArrayUtils.contains(grantedPermissions, permission));
             }
-            if (bp != null && (bp.isRuntime() || bp.isDevelopment())
-                    && (!instantApp || bp.isInstant())
-                    && (supportsRuntimePermissions || !bp.isRuntimeOnly())
-                    && (grantedPermissions == null
-                           || ArrayUtils.contains(grantedPermissions, permission))) {
+            if (shouldGrantPermission) {
                 final int flags = getPermissionFlagsInternal(permission, pkg.getPackageName(),
                         callingUid, userId);
                 if (supportsRuntimePermissions) {
@@ -3704,14 +3729,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             for (int j = 0; j < permissionCount; j++) {
                 final String permissionName = pkg.getRequestedPermissions().get(j);
 
-                final Permission bp = mRegistry.getPermissionLocked(permissionName);
-
-                if (bp == null || !bp.isHardOrSoftRestricted()) {
-                    continue;
-                }
-
                 final boolean isGranted;
                 synchronized (mLock) {
+                    final Permission bp = mRegistry.getPermission(permissionName);
+                    if (bp == null || !bp.isHardOrSoftRestricted()) {
+                        continue;
+                    }
+
                     final UidPermissionState uidState = getUidStateLocked(pkg, userId);
                     if (uidState == null) {
                         Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
@@ -3865,11 +3889,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         int affectedUserId = UserHandle.USER_NULL;
         // Update permissions
         for (String eachPerm : deletedPs.pkg.getRequestedPermissions()) {
-            Permission bp = mRegistry.getPermission(eachPerm);
-            if (bp == null) {
-                continue;
-            }
-
             // Check if another package in the shared user needs the permission.
             boolean used = false;
             final List<AndroidPackage> pkgs = sus.getPackages();
@@ -3913,6 +3932,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     continue;
                 }
 
+                Permission bp = mRegistry.getPermission(eachPerm);
+                if (bp == null) {
+                    continue;
+                }
+
                 // TODO(zhanghai): Why are we only killing the UID when GIDs changed, instead of any
                 //  permission change?
                 if (uidState.removePermissionState(bp.getName()) && bp.hasGids()) {
@@ -3939,7 +3963,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final int requestedPermCount = pkg.getRequestedPermissions().size();
             for (int j = 0; j < requestedPermCount; j++) {
                 String permission = pkg.getRequestedPermissions().get(j);
-                Permission bp = mRegistry.getPermissionLocked(permission);
+                Permission bp = mRegistry.getPermission(permission);
                 if (bp != null) {
                     usedPermissions.add(permission);
                 }
@@ -3954,7 +3978,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = permissionStatesSize - 1; i >= 0; i--) {
             PermissionState permissionState = permissionStates.get(i);
             if (!usedPermissions.contains(permissionState.getName())) {
-                Permission bp = mRegistry.getPermissionLocked(permissionState.getName());
+                Permission bp = mRegistry.getPermission(permissionState.getName());
                 if (bp != null) {
                     if (uidState.removePermissionState(bp.getName())
                             && permissionState.isRuntime()) {
@@ -4027,7 +4051,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Cache background -> foreground permission mapping.
                 // Only system declares background permissions, hence mapping does never change.
                 mBackgroundPermissions = new ArrayMap<>();
-                for (Permission bp : mRegistry.getPermissionsLocked()) {
+                for (Permission bp : mRegistry.getPermissions()) {
                     if (bp.getBackgroundPermission() != null) {
                         String fgPerm = bp.getName();
                         String bgPerm = bp.getBackgroundPermission();
@@ -4173,9 +4197,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         boolean changed = false;
         Set<Permission> needsUpdate = null;
         synchronized (mLock) {
-            for (final Permission bp : mRegistry.getPermissionsLocked()) {
+            for (final Permission bp : mRegistry.getPermissions()) {
                 if (bp.isDynamic()) {
-                    bp.updateDynamicPermission(mRegistry.getPermissionTreesLocked());
+                    bp.updateDynamicPermission(mRegistry.getPermissionTrees());
                 }
                 if (!packageName.equals(bp.getPackageName())) {
                     // Not checking sourcePackageSetting because it can be null when
@@ -4225,7 +4249,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             }
                         });
                     }
-                    mRegistry.removePermissionLocked(bp.getName());
+                    mRegistry.removePermission(bp.getName());
                     continue;
                 }
                 final AndroidPackage sourcePkg =
@@ -4239,7 +4263,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                     Slog.w(TAG, "Removing dangling permission: " + bp.getName()
                             + " from package " + bp.getPackageName());
-                    mRegistry.removePermissionLocked(bp.getName());
+                    mRegistry.removePermission(bp.getName());
                 }
             }
         }
@@ -4307,7 +4331,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         Set<Permission> needsUpdate = null;
         synchronized (mLock) {
-            final Iterator<Permission> it = mRegistry.getPermissionTreesLocked().iterator();
+            final Iterator<Permission> it = mRegistry.getPermissionTrees().iterator();
             while (it.hasNext()) {
                 final Permission bp = it.next();
                 if (!packageName.equals(bp.getPackageName())) {
@@ -4343,7 +4367,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                     Slog.w(TAG, "Removing dangling permission tree: " + bp.getName()
                             + " from package " + bp.getPackageName());
-                    mRegistry.removePermissionLocked(bp.getName());
+                    mRegistry.removePermission(bp.getName());
                 }
             }
         }
@@ -4527,7 +4551,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @GuardedBy({"mSettings.mLock", "mLock"})
     private int calculateCurrentPermissionFootprintLocked(@NonNull Permission permissionTree) {
         int size = 0;
-        for (final Permission permission : mRegistry.getPermissionsLocked()) {
+        for (final Permission permission : mRegistry.getPermissions()) {
             size += permissionTree.calculateFootprint(permission);
         }
         return size;
@@ -4686,7 +4710,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull Collection<LegacyPermissionState.PermissionState> permissionStates) {
         for (final LegacyPermissionState.PermissionState permissionState : permissionStates) {
             final String permissionName = permissionState.getName();
-            final Permission permission = mRegistry.getPermissionLocked(permissionName);
+            final Permission permission = mRegistry.getPermission(permissionName);
             if (permission == null) {
                 Slog.w(TAG, "Unknown permission: " + permissionName);
                 continue;
@@ -4771,9 +4795,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             permission.setGids(configPermission.getRawGids(),
                                     configPermission.areGidsPerUser());
                         }
-                        mRegistry.addPermissionLocked(permission);
+                        mRegistry.addPermission(permission);
                     } else {
-                        mRegistry.addPermissionTreeLocked(permission);
+                        mRegistry.addPermissionTree(permission);
                     }
                 }
             }
@@ -4787,7 +4811,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final List<LegacyPermission> legacyPermissions = new ArrayList<>();
             synchronized (mLock) {
                 final Collection<Permission> permissions = writePermissionOrPermissionTree == 0
-                        ? mRegistry.getPermissionsLocked() : mRegistry.getPermissionTreesLocked();
+                        ? mRegistry.getPermissions() : mRegistry.getPermissionTrees();
                 for (final Permission permission : permissions) {
                     // We don't need to provide UID and GIDs, which are only retrieved when dumping.
                     final LegacyPermission legacyPermission = new LegacyPermission(
@@ -4807,7 +4831,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void transferPermissions(@NonNull String oldPackageName,
             @NonNull String newPackageName) {
         synchronized (mLock) {
-            mRegistry.transferPermissionsLocked(oldPackageName, newPackageName);
+            mRegistry.transferPermissions(oldPackageName, newPackageName);
         }
     }
 
@@ -4822,7 +4846,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private List<LegacyPermission> getLegacyPermissions() {
         synchronized (mLock) {
             final List<LegacyPermission> legacyPermissions = new ArrayList<>();
-            for (final Permission permission : mRegistry.getPermissionsLocked()) {
+            for (final Permission permission : mRegistry.getPermissions()) {
                 final LegacyPermission legacyPermission = new LegacyPermission(
                         permission.getPermissionInfo(), permission.getType(), permission.getUid(),
                         permission.getRawGids());
@@ -4836,7 +4860,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private Map<String, Set<String>> getAllAppOpPermissionPackages() {
         synchronized (mLock) {
             final ArrayMap<String, ArraySet<String>> appOpPermissionPackages =
-                    mRegistry.getAllAppOpPermissionPackagesLocked();
+                    mRegistry.getAllAppOpPermissionPackages();
             final Map<String, Set<String>> deepClone = new ArrayMap<>();
             final int appOpPermissionPackagesSize = appOpPermissionPackages.size();
             for (int i = 0; i < appOpPermissionPackagesSize; i++) {
@@ -5046,7 +5070,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public Permission getPermissionTEMP(String permName) {
             synchronized (PermissionManagerService.this.mLock) {
-                return mRegistry.getPermissionLocked(permName);
+                return mRegistry.getPermission(permName);
             }
         }
 
@@ -5056,7 +5080,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
 
             synchronized (mLock) {
-                for (final Permission permission : mRegistry.getPermissionsLocked()) {
+                for (final Permission permission : mRegistry.getPermissions()) {
                     if (permission.getProtection() == protection) {
                         matchingPermissions.add(permission.generatePermissionInfo(0));
                     }
@@ -5072,7 +5096,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
 
             synchronized (mLock) {
-                for (final Permission permission : mRegistry.getPermissionsLocked()) {
+                for (final Permission permission : mRegistry.getPermissions()) {
                     if ((permission.getProtectionFlags() & protectionFlags) == protectionFlags) {
                         matchingPermissions.add(permission.generatePermissionInfo(0));
                     }
@@ -5270,7 +5294,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Iterator<String> iterator = permissionNames.iterator();
                 while (iterator.hasNext()) {
                     final String permissionName = iterator.next();
-                    final Permission permission = mRegistry.getPermissionLocked(permissionName);
+                    final Permission permission = mRegistry.getPermission(permissionName);
                     if (permission == null || !permission.isHardOrSoftRestricted()) {
                         iterator.remove();
                     }
