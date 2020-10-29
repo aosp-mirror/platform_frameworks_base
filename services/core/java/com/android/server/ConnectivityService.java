@@ -6078,7 +6078,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (final String iface : interfaceDiff.added) {
                 try {
                     if (DBG) log("Adding iface " + iface + " to network " + netId);
-                    mNMS.addInterfaceToNetwork(iface, netId);
+                    mNetd.networkAddInterface(netId, iface);
                     wakeupModifyInterface(iface, caps, true);
                     bs.noteNetworkInterfaceType(iface, legacyType);
                 } catch (Exception e) {
@@ -6090,7 +6090,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 if (DBG) log("Removing iface " + iface + " from network " + netId);
                 wakeupModifyInterface(iface, caps, false);
-                mNMS.removeInterfaceFromNetwork(iface, netId);
+                mNetd.networkRemoveInterface(netId, iface);
             } catch (Exception e) {
                 loge("Exception removing interface: " + e);
             }
