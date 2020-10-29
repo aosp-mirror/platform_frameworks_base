@@ -261,4 +261,12 @@ public class ContentResolverTest {
             // Expected
         }
     }
+
+    @Test
+    public void testUncanonicalize() {
+        Uri uncanonical = mResolver.uncanonicalize(
+                Uri.parse("content://android.content.FakeProviderRemote/something"));
+        assertThat(uncanonical).isEqualTo(
+                Uri.parse("content://android.content.FakeProviderRemote/uncanonical"));
+    }
 }
