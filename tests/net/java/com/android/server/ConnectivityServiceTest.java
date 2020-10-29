@@ -6023,23 +6023,23 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(true);
         trustedCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-        verify(mNetworkManagementService).setDefaultNetId(eq(mCellNetworkAgent.getNetwork().netId));
-        reset(mNetworkManagementService);
+        verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
+        reset(mMockNetd);
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true);
         trustedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
-        verify(mNetworkManagementService).setDefaultNetId(eq(mWiFiNetworkAgent.getNetwork().netId));
-        reset(mNetworkManagementService);
+        verify(mMockNetd).networkSetDefault(eq(mWiFiNetworkAgent.getNetwork().netId));
+        reset(mMockNetd);
 
         mWiFiNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
         trustedCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
-        verify(mNetworkManagementService).setDefaultNetId(eq(mCellNetworkAgent.getNetwork().netId));
-        reset(mNetworkManagementService);
+        verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
+        reset(mMockNetd);
 
         mCellNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
         trustedCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
-        verify(mNetworkManagementService).clearDefaultNetId();
+        verify(mMockNetd).networkClearDefault();
 
         mCm.unregisterNetworkCallback(trustedCallback);
     }
