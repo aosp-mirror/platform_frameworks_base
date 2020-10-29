@@ -19,6 +19,7 @@ package com.android.server.pm.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
@@ -28,31 +29,25 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.util.EmptyArray;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
-public final class BasePermission {
-    private static final String TAG = "PackageManager";
+/**
+ * Permission definition.
+ */
+public final class Permission {
+    private static final String TAG = "Permission";
 
-    public static final int TYPE_MANIFEST = 0;
-    public static final int TYPE_CONFIG = 1;
-    public static final int TYPE_DYNAMIC = 2;
+    public static final int TYPE_MANIFEST = LegacyPermission.TYPE_MANIFEST;
+    public static final int TYPE_CONFIG = LegacyPermission.TYPE_CONFIG;
+    public static final int TYPE_DYNAMIC = LegacyPermission.TYPE_DYNAMIC;
     @IntDef({
             TYPE_MANIFEST,
             TYPE_CONFIG,
@@ -70,18 +65,13 @@ public final class BasePermission {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionLevel {}
 
-    private static final String ATTR_NAME = "name";
-    private static final String ATTR_PACKAGE = "package";
-    private static final String TAG_ITEM = "item";
-
-    private boolean mPermissionDefinitionChanged;
-
     @NonNull
     private PermissionInfo mPermissionInfo;
 
     private boolean mReconciled;
 
-    private final @PermissionType int mType;
+    @PermissionType
+    private final int mType;
 
     /** UID that owns the definition of this permission */
     private int mUid;
@@ -96,7 +86,10 @@ public final class BasePermission {
      */
     private boolean mGidsPerUser;
 
-    public BasePermission(@NonNull String name, String packageName, @PermissionType int type) {
+    private boolean mDefinitionChanged;
+
+    public Permission(@NonNull String name, @NonNull String packageName,
+            @PermissionType int type) {
         mPermissionInfo = new PermissionInfo();
         mPermissionInfo.name = name;
         mPermissionInfo.packageName = packageName;
@@ -105,40 +98,14 @@ public final class BasePermission {
         mType = type;
     }
 
-    @Override
-    public String toString() {
-        return "BasePermission{" + Integer.toHexString(System.identityHashCode(this)) + " "
-                + mPermissionInfo.name + "}";
+    public Permission(@NonNull PermissionInfo permissionInfo, @PermissionType int type) {
+        mPermissionInfo = permissionInfo;
+        mType = type;
     }
 
     @NonNull
-    public String getName() {
-        return mPermissionInfo.name;
-    }
-
-    public int getProtectionLevel() {
-        return mPermissionInfo.protectionLevel;
-    }
-
-    public String getPackageName() {
-        return mPermissionInfo.packageName;
-    }
-
-    public boolean isPermissionDefinitionChanged() {
-        return mPermissionDefinitionChanged;
-    }
-
-    public int getType() {
-        return mType;
-    }
-
-    public int getUid() {
-        return mUid;
-    }
-
-    public void setGids(@NonNull int[] gids, boolean gidsPerUser) {
-        mGids = gids;
-        mGidsPerUser = gidsPerUser;
+    public PermissionInfo getPermissionInfo() {
+        return mPermissionInfo;
     }
 
     public void setPermissionInfo(@Nullable PermissionInfo permissionInfo) {
@@ -154,8 +121,26 @@ public final class BasePermission {
         mReconciled = permissionInfo != null;
     }
 
-    public void setPermissionDefinitionChanged(boolean shouldOverride) {
-        mPermissionDefinitionChanged = shouldOverride;
+    @NonNull
+    public String getName() {
+        return mPermissionInfo.name;
+    }
+
+    public int getProtectionLevel() {
+        return mPermissionInfo.protectionLevel;
+    }
+
+    @NonNull
+    public String getPackageName() {
+        return mPermissionInfo.packageName;
+    }
+
+    public int getType() {
+        return mType;
+    }
+
+    public int getUid() {
+        return mUid;
     }
 
     public boolean hasGids() {
@@ -163,7 +148,21 @@ public final class BasePermission {
     }
 
     @NonNull
-    public int[] computeGids(int userId) {
+    public int[] getRawGids() {
+        return mGids;
+    }
+
+    public boolean areGidsPerUser() {
+        return mGidsPerUser;
+    }
+
+    public void setGids(@NonNull int[] gids, boolean gidsPerUser) {
+        mGids = gids;
+        mGidsPerUser = gidsPerUser;
+    }
+
+    @NonNull
+    public int[] computeGids(@UserIdInt int userId) {
         if (mGidsPerUser) {
             final int[] userGids = new int[mGids.length];
             for (int i = 0; i < mGids.length; i++) {
@@ -176,19 +175,28 @@ public final class BasePermission {
         }
     }
 
-    public int calculateFootprint(BasePermission perm) {
-        if (mUid == perm.mUid) {
-            return perm.mPermissionInfo.name.length() + perm.mPermissionInfo.calculateFootprint();
+    public boolean isDefinitionChanged() {
+        return mDefinitionChanged;
+    }
+
+    public void setDefinitionChanged(boolean definitionChanged) {
+        mDefinitionChanged = definitionChanged;
+    }
+
+    public int calculateFootprint(@NonNull Permission permission) {
+        if (mUid == permission.mUid) {
+            return permission.mPermissionInfo.name.length()
+                    + permission.mPermissionInfo.calculateFootprint();
         }
         return 0;
     }
 
-    public boolean isPermission(ParsedPermission perm) {
+    public boolean isPermission(@NonNull ParsedPermission parsedPermission) {
         if (mPermissionInfo == null) {
             return false;
         }
-        return Objects.equals(mPermissionInfo.packageName, perm.getPackageName())
-                && Objects.equals(mPermissionInfo.name, perm.getName());
+        return Objects.equals(mPermissionInfo.packageName, parsedPermission.getPackageName())
+                && Objects.equals(mPermissionInfo.name, parsedPermission.getName());
     }
 
     public boolean isDynamic() {
@@ -323,8 +331,8 @@ public final class BasePermission {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0;
     }
 
-    public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
-        if (!origPackageName.equals(mPermissionInfo.packageName)) {
+    public void transfer(@NonNull String oldPackageName, @NonNull String newPackageName) {
+        if (!oldPackageName.equals(mPermissionInfo.packageName)) {
             return;
         }
         final PermissionInfo newPermissionInfo = new PermissionInfo();
@@ -339,28 +347,29 @@ public final class BasePermission {
     }
 
     public boolean addToTree(@ProtectionLevel int protectionLevel,
-            @NonNull PermissionInfo permissionInfo, @NonNull BasePermission tree) {
+            @NonNull PermissionInfo permissionInfo, @NonNull Permission permissionTree) {
         final boolean changed =
                 (mPermissionInfo.protectionLevel != protectionLevel
                     || !mReconciled
-                    || mUid != tree.mUid
+                    || mUid != permissionTree.mUid
                     || !Objects.equals(mPermissionInfo.packageName,
-                            tree.mPermissionInfo.packageName)
+                            permissionTree.mPermissionInfo.packageName)
                     || !comparePermissionInfos(mPermissionInfo, permissionInfo));
         mPermissionInfo = new PermissionInfo(permissionInfo);
-        mPermissionInfo.packageName = tree.mPermissionInfo.packageName;
+        mPermissionInfo.packageName = permissionTree.mPermissionInfo.packageName;
         mPermissionInfo.protectionLevel = protectionLevel;
         mReconciled = true;
-        mUid = tree.mUid;
+        mUid = permissionTree.mUid;
         return changed;
     }
 
-    public void updateDynamicPermission(Collection<BasePermission> permissionTrees) {
-        if (PackageManagerService.DEBUG_SETTINGS) Log.v(TAG, "Dynamic permission: name="
-                + getName() + " pkg=" + getPackageName()
-                + " info=" + mPermissionInfo);
+    public void updateDynamicPermission(@NonNull Collection<Permission> permissionTrees) {
+        if (PackageManagerService.DEBUG_SETTINGS) {
+            Log.v(TAG, "Dynamic permission: name=" + getName() + " pkg=" + getPackageName()
+                    + " info=" + mPermissionInfo);
+        }
         if (mType == TYPE_DYNAMIC) {
-            final BasePermission tree = findPermissionTree(permissionTrees, mPermissionInfo.name);
+            final Permission tree = findPermissionTree(permissionTrees, mPermissionInfo.name);
             if (tree != null) {
                 mPermissionInfo.packageName = tree.mPermissionInfo.packageName;
                 mReconciled = true;
@@ -369,19 +378,21 @@ public final class BasePermission {
         }
     }
 
-    static BasePermission createOrUpdate(PackageManagerInternal packageManagerInternal,
-            @Nullable BasePermission bp, @NonNull PermissionInfo p,
-            @NonNull AndroidPackage pkg, Collection<BasePermission> permissionTrees,
+    @NonNull
+    static Permission createOrUpdate(PackageManagerInternal packageManagerInternal,
+            @Nullable Permission permission, @NonNull PermissionInfo permissionInfo,
+            @NonNull AndroidPackage pkg, @NonNull Collection<Permission> permissionTrees,
             boolean chatty) {
         // Allow system apps to redefine non-system permissions
         boolean ownerChanged = false;
-        if (bp != null && !Objects.equals(bp.mPermissionInfo.packageName, p.packageName)) {
+        if (permission != null && !Objects.equals(permission.mPermissionInfo.packageName,
+                permissionInfo.packageName)) {
             final boolean currentOwnerIsSystem;
-            if (!bp.mReconciled) {
+            if (!permission.mReconciled) {
                 currentOwnerIsSystem = false;
             } else {
                 AndroidPackage currentPackage = packageManagerInternal.getPackage(
-                        bp.mPermissionInfo.packageName);
+                        permission.mPermissionInfo.packageName);
                 if (currentPackage == null) {
                     currentOwnerIsSystem = false;
                 } else {
@@ -390,54 +401,56 @@ public final class BasePermission {
             }
 
             if (pkg.isSystem()) {
-                if (bp.mType == BasePermission.TYPE_CONFIG && !bp.mReconciled) {
+                if (permission.mType == Permission.TYPE_CONFIG && !permission.mReconciled) {
                     // It's a built-in permission and no owner, take ownership now
-                    p.flags |= PermissionInfo.FLAG_INSTALLED;
-                    bp.mPermissionInfo = p;
-                    bp.mReconciled = true;
-                    bp.mUid = pkg.getUid();
+                    permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
+                    permission.mPermissionInfo = permissionInfo;
+                    permission.mReconciled = true;
+                    permission.mUid = pkg.getUid();
                 } else if (!currentOwnerIsSystem) {
                     String msg = "New decl " + pkg + " of permission  "
-                            + p.name + " is system; overriding " + bp.mPermissionInfo.packageName;
+                            + permissionInfo.name + " is system; overriding "
+                            + permission.mPermissionInfo.packageName;
                     PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                     ownerChanged = true;
-                    bp = null;
+                    permission = null;
                 }
             }
         }
-        if (bp == null) {
-            bp = new BasePermission(p.name, p.packageName, TYPE_MANIFEST);
+        if (permission == null) {
+            permission = new Permission(permissionInfo.name, permissionInfo.packageName,
+                    TYPE_MANIFEST);
         }
-        boolean wasNormal = bp.isNormal();
+        boolean wasNormal = permission.isNormal();
         StringBuilder r = null;
-        if (!bp.mReconciled) {
-            if (bp.mPermissionInfo.packageName == null
-                    || bp.mPermissionInfo.packageName.equals(p.packageName)) {
-                final BasePermission tree = findPermissionTree(permissionTrees, p.name);
+        if (!permission.mReconciled) {
+            if (permission.mPermissionInfo.packageName == null
+                    || permission.mPermissionInfo.packageName.equals(permissionInfo.packageName)) {
+                final Permission tree = findPermissionTree(permissionTrees, permissionInfo.name);
                 if (tree == null
-                        || tree.mPermissionInfo.packageName.equals(p.packageName)) {
-                    p.flags |= PermissionInfo.FLAG_INSTALLED;
-                    bp.mPermissionInfo = p;
-                    bp.mReconciled = true;
-                    bp.mUid = pkg.getUid();
+                        || tree.mPermissionInfo.packageName.equals(permissionInfo.packageName)) {
+                    permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
+                    permission.mPermissionInfo = permissionInfo;
+                    permission.mReconciled = true;
+                    permission.mUid = pkg.getUid();
                     if (chatty) {
                         if (r == null) {
                             r = new StringBuilder(256);
                         } else {
                             r.append(' ');
                         }
-                        r.append(p.name);
+                        r.append(permissionInfo.name);
                     }
                 } else {
-                    Slog.w(TAG, "Permission " + p.name + " from package "
-                            + p.packageName + " ignored: base tree "
+                    Slog.w(TAG, "Permission " + permissionInfo.name + " from package "
+                            + permissionInfo.packageName + " ignored: base tree "
                             + tree.mPermissionInfo.name + " is from package "
                             + tree.mPermissionInfo.packageName);
                 }
             } else {
-                Slog.w(TAG, "Permission " + p.name + " from package "
-                        + p.packageName + " ignored: original from "
-                        + bp.mPermissionInfo.packageName);
+                Slog.w(TAG, "Permission " + permissionInfo.name + " from package "
+                        + permissionInfo.packageName + " ignored: original from "
+                        + permission.mPermissionInfo.packageName);
             }
         } else if (chatty) {
             if (r == null) {
@@ -446,42 +459,47 @@ public final class BasePermission {
                 r.append(' ');
             }
             r.append("DUP:");
-            r.append(p.name);
+            r.append(permissionInfo.name);
         }
-        if (bp.isRuntime() && (ownerChanged || wasNormal)) {
+        if (permission.isRuntime() && (ownerChanged || wasNormal)) {
             // If this is a runtime permission and the owner has changed, or this was a normal
             // permission, then permission state should be cleaned up
-            bp.mPermissionDefinitionChanged = true;
+            permission.mDefinitionChanged = true;
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
             Log.d(TAG, "  Permissions: " + r);
         }
-        return bp;
+        return permission;
     }
 
-    static BasePermission enforcePermissionTree(
-            Collection<BasePermission> permissionTrees, String permName, int callingUid) {
-        if (permName != null) {
-            BasePermission bp = findPermissionTree(permissionTrees, permName);
-            if (bp != null) {
-                if (bp.mUid == UserHandle.getAppId(callingUid)) {
-                    return bp;
+    @NonNull
+    public static Permission enforcePermissionTree(@NonNull Collection<Permission> permissionTrees,
+            @NonNull String permissionName, int callingUid) {
+        if (permissionName != null) {
+            final Permission permissionTree = Permission.findPermissionTree(permissionTrees,
+                    permissionName);
+            if (permissionTree != null) {
+                if (permissionTree.getUid() == UserHandle.getAppId(callingUid)) {
+                    return permissionTree;
                 }
                 throw new SecurityException("Calling uid " + callingUid
                         + " is not allowed to add to permission tree "
-                        + bp.mPermissionInfo.name + " owned by uid " + bp.mUid);
+                        + permissionTree.getName() + " owned by uid "
+                        + permissionTree.getUid());
             }
         }
-        throw new SecurityException("No permission tree found for " + permName);
+        throw new SecurityException("No permission tree found for " + permissionName);
     }
 
-    private static BasePermission findPermissionTree(
-            Collection<BasePermission> permissionTrees, String permName) {
-        for (BasePermission bp : permissionTrees) {
-            if (permName.startsWith(bp.mPermissionInfo.name)
-                    && permName.length() > bp.mPermissionInfo.name.length()
-                    && permName.charAt(bp.mPermissionInfo.name.length()) == '.') {
-                return bp;
+    @Nullable
+    private static Permission findPermissionTree(@NonNull Collection<Permission> permissionTrees,
+            @NonNull String permissionName) {
+        for (final Permission permissionTree : permissionTrees) {
+            final String permissionTreeName = permissionTree.getName();
+            if (permissionName.startsWith(permissionTreeName)
+                    && permissionName.length() > permissionTreeName.length()
+                    && permissionName.charAt(permissionTreeName.length()) == '.') {
+                return permissionTree;
             }
         }
         return null;
@@ -512,7 +530,7 @@ public final class BasePermission {
 
     @NonNull
     public PermissionInfo generatePermissionInfo(int flags, int targetSdkVersion) {
-        PermissionInfo permissionInfo;
+        final PermissionInfo permissionInfo;
         if (mPermissionInfo != null) {
             permissionInfo = new PermissionInfo(mPermissionInfo);
             if ((flags & PackageManager.GET_META_DATA) != PackageManager.GET_META_DATA) {
@@ -539,79 +557,6 @@ public final class BasePermission {
         return permissionInfo;
     }
 
-    public static boolean readLPw(@NonNull Map<String, BasePermission> out,
-            @NonNull XmlPullParser parser) {
-        final String tagName = parser.getName();
-        if (!tagName.equals(TAG_ITEM)) {
-            return false;
-        }
-        final String name = parser.getAttributeValue(null, ATTR_NAME);
-        final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-        final String ptype = parser.getAttributeValue(null, "type");
-        if (name == null || packageName == null) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings: permissions has" + " no name at "
-                            + parser.getPositionDescription());
-            return false;
-        }
-        final boolean dynamic = "dynamic".equals(ptype);
-        BasePermission bp = out.get(name);
-        // If the permission is builtin, do not clobber it.
-        if (bp == null || bp.mType != TYPE_CONFIG) {
-            bp = new BasePermission(name.intern(), packageName,
-                    dynamic ? TYPE_DYNAMIC : TYPE_MANIFEST);
-        }
-        bp.mPermissionInfo.protectionLevel = readInt(parser, null, "protection",
-                PermissionInfo.PROTECTION_NORMAL);
-        bp.mPermissionInfo.protectionLevel = PermissionInfo.fixProtectionLevel(
-                bp.mPermissionInfo.protectionLevel);
-        if (dynamic) {
-            bp.mPermissionInfo.icon = readInt(parser, null, "icon", 0);
-            bp.mPermissionInfo.nonLocalizedLabel = parser.getAttributeValue(null, "label");
-        }
-        out.put(bp.mPermissionInfo.name, bp);
-        return true;
-    }
-
-    private static int readInt(XmlPullParser parser, String ns, String name, int defValue) {
-        String v = parser.getAttributeValue(ns, name);
-        try {
-            if (v == null) {
-                return defValue;
-            }
-            return Integer.parseInt(v);
-        } catch (NumberFormatException e) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings: attribute " + name
-                            + " has bad integer value " + v + " at "
-                            + parser.getPositionDescription());
-        }
-        return defValue;
-    }
-
-    public void writeLPr(@NonNull XmlSerializer serializer) throws IOException {
-        if (mPermissionInfo.packageName == null) {
-            return;
-        }
-        serializer.startTag(null, TAG_ITEM);
-        serializer.attribute(null, ATTR_NAME, mPermissionInfo.name);
-        serializer.attribute(null, ATTR_PACKAGE, mPermissionInfo.packageName);
-        if (mPermissionInfo.protectionLevel != PermissionInfo.PROTECTION_NORMAL) {
-            serializer.attribute(null, "protection",
-                    Integer.toString(mPermissionInfo.protectionLevel));
-        }
-        if (mType == TYPE_DYNAMIC) {
-            serializer.attribute(null, "type", "dynamic");
-            if (mPermissionInfo.icon != 0) {
-                serializer.attribute(null, "icon", Integer.toString(mPermissionInfo.icon));
-            }
-            if (mPermissionInfo.nonLocalizedLabel != null) {
-                serializer.attribute(null, "label", mPermissionInfo.nonLocalizedLabel.toString());
-            }
-        }
-        serializer.endTag(null, TAG_ITEM);
-    }
-
     private static boolean comparePermissionInfos(PermissionInfo pi1, PermissionInfo pi2) {
         if (pi1.icon != pi2.icon) return false;
         if (pi1.logo != pi2.logo) return false;
@@ -625,44 +570,6 @@ public final class BasePermission {
         //if (!compareStrings(pi1.nonLocalizedDescription, pi2.nonLocalizedDescription)) return false;
         //if (pi1.labelRes != pi2.labelRes) return false;
         //if (pi1.descriptionRes != pi2.descriptionRes) return false;
-        return true;
-    }
-
-    public boolean dumpPermissionsLPr(@NonNull PrintWriter pw, @NonNull String packageName,
-            @NonNull Set<String> permissionNames, boolean readEnforced,
-            boolean printedSomething, @NonNull DumpState dumpState) {
-        if (packageName != null && !packageName.equals(mPermissionInfo.packageName)) {
-            return false;
-        }
-        if (permissionNames != null && !permissionNames.contains(mPermissionInfo.name)) {
-            return false;
-        }
-        if (!printedSomething) {
-            if (dumpState.onTitlePrinted())
-                pw.println();
-            pw.println("Permissions:");
-        }
-        pw.print("  Permission ["); pw.print(mPermissionInfo.name); pw.print("] (");
-                pw.print(Integer.toHexString(System.identityHashCode(this)));
-                pw.println("):");
-        pw.print("    sourcePackage="); pw.println(mPermissionInfo.packageName);
-        pw.print("    uid="); pw.print(mUid);
-        pw.print(" gids="); pw.print(Arrays.toString(computeGids(UserHandle.USER_SYSTEM)));
-        pw.print(" type="); pw.print(mType);
-        pw.print(" prot=");
-        pw.println(PermissionInfo.protectionToString(mPermissionInfo.protectionLevel));
-        if (mPermissionInfo != null) {
-            pw.print("    perm="); pw.println(mPermissionInfo);
-            if ((mPermissionInfo.flags & PermissionInfo.FLAG_INSTALLED) == 0
-                    || (mPermissionInfo.flags & PermissionInfo.FLAG_REMOVED) != 0) {
-                pw.print("    flags=0x"); pw.println(Integer.toHexString(mPermissionInfo.flags));
-            }
-        }
-        if (Objects.equals(mPermissionInfo.name,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            pw.print("    enforced=");
-            pw.println(readEnforced);
-        }
         return true;
     }
 }

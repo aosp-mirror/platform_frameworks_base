@@ -918,7 +918,7 @@ class InstantAppRegistry {
         try {
             for (String grantedPermission : appInfo.getGrantedPermissions()) {
                 final boolean propagatePermission =
-                        mService.mSettings.canPropagatePermissionToInstantApp(grantedPermission);
+                        mPermissionManager.canPropagatePermissionToInstantApp(grantedPermission);
                 if (propagatePermission && pkg.getRequestedPermissions().contains(
                         grantedPermission)) {
                     mService.grantRuntimePermission(pkg.getPackageName(), grantedPermission,
