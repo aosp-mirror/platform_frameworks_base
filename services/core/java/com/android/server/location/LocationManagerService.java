@@ -306,9 +306,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void removeLocationProviderManager(LocationProviderManager manager) {
         synchronized (mProviderManagers) {
-            Preconditions.checkState(getLocationProviderManager(manager.getName()) == manager);
-
-            mProviderManagers.remove(manager);
+            boolean removed = mProviderManagers.remove(manager);
+            Preconditions.checkArgument(removed);
             manager.setMockProvider(null);
             manager.setRealProvider(null);
             manager.stopManager();

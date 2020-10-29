@@ -1197,19 +1197,19 @@ class LocationProviderManager extends
 
     public void stopManager() {
         synchronized (mLock) {
-            mUserHelper.removeListener(mUserChangedListener);
-            mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
-
-            mStarted = false;
-
             final long identity = Binder.clearCallingIdentity();
             try {
                 onEnabledChanged(UserHandle.USER_ALL);
                 removeRegistrationIf(key -> true);
-                mEnabledListeners.clear();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+
+            mUserHelper.removeListener(mUserChangedListener);
+            mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
+
+            Preconditions.checkState(mEnabledListeners.isEmpty());
+            mStarted = false;
         }
     }
 
@@ -1408,6 +1408,7 @@ class LocationProviderManager extends
 
         Location location;
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             LastLocation lastLocation = mLastLocations.get(userId);
             if (lastLocation == null) {
                 location = null;
@@ -1429,6 +1430,7 @@ class LocationProviderManager extends
 
     public void injectLastLocation(Location location, int userId) {
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             if (getLastLocationUnsafe(userId, PERMISSION_FINE, false, Long.MAX_VALUE) == null) {
                 setLastLocation(location, userId);
             }
@@ -1476,6 +1478,7 @@ class LocationProviderManager extends
                         permissionLevel);
 
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             final long ident = Binder.clearCallingIdentity();
             try {
                 putRegistration(callback.asBinder(), registration);
@@ -1517,6 +1520,7 @@ class LocationProviderManager extends
                 permissionLevel);
 
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             final long ident = Binder.clearCallingIdentity();
             try {
                 putRegistration(listener.asBinder(), registration);
@@ -1535,6 +1539,7 @@ class LocationProviderManager extends
                 permissionLevel);
 
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             final long identity = Binder.clearCallingIdentity();
             try {
                 putRegistration(pendingIntent, registration);
@@ -1546,6 +1551,7 @@ class LocationProviderManager extends
 
     public void unregisterLocationRequest(ILocationListener listener) {
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             final long identity = Binder.clearCallingIdentity();
             try {
                 removeRegistration(listener.asBinder());
@@ -1557,6 +1563,7 @@ class LocationProviderManager extends
 
     public void unregisterLocationRequest(PendingIntent pendingIntent) {
         synchronized (mLock) {
+            Preconditions.checkState(mStarted);
             final long identity = Binder.clearCallingIdentity();
             try {
                 removeRegistration(pendingIntent);
