@@ -17,7 +17,6 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
-import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -333,7 +332,7 @@ public class LauncherApps {
          * @param user The UserHandle of the profile that generated the change.
          * @param progress The new progress value, between [0, 1].
          */
-        public void onPackageProgressChanged(@NonNull String packageName,
+        public void onPackageLoadingProgressChanged(@NonNull String packageName,
                 @NonNull UserHandle user, float progress) {}
     }
 
@@ -1702,15 +1701,15 @@ public class LauncherApps {
             }
         }
 
-        public void onPackageProgressChanged(UserHandle user, String packageName,
+        public void onPackageLoadingProgressChanged(UserHandle user, String packageName,
                 float progress) {
             if (DEBUG) {
-                Log.d(TAG, "onPackageProgressChanged " + user.getIdentifier() + ","
+                Log.d(TAG, "onPackageLoadingProgressChanged " + user.getIdentifier() + ","
                         + packageName + "," + progress);
             }
             synchronized (LauncherApps.this) {
                 for (CallbackMessageHandler callback : mCallbacks) {
-                    callback.postOnPackageProgressChanged(user, packageName, progress);
+                    callback.postOnPackageLoadingProgressChanged(user, packageName, progress);
                 }
             }
         }
@@ -1777,7 +1776,7 @@ public class LauncherApps {
                     mCallback.onShortcutsChanged(info.packageName, info.shortcuts, info.user);
                     break;
                 case MSG_LOADING_PROGRESS_CHANGED:
-                    mCallback.onPackageProgressChanged(info.packageName, info.user,
+                    mCallback.onPackageLoadingProgressChanged(info.packageName, info.user,
                             info.mLoadingProgress);
                     break;
             }
@@ -1847,7 +1846,7 @@ public class LauncherApps {
             obtainMessage(MSG_SHORTCUT_CHANGED, info).sendToTarget();
         }
 
-        public void postOnPackageProgressChanged(UserHandle user, String packageName,
+        public void postOnPackageLoadingProgressChanged(UserHandle user, String packageName,
                 float progress) {
             CallbackInfo info = new CallbackInfo();
             info.packageName = packageName;
