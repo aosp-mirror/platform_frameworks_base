@@ -169,6 +169,12 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
+        public void uncanonicalizeAsync(String callingPkg, String featureId, Uri uri,
+                RemoteCallback callback) {
+            MockContentProvider.this.uncanonicalizeAsync(uri, callback);
+        }
+
+        @Override
         public boolean refresh(String callingPkg, @Nullable String featureId, Uri url,
                 Bundle args, ICancellationSignal cancellationSignal) throws RemoteException {
             return MockContentProvider.this.refresh(url, args);
@@ -304,6 +310,18 @@ public class MockContentProvider extends ContentProvider {
         AsyncTask.SERIAL_EXECUTOR.execute(() -> {
             final Bundle bundle = new Bundle();
             bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT, canonicalize(uri));
+            callback.sendResult(bundle);
+        });
+    }
+
+    /**
+     * @hide
+     */
+    @SuppressWarnings("deprecation")
+    public void uncanonicalizeAsync(Uri uri, RemoteCallback callback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT, uncanonicalize(uri));
             callback.sendResult(bundle);
         });
     }

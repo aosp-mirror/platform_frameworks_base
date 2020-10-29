@@ -137,6 +137,14 @@ public interface IContentProvider extends IInterface {
     public Uri uncanonicalize(String callingPkg, @Nullable String attributionTag, Uri uri)
             throws RemoteException;
 
+    /**
+     * A oneway version of uncanonicalize. The functionality is exactly the same, except that the
+     * call returns immediately, and the resulting type is returned when available via
+     * a binder callback.
+     */
+    void uncanonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
+            RemoteCallback callback) throws RemoteException;
+
     public boolean refresh(String callingPkg, @Nullable String attributionTag, Uri url,
             @Nullable Bundle extras, ICancellationSignal cancellationSignal) throws RemoteException;
 
@@ -172,4 +180,5 @@ public interface IContentProvider extends IInterface {
     static final int CHECK_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 27;
     int GET_TYPE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 28;
     int CANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 29;
+    int UNCANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 30;
 }

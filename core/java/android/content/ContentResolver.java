@@ -1338,7 +1338,14 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.uncanonicalize(mPackageName, mAttributionTag, url);
+            final UriResultListener resultListener = new UriResultListener();
+            provider.uncanonicalizeAsync(mPackageName, mAttributionTag, url,
+                    new RemoteCallback(resultListener));
+            resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
+            if (resultListener.exception != null) {
+                throw resultListener.exception;
+            }
+            return resultListener.result;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.

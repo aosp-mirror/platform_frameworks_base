@@ -218,6 +218,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             return null;
         }).when(mTestIContentProvider).canonicalizeAsync(any(), any(), any(), any());
         doAnswer(invocation -> {
+            String callingPkg = invocation.getArgument(0);
+            String featureId = invocation.getArgument(1);
+            Uri uri = invocation.getArgument(2);
+            RemoteCallback cb = invocation.getArgument(3);
+            IContentProvider mock = (IContentProvider) (invocation.getMock());
+            AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+                final Bundle bundle = new Bundle();
+                try {
+                    bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                            mock.uncanonicalize(callingPkg, featureId, uri));
+                } catch (RemoteException e) { /* consume */ }
+                cb.sendResult(bundle);
+            });
+            return null;
+        }).when(mTestIContentProvider).uncanonicalizeAsync(any(), any(), any(), any());
+        doAnswer(invocation -> {
             Uri uri = invocation.getArgument(0);
             RemoteCallback cb = invocation.getArgument(1);
             IContentProvider mock = (IContentProvider) (invocation.getMock());
