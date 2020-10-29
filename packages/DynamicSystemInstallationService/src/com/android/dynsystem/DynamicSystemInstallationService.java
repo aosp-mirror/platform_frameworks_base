@@ -422,7 +422,7 @@ public class DynamicSystemInstallationService extends Service
     private PendingIntent createPendingIntent(String action) {
         Intent intent = new Intent(this, DynamicSystemInstallationService.class);
         intent.setAction(action);
-        return PendingIntent.getService(this, 0, intent, 0);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private Notification buildNotification(int status, int cause) {
