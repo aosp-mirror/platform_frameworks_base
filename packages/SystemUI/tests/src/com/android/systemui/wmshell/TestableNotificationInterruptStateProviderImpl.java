@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.bubbles;
+package com.android.systemui.wmshell;
 
 import android.content.ContentResolver;
 import android.hardware.display.AmbientDisplayConfiguration;

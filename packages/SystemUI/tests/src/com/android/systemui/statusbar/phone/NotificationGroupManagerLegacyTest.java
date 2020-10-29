@@ -70,7 +70,7 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
         mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
                 () -> mock(PeopleNotificationIdentifier.class),
-                Optional.of(() -> mock(Bubbles.class)));
+                Optional.of(mock(Bubbles.class)));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 

@@ -22,6 +22,8 @@ import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
@@ -41,9 +43,12 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+
+import java.util.Optional;
 
 import dagger.Module;
 import dagger.Provides;
@@ -56,23 +61,8 @@ public interface BubbleModule {
      */
     @SysUISingleton
     @Provides
-    static Bubbles newBubbleController(
-            Context context,
-            NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarStateController statusBarStateController,
-            ShadeController shadeController,
-            ConfigurationController configurationController,
-            NotificationInterruptStateProvider interruptionStateProvider,
-            ZenModeController zenModeController,
-            NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManagerLegacy groupManager,
-            NotificationEntryManager entryManager,
-            NotifPipeline notifPipeline,
-            FeatureFlags featureFlags,
-            DumpManager dumpManager,
+    static Bubbles newBubbleController(Context context,
             FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState,
-            INotificationManager notifManager,
             IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -80,30 +70,29 @@ public interface BubbleModule {
             UiEventLogger uiEventLogger,
             @Main Handler mainHandler,
             ShellTaskOrganizer organizer) {
-        return BubbleController.create(
-                context,
-                notificationShadeWindowController,
-                statusBarStateController,
-                shadeController,
-                null /* synchronizer */,
-                configurationController,
-                interruptionStateProvider,
-                zenModeController,
-                notifUserManager,
-                groupManager,
-                entryManager,
-                notifPipeline,
-                featureFlags,
-                dumpManager,
-                floatingContentCoordinator,
-                sysUiState,
-                notifManager,
-                statusBarService,
-                windowManager,
-                windowManagerShellWrapper,
-                launcherApps,
-                uiEventLogger,
-                mainHandler,
-                organizer);
+        return BubbleController.create(context, null /* synchronizer */, floatingContentCoordinator,
+                statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
+                uiEventLogger, mainHandler, organizer);
+    }
+
+    /** Provides Optional of BubbleManager */
+    @SysUISingleton
+    @Provides
+    static Optional<BubblesManager> provideBubblesManager(Context context,
+            Optional<Bubbles> bubblesOptional,
+            NotificationShadeWindowController notificationShadeWindowController,
+            StatusBarStateController statusBarStateController, ShadeController shadeController,
+            ConfigurationController configurationController,
+            @Nullable IStatusBarService statusBarService, INotificationManager notificationManager,
+            NotificationInterruptStateProvider interruptionStateProvider,
+            ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
+            NotifPipeline notifPipeline, SysUiState sysUiState, FeatureFlags featureFlags,
+            DumpManager dumpManager) {
+        return Optional.ofNullable(BubblesManager.create(context, bubblesOptional,
+                notificationShadeWindowController, statusBarStateController, shadeController,
+                configurationController, statusBarService, notificationManager,
+                interruptionStateProvider, zenModeController, notifUserManager,
+                groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager));
     }
 }

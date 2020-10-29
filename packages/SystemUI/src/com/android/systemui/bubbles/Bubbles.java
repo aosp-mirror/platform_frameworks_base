@@ -16,21 +16,54 @@
 
 package com.android.systemui.bubbles;
 
-import android.annotation.NonNull;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import androidx.annotation.MainThread;
+import android.content.res.Configuration;
+import android.service.notification.NotificationListenerService.RankingMap;
+import android.util.ArraySet;
+import android.view.View;
 
-import com.android.systemui.statusbar.ScrimView;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.wm.shell.ShellTaskOrganizer;
+import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.List;
+import java.util.function.IntConsumer;
 
 /**
  * Interface to engage bubbles feature.
  */
 public interface Bubbles {
+
+    @Retention(SOURCE)
+    @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
+            DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
+            DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
+            DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
+            DISMISS_NO_BUBBLE_UP})
+    @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
+    @interface DismissReason {}
+
+    int DISMISS_USER_GESTURE = 1;
+    int DISMISS_AGED = 2;
+    int DISMISS_TASK_FINISHED = 3;
+    int DISMISS_BLOCKED = 4;
+    int DISMISS_NOTIF_CANCEL = 5;
+    int DISMISS_ACCESSIBILITY_ACTION = 6;
+    int DISMISS_NO_LONGER_BUBBLE = 7;
+    int DISMISS_USER_CHANGED = 8;
+    int DISMISS_GROUP_CANCELLED = 9;
+    int DISMISS_INVALID_INTENT = 10;
+    int DISMISS_OVERFLOW_MAX_REACHED = 11;
+    int DISMISS_SHORTCUT_REMOVED = 12;
+    int DISMISS_PACKAGE_REMOVED = 13;
+    int DISMISS_NO_BUBBLE_UP = 14;
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
@@ -38,29 +71,30 @@ public interface Bubbles {
      * provided key that is hidden from the shade because it has been dismissed but still has child
      * bubbles active.
      */
-    boolean isBubbleNotificationSuppressedFromShade(NotificationEntry entry);
+    boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey);
 
     /**
      * @return {@code true} if the current notification entry same as selected bubble
      * notification entry and the stack is currently expanded.
      */
-    boolean isBubbleExpanded(NotificationEntry entry);
+    boolean isBubbleExpanded(String key);
 
     /** @return {@code true} if stack of bubbles is expanded or not. */
     boolean isStackExpanded();
 
-    /**
-     * @return the {@link ScrimView} drawn behind the bubble stack. This is managed by
-     * {@link ScrimController} since we want the scrim's appearance and behavior to be identical to
-     * that of the notification shade scrim.
-     */
-    ScrimView getScrimForBubble();
+    /** @return {@code true} if the summary for the provided group key is suppressed. */
+    boolean isSummarySuppressed(String groupKey);
 
-    /** @return Bubbles for updating overflow. */
-    List<Bubble> getOverflowBubbles();
+    /**
+     * Removes a group key indicating that summary for this group should no longer be suppressed.
+     */
+    void removeSuppressedSummary(String groupKey);
 
     /** Tell the stack of bubbles to collapse. */
     void collapseStack();
+
+    /** Tell the controller need update its UI to fit theme. */
+    void updateForThemeChanges();
 
     /**
      * Request the stack expand if needed, then select the specified Bubble as current.
@@ -68,10 +102,7 @@ public interface Bubbles {
      *
      * @param entry the notification for the bubble to be selected
      */
-    void expandStackAndSelectBubble(NotificationEntry entry);
-
-    /** Promote the provided bubbles when overflow view. */
-    void promoteBubbleFromOverflow(Bubble bubble);
+    void expandStackAndSelectBubble(BubbleEntry entry);
 
     /**
      * We intercept notification entries (including group summaries) dismissed by the user when
@@ -81,26 +112,65 @@ public interface Bubbles {
      * {@link Bubble#setSuppressNotification}.  For the case of suppressed summaries, we also add
      * {@link BubbleData#addSummaryToSuppress}.
      *
+     * @param entry the notification of the BubbleEntry should be removed.
+     * @param children the list of child notification of the BubbleEntry from 1st param entry,
+     *                 this will be null if entry does have no children.
+     * @param removeCallback the remove callback for SystemUI side to remove notification, the int
+     *                       number should be list position of children list and use -1 for
+     *                       removing the parent notification.
+     *
      * @return true if we want to intercept the dismissal of the entry, else false.
      */
-    boolean handleDismissalInterception(NotificationEntry entry);
+    boolean handleDismissalInterception(BubbleEntry entry, @Nullable List<BubbleEntry> children,
+            IntConsumer removeCallback);
 
     /**
-     * Removes the bubble with the given key.
-     * <p>
-     * Must be called from the main thread.
-     */
-    @MainThread
-    void removeBubble(String key, int reason);
-
-
-    /**
-     * When a notification is marked Priority, expand the stack if needed,
-     * then (maybe create and) select the given bubble.
+     * Retrieves the notif entry key of the summary associated with the provided group key.
      *
-     * @param entry the notification for the bubble to show
+     * @param groupKey the group to look up
+     * @return the key for the notification that is the summary of this group.
      */
-    void onUserChangedImportance(NotificationEntry entry);
+    String getSummaryKey(String groupKey);
+
+    /** Set the proxy to commnuicate with SysUi side components. */
+    void setSysuiProxy(SysuiProxy proxy);
+
+    /** Set the scrim view for bubbles. */
+    void setBubbleScrim(View view);
+
+    /** Set a listener to be notified of bubble expand events. */
+    void setExpandListener(BubbleExpandListener listener);
+
+    /**
+     * Called when new notification entry added.
+     *
+     * @param entry the {@link BubbleEntry} by the notification.
+     */
+    void onEntryAdded(BubbleEntry entry);
+
+    /**
+     * Called when new notification entry updated.
+     *
+     * @param entry the {@link BubbleEntry} by the notification.
+     * @param shouldBubbleUp {@code true} if this notification should bubble up.
+     */
+    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp);
+
+    /**
+     * Called when new notification entry removed.
+     *
+     * @param entry the {@link BubbleEntry} by the notification.
+     */
+    void onEntryRemoved(BubbleEntry entry);
+
+    /**
+     * Called when NotificationListener has received adjusted notification rank and reapplied
+     * filtering and sorting. This is used to dismiss or create bubbles based on changes in
+     * permissions on the notification channel or the global setting.
+     *
+     * @param rankingMap the updated ranking map from NotificationListenerService
+     */
+    void onRankingUpdated(RankingMap rankingMap);
 
     /**
      * Called when the status bar has become visible or invisible (either permanently or
@@ -108,30 +178,85 @@ public interface Bubbles {
      */
     void onStatusBarVisibilityChanged(boolean visible);
 
+    /** Called when system zen mode state changed. */
+    void onZenStateChanged();
+
     /**
-     * Called when a user has indicated that an active notification should be shown as a bubble.
-     * <p>
-     * This method will collapse the shade, create the bubble without a flyout or dot, and suppress
-     * the notification from appearing in the shade.
+     * Called when statusBar state changed.
      *
-     * @param entry the notification to change bubble state for.
-     * @param shouldBubble whether the notification should show as a bubble or not.
+     * @param isShade {@code true} is state is SHADE.
      */
-    void onUserChangedBubble(@NonNull NotificationEntry entry, boolean shouldBubble);
+    void onStatusBarStateChanged(boolean isShade);
 
+    /**
+     * Called when the current user changed.
+     *
+     * @param newUserId the new user's id.
+     */
+    void onUserChanged(int newUserId);
 
-    /** See {@link BubbleController.NotifCallback}. */
-    void addNotifCallback(BubbleController.NotifCallback callback);
+    /**
+     * Called when config changed.
+     *
+     * @param newConfig the new config.
+     */
+    void onConfigChanged(Configuration newConfig);
 
-    /** Set a listener to be notified of bubble expand events. */
-    void setExpandListener(BubbleController.BubbleExpandListener listener);
+    /** Description of current bubble state. */
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
-    /** Set a listener to be notified of when overflow view update. */
-    void setOverflowListener(BubbleData.Listener listener);
+    /** Listener to find out about stack expansion / collapse events. */
+    interface BubbleExpandListener {
+        /**
+         * Called when the expansion state of the bubble stack changes.
+         *
+         * @param isExpanding whether it's expanding or collapsing
+         * @param key the notification key associated with bubble being expanded
+         */
+        void onBubbleExpandChanged(boolean isExpanding, String key);
+    }
 
-    /** The task listener for events in bubble tasks. **/
-    ShellTaskOrganizer getTaskOrganizer();
+    /** Listener to be notified when a bubbles' notification suppression state changes.*/
+    interface NotificationSuppressionChangedListener {
+        /** Called when the notification suppression state of a bubble changes. */
+        void onBubbleNotificationSuppressionChange(Bubble bubble);
+    }
 
-    /** Contains information to help position things on the screen.  */
-    BubblePositioner getPositioner();
+    /** Listener to be notified when a pending intent has been canceled for a bubble. */
+    interface PendingIntentCanceledListener {
+        /** Called when the pending intent for a bubble has been canceled. */
+        void onPendingIntentCanceled(Bubble bubble);
+    }
+
+    /** Callback to tell SysUi components execute some methods. */
+    interface SysuiProxy {
+        @Nullable
+        BubbleEntry getPendingOrActiveEntry(String key);
+
+        List<BubbleEntry> getShouldRestoredEntries(ArraySet<String> savedBubbleKeys);
+
+        boolean isNotificationShadeExpand();
+
+        boolean shouldBubbleUp(String key);
+
+        void setNotificationInterruption(String key);
+
+        void requestNotificationShadeTopUi(boolean requestTopUi, String componentTag);
+
+        void notifyRemoveNotification(String key, int reason);
+
+        void notifyInvalidateNotifications(String reason);
+
+        void notifyMaybeCancelSummary(String key);
+
+        void removeNotificationEntry(String key);
+
+        void updateNotificationBubbleButton(String key);
+
+        void updateNotificationSuppression(String key);
+
+        void onStackExpandChanged(boolean shouldExpand);
+
+        void onUnbubbleConversation(String key);
+    }
 }

@@ -72,7 +72,6 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -102,12 +101,14 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -147,6 +148,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private LayoutListener mLayoutListener;
     private RowContentBindStage mRowContentBindStage;
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    private Optional<BubblesManager> mBubblesManagerOptional;
     private int mIconTransformContentShift;
     private int mMaxHeadsUpHeightBeforeN;
     private int mMaxHeadsUpHeightBeforeP;
@@ -1078,13 +1080,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     /** The click listener for the bubble button. */
     public View.OnClickListener getBubbleClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Dependency.get(Bubbles.class)
-                        .onUserChangedBubble(mEntry, !mEntry.isBubble() /* createBubble */);
-                mHeadsUpManager.removeNotification(mEntry.getKey(), true /* releaseImmediately */);
+        return v -> {
+            if (mBubblesManagerOptional.isPresent()) {
+                mBubblesManagerOptional.get()
+                    .onUserChangedBubble(mEntry, !mEntry.isBubble() /* createBubble */);
             }
+            mHeadsUpManager.removeNotification(mEntry.getKey(), true /* releaseImmediately */);
         };
     }
 
@@ -1553,7 +1554,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
-            OnUserInteractionCallback onUserInteractionCallback) {
+            OnUserInteractionCallback onUserInteractionCallback,
+            Optional<BubblesManager> bubblesManagerOptional) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1581,6 +1583,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.setPeopleNotificationIdentifier(mPeopleNotificationIdentifier);
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
+        mBubblesManagerOptional = bubblesManagerOptional;
 
         cacheIsSystemNotification();
     }

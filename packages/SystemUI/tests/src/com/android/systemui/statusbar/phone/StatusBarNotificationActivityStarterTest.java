@@ -53,7 +53,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -77,6 +76,7 @@ import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.wmshell.BubblesManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -116,7 +116,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private Handler mHandler;
     @Mock
-    private Bubbles mBubbles;
+    private BubblesManager mBubblesManager;
     @Mock
     private ShadeControllerImpl mShadeController;
     @Mock
@@ -193,7 +193,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mStatusBarKeyguardViewManager,
                         mock(KeyguardManager.class),
                         mock(IDreamManager.class),
-                        Optional.of(mBubbles),
+                        Optional.of(mBubblesManager),
                         () -> mAssistManager,
                         mRemoteInputManager,
                         mock(NotificationGroupManagerLegacy.class),
@@ -280,7 +280,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbles).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
+        verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
         // This is called regardless, and simply short circuits when there is nothing to do.
         verify(mShadeController, atLeastOnce()).collapsePanel();
@@ -312,7 +312,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbles).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
+        verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
@@ -342,7 +342,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbles).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
+        verify(mBubblesManager).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
