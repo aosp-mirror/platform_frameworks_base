@@ -16,10 +16,13 @@
 
 package android.view.inputmethod;
 
+import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * <p>Wrapper class for proxying calls to another InputConnection.  Subclass and have fun!
@@ -74,18 +77,24 @@ public class InputConnectionWrapper implements InputConnection {
     /**
      * {@inheritDoc}
      * @throws NullPointerException if the target is {@code null}.
+     * @throws IllegalArgumentException if {@code length} is negative.
      */
+    @Nullable
     @Override
-    public CharSequence getTextBeforeCursor(int n, int flags) {
+    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int n, int flags) {
+        Preconditions.checkArgumentNonnegative(n);
         return mTarget.getTextBeforeCursor(n, flags);
     }
 
     /**
      * {@inheritDoc}
      * @throws NullPointerException if the target is {@code null}.
+     * @throws IllegalArgumentException if {@code length} is negative.
      */
+    @Nullable
     @Override
-    public CharSequence getTextAfterCursor(int n, int flags) {
+    public CharSequence getTextAfterCursor(@IntRange(from = 0) int n, int flags) {
+        Preconditions.checkArgumentNonnegative(n);
         return mTarget.getTextAfterCursor(n, flags);
     }
 
@@ -101,10 +110,13 @@ public class InputConnectionWrapper implements InputConnection {
     /**
      * {@inheritDoc}
      * @throws NullPointerException if the target is {@code null}.
+     * @throws IllegalArgumentException if {@code beforeLength} or {@code afterLength} is negative.
      */
     @Nullable
     @Override
     public SurroundingText getSurroundingText(int beforeLength, int afterLength, int flags) {
+        Preconditions.checkArgumentNonnegative(beforeLength);
+        Preconditions.checkArgumentNonnegative(afterLength);
         return mTarget.getSurroundingText(beforeLength, afterLength, flags);
     }
 
