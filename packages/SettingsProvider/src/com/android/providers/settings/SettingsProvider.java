@@ -3342,7 +3342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 193;
+            private static final int SETTINGS_VERSION = 194;
 
             private final int mUserId;
 
@@ -4752,6 +4752,13 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
                     currentVersion = 193;
+                }
+
+                if (currentVersion == 193) {
+                    // Version 193: remove obsolete LOCATION_PROVIDERS_ALLOWED settings
+                    getSecureSettingsLocked(userId).deleteSettingLocked(
+                            Secure.LOCATION_PROVIDERS_ALLOWED);
+                    currentVersion = 194;
                 }
 
                 // vXXX: Add new settings above this point.
