@@ -99,7 +99,7 @@ class DoubleLineTileLayout(
         }
     }
 
-    override fun getNumVisibleTiles() = tilesToShow
+    override fun getNumVisibleTiles() = Math.min(mRecords.size, tilesToShow)
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
