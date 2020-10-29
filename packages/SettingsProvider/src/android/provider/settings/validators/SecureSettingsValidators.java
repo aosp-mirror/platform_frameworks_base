@@ -135,6 +135,9 @@ public class SecureSettingsValidators {
                 Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                 new DiscreteValueValidator(new String[] {"1", "2"}));
         VALIDATORS.put(Secure.MINIMAL_POST_PROCESSING_ALLOWED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Secure.MATCH_CONTENT_FRAME_RATE,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Secure.NIGHT_DISPLAY_CUSTOM_START_TIME, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.NIGHT_DISPLAY_CUSTOM_END_TIME, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, NON_NEGATIVE_INTEGER_VALIDATOR);
