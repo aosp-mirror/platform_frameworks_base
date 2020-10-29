@@ -45,6 +45,11 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
+import static com.android.server.usage.AppStandbyController.DEFAULT_ELAPSED_TIME_THRESHOLDS;
+import static com.android.server.usage.AppStandbyController.DEFAULT_SCREEN_TIME_THRESHOLDS;
+import static com.android.server.usage.AppStandbyController.MINIMUM_ELAPSED_TIME_THRESHOLDS;
+import static com.android.server.usage.AppStandbyController.MINIMUM_SCREEN_TIME_THRESHOLDS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -73,6 +78,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.view.Display;
 
@@ -184,6 +190,19 @@ public class AppStandbyControllerTests {
         int[] mRunningUsers = new int[] {USER_ID};
         List<UserHandle> mCrossProfileTargets = Collections.emptyList();
         boolean mDeviceIdleMode = false;
+        DeviceConfig.Properties.Builder mSettingsBuilder =
+                new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_APP_STANDBY)
+                        .setLong("screen_threshold_active", 0)
+                        .setLong("screen_threshold_working_set", 0)
+                        .setLong("screen_threshold_frequent", 0)
+                        .setLong("screen_threshold_rare", HOUR_MS)
+                        // screen_threshold_restricted intentionally skipped
+                        .setLong("elapsed_threshold_active", 0)
+                        .setLong("elapsed_threshold_working_set", WORKING_SET_THRESHOLD)
+                        .setLong("elapsed_threshold_frequent", FREQUENT_THRESHOLD)
+                        .setLong("elapsed_threshold_rare", RARE_THRESHOLD)
+                        .setLong("elapsed_threshold_restricted", RESTRICTED_THRESHOLD);
+        DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener;
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -285,10 +304,9 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        String getAppIdleSettings() {
-            return "screen_thresholds=0/0/0/" + HOUR_MS + ",elapsed_thresholds=0/"
-                    + WORKING_SET_THRESHOLD + "/" + FREQUENT_THRESHOLD + "/" + RARE_THRESHOLD
-                    + "/" + RESTRICTED_THRESHOLD;
+        @NonNull
+        DeviceConfig.Properties getDeviceConfigProperties(String... keys) {
+            return mSettingsBuilder.build();
         }
 
         @Override
@@ -299,6 +317,12 @@ public class AppStandbyControllerTests {
         @Override
         public List<UserHandle> getValidCrossProfileTargets(String pkg, int userId) {
             return mCrossProfileTargets;
+        }
+
+        @Override
+        public void registerDeviceConfigPropertiesChangedListener(
+                @NonNull DeviceConfig.OnPropertiesChangedListener listener) {
+            mPropertiesChangedListener = listener;
         }
 
         // Internal methods
@@ -865,6 +889,25 @@ public class AppStandbyControllerTests {
         mInjector.mElapsedRealtime = RARE_THRESHOLD;
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RARE);
+    }
+
+    /** Test that timeouts still work properly even if invalid configuration values are set. */
+    @Test
+    public void testTimeout_InvalidThresholds() throws Exception {
+        mInjector.mSettingsBuilder
+                .setLong("screen_threshold_active", -1)
+                .setLong("screen_threshold_working_set", -1)
+                .setLong("screen_threshold_frequent", -1)
+                .setLong("screen_threshold_rare", -1)
+                .setLong("screen_threshold_restricted", -1)
+                .setLong("elapsed_threshold_active", -1)
+                .setLong("elapsed_threshold_working_set", -1)
+                .setLong("elapsed_threshold_frequent", -1)
+                .setLong("elapsed_threshold_rare", -1)
+                .setLong("elapsed_threshold_restricted", -1);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        testTimeout();
     }
 
     /**
@@ -1552,6 +1595,132 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_TIMEOUT);
         assertBucket(STANDBY_BUCKET_RARE, PACKAGE_1);
+    }
+
+    @Test
+    public void testChangingSettings_ElapsedThreshold_Invalid() {
+        mInjector.mSettingsBuilder
+                .setLong("elapsed_threshold_active", -1)
+                .setLong("elapsed_threshold_working_set", -1)
+                .setLong("elapsed_threshold_frequent", -1)
+                .setLong("elapsed_threshold_rare", -1)
+                .setLong("elapsed_threshold_restricted", -1);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        for (int i = 0; i < MINIMUM_ELAPSED_TIME_THRESHOLDS.length; ++i) {
+            assertEquals(MINIMUM_ELAPSED_TIME_THRESHOLDS[i],
+                    mController.mAppStandbyElapsedThresholds[i]);
+        }
+    }
+
+    @Test
+    public void testChangingSettings_ElapsedThreshold_Valid() {
+        // Effectively clear values
+        mInjector.mSettingsBuilder
+                .setString("elapsed_threshold_active", null)
+                .setString("elapsed_threshold_working_set", null)
+                .setString("elapsed_threshold_frequent", null)
+                .setString("elapsed_threshold_rare", null)
+                .setString("elapsed_threshold_restricted", null);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        for (int i = 0; i < DEFAULT_ELAPSED_TIME_THRESHOLDS.length; ++i) {
+            assertEquals(DEFAULT_ELAPSED_TIME_THRESHOLDS[i],
+                    mController.mAppStandbyElapsedThresholds[i]);
+        }
+
+        // Set really high thresholds
+        mInjector.mSettingsBuilder
+                .setLong("elapsed_threshold_active", 90 * DAY_MS)
+                .setLong("elapsed_threshold_working_set", 91 * DAY_MS)
+                .setLong("elapsed_threshold_frequent", 92 * DAY_MS)
+                .setLong("elapsed_threshold_rare", 93 * DAY_MS)
+                .setLong("elapsed_threshold_restricted", 94 * DAY_MS);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        for (int i = 0; i < mController.mAppStandbyElapsedThresholds.length; ++i) {
+            assertEquals((90 + i) * DAY_MS, mController.mAppStandbyElapsedThresholds[i]);
+        }
+
+        // Only set a few values
+        mInjector.mSettingsBuilder
+                .setString("elapsed_threshold_active", null)
+                .setLong("elapsed_threshold_working_set", 31 * DAY_MS)
+                .setLong("elapsed_threshold_frequent", 62 * DAY_MS)
+                .setString("elapsed_threshold_rare", null)
+                .setLong("elapsed_threshold_restricted", 93 * DAY_MS);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
+        assertEquals(DEFAULT_ELAPSED_TIME_THRESHOLDS[0],
+                mController.mAppStandbyElapsedThresholds[0]);
+        assertEquals(31 * DAY_MS, mController.mAppStandbyElapsedThresholds[1]);
+        assertEquals(62 * DAY_MS, mController.mAppStandbyElapsedThresholds[2]);
+        assertEquals(DEFAULT_ELAPSED_TIME_THRESHOLDS[3],
+                mController.mAppStandbyElapsedThresholds[3]);
+        assertEquals(93 * DAY_MS, mController.mAppStandbyElapsedThresholds[4]);
+    }
+
+    @Test
+    public void testChangingSettings_ScreenThreshold_Invalid() {
+        mInjector.mSettingsBuilder
+                .setLong("screen_threshold_active", -1)
+                .setLong("screen_threshold_working_set", -1)
+                .setLong("screen_threshold_frequent", -1)
+                .setLong("screen_threshold_rare", -1)
+                .setLong("screen_threshold_restricted", -1);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        for (int i = 0; i < MINIMUM_SCREEN_TIME_THRESHOLDS.length; ++i) {
+            assertEquals(MINIMUM_SCREEN_TIME_THRESHOLDS[i],
+                    mController.mAppStandbyScreenThresholds[i]);
+        }
+    }
+
+    @Test
+    public void testChangingSettings_ScreenThreshold_Valid() {
+        // Effectively clear values
+        mInjector.mSettingsBuilder
+                .setString("screen_threshold_active", null)
+                .setString("screen_threshold_working_set", null)
+                .setString("screen_threshold_frequent", null)
+                .setString("screen_threshold_rare", null)
+                .setString("screen_threshold_restricted", null);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        for (int i = 0; i < DEFAULT_SCREEN_TIME_THRESHOLDS.length; ++i) {
+            assertEquals(DEFAULT_SCREEN_TIME_THRESHOLDS[i],
+                    mController.mAppStandbyScreenThresholds[i]);
+        }
+
+        // Set really high thresholds
+        mInjector.mSettingsBuilder
+                .setLong("screen_threshold_active", 90 * DAY_MS)
+                .setLong("screen_threshold_working_set", 91 * DAY_MS)
+                .setLong("screen_threshold_frequent", 92 * DAY_MS)
+                .setLong("screen_threshold_rare", 93 * DAY_MS)
+                .setLong("screen_threshold_restricted", 94 * DAY_MS);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+        for (int i = 0; i < mController.mAppStandbyScreenThresholds.length; ++i) {
+            assertEquals((90 + i) * DAY_MS, mController.mAppStandbyScreenThresholds[i]);
+        }
+
+        // Only set a few values
+        mInjector.mSettingsBuilder
+                .setString("screen_threshold_active", null)
+                .setLong("screen_threshold_working_set", 31 * DAY_MS)
+                .setLong("screen_threshold_frequent", 62 * DAY_MS)
+                .setString("screen_threshold_rare", null)
+                .setLong("screen_threshold_restricted", 93 * DAY_MS);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
+        assertEquals(DEFAULT_SCREEN_TIME_THRESHOLDS[0], mController.mAppStandbyScreenThresholds[0]);
+        assertEquals(31 * DAY_MS, mController.mAppStandbyScreenThresholds[1]);
+        assertEquals(62 * DAY_MS, mController.mAppStandbyScreenThresholds[2]);
+        assertEquals(DEFAULT_SCREEN_TIME_THRESHOLDS[3], mController.mAppStandbyScreenThresholds[3]);
+        assertEquals(93 * DAY_MS, mController.mAppStandbyScreenThresholds[4]);
     }
 
     private String getAdminAppsStr(int userId) {
