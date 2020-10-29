@@ -7676,8 +7676,11 @@ package android.net.wifi {
     method public double getSuccessfulRxPacketsPerSecond();
     method public double getSuccessfulTxPacketsPerSecond();
     method public boolean isEphemeral();
+    method public boolean isOemPaid();
+    method public boolean isOemPrivate();
     method public boolean isOsuAp();
     method public boolean isPasspointAp();
+    method public boolean isTrusted();
     method @Nullable public static String sanitizeSsid(@Nullable String);
     field public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
     field public static final int INVALID_RSSI = -127; // 0xffffff81
@@ -7903,11 +7906,13 @@ package android.net.wifi {
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
     method public boolean isOemPaid();
+    method public boolean isOemPrivate();
   }
 
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setOemPaid(boolean);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setOemPrivate(boolean);
   }
 
   public class WifiScanner {

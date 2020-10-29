@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -62,6 +63,7 @@ public class WifiInfoTest {
         writeWifiInfo.rxSuccess = TEST_RX_SUCCESS;
         writeWifiInfo.setTrusted(true);
         writeWifiInfo.setOemPaid(true);
+        writeWifiInfo.setOemPrivate(true);
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
@@ -83,6 +85,46 @@ public class WifiInfoTest {
         assertEquals(TEST_RX_SUCCESS, readWifiInfo.rxSuccess);
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOemPaid());
+        assertTrue(readWifiInfo.isOemPrivate());
+        assertTrue(readWifiInfo.isOsuAp());
+        assertTrue(readWifiInfo.isPasspointAp());
+        assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
+        assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
+        assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
+        assertEquals(TEST_WIFI_STANDARD, readWifiInfo.getWifiStandard());
+        assertEquals(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS,
+                readWifiInfo.getMaxSupportedTxLinkSpeedMbps());
+        assertEquals(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS,
+                readWifiInfo.getMaxSupportedRxLinkSpeedMbps());
+    }
+
+    @Test
+    public void testWifiInfoCopyConstructor() throws Exception {
+        WifiInfo writeWifiInfo = new WifiInfo();
+        writeWifiInfo.txSuccess = TEST_TX_SUCCESS;
+        writeWifiInfo.txRetries = TEST_TX_RETRIES;
+        writeWifiInfo.txBad = TEST_TX_BAD;
+        writeWifiInfo.rxSuccess = TEST_RX_SUCCESS;
+        writeWifiInfo.setTrusted(true);
+        writeWifiInfo.setOemPaid(true);
+        writeWifiInfo.setOemPrivate(true);
+        writeWifiInfo.setOsuAp(true);
+        writeWifiInfo.setFQDN(TEST_FQDN);
+        writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
+        writeWifiInfo.setRequestingPackageName(TEST_PACKAGE_NAME);
+        writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
+        writeWifiInfo.setMaxSupportedTxLinkSpeedMbps(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS);
+        writeWifiInfo.setMaxSupportedRxLinkSpeedMbps(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS);
+
+        WifiInfo readWifiInfo = new WifiInfo(writeWifiInfo);
+
+        assertEquals(TEST_TX_SUCCESS, readWifiInfo.txSuccess);
+        assertEquals(TEST_TX_RETRIES, readWifiInfo.txRetries);
+        assertEquals(TEST_TX_BAD, readWifiInfo.txBad);
+        assertEquals(TEST_RX_SUCCESS, readWifiInfo.rxSuccess);
+        assertTrue(readWifiInfo.isTrusted());
+        assertTrue(readWifiInfo.isOemPaid());
+        assertTrue(readWifiInfo.isOemPrivate());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
@@ -110,6 +152,8 @@ public class WifiInfoTest {
         assertEquals(WifiManager.UNKNOWN_SSID, wifiInfo.getSSID());
         assertEquals(null, wifiInfo.getBSSID());
         assertEquals(-1, wifiInfo.getNetworkId());
+        assertFalse(wifiInfo.isOemPaid());
+        assertFalse(wifiInfo.isOemPrivate());
     }
 
     /**
