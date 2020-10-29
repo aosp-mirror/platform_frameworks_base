@@ -1090,7 +1090,7 @@ public class ChooserActivity extends ResolverActivity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         ViewPager viewPager = findViewById(R.id.profile_pager);
-        if (shouldShowTabs() && viewPager.isLayoutRtl()) {
+        if (viewPager.isLayoutRtl()) {
             mMultiProfilePagerAdapter.setupViewPager(viewPager);
         }
 
