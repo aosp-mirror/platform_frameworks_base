@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.compat.feature.ImsFeature;
@@ -86,7 +87,7 @@ public class ImsService extends Service {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     protected final IBinder mImsServiceController = new IImsServiceController.Stub() {
 
         @Override
@@ -122,7 +123,7 @@ public class ImsService extends Service {
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsService() {
     }
 

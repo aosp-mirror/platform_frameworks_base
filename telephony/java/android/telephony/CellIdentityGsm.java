@@ -21,6 +21,7 @@ import static android.text.TextUtils.formatSimple;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
@@ -58,7 +59,7 @@ public final class CellIdentityGsm extends CellIdentity {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public CellIdentityGsm() {
         super(TAG, CellInfo.TYPE_GSM, null, null, null, null);
         mLac = CellInfo.UNAVAILABLE;

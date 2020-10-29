@@ -18,6 +18,7 @@
 package com.google.android.mms.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -64,7 +65,7 @@ public abstract class AbstractCache<K, V> {
         return false;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public V get(K key) {
         if (LOCAL_LOGV) {
             Log.v(TAG, "Trying to get " + key + " from cache.");

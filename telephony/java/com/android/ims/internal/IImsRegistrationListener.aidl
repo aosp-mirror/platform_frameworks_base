@@ -32,7 +32,7 @@ oneway interface IImsRegistrationListener {
      *
      * @deprecated see {@link registrationConnectedWithRadioTech}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationConnected();
 
     /**
@@ -48,7 +48,7 @@ oneway interface IImsRegistrationListener {
      * @param imsRadioTech the radio access technology. Valid values are {@code
      * RIL_RADIO_TECHNOLOGY_*} defined in {@link ServiceState}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationConnectedWithRadioTech(int imsRadioTech);
 
     /**
@@ -57,14 +57,14 @@ oneway interface IImsRegistrationListener {
      * @param imsRadioTech the radio access technology. Valid values are {@code
      * RIL_RADIO_TECHNOLOGY_*} defined in {@link ServiceState}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationProgressingWithRadioTech(int imsRadioTech);
 
 
     /**
      * Notifies the application when the device is disconnected from the IMS network.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationDisconnected(in ImsReasonInfo imsReasonInfo);
 
     /**
@@ -98,7 +98,7 @@ oneway interface IImsRegistrationListener {
      * @param enabledFeatures features enabled as defined in com.android.ims.ImsConfig#FeatureConstants.
      * @param disabledFeatures features disabled as defined in com.android.ims.ImsConfig#FeatureConstants.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationFeatureCapabilityChanged(int serviceClass,
             in int[] enabledFeatures, in int[] disabledFeatures);
 
@@ -106,13 +106,13 @@ oneway interface IImsRegistrationListener {
      * Updates the application with the waiting voice message count.
      * @param count The number of waiting voice messages.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void voiceMessageCountUpdate(int count);
 
     /**
      * Notifies the application when the list of URIs associated with IMS client is updated.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationAssociatedUriChanged(in Uri[] uris);
 
     /**
@@ -123,6 +123,6 @@ oneway interface IImsRegistrationListener {
      *         attempted.
      * @param imsReasonInfo Reason for the failure.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void registrationChangeFailed(in int targetAccessTech, in ImsReasonInfo imsReasonInfo);
 }

@@ -35,6 +35,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -1743,9 +1744,9 @@ public class ZenModeConfig implements Parcelable {
     public static class ZenRule implements Parcelable {
         @UnsupportedAppUsage
         public boolean enabled;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean snoozing;         // user manually disabled this instance
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String name;              // required for automatic
         @UnsupportedAppUsage
         public int zenMode;             // ie: Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
@@ -1755,7 +1756,7 @@ public class ZenModeConfig implements Parcelable {
         public ComponentName component;  // optional
         public ComponentName configurationActivity; // optional
         public String id;                // required for automatic (unique)
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long creationTime;        // required for automatic
         // package name, only used for manual rules when they have turned DND on.
         public String enabler;

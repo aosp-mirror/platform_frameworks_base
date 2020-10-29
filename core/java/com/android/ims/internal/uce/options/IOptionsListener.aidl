@@ -29,7 +29,7 @@ interface IOptionsListener
      * @param version, version information of the service.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void getVersionCb(in String version );
 
     /**
@@ -38,7 +38,7 @@ interface IOptionsListener
      * @param statusCode, UCE_SUCCESS as service availability.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void serviceAvailable(in StatusCode statusCode);
 
     /**
@@ -47,7 +47,7 @@ interface IOptionsListener
      * @param statusCode, UCE_SUCCESS as service unavailability.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void serviceUnavailable(in StatusCode statusCode);
 
     /**
@@ -58,7 +58,7 @@ interface IOptionsListener
      * @param capInfo, capabilities of the remote entity received.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void sipResponseReceived( String uri,
                                 in OptionsSipResponse sipResponse, in OptionsCapInfo capInfo);
 
@@ -67,7 +67,7 @@ interface IOptionsListener
      * @param cmdStatus, command status of the request placed.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void cmdStatus(in OptionsCmdStatus cmdStatus);
 
     /**
@@ -78,7 +78,7 @@ interface IOptionsListener
      * @param tID, transation of the request received from network.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void incomingOptions( String uri, in OptionsCapInfo capInfo,
                                             in int tID);
 }

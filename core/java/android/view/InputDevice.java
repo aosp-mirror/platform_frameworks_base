@@ -424,7 +424,7 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
             KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
@@ -757,7 +757,7 @@ public final class InputDevice implements Parcelable {
     }
 
     // Called from native code.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void addMotionRange(int axis, int source,
             float min, float max, float flat, float fuzz, float resolution) {
         mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));

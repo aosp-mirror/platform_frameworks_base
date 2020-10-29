@@ -98,7 +98,7 @@ public abstract class ShellCommand extends BasicShellCommandHandler {
         return super.handleDefaultCommands(cmd);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public String peekNextArg() {
         return super.peekNextArg();
     }

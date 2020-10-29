@@ -17,6 +17,7 @@
 package android.ddm;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.util.Log;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
@@ -80,7 +81,7 @@ public class DdmHandleAppName extends ChunkHandler {
      * before or after DDMS connects.  For the latter we need to send up
      * an APNM message.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void setAppName(String appName, String pkgName, int userId) {
         if (appName == null || appName.isEmpty() || pkgName == null || pkgName.isEmpty()) return;
 
@@ -90,7 +91,7 @@ public class DdmHandleAppName extends ChunkHandler {
         sendAPNM(appName, pkgName, userId);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static Names getNames() {
         return sNames;
     }

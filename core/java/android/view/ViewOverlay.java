@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 
 import java.util.ArrayList;
 
@@ -56,7 +57,7 @@ public class ViewOverlay {
      * of the overlay
      * @return
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     ViewGroup getOverlayView() {
         return mOverlayViewGroup;
     }
@@ -96,7 +97,7 @@ public class ViewOverlay {
         mOverlayViewGroup.clear();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean isEmpty() {
         return mOverlayViewGroup.isEmpty();
     }
