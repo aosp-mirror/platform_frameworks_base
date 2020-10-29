@@ -84,6 +84,7 @@ import com.android.systemui.statusbar.policy.InflatedSmartReplies;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.wmshell.BubblesManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,6 +97,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -243,7 +245,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 true,
                                 null,
                                 mFalsingManager,
-                                mPeopleNotificationIdentifier
+                                mPeopleNotificationIdentifier,
+                                Optional.of(mock(BubblesManager.class))
                         ));
 
         when(mNotificationRowComponentBuilder.activatableNotificationView(any()))

@@ -33,10 +33,10 @@ public class BubbleDebugConfig {
     // to figure-out the origin of a log message while debugging the Bubbles a little painful. By
     // setting this constant to true, log messages from the Bubbles package will be tagged with
     // their class names instead fot the generic tag.
-    static final boolean TAG_WITH_CLASS_NAME = false;
+    public static final boolean TAG_WITH_CLASS_NAME = false;
 
     // Default log tag for the Bubbles package.
-    static final String TAG_BUBBLES = "Bubbles";
+    public static final String TAG_BUBBLES = "Bubbles";
 
     static final boolean DEBUG_BUBBLE_CONTROLLER = false;
     static final boolean DEBUG_BUBBLE_DATA = false;

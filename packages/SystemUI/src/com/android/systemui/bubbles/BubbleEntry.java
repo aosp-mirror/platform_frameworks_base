@@ -16,6 +16,9 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.Notification.FLAG_BUBBLE;
+
+import android.app.Notification;
 import android.app.Notification.BubbleMetadata;
 import android.app.NotificationManager.Policy;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -67,10 +70,43 @@ public class BubbleEntry {
         return mSbn.getKey();
     }
 
+    /** @return the group key in the {@link StatusBarNotification}. */
+    public String getGroupKey() {
+        return mSbn.getGroupKey();
+    }
+
     /** @return the {@link BubbleMetadata} in the {@link StatusBarNotification}. */
     @Nullable
     public BubbleMetadata getBubbleMetadata() {
         return getStatusBarNotification().getNotification().getBubbleMetadata();
+    }
+
+    /**
+     * Updates the {@link Notification#FLAG_BUBBLE} flag on this notification to indicate
+     * whether it is a bubble or not. If this entry is set to not bubble, or does not have
+     * the required info to bubble, the flag cannot be set to true.
+     *
+     * @param shouldBubble whether this notification should be flagged as a bubble.
+     * @return true if the value changed.
+     */
+    public boolean setFlagBubble(boolean shouldBubble) {
+        boolean wasBubble = isBubble();
+        if (!shouldBubble) {
+            mSbn.getNotification().flags &= ~FLAG_BUBBLE;
+        } else if (getBubbleMetadata() != null && canBubble()) {
+            // wants to be bubble & can bubble, set flag
+            mSbn.getNotification().flags |= FLAG_BUBBLE;
+        }
+        return wasBubble != isBubble();
+    }
+
+    public boolean isBubble() {
+        return (mSbn.getNotification().flags & FLAG_BUBBLE) != 0;
+    }
+
+    /** @see Ranking#canBubble() */
+    public boolean canBubble() {
+        return mRanking.canBubble();
     }
 
     /** @return true if this notification is clearable. */

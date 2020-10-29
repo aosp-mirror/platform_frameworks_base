@@ -35,6 +35,7 @@ import com.android.systemui.R
 
 class BubbleOverflow(
     private val context: Context,
+    private val controller: BubbleController,
     private val stack: BubbleStackView
 ) : BubbleViewProvider {
 
@@ -56,8 +57,8 @@ class BubbleOverflow(
     init {
         updateResources()
         with(expandedView) {
+            initialize(controller, stack)
             setOverflow(true)
-            setStackView(stack)
             applyThemeAttrs()
         }
         with(overflowBtn) {

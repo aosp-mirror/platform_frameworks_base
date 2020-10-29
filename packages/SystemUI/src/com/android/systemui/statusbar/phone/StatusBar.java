@@ -144,7 +144,6 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
@@ -229,6 +228,7 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.volume.VolumeComponent;
+import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
@@ -648,8 +648,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
+    private final Optional<BubblesManager> mBubblesManagerOptional;
     private final Optional<Bubbles> mBubblesOptional;
-    private final BubbleController.BubbleExpandListener mBubbleExpandListener;
+    private final Bubbles.BubbleExpandListener mBubbleExpandListener;
 
     private ActivityIntentHelper mActivityIntentHelper;
     private NotificationStackScrollLayoutController mStackScrollerController;
@@ -697,6 +698,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             WakefulnessLifecycle wakefulnessLifecycle,
             SysuiStatusBarStateController statusBarStateController,
             VibratorHelper vibratorHelper,
+            Optional<BubblesManager> bubblesManagerOptional,
             Optional<Bubbles> bubblesOptional,
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
@@ -776,6 +778,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mVibratorHelper = vibratorHelper;
+        mBubblesManagerOptional = bubblesManagerOptional;
         mBubblesOptional = bubblesOptional;
         mVisualStabilityManager = visualStabilityManager;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -1141,8 +1144,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         ScrimView scrimBehind = mNotificationShadeWindowView.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mNotificationShadeWindowView.findViewById(R.id.scrim_in_front);
-        ScrimView scrimForBubble = mBubblesOptional.isPresent()
-                ? mBubblesOptional.get().getScrimForBubble() : null;
+        ScrimView scrimForBubble = mBubblesManagerOptional.isPresent()
+                ? mBubblesManagerOptional.get().getScrimForBubble() : null;
 
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);

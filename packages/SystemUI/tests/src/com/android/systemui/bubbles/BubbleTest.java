@@ -60,7 +60,7 @@ public class BubbleTest extends SysuiTestCase {
     private Bubble mBubble;
 
     @Mock
-    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
 
     @Before
     public void setUp() {

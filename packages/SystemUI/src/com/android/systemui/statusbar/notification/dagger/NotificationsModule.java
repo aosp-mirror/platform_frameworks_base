@@ -26,7 +26,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -73,6 +72,7 @@ import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogC
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -133,7 +133,7 @@ public interface NotificationsModule {
             UserContextProvider contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
-            Optional<Bubbles> bubblesOptional,
+            Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback) {
         return new NotificationGutsManager(
@@ -150,7 +150,7 @@ public interface NotificationsModule {
                 contextTracker,
                 builderProvider,
                 assistantFeedbackController,
-                bubblesOptional,
+                bubblesManagerOptional,
                 uiEventLogger,
                 onUserInteractionCallback);
     }
