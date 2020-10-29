@@ -58,7 +58,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -1112,9 +1111,6 @@ public class BubbleStackView extends FrameLayout
         }
         mFlyout = new BubbleFlyoutView(getContext());
         mFlyout.setVisibility(GONE);
-        mFlyout.animate()
-                .setDuration(FLYOUT_ALPHA_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateDecelerateInterpolator());
         mFlyout.setOnClickListener(mFlyoutClickListener);
         mFlyout.setOnTouchListener(mFlyoutTouchListener);
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
