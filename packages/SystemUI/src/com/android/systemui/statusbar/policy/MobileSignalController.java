@@ -423,7 +423,8 @@ public class MobileSignalController extends SignalController<
             return false;
         }
         if (isCdma()) {
-            return mPhone.getCdmaEnhancedRoamingIndicatorIconIndex() != TelephonyManager.ERI_OFF;
+            return mPhone.getCdmaEnhancedRoamingIndicatorDisplayNumber()
+                    != TelephonyManager.ERI_OFF;
         } else {
             return mServiceState != null && mServiceState.getRoaming();
         }
