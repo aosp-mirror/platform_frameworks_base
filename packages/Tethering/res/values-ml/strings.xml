@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ടെതറിംഗ് അല്ലെങ്കിൽ ഹോട്ട്സ്‌പോട്ട് സജീവമാണ്"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"സജ്ജമാക്കാൻ ടാപ്പുചെയ്യുക."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ടെതറിംഗ് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"വിശദവിവരങ്ങൾക്ക് നിങ്ങളുടെ അഡ്മിനെ ബന്ധപ്പെടുക"</string>
-</resources>

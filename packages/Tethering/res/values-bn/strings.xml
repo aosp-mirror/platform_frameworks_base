@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"টিথারিং বা হটস্পট সক্রিয় আছে"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"সেট-আপ করার জন্য আলতো চাপুন৷"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"টিথারিং অক্ষম করা আছে"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"বিশদ বিবরণের জন্য প্রশাসকের সাথে যোগাযোগ করুন"</string>
-</resources>
