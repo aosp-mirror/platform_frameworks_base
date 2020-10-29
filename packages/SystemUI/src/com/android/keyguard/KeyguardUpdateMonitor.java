@@ -2102,7 +2102,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
             if (isEncryptedOrLockdown(userId)) {
                 mFpm.detectFingerprint(mFingerprintCancelSignal, mFingerprintDetectionCallback,
-                        userId, null /* surface */);
+                        userId);
             } else {
                 mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
                         mFingerprintAuthenticationCallback, null /* handler */, userId);

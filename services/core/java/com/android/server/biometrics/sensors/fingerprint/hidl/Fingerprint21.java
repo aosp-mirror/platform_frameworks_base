@@ -46,7 +46,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
@@ -539,8 +538,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
-            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @Nullable Surface surface) {
+            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -571,7 +569,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter listener, @NonNull String opPackageName,
-            @Nullable Surface surface, int statsClient) {
+            int statsClient) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
