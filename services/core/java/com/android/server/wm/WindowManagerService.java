@@ -1216,9 +1216,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
-        mUseBLAST = DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
-                    WM_USE_BLAST_ADAPTER_FLAG, false);
+        final ContentResolver resolver = context.getContentResolver();
+        mUseBLAST = Settings.Global.getInt(resolver,
+            Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_VR, 1) == 1;
 
         mSyncEngine = new BLASTSyncEngine(this);
 
@@ -1296,7 +1296,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }, UserHandle.ALL, suspendPackagesFilter, null, null);
 
-        final ContentResolver resolver = context.getContentResolver();
         // Get persisted window scale setting
         mWindowAnimationScaleSetting = Settings.Global.getFloat(resolver,
                 Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
