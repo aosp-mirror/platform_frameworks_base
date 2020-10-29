@@ -1985,16 +1985,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         pw.println("]");
     }
 
-    @Override
-    public void addInterfaceToNetwork(String iface, int netId) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, netId, iface);
-    }
-
-    @Override
-    public void removeInterfaceFromNetwork(String iface, int netId) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_REMOVE, netId, iface);
-    }
-
     private void modifyInterfaceInNetwork(boolean add, int netId, String iface) {
         NetworkStack.checkNetworkStackPermission(mContext);
         try {
