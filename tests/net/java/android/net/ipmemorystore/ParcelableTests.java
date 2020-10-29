@@ -19,8 +19,8 @@ package android.net.ipmemorystore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.net.quirks.IPv6ProvisioningLossQuirk;
-import android.net.quirks.IPv6ProvisioningLossQuirkParcelable;
+import android.net.networkstack.aidl.quirks.IPv6ProvisioningLossQuirk;
+import android.net.networkstack.aidl.quirks.IPv6ProvisioningLossQuirkParcelable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -119,7 +119,7 @@ public class ParcelableTests {
         final NetworkAttributes in = builder.build();
 
         final NetworkAttributes out = new NetworkAttributes(parcelingRoundTrip(in.toParcelable()));
-        assertEquals(out.ipv6ProvLossQuirk, in.ipv6ProvLossQuirk);
+        assertEquals(out.ipv6ProvisioningLossQuirk, in.ipv6ProvisioningLossQuirk);
     }
 
     private <T extends Parcelable> T parcelingRoundTrip(final T in) throws Exception {
