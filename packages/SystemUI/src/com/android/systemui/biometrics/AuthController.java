@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -247,12 +248,14 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
      *
      * @param screenX X position of long press
      * @param screenY Y position of long press
+     * @param major length of the major axis. See {@link MotionEvent#AXIS_TOOL_MAJOR}.
+     * @param minor length of the minor axis. See {@link MotionEvent#AXIS_TOOL_MINOR}.
      */
-    public void onAodInterrupt(int screenX, int screenY) {
+    public void onAodInterrupt(int screenX, int screenY, float major, float minor) {
         if (mUdfpsController == null) {
             return;
         }
-        mUdfpsController.onAodInterrupt(screenX, screenY);
+        mUdfpsController.onAodInterrupt(screenX, screenY, major, minor);
     }
 
     /**

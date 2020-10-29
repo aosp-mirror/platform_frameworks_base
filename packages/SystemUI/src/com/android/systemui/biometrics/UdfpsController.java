@@ -337,7 +337,7 @@ class UdfpsController implements DozeReceiver {
      * This is intented to be called in response to a sensor that triggers an AOD interrupt for the
      * fingerprint sensor.
      */
-    void onAodInterrupt(int screenX, int screenY) {
+    void onAodInterrupt(int screenX, int screenY, float major, float minor) {
         if (mIsAodInterruptActive) {
             return;
         }
@@ -348,7 +348,7 @@ class UdfpsController implements DozeReceiver {
         mCancelAodTimeoutAction = mFgExecutor.executeDelayed(this::onCancelAodInterrupt,
                 AOD_INTERRUPT_TIMEOUT_MILLIS);
         // using a hard-coded value for major and minor until it is available from the sensor
-        onFingerDown(screenX, screenY, 13.0f, 13.0f);
+        onFingerDown(screenX, screenY, minor, major);
     }
 
     /**
