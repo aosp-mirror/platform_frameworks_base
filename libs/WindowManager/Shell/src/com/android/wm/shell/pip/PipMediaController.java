@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.pip;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
-import android.app.IActivityManager;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
@@ -28,10 +27,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
+import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.UserHandle;
+
+import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
 
@@ -46,10 +48,10 @@ import java.util.List;
  */
 public class PipMediaController {
 
-    private static final String ACTION_PLAY = "com.android.wm.shell.pip.phone.PLAY";
-    private static final String ACTION_PAUSE = "com.android.wm.shell.pip.phone.PAUSE";
-    private static final String ACTION_NEXT = "com.android.wm.shell.pip.phone.NEXT";
-    private static final String ACTION_PREV = "com.android.wm.shell.pip.phone.PREV";
+    private static final String ACTION_PLAY = "com.android.wm.shell.pip.PLAY";
+    private static final String ACTION_PAUSE = "com.android.wm.shell.pip.PAUSE";
+    private static final String ACTION_NEXT = "com.android.wm.shell.pip.NEXT";
+    private static final String ACTION_PREV = "com.android.wm.shell.pip.PREV";
 
     /**
      * A listener interface to receive notification on changes to the media actions.
@@ -61,8 +63,17 @@ public class PipMediaController {
         void onMediaActionsChanged(List<RemoteAction> actions);
     }
 
+    /**
+     * A listener interface to receive notification on changes to the media metadata.
+     */
+    public interface MetadataListener {
+        /**
+         * Called when the media metadata changes.
+         */
+        void onMediaMetadataChanged(MediaMetadata metadata);
+    }
+
     private final Context mContext;
-    private final IActivityManager mActivityManager;
 
     private final MediaSessionManager mMediaSessionManager;
     private MediaController mMediaController;
@@ -94,16 +105,21 @@ public class PipMediaController {
                 public void onPlaybackStateChanged(PlaybackState state) {
                     notifyActionsChanged();
                 }
+
+                @Override
+                public void onMetadataChanged(@Nullable MediaMetadata metadata) {
+                    notifyMetadataChanged(metadata);
+                }
             };
 
     private final MediaSessionManager.OnActiveSessionsChangedListener mSessionsChangedListener =
-            controllers -> resolveActiveMediaController(controllers);
+            this::resolveActiveMediaController;
 
-    private ArrayList<ActionListener> mListeners = new ArrayList<>();
+    private final ArrayList<ActionListener> mActionListeners = new ArrayList<>();
+    private final ArrayList<MetadataListener> mMetadataListeners = new ArrayList<>();
 
-    public PipMediaController(Context context, IActivityManager activityManager) {
+    public PipMediaController(Context context) {
         mContext = context;
-        mActivityManager = activityManager;
         IntentFilter mediaControlFilter = new IntentFilter();
         mediaControlFilter.addAction(ACTION_PLAY);
         mediaControlFilter.addAction(ACTION_PAUSE);
@@ -113,8 +129,7 @@ public class PipMediaController {
                 UserHandle.USER_ALL);
 
         createMediaActions();
-        mMediaSessionManager =
-                (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mMediaSessionManager = context.getSystemService(MediaSessionManager.class);
     }
 
     /**
@@ -129,9 +144,9 @@ public class PipMediaController {
     /**
      * Adds a new media action listener.
      */
-    public void addListener(ActionListener listener) {
-        if (!mListeners.contains(listener)) {
-            mListeners.add(listener);
+    public void addActionListener(ActionListener listener) {
+        if (!mActionListeners.contains(listener)) {
+            mActionListeners.add(listener);
             listener.onMediaActionsChanged(getMediaActions());
         }
     }
@@ -139,9 +154,31 @@ public class PipMediaController {
     /**
      * Removes a media action listener.
      */
-    public void removeListener(ActionListener listener) {
-        listener.onMediaActionsChanged(Collections.EMPTY_LIST);
-        mListeners.remove(listener);
+    public void removeActionListener(ActionListener listener) {
+        listener.onMediaActionsChanged(Collections.emptyList());
+        mActionListeners.remove(listener);
+    }
+
+    /**
+     * Adds a new media metadata listener.
+     */
+    public void addMetadataListener(MetadataListener listener) {
+        if (!mMetadataListeners.contains(listener)) {
+            mMetadataListeners.add(listener);
+            listener.onMediaMetadataChanged(getMediaMetadata());
+        }
+    }
+
+    /**
+     * Removes a media metadata listener.
+     */
+    public void removeMetadataListener(MetadataListener listener) {
+        listener.onMediaMetadataChanged(null);
+        mMetadataListeners.remove(listener);
+    }
+
+    private MediaMetadata getMediaMetadata() {
+        return mMediaController != null ? mMediaController.getMetadata() : null;
     }
 
     /**
@@ -149,7 +186,7 @@ public class PipMediaController {
      */
     private List<RemoteAction> getMediaActions() {
         if (mMediaController == null || mMediaController.getPlaybackState() == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         ArrayList<RemoteAction> mediaActions = new ArrayList<>();
@@ -216,8 +253,7 @@ public class PipMediaController {
      */
     private void resolveActiveMediaController(List<MediaController> controllers) {
         if (controllers != null) {
-            final ComponentName topActivity = PipUtils.getTopPipActivity(mContext,
-                    mActivityManager).first;
+            final ComponentName topActivity = PipUtils.getTopPipActivity(mContext).first;
             if (topActivity != null) {
                 for (int i = 0; i < controllers.size(); i++) {
                     final MediaController controller = controllers.get(i);
@@ -244,6 +280,7 @@ public class PipMediaController {
                 controller.registerCallback(mPlaybackChangedListener);
             }
             notifyActionsChanged();
+            notifyMetadataChanged(getMediaMetadata());
 
             // TODO(winsonc): Consider if we want to close the PIP after a timeout (like on TV)
         }
@@ -253,9 +290,18 @@ public class PipMediaController {
      * Notifies all listeners that the actions have changed.
      */
     private void notifyActionsChanged() {
-        if (!mListeners.isEmpty()) {
+        if (!mActionListeners.isEmpty()) {
             List<RemoteAction> actions = getMediaActions();
-            mListeners.forEach(l -> l.onMediaActionsChanged(actions));
+            mActionListeners.forEach(l -> l.onMediaActionsChanged(actions));
+        }
+    }
+
+    /**
+     * Notifies all listeners that the metadata have changed.
+     */
+    private void notifyMetadataChanged(MediaMetadata metadata) {
+        if (!mMetadataListeners.isEmpty()) {
+            mMetadataListeners.forEach(l -> l.onMediaMetadataChanged(metadata));
         }
     }
 }

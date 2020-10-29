@@ -34,6 +34,7 @@ import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.HandlerExecutor;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
@@ -41,10 +42,10 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
-import com.android.wm.shell.pip.phone.PipMediaController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -123,9 +124,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static PipMediaController providePipMediaController(Context context,
-            IActivityManager activityManager) {
-        return new PipMediaController(context, activityManager);
+    static PipMediaController providePipMediaController(Context context) {
+        return new PipMediaController(context);
     }
 
     @WMSingleton
@@ -158,9 +158,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
-            @Main Handler handler, TransactionPool transactionPool) {
+            ShellExecutor mainExecutor, TransactionPool transactionPool) {
         return new ShellTaskOrganizer(syncQueue, transactionPool,
-                new HandlerExecutor(handler), AnimationThread.instance().getExecutor());
+                mainExecutor, AnimationThread.instance().getExecutor());
     }
 
     @BindsOptionalOf
@@ -175,4 +175,11 @@ public abstract class WMShellBaseModule {
             DisplayController displayController) {
         return Optional.ofNullable(OneHandedController.create(context, displayController));
     }
+
+    @WMSingleton
+    @Provides
+    static ShellExecutor provideMainShellExecutor(@Main Handler handler) {
+        return new HandlerExecutor(handler);
+    }
+
 }

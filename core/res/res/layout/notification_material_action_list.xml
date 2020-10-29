@@ -28,6 +28,7 @@
             android:gravity="end"
             android:orientation="horizontal"
             android:paddingEnd="@dimen/bubble_gone_padding_end"
+            android:background="@color/notification_action_list_background_color"
             >
 
             <com.android.internal.widget.NotificationActionListLayout
@@ -38,7 +39,6 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:visibility="gone"
-                android:background="@color/notification_action_list_background_color"
                 >
                 <!-- actions will be added here -->
             </com.android.internal.widget.NotificationActionListLayout>

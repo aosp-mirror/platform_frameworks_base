@@ -19,6 +19,7 @@ package android.companion;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.OneTimeUseBuilder;
@@ -46,6 +47,7 @@ public final class AssociationRequest implements Parcelable {
 
     private final boolean mSingleDevice;
     private final List<DeviceFilter<?>> mDeviceFilters;
+    private String mCallingPackage;
 
     private AssociationRequest(
             boolean singleDevice, @Nullable List<DeviceFilter<?>> deviceFilters) {
@@ -57,19 +59,30 @@ public final class AssociationRequest implements Parcelable {
         this(
             in.readByte() != 0,
             in.readParcelableList(new ArrayList<>(), AssociationRequest.class.getClassLoader()));
+        setCallingPackage(in.readString());
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isSingleDevice() {
         return mSingleDevice;
     }
 
     /** @hide */
     @NonNull
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public List<DeviceFilter<?>> getDeviceFilters() {
         return mDeviceFilters;
+    }
+
+    /** @hide */
+    public String getCallingPackage() {
+        return mCallingPackage;
+    }
+
+    /** @hide */
+    public void setCallingPackage(String pkg) {
+        mCallingPackage = pkg;
     }
 
     @Override
@@ -77,27 +90,30 @@ public final class AssociationRequest implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AssociationRequest that = (AssociationRequest) o;
-        return mSingleDevice == that.mSingleDevice &&
-                Objects.equals(mDeviceFilters, that.mDeviceFilters);
+        return mSingleDevice == that.mSingleDevice
+                && Objects.equals(mDeviceFilters, that.mDeviceFilters)
+                && Objects.equals(mCallingPackage, that.mCallingPackage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSingleDevice, mDeviceFilters);
+        return Objects.hash(mSingleDevice, mDeviceFilters, mCallingPackage);
     }
 
     @Override
     public String toString() {
-        return "AssociationRequest{" +
-                "mSingleDevice=" + mSingleDevice +
-                ", mDeviceFilters=" + mDeviceFilters +
-                '}';
+        return "AssociationRequest{"
+                + "mSingleDevice=" + mSingleDevice
+                + ", mDeviceFilters=" + mDeviceFilters
+                + ", mCallingPackage=" + mCallingPackage
+                + '}';
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (mSingleDevice ? 1 : 0));
         dest.writeParcelableList(mDeviceFilters, flags);
+        dest.writeString(mCallingPackage);
     }
 
     @Override

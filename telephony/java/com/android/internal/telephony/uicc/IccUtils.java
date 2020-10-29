@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.GsmAlphabet;
@@ -385,7 +386,7 @@ public class IccUtils {
         return GsmAlphabet.gsm8BitUnpackedToString(data, offset, length, defaultCharset.trim());
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int
     hexCharToInt(char c) {
         if (c >= '0' && c <= '9') return (c - '0');

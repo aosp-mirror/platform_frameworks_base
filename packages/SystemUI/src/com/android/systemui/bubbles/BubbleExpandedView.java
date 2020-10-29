@@ -252,8 +252,7 @@ public class BubbleExpandedView extends LinearLayout {
 
         mPositioner = mBubbles.getPositioner();
 
-        mTaskView = new TaskView(mContext, mBubbles.getTaskOrganizer(),
-                new HandlerExecutor(getHandler()));
+        mTaskView = new TaskView(mContext, mBubbles.getTaskOrganizer());
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 
@@ -308,6 +307,12 @@ public class BubbleExpandedView extends LinearLayout {
         // BubbleStackView is forced LTR, but we want to respect the locale for expanded view layout
         // so the Manage button appears on the right.
         setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mTaskView.setExecutor(new HandlerExecutor(getHandler()));
     }
 
     void updateDimensions() {

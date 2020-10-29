@@ -20,11 +20,14 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
@@ -34,8 +37,10 @@ import android.testing.TestableLooper;
 
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTestCase;
 
@@ -63,6 +68,7 @@ public class PipControllerTest extends PipTestCase {
     @Mock private PipTouchHandler mMockPipTouchHandler;
     @Mock private WindowManagerShellWrapper mMockWindowManagerShellWrapper;
     @Mock private PipBoundsState mMockPipBoundsState;
+    @Mock private ShellExecutor mMockExecutor;
 
     @Before
     public void setUp() throws RemoteException {
@@ -70,7 +76,11 @@ public class PipControllerTest extends PipTestCase {
         mPipController = new PipController(mContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipBoundsState,
                 mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
-                mMockPipTouchHandler, mMockWindowManagerShellWrapper);
+                mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockExecutor);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mMockExecutor).execute(any());
     }
 
     @Test
@@ -98,6 +108,27 @@ public class PipControllerTest extends PipTestCase {
         assertNull(PipController.create(spyContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipBoundsState,
                 mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
-                mMockPipTouchHandler, mMockWindowManagerShellWrapper));
+                mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockExecutor));
+    }
+
+    @Test
+    public void onActivityHidden_isLastPipComponentName_clearLastPipComponent() {
+        final ComponentName component1 = new ComponentName(mContext, "component1");
+        when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
+
+        mPipController.mPinnedStackListener.onActivityHidden(component1);
+
+        verify(mMockPipBoundsState).setLastPipComponentName(null);
+    }
+
+    @Test
+    public void onActivityHidden_isNotLastPipComponentName_lastPipComponentNotCleared() {
+        final ComponentName component1 = new ComponentName(mContext, "component1");
+        final ComponentName component2 = new ComponentName(mContext, "component2");
+        when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
+
+        mPipController.mPinnedStackListener.onActivityHidden(component2);
+
+        verify(mMockPipBoundsState, never()).setLastPipComponentName(null);
     }
 }

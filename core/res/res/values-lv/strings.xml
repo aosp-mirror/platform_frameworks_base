@@ -1149,10 +1149,8 @@
     <string name="capital_off" msgid="7443704171014626777">"IZSL."</string>
     <string name="checked" msgid="9179896827054513119">"atzīmēts"</string>
     <string name="not_checked" msgid="7972320087569023342">"nav atzīmēts"</string>
-    <!-- no translation found for selected (6614607926197755875) -->
-    <skip />
-    <!-- no translation found for not_selected (410652016565864475) -->
-    <skip />
+    <string name="selected" msgid="6614607926197755875">"atlasīts"</string>
+    <string name="not_selected" msgid="410652016565864475">"nav atlasīts"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Izvēlieties lietotni"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Pabeigt darbību, izmantojot %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Pabeigt darbību"</string>

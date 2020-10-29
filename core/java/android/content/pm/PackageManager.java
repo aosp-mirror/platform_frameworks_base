@@ -567,9 +567,11 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Internal {@link PackageInfo} flag used to indicate that a package is a hidden system app.
+     * {@link PackageInfo} flag: include system apps that are in the uninstalled state and have
+     * been set to be hidden until installed via {@link #setSystemAppState}.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS =  0x20000000;
 
     /**
@@ -1792,7 +1794,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int MOVE_INTERNAL = 0x00000001;
 
     /**
@@ -1801,7 +1803,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
 
     /** {@hide} */
@@ -3661,7 +3663,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
 
@@ -3674,7 +3676,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
 
@@ -3768,27 +3770,34 @@ public abstract class PackageManager {
     public @interface SystemAppState {}
 
     /**
-     * Constant for noting system app state as hidden before installation
+     * Constant for use with {@link #setSystemAppState} to mark a system app as hidden until
+     * installation.
      * @hide
      */
+    @SystemApi
     public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0;
 
     /**
-     * Constant for noting system app state as visible before installation
+     * Constant for use with {@link #setSystemAppState} to mark a system app as not hidden until
+     * installation.
      * @hide
      */
+    @SystemApi
     public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1;
 
     /**
-     * Constant for noting system app state as installed
+     * Constant for use with {@link #setSystemAppState} to change a system app's state to installed.
      * @hide
      */
+    @SystemApi
     public static final int SYSTEM_APP_STATE_INSTALLED = 2;
 
     /**
-     * Constant for noting system app state as not installed
+     * Constant for use with {@link #setSystemAppState} to change a system app's state to
+     * uninstalled.
      * @hide
      */
+    @SystemApi
     public static final int SYSTEM_APP_STATE_UNINSTALLED = 3;
 
     /**
@@ -7092,11 +7101,18 @@ public abstract class PackageManager {
             @NonNull UserHandle userHandle);
 
     /**
-     * Sets system app state
+     * Sets the state of a system app.
+     *
+     * This method can be used to change a system app's hidden-until-installed state (via
+     * {@link #SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN} and
+     * {@link #SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE} or its installation state (via
+     * {@link #SYSTEM_APP_STATE_INSTALLED} and {@link #SYSTEM_APP_STATE_UNINSTALLED}.
+     *
      * @param packageName Package name of the app.
      * @param state State of the app.
      * @hide
      */
+    @SystemApi
     public void setSystemAppState(@NonNull String packageName, @SystemAppState int state) {
         throw new RuntimeException("Not implemented. Must override in a subclass");
     }
@@ -7484,14 +7500,14 @@ public abstract class PackageManager {
     public abstract void unregisterMoveCallback(@NonNull MoveCallback callback);
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract int movePackage(@NonNull String packageName, @NonNull VolumeInfo vol);
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract @Nullable VolumeInfo getPackageCurrentVolume(@NonNull ApplicationInfo app);
     /** {@hide} */
     @NonNull
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract List<VolumeInfo> getPackageCandidateVolumes(
             @NonNull ApplicationInfo app);
 
@@ -7582,7 +7598,7 @@ public abstract class PackageManager {
 
     /** {@hide} */
     @NonNull
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String installStatusToString(int status, @Nullable String msg) {
         final String str = installStatusToString(status);
         if (msg != null) {

@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
@@ -186,8 +187,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         // Perform dragging
         final View.OnTouchListener listener = mTouchListenerCaptor.getValue();
         final int offset = ViewConfiguration.get(mContext).getScaledTouchSlop();
-        final int previousMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
+        final int previousMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0, UserHandle.USER_CURRENT);
         listener.onTouch(mSpyImageView, MotionEvent.obtain(
                 0, 0, ACTION_DOWN, 100, 100, 0));
         verify(mViewPropertyAnimator).cancel();
@@ -334,8 +335,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         verify(mSpyImageView).setImageResource(
                 getIconResId(expectedMode));
         verify(mWindowManager).removeView(mSpyImageView);
-        final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
+        final int actualMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0, UserHandle.USER_CURRENT);
         assertEquals(expectedMode, actualMode);
     }
 }

@@ -650,9 +650,9 @@
     <string name="quick_settings" msgid="6211774484997470203">"Brze postavke"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
     <string name="overview" msgid="3522318590458536816">"Pregled"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Način demonstracije Sistemskog UI-a"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način demonstracije"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način demonstracije"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Način rada za demonstraciju Sistemskog UI-a"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način rada za demonstraciju"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>

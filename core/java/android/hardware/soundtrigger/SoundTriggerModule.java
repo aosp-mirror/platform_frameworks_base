@@ -29,6 +29,7 @@ import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
 import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.SoundModel;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -48,7 +49,7 @@ public class SoundTriggerModule {
     private static final int EVENT_RECOGNITION = 1;
     private static final int EVENT_SERVICE_DIED = 2;
     private static final int EVENT_SERVICE_STATE_CHANGE = 3;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mId;
     private EventHandlerDelegate mEventHandlerDelegate;
     private ISoundTriggerModule mService;

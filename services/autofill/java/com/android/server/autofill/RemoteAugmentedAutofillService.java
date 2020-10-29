@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -296,11 +297,29 @@ final class RemoteAugmentedAutofillService
                                         dataset.getId(), clientState);
                                 try {
                                     final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
-                                    final int size = fieldIds.size();
-                                    final boolean hideHighlight = size == 1
-                                            && fieldIds.get(0).equals(focusedId);
-                                    client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
-                                            hideHighlight);
+                                    final ClipData content = dataset.getFieldContent();
+                                    if (content != null) {
+                                        final AutofillId fieldId = fieldIds.get(0);
+                                        if (sDebug) {
+                                            Slog.d(TAG, "Calling client autofillContent(): "
+                                                    + "id=" + fieldId + ", content=" + content);
+                                        }
+                                        client.autofillContent(sessionId, fieldId, content);
+                                    } else {
+                                        final int size = fieldIds.size();
+                                        final boolean hideHighlight = size == 1
+                                                && fieldIds.get(0).equals(focusedId);
+                                        if (sDebug) {
+                                            Slog.d(TAG, "Calling client autofill(): "
+                                                    + "ids=" + fieldIds
+                                                    + ", values=" + dataset.getFieldValues());
+                                        }
+                                        client.autofill(
+                                                sessionId,
+                                                fieldIds,
+                                                dataset.getFieldValues(),
+                                                hideHighlight);
+                                    }
                                     inlineSuggestionsCallback.apply(
                                             InlineFillUi.emptyUi(focusedId));
                                 } catch (RemoteException e) {

@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.RemoteViews;
@@ -36,6 +37,7 @@ import java.util.List;
  */
 @RemoteViews.RemoteView
 public class NotificationTopLineView extends ViewGroup {
+    private final int mGravityY;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private View mAppName;
@@ -47,6 +49,9 @@ public class NotificationTopLineView extends ViewGroup {
     private View mFeedbackIcon;
     private int mHeaderTextMarginEnd;
     private List<View> mIconsAtEnd;
+
+    private int mMaxAscent;
+    private int mMaxDescent;
 
     public NotificationTopLineView(Context context) {
         this(context, null);
@@ -67,6 +72,20 @@ public class NotificationTopLineView extends ViewGroup {
         Resources res = getResources();
         mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
+
+        // NOTE: Implementation only supports TOP, BOTTOM, and CENTER_VERTICAL gravities,
+        // with CENTER_VERTICAL being the default.
+        int[] attrIds = {android.R.attr.gravity};
+        TypedArray ta = context.obtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes);
+        int gravity = ta.getInt(0, 0);
+        ta.recycle();
+        if ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM) {
+            mGravityY = Gravity.BOTTOM;
+        } else if ((gravity & Gravity.TOP) == Gravity.TOP) {
+            mGravityY = Gravity.TOP;
+        } else {
+            mGravityY = Gravity.CENTER_VERTICAL;
+        }
     }
 
     @Override
@@ -84,12 +103,16 @@ public class NotificationTopLineView extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int givenWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
+        final boolean wrapHeight = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST;
         int wrapContentWidthSpec = MeasureSpec.makeMeasureSpec(givenWidth,
                 MeasureSpec.AT_MOST);
         int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
                 MeasureSpec.AT_MOST);
         int totalWidth = getPaddingStart();
         int iconWidth = getPaddingEnd();
+        int maxChildHeight = -1;
+        mMaxAscent = -1;
+        mMaxDescent = -1;
         for (int i = 0; i < getChildCount(); i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() == GONE) {
@@ -108,6 +131,13 @@ public class NotificationTopLineView extends ViewGroup {
             } else {
                 totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             }
+            int childBaseline = child.getBaseline();
+            int childHeight = child.getMeasuredHeight();
+            if (childBaseline != -1) {
+                mMaxAscent = Math.max(mMaxAscent, childBaseline);
+                mMaxDescent = Math.max(mMaxDescent, childHeight - childBaseline);
+            }
+            maxChildHeight = Math.max(maxChildHeight, childHeight);
         }
 
         // Ensure that there is at least enough space for the icons
@@ -125,7 +155,7 @@ public class NotificationTopLineView extends ViewGroup {
             shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
                     0);
         }
-        setMeasuredDimension(givenWidth, givenHeight);
+        setMeasuredDimension(givenWidth, wrapHeight ? maxChildHeight : givenHeight);
     }
 
     private int shrinkViewForOverflow(int heightSpec, int overFlow, View targetView,
@@ -146,7 +176,13 @@ public class NotificationTopLineView extends ViewGroup {
         int left = getPaddingStart();
         int end = getMeasuredWidth();
         int childCount = getChildCount();
-        int ownHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        int ownHeight = b - t;
+        int childSpace = ownHeight - mPaddingTop - mPaddingBottom;
+
+        // Instead of centering the baseline, pick a baseline that centers views which align to it.
+        // Only used when mGravityY is CENTER_VERTICAL
+        int baselineY = mPaddingTop + ((childSpace - (mMaxAscent + mMaxDescent)) / 2) + mMaxAscent;
+
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child.getVisibility() == GONE) {
@@ -156,8 +192,42 @@ public class NotificationTopLineView extends ViewGroup {
             MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
             int layoutLeft;
             int layoutRight;
-            int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
-            int bottom = top + childHeight;
+
+            // Calculate vertical alignment of the views, accounting for the view baselines
+            int childTop;
+            int childBaseline = child.getBaseline();
+            switch (mGravityY) {
+                case Gravity.TOP:
+                    childTop = mPaddingTop + params.topMargin;
+                    if (childBaseline != -1) {
+                        childTop += mMaxAscent - childBaseline;
+                    }
+                    break;
+                case Gravity.CENTER_VERTICAL:
+                    if (childBaseline != -1) {
+                        // Align baselines vertically only if the child is smaller than us
+                        if (childSpace - childHeight > 0) {
+                            childTop = baselineY - childBaseline;
+                        } else {
+                            childTop = mPaddingTop + (childSpace - childHeight) / 2;
+                        }
+                    } else {
+                        childTop = mPaddingTop + ((childSpace - childHeight) / 2)
+                                + params.topMargin - params.bottomMargin;
+                    }
+                    break;
+                case Gravity.BOTTOM:
+                    int childBottom = ownHeight - mPaddingBottom;
+                    childTop = childBottom - childHeight - params.bottomMargin;
+                    if (childBaseline != -1) {
+                        int descent = childHeight - childBaseline;
+                        childTop -= (mMaxDescent - descent);
+                    }
+                    break;
+                default:
+                    childTop = mPaddingTop;
+            }
+
             // Icons that should go at the end
             if (mIconsAtEnd.contains(child)) {
                 if (end == getMeasuredWidth()) {
@@ -179,7 +249,7 @@ public class NotificationTopLineView extends ViewGroup {
                 layoutLeft = getWidth() - layoutRight;
                 layoutRight = getWidth() - ltrLeft;
             }
-            child.layout(layoutLeft, top, layoutRight, bottom);
+            child.layout(layoutLeft, childTop, layoutRight, childTop + childHeight);
         }
         updateTouchListener();
     }

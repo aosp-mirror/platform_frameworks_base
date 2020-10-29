@@ -35,6 +35,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -286,7 +287,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         StringBuilder buffer = new StringBuilder(automaticRules.size() * 28);
-        buffer.append('{');
+        buffer.append("{\n");
         for (int i = 0; i < automaticRules.size(); i++) {
             if (i > 0) {
                 buffer.append(",\n");
@@ -1743,9 +1744,9 @@ public class ZenModeConfig implements Parcelable {
     public static class ZenRule implements Parcelable {
         @UnsupportedAppUsage
         public boolean enabled;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean snoozing;         // user manually disabled this instance
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String name;              // required for automatic
         @UnsupportedAppUsage
         public int zenMode;             // ie: Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
@@ -1755,7 +1756,7 @@ public class ZenModeConfig implements Parcelable {
         public ComponentName component;  // optional
         public ComponentName configurationActivity; // optional
         public String id;                // required for automatic (unique)
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long creationTime;        // required for automatic
         // package name, only used for manual rules when they have turned DND on.
         public String enabler;
@@ -1830,12 +1831,13 @@ public class ZenModeConfig implements Parcelable {
         public String toString() {
             return new StringBuilder(ZenRule.class.getSimpleName()).append('[')
                     .append("id=").append(id)
+                    .append(",state=").append(condition == null ? "STATE_FALSE"
+                            : Condition.stateToString(condition.state))
                     .append(",enabled=").append(String.valueOf(enabled).toUpperCase())
                     .append(",snoozing=").append(snoozing)
                     .append(",name=").append(name)
                     .append(",zenMode=").append(Global.zenModeToString(zenMode))
                     .append(",conditionId=").append(conditionId)
-                    .append(",condition=").append(condition)
                     .append(",pkg=").append(pkg)
                     .append(",component=").append(component)
                     .append(",configActivity=").append(configurationActivity)
@@ -1843,6 +1845,7 @@ public class ZenModeConfig implements Parcelable {
                     .append(",enabler=").append(enabler)
                     .append(",zenPolicy=").append(zenPolicy)
                     .append(",modified=").append(modified)
+                    .append(",condition=").append(condition)
                     .append(']').toString();
         }
 
@@ -2009,6 +2012,10 @@ public class ZenModeConfig implements Parcelable {
 
         public Diff addLine(String item, Object from, Object to) {
             return addLine(item, from + "->" + to);
+        }
+
+        public boolean isEmpty() {
+            return lines.isEmpty();
         }
     }
 

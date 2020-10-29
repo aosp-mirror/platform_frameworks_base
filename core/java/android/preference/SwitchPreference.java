@@ -20,6 +20,7 @@ import android.annotation.StringRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Checkable;
@@ -45,7 +46,7 @@ import android.widget.Switch;
  */
 @Deprecated
 public class SwitchPreference extends TwoStatePreference {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final Listener mListener = new Listener();
 
     // Switch text for on and off states

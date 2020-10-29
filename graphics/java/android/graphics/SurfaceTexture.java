@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -69,17 +70,17 @@ import java.lang.ref.WeakReference;
  */
 public class SurfaceTexture {
     private final Looper mCreatorLooper;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Handler mOnFrameAvailableHandler;
 
     /**
      * These fields are used by native code, do not access or modify.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mSurfaceTexture;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mProducer;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mFrameAvailableListener;
 
     private boolean mIsSingleBuffered;
@@ -390,7 +391,7 @@ public class SurfaceTexture {
      * This method is invoked from native code only.
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static void postEventFromNative(WeakReference<SurfaceTexture> weakSelf) {
         SurfaceTexture st = weakSelf.get();
         if (st != null) {

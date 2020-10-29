@@ -18,10 +18,10 @@ package com.android.wm.shell.pip.tv;
 
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.Context;
 import android.graphics.Color;
-import android.media.session.MediaController;
-import android.media.session.PlaybackState;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,9 +29,8 @@ import android.view.View;
 import com.android.wm.shell.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -42,213 +41,118 @@ public class PipControlsViewController {
 
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
-    private final PipControlsView mView;
-    private final LayoutInflater mLayoutInflater;
-    private final Handler mHandler;
     private final PipController mPipController;
-    private final PipControlButtonView mPlayPauseButtonView;
-    private MediaController mMediaController;
-    private PipControlButtonView mFocusedChild;
-    private Listener mListener;
-    private ArrayList<PipControlButtonView> mCustomButtonViews = new ArrayList<>();
-    private List<RemoteAction> mCustomActions = new ArrayList<>();
 
-    public PipControlsView getView() {
+    private final Context mContext;
+    private final Handler mUiThreadHandler;
+    private final PipControlsView mView;
+    private final List<PipControlButtonView> mAdditionalButtons = new ArrayList<>();
+
+    private final List<RemoteAction> mCustomActions = new ArrayList<>();
+    private final List<RemoteAction> mMediaActions = new ArrayList<>();
+
+    public PipControlsViewController(PipControlsView view, PipController pipController) {
+        mContext = view.getContext();
+        mUiThreadHandler = new Handler(Looper.getMainLooper());
+        mPipController = pipController;
+        mView = view;
+
+        mView.getFullscreenButton().setOnClickListener(v -> mPipController.movePipToFullscreen());
+        mView.getCloseButton().setOnClickListener(v -> mPipController.closePip());
+
+        mPipController.getPipMediaController().addActionListener(this::onMediaActionsChanged);
+    }
+
+    PipControlsView getView() {
         return mView;
     }
 
     /**
-     * An interface to listen user action.
-     */
-    public interface Listener {
-        /**
-         * Called when a user clicks close PIP button.
-         */
-        void onClosed();
-    }
-
-    private View.OnAttachStateChangeListener
-            mOnAttachStateChangeListener =
-            new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    updateMediaController();
-                    mPipController.addMediaListener(mPipMediaListener);
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    mPipController.removeMediaListener(mPipMediaListener);
-                }
-            };
-
-    private MediaController.Callback mMediaControllerCallback = new MediaController.Callback() {
-        @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
-            updateUserActions();
-        }
-    };
-
-    private final PipController.MediaListener mPipMediaListener = this::updateMediaController;
-
-    private final View.OnFocusChangeListener
-            mFocusChangeListener =
-            new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View view, boolean hasFocus) {
-                    if (hasFocus) {
-                        mFocusedChild = (PipControlButtonView) view;
-                    } else if (mFocusedChild == view) {
-                        mFocusedChild = null;
-                    }
-                }
-            };
-
-    public PipControlsViewController(PipControlsView view, PipController pipController,
-            LayoutInflater layoutInflater, Handler handler) {
-        super();
-        mView = view;
-        mPipController = pipController;
-        mLayoutInflater = layoutInflater;
-        mHandler = handler;
-
-        mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        if (mView.isAttachedToWindow()) {
-            mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
-        }
-
-        View fullButtonView = mView.getFullButtonView();
-        fullButtonView.setOnFocusChangeListener(mFocusChangeListener);
-        fullButtonView.setOnClickListener(mView -> mPipController.movePipToFullscreen());
-
-        View closeButtonView = mView.getCloseButtonView();
-        closeButtonView.setOnFocusChangeListener(mFocusChangeListener);
-        closeButtonView.setOnClickListener(v -> {
-            mPipController.closePip();
-            if (mListener != null) {
-                mListener.onClosed();
-            }
-        });
-
-        mPlayPauseButtonView = mView.getPlayPauseButtonView();
-        mPlayPauseButtonView.setOnFocusChangeListener(mFocusChangeListener);
-        mPlayPauseButtonView.setOnClickListener(v -> {
-            if (mMediaController == null || mMediaController.getPlaybackState() == null) {
-                return;
-            }
-            final int playbackState = mPipController.getPlaybackState();
-            if (playbackState == PipController.PLAYBACK_STATE_PAUSED) {
-                mMediaController.getTransportControls().play();
-            } else if (playbackState == PipController.PLAYBACK_STATE_PLAYING) {
-                mMediaController.getTransportControls().pause();
-            }
-
-            // View will be updated later in {@link mMediaControllerCallback}
-        });
-    }
-
-    private void updateMediaController() {
-        AtomicReference<MediaController> newController = new AtomicReference<>();
-        newController.set(mPipController.getMediaController());
-
-        if (newController.get() == null || mMediaController == newController.get()) {
-            return;
-        }
-        if (mMediaController != null) {
-            mMediaController.unregisterCallback(mMediaControllerCallback);
-        }
-        mMediaController = newController.get();
-        if (mMediaController != null) {
-            mMediaController.registerCallback(mMediaControllerCallback);
-        }
-        updateUserActions();
-    }
-
-    /**
-     * Updates the actions for the PIP. If there are no custom actions, then the media session
-     * actions are shown.
-     */
-    private void updateUserActions() {
-        if (!mCustomActions.isEmpty()) {
-            // Ensure we have as many buttons as actions
-            while (mCustomButtonViews.size() < mCustomActions.size()) {
-                PipControlButtonView buttonView = (PipControlButtonView) mLayoutInflater.inflate(
-                        R.layout.tv_pip_custom_control, mView, false);
-                mView.addView(buttonView);
-                mCustomButtonViews.add(buttonView);
-            }
-
-            // Update the visibility of all views
-            for (int i = 0; i < mCustomButtonViews.size(); i++) {
-                mCustomButtonViews.get(i).setVisibility(
-                        i < mCustomActions.size() ? View.VISIBLE : View.GONE);
-            }
-
-            // Update the state and visibility of the action buttons, and hide the rest
-            for (int i = 0; i < mCustomActions.size(); i++) {
-                final RemoteAction action = mCustomActions.get(i);
-                PipControlButtonView actionView = mCustomButtonViews.get(i);
-
-                // TODO: Check if the action drawable has changed before we reload it
-                action.getIcon().loadDrawableAsync(mView.getContext(), d -> {
-                    d.setTint(Color.WHITE);
-                    actionView.setImageDrawable(d);
-                }, mHandler);
-                actionView.setText(action.getContentDescription());
-                if (action.isEnabled()) {
-                    actionView.setOnClickListener(v -> {
-                        try {
-                            action.getActionIntent().send();
-                        } catch (PendingIntent.CanceledException e) {
-                            Log.w(TAG, "Failed to send action", e);
-                        }
-                    });
-                }
-                actionView.setEnabled(action.isEnabled());
-                actionView.setAlpha(action.isEnabled() ? 1f : DISABLED_ACTION_ALPHA);
-            }
-
-            // Hide the media session buttons
-            mPlayPauseButtonView.setVisibility(View.GONE);
-        } else {
-            AtomicInteger state = new AtomicInteger(PipController.STATE_UNKNOWN);
-            state.set(mPipController.getPlaybackState());
-            if (state.get() == PipController.STATE_UNKNOWN
-                    || state.get() == PipController.PLAYBACK_STATE_UNAVAILABLE) {
-                mPlayPauseButtonView.setVisibility(View.GONE);
-            } else {
-                mPlayPauseButtonView.setVisibility(View.VISIBLE);
-                if (state.get() == PipController.PLAYBACK_STATE_PLAYING) {
-                    mPlayPauseButtonView.setImageResource(R.drawable.pip_ic_pause_white);
-                    mPlayPauseButtonView.setText(R.string.pip_pause);
-                } else {
-                    mPlayPauseButtonView.setImageResource(R.drawable.pip_ic_play_arrow_white);
-                    mPlayPauseButtonView.setText(R.string.pip_play);
-                }
-            }
-
-            // Hide all the custom action buttons
-            for (int i = 0; i < mCustomButtonViews.size(); i++) {
-                mCustomButtonViews.get(i).setVisibility(View.GONE);
-            }
-        }
-    }
-
-
-    /**
-     * Sets the {@link Listener} to listen user actions.
-     */
-    public void setListener(Listener listener) {
-        mListener = listener;
-    }
-
-
-    /**
      * Updates the set of activity-defined actions.
      */
-    public void setActions(List<? extends RemoteAction> actions) {
+    void setCustomActions(List<? extends RemoteAction> actions) {
+        if (mCustomActions.isEmpty() && actions.isEmpty()) {
+            // Nothing changed - return early.
+            return;
+        }
         mCustomActions.clear();
         mCustomActions.addAll(actions);
-        updateUserActions();
+        updateAdditionalActions();
+    }
+
+    private void onMediaActionsChanged(List<RemoteAction> actions) {
+        if (mMediaActions.isEmpty() && actions.isEmpty()) {
+            // Nothing changed - return early.
+            return;
+        }
+        mMediaActions.clear();
+        mMediaActions.addAll(actions);
+
+        // Update the view only if there are no custom actions (media actions are only shown when
+        // there no custom actions).
+        if (mCustomActions.isEmpty()) {
+            updateAdditionalActions();
+        }
+    }
+
+    private void updateAdditionalActions() {
+        final List<RemoteAction> actionsToDisplay;
+        if (!mCustomActions.isEmpty()) {
+            // If there are custom actions: show them.
+            actionsToDisplay = mCustomActions;
+        } else if (!mMediaActions.isEmpty()) {
+            // If there are no custom actions, but there media actions: show them.
+            actionsToDisplay = mMediaActions;
+        } else {
+            // If there no custom actions and no media actions: clean up all the additional buttons.
+            actionsToDisplay = Collections.emptyList();
+        }
+
+        // Make sure we exactly as many additional buttons as we have actions to display.
+        final int actionsNumber = actionsToDisplay.size();
+        int buttonsNumber = mAdditionalButtons.size();
+        if (actionsNumber > buttonsNumber) {
+            final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+            // Add buttons until we have enough to display all of the actions.
+            while (actionsNumber > buttonsNumber) {
+                final PipControlButtonView button = (PipControlButtonView) layoutInflater.inflate(
+                        R.layout.tv_pip_custom_control, mView, false);
+                mView.addView(button);
+                mAdditionalButtons.add(button);
+
+                buttonsNumber++;
+            }
+        } else if (actionsNumber < buttonsNumber) {
+            // Hide buttons until we as many as the actions.
+            while (actionsNumber < buttonsNumber) {
+                final View button = mAdditionalButtons.get(buttonsNumber - 1);
+                button.setVisibility(View.GONE);
+                button.setOnClickListener(null);
+
+                buttonsNumber--;
+            }
+        }
+
+        // "Assign" actions to the buttons.
+        for (int index = 0; index < actionsNumber; index++) {
+            final RemoteAction action = actionsToDisplay.get(index);
+            final PipControlButtonView button = mAdditionalButtons.get(index);
+            button.setVisibility(View.VISIBLE); // Ensure the button is visible.
+            button.setText(action.getContentDescription());
+            button.setEnabled(action.isEnabled());
+            button.setAlpha(action.isEnabled() ? 1f : DISABLED_ACTION_ALPHA);
+            button.setOnClickListener(v -> {
+                try {
+                    action.getActionIntent().send();
+                } catch (PendingIntent.CanceledException e) {
+                    Log.w(TAG, "Failed to send action", e);
+                }
+            });
+
+            action.getIcon().loadDrawableAsync(mContext, drawable -> {
+                drawable.setTint(Color.WHITE);
+                button.setImageDrawable(drawable);
+            }, mUiThreadHandler);
+        }
     }
 }

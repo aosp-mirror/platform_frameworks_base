@@ -35,6 +35,9 @@ import java.util.function.Consumer;
  * Responsible for creating {@link LogicalDisplay}s and associating them to the
  * {@link DisplayDevice} objects supplied through {@link DisplayAdapter.Listener}.
  *
+ * Additionally this class will keep track of which {@link DisplayGroup} each
+ * {@link LogicalDisplay} belongs to.
+ *
  * For devices with a single internal display, the mapping is done once and left
  * alone. For devices with multiple built-in displays, such as foldable devices,
  * {@link LogicalDisplay}s can be remapped to different {@link DisplayDevice}s.
@@ -90,6 +93,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final SparseArray<LogicalDisplay> mLogicalDisplays =
             new SparseArray<LogicalDisplay>();
     private int mNextNonDefaultDisplayId = Display.DEFAULT_DISPLAY + 1;
+
+    /** A mapping from logical display id to display group. */
+    private final SparseArray<DisplayGroup> mDisplayGroups = new SparseArray<>();
 
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final PersistentDataStore mPersistentDataStore;
@@ -296,6 +302,15 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
         mLogicalDisplays.put(displayId, display);
 
+        final DisplayGroup displayGroup;
+        if (isDefault || (deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
+            displayGroup = new DisplayGroup();
+        } else {
+            displayGroup = mDisplayGroups.get(Display.DEFAULT_DISPLAY);
+        }
+        displayGroup.addDisplay(display);
+        mDisplayGroups.append(displayId, displayGroup);
+
         mListener.onLogicalDisplayEventLocked(display,
                 LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED);
     }
@@ -314,10 +329,31 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             display.updateLocked(mDisplayDeviceRepo);
             if (!display.isValidLocked()) {
                 mLogicalDisplays.removeAt(i);
+                mDisplayGroups.removeReturnOld(displayId).removeDisplay(display);
 
                 mListener.onLogicalDisplayEventLocked(display,
                         LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED);
             } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
+                final int flags = display.getDisplayInfoLocked().flags;
+                final DisplayGroup defaultDisplayGroup = mDisplayGroups.get(
+                        Display.DEFAULT_DISPLAY);
+                if ((flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0) {
+                    // The display should have its own DisplayGroup.
+                    if (defaultDisplayGroup.removeDisplay(display)) {
+                        final DisplayGroup displayGroup = new DisplayGroup();
+                        displayGroup.addDisplay(display);
+                        mDisplayGroups.append(display.getDisplayIdLocked(), displayGroup);
+                    }
+                } else {
+                    // The display should be a part of the default DisplayGroup.
+                    final DisplayGroup displayGroup = mDisplayGroups.get(displayId);
+                    if (displayGroup != defaultDisplayGroup) {
+                        displayGroup.removeDisplay(display);
+                        defaultDisplayGroup.addDisplay(display);
+                        mDisplayGroups.put(displayId, defaultDisplayGroup);
+                    }
+                }
+
                 final String oldUniqueId = mTempDisplayInfo.uniqueId;
                 final String newUniqueId = display.getDisplayInfoLocked().uniqueId;
                 final int eventMsg = TextUtils.equals(oldUniqueId, newUniqueId)

@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -219,11 +220,11 @@ public final class NetworkStats implements Parcelable {
      * generated.
      */
     private long elapsedRealtime;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int size;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int capacity;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String[] iface;
     @UnsupportedAppUsage
     private int[] uid;
@@ -231,21 +232,21 @@ public final class NetworkStats implements Parcelable {
     private int[] set;
     @UnsupportedAppUsage
     private int[] tag;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int[] metered;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int[] roaming;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int[] defaultNetwork;
     @UnsupportedAppUsage
     private long[] rxBytes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long[] rxPackets;
     @UnsupportedAppUsage
     private long[] txBytes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long[] txPackets;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long[] operations;
 
     /**
@@ -258,7 +259,7 @@ public final class NetworkStats implements Parcelable {
     @SystemApi
     public static class Entry {
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String iface;
         /** @hide */
         @UnsupportedAppUsage
@@ -267,7 +268,7 @@ public final class NetworkStats implements Parcelable {
         @UnsupportedAppUsage
         public int set;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int tag;
         /**
          * Note that this is only populated w/ the default value when read from /proc or written
@@ -294,20 +295,20 @@ public final class NetworkStats implements Parcelable {
         @UnsupportedAppUsage
         public long rxBytes;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long rxPackets;
         /** @hide */
         @UnsupportedAppUsage
         public long txBytes;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long txPackets;
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long operations;
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Entry() {
             this(IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
         }
@@ -454,7 +455,7 @@ public final class NetworkStats implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public NetworkStats(Parcel parcel) {
         elapsedRealtime = parcel.readLong();
         size = parcel.readInt();

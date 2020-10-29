@@ -30,6 +30,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
@@ -351,6 +352,33 @@ public class NetworkCapabilitiesTest {
         // Now let's make request for OEM_PAID network.
         NetworkCapabilities nr = new NetworkCapabilities();
         nr.addCapability(NET_CAPABILITY_OEM_PAID);
+        nr.maybeMarkCapabilitiesRestricted();
+        assertTrue(nr.satisfiedByNetworkCapabilities(nc));
+
+        // Request fails for network with the default capabilities.
+        assertFalse(nr.satisfiedByNetworkCapabilities(new NetworkCapabilities()));
+    }
+
+    @Test
+    public void testOemPrivate() {
+        NetworkCapabilities nc = new NetworkCapabilities();
+        // By default OEM_PRIVATE is neither in the unwanted or required lists and the network is
+        // not restricted.
+        assertFalse(nc.hasUnwantedCapability(NET_CAPABILITY_OEM_PRIVATE));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_OEM_PRIVATE));
+        nc.maybeMarkCapabilitiesRestricted();
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Adding OEM_PRIVATE to capability list should make network restricted.
+        nc.addCapability(NET_CAPABILITY_OEM_PRIVATE);
+        nc.addCapability(NET_CAPABILITY_INTERNET);  // Combine with unrestricted capability.
+        nc.maybeMarkCapabilitiesRestricted();
+        assertTrue(nc.hasCapability(NET_CAPABILITY_OEM_PRIVATE));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Now let's make request for OEM_PRIVATE network.
+        NetworkCapabilities nr = new NetworkCapabilities();
+        nr.addCapability(NET_CAPABILITY_OEM_PRIVATE);
         nr.maybeMarkCapabilitiesRestricted();
         assertTrue(nr.satisfiedByNetworkCapabilities(nc));
 

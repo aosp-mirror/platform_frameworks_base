@@ -27,18 +27,19 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
-import com.android.wm.shell.pip.phone.PipMediaController;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -82,11 +83,12 @@ public class WMShellModule {
             PipAppOpsListener pipAppOpsListener, PipBoundsHandler pipBoundsHandler,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             PipMenuActivityController pipMenuActivityController, PipTaskOrganizer pipTaskOrganizer,
-            PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper) {
+            PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
+            ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsHandler, pipBoundsState, pipMediaController,
                 pipMenuActivityController, pipTaskOrganizer, pipTouchHandler,
-                windowManagerShellWrapper));
+                windowManagerShellWrapper, mainExecutor));
     }
 
     @WMSingleton

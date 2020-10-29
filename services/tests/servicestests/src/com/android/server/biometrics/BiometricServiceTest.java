@@ -262,7 +262,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(0),
+                AdditionalMatchers.aryEq(new int[0]) /* sensorIds */,
+                eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -345,7 +346,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(BiometricAuthenticator.TYPE_FACE),
+                AdditionalMatchers.aryEq(new int[] {SENSOR_ID_FACE}),
+                eq(false) /* credentialAllowed */,
                 eq(false) /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -477,7 +479,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
+                any(),
+                eq(false) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -530,7 +533,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(0 /* biometricModality */),
+                AdditionalMatchers.aryEq(new int[0]) /* sensorIds */,
+                eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -696,7 +700,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService, never()).showAuthenticationDialog(
                 any(PromptInfo.class),
                 any(IBiometricSysuiReceiver.class),
-                anyInt(),
+                any() /* sensorIds */,
+                anyBoolean() /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 anyString(),
@@ -796,7 +801,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(0 /* biometricModality */),
+                AdditionalMatchers.aryEq(new int[0]) /* sensorIds */,
+                eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -874,7 +880,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(0 /* biometricModality */),
+                AdditionalMatchers.aryEq(new int[0]) /* sensorIds */,
+                eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -1383,7 +1390,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
+                AdditionalMatchers.aryEq(new int[] {testId}),
+                eq(false) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -1403,7 +1411,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(BiometricAuthenticator.TYPE_NONE /* biometricModality */),
+                AdditionalMatchers.aryEq(new int[0]) /* sensorIds */,
+                eq(true) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
@@ -1426,7 +1435,8 @@ public class BiometricServiceTest {
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
                 eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
-                eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
+                AdditionalMatchers.aryEq(new int[] {testId}) /* sensorIds */,
+                eq(false) /* credentialAllowed */,
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),

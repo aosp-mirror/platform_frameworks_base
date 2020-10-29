@@ -262,6 +262,15 @@ public final class Display {
     public static final int FLAG_TRUSTED = 1 << 7;
 
     /**
+     * Flag: Indicates that the display should not be a part of the default DisplayGroup and
+     * instead be part of a new DisplayGroup.
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_OWN_DISPLAY_GROUP = 1 << 8;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.
@@ -289,7 +298,7 @@ public final class Display {
      * Display type: Physical display connected through an external port.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int TYPE_EXTERNAL = 2;
 
@@ -1400,7 +1409,7 @@ public final class Display {
         /**
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Mode(int modeId, int width, int height, float refreshRate) {
             mModeId = modeId;
             mWidth = width;
@@ -1583,7 +1592,7 @@ public final class Display {
         /**
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
                 float maxAverageLuminance, float minLuminance) {
             mSupportedHdrTypes = supportedHdrTypes;

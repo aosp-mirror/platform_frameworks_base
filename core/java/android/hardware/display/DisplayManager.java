@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -66,7 +67,7 @@ public final class DisplayManager {
      * </p>
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_WIFI_DISPLAY_STATUS_CHANGED =
             "android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED";
 
@@ -74,7 +75,7 @@ public final class DisplayManager {
      * Contains a {@link WifiDisplayStatus} object.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String EXTRA_WIFI_DISPLAY_STATUS =
             "android.hardware.display.extra.WIFI_DISPLAY_STATUS";
 
@@ -325,6 +326,15 @@ public final class DisplayManager {
      */
     @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
+
+    /**
+     * Virtual display flags: Indicates that the display should not be a part of the default
+     * DisplayGroup and instead be part of a new DisplayGroup.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
 
     /** @hide */
     public DisplayManager(Context context) {

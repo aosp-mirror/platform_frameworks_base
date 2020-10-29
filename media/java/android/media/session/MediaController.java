@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
@@ -462,21 +461,14 @@ public final class MediaController {
         return mTag;
     }
 
-    /*
-     * @hide
-     */
-    ISessionController getSessionBinder() {
-        return mSessionBinder;
-    }
-
     /**
-     * @hide
+     * Returns whether this and {@code other} media controller controls the same session.
+     * @deprecated Check equality of {@link #getSessionToken() tokens} instead.
      */
-    @UnsupportedAppUsage(publicAlternatives = "Check equality of {@link #getSessionToken() tokens}"
-            + "instead.")
-    public boolean controlsSameSession(MediaController other) {
+    @Deprecated
+    public boolean controlsSameSession(@Nullable MediaController other) {
         if (other == null) return false;
-        return mSessionBinder.asBinder() == other.getSessionBinder().asBinder();
+        return mToken.equals(other.mToken);
     }
 
     private void addCallbackLocked(Callback cb, Handler handler) {

@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
@@ -453,6 +452,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** System UI can create more window context... */
     private static final int SYSTEM_UI_MULTIPLIER = 2;
+
+    /**
+     * Override of task letterbox aspect ratio that is set via ADB with
+     * set-task-letterbox-aspect-ratio or via {@link
+     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio} will be ignored
+     * if it is <= this value.
+     */
+    static final float MIN_TASK_LETTERBOX_ASPECT_RATIO = 1.0f;
 
     final WindowManagerConstants mConstants;
 
@@ -962,6 +969,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
+    // Aspect ratio of task level letterboxing, values <= MIN_TASK_LETTERBOX_ASPECT_RATIO will be
+    // ignored.
+    private float mTaskLetterboxAspectRatio;
+
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
@@ -1190,6 +1201,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
+        mTaskLetterboxAspectRatio = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
@@ -3755,6 +3768,53 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Overrides the aspect ratio of task level letterboxing. If given value is <= {@link
+     * #MIN_TASK_LETTERBOX_ASPECT_RATIO}, both it and a value of {@link
+     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio} will be ignored and
+     * the framework implementation will be used to determine the aspect ratio.
+     */
+    void setTaskLetterboxAspectRatio(float aspectRatio) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTaskLetterboxAspectRatio = aspectRatio;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Resets the aspect ratio of task level letterboxing to {@link
+     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio}.
+     */
+    void resetTaskLetterboxAspectRatio() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
+                            com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Gets the aspect ratio of task level letterboxing.
+     */
+    float getTaskLetterboxAspectRatio() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mTaskLetterboxAspectRatio;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     @Override
     public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
         mAtmInternal.enforceCallerIsRecentsOrHasPermission(
@@ -3956,10 +4016,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setDisplayWindowRotationController(IDisplayWindowRotationController controller) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
-        }
+        mAtmService.enforceTaskPermission("setDisplayWindowRotationController");
         try {
             synchronized (mGlobalLock) {
                 if (mDisplayRotationController != null) {
@@ -4228,10 +4285,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Registers a hierarchy listener that gets callbacks when the hierarchy changes. */
     @Override
     public void registerDisplayWindowListener(IDisplayWindowListener listener) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
-        }
+        mAtmService.enforceTaskPermission("registerDisplayWindowListener");
         final long ident = Binder.clearCallingIdentity();
         try {
             mDisplayNotificationController.registerListener(listener);
@@ -4243,10 +4297,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Unregister a hierarchy listener so that it stops receiving callbacks. */
     @Override
     public void unregisterDisplayWindowListener(IDisplayWindowListener listener) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
-        }
+        mAtmService.enforceTaskPermission("unregisterDisplayWindowListener");
         mDisplayNotificationController.unregisterListener(listener);
     }
 
@@ -6927,9 +6978,6 @@ public class WindowManagerService extends IWindowManager.Stub
             IScrollCaptureCallbacks callbacks) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestScrollCapture()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
-        }
-        if (behindClient != null && !isWindowToken(behindClient)) {
-            throw new IllegalArgumentException("behindClient must be a window token");
         }
         final long token = Binder.clearCallingIdentity();
         try {

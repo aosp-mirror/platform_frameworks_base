@@ -47,6 +47,7 @@ import android.app.IAssistDataReceiver;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.AutofillOverlay;
 import android.app.assist.AssistStructure.ViewNode;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1493,11 +1494,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.d(TAG, "Auth result for augmented autofill: sessionId=" + id
                     + ", authId=" + authId + ", dataset=" + dataset);
         }
-        if (dataset == null
-                || dataset.getFieldIds().size() != 1
-                || dataset.getFieldIds().get(0) == null
-                || dataset.getFieldValues().size() != 1
-                || dataset.getFieldValues().get(0) == null) {
+        final AutofillId fieldId = (dataset != null && dataset.getFieldIds().size() == 1)
+                ? dataset.getFieldIds().get(0) : null;
+        final AutofillValue value = (dataset != null && dataset.getFieldValues().size() == 1)
+                ? dataset.getFieldValues().get(0) : null;
+        final ClipData content = (dataset != null) ? dataset.getFieldContent() : null;
+        if (fieldId == null || (value == null && content == null)) {
             if (sDebug) {
                 Slog.d(TAG, "Rejecting empty/invalid auth result");
             }
@@ -1505,10 +1507,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             removeSelfLocked();
             return;
         }
-        final List<AutofillId> fieldIds = dataset.getFieldIds();
-        final List<AutofillValue> autofillValues = dataset.getFieldValues();
-        final AutofillId fieldId = fieldIds.get(0);
-        final AutofillValue value = autofillValues.get(0);
 
         // Update state to ensure that after filling the field here we don't end up firing another
         // autofill request that will end up showing the same suggestions to the user again. When
@@ -1524,13 +1522,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Fill the value into the field.
         if (sDebug) {
-            Slog.d(TAG, "Filling after auth: fieldId=" + fieldId + ", value=" + value);
+            Slog.d(TAG, "Filling after auth: fieldId=" + fieldId + ", value=" + value
+                    + ", content=" + content);
         }
         try {
-            mClient.autofill(id, fieldIds, autofillValues, true);
+            if (content != null) {
+                mClient.autofillContent(id, fieldId, content);
+            } else {
+                mClient.autofill(id, dataset.getFieldIds(), dataset.getFieldValues(), true);
+            }
         } catch (RemoteException e) {
             Slog.w(TAG, "Error filling after auth: fieldId=" + fieldId + ", value=" + value
-                    + ", error=" + e);
+                    + ", content=" + content, e);
         }
 
         // Clear the suggestions since the user already accepted one of them.

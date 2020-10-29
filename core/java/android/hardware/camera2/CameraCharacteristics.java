@@ -26,6 +26,7 @@ import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
+import android.os.Build;
 import android.util.Rational;
 
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
          *
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Key(String name, Class<T> type, long vendorId) {
             mKey = new CameraMetadataNative.Key<T>(name,  type, vendorId);
         }
@@ -193,7 +194,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final CameraMetadataNative mProperties;
     private List<CameraCharacteristics.Key<?>> mKeys;
     private List<CameraCharacteristics.Key<?>> mKeysNeedingPermission;
@@ -1180,7 +1181,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The list of extended scene modes for {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode} that
      * are supported by this camera device, and each extended scene mode's capabilities such
      * as maximum streaming size, and supported zoom ratio ranges.</p>
-     * <p>For DISABLED mode, the camera behaves normally with no extended scene mdoe enabled.</p>
+     * <p>For DISABLED mode, the camera behaves normally with no extended scene mode enabled.</p>
      * <p>For BOKEH_STILL_CAPTURE mode, the maximum streaming dimension specifies the limit
      * under which bokeh is effective when capture intent is PREVIEW. Note that when capture
      * intent is PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE
@@ -3164,7 +3165,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * rectangle, and cropping to the rectangle given in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
      * <p>E.g. to calculate position of a pixel, (x,y), in a processed YUV output image with the
      * dimensions in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} given the position of a pixel,
-     * (x', y'), in the raw pixel array with dimensions give in
+     * (x', y'), in the raw pixel array with dimensions given in
      * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}:</p>
      * <ol>
      * <li>Choose a pixel (x', y') within the active array region of the raw buffer given in

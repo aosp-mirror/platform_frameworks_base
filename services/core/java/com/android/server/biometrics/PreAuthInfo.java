@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.util.Pair;
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.lang.annotation.Retention;
@@ -353,6 +352,13 @@ class PreAuthInfo {
         }
 
         return new Pair<>(modality, publicError);
+    }
+
+    /**
+     * @return true if SystemUI should show the credential UI.
+     */
+    boolean shouldShowCredential() {
+        return credentialRequested && credentialAvailable;
     }
 
     /**

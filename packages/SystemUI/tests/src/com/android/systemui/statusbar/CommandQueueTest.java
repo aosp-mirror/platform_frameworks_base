@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.view.WindowInsetsController.Appearance;
@@ -409,13 +410,20 @@ public class CommandQueueTest extends SysuiTestCase {
     @Test
     public void testShowAuthenticationDialog() {
         PromptInfo promptInfo = new PromptInfo();
-        String packageName = "test";
+        final IBiometricSysuiReceiver receiver = mock(IBiometricSysuiReceiver.class);
+        final int[] sensorIds = {1, 2};
+        final boolean credentialAllowed = true;
+        final boolean requireConfirmation = true;
+        final int userId = 10;
+        final String packageName = "test";
         final long operationId = 1;
-        mCommandQueue.showAuthenticationDialog(promptInfo, null /* receiver */, 1, true, 3,
-                packageName, operationId);
+
+        mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
+                credentialAllowed, requireConfirmation , userId, packageName, operationId);
         waitForIdleSync();
-        verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(null), eq(1), eq(true),
-                eq(3), eq(packageName), eq(operationId));
+        verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
+                eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(packageName),
+                eq(operationId));
     }
 
     @Test

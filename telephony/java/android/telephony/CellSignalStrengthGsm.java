@@ -53,7 +53,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     private int mLevel;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public CellSignalStrengthGsm() {
         setDefaultValues();
     }

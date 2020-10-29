@@ -173,7 +173,7 @@ public class ActivityTaskManager {
      * @param toTop If the task should be moved to the top once the windowing mode changes.
      * @return Whether the task was successfully put into the specified windowing mode.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop)
             throws SecurityException {
         try {
@@ -200,7 +200,7 @@ public class ActivityTaskManager {
      *                    going into split-screen mode.
      * @return Whether the task was successfully put into splitscreen.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
             boolean animate, Rect initialBounds, boolean showRecents) throws SecurityException {
         try {
@@ -214,7 +214,7 @@ public class ActivityTaskManager {
      * Removes root tasks in the windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void removeRootTasksInWindowingModes(@NonNull int[] windowingModes) {
         try {
             getService().removeRootTasksInWindowingModes(windowingModes);
@@ -224,7 +224,7 @@ public class ActivityTaskManager {
     }
 
     /** Removes root tasks of the activity types from the system. */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void removeRootTasksWithActivityTypes(@NonNull int[] activityTypes) {
         try {
             getService().removeRootTasksWithActivityTypes(activityTypes);
@@ -315,7 +315,7 @@ public class ActivityTaskManager {
      * @param bounds Bounds to use for pinned root task.
      * @return True if the top activity of root task was successfully moved to the pinned root task.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public boolean moveTopActivityToPinnedRootTask(int rootTaskId, @NonNull Rect bounds) {
         try {
             return getService().moveTopActivityToPinnedRootTask(rootTaskId, bounds);
@@ -328,7 +328,7 @@ public class ActivityTaskManager {
      * Start to enter lock task mode for given task by system(UI).
      * @param taskId Id of task to lock.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void startSystemLockTaskMode(int taskId) {
         try {
             getService().startSystemLockTaskMode(taskId);
@@ -340,7 +340,7 @@ public class ActivityTaskManager {
     /**
      * Stop lock task mode by system(UI).
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void stopSystemLockTaskMode() {
         try {
             getService().stopSystemLockTaskMode();
@@ -355,7 +355,7 @@ public class ActivityTaskManager {
      * @param rootTaskId Id of the rootTask for task moving.
      * @param toTop Whether the given task should shown to top of stack.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop) {
         try {
             getService().moveTaskToRootTask(taskId, rootTaskId, toTop);
@@ -369,7 +369,7 @@ public class ActivityTaskManager {
      * @param taskId Id of task to resize.
      * @param bounds Bounds to resize task.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void resizeTask(int taskId, Rect bounds) {
         try {
             getService().resizeTask(taskId, bounds, RESIZE_MODE_SYSTEM);
@@ -383,7 +383,7 @@ public class ActivityTaskManager {
      * @param rootTaskBounds Bounds to resize stack.
      * @param taskBounds Bounds to resize task.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void resizePrimarySplitScreen(@NonNull Rect rootTaskBounds, @NonNull Rect taskBounds) {
         try {
             getService().resizePrimarySplitScreen(rootTaskBounds, taskBounds, null, null, null);
@@ -396,7 +396,7 @@ public class ActivityTaskManager {
      * Clears launch params for the given package.
      * @param packageNames the names of the packages of which the launch params are to be cleared
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void clearLaunchParamsForPackages(List<String> packageNames) {
         try {
             getService().clearLaunchParamsForPackages(packageNames);
@@ -410,7 +410,7 @@ public class ActivityTaskManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void requestPictureInPictureMode(@NonNull IBinder token) {
         try {
             getService().requestPictureInPictureMode(token);

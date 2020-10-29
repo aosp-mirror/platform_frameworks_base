@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -356,10 +357,10 @@ public final class ImsCallProfile implements Parcelable {
     /** @hide */
     public int mServiceType;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int mCallType;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
 
     /**
@@ -467,10 +468,10 @@ public final class ImsCallProfile implements Parcelable {
      * a {@link android.os.Binder}.
      */
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Bundle mCallExtras;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsStreamMediaProfile mMediaProfile;
 
     /** @hide */
@@ -823,7 +824,7 @@ public final class ImsCallProfile implements Parcelable {
      * See {@link #presentationToOir(int)}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int presentationToOIR(int presentation) {
         switch (presentation) {
             case PhoneConstants.PRESENTATION_RESTRICTED:

@@ -1388,6 +1388,11 @@ public final class JobStatus {
         }
         if (isReady()) {
             sb.append(" READY");
+        } else {
+            sb.append(" satisfied:0x").append(Integer.toHexString(satisfiedConstraints));
+            sb.append(" unsatisfied:0x").append(Integer.toHexString(
+                    (satisfiedConstraints & mRequiredConstraintsOfInterest)
+                            ^ mRequiredConstraintsOfInterest));
         }
         sb.append("}");
         return sb.toString();

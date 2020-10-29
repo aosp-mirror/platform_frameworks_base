@@ -35,6 +35,7 @@ import android.content.pm.PackageManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerService;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,8 +64,6 @@ public class OomAdjusterTests {
         sPackageManagerInternal = mock(PackageManagerInternal.class);
         doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
                 .getSystemUiServiceComponent();
-        // Remove stale instance of PackageManagerInternal if there is any
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
 
         // We need to run with dexmaker share class loader to make use of
@@ -78,11 +77,16 @@ public class OomAdjusterTests {
             sService.mConstants = new ActivityManagerConstants(sContext, sService,
                     sContext.getMainThreadHandler());
             sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList, null);
-            LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
             LocalServices.addService(UsageStatsManagerInternal.class,
                     mock(UsageStatsManagerInternal.class));
             sService.mUsageStatsService = LocalServices.getService(UsageStatsManagerInternal.class);
         });
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
     }
 
     @Before

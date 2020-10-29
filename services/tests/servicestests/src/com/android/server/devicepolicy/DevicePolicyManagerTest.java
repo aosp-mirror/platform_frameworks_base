@@ -2814,7 +2814,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         exerciseUserProvisioningTransitions(CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_PROFILE_COMPLETE,
-                DevicePolicyManager.STATE_USER_UNMANAGED);
+                DevicePolicyManager.STATE_USER_PROFILE_FINALIZED);
     }
 
     public void testSetUserProvisioningState_managedProfileFromSetupWizard_managedProfile()
