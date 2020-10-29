@@ -37,6 +37,7 @@ import com.android.server.hdmi.cec.config.XmlParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -166,6 +167,29 @@ public class HdmiCecConfig {
             Slog.e(TAG, "Encountered an error while reading/parsing CEC config file: " + file, e);
         }
         return null;
+    }
+
+    @NonNull
+    @VisibleForTesting
+    static HdmiCecConfig createFromStrings(@NonNull Context context,
+                                           @NonNull StorageAdapter storageAdapter,
+                                           @Nullable String systemConfigXml,
+                                           @Nullable String vendorOverrideXml) {
+        CecSettings systemConfig = null;
+        CecSettings vendorOverride = null;
+        try {
+            if (systemConfigXml != null) {
+                systemConfig = XmlParser.read(
+                        new ByteArrayInputStream(systemConfigXml.getBytes()));
+            }
+            if (vendorOverrideXml != null) {
+                vendorOverride = XmlParser.read(
+                        new ByteArrayInputStream(vendorOverrideXml.getBytes()));
+            }
+        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
+            Slog.e(TAG, "Encountered an error while reading/parsing CEC config strings", e);
+        }
+        return new HdmiCecConfig(context, storageAdapter, systemConfig, vendorOverride);
     }
 
     @Nullable
