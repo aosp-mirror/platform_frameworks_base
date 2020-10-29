@@ -19,6 +19,7 @@ package com.android.server.net.ipmemorystore;
 import static org.junit.Assert.assertEquals;
 
 import android.net.ipmemorystore.NetworkAttributes;
+import android.net.quirks.IPv6ProvisioningLossQuirk;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -52,6 +53,8 @@ public class NetworkAttributesTest {
         }
         assertEquals(sum, NetworkAttributes.TOTAL_WEIGHT, EPSILON);
 
+        final IPv6ProvisioningLossQuirk ipv6ProvLossQuirk =
+                new IPv6ProvisioningLossQuirk(3, System.currentTimeMillis() + 7_200_000);
         // Use directly the constructor with all attributes, and make sure that when compared
         // to itself the score is a clean 1.0f.
         final NetworkAttributes na =
@@ -61,7 +64,7 @@ public class NetworkAttributesTest {
                         "some hint",
                         Arrays.asList(Inet4Address.getByAddress(new byte[] {5, 6, 7, 8}),
                                 Inet4Address.getByAddress(new byte[] {9, 0, 1, 2})),
-                        98);
+                        98, ipv6ProvLossQuirk);
         assertEquals(1.0f, na.getNetworkGroupSamenessConfidence(na), EPSILON);
     }
 }
