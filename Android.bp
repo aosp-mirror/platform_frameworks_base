@@ -581,6 +581,7 @@ java_library {
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/packages/Tethering/tests/unit",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
 }
 
