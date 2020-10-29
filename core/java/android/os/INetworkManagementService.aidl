@@ -348,13 +348,6 @@ interface INetworkManagementService
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
     /**
-     * Set permission for a network.
-     * @param permission PERMISSION_NONE to clear permissions.
-     *                   PERMISSION_NETWORK or PERMISSION_SYSTEM to set permission.
-     */
-    void setNetworkPermission(int netId, int permission);
-
-    /**
      * Allow UID to call protect().
      */
     void allowProtect(int uid);
