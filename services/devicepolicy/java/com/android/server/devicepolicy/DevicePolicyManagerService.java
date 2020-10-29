@@ -3240,7 +3240,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(adminReceiver, "ComponentName is null");
-        enforceShell("forceRemoveActiveAdmin");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
+                "Non-shell user attempted to call forceRemoveActiveAdmin");
         mInjector.binderWithCleanCallingIdentity(() -> {
             synchronized (getLockObject()) {
                 if (!isAdminTestOnlyLocked(adminReceiver, userHandle)) {
@@ -3317,13 +3318,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean isAdminTestOnlyLocked(ComponentName who, int userHandle) {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
         return (admin != null) && admin.testOnlyAdmin;
-    }
-
-    private void enforceShell(String method) {
-        final int callingUid = mInjector.binderGetCallingUid();
-        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
-            throw new SecurityException("Non-shell user attempted to call " + method);
-        }
     }
 
     @Override
@@ -7255,10 +7249,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalArgumentException("Invalid component " + admin
                     + " for device owner");
         }
-        final boolean hasIncompatibleAccountsOrNonAdb =
-                hasIncompatibleAccountsOrNonAdbNoLock(userId, admin);
+
+        final CallerIdentity caller = getCallerIdentity();
         synchronized (getLockObject()) {
-            enforceCanSetDeviceOwnerLocked(admin, userId, hasIncompatibleAccountsOrNonAdb);
+            enforceCanSetDeviceOwnerLocked(caller, admin, userId);
             final ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(admin, userId);
             if (activeAdmin == null
                     || getUserData(userId).mRemovingAdmins.contains(admin)) {
@@ -7267,7 +7261,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             // Shutting down backup manager service permanently.
             toggleBackupServiceActive(UserHandle.USER_SYSTEM, /* makeActive= */ false);
-            if (isAdb()) {
+            if (isAdb(caller)) {
                 // Log device owner provisioning was started using adb.
                 MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_DEVICE_OWNER);
                 DevicePolicyEventLogger
@@ -7623,10 +7617,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + " not installed for userId:" + userHandle);
         }
 
-        final boolean hasIncompatibleAccountsOrNonAdb =
-                hasIncompatibleAccountsOrNonAdbNoLock(userHandle, who);
+        final CallerIdentity caller = getCallerIdentity();
         synchronized (getLockObject()) {
-            enforceCanSetProfileOwnerLocked(who, userHandle, hasIncompatibleAccountsOrNonAdb);
+            enforceCanSetProfileOwnerLocked(caller, who, userHandle);
 
             final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
             if (admin == null || getUserData(userHandle).mRemovingAdmins.contains(who)) {
@@ -7644,7 +7637,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return false;
             }
 
-            if (isAdb()) {
+            if (isAdb(caller)) {
                 // Log profile owner provisioning was started using adb.
                 MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_PROFILE_OWNER);
                 DevicePolicyEventLogger
@@ -7837,6 +7830,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
 
+        final CallerIdentity caller = getCallerIdentity();
         if (userHandle != mOwners.getDeviceOwnerUserId() && !mOwners.hasProfileOwner(userHandle)
                 && getManagedUserId(userHandle) == -1) {
             // No managed device, user or profile, so setting provisioning state makes no sense.
@@ -7848,7 +7842,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             boolean transitionCheckNeeded = true;
 
             // Calling identity/permission checks.
-            if (isAdb()) {
+            if (isAdb(caller)) {
                 // ADB shell can only move directly from un-managed to finalized as part of directly
                 // setting profile-owner or device-owner.
                 if (getUserProvisioningState(userHandle) !=
@@ -8211,8 +8205,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * - SYSTEM_UID
      * - adb unless hasIncompatibleAccountsOrNonAdb is true.
      */
-    private void enforceCanSetProfileOwnerLocked(@Nullable ComponentName owner, int userHandle,
-            boolean hasIncompatibleAccountsOrNonAdb) {
+    private void enforceCanSetProfileOwnerLocked(CallerIdentity caller,
+            @Nullable ComponentName owner, int userHandle) {
         UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -8230,9 +8224,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalStateException("Trying to set the profile owner, but the user "
                     + "already has a device owner.");
         }
-        if (isAdb()) {
+        if (isAdb(caller)) {
             if ((mIsWatch || hasUserSetupCompleted(userHandle))
-                    && hasIncompatibleAccountsOrNonAdb) {
+                    && hasIncompatibleAccountsOrNonAdbNoLock(caller, userHandle, owner)) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -8271,16 +8265,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
-    private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner,
-            @UserIdInt int userId,
-            boolean hasIncompatibleAccountsOrNonAdb) {
-        if (!isAdb()) {
+    private void enforceCanSetDeviceOwnerLocked(CallerIdentity caller,
+            @Nullable ComponentName owner, @UserIdInt int userId) {
+        if (!isAdb(caller)) {
             Preconditions.checkCallAuthorization(
                     hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         }
 
-        final int code = checkDeviceOwnerProvisioningPreConditionLocked(
-                owner, userId, isAdb(), hasIncompatibleAccountsOrNonAdb);
+        final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner, userId,
+                isAdb(caller), hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, owner));
         if (code != CODE_OK) {
             throw new IllegalStateException(computeProvisioningErrorString(code, userId));
         }
@@ -11668,7 +11661,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
-        enforceShell("clearSystemUpdatePolicyFreezePeriodRecord");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
+                "Non-shell user attempted to call clearSystemUpdatePolicyFreezePeriodRecord");
         synchronized (getLockObject()) {
             // Print out current record to help diagnosed CTS failures
             Slog.i(LOG_TAG, "Clear freeze period record: "
@@ -12578,23 +12572,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void markProfileOwnerOnOrganizationOwnedDevice(ComponentName who, int userId) {
+        if (!mHasFeature) {
+            return;
+        }
         // As the caller is the system, it must specify the component name of the profile owner
         // as a safety check.
         Objects.requireNonNull(who);
 
-        if (!mHasFeature) {
-            return;
-        }
-
+        final CallerIdentity caller = getCallerIdentity();
         // Only adb or system apps with the right permission can mark a profile owner on
         // organization-owned device.
-        if (!(isAdb() || hasCallingPermission(permission.MARK_DEVICE_ORGANIZATION_OWNED))) {
+        if (!(isAdb(caller) || hasCallingPermission(permission.MARK_DEVICE_ORGANIZATION_OWNED))) {
             throw new SecurityException(
                     "Only the system can mark a profile owner of organization-owned device.");
         }
 
-        if (isAdb()) {
-            if (hasIncompatibleAccountsOrNonAdbNoLock(userId, who)) {
+        if (isAdb(caller)) {
+            if (hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, who)) {
                 throw new SecurityException(
                         "Can only be called from ADB if the device has no accounts.");
             }
@@ -12915,7 +12909,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public long forceSecurityLogs() {
-        enforceShell("forceSecurityLogs");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
+                "Non-shell user attempted to call forceSecurityLogs");
         if (!mInjector.securityLogGetLoggingEnabledProperty()) {
             throw new IllegalStateException("logging is not available");
         }
@@ -13283,9 +13278,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      *
      * DO NOT CALL IT WITH THE DPMS LOCK HELD.
      */
-    private boolean hasIncompatibleAccountsOrNonAdbNoLock(
+    private boolean hasIncompatibleAccountsOrNonAdbNoLock(CallerIdentity caller,
             int userId, @Nullable ComponentName owner) {
-        if (!isAdb()) {
+        if (!isAdb(caller)) {
             return true;
         }
         wtfIfInLock();
@@ -13340,9 +13335,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isAdb() {
-        final int callingUid = mInjector.binderGetCallingUid();
-        return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
+    private boolean isAdb(CallerIdentity caller) {
+        return isShellUid(caller) || isRootUid(caller);
     }
 
     @Override
@@ -13404,7 +13398,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public long forceNetworkLogs() {
-        enforceShell("forceNetworkLogs");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
+                "Non-shell user attempted to call forceNetworkLogs");
         synchronized (getLockObject()) {
             if (!isNetworkLoggingEnabledInternalLocked()) {
                 throw new IllegalStateException("logging is not available");
