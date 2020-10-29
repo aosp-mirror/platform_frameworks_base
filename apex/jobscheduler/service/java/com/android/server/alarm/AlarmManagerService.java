@@ -268,6 +268,7 @@ public class AlarmManagerService extends SystemService {
      */
     Bundle mIdleOptions;
 
+    // TODO(b/172085676): Move inside alarm store.
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
             new SparseArray<>();
     private final SparseArray<AlarmManager.AlarmClockInfo> mTmpSparseAlarmClockArray =
@@ -275,6 +276,9 @@ public class AlarmManagerService extends SystemService {
     private final SparseBooleanArray mPendingSendNextAlarmClockChangedForUser =
             new SparseBooleanArray();
     private boolean mNextAlarmClockMayChange;
+
+    @GuardedBy("mLock")
+    private final Runnable mAlarmClockUpdater = () -> mNextAlarmClockMayChange = true;
 
     // May only use on mHandler's thread, locking not required.
     private final SparseArray<AlarmManager.AlarmClockInfo> mHandlerSparseAlarmClockArray =
@@ -410,6 +414,9 @@ public class AlarmManagerService extends SystemService {
         private static final String KEY_APP_STANDBY_RESTRICTED_WINDOW =
                 "app_standby_restricted_window";
 
+        @VisibleForTesting
+        static final String KEY_LAZY_BATCHING = "lazy_batching";
+
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_MAX_INTERVAL = 365 * DateUtils.DAY_IN_MILLIS;
@@ -431,6 +438,8 @@ public class AlarmManagerService extends SystemService {
         };
         private static final int DEFAULT_APP_STANDBY_RESTRICTED_QUOTA = 1;
         private static final long DEFAULT_APP_STANDBY_RESTRICTED_WINDOW = MILLIS_IN_DAY;
+
+        private static final boolean DEFAULT_LAZY_BATCHING = false;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -459,6 +468,8 @@ public class AlarmManagerService extends SystemService {
         public int[] APP_STANDBY_QUOTAS = new int[DEFAULT_APP_STANDBY_QUOTAS.length];
         public int APP_STANDBY_RESTRICTED_QUOTA = DEFAULT_APP_STANDBY_RESTRICTED_QUOTA;
         public long APP_STANDBY_RESTRICTED_WINDOW = DEFAULT_APP_STANDBY_RESTRICTED_WINDOW;
+
+        public boolean LAZY_BATCHING = DEFAULT_LAZY_BATCHING;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
 
@@ -538,6 +549,14 @@ public class AlarmManagerService extends SystemService {
                         case KEY_APP_STANDBY_RESTRICTED_WINDOW:
                             updateStandbyWindowsLocked();
                             break;
+                        case KEY_LAZY_BATCHING:
+                            final boolean oldLazyBatching = LAZY_BATCHING;
+                            LAZY_BATCHING = properties.getBoolean(
+                                    KEY_LAZY_BATCHING, DEFAULT_LAZY_BATCHING);
+                            if (oldLazyBatching != LAZY_BATCHING) {
+                                migrateAlarmsToNewStoreLocked();
+                            }
+                            break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
                                 // The quotas need to be updated in order, so we can't just rely
@@ -549,6 +568,15 @@ public class AlarmManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        private void migrateAlarmsToNewStoreLocked() {
+            final AlarmStore newStore = LAZY_BATCHING ? new LazyAlarmStore()
+                    : new BatchingAlarmStore();
+            final ArrayList<Alarm> allAlarms = mAlarmStore.remove((unused) -> true);
+            newStore.addAll(allAlarms);
+            mAlarmStore = newStore;
+            mAlarmStore.setAlarmClockRemovalListener(mAlarmClockUpdater);
         }
 
         private void updateStandbyQuotasLocked() {
@@ -657,6 +685,9 @@ public class AlarmManagerService extends SystemService {
             pw.print(KEY_APP_STANDBY_RESTRICTED_WINDOW);
             pw.print("=");
             TimeUtils.formatDuration(APP_STANDBY_RESTRICTED_WINDOW, pw);
+            pw.println();
+
+            pw.print(KEY_LAZY_BATCHING, LAZY_BATCHING);
             pw.println();
 
             pw.decreaseIndent();
@@ -770,7 +801,7 @@ public class AlarmManagerService extends SystemService {
     // minimum recurrence period or alarm futurity for us to be able to fuzz it
     static final long MIN_FUZZABLE_INTERVAL = 10000;
     @GuardedBy("mLock")
-    final AlarmStore mAlarmStore;
+    AlarmStore mAlarmStore;
 
     // set to non-null if in idle mode; while in this mode, any alarms we don't want
     // to run during this time are rescehduled to go off after this alarm.
@@ -781,7 +812,6 @@ public class AlarmManagerService extends SystemService {
     AlarmManagerService(Context context, Injector injector) {
         super(context);
         mInjector = injector;
-        mAlarmStore = new BatchingAlarmStore(() -> mNextAlarmClockMayChange = true);
     }
 
     public AlarmManagerService(Context context) {
@@ -1219,6 +1249,11 @@ public class AlarmManagerService extends SystemService {
         synchronized (mLock) {
             mHandler = new AlarmHandler();
             mConstants = new Constants();
+
+            mAlarmStore = mConstants.LAZY_BATCHING ? new LazyAlarmStore()
+                    : new BatchingAlarmStore();
+            mAlarmStore.setAlarmClockRemovalListener(mAlarmClockUpdater);
+
             mAppWakeupHistory = new AppWakeupHistory(Constants.DEFAULT_APP_STANDBY_WINDOW);
 
             mNextWakeup = mNextNonWakeup = 0;
@@ -3055,12 +3090,13 @@ public class AlarmManagerService extends SystemService {
 
     static final void dumpAlarmList(IndentingPrintWriter ipw, ArrayList<Alarm> list,
             long nowELAPSED, SimpleDateFormat sdf) {
-        for (int i = list.size() - 1; i >= 0; i--) {
+        final int n = list.size();
+        for (int i = n - 1; i >= 0; i--) {
             final Alarm a = list.get(i);
             final String label = Alarm.typeToString(a.type);
             ipw.print(label);
             ipw.print(" #");
-            ipw.print(i);
+            ipw.print(n - i);
             ipw.print(": ");
             ipw.println(a);
             ipw.increaseIndent();
