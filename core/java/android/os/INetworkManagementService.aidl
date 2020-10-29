@@ -350,16 +350,6 @@ interface INetworkManagementService
      */
     boolean isNetworkActive();
 
-    /**
-     * Add an interface to a network.
-     */
-    void addInterfaceToNetwork(String iface, int netId);
-
-    /**
-     * Remove an Interface from a network.
-     */
-    void removeInterfaceFromNetwork(String iface, int netId);
-
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
     void setDefaultNetId(int netId);
