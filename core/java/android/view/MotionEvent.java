@@ -1484,7 +1484,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     // Private value for history pos that obtains the current sample.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int HISTORY_CURRENT = -0x80000000;
 
     // This is essentially the same as native AMOTION_EVENT_INVALID_CURSOR_POSITION as they're all

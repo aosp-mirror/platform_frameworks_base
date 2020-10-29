@@ -17,6 +17,7 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * An AudioDevicePortConfig describes a possible configuration of an output or input device
@@ -28,7 +29,7 @@ import android.compat.annotation.UnsupportedAppUsage;
  */
 
 public class AudioDevicePortConfig extends AudioPortConfig {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     AudioDevicePortConfig(AudioDevicePort devicePort, int samplingRate, int channelMask,
             int format, AudioGainConfig gain) {
         super((AudioPort)devicePort, samplingRate, channelMask, format, gain);

@@ -33,7 +33,7 @@ interface IPresenceService
      * @param presenceServiceHdl returned in createPresenceService().
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getVersion(int presenceServiceHdl);
 
     /**
@@ -46,7 +46,7 @@ interface IPresenceService
      *
      * @return StatusCode, status of the request placed
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode addListener(int presenceServiceHdl, IPresenceListener presenceServiceListener,
                            inout UceLong presenceServiceListenerHdl);
 
@@ -56,7 +56,7 @@ interface IPresenceService
      * @param presenceServiceListenerHdl provided in createPresenceService() or Addlistener().
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode removeListener(int presenceServiceHdl, in UceLong presenceServiceListenerHdl);
 
     /**
@@ -72,7 +72,7 @@ interface IPresenceService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode reenableService(int presenceServiceHdl, int userData);
 
     /**
@@ -85,7 +85,7 @@ interface IPresenceService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode publishMyCap(int presenceServiceHdl, in PresCapInfo myCapInfo , int userData);
 
     /**
@@ -99,7 +99,7 @@ interface IPresenceService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getContactCap(int presenceServiceHdl , String remoteUri, int userData);
 
     /**
@@ -113,7 +113,7 @@ interface IPresenceService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getContactListCap(int presenceServiceHdl, in String[] remoteUriList, int userData);
 
     /**
@@ -129,7 +129,7 @@ interface IPresenceService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode  setNewFeatureTag(int presenceServiceHdl, String featureTag,
                                  in PresServiceInfo serviceInfo, int userData);
 

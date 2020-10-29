@@ -80,7 +80,7 @@ public final class Bitmap implements Parcelable {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769491)
     private byte[] mNinePatchChunk; // may be null
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private NinePatch.InsetStruct mNinePatchInsets; // may be null
     @UnsupportedAppUsage
     private int mWidth;
@@ -176,7 +176,7 @@ public final class Bitmap implements Parcelable {
      * width/height values
      */
     @SuppressWarnings("unused") // called from JNI
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void reinit(int width, int height, boolean requestPremultiplied) {
         mWidth = width;
         mHeight = height;

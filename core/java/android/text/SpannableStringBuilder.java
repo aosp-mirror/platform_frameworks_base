@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.BaseCanvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -863,7 +864,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public <T> T[] getSpans(int queryStart, int queryEnd, @Nullable Class<T> kind,
             boolean sortByInsertionOrder) {
         if (kind == null) return (T[]) ArrayUtils.emptyArray(Object.class);

@@ -1139,7 +1139,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mService.getContentResolver().unregisterContentObserver(this);
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private boolean shouldShowImeWithHardKeyboard() {
             // Lazily initialize as needed.
             if (mShowImeWithHardKeyboard == ShowImeWithHardKeyboardType.UNKNOWN) {
@@ -1179,7 +1179,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return "SettingsObserver{mShowImeWithHardKeyboard=" + mShowImeWithHardKeyboard  + "}";
         }
     }
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private SettingsObserver mSettingsObserver;
 
     /**

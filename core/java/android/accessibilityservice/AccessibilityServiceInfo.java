@@ -888,7 +888,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCapabilities(int capabilities) {
         mCapabilities = capabilities;
     }
