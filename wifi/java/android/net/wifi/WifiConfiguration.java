@@ -1349,36 +1349,26 @@ public class WifiConfiguration implements Parcelable {
          * @hide
          */
         public static final int NETWORK_SELECTION_DISABLED_STARTING_INDEX = 1;
-        /**
-         * The starting index for network selection temporarily disabled reasons.
-         * @hide
-         */
-        public static final int TEMPORARILY_DISABLED_STARTING_INDEX = 1;
-        /** This network is disabled because of multiple association rejections. */
+        /** This network is temporarily disabled because of multiple association rejections. */
         public static final int DISABLED_ASSOCIATION_REJECTION = 1;
-        /** This network is disabled because of multiple authentication failure. */
+        /** This network is temporarily disabled because of multiple authentication failure. */
         public static final int DISABLED_AUTHENTICATION_FAILURE = 2;
-        /** This network is disabled because of multiple DHCP failure. */
+        /** This network is temporarily disabled because of multiple DHCP failure. */
         public static final int DISABLED_DHCP_FAILURE = 3;
         /** This network is temporarily disabled because it has no Internet access. */
         public static final int DISABLED_NO_INTERNET_TEMPORARY = 4;
-        /**
-         * The starting index for network selection permanently disabled reasons.
-         * @hide
-         */
-        public static final int PERMANENTLY_DISABLED_STARTING_INDEX = 5;
-        /** This network is disabled due to absence of user credentials */
+        /** This network is permanently disabled due to absence of user credentials */
         public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 5;
         /**
          * This network is permanently disabled because it has no Internet access and the user does
          * not want to stay connected.
          */
         public static final int DISABLED_NO_INTERNET_PERMANENT = 6;
-        /** This network is disabled due to WifiManager disabling it explicitly. */
+        /** This network is permanently disabled due to WifiManager disabling it explicitly. */
         public static final int DISABLED_BY_WIFI_MANAGER = 7;
-        /** This network is disabled due to wrong password. */
+        /** This network is permanently disabled due to wrong password. */
         public static final int DISABLED_BY_WRONG_PASSWORD = 8;
-        /** This network is disabled because service is not subscribed. */
+        /** This network is permanently disabled because service is not subscribed. */
         public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9;
         /**
          * All other disable reasons should be strictly less than this value.
@@ -1428,6 +1418,8 @@ public class WifiConfiguration implements Parcelable {
             /**
              * Network Selection disable timeout for the error. After the timeout milliseconds,
              * enable the network again.
+             * If this is set to Integer.MAX_VALUE, the network will be permanently disabled until
+             * the next time the user manually connects to it.
              */
             public final int mDisableTimeoutMillis;
 
