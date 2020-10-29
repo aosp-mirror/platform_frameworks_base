@@ -2334,7 +2334,7 @@ public final class InputMethodManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
@@ -2350,7 +2350,7 @@ public final class InputMethodManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setUpdateCursorAnchorInfoMode(int flags) {
         synchronized (mH) {
             mRequestUpdateCursorAnchorInfoMonitorMode = flags;

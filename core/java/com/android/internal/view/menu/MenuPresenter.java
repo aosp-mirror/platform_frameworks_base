@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Build;
 import android.os.Parcelable;
 import android.view.ViewGroup;
 
@@ -49,7 +48,7 @@ public interface MenuPresenter {
          * @return true if the Callback will handle presenting the submenu, false if
          *         the presenter should attempt to do so.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public boolean onOpenSubMenu(MenuBuilder subMenu);
     }
 

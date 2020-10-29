@@ -39,7 +39,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Paint;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -2816,7 +2815,7 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static final Alignment UNDEFINED_ALIGNMENT = new Alignment() {
         @Override
         int getGravityOffset(View view, int cellDelta) {

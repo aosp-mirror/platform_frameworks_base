@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.LongSparseArray;
@@ -102,7 +101,7 @@ public final class InputQueue {
         mActiveEventArray.put(id, event);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void finishInputEvent(long id, boolean handled) {
         int index = mActiveEventArray.indexOfKey(id);
         if (index >= 0) {

@@ -120,7 +120,7 @@ public class BatteryManager {
      * Int value set to the maximum charging current supported by the charger in micro amperes.
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String EXTRA_MAX_CHARGING_CURRENT = "max_charging_current";
 
     /**
@@ -128,7 +128,7 @@ public class BatteryManager {
      * Int value set to the maximum charging voltage supported by the charger in micro volts.
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String EXTRA_MAX_CHARGING_VOLTAGE = "max_charging_voltage";
 
     /**
@@ -136,7 +136,7 @@ public class BatteryManager {
      * integer containing the charge counter present in the battery.
      * {@hide}
      */
-     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+     @UnsupportedAppUsage
      public static final String EXTRA_CHARGE_COUNTER = "charge_counter";
 
     /**

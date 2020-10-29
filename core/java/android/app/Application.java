@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
@@ -353,7 +352,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPreCreated(@NonNull Activity activity,
             @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -377,7 +376,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostCreated(@NonNull Activity activity,
             @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -389,7 +388,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPreStarted(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -409,7 +408,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostStarted(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -419,7 +418,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPreResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -439,7 +438,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -449,7 +448,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPrePaused(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -469,7 +468,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostPaused(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -479,7 +478,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPreStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -499,7 +498,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -509,7 +508,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPreSaveInstanceState(@NonNull Activity activity,
             @NonNull Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -533,7 +532,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostSaveInstanceState(@NonNull Activity activity,
             @NonNull Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -545,7 +544,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPreDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -565,7 +564,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
         /* package */ void dispatchActivityPostDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {

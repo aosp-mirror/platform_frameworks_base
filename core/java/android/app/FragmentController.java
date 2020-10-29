@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -45,7 +44,7 @@ import java.util.List;
  */
 @Deprecated
 public class FragmentController {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final FragmentHostCallback<?> mHost;
 
     /**

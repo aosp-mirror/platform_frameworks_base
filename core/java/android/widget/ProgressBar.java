@@ -240,7 +240,7 @@ public class ProgressBar extends View {
     /** Value used to track progress animation, in the range [0...1]. */
     private float mVisualProgress;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean mMirrorForRtl = false;
 
     private boolean mAggregatedIsVisible;
@@ -1673,7 +1673,7 @@ public class ProgressBar extends View {
         // Stub method.
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private synchronized void refreshProgress(int id, int progress, boolean fromUser,
             boolean animate) {
         if (mUiThreadId == Thread.currentThread().getId()) {

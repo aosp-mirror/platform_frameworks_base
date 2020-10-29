@@ -26,7 +26,6 @@ import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
-import android.os.Build;
 import android.util.Rational;
 
 import java.util.ArrayList;
@@ -80,7 +79,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
          *
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public Key(String name, Class<T> type, long vendorId) {
             mKey = new CameraMetadataNative.Key<T>(name,  type, vendorId);
         }
@@ -194,7 +193,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final CameraMetadataNative mProperties;
     private List<CameraCharacteristics.Key<?>> mKeys;
     private List<CameraCharacteristics.Key<?>> mKeysNeedingPermission;

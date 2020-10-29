@@ -82,7 +82,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     private Looper mMainLooper;
     private Handler mH;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private Object mLock = new Object();
     @GuardedBy("mLock")
     private boolean mFinished = false;

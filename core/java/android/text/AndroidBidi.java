@@ -18,7 +18,6 @@ package android.text;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.text.Bidi;
-import android.os.Build;
 import android.text.Layout.Directions;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -33,7 +32,7 @@ public class AndroidBidi {
     /**
      * Runs the bidi algorithm on input text.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int bidi(int dir, char[] chs, byte[] chInfo) {
         if (chs == null || chInfo == null) {
             throw new NullPointerException();

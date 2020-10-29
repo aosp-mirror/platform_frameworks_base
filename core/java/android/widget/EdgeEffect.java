@@ -87,7 +87,7 @@ public class EdgeEffect {
     private static final float RADIUS_FACTOR = 0.6f;
 
     private float mGlowAlpha;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private float mGlowScaleY;
 
     private float mGlowAlphaStart;

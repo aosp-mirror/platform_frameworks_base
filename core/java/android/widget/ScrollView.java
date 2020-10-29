@@ -188,7 +188,7 @@ public class ScrollView extends FrameLayout {
      * These are no-ops on user builds.
      */
     private StrictMode.Span mScrollStrictSpan = null;  // aka "drag"
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private StrictMode.Span mFlingStrictSpan = null;
 
     /**

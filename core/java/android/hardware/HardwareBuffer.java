@@ -97,7 +97,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final int S_UI8        = 0x35;
 
     // Note: do not rename, this field is used by native code
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeObject;
 
     // Invoked on destruction

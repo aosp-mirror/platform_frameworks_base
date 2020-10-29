@@ -17,7 +17,6 @@
 package com.android.internal.telephony.gsm;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.SmsCbEtwsInfo;
 
@@ -112,7 +111,7 @@ public class SmsCbHeader {
     private final int mSerialNumber;
 
     /** The Message Identifier in 3GPP is the same as the Service Category in CDMA. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final int mMessageIdentifier;
 
     private final int mDataCodingScheme;
@@ -131,7 +130,7 @@ public class SmsCbHeader {
     /** CMAS warning notification info. */
     private final SmsCbCmasInfo mCmasInfo;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public SmsCbHeader(byte[] pdu) throws IllegalArgumentException {
         if (pdu == null || pdu.length < PDU_HEADER_LENGTH) {
             throw new IllegalArgumentException("Illegal PDU");
@@ -229,17 +228,17 @@ public class SmsCbHeader {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getGeographicalScope() {
         return mGeographicalScope;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getSerialNumber() {
         return mSerialNumber;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getServiceCategory() {
         return mMessageIdentifier;
     }
@@ -252,12 +251,12 @@ public class SmsCbHeader {
         return mDataCodingSchemeStructedData;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getPageIndex() {
         return mPageIndex;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getNumberOfPages() {
         return mNrOfPages;
     }

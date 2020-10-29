@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,7 +54,7 @@ public class AppWidgetHost {
     static final int HANDLE_UPDATE = 1;
     static final int HANDLE_PROVIDER_CHANGED = 2;
     static final int HANDLE_PROVIDERS_CHANGED = 3;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static final int HANDLE_VIEW_DATA_CHANGED = 4;
     static final int HANDLE_APP_WIDGET_REMOVED = 5;
 
@@ -174,7 +173,7 @@ public class AppWidgetHost {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public AppWidgetHost(Context context, int hostId, OnClickHandler handler, Looper looper) {
         mContextOpPackageName = context.getOpPackageName();
         mHostId = hostId;

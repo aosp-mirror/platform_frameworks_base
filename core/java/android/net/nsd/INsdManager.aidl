@@ -25,7 +25,7 @@ import android.os.Messenger;
  */
 interface INsdManager
 {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     Messenger getMessenger();
     void setEnabled(boolean enable);
 }

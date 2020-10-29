@@ -33,7 +33,7 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param infos The result {@link AccessibilityNodeInfo}.
      * @param interactionId The interaction id to match the result with the request.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setFindAccessibilityNodeInfoResult(in AccessibilityNodeInfo info, int interactionId);
 
     /**
@@ -42,7 +42,7 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param infos The result {@link AccessibilityNodeInfo}s.
      * @param interactionId The interaction id to match the result with the request.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setFindAccessibilityNodeInfosResult(in List<AccessibilityNodeInfo> infos,
         int interactionId);
 
@@ -52,6 +52,6 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      * @param Whether the action was performed.
      * @param interactionId The interaction id to match the result with the request.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setPerformAccessibilityActionResult(boolean succeeded, int interactionId);
 }

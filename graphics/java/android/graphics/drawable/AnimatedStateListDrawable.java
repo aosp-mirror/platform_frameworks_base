@@ -561,9 +561,9 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         int[] mAnimThemeAttrs;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         LongSparseLongArray mTransitions;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         SparseIntArray mStateIds;
 
         AnimatedStateListState(@Nullable AnimatedStateListState orig,

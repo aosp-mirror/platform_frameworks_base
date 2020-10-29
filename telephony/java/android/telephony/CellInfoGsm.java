@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,7 +35,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     private CellSignalStrengthGsm mCellSignalStrengthGsm;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public CellInfoGsm() {
         super();
         mCellIdentityGsm = new CellIdentityGsm();

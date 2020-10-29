@@ -726,7 +726,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int getAccessibilityViewId(long accessibilityNodeId) {
         return (int) accessibilityNodeId;
     }
@@ -740,7 +740,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int getVirtualDescendantId(long accessibilityNodeId) {
         return (int) ((accessibilityNodeId & VIRTUAL_DESCENDANT_ID_MASK)
                 >> VIRTUAL_DESCENDANT_ID_SHIFT);
@@ -768,7 +768,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final AccessibilityNodeInfo DEFAULT = new AccessibilityNodeInfo();
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private boolean mSealed;
 
     // Data.
@@ -988,7 +988,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean refresh(Bundle arguments, boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {

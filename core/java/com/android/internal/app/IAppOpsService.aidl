@@ -89,7 +89,7 @@ interface IAppOpsService {
     void setUidMode(int code, int uid, int mode);
     @UnsupportedAppUsage
     void setMode(int code, int uid, String packageName, int mode);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void resetAllModes(int reqUserId, String reqPackageName);
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
 

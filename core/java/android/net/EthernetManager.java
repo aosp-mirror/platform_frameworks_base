@@ -23,7 +23,6 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -77,7 +76,7 @@ public class EthernetManager {
          * @param isAvailable {@code true} if Ethernet port exists.
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         void onAvailabilityChanged(String iface, boolean isAvailable);
     }
 
@@ -98,7 +97,7 @@ public class EthernetManager {
      * @return the Ethernet Configuration, contained in {@link IpConfiguration}.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public IpConfiguration getConfiguration(String iface) {
         try {
             return mService.getConfiguration(iface);
@@ -111,7 +110,7 @@ public class EthernetManager {
      * Set Ethernet configuration.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setConfiguration(String iface, IpConfiguration config) {
         try {
             mService.setConfiguration(iface, config);
@@ -124,7 +123,7 @@ public class EthernetManager {
      * Indicates whether the system currently has one or more Ethernet interfaces.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isAvailable() {
         return getAvailableInterfaces().length > 0;
     }
@@ -135,7 +134,7 @@ public class EthernetManager {
      * @param iface Ethernet interface name
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isAvailable(String iface) {
         try {
             return mService.isAvailable(iface);
@@ -150,7 +149,7 @@ public class EthernetManager {
      * @throws IllegalArgumentException If the listener is null.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void addListener(Listener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
@@ -169,7 +168,7 @@ public class EthernetManager {
      * Returns an array of available Ethernet interface names.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String[] getAvailableInterfaces() {
         try {
             return mService.getAvailableInterfaces();
@@ -184,7 +183,7 @@ public class EthernetManager {
      * @throws IllegalArgumentException If the listener is null.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void removeListener(Listener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");

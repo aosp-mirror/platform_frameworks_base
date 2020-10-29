@@ -53,7 +53,7 @@ import java.util.Locale;
  */
 public class Paint {
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativePaint;
     private long mNativeShader;
     private long mNativeColorFilter;

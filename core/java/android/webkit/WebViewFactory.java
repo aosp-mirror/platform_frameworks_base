@@ -26,7 +26,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
@@ -391,7 +390,7 @@ public final class WebViewFactory {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static Class<WebViewFactoryProvider> getProviderClass() {
         Context webViewContext = null;
         Application initialApplication = AppGlobals.getInitialApplication();

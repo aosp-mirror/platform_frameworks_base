@@ -17,7 +17,6 @@
 package android.database.sqlite;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -29,7 +28,7 @@ import android.os.ParcelFileDescriptor;
  * </p>
  */
 public final class SQLiteStatement extends SQLiteProgram {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     SQLiteStatement(SQLiteDatabase db, String sql, Object[] bindArgs) {
         super(db, sql, bindArgs, null);
     }

@@ -68,7 +68,7 @@ interface INetworkManagementService
     /**
      * Clear all IP addresses on the specified interface
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void clearInterfaceAddresses(String iface);
 
     /**
@@ -84,26 +84,26 @@ interface INetworkManagementService
     /**
      * Set interface IPv6 privacy extensions
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable);
 
     /**
      * Disable IPv6 on an interface
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void disableIpv6(String iface);
 
     /**
      * Enable IPv6 on an interface
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void enableIpv6(String iface);
 
     /**
      * Set IPv6 autoconf address generation mode.
      * This is a no-op if an unsupported mode is requested.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setIPv6AddrGenMode(String iface, int mode);
 
     /**
@@ -296,7 +296,7 @@ interface INetworkManagementService
     /**
      * Return status of bandwidth control module.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean isBandwidthControlEnabled();
 
     /**

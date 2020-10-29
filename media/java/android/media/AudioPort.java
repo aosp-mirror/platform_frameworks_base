@@ -17,7 +17,6 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * An audio port is a node of the audio framework or hardware that can be connected to or
@@ -83,7 +82,7 @@ public class AudioPort {
     @UnsupportedAppUsage
     private AudioPortConfig mActiveConfig;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     AudioPort(AudioHandle handle, int role, String name,
             int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains) {
@@ -114,7 +113,7 @@ public class AudioPort {
     /**
      * Get the audio port role
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int role() {
         return mRole;
     }

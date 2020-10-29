@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -876,7 +875,7 @@ public class BitmapFactory {
     @UnsupportedAppUsage
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts, long inBitmapHandle, long colorSpaceHandle);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static native Bitmap nativeDecodeAsset(long nativeAsset, Rect padding, Options opts,
             long inBitmapHandle, long colorSpaceHandle);
     @UnsupportedAppUsage

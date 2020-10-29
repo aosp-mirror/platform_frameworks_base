@@ -531,7 +531,7 @@ public class KeyguardManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isDeviceSecure(int userId) {
         try {
             return mTrustManager.isDeviceSecure(userId);

@@ -17,7 +17,6 @@
 package android.os.storage;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * Used for receiving notifications from the StorageManager
@@ -48,23 +47,23 @@ public class StorageEventListener {
     public void onStorageStateChanged(String path, String oldState, String newState) {
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onVolumeRecordChanged(VolumeRecord rec) {
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onVolumeForgotten(String fsUuid) {
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onDiskScanned(DiskInfo disk, int volumeCount) {
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void onDiskDestroyed(DiskInfo disk) {
     }
 }

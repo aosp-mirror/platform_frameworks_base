@@ -25,7 +25,6 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.RemoteViews;
 
@@ -69,7 +68,7 @@ public class NotificationHeaderView extends ViewGroup {
         this(context, null);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NotificationHeaderView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }

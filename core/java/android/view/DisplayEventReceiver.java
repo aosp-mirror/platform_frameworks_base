@@ -18,7 +18,6 @@ package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.FrameInfo;
-import android.os.Build;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -229,7 +228,7 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void dispatchHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
         onHotplug(timestampNanos, physicalDisplayId, connected);
     }

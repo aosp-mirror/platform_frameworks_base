@@ -13558,7 +13558,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getDischargeStartLevel() {
         synchronized(this) {
             return getDischargeStartLevelLocked();
@@ -13570,7 +13570,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getDischargeCurrentLevel() {
         synchronized(this) {
             return getDischargeCurrentLevelLocked();

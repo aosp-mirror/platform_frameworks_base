@@ -1355,7 +1355,7 @@ public class Canvas extends BaseCanvas {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void release() {
         mNativeCanvasWrapper = 0;
         if (mFinalizer != null) {
@@ -1379,7 +1379,7 @@ public class Canvas extends BaseCanvas {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void freeTextLayoutCaches() {
         nFreeTextLayoutCaches();
     }

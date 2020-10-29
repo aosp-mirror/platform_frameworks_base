@@ -38,7 +38,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
-import android.os.Build;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 import android.text.format.TimeMigrationUtils;
@@ -1826,7 +1825,7 @@ public final class CalendarContract {
          *
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static String[] PROVIDER_WRITABLE_COLUMNS = new String[] {
                 ACCOUNT_NAME,
                 ACCOUNT_TYPE,
@@ -1861,7 +1860,7 @@ public final class CalendarContract {
          *
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         @TestApi
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             _SYNC_ID,
@@ -2513,7 +2512,7 @@ public final class CalendarContract {
          *         if no such alarm exists.
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final long findNextAlarmTime(ContentResolver cr, long millis) {
             String selection = ALARM_TIME + ">=" + millis;
             // TODO: construct an explicit SQL query so that we can add
@@ -2547,7 +2546,7 @@ public final class CalendarContract {
          * @param manager the AlarmManager
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static final void rescheduleMissedAlarms(ContentResolver cr,
                 Context context, AlarmManager manager) {
             // Get all the alerts that have been scheduled but have not fired
@@ -2604,7 +2603,7 @@ public final class CalendarContract {
          *            epoch
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public static void scheduleAlarm(Context context, AlarmManager manager, long alarmTime) {
             if (DEBUG) {
                 String schedTime = TimeMigrationUtils.formatMillisWithFixedFormat(alarmTime);

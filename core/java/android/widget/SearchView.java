@@ -1938,7 +1938,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             mThreshold = getThreshold();
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public SearchAutoComplete(Context context, AttributeSet attrs) {
             super(context, attrs);
             mThreshold = getThreshold();

@@ -1979,7 +1979,7 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean trackMotionScroll(int deltaY, int incrementalDeltaY) {
         final boolean result = super.trackMotionScroll(deltaY, incrementalDeltaY);
         removeUnusedFixedViews(mHeaderViewInfos);
@@ -4028,7 +4028,7 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int getHeightForPosition(int position) {
         final int height = super.getHeightForPosition(position);
         if (shouldAdjustHeightForDivider(position)) {

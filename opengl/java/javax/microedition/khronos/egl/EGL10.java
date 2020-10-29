@@ -17,7 +17,6 @@
 package javax.microedition.khronos.egl;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 public interface EGL10 extends EGL {
     int EGL_SUCCESS                     = 0x3000;
@@ -117,7 +116,7 @@ public interface EGL10 extends EGL {
     String      eglQueryString(EGLDisplay display, int name);
     boolean     eglQuerySurface(EGLDisplay display, EGLSurface surface, int attribute, int[] value);
     /** @hide **/
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean     eglReleaseThread();
     boolean     eglSwapBuffers(EGLDisplay display, EGLSurface surface);
     boolean     eglTerminate(EGLDisplay display);

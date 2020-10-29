@@ -17,7 +17,6 @@
 package com.android.internal.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.io.Writer;
 
@@ -27,7 +26,7 @@ import java.io.Writer;
 @Deprecated
 public class IndentingPrintWriter extends android.util.IndentingPrintWriter {
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public IndentingPrintWriter(Writer writer, String singleIndent) {
         super(writer, singleIndent, -1);
     }
@@ -50,13 +49,13 @@ public class IndentingPrintWriter extends android.util.IndentingPrintWriter {
         return this;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public IndentingPrintWriter increaseIndent() {
         super.increaseIndent();
         return this;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public IndentingPrintWriter decreaseIndent() {
         super.decreaseIndent();
         return this;

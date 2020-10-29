@@ -17,7 +17,6 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -42,10 +41,10 @@ public final class RemoteDisplayState implements Parcelable {
     /**
      * A list of all remote displays.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final ArrayList<RemoteDisplayInfo> displays;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public RemoteDisplayState() {
         displays = new ArrayList<RemoteDisplayInfo>();
     }

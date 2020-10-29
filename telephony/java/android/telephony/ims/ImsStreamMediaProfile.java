@@ -19,7 +19,6 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -85,16 +84,16 @@ public final class ImsStreamMediaProfile implements Parcelable {
 
     // Audio related information
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int mAudioQuality;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int mAudioDirection;
     // Video related information
     /** @hide */
     public int mVideoQuality;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int mVideoDirection;
     // Rtt related information
     /** @hide */
@@ -165,7 +164,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ImsStreamMediaProfile() {
         mAudioQuality = AUDIO_QUALITY_NONE;
         mAudioDirection = DIRECTION_SEND_RECEIVE;

@@ -346,7 +346,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     AppBindData mBoundApplication;
     Profiler mProfiler;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int mCurDefaultDisplayDpi;
     @UnsupportedAppUsage
     boolean mDensityCompatMode;
@@ -821,7 +821,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         boolean trackAllocation;
         @UnsupportedAppUsage
         boolean restrictedBackupMode;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         boolean persistent;
         Configuration config;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -2288,7 +2288,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return null;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
             int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
@@ -3036,7 +3036,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         proto.end(asToken);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void registerOnActivityPausedListener(Activity activity,
             OnActivityPausedListener listener) {
         synchronized (mOnPauseListeners) {
@@ -3049,7 +3049,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void unregisterOnActivityPausedListener(Activity activity,
             OnActivityPausedListener listener) {
         synchronized (mOnPauseListeners) {

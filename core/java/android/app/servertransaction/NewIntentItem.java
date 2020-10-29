@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
@@ -40,7 +39,7 @@ import java.util.Objects;
  */
 public class NewIntentItem extends ActivityTransactionItem {
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private List<ReferrerIntent> mIntents;
     private boolean mResume;
 

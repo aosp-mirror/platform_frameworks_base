@@ -55,7 +55,7 @@ interface IBatteryStats {
     ParcelFileDescriptor getStatisticsStream();
 
     // Return true if we see the battery as currently charging.
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean isCharging();
 
     // Return the computed amount of time remaining on battery, in milliseconds.
@@ -64,7 +64,7 @@ interface IBatteryStats {
 
     // Return the computed amount of time remaining to fully charge, in milliseconds.
     // Returns -1 if nothing could be computed.
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     long computeChargeTimeRemaining();
 
     void noteEvent(int code, String name, int uid);
@@ -134,7 +134,7 @@ interface IBatteryStats {
     void noteDeviceIdleMode(int mode, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt,
             int chargeUAh, int chargeFullUAh, long chargeTimeToFullSeconds);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 

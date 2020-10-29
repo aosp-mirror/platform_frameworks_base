@@ -32,7 +32,6 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.android.internal.util.ArrayUtils.total;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.NetworkStatsHistoryBucketProto;
@@ -92,18 +91,18 @@ public class NetworkStatsHistory implements Parcelable {
     public static class Entry {
         public static final long UNKNOWN = -1;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public long bucketDuration;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public long bucketStart;
         public long activeTime;
         @UnsupportedAppUsage
         public long rxBytes;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public long rxPackets;
         @UnsupportedAppUsage
         public long txBytes;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public long txPackets;
         public long operations;
     }
@@ -135,7 +134,7 @@ public class NetworkStatsHistory implements Parcelable {
         recordEntireHistory(existing);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NetworkStatsHistory(Parcel in) {
         bucketDuration = in.readLong();
         bucketStart = readLongArray(in);
@@ -221,7 +220,7 @@ public class NetworkStatsHistory implements Parcelable {
         return 0;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int size() {
         return bucketCount;
     }
@@ -259,7 +258,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Return index of bucket that contains or is immediately before the
      * requested time.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getIndexBefore(long time) {
         int index = Arrays.binarySearch(bucketStart, 0, bucketCount, time);
         if (index < 0) {
@@ -287,7 +286,7 @@ public class NetworkStatsHistory implements Parcelable {
     /**
      * Return specific stats entry.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Entry getValues(int i, Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.bucketStart = bucketStart[i];

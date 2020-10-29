@@ -19,7 +19,6 @@ package android.telephony.ims.compat.stub;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -60,7 +59,7 @@ public class ImsConfigImplBase {
 
     ImsConfigStub mImsConfigStub;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ImsConfigImplBase(Context context) {
         mImsConfigStub = new ImsConfigStub(this, context);
     }
@@ -165,7 +164,7 @@ public class ImsConfigImplBase {
     public void setVideoQuality(int quality, ImsConfigListener listener) throws RemoteException {
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public IImsConfig getIImsConfig() { return mImsConfigStub; }
 
     /**

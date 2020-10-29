@@ -1055,7 +1055,7 @@ public class WifiManager {
      * @see #ACTION_LINK_CONFIGURATION_CHANGED
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String LINK_CONFIGURATION_CHANGED_ACTION =
             "android.net.wifi.LINK_CONFIGURATION_CHANGED";
 
@@ -1265,7 +1265,7 @@ public class WifiManager {
      * change is significant enough to change the RSSI signal level.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int RSSI_LEVELS = 5;
 
     //TODO (b/146346676): This needs to be removed, not used in the code.

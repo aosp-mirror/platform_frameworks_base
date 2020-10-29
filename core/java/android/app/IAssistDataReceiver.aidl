@@ -21,8 +21,8 @@ import android.os.Bundle;
 
 /** @hide */
 oneway interface IAssistDataReceiver {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void onHandleAssistData(in Bundle resultData);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void onHandleAssistScreenshot(in Bitmap screenshot);
 }

@@ -509,7 +509,7 @@ public final class Sensor {
      *
      * @hide Expected to be used internally for always on display.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int TYPE_PICK_UP_GESTURE = 25;
 
     /**
@@ -549,7 +549,7 @@ public final class Sensor {
      * @hide Expected to be used internally for auto-rotate and speaker rotation.
      *
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int TYPE_DEVICE_ORIENTATION = 27;
 
     /**

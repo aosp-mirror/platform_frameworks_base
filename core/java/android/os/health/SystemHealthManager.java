@@ -52,7 +52,7 @@ public class SystemHealthManager {
      * Construct a new SystemHealthManager object.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public SystemHealthManager() {
         this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)));
     }

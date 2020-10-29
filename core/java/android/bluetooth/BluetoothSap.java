@@ -21,7 +21,6 @@ import android.annotation.RequiresPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -220,7 +219,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return false on error, true otherwise
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothSap service = getService();

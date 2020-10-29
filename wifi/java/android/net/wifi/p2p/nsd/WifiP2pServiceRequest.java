@@ -265,7 +265,7 @@ public class WifiP2pServiceRequest implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final @android.annotation.NonNull Creator<WifiP2pServiceRequest> CREATOR =
         new Creator<WifiP2pServiceRequest>() {
             public WifiP2pServiceRequest createFromParcel(Parcel in) {

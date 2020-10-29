@@ -354,7 +354,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String ACTION_TETHER_STATE_CHANGED =
             TetheringManager.ACTION_TETHER_STATE_CHANGED;
 
@@ -363,7 +363,7 @@ public class ConnectivityManager {
      * gives a String[] listing all the interfaces configured for
      * tethering and currently available for tethering.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String EXTRA_AVAILABLE_TETHER = TetheringManager.EXTRA_AVAILABLE_TETHER;
 
     /**
@@ -378,7 +378,7 @@ public class ConnectivityManager {
      * gives a String[] listing all the interfaces currently tethered
      * (ie, has DHCPv4 support and packets potentially forwarded/NATed)
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String EXTRA_ACTIVE_TETHER = TetheringManager.EXTRA_ACTIVE_TETHER;
 
     /**
@@ -387,7 +387,7 @@ public class ConnectivityManager {
      * failed.  Use {@link #getLastTetherError} to find the error code
      * for any interfaces listed here.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String EXTRA_ERRORED_TETHER = TetheringManager.EXTRA_ERRORED_TETHER;
 
     /**
@@ -850,7 +850,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static String getNetworkTypeName(int type) {
         switch (type) {
           case TYPE_NONE:
@@ -1173,7 +1173,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
         return getActiveNetworkInfoForUid(uid, false);
     }
@@ -1520,7 +1520,7 @@ public class ConnectivityManager {
         return 1;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
         if (networkType == TYPE_MOBILE) {
             switch (feature) {
@@ -1606,7 +1606,7 @@ public class ConnectivityManager {
         };
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final HashMap<NetworkCapabilities, LegacyRequest> sLegacyRequests =
             new HashMap<>();
 
@@ -1635,7 +1635,7 @@ public class ConnectivityManager {
         Log.d(TAG, "expireRequest with " + ourSeqNum + ", " + sequenceNum);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private NetworkRequest requestNetworkForFeatureLocked(NetworkCapabilities netCap) {
         int delay = -1;
         int type = legacyTypeForNetworkCapabilities(netCap);
@@ -1665,7 +1665,7 @@ public class ConnectivityManager {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private boolean removeRequestForFeature(NetworkCapabilities netCap) {
         final LegacyRequest l;
         synchronized (sLegacyRequests) {
@@ -1732,17 +1732,17 @@ public class ConnectivityManager {
 
     /** @hide */
     public static class PacketKeepaliveCallback {
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public PacketKeepaliveCallback() {
         }
         /** The requested keepalive was successfully started. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void onStarted() {}
         /** The keepalive was successfully stopped. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void onStopped() {}
         /** An error occurred. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void onError(int error) {}
     }
 
@@ -1806,7 +1806,7 @@ public class ConnectivityManager {
 
         private volatile Integer mSlot;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void stop() {
             try {
                 mExecutor.execute(() -> {
@@ -1875,7 +1875,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PacketKeepalive startNattKeepalive(
             Network network, int intervalSeconds, PacketKeepaliveCallback callback,
             InetAddress srcAddr, int srcPort, InetAddress dstAddr) {
@@ -2110,7 +2110,7 @@ public class ConnectivityManager {
 
     /** {@hide} */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
         try {
             return mService.getActiveNetworkQuotaInfo();
@@ -2408,7 +2408,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Deprecated
     public int tether(String iface) {
         return mTetheringManager.tether(iface);
@@ -2849,7 +2849,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Deprecated
     public int getLastTetherError(String iface) {
         int error = mTetheringManager.getLastTetherError(iface);
@@ -4659,7 +4659,7 @@ public class ConnectivityManager {
      * @deprecated This is strictly for legacy usage to support {@link #startUsingNetworkFeature}.
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
         return NetworkUtils.bindProcessToNetworkForHostResolution(
                 (network == null) ? NETID_UNSET : network.getNetIdForResolv());

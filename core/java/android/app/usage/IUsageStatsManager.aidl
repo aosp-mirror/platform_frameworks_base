@@ -28,10 +28,10 @@ import java.util.Map;
  * {@hide}
  */
 interface IUsageStatsManager {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     ParceledListSlice queryUsageStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
     ParceledListSlice queryEventStats(int bucketType, long beginTime, long endTime,
@@ -40,9 +40,9 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setAppInactive(String packageName, boolean inactive, int userId);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean isAppInactive(String packageName, int userId, String callingPackage);
     void onCarrierPrivilegedAppsChanged();
     void reportChooserSelection(String packageName, int userId, String contentType,

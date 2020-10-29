@@ -150,9 +150,9 @@ public class HorizontalScrollView extends FrameLayout {
     private int mMinimumVelocity;
     private int mMaximumVelocity;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mOverscrollDistance;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mOverflingDistance;
 
     private float mHorizontalScrollFactor;

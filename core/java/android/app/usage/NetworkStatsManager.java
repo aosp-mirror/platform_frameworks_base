@@ -34,7 +34,6 @@ import android.net.NetworkTemplate;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -130,7 +129,7 @@ public class NetworkStatsManager {
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NetworkStatsManager(Context context) throws ServiceNotFoundException {
         this(context, INetworkStatsService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE)));
@@ -154,7 +153,7 @@ public class NetworkStatsManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public void setPollForce(boolean pollForce) {
         if (pollForce) {

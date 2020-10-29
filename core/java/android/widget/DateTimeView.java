@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -82,7 +81,7 @@ public class DateTimeView extends TextView {
         this(context, null);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public DateTimeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         final TypedArray a = context.obtainStyledAttributes(attrs,

@@ -546,7 +546,7 @@ public final class LocaleList implements Parcelable {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void setDefault(@NonNull @Size(min=1) LocaleList locales, int localeIndex) {
         if (locales == null) {
             throw new NullPointerException("locales is null");

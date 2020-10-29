@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.MacAddress;
 import android.net.wifi.WpsInfo;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -139,7 +138,7 @@ public class WifiP2pConfig implements Parcelable {
     public int groupOwnerIntent = GROUP_OWNER_INTENT_AUTO;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int netId = WifiP2pGroup.NETWORK_ID_PERSISTENT;
 
     /**

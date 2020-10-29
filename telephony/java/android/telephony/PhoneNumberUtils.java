@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.PersistableBundle;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
@@ -1833,7 +1832,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Deprecated
     public static boolean isPotentialEmergencyNumber(int subId, String number) {
         // Check against the emergency numbers listed by the RIL / SIM,
@@ -2109,7 +2108,7 @@ public class PhoneNumberUtils {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean isPotentialLocalEmergencyNumber(Context context, String number) {
         return isPotentialLocalEmergencyNumber(context, getDefaultVoiceSubId(), number);
     }
@@ -2139,7 +2138,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Deprecated
     public static boolean isPotentialLocalEmergencyNumber(Context context, int subId,
             String number) {

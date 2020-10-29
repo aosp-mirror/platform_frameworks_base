@@ -19,7 +19,7 @@ package android.app;
 
 /** @hide */
 oneway interface ITransientNotification {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void show(IBinder windowToken);
     void hide();
 }

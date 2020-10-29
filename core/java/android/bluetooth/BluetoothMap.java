@@ -24,7 +24,6 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.CloseGuard;
@@ -210,7 +209,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothMap service = getService();

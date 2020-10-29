@@ -19,7 +19,6 @@ package com.android.internal.widget;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.StateSet;
 import android.view.KeyEvent;
@@ -55,7 +54,7 @@ public class NumericTextView extends TextView {
 
     private OnValueChangedListener mListener;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NumericTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
 

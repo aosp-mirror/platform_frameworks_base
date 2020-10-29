@@ -35,7 +35,6 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -111,7 +110,7 @@ public class Switch extends CompoundButton {
     private boolean mHasTrackTintMode = false;
 
     private int mThumbTextPadding;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private int mSwitchMinWidth;
     private int mSwitchPadding;
     private boolean mSplitTrack;

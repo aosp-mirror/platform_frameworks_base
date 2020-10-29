@@ -22,7 +22,7 @@ package android.app;
  */
 interface IStopUserCallback
 {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void userStopped(int userId);
     void userStopAborted(int userId);
 }

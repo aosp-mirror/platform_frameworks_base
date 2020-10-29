@@ -842,7 +842,7 @@ public final class DocumentsContract {
     public static final String EXTRA_RESULT = "result";
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
     /** {@hide} */
     public static final String METHOD_RENAME_DOCUMENT = "android:renameDocument";
@@ -877,11 +877,11 @@ public final class DocumentsContract {
 
     private static final String PATH_ROOT = "root";
     private static final String PATH_RECENT = "recent";
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final String PATH_TREE = "tree";
 
     private static final String PARAM_QUERY = "query";

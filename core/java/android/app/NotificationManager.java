@@ -1112,7 +1112,7 @@ public class NotificationManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ZenModeConfig getZenModeConfig() {
         INotificationManager service = getService();
         try {

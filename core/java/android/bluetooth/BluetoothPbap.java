@@ -27,7 +27,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -323,7 +322,7 @@ public class BluetoothPbap implements BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         log("disconnect()");
         final IBluetoothPbap service = mService;

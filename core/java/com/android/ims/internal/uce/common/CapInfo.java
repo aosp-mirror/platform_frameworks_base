@@ -17,7 +17,6 @@
 package com.android.ims.internal.uce.common;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -92,7 +91,7 @@ public class CapInfo implements Parcelable {
     /**
      * Constructor for the CapInfo class.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public CapInfo() {
     };
 
@@ -100,7 +99,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether IM is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isImSupported() {
         return mImSupported;
     }
@@ -108,7 +107,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets IM as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setImSupported(boolean imSupported) {
         this.mImSupported = imSupported;
     }
@@ -116,7 +115,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether FT Thumbnail is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isFtThumbSupported() {
         return mFtThumbSupported;
     }
@@ -124,7 +123,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets FT thumbnail as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setFtThumbSupported(boolean ftThumbSupported) {
         this.mFtThumbSupported = ftThumbSupported;
     }
@@ -134,7 +133,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether FT Store and Forward is supported
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isFtSnFSupported() {
         return  mFtSnFSupported;
     }
@@ -142,7 +141,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets FT Store and Forward as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setFtSnFSupported(boolean  ftSnFSupported) {
         this.mFtSnFSupported =  ftSnFSupported;
     }
@@ -150,7 +149,7 @@ public class CapInfo implements Parcelable {
    /**
     * Checks whether File transfer HTTP is supported.
     */
-   @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+   @UnsupportedAppUsage
    public boolean isFtHttpSupported() {
        return  mFtHttpSupported;
    }
@@ -158,7 +157,7 @@ public class CapInfo implements Parcelable {
    /**
     * Sets File transfer HTTP as supported or not supported.
     */
-   @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+   @UnsupportedAppUsage
    public void setFtHttpSupported(boolean  ftHttpSupported) {
        this.mFtHttpSupported =  ftHttpSupported;
    }
@@ -166,7 +165,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether FT is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isFtSupported() {
         return mFtSupported;
     }
@@ -174,7 +173,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets FT as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setFtSupported(boolean ftSupported) {
         this.mFtSupported = ftSupported;
     }
@@ -182,7 +181,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether IS is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isIsSupported() {
         return mIsSupported;
     }
@@ -190,7 +189,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets IS as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIsSupported(boolean isSupported) {
         this.mIsSupported = isSupported;
     }
@@ -198,7 +197,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether video sharing is supported during a CS call.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isVsDuringCSSupported() {
         return mVsDuringCSSupported;
     }
@@ -207,7 +206,7 @@ public class CapInfo implements Parcelable {
      *  Sets video sharing as supported or not supported during a CS
      *  call.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setVsDuringCSSupported(boolean vsDuringCSSupported) {
         this.mVsDuringCSSupported = vsDuringCSSupported;
     }
@@ -216,7 +215,7 @@ public class CapInfo implements Parcelable {
      *  Checks whether video sharing outside a voice call is
      *   supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isVsSupported() {
         return mVsSupported;
     }
@@ -224,7 +223,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets video sharing as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setVsSupported(boolean vsSupported) {
         this.mVsSupported = vsSupported;
     }
@@ -232,7 +231,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether social presence is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isSpSupported() {
         return mSpSupported;
     }
@@ -240,7 +239,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets social presence as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setSpSupported(boolean spSupported) {
         this.mSpSupported = spSupported;
     }
@@ -249,7 +248,7 @@ public class CapInfo implements Parcelable {
      * Checks whether capability discovery via presence is
      * supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isCdViaPresenceSupported() {
         return mCdViaPresenceSupported;
     }
@@ -258,7 +257,7 @@ public class CapInfo implements Parcelable {
      * Sets capability discovery via presence as supported or not
      * supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setCdViaPresenceSupported(boolean cdViaPresenceSupported) {
         this.mCdViaPresenceSupported = cdViaPresenceSupported;
     }
@@ -266,7 +265,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether IP voice call is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isIpVoiceSupported() {
         return mIpVoiceSupported;
     }
@@ -274,7 +273,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets IP voice call as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIpVoiceSupported(boolean ipVoiceSupported) {
         this.mIpVoiceSupported = ipVoiceSupported;
     }
@@ -282,7 +281,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether IP video call is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isIpVideoSupported() {
         return mIpVideoSupported;
     }
@@ -290,7 +289,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets IP video call as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIpVideoSupported(boolean ipVideoSupported) {
         this.mIpVideoSupported = ipVideoSupported;
     }
@@ -299,7 +298,7 @@ public class CapInfo implements Parcelable {
     * Checks whether Geo location Pull using File Transfer is
     * supported.
     */
-   @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+   @UnsupportedAppUsage
    public boolean isGeoPullFtSupported() {
        return mGeoPullFtSupported;
    }
@@ -308,7 +307,7 @@ public class CapInfo implements Parcelable {
     * Sets Geo location Pull using File Transfer as supported or
     * not supported.
     */
-   @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+   @UnsupportedAppUsage
    public void setGeoPullFtSupported(boolean geoPullFtSupported) {
        this.mGeoPullFtSupported = geoPullFtSupported;
    }
@@ -316,7 +315,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether Geo Pull is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isGeoPullSupported() {
         return mGeoPullSupported;
     }
@@ -324,7 +323,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets Geo Pull as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setGeoPullSupported(boolean geoPullSupported) {
         this.mGeoPullSupported = geoPullSupported;
     }
@@ -332,7 +331,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether Geo Push is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isGeoPushSupported() {
         return mGeoPushSupported;
     }
@@ -340,7 +339,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets Geo Push as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setGeoPushSupported(boolean geoPushSupported) {
         this.mGeoPushSupported = geoPushSupported;
     }
@@ -348,7 +347,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether short messaging is supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isSmSupported() {
         return mSmSupported;
     }
@@ -356,7 +355,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets short messaging as supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setSmSupported(boolean smSupported) {
         this.mSmSupported = smSupported;
     }
@@ -364,22 +363,22 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether store/forward and group chat are supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isFullSnFGroupChatSupported() {
         return mFullSnFGroupChatSupported;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isRcsIpVoiceCallSupported() {
         return mRcsIpVoiceCallSupported;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isRcsIpVideoCallSupported() {
         return mRcsIpVideoCallSupported;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isRcsIpVideoOnlyCallSupported() {
         return mRcsIpVideoOnlyCallSupported;
     }
@@ -387,20 +386,20 @@ public class CapInfo implements Parcelable {
     /**
      * Sets store/forward and group chat supported or not supported.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setFullSnFGroupChatSupported(boolean fullSnFGroupChatSupported) {
         this.mFullSnFGroupChatSupported = fullSnFGroupChatSupported;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setRcsIpVoiceCallSupported(boolean rcsIpVoiceCallSupported) {
         this.mRcsIpVoiceCallSupported = rcsIpVoiceCallSupported;
     }
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setRcsIpVideoCallSupported(boolean rcsIpVideoCallSupported) {
         this.mRcsIpVideoCallSupported = rcsIpVideoCallSupported;
     }
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setRcsIpVideoOnlyCallSupported(boolean rcsIpVideoOnlyCallSupported) {
         this.mRcsIpVideoOnlyCallSupported = rcsIpVideoOnlyCallSupported;
     }
@@ -537,20 +536,20 @@ public class CapInfo implements Parcelable {
     }
 
     /** Sets the list of supported extensions. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setExts(String[] exts) {
         this.mExts = exts;
     }
 
 
     /** Gets the time stamp for when to query again. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public long getCapTimestamp() {
         return mCapTimestamp;
     }
 
     /** Sets the time stamp for when to query again. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setCapTimestamp(long capTimestamp) {
         this.mCapTimestamp = capTimestamp;
     }

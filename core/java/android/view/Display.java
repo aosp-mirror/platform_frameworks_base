@@ -298,7 +298,7 @@ public final class Display {
      * Display type: Physical display connected through an external port.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public static final int TYPE_EXTERNAL = 2;
 
@@ -1409,7 +1409,7 @@ public final class Display {
         /**
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public Mode(int modeId, int width, int height, float refreshRate) {
             mModeId = modeId;
             mWidth = width;
@@ -1592,7 +1592,7 @@ public final class Display {
         /**
          * @hide
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
                 float maxAverageLuminance, float minLuminance) {
             mSupportedHdrTypes = supportedHdrTypes;

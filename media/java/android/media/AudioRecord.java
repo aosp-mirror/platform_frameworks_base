@@ -30,7 +30,6 @@ import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.projection.MediaProjection;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -175,14 +174,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * Accessed by native methods: provides access to the callback data.
      */
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeCallbackCookie;
 
     /**
      * Accessed by native methods: provides access to the JNIDeviceCallback instance.
      */
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeDeviceCallback;
 
 
@@ -262,7 +261,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     /**
      * AudioAttributes
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private AudioAttributes mAudioAttributes;
     private boolean mIsSubmixFullVolume = false;
 
@@ -1966,7 +1965,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     // Java methods called from the native side
     //--------------------
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static void postEventFromNative(Object audiorecord_ref,
             int what, int arg1, int arg2, Object obj) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);
