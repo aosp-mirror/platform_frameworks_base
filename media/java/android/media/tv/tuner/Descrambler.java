@@ -111,10 +111,13 @@ public class Descrambler implements AutoCloseable {
     /**
      * Set a key token to link descrambler to a key slot
      *
-     * A descrambler instance can have only one key slot to link, but a key slot can hold a few
+     * <p>A descrambler instance can have only one key slot to link, but a key slot can hold a few
      * keys for different purposes.
      *
-     * @param keyToken the token to be used to link the key slot.
+     * @param keyToken the token to be used to link the key slot. Use {@link Tuner.INVALID_KEYTOKEN}
+     *        to remove the to remove the current key from descrambler. If the current keyToken
+     *        comes from MediaCas session, use {@link Tuner.INVALID_KEYTOKEN} to remove current key
+     *        before close MediaCas session.
      * @return result status of the operation.
      */
     @Result
