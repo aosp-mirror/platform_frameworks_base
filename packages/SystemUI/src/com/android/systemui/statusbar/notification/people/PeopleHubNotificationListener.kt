@@ -220,7 +220,7 @@ class PeopleHubDataSourceImpl @Inject constructor(
         }
         val clickRunnable = Runnable { notificationListener.unsnoozeNotification(key) }
         val extras = sbn.notification.extras
-        val name = ranking.shortcutInfo?.label
+        val name = ranking.conversationShortcutInfo?.label
                 ?: extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)
                 ?: extras.getCharSequence(Notification.EXTRA_TITLE)
                 ?: return null
@@ -238,9 +238,9 @@ class PeopleHubDataSourceImpl @Inject constructor(
         iconFactory: ConversationIconFactory,
         sbn: StatusBarNotification
     ): Drawable? =
-            shortcutInfo?.let { shortcutInfo ->
+            conversationShortcutInfo?.let { conversationShortcutInfo ->
                 iconFactory.getConversationDrawable(
-                        shortcutInfo,
+                        conversationShortcutInfo,
                         sbn.packageName,
                         sbn.uid,
                         channel.isImportantConversation

@@ -120,7 +120,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(canBubble(i), ranking.canBubble());
             assertEquals(visuallyInterruptive(i), ranking.visuallyInterruptive());
             assertEquals(isConversation(i), ranking.isConversation());
-            assertEquals(getShortcutInfo(i).getId(), ranking.getShortcutInfo().getId());
+            assertEquals(getShortcutInfo(i).getId(), ranking.getConversationShortcutInfo().getId());
             assertEquals(getRankingAdjustment(i), ranking.getRankingAdjustment());
         }
     }
@@ -191,7 +191,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.canBubble(),
                 tweak.visuallyInterruptive(),
                 tweak.isConversation(),
-                tweak.getShortcutInfo(),
+                tweak.getConversationShortcutInfo(),
                 tweak.getRankingAdjustment(),
                 tweak.isBubble()
         );
@@ -440,7 +440,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
         assertEquals(comment, a.canBubble(), b.canBubble());
         assertEquals(comment, a.isConversation(), b.isConversation());
-        assertEquals(comment, a.getShortcutInfo().getId(), b.getShortcutInfo().getId());
+        assertEquals(comment, a.getConversationShortcutInfo().getId(), b.getConversationShortcutInfo().getId());
         assertActionsEqual(a.getSmartActions(), b.getSmartActions());
     }
 

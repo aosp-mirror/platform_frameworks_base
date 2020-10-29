@@ -46,7 +46,7 @@ class ConversationNotificationProcessor @Inject constructor(
                     Notification.MessagingStyle.CONVERSATION_TYPE_IMPORTANT
                 else
                     Notification.MessagingStyle.CONVERSATION_TYPE_NORMAL
-        entry.ranking.shortcutInfo?.let { shortcutInfo ->
+        entry.ranking.conversationShortcutInfo?.let { shortcutInfo ->
             messagingStyle.shortcutIcon = launcherApps.getShortcutIcon(shortcutInfo)
             shortcutInfo.label?.let { label ->
                 messagingStyle.conversationTitle = label
