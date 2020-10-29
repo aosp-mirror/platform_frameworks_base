@@ -43,10 +43,6 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
@@ -120,12 +116,16 @@ import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_ALLOWLISTED;
+import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE;
+import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
+import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.ActivityState.PAUSED;
 import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
-import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.BOUNDS;
@@ -407,17 +407,6 @@ class Task extends WindowContainer<WindowContainer> {
     boolean mUserSetupComplete; // The user set-up is complete as of the last time the task activity
                                 // was changed.
 
-    /** Can't be put in lockTask mode. */
-    final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
-    /** Can enter app pinning with user approval. Can never start over existing lockTask task. */
-    final static int LOCK_TASK_AUTH_PINNABLE = 1;
-    /** Starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing lockTask task. */
-    final static int LOCK_TASK_AUTH_LAUNCHABLE = 2;
-    /** Can enter lockTask without user approval. Can start over existing lockTask task. */
-    final static int LOCK_TASK_AUTH_ALLOWLISTED = 3;
-    /** Priv-app that starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing
-     * lockTask task. */
-    final static int LOCK_TASK_AUTH_LAUNCHABLE_PRIV = 4;
     int mLockTaskAuth = LOCK_TASK_AUTH_PINNABLE;
 
     int mLockTaskUid = -1;  // The uid of the application that called startLockTask().
@@ -1941,32 +1930,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private void setLockTaskAuth(@Nullable ActivityRecord r) {
-        if (r == null) {
-            mLockTaskAuth = LOCK_TASK_AUTH_PINNABLE;
-            return;
-        }
-
-        final String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
-        final LockTaskController lockTaskController = mAtmService.getLockTaskController();
-        switch (r.lockTaskLaunchMode) {
-            case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                mLockTaskAuth = lockTaskController.isPackageAllowlisted(mUserId, pkg)
-                        ? LOCK_TASK_AUTH_ALLOWLISTED : LOCK_TASK_AUTH_PINNABLE;
-                break;
-
-            case LOCK_TASK_LAUNCH_MODE_NEVER:
-                mLockTaskAuth = LOCK_TASK_AUTH_DONT_LOCK;
-                break;
-
-            case LOCK_TASK_LAUNCH_MODE_ALWAYS:
-                mLockTaskAuth = LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-                break;
-
-            case LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED:
-                mLockTaskAuth = lockTaskController.isPackageAllowlisted(mUserId, pkg)
-                        ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
-                break;
-        }
+        mLockTaskAuth = mAtmService.getLockTaskController().getLockTaskAuth(r, this);
         ProtoLog.d(WM_DEBUG_LOCKTASK, "setLockTaskAuth: task=%s mLockTaskAuth=%s", this,
                 lockTaskAuthToString());
     }
