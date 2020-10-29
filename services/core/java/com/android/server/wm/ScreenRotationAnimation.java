@@ -181,9 +181,25 @@ class ScreenRotationAnimation {
         mSurfaceRotationAnimationController = new SurfaceRotationAnimationController();
 
         // Check whether the current screen contains any secure content.
-        final boolean isSecure = displayContent.hasSecureWindowOnScreen();
+        boolean isSecure = displayContent.hasSecureWindowOnScreen();
+        final int displayId = displayContent.getDisplayId();
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
+
         try {
+            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    mService.mDisplayManagerInternal.systemScreenshot(displayId);
+            if (screenshotBuffer == null) {
+                Slog.w(TAG, "Unable to take screenshot of display " + displayId);
+                return;
+            }
+
+            // If the screenshot contains secure layers, we have to make sure the
+            // screenshot surface we display it in also has FLAG_SECURE so that
+            // the user can not screenshot secure layers via the screenshot surface.
+            if (screenshotBuffer.containsSecureLayers()) {
+                isSecure = true;
+            }
+
             mBackColorSurface = displayContent.makeChildSurface(null)
                     .setName("BackColorSurface")
                     .setColorLayer()
@@ -203,51 +219,39 @@ class ScreenRotationAnimation {
                     .setCallsite("ScreenRotationAnimation")
                     .build();
 
-            // Capture a screenshot into the surface we just created.
-            final int displayId = displayContent.getDisplayId();
             final Surface surface = mService.mSurfaceFactory.get();
-            // In case display bounds change, screenshot buffer and surface may mismatch so set a
-            // scaling mode.
+            // In case display bounds change, screenshot buffer and surface may mismatch so
+            // set a scaling mode.
             surface.copyFrom(mScreenshotLayer);
             surface.setScalingMode(Surface.SCALING_MODE_SCALE_TO_WINDOW);
 
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    mService.mDisplayManagerInternal.systemScreenshot(displayId);
-            if (screenshotBuffer != null) {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
-                        "ScreenRotationAnimation#getMedianBorderLuma");
-                mStartLuma = RotationAnimationUtils.getMedianBorderLuma(
-                        screenshotBuffer.getHardwareBuffer(), screenshotBuffer.getColorSpace());
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                try {
-                    surface.attachAndQueueBufferWithColorSpace(screenshotBuffer.getHardwareBuffer(),
-                            screenshotBuffer.getColorSpace());
-                } catch (RuntimeException e) {
-                    Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
-                }
-                // If the screenshot contains secure layers, we have to make sure the
-                // screenshot surface we display it in also has FLAG_SECURE so that
-                // the user can not screenshot secure layers via the screenshot surface.
-                if (screenshotBuffer.containsSecureLayers()) {
-                    t.setSecure(mScreenshotLayer, true);
-                }
-                t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
-                t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
-                t.setLayer(mBackColorSurface, -1);
-                t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
-                t.setAlpha(mBackColorSurface, 1);
-                t.show(mScreenshotLayer);
-                t.show(mBackColorSurface);
-            } else {
-                Slog.w(TAG, "Unable to take screenshot of display " + displayId);
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                    "ScreenRotationAnimation#getMedianBorderLuma");
+            mStartLuma = RotationAnimationUtils.getMedianBorderLuma(
+                    screenshotBuffer.getHardwareBuffer(), screenshotBuffer.getColorSpace());
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            try {
+                surface.attachAndQueueBufferWithColorSpace(screenshotBuffer.getHardwareBuffer(),
+                        screenshotBuffer.getColorSpace());
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
             }
+
+            t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
+            t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
+            t.setLayer(mBackColorSurface, -1);
+            t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
+            t.setAlpha(mBackColorSurface, 1);
+            t.show(mScreenshotLayer);
+            t.show(mBackColorSurface);
             surface.destroy();
+
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
         ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                    "  FREEZE %s: CREATE", mScreenshotLayer);
+                "  FREEZE %s: CREATE", mScreenshotLayer);
         setRotation(t, realOriginalRotation);
         t.apply();
     }

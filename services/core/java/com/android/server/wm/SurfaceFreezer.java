@@ -137,6 +137,7 @@ class SurfaceFreezer {
                 new SurfaceControl.LayerCaptureArgs.Builder(target)
                         .setSourceCrop(cropBounds)
                         .setCaptureSecureLayers(true)
+                        .setAllowProtected(true)
                         .build();
         return SurfaceControl.captureLayers(captureArgs);
     }

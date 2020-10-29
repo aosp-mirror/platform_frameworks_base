@@ -1293,6 +1293,7 @@ public final class DisplayManagerService extends SystemService {
                             .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
                             .setUseIdentityTransform(true)
                             .setCaptureSecureLayers(true)
+                            .setAllowProtected(true)
                             .build();
             return SurfaceControl.captureDisplay(captureArgs);
         }

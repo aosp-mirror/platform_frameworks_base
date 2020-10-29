@@ -653,12 +653,14 @@ public final class SurfaceControl implements Parcelable {
         private final Rect mSourceCrop = new Rect();
         private final float mFrameScale;
         private final boolean mCaptureSecureLayers;
+        private final boolean mAllowProtected;
 
         private CaptureArgs(Builder<? extends Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
             mSourceCrop.set(builder.mSourceCrop);
             mFrameScale = builder.mFrameScale;
             mCaptureSecureLayers = builder.mCaptureSecureLayers;
+            mAllowProtected = builder.mAllowProtected;
         }
 
         /**
@@ -671,6 +673,7 @@ public final class SurfaceControl implements Parcelable {
             private final Rect mSourceCrop = new Rect();
             private float mFrameScale = 1;
             private boolean mCaptureSecureLayers;
+            private boolean mAllowProtected;
 
             /**
              * The desired pixel format of the returned buffer.
@@ -705,6 +708,17 @@ public final class SurfaceControl implements Parcelable {
              */
             public T setCaptureSecureLayers(boolean captureSecureLayers) {
                 mCaptureSecureLayers = captureSecureLayers;
+                return getThis();
+            }
+
+            /**
+             * Whether to allow the screenshot of protected (DRM) content. Warning: The screenshot
+             * cannot be read in unprotected space.
+             *
+             * @see HardwareBuffer#USAGE_PROTECTED_CONTENT
+             */
+            public T setAllowProtected(boolean allowProtected) {
+                mAllowProtected = allowProtected;
                 return getThis();
             }
 
