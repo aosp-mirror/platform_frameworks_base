@@ -32,6 +32,7 @@ import android.text.TextUtils;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.wm.shell.R;
+import com.android.wm.shell.pip.PipMediaController;
 
 import java.util.Objects;
 
@@ -40,7 +41,7 @@ import java.util.Objects;
  * <p>Once it's created, it will manage the PIP notification UI by itself except for handling
  * configuration changes.
  */
-public class PipNotification {
+public class PipNotification implements PipController.Listener {
     private static final boolean DEBUG = PipController.DEBUG;
     private static final String TAG = "PipNotification";
 
@@ -63,42 +64,7 @@ public class PipNotification {
     private String mMediaTitle;
     private Bitmap mArt;
 
-    private PipController.Listener mPipListener = new PipController.Listener() {
-        @Override
-        public void onPipEntered(String packageName) {
-            mPackageName = packageName;
-            notifyPipNotification();
-        }
-
-        @Override
-        public void onPipActivityClosed() {
-            dismissPipNotification();
-            mPackageName = null;
-        }
-
-        @Override
-        public void onShowPipMenu() {
-            // no-op.
-        }
-
-        @Override
-        public void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions) {
-            // no-op.
-        }
-
-        @Override
-        public void onMoveToFullscreen() {
-            dismissPipNotification();
-            mPackageName = null;
-        }
-
-        @Override
-        public void onPipResizeAboutToStart() {
-            // no-op.
-        }
-    };
-
-    public PipNotification(Context context, PipController pipController) {
+    public PipNotification(Context context, PipMediaController pipMediaController) {
         mPackageManager = context.getPackageManager();
         mNotificationManager = context.getSystemService(NotificationManager.class);
 
@@ -110,10 +76,42 @@ public class PipNotification {
                         .setContentIntent(createPendingIntent(context, ACTION_MENU))
                         .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE)));
 
-        pipController.addListener(mPipListener);
-        pipController.getPipMediaController().addMetadataListener(this::onMediaMetadataChanged);
+        pipMediaController.addMetadataListener(this::onMediaMetadataChanged);
 
         onConfigurationChanged(context);
+    }
+
+    @Override
+    public void onPipEntered(String packageName) {
+        mPackageName = packageName;
+        notifyPipNotification();
+    }
+
+    @Override
+    public void onPipActivityClosed() {
+        dismissPipNotification();
+        mPackageName = null;
+    }
+
+    @Override
+    public void onShowPipMenu() {
+        // no-op.
+    }
+
+    @Override
+    public void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions) {
+        // no-op.
+    }
+
+    @Override
+    public void onMoveToFullscreen() {
+        dismissPipNotification();
+        mPackageName = null;
+    }
+
+    @Override
+    public void onPipResizeAboutToStart() {
+        // no-op.
     }
 
     private void onMediaMetadataChanged(MediaMetadata metadata) {
