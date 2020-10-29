@@ -30,12 +30,16 @@ import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
+import android.os.Binder;
+import android.os.Build;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class encapsulating helper functions used by the ContextHubService class
@@ -44,6 +48,9 @@ import java.util.List;
     private static final String TAG = "ContextHubServiceUtil";
     private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
     private static final String CONTEXT_HUB_PERMISSION = Manifest.permission.ACCESS_CONTEXT_HUB;
+
+    // A set of packages that have already been warned regarding the ACCESS_CONTEXT_HUB permission.
+    private static final Set<String> PERMISSION_WARNED_PACKAGES = new HashSet<String>();
 
     /**
      * Creates a ConcurrentHashMap of the Context Hub ID to the ContextHubInfo object given an
@@ -95,6 +102,7 @@ import java.util.List;
 
     /**
      * Creates a primitive integer array given a Collection<Integer>.
+     *
      * @param collection the collection to iterate
      * @return the primitive integer array
      */
@@ -200,10 +208,25 @@ import java.util.List;
      */
     /* package */
     static void checkPermissions(Context context) {
-        if (context.checkCallingPermission(HARDWARE_PERMISSION) != PERMISSION_GRANTED
-                && context.checkCallingPermission(CONTEXT_HUB_PERMISSION) != PERMISSION_GRANTED) {
+        boolean hasLocationHardwarePermission = (context.checkCallingPermission(HARDWARE_PERMISSION)
+                == PERMISSION_GRANTED);
+        boolean hasAccessContextHubPermission = (context.checkCallingPermission(
+                CONTEXT_HUB_PERMISSION) == PERMISSION_GRANTED);
+
+        if (!hasLocationHardwarePermission && !hasAccessContextHubPermission) {
             throw new SecurityException(
-                "LOCATION_HARDWARE or ACCESS_CONTEXT_HUB permission required to use Context Hub");
+                    "LOCATION_HARDWARE or ACCESS_CONTEXT_HUB permission required to use Context "
+                            + "Hub");
+        }
+
+        if (!hasAccessContextHubPermission && !Build.IS_USER) {
+            String pkgName = context.getPackageManager().getNameForUid(Binder.getCallingUid());
+            if (!PERMISSION_WARNED_PACKAGES.contains(pkgName)) {
+                Log.w(TAG, pkgName
+                        + ": please use the ACCESS_CONTEXT_HUB permission rather than "
+                        + "LOCATION_HARDWARE (will be removed for Context Hub APIs in T)");
+                PERMISSION_WARNED_PACKAGES.add(pkgName);
+            }
         }
     }
 
