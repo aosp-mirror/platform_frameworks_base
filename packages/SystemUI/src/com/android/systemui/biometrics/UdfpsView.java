@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -25,6 +26,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -55,8 +57,6 @@ public class UdfpsView extends View implements DozeReceiver,
 
     private final RectF mSensorRect;
     private final Paint mSensorPaint;
-    private final float mSensorRadius;
-    private final float mSensorCenterY;
     private final float mSensorTouchAreaCoefficient;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
@@ -64,9 +64,7 @@ public class UdfpsView extends View implements DozeReceiver,
     private final Rect mTouchableRegion;
     private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
 
-    // This is calculated from the screen's dimensions at runtime, as opposed to mSensorCenterY,
-    // which is defined in layout.xml
-    private float mSensorCenterX;
+    @NonNull private FingerprintSensorPropertiesInternal mProps;
 
     // AOD anti-burn-in offsets
     private float mInterpolatedDarkAmount;
@@ -83,18 +81,10 @@ public class UdfpsView extends View implements DozeReceiver,
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.UdfpsView, 0,
                 0);
         try {
-            if (!a.hasValue(R.styleable.UdfpsView_sensorRadius)) {
-                throw new IllegalArgumentException("UdfpsView must contain sensorRadius");
-            }
-            if (!a.hasValue(R.styleable.UdfpsView_sensorCenterY)) {
-                throw new IllegalArgumentException("UdfpsView must contain sensorMarginBottom");
-            }
             if (!a.hasValue(R.styleable.UdfpsView_sensorTouchAreaCoefficient)) {
                 throw new IllegalArgumentException(
                         "UdfpsView must contain sensorTouchAreaCoefficient");
             }
-            mSensorRadius = a.getDimension(R.styleable.UdfpsView_sensorRadius, 0f);
-            mSensorCenterY = a.getDimension(R.styleable.UdfpsView_sensorCenterY, 0f);
             mSensorTouchAreaCoefficient = a.getFloat(
                     R.styleable.UdfpsView_sensorTouchAreaCoefficient, 0f);
         } finally {
@@ -134,6 +124,10 @@ public class UdfpsView extends View implements DozeReceiver,
         mIsScrimShowing = false;
     }
 
+    void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
+        mProps = properties;
+    }
+
     @Override
     public void dozeTimeTick() {
         updateAodPosition();
@@ -165,9 +159,10 @@ public class UdfpsView extends View implements DozeReceiver,
         final int h = getLayoutParams().height;
         final int w = getLayoutParams().width;
         mScrimRect.set(0 /* left */, 0 /* top */, w, h);
-        mSensorCenterX = w / 2f;
-        mSensorRect.set(mSensorCenterX - mSensorRadius, mSensorCenterY - mSensorRadius,
-                mSensorCenterX + mSensorRadius, mSensorCenterY + mSensorRadius);
+        mSensorRect.set(mProps.sensorLocationX - mProps.sensorRadius,
+                mProps.sensorLocationY - mProps.sensorRadius,
+                mProps.sensorLocationX + mProps.sensorRadius,
+                mProps.sensorLocationY + mProps.sensorRadius);
 
         // Sets mTouchableRegion with rounded up values from mSensorRect.
         mSensorRect.roundOut(mTouchableRegion);
@@ -211,10 +206,10 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
-        return x > (mSensorCenterX - mSensorRadius * mSensorTouchAreaCoefficient)
-                && x < (mSensorCenterX + mSensorRadius * mSensorTouchAreaCoefficient)
-                && y > (mSensorCenterY - mSensorRadius * mSensorTouchAreaCoefficient)
-                && y < (mSensorCenterY + mSensorRadius * mSensorTouchAreaCoefficient);
+        return x > (mProps.sensorLocationX - mProps.sensorRadius * mSensorTouchAreaCoefficient)
+                && x < (mProps.sensorLocationX + mProps.sensorRadius * mSensorTouchAreaCoefficient)
+                && y > (mProps.sensorLocationY - mProps.sensorRadius * mSensorTouchAreaCoefficient)
+                && y < (mProps.sensorLocationY + mProps.sensorRadius * mSensorTouchAreaCoefficient);
     }
 
     void setScrimAlpha(int alpha) {
