@@ -193,7 +193,7 @@ public class SuspendedAppActivity extends AlertActivity
             try {
                 mSuspendingAppResources = createContextAsUser(
                         UserHandle.of(mUserId), /* flags */ 0).getPackageManager()
-                        .getResourcesForApplication(mSuspendedPackage);
+                        .getResourcesForApplication(mSuspendingPackage);
             } catch (PackageManager.NameNotFoundException ne) {
                 Slog.e(TAG, "Could not find resources for " + mSuspendingPackage, ne);
             }
