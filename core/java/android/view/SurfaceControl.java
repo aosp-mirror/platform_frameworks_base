@@ -654,6 +654,7 @@ public final class SurfaceControl implements Parcelable {
         private final float mFrameScale;
         private final boolean mCaptureSecureLayers;
         private final boolean mAllowProtected;
+        private final long mUid;
 
         private CaptureArgs(Builder<? extends Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
@@ -661,6 +662,7 @@ public final class SurfaceControl implements Parcelable {
             mFrameScale = builder.mFrameScale;
             mCaptureSecureLayers = builder.mCaptureSecureLayers;
             mAllowProtected = builder.mAllowProtected;
+            mUid = builder.mUid;
         }
 
         /**
@@ -674,6 +676,7 @@ public final class SurfaceControl implements Parcelable {
             private float mFrameScale = 1;
             private boolean mCaptureSecureLayers;
             private boolean mAllowProtected;
+            private long mUid = -1;
 
             /**
              * The desired pixel format of the returned buffer.
@@ -719,6 +722,15 @@ public final class SurfaceControl implements Parcelable {
              */
             public T setAllowProtected(boolean allowProtected) {
                 mAllowProtected = allowProtected;
+                return getThis();
+            }
+
+            /**
+             * Set the uid of the content that should be screenshot. The code will skip any surfaces
+             * that don't belong to the specified uid.
+             */
+            public T setUid(long uid) {
+                mUid = uid;
                 return getThis();
             }
 
