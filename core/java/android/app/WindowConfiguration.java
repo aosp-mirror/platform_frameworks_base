@@ -796,9 +796,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns {@code true} if the windowingMode represents a window in multi-window mode.
      * I.e. sharing the screen with another activity.
-     *
-     * TODO(b/171672645): This API could be misleading - in 'undefined' mode it's determined by the
-     * parent's mode
      * @hide
      */
     public static boolean inMultiWindowMode(int windowingMode) {

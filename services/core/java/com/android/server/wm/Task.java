@@ -2847,13 +2847,18 @@ class Task extends WindowContainer<WindowContainer> {
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
-        // Do not allow non-resizable non-pinned tasks to be in a multi-window mode - they should
-        // use their parent's windowing mode, or fullscreen.
-        if (!isResizeable() && windowingMode != WINDOWING_MODE_PINNED
-                && WindowConfiguration.inMultiWindowMode(windowingMode)) {
-            windowingMode = WindowConfiguration.inMultiWindowMode(parentWindowingMode)
-                    ? WINDOWING_MODE_FULLSCREEN : parentWindowingMode;
-            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+        // Do not allow non-resizable tasks to be in a multi-window mode, unless it is in pinned
+        // windowing mode or is in size compat freeform mode
+        if (!isResizeable()) {
+            final int candidateWindowingMode =
+                    windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
+            if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
+                    && candidateWindowingMode != WINDOWING_MODE_PINNED
+                    && (candidateWindowingMode != WINDOWING_MODE_FREEFORM
+                            || !mStackSupervisor.mService.mSizeCompatFreeform)) {
+                getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
+                        WINDOWING_MODE_FULLSCREEN);
+            }
         }
 
         if (isLeafTask()) {
