@@ -1130,7 +1130,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Вибрати все"</string>
-    <string name="cut" msgid="2561199725874745819">"Виріз."</string>
+    <string name="cut" msgid="2561199725874745819">"Вирізати"</string>
     <string name="copy" msgid="5472512047143665218">"Копіювати"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Не вдалося скопіювати в буфер обміну"</string>
     <string name="paste" msgid="461843306215520225">"Вставити"</string>
@@ -1162,7 +1162,7 @@
     <string name="capital_off" msgid="7443704171014626777">"ВИМК"</string>
     <string name="checked" msgid="9179896827054513119">"вибрано"</string>
     <string name="not_checked" msgid="7972320087569023342">"не вибрано"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Завершити дію за доп."</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Що використовувати?"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завершити дію за допомогою %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Завершити дію"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Відкрити за допомогою"</string>
@@ -1856,7 +1856,7 @@
       <item quantity="other">Протягом %1$d хв (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">%1$d годину (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">%1$d година (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d години (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d годин (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d години (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

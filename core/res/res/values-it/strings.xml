@@ -1937,7 +1937,7 @@
       <item quantity="one">Un suggerimento di Compilazione automatica</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vuoi salvare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vuoi salvare <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vuoi salvare la <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> su "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> su "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Vuoi aggiornare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>

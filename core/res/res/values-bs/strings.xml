@@ -590,7 +590,7 @@
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Postavite lice direktno ispred telefona"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Previše pokreta. Držite telefon mirno."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ponovo registrirajte lice."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Nije više moguće prepoznati lice. Pokušajte opet."</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Više nije moguće prepoznati lice. Pokušajte opet."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Previše slično, promijenite položaj."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Malo manje zakrenite glavu."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Malo manje zakrenite glavu."</string>
@@ -970,7 +970,7 @@
     <string name="save_password_remember" msgid="6490888932657708341">"Zapamti"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Nikad"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Nemate odobrenje za otvaranje ove stranice."</string>
-    <string name="text_copied" msgid="2531420577879738860">"Tekst kopiran u međuspremnik."</string>
+    <string name="text_copied" msgid="2531420577879738860">"Tekst kopiran u međumemoriju."</string>
     <string name="copied" msgid="4675902854553014676">"Kopirano"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Više"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Meni+"</string>
@@ -1142,8 +1142,8 @@
     <string name="capital_off" msgid="7443704171014626777">"Isključeno"</string>
     <string name="checked" msgid="9179896827054513119">"označeno"</string>
     <string name="not_checked" msgid="7972320087569023342">"nije označeno"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Izvrši akciju koristeći"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"Dovršite akciju koristeći %1$s"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Završite radnju pomoću aplikacije"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"Završite radnju pomoću aplikacije %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Izvršiti akciju"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Otvori koristeći"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvori koristeći %1$s"</string>
@@ -1280,7 +1280,7 @@
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"nepoznata vrsta mreže"</string>
     <string name="accept" msgid="5447154347815825107">"Prihvati"</string>
     <string name="decline" msgid="6490507610282145874">"Odbijte"</string>
-    <string name="select_character" msgid="3352797107930786979">"Umetni karakter"</string>
+    <string name="select_character" msgid="3352797107930786979">"Umetni znak"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"Slanje SMS poruka"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; šalje veliki broj SMS poruka. Da li želite dozvoliti ovoj aplikaciji da nastavi slanje poruka?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Dozvoli"</string>
