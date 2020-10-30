@@ -6994,7 +6994,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("isProfileOwnerApp");
         if (mService != null) {
             try {
-                ComponentName profileOwner = mService.getProfileOwner(myUserId());
+                ComponentName profileOwner = mService.getProfileOwnerAsUser(myUserId());
                 return profileOwner != null
                         && profileOwner.getPackageName().equals(packageName);
             } catch (RemoteException re) {
