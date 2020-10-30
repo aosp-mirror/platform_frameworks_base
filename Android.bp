@@ -580,6 +580,7 @@ java_defaults {
     aidl: {
         generate_get_transaction_name: true,
         local_include_dirs: ["media/aidl"],
+        include_dirs: ["frameworks/av/aidl"],
     },
     dxflags: [
         "--core-library",
@@ -614,6 +615,7 @@ java_defaults {
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
+        "av-types-aidl-java",
         "mediatranscoding_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
     ],
