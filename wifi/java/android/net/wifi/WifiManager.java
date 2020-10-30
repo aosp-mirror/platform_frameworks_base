@@ -2425,6 +2425,9 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_FILS_SHA384     = 0x8000000000L; // FILS-SHA384
 
+    /** @hide */
+    public static final long WIFI_FEATURE_SAE_PK          = 0x10000000000L; // SAE-PK
+
     private long getSupportedFeatures() {
         try {
             return mService.getSupportedFeatures();
@@ -5327,6 +5330,13 @@ public class WifiManager {
      */
     public boolean isWapiSupported() {
         return isFeatureSupported(WIFI_FEATURE_WAPI);
+    }
+
+    /**
+     * @return true if this device supports WPA3 AP validation.
+     */
+    public boolean isWpa3ApValidationSupported() {
+        return isFeatureSupported(WIFI_FEATURE_SAE_PK);
     }
 
     /**
