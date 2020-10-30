@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +32,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
@@ -40,6 +42,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 /**
  * Build/Install/Run:
@@ -89,27 +93,39 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testRegisterOrganizer() throws RemoteException {
+        IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        List<DisplayAreaAppearedInfo> infos = mWm.mAtmService.mWindowOrganizerController
+                .mDisplayAreaOrganizerController
+                .registerOrganizer(organizer, FEATURE_VENDOR_FIRST).getList();
+
+        // Return a list contains the DA, and no onDisplayAreaAppeared triggered.
+        assertThat(infos).hasSize(1);
+        assertThat(infos.get(0).getDisplayAreaInfo().token)
+                .isEqualTo(mTestDisplayArea.getDisplayAreaInfo().token);
+        verify(organizer, never()).onDisplayAreaAppeared(any(DisplayAreaInfo.class),
+                any(SurfaceControl.class));
+    }
+
+    @Test
     public void testAppearedVanished() throws RemoteException {
         IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
-        verify(organizer)
-                .onDisplayAreaAppeared(any(DisplayAreaInfo.class), any(SurfaceControl.class));
-
         unregisterMockOrganizer(organizer);
+
         verify(organizer).onDisplayAreaVanished(any());
     }
 
     @Test
     public void testChanged() throws RemoteException {
         IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
-        verify(organizer)
-                .onDisplayAreaAppeared(any(DisplayAreaInfo.class), any(SurfaceControl.class));
-
         mDisplayContent.setBounds(new Rect(0, 0, 1000, 1000));
+
         verify(organizer).onDisplayAreaInfoChanged(any());
 
         Configuration tmpConfiguration = new Configuration();
         tmpConfiguration.setTo(mDisplayContent.getRequestedOverrideConfiguration());
         mDisplayContent.onRequestedOverrideConfigurationChanged(tmpConfiguration);
+
         // Ensure it was still only called once if the bounds didn't change
         verify(organizer).onDisplayAreaInfoChanged(any());
     }

@@ -85,6 +85,8 @@ final class HdmiCecController {
 
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
+    private static final int MAX_DEDICATED_ADDRESS = 11;
+
     private static final int MAX_HDMI_MESSAGE_HISTORY = 250;
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
@@ -104,7 +106,7 @@ final class HdmiCecController {
     private final Predicate<Integer> mSystemAudioAddressPredicate = new Predicate<Integer>() {
         @Override
         public boolean test(Integer address) {
-            return HdmiUtils.getTypeFromAddress(address) == Constants.ADDR_AUDIO_SYSTEM;
+            return HdmiUtils.isEligibleAddressForDevice(Constants.ADDR_AUDIO_SYSTEM, address);
         }
     };
 
@@ -195,41 +197,45 @@ final class HdmiCecController {
         });
     }
 
+    /**
+     * Address allocation will check the following addresses (in order):
+     * <ul>
+     *     <li>Given preferred logical address (if the address is valid for the given device
+     *     type)</li>
+     *     <li>All dedicated logical addresses for the given device type</li>
+     *     <li>Backup addresses, if valid for the given device type</li>
+     * </ul>
+     */
     @IoThreadOnly
     private void handleAllocateLogicalAddress(final int deviceType, int preferredAddress,
             final AllocateAddressCallback callback) {
         assertRunOnIoThread();
-        int startAddress = preferredAddress;
-        // If preferred address is "unregistered", start address will be the smallest
-        // address matched with the given device type.
-        if (preferredAddress == Constants.ADDR_UNREGISTERED) {
-            for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
-                if (deviceType == HdmiUtils.getTypeFromAddress(i)) {
-                    startAddress = i;
-                    break;
-                }
+        List<Integer> logicalAddressesToPoll = new ArrayList<>();
+        if (HdmiUtils.isEligibleAddressForDevice(deviceType, preferredAddress)) {
+            logicalAddressesToPoll.add(preferredAddress);
+        }
+        for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
+            if (!logicalAddressesToPoll.contains(i) && HdmiUtils.isEligibleAddressForDevice(
+                    deviceType, i) && HdmiUtils.isEligibleAddressForCecVersion(
+                    mService.getCecVersion(), i)) {
+                logicalAddressesToPoll.add(i);
             }
         }
 
         int logicalAddress = Constants.ADDR_UNREGISTERED;
-        // Iterates all possible addresses which has the same device type.
-        for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
-            int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
-            if (curAddress != Constants.ADDR_UNREGISTERED
-                    && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
-                boolean acked = false;
-                for (int j = 0; j < HdmiConfig.ADDRESS_ALLOCATION_RETRY; ++j) {
-                    if (sendPollMessage(curAddress, curAddress, 1)) {
-                        acked = true;
-                        break;
-                    }
-                }
-                // If sending <Polling Message> failed, it becomes new logical address for the
-                // device because no device uses it as logical address of the device.
-                if (!acked) {
-                    logicalAddress = curAddress;
+        for (Integer logicalAddressToPoll : logicalAddressesToPoll) {
+            boolean acked = false;
+            for (int j = 0; j < HdmiConfig.ADDRESS_ALLOCATION_RETRY; ++j) {
+                if (sendPollMessage(logicalAddressToPoll, logicalAddressToPoll, 1)) {
+                    acked = true;
                     break;
                 }
+            }
+            // If sending <Polling Message> failed, it becomes new logical address for the
+            // device because no device uses it as logical address of the device.
+            if (!acked) {
+                logicalAddress = logicalAddressToPoll;
+                break;
             }
         }
 

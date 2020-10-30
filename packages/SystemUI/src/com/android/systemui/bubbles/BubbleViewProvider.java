@@ -26,7 +26,7 @@ import androidx.annotation.Nullable;
 /**
  * Interface to represent actual Bubbles and UI elements that act like bubbles, like BubbleOverflow.
  */
-interface BubbleViewProvider {
+public interface BubbleViewProvider {
     @Nullable BubbleExpandedView getExpandedView();
 
     void setContentVisibility(boolean visible);

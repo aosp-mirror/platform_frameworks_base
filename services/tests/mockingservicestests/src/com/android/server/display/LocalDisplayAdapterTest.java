@@ -429,7 +429,12 @@ public class LocalDisplayAdapterTest {
         public Display.HdrCapabilities hdrCapabilities = new Display.HdrCapabilities(new int[0],
                 1000, 1000, 0);
         public SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs =
-                new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f, 60.f, 60.f);
+                new SurfaceControl.DesiredDisplayConfigSpecs(/* defaultConfig */ 0,
+                    /* allowGroupSwitching */ false,
+                    /* primaryRefreshRateMin */ 60.f,
+                    /* primaryRefreshRateMax */ 60.f,
+                    /* appRefreshRateMin */ 60.f,
+                    /* appRefreshRateMax */60.f);
 
         private FakeDisplay(int port) {
             this.address = createDisplayAddress(port);

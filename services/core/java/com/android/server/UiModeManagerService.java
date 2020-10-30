@@ -501,7 +501,7 @@ final class UiModeManagerService extends SystemService {
     }
 
     /**
-     * Updates the night mode setting in Settings.Global and returns if the value was successfully
+     * Updates the night mode setting in Settings.Secure and returns if the value was successfully
      * changed.
      *
      * @param context A valid context
@@ -516,7 +516,8 @@ final class UiModeManagerService extends SystemService {
         int oldNightMode = mNightMode;
         if (mSetupWizardComplete) {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
-                    Secure.UI_NIGHT_MODE, mNightMode, userId);
+                    Secure.UI_NIGHT_MODE, res.getInteger(
+                            com.android.internal.R.integer.config_defaultNightMode), userId);
             mOverrideNightModeOn = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE_OVERRIDE_ON, 0, userId) != 0;
             mOverrideNightModeOff = Secure.getIntForUser(context.getContentResolver(),

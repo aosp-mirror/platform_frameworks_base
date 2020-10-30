@@ -17,8 +17,14 @@ package com.android.server.alarm;
 
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
+import static android.app.AlarmManager.FLAG_IDLE_UNTIL;
+import static android.app.AlarmManager.FLAG_STANDALONE;
+import static android.app.AlarmManager.FLAG_WAKE_FROM_IDLE;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.app.AlarmManager.WINDOW_EXACT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
@@ -66,7 +72,6 @@ import static org.mockito.Mockito.atLeastOnce;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IAlarmCompleteListener;
 import android.app.IAlarmListener;
@@ -85,7 +90,6 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -112,8 +116,6 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.Executor;
@@ -354,48 +356,51 @@ public class AlarmManagerServiceTest {
     }
 
     private void setTestAlarm(int type, long triggerTime, PendingIntent operation) {
-        setTestAlarm(type, triggerTime, operation, 0, AlarmManager.FLAG_STANDALONE,
-                TEST_CALLING_UID);
+        setTestAlarm(type, triggerTime, operation, 0, FLAG_STANDALONE, TEST_CALLING_UID);
     }
 
     private void setRepeatingTestAlarm(int type, long firstTrigger, long interval,
             PendingIntent pi) {
-        setTestAlarm(type, firstTrigger, pi, interval, AlarmManager.FLAG_STANDALONE,
-                TEST_CALLING_UID);
+        setTestAlarm(type, firstTrigger, pi, interval, FLAG_STANDALONE, TEST_CALLING_UID);
     }
 
     private void setIdleUntilAlarm(int type, long triggerTime, PendingIntent pi) {
-        setTestAlarm(type, triggerTime, pi, 0, AlarmManager.FLAG_IDLE_UNTIL, TEST_CALLING_UID);
+        setTestAlarm(type, triggerTime, pi, 0, FLAG_IDLE_UNTIL, TEST_CALLING_UID);
     }
 
     private void setWakeFromIdle(int type, long triggerTime, PendingIntent pi) {
         // Note: Only alarm clock alarms are allowed to include this flag in the actual service.
         // But this is a unit test so we'll only test the flag for granularity and convenience.
-        setTestAlarm(type, triggerTime, pi, 0,
-                AlarmManager.FLAG_WAKE_FROM_IDLE | AlarmManager.FLAG_STANDALONE, TEST_CALLING_UID);
+        setTestAlarm(type, triggerTime, pi, 0, FLAG_WAKE_FROM_IDLE | FLAG_STANDALONE,
+                TEST_CALLING_UID);
+    }
+
+    private void setAllowWhileIdleAlarm(int type, long triggerTime, PendingIntent pi,
+            boolean unrestricted) {
+        final int flags = unrestricted ? FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED : FLAG_ALLOW_WHILE_IDLE;
+        setTestAlarm(type, triggerTime, pi, 0, flags, TEST_CALLING_UID);
     }
 
     private void setTestAlarm(int type, long triggerTime, PendingIntent operation, long interval,
             int flags, int callingUid) {
-        mService.setImpl(type, triggerTime, AlarmManager.WINDOW_EXACT, interval, operation, null,
-                "test", flags, null, null, callingUid, TEST_CALLING_PACKAGE);
+        mService.setImpl(type, triggerTime, WINDOW_EXACT, interval, operation, null, "test", flags,
+                null, null, callingUid, TEST_CALLING_PACKAGE);
     }
 
     private void setTestAlarmWithListener(int type, long triggerTime, IAlarmListener listener) {
-        mService.setImpl(type, triggerTime, AlarmManager.WINDOW_EXACT, 0,
-                null, listener, "test", AlarmManager.FLAG_STANDALONE, null, null,
-                TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+        mService.setImpl(type, triggerTime, WINDOW_EXACT, 0, null, listener, "test",
+                FLAG_STANDALONE, null, null, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
     }
 
 
     private PendingIntent getNewMockPendingIntent() {
-        return getNewMockPendingIntent(TEST_CALLING_UID);
+        return getNewMockPendingIntent(TEST_CALLING_UID, TEST_CALLING_PACKAGE);
     }
 
-    private PendingIntent getNewMockPendingIntent(int mockUid) {
+    private PendingIntent getNewMockPendingIntent(int creatorUid, String creatorPackage) {
         final PendingIntent mockPi = mock(PendingIntent.class, Answers.RETURNS_DEEP_STUBS);
-        when(mockPi.getCreatorUid()).thenReturn(mockUid);
-        when(mockPi.getCreatorPackage()).thenReturn(TEST_CALLING_PACKAGE);
+        when(mockPi.getCreatorUid()).thenReturn(creatorUid);
+        when(mockPi.getCreatorPackage()).thenReturn(creatorPackage);
         return mockPi;
     }
 
@@ -865,7 +870,7 @@ public class AlarmManagerServiceTest {
     public void alarmCountKeyedOnCallingUid() {
         final int mockCreatorUid = 431412;
         setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 5,
-                getNewMockPendingIntent(mockCreatorUid));
+                getNewMockPendingIntent(mockCreatorUid, TEST_CALLING_PACKAGE));
         assertEquals(1, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
         assertEquals(-1, mService.mAlarmsPerUid.get(mockCreatorUid, -1));
     }
@@ -1018,31 +1023,12 @@ public class AlarmManagerServiceTest {
         for (int i = 0; i < numAlarms; i++) {
             int mockUid = UserHandle.getUid(mockUserId, 1234 + i);
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 10,
-                    getNewMockPendingIntent(mockUid), 0, AlarmManager.FLAG_STANDALONE, mockUid);
+                    getNewMockPendingIntent(mockUid, TEST_CALLING_PACKAGE), 0, FLAG_STANDALONE,
+                    mockUid);
         }
         assertEquals(numAlarms, mService.mAlarmsPerUid.size());
         mService.removeUserLocked(mockUserId);
         assertEquals(0, mService.mAlarmsPerUid.size());
-    }
-
-    @Test
-    public void alarmCountOnRemoveFromPendingWhileIdle() {
-        mService.mPendingIdleUntil = mock(Alarm.class);
-        final int numAlarms = 15;
-        final PendingIntent[] pis = new PendingIntent[numAlarms];
-        for (int i = 0; i < numAlarms; i++) {
-            pis[i] = getNewMockPendingIntent();
-            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 5, pis[i]);
-        }
-        assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        assertEquals(numAlarms, mService.mPendingWhileIdleAlarms.size());
-        final int toRemove = 8;
-        for (int i = 0; i < toRemove; i++) {
-            mService.removeLocked(pis[i], null);
-            assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
-        }
-        mService.removeLocked(TEST_CALLING_UID);
-        assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
     }
 
     @Test
@@ -1268,19 +1254,139 @@ public class AlarmManagerServiceTest {
         assertEquals(mNowElapsedTest + 12, mService.mPendingIdleUntil.getWhenElapsed());
     }
 
+    @Test
+    public void allowWhileIdleAlarmsWhileDeviceIdle() throws Exception {
+        doReturn(0).when(mService).fuzzForDuration(anyLong());
+
+        final long awiDelayForTest = 23;
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, awiDelayForTest);
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, 0);
+
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1000,
+                getNewMockPendingIntent());
+        assertNotNull(mService.mPendingIdleUntil);
+
+        final long seedTrigger = mNowElapsedTest + 3;
+        final int numAlarms = 10;
+        final PendingIntent[] pis = new PendingIntent[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            pis[i] = getNewMockPendingIntent();
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, seedTrigger + i * i, pis[i], false);
+        }
+
+        long lastAwiDispatch = -1;
+        int i = 0;
+        while (i < numAlarms) {
+            final long nextDispatch = (lastAwiDispatch >= 0) ? (lastAwiDispatch + awiDelayForTest)
+                    : (seedTrigger + i * i);
+            assertEquals("Wrong allow-while-idle dispatch", nextDispatch, mTestTimer.getElapsed());
+
+            mNowElapsedTest = nextDispatch;
+            mTestTimer.expire();
+
+            while (i < numAlarms && (seedTrigger + i * i) <= nextDispatch) {
+                verify(pis[i]).send(eq(mMockContext), eq(0), any(Intent.class), any(),
+                        any(Handler.class), isNull(), any());
+                i++;
+            }
+            Log.d(TAG, "Dispatched alarms upto " + i + " at " + nextDispatch);
+            lastAwiDispatch = nextDispatch;
+        }
+    }
+
+    @Test
+    public void allowWhileIdleUnrestricted() throws Exception {
+        doReturn(0).when(mService).fuzzForDuration(anyLong());
+
+        final long awiDelayForTest = 127;
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, awiDelayForTest);
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, 0);
+
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1000,
+                getNewMockPendingIntent());
+        assertNotNull(mService.mPendingIdleUntil);
+
+        final long seedTrigger = mNowElapsedTest + 3;
+        for (int i = 1; i <= 5; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, seedTrigger + i * i,
+                    getNewMockPendingIntent(), true);
+        }
+        for (int i = 1; i <= 5; i++) {
+            final long nextTrigger = mTestTimer.getElapsed();
+            assertEquals("Wrong trigger for alarm " + i, seedTrigger + i * i, nextTrigger);
+            mNowElapsedTest = nextTrigger;
+            mTestTimer.expire();
+        }
+    }
+
+    @Test
+    public void deviceIdleThrottling() throws Exception {
+        doReturn(0).when(mService).fuzzForDuration(anyLong());
+
+        final long deviceIdleUntil = mNowElapsedTest + 1234;
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, deviceIdleUntil, getNewMockPendingIntent());
+
+        assertEquals(deviceIdleUntil, mTestTimer.getElapsed());
+
+        final int numAlarms = 10;
+        final PendingIntent[] pis = new PendingIntent[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + i + 1,
+                    pis[i] = getNewMockPendingIntent());
+            assertEquals(deviceIdleUntil, mTestTimer.getElapsed());
+        }
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+        for (int i = 0; i < numAlarms; i++) {
+            verify(pis[i]).send(eq(mMockContext), eq(0), any(Intent.class), any(),
+                    any(Handler.class), isNull(), any());
+        }
+    }
+
+    @Test
+    public void dispatchOrder() throws Exception {
+        doReturn(0).when(mService).fuzzForDuration(anyLong());
+
+        final long deviceIdleUntil = mNowElapsedTest + 1234;
+        final PendingIntent idleUntilPi = getNewMockPendingIntent();
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, deviceIdleUntil, idleUntilPi);
+
+        assertEquals(deviceIdleUntil, mTestTimer.getElapsed());
+
+        final PendingIntent pi5wakeup = getNewMockPendingIntent();
+        final PendingIntent pi4wakeupPackage = getNewMockPendingIntent();
+        final PendingIntent pi2nonWakeup = getNewMockPendingIntent(57, "test.different.package");
+
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, pi5wakeup);
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 4, pi4wakeupPackage);
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 2, pi2nonWakeup);
+
+        mNowElapsedTest = deviceIdleUntil;
+        mTestTimer.expire();
+
+        // The order of the alarms in delivery list should be:
+        // IdleUntil, all alarms of a package with any wakeup alarms, then the rest.
+        // Within a package, alarms should be ordered by requested delivery time.
+        final PendingIntent[] expectedOrder = new PendingIntent[]{
+                idleUntilPi, pi4wakeupPackage, pi5wakeup, pi2nonWakeup};
+
+        ArgumentCaptor<ArrayList<Alarm>> listCaptor = ArgumentCaptor.forClass(ArrayList.class);
+        verify(mService).deliverAlarmsLocked(listCaptor.capture(), anyLong());
+        final ArrayList<Alarm> deliveryList = listCaptor.getValue();
+
+        assertEquals(expectedOrder.length, deliveryList.size());
+        for (int i = 0; i < expectedOrder.length; i++) {
+            assertTrue("Unexpected alarm: " + deliveryList.get(i) + " at pos: " + i,
+                    deliveryList.get(i).matches(expectedOrder[i], null));
+        }
+    }
+
     @After
     public void tearDown() {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
         LocalServices.removeServiceForTest(AlarmManagerInternal.class);
-    }
-
-    private void dumpAllAlarms(String tag, ArrayList<Alarm> alarms) {
-        System.out.println(tag + ": ");
-        IndentingPrintWriter ipw = new IndentingPrintWriter(new PrintWriter(System.out));
-        AlarmManagerService.dumpAlarmList(ipw, alarms, mNowElapsedTest,
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
-        ipw.close();
     }
 }

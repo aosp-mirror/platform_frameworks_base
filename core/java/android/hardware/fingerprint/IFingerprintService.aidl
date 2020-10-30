@@ -23,7 +23,6 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.view.Surface;
 import java.util.List;
 
 /**
@@ -42,12 +41,12 @@ interface IFingerprintService {
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
     // through FingerprintManager now.
     void authenticate(IBinder token, long operationId, int userId,
-            IFingerprintServiceReceiver receiver, String opPackageName, in Surface surface);
+            IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
     // about accept/reject/lockout.
     void detectFingerprint(IBinder token, int userId, IFingerprintServiceReceiver receiver,
-            String opPackageName, in Surface surface);
+            String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
@@ -56,7 +55,7 @@ interface IFingerprintService {
     // startPreparedClient().
     void prepareForAuthentication(IBinder token, long operationId, int userId,
             IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
-            int callingUid, int callingPid, int callingUserId, in Surface surface);
+            int callingUid, int callingPid, int callingUserId);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int cookie);
@@ -74,7 +73,7 @@ interface IFingerprintService {
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
-            String opPackageName, in Surface surface);
+            String opPackageName);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);

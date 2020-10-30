@@ -52,6 +52,8 @@ class SettingsProtoDumpUtil {
                 ConfigSettingsProto.ALARM_MANAGER_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_APP_COMPAT,
                 ConfigSettingsProto.APP_COMPAT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_APP_STANDBY,
+                ConfigSettingsProto.APP_STANDBY_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_AUTOFILL,
                 ConfigSettingsProto.AUTOFILL_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_BLOBSTORE,
@@ -219,9 +221,6 @@ class SettingsProtoDumpUtil {
         p.end(apnDbToken);
 
         final long appToken = p.start(GlobalSettingsProto.APP);
-        dumpSetting(s, p,
-                Settings.Global.APP_IDLE_CONSTANTS,
-                GlobalSettingsProto.App.IDLE_CONSTANTS);
         dumpSetting(s, p,
                 Settings.Global.APP_STANDBY_ENABLED,
                 GlobalSettingsProto.App.STANDBY_ENABLED);

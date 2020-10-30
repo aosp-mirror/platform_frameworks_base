@@ -63,7 +63,7 @@ public class BubbleOverflowActivity extends Activity {
     private TextView mEmptyStateTitle;
     private TextView mEmptyStateSubtitle;
     private ImageView mEmptyStateImage;
-    private Bubbles mBubbles;
+    private BubbleController mController;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
@@ -111,7 +111,7 @@ public class BubbleOverflowActivity extends Activity {
         if (intent != null && intent.getExtras() != null) {
             IBinder binder = intent.getExtras().getBinder(EXTRA_BUBBLE_CONTROLLER);
             if (binder instanceof ObjectWrapper) {
-                mBubbles = ((ObjectWrapper<Bubbles>) binder).get();
+                mController = ((ObjectWrapper<BubbleController>) binder).get();
             }
         } else {
             Log.w(TAG, "Bubble overflow activity created without bubble controller!");
@@ -139,15 +139,15 @@ public class BubbleOverflowActivity extends Activity {
         final int viewHeight = recyclerViewHeight / rows;
 
         mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
-                mBubbles::promoteBubbleFromOverflow, viewWidth, viewHeight);
+                mController::promoteBubbleFromOverflow, viewWidth, viewHeight);
         mRecyclerView.setAdapter(mAdapter);
 
         mOverflowBubbles.clear();
-        mOverflowBubbles.addAll(mBubbles.getOverflowBubbles());
+        mOverflowBubbles.addAll(mController.getOverflowBubbles());
         mAdapter.notifyDataSetChanged();
         updateEmptyStateVisibility();
 
-        mBubbles.setOverflowListener(mDataListener);
+        mController.setOverflowListener(mDataListener);
         updateTheme();
     }
 
@@ -217,7 +217,7 @@ public class BubbleOverflowActivity extends Activity {
 
             if (DEBUG_OVERFLOW) {
                 Log.d(TAG, BubbleDebugConfig.formatBubblesString(
-                        mBubbles.getOverflowBubbles(), null));
+                        mController.getOverflowBubbles(), null));
             }
         }
     };

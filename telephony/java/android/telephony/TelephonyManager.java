@@ -10571,6 +10571,9 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
      *
+     * If you want continuous updates of service state info, register a {@link PhoneStateListener}
+     * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.

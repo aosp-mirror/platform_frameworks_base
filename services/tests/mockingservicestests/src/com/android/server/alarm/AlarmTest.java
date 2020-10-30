@@ -19,6 +19,7 @@ package com.android.server.alarm;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 
 import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
+import static com.android.server.alarm.Alarm.NUM_POLICIES;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
 import static com.android.server.alarm.Constants.TEST_CALLING_PACKAGE;
 import static com.android.server.alarm.Constants.TEST_CALLING_UID;
@@ -36,6 +37,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Random;
+
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class AlarmTest {
@@ -49,29 +52,54 @@ public class AlarmTest {
     @Test
     public void initSetsOnlyRequesterPolicy() {
         final Alarm a = createDefaultAlarm(4567, 2);
-        assertEquals(4567, a.getPolicyElapsed(REQUESTER_POLICY_INDEX));
-        assertEquals(0, a.getPolicyElapsed(APP_STANDBY_POLICY_INDEX));
+
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            if (i == REQUESTER_POLICY_INDEX) {
+                assertEquals(4567, a.getPolicyElapsed(i));
+            } else {
+                assertEquals(0, a.getPolicyElapsed(i));
+            }
+        }
+    }
+
+    /**
+     * Generates a long matrix {@code A} of size {@code NxN}, with the property that the {@code i}th
+     * row will have the {@code i}th element largest in that row.
+     *
+     * In other words, {@code A[i][i]} will be the maximum of {@code A[i][j]} over all {@code j},
+     * {@code 0<=j<N}.
+     */
+    private static long[][] generatePolicyTestMatrix(int n) {
+        final long[][] data = new long[n][n];
+        final Random random = new Random(971);
+        for (int i = 0; i < n; i++) {
+            data[i][i] = 1;
+            for (int j = 0; j < n; j++) {
+                if (i != j) {
+                    data[i][j] = random.nextInt(1 << 20);
+                    data[i][i] += data[i][j];
+                }
+            }
+        }
+        return data;
     }
 
     @Test
     public void whenElapsed() {
         final Alarm a = createDefaultAlarm(0, 0);
 
-        a.setPolicyElapsed(REQUESTER_POLICY_INDEX, 4);
-        a.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 10);
-        assertEquals(10, a.getWhenElapsed());
+        final long[][] uniqueData = generatePolicyTestMatrix(NUM_POLICIES);
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            for (int j = 0; j < NUM_POLICIES; j++) {
+                a.setPolicyElapsed(j, uniqueData[i][j]);
+            }
+            assertEquals(uniqueData[i][i], a.getWhenElapsed());
+        }
 
-        a.setPolicyElapsed(REQUESTER_POLICY_INDEX, 12);
-        assertEquals(12, a.getWhenElapsed());
-
-        a.setPolicyElapsed(REQUESTER_POLICY_INDEX, 7);
-        assertEquals(10, a.getWhenElapsed());
-
-        a.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 2);
-        assertEquals(7, a.getWhenElapsed());
-
-        a.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 7);
-        assertEquals(7, a.getWhenElapsed());
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            a.setPolicyElapsed(i, 3);
+        }
+        assertEquals(3, a.getWhenElapsed());
     }
 
     @Test
@@ -85,18 +113,21 @@ public class AlarmTest {
         a.setPolicyElapsed(REQUESTER_POLICY_INDEX, 2);
         assertEquals(14, a.getMaxWhenElapsed());
 
-        a.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 5);
-        assertEquals(14, a.getMaxWhenElapsed());
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            if (i == REQUESTER_POLICY_INDEX) {
+                continue;
+            }
+            a.setPolicyElapsed(i, 17);
+            // getWhenElapsed is 17, so getMaxWhenElapsed will return 17 too.
+            assertEquals(17, a.getMaxWhenElapsed());
 
-        a.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 16);
-        assertEquals(16, a.getMaxWhenElapsed());
-
-        a.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 12);
-        assertEquals(14, a.getMaxWhenElapsed());
+            a.setPolicyElapsed(i, 5);
+            assertEquals(14, a.getMaxWhenElapsed());
+        }
     }
 
     @Test
-    public void setPolicyElapsed() {
+    public void setPolicyElapsedExact() {
         final Alarm exactAlarm = createDefaultAlarm(10, 0);
 
         assertTrue(exactAlarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, 4));
@@ -108,6 +139,10 @@ public class AlarmTest {
 
         assertTrue(exactAlarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, 7));
 
+    }
+
+    @Test
+    public void setPolicyElapsedInexact() {
         final Alarm inexactAlarm = createDefaultAlarm(10, 5);
 
         assertTrue(inexactAlarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, 4));

@@ -27,10 +27,11 @@ import static org.junit.Assume.assumeTrue;
 import android.net.MacAddress;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.PasspointTestUtils;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.Test;
 
@@ -198,7 +199,7 @@ public class WifiNetworkSuggestionTest {
      */
     @Test
     public void testWifiNetworkSuggestionBuilderForOemPaidEnhancedOpenNetworkWithBssid() {
-        assumeTrue(SdkLevelUtil.isAtLeastS());
+        assumeTrue(SdkLevel.isAtLeastS());
 
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
@@ -953,7 +954,7 @@ public class WifiNetworkSuggestionTest {
      */
     @Test
     public void testSimCredentialNetworkWithSubId() {
-        assumeTrue(SdkLevelUtil.isAtLeastS());
+        assumeTrue(SdkLevel.isAtLeastS());
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
         enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
         enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
@@ -1254,7 +1255,7 @@ public class WifiNetworkSuggestionTest {
      */
     @Test
     public void testSetIsNetworkAsOemPaid() {
-        assumeTrue(SdkLevelUtil.isAtLeastS());
+        assumeTrue(SdkLevel.isAtLeastS());
 
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
@@ -1272,7 +1273,7 @@ public class WifiNetworkSuggestionTest {
      */
     @Test
     public void testSetIsNetworkAsOemPaidOnPasspointNetwork() {
-        assumeTrue(SdkLevelUtil.isAtLeastS());
+        assumeTrue(SdkLevel.isAtLeastS());
 
         PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
@@ -1307,7 +1308,7 @@ public class WifiNetworkSuggestionTest {
      */
     @Test(expected = IllegalStateException.class)
     public void testSetCredentialSharedWithUserWithSetIsNetworkAsOemPaid() {
-        assumeTrue(SdkLevelUtil.isAtLeastS());
+        assumeTrue(SdkLevel.isAtLeastS());
 
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)

@@ -306,7 +306,8 @@ public class NotificationIconAreaController implements
                         || !entry.isPulseSuppressed())) {
             return false;
         }
-        if (mBubblesOptional.isPresent() && mBubblesOptional.get().isBubbleExpanded(entry)) {
+        if (mBubblesOptional.isPresent()
+                && mBubblesOptional.get().isBubbleExpanded(entry.getKey())) {
             return false;
         }
         return true;

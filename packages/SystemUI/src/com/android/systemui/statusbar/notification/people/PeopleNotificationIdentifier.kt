@@ -103,7 +103,7 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
     private val Ranking.personTypeInfo
         get() = when {
             !isConversation -> TYPE_NON_PERSON
-            shortcutInfo == null -> TYPE_PERSON
+            conversationShortcutInfo == null -> TYPE_PERSON
             channel?.isImportantConversation == true -> TYPE_IMPORTANT_PERSON
             else -> TYPE_FULL_PERSON
         }

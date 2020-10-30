@@ -92,11 +92,11 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -117,8 +117,6 @@ import com.android.server.usage.AppIdleHistory.AppUsageHistory;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.time.Duration;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -144,10 +142,11 @@ public class AppStandbyController implements AppStandbyInternal {
     private static final long ONE_DAY = ONE_HOUR * 24;
 
     /**
-     * The minimum amount of time the screen must have been on before an app can time out from its
-     * current bucket to the next bucket.
+     * The default minimum amount of time the screen must have been on before an app can time out
+     * from its current bucket to the next bucket.
      */
-    private static final long[] SCREEN_TIME_THRESHOLDS = {
+    @VisibleForTesting
+    static final long[] DEFAULT_SCREEN_TIME_THRESHOLDS = {
             0,
             0,
             COMPRESS_TIME ? 2 * ONE_MINUTE : 1 * ONE_HOUR,
@@ -155,9 +154,10 @@ public class AppStandbyController implements AppStandbyInternal {
             COMPRESS_TIME ? 8 * ONE_MINUTE : 6 * ONE_HOUR
     };
 
-    /** The minimum allowed values for each index in {@link #SCREEN_TIME_THRESHOLDS}. */
-    private static final long[] MINIMUM_SCREEN_TIME_THRESHOLDS = COMPRESS_TIME
-            ? new long[SCREEN_TIME_THRESHOLDS.length]
+    /** The minimum allowed values for each index in {@link #DEFAULT_SCREEN_TIME_THRESHOLDS}. */
+    @VisibleForTesting
+    static final long[] MINIMUM_SCREEN_TIME_THRESHOLDS = COMPRESS_TIME
+            ? new long[DEFAULT_SCREEN_TIME_THRESHOLDS.length]
             : new long[]{
                     0,
                     0,
@@ -167,20 +167,22 @@ public class AppStandbyController implements AppStandbyInternal {
             };
 
     /**
-     * The minimum amount of elapsed time that must have passed before an app can time out from its
-     * current bucket to the next bucket.
+     * The default minimum amount of elapsed time that must have passed before an app can time out
+     * from its current bucket to the next bucket.
      */
-    private static final long[] ELAPSED_TIME_THRESHOLDS = {
+    @VisibleForTesting
+    static final long[] DEFAULT_ELAPSED_TIME_THRESHOLDS = {
             0,
-            COMPRESS_TIME ?  1 * ONE_MINUTE : 12 * ONE_HOUR,
-            COMPRESS_TIME ?  4 * ONE_MINUTE : 24 * ONE_HOUR,
+            COMPRESS_TIME ? 1 * ONE_MINUTE : 12 * ONE_HOUR,
+            COMPRESS_TIME ? 4 * ONE_MINUTE : 24 * ONE_HOUR,
             COMPRESS_TIME ? 16 * ONE_MINUTE : 48 * ONE_HOUR,
             COMPRESS_TIME ? 32 * ONE_MINUTE : 30 * ONE_DAY
     };
 
-    /** The minimum allowed values for each index in {@link #ELAPSED_TIME_THRESHOLDS}. */
-    private static final long[] MINIMUM_ELAPSED_TIME_THRESHOLDS = COMPRESS_TIME
-            ? new long[ELAPSED_TIME_THRESHOLDS.length]
+    /** The minimum allowed values for each index in {@link #DEFAULT_ELAPSED_TIME_THRESHOLDS}. */
+    @VisibleForTesting
+    static final long[] MINIMUM_ELAPSED_TIME_THRESHOLDS = COMPRESS_TIME
+            ? new long[DEFAULT_ELAPSED_TIME_THRESHOLDS.length]
             : new long[]{
                     0,
                     ONE_HOUR,
@@ -198,7 +200,8 @@ public class AppStandbyController implements AppStandbyInternal {
     };
 
     /** Default expiration time for bucket prediction. After this, use thresholds to downgrade. */
-    private static final long DEFAULT_PREDICTION_TIMEOUT = 12 * ONE_HOUR;
+    private static final long DEFAULT_PREDICTION_TIMEOUT =
+            COMPRESS_TIME ? 10 * ONE_MINUTE : 12 * ONE_HOUR;
 
     /**
      * Indicates the maximum wait time for admin data to be available;
@@ -269,58 +272,64 @@ public class AppStandbyController implements AppStandbyInternal {
     static final int MSG_REPORT_SYNC_SCHEDULED = 12;
     static final int MSG_REPORT_EXEMPTED_SYNC_START = 13;
 
-    long mCheckIdleIntervalMillis;
+    long mCheckIdleIntervalMillis = Math.min(DEFAULT_ELAPSED_TIME_THRESHOLDS[1] / 4,
+            ConstantsObserver.DEFAULT_CHECK_IDLE_INTERVAL_MS);
     /**
      * The minimum amount of time the screen must have been on before an app can time out from its
      * current bucket to the next bucket.
      */
-    long[] mAppStandbyScreenThresholds = SCREEN_TIME_THRESHOLDS;
+    long[] mAppStandbyScreenThresholds = DEFAULT_SCREEN_TIME_THRESHOLDS;
     /**
      * The minimum amount of elapsed time that must have passed before an app can time out from its
      * current bucket to the next bucket.
      */
-    long[] mAppStandbyElapsedThresholds = ELAPSED_TIME_THRESHOLDS;
+    long[] mAppStandbyElapsedThresholds = DEFAULT_ELAPSED_TIME_THRESHOLDS;
     /** Minimum time a strong usage event should keep the bucket elevated. */
-    long mStrongUsageTimeoutMillis;
+    long mStrongUsageTimeoutMillis = ConstantsObserver.DEFAULT_STRONG_USAGE_TIMEOUT;
     /** Minimum time a notification seen event should keep the bucket elevated. */
-    long mNotificationSeenTimeoutMillis;
+    long mNotificationSeenTimeoutMillis = ConstantsObserver.DEFAULT_NOTIFICATION_TIMEOUT;
     /** Minimum time a system update event should keep the buckets elevated. */
-    long mSystemUpdateUsageTimeoutMillis;
+    long mSystemUpdateUsageTimeoutMillis = ConstantsObserver.DEFAULT_SYSTEM_UPDATE_TIMEOUT;
     /** Maximum time to wait for a prediction before using simple timeouts to downgrade buckets. */
-    long mPredictionTimeoutMillis;
+    long mPredictionTimeoutMillis = DEFAULT_PREDICTION_TIMEOUT;
     /** Maximum time a sync adapter associated with a CP should keep the buckets elevated. */
-    long mSyncAdapterTimeoutMillis;
+    long mSyncAdapterTimeoutMillis = ConstantsObserver.DEFAULT_SYNC_ADAPTER_TIMEOUT;
     /**
      * Maximum time an exempted sync should keep the buckets elevated, when sync is scheduled in
      * non-doze
      */
-    long mExemptedSyncScheduledNonDozeTimeoutMillis;
+    long mExemptedSyncScheduledNonDozeTimeoutMillis =
+            ConstantsObserver.DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT;
     /**
      * Maximum time an exempted sync should keep the buckets elevated, when sync is scheduled in
      * doze
      */
-    long mExemptedSyncScheduledDozeTimeoutMillis;
+    long mExemptedSyncScheduledDozeTimeoutMillis =
+            ConstantsObserver.DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT;
     /**
      * Maximum time an exempted sync should keep the buckets elevated, when sync is started.
      */
-    long mExemptedSyncStartTimeoutMillis;
+    long mExemptedSyncStartTimeoutMillis = ConstantsObserver.DEFAULT_EXEMPTED_SYNC_START_TIMEOUT;
     /**
      * Maximum time an unexempted sync should keep the buckets elevated, when sync is scheduled
      */
-    long mUnexemptedSyncScheduledTimeoutMillis;
+    long mUnexemptedSyncScheduledTimeoutMillis =
+            ConstantsObserver.DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT;
     /** Maximum time a system interaction should keep the buckets elevated. */
-    long mSystemInteractionTimeoutMillis;
+    long mSystemInteractionTimeoutMillis = ConstantsObserver.DEFAULT_SYSTEM_INTERACTION_TIMEOUT;
     /**
      * Maximum time a foreground service start should keep the buckets elevated if the service
      * start is the first usage of the app
      */
-    long mInitialForegroundServiceStartTimeoutMillis;
+    long mInitialForegroundServiceStartTimeoutMillis =
+            ConstantsObserver.DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT;
     /**
      * User usage that would elevate an app's standby bucket will also elevate the standby bucket of
      * cross profile connected apps. Explicit standby bucket setting via
      * {@link #setAppStandbyBucket(String, int, int, int, int)} will not be propagated.
      */
-    boolean mLinkCrossProfileApps;
+    boolean mLinkCrossProfileApps =
+            ConstantsObserver.DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS;
     /**
      * Whether we should allow apps into the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
@@ -481,9 +490,8 @@ public class AppStandbyController implements AppStandbyInternal {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             Slog.d(TAG, "Setting app idle enabled state");
             // Observe changes to the threshold
-            SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-            settingsObserver.registerObserver();
-            settingsObserver.updateSettings();
+            ConstantsObserver settingsObserver = new ConstantsObserver(mHandler);
+            settingsObserver.start();
 
             mAppWidgetManager = mContext.getSystemService(AppWidgetManager.class);
 
@@ -1964,7 +1972,8 @@ public class AppStandbyController implements AppStandbyInternal {
          * The minimum amount of time required since the last user interaction before an app can be
          * automatically placed in the RESTRICTED bucket.
          */
-        long mAutoRestrictedBucketDelayMs = ONE_DAY;
+        long mAutoRestrictedBucketDelayMs =
+                ConstantsObserver.DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS;
         /**
          * Cached set of apps that are power whitelisted, including those not whitelisted from idle.
          */
@@ -2136,9 +2145,9 @@ public class AppStandbyController implements AppStandbyInternal {
             return appWidgetManager.isBoundWidgetPackage(packageName, userId);
         }
 
-        String getAppIdleSettings() {
-            return Global.getString(mContext.getContentResolver(),
-                    Global.APP_IDLE_CONSTANTS);
+        @NonNull
+        DeviceConfig.Properties getDeviceConfigProperties(String... keys) {
+            return DeviceConfig.getProperties(DeviceConfig.NAMESPACE_APP_STANDBY, keys);
         }
 
         /** Whether the device is in doze or not. */
@@ -2160,6 +2169,12 @@ public class AppStandbyController implements AppStandbyInternal {
                 return Collections.emptyList();
             }
             return mCrossProfileAppsInternal.getTargetUserProfiles(pkg, userId);
+        }
+
+        void registerDeviceConfigPropertiesChangedListener(
+                @NonNull DeviceConfig.OnPropertiesChangedListener listener) {
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_STANDBY,
+                    JobSchedulerBackgroundThread.getExecutor(), listener);
         }
 
         void dump(PrintWriter pw) {
@@ -2286,11 +2301,11 @@ public class AppStandbyController implements AppStandbyInternal {
     };
 
     /**
-     * Observe settings changes for {@link Global#APP_IDLE_CONSTANTS}.
+     * Observe changes for {@link DeviceConfig#NAMESPACE_APP_STANDBY} and other standby related
+     * Settings constants.
      */
-    private class SettingsObserver extends ContentObserver {
-        private static final String KEY_SCREEN_TIME_THRESHOLDS = "screen_thresholds";
-        private static final String KEY_ELAPSED_TIME_THRESHOLDS = "elapsed_thresholds";
+    private class ConstantsObserver extends ContentObserver implements
+            DeviceConfig.OnPropertiesChangedListener {
         private static final String KEY_STRONG_USAGE_HOLD_DURATION = "strong_usage_duration";
         private static final String KEY_NOTIFICATION_SEEN_HOLD_DURATION =
                 "notification_seen_duration";
@@ -2314,39 +2329,176 @@ public class AppStandbyController implements AppStandbyInternal {
                 "auto_restricted_bucket_delay_ms";
         private static final String KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS =
                 "cross_profile_apps_share_standby_buckets";
-        public static final long DEFAULT_STRONG_USAGE_TIMEOUT = 1 * ONE_HOUR;
-        public static final long DEFAULT_NOTIFICATION_TIMEOUT = 12 * ONE_HOUR;
-        public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT = 2 * ONE_HOUR;
-        public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT = 10 * ONE_MINUTE;
-        public static final long DEFAULT_SYNC_ADAPTER_TIMEOUT = 10 * ONE_MINUTE;
-        public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT = 10 * ONE_MINUTE;
-        public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT = 4 * ONE_HOUR;
-        public static final long DEFAULT_EXEMPTED_SYNC_START_TIMEOUT = 10 * ONE_MINUTE;
-        public static final long DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT = 10 * ONE_MINUTE;
-        public static final long DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT = 30 * ONE_MINUTE;
-        public static final long DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS = ONE_DAY;
+        private static final String KEY_PREFIX_SCREEN_TIME_THRESHOLD = "screen_threshold_";
+        private final String[] KEYS_SCREEN_TIME_THRESHOLDS = {
+                KEY_PREFIX_SCREEN_TIME_THRESHOLD + "active",
+                KEY_PREFIX_SCREEN_TIME_THRESHOLD + "working_set",
+                KEY_PREFIX_SCREEN_TIME_THRESHOLD + "frequent",
+                KEY_PREFIX_SCREEN_TIME_THRESHOLD + "rare",
+                KEY_PREFIX_SCREEN_TIME_THRESHOLD + "restricted"
+        };
+        private static final String KEY_PREFIX_ELAPSED_TIME_THRESHOLD = "elapsed_threshold_";
+        private final String[] KEYS_ELAPSED_TIME_THRESHOLDS = {
+                KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "active",
+                KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "working_set",
+                KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "frequent",
+                KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "rare",
+                KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "restricted"
+        };
+        public static final long DEFAULT_CHECK_IDLE_INTERVAL_MS =
+                COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR;
+        public static final long DEFAULT_STRONG_USAGE_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 1 * ONE_HOUR;
+        public static final long DEFAULT_NOTIFICATION_TIMEOUT =
+                COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
+        public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT =
+                COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR;
+        public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE;
+        public static final long DEFAULT_SYNC_ADAPTER_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE;
+        public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT =
+                COMPRESS_TIME ? (ONE_MINUTE / 2) : 10 * ONE_MINUTE;
+        public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR;
+        public static final long DEFAULT_EXEMPTED_SYNC_START_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE;
+        public static final long DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE;
+        public static final long DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 30 * ONE_MINUTE;
+        public static final long DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS =
+                COMPRESS_TIME ? ONE_MINUTE : ONE_DAY;
         public static final boolean DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS = true;
 
-        private final KeyValueListParser mParser = new KeyValueListParser(',');
-
-        SettingsObserver(Handler handler) {
+        ConstantsObserver(Handler handler) {
             super(handler);
         }
 
-        void registerObserver() {
+        public void start() {
             final ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Global.getUriFor(Global.APP_IDLE_CONSTANTS), false, this);
+            // APP_STANDBY_ENABLED is a SystemApi that some apps may be watching, so best to
+            // leave it in Settings.
             cr.registerContentObserver(Global.getUriFor(Global.APP_STANDBY_ENABLED), false, this);
+            // Leave ENABLE_RESTRICTED_BUCKET as a user-controlled setting which will stay in
+            // Settings.
+            // TODO: make setting user-specific
             cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
                     false, this);
+            // ADAPTIVE_BATTERY_MANAGEMENT_ENABLED is a user setting, so it has to stay in Settings.
             cr.registerContentObserver(Global.getUriFor(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED),
                     false, this);
+            mInjector.registerDeviceConfigPropertiesChangedListener(this);
+            // Load all the constants.
+            onPropertiesChanged(mInjector.getDeviceConfigProperties());
+            updateSettings();
         }
 
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
             postOneTimeCheckIdleStates();
+        }
+
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            boolean timeThresholdsUpdated = false;
+            synchronized (mAppIdleLock) {
+                for (String name : properties.getKeyset()) {
+                    if (name == null) {
+                        continue;
+                    }
+                    switch (name) {
+                        case KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS:
+                            mInjector.mAutoRestrictedBucketDelayMs = Math.max(
+                                    COMPRESS_TIME ? ONE_MINUTE : 2 * ONE_HOUR,
+                                    properties.getLong(KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS,
+                                            DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS));
+                            break;
+                        case KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS:
+                            mLinkCrossProfileApps = properties.getBoolean(
+                                    KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS,
+                                    DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS);
+                            break;
+                        case KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION:
+                            mInitialForegroundServiceStartTimeoutMillis = properties.getLong(
+                                    KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION,
+                                    DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT);
+                            break;
+                        case KEY_NOTIFICATION_SEEN_HOLD_DURATION:
+                            mNotificationSeenTimeoutMillis = properties.getLong(
+                                    KEY_NOTIFICATION_SEEN_HOLD_DURATION,
+                                    DEFAULT_NOTIFICATION_TIMEOUT);
+                            break;
+                        case KEY_STRONG_USAGE_HOLD_DURATION:
+                            mStrongUsageTimeoutMillis = properties.getLong(
+                                    KEY_STRONG_USAGE_HOLD_DURATION, DEFAULT_STRONG_USAGE_TIMEOUT);
+                            break;
+                        case KEY_PREDICTION_TIMEOUT:
+                            mPredictionTimeoutMillis = properties.getLong(
+                                    KEY_PREDICTION_TIMEOUT, DEFAULT_PREDICTION_TIMEOUT);
+                            break;
+                        case KEY_SYSTEM_INTERACTION_HOLD_DURATION:
+                            mSystemInteractionTimeoutMillis = properties.getLong(
+                                    KEY_SYSTEM_INTERACTION_HOLD_DURATION,
+                                    DEFAULT_SYSTEM_INTERACTION_TIMEOUT);
+                            break;
+                        case KEY_SYSTEM_UPDATE_HOLD_DURATION:
+                            mSystemUpdateUsageTimeoutMillis = properties.getLong(
+                                    KEY_SYSTEM_UPDATE_HOLD_DURATION, DEFAULT_SYSTEM_UPDATE_TIMEOUT);
+                            break;
+                        case KEY_SYNC_ADAPTER_HOLD_DURATION:
+                            mSyncAdapterTimeoutMillis = properties.getLong(
+                                    KEY_SYNC_ADAPTER_HOLD_DURATION, DEFAULT_SYNC_ADAPTER_TIMEOUT);
+                            break;
+                        case KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION:
+                            mExemptedSyncScheduledDozeTimeoutMillis = properties.getLong(
+                                    KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION,
+                                    DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT);
+                            break;
+                        case KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION:
+                            mExemptedSyncScheduledNonDozeTimeoutMillis = properties.getLong(
+                                    KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION,
+                                    DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT);
+                            break;
+                        case KEY_EXEMPTED_SYNC_START_HOLD_DURATION:
+                            mExemptedSyncStartTimeoutMillis = properties.getLong(
+                                    KEY_EXEMPTED_SYNC_START_HOLD_DURATION,
+                                    DEFAULT_EXEMPTED_SYNC_START_TIMEOUT);
+                            break;
+                        case KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION:
+                            mUnexemptedSyncScheduledTimeoutMillis = properties.getLong(
+                                    KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION,
+                                    DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT);
+                            break;
+                        default:
+                            if (!timeThresholdsUpdated
+                                    && (name.startsWith(KEY_PREFIX_SCREEN_TIME_THRESHOLD)
+                                    || name.startsWith(KEY_PREFIX_ELAPSED_TIME_THRESHOLD))) {
+                                updateTimeThresholds();
+                                timeThresholdsUpdated = true;
+                            }
+                            break;
+                    }
+                }
+            }
+            postOneTimeCheckIdleStates();
+        }
+
+        private void updateTimeThresholds() {
+            // Query the values as an atomic set.
+            final DeviceConfig.Properties screenThresholdProperties =
+                    mInjector.getDeviceConfigProperties(KEYS_SCREEN_TIME_THRESHOLDS);
+            final DeviceConfig.Properties elapsedThresholdProperties =
+                    mInjector.getDeviceConfigProperties(KEYS_ELAPSED_TIME_THRESHOLDS);
+            mAppStandbyScreenThresholds = generateThresholdArray(
+                    screenThresholdProperties, KEYS_SCREEN_TIME_THRESHOLDS,
+                    DEFAULT_SCREEN_TIME_THRESHOLDS, MINIMUM_SCREEN_TIME_THRESHOLDS);
+            mAppStandbyElapsedThresholds = generateThresholdArray(
+                    elapsedThresholdProperties, KEYS_ELAPSED_TIME_THRESHOLDS,
+                    DEFAULT_ELAPSED_TIME_THRESHOLDS, MINIMUM_ELAPSED_TIME_THRESHOLDS);
+            mCheckIdleIntervalMillis = Math.min(mAppStandbyElapsedThresholds[1] / 4,
+                    DEFAULT_CHECK_IDLE_INTERVAL_MS);
         }
 
         void updateSettings() {
@@ -2357,126 +2509,43 @@ public class AppStandbyController implements AppStandbyInternal {
                 Slog.d(TAG,
                         "adaptivebat=" + Global.getString(mContext.getContentResolver(),
                                 Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED));
-                Slog.d(TAG, "appidleconstants=" + Global.getString(
-                        mContext.getContentResolver(),
-                        Global.APP_IDLE_CONSTANTS));
-            }
-
-            // Look at global settings for this.
-            // TODO: Maybe apply different thresholds for different users.
-            try {
-                mParser.setString(mInjector.getAppIdleSettings());
-            } catch (IllegalArgumentException e) {
-                Slog.e(TAG, "Bad value for app idle settings: " + e.getMessage());
-                // fallthrough, mParser is empty and all defaults will be returned.
             }
 
             synchronized (mAppIdleLock) {
-
-                String screenThresholdsValue = mParser.getString(KEY_SCREEN_TIME_THRESHOLDS, null);
-                mAppStandbyScreenThresholds = parseLongArray(screenThresholdsValue,
-                        SCREEN_TIME_THRESHOLDS, MINIMUM_SCREEN_TIME_THRESHOLDS);
-
-                String elapsedThresholdsValue = mParser.getString(KEY_ELAPSED_TIME_THRESHOLDS,
-                        null);
-                mAppStandbyElapsedThresholds = parseLongArray(elapsedThresholdsValue,
-                        ELAPSED_TIME_THRESHOLDS, MINIMUM_ELAPSED_TIME_THRESHOLDS);
-                mCheckIdleIntervalMillis = Math.min(mAppStandbyElapsedThresholds[1] / 4,
-                        COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
-                mStrongUsageTimeoutMillis = mParser.getDurationMillis(
-                        KEY_STRONG_USAGE_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_STRONG_USAGE_TIMEOUT);
-                mNotificationSeenTimeoutMillis = mParser.getDurationMillis(
-                        KEY_NOTIFICATION_SEEN_HOLD_DURATION,
-                                COMPRESS_TIME ? 12 * ONE_MINUTE : DEFAULT_NOTIFICATION_TIMEOUT);
-                mSystemUpdateUsageTimeoutMillis = mParser.getDurationMillis(
-                        KEY_SYSTEM_UPDATE_HOLD_DURATION,
-                                COMPRESS_TIME ? 2 * ONE_MINUTE : DEFAULT_SYSTEM_UPDATE_TIMEOUT);
-                mPredictionTimeoutMillis = mParser.getDurationMillis(
-                        KEY_PREDICTION_TIMEOUT,
-                                COMPRESS_TIME ? 10 * ONE_MINUTE : DEFAULT_PREDICTION_TIMEOUT);
-                mSyncAdapterTimeoutMillis = mParser.getDurationMillis(
-                        KEY_SYNC_ADAPTER_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYNC_ADAPTER_TIMEOUT);
-
-                mExemptedSyncScheduledNonDozeTimeoutMillis = mParser.getDurationMillis(
-                        KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION,
-                                COMPRESS_TIME ? (ONE_MINUTE / 2)
-                                        : DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT);
-
-                mExemptedSyncScheduledDozeTimeoutMillis = mParser.getDurationMillis(
-                        KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE
-                                        : DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT);
-
-                mExemptedSyncStartTimeoutMillis = mParser.getDurationMillis(
-                        KEY_EXEMPTED_SYNC_START_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE
-                                        : DEFAULT_EXEMPTED_SYNC_START_TIMEOUT);
-
-                mUnexemptedSyncScheduledTimeoutMillis = mParser.getDurationMillis(
-                        KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION,
-                                COMPRESS_TIME
-                                        ? ONE_MINUTE : DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT);
-
-                mSystemInteractionTimeoutMillis = mParser.getDurationMillis(
-                        KEY_SYSTEM_INTERACTION_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYSTEM_INTERACTION_TIMEOUT);
-
-                mInitialForegroundServiceStartTimeoutMillis = mParser.getDurationMillis(
-                        KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION,
-                        COMPRESS_TIME ? ONE_MINUTE :
-                                DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT);
-
-                mInjector.mAutoRestrictedBucketDelayMs = Math.max(
-                        COMPRESS_TIME ? ONE_MINUTE : 2 * ONE_HOUR,
-                        mParser.getDurationMillis(KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS,
-                                COMPRESS_TIME
-                                        ? ONE_MINUTE : DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS));
-
-                mLinkCrossProfileApps = mParser.getBoolean(
-                        KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS,
-                        DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS);
-
                 mAllowRestrictedBucket = mInjector.isRestrictedBucketEnabled();
             }
 
-            // Check if app_idle_enabled has changed. Do this after getting the rest of the settings
-            // in case we need to change something based on the new values.
             setAppIdleEnabled(mInjector.isAppIdleEnabled());
         }
 
-        long[] parseLongArray(String values, long[] defaults, long[] minValues) {
-            if (values == null) return defaults;
-            if (values.isEmpty()) {
+        long[] generateThresholdArray(@NonNull DeviceConfig.Properties properties,
+                @NonNull String[] keys, long[] defaults, long[] minValues) {
+            if (properties.getKeyset().isEmpty()) {
                 // Reset to defaults
                 return defaults;
-            } else {
-                String[] thresholds = values.split("/");
-                if (thresholds.length == THRESHOLD_BUCKETS.length) {
-                    if (minValues.length != THRESHOLD_BUCKETS.length) {
-                        Slog.wtf(TAG, "minValues array is the wrong size");
-                        // Use zeroes as the minimums.
-                        minValues = new long[THRESHOLD_BUCKETS.length];
-                    }
-                    long[] array = new long[THRESHOLD_BUCKETS.length];
-                    for (int i = 0; i < THRESHOLD_BUCKETS.length; i++) {
-                        try {
-                            if (thresholds[i].startsWith("P") || thresholds[i].startsWith("p")) {
-                                array[i] = Math.max(minValues[i],
-                                        Duration.parse(thresholds[i]).toMillis());
-                            } else {
-                                array[i] = Math.max(minValues[i], Long.parseLong(thresholds[i]));
-                            }
-                        } catch (NumberFormatException|DateTimeParseException e) {
-                            return defaults;
-                        }
-                    }
-                    return array;
-                } else {
-                    return defaults;
-                }
             }
+            if (keys.length != THRESHOLD_BUCKETS.length) {
+                // This should only happen in development.
+                throw new IllegalStateException(
+                        "# keys (" + keys.length + ") != # buckets ("
+                                + THRESHOLD_BUCKETS.length + ")");
+            }
+            if (defaults.length != THRESHOLD_BUCKETS.length) {
+                // This should only happen in development.
+                throw new IllegalStateException(
+                        "# defaults (" + defaults.length + ") != # buckets ("
+                                + THRESHOLD_BUCKETS.length + ")");
+            }
+            if (minValues.length != THRESHOLD_BUCKETS.length) {
+                Slog.wtf(TAG, "minValues array is the wrong size");
+                // Use zeroes as the minimums.
+                minValues = new long[THRESHOLD_BUCKETS.length];
+            }
+            long[] array = new long[THRESHOLD_BUCKETS.length];
+            for (int i = 0; i < THRESHOLD_BUCKETS.length; i++) {
+                array[i] = Math.max(minValues[i], properties.getLong(keys[i], defaults[i]));
+            }
+            return array;
         }
     }
 }

@@ -12305,9 +12305,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // user-installed version of the application will be ignored.
             if ((scanFlags & SCAN_REQUIRE_KNOWN) != 0) {
                 if (mExpectingBetter.containsKey(pkg.getPackageName())) {
-                    logCriticalInfo(Log.WARN,
-                            "Relax SCAN_REQUIRE_KNOWN requirement for package "
-                                    + pkg.getPackageName());
+                    Slog.w(TAG, "Relax SCAN_REQUIRE_KNOWN requirement for package "
+                            + pkg.getPackageName());
                 } else {
                     PackageSetting known = mSettings.getPackageLPr(pkg.getPackageName());
                     if (known != null) {

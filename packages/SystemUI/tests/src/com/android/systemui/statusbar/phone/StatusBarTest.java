@@ -145,6 +145,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
+import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;
@@ -223,6 +224,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private NetworkController mNetworkController;
     @Mock private VibratorHelper mVibratorHelper;
+    @Mock private BubblesManager mBubblesManager;
     @Mock private Bubbles mBubbles;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
@@ -377,6 +379,7 @@ public class StatusBarTest extends SysuiTestCase {
                 wakefulnessLifecycle,
                 mStatusBarStateController,
                 mVibratorHelper,
+                Optional.of(mBubblesManager),
                 Optional.of(mBubbles),
                 mVisualStabilityManager,
                 mDeviceProvisionedController,

@@ -21,9 +21,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.SoftApConfiguration.BandType;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -176,7 +177,7 @@ public final class SoftApCapability implements Parcelable {
      */
     @NonNull
     public int[] getSupportedChannelList(@BandType int band) {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         switch (band) {

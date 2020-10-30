@@ -1018,29 +1018,17 @@ public abstract class ApexManager {
             // the /apex directory is just a symlink to /system/apex.
             List<ActiveApexInfo> result = new ArrayList<>();
             File apexDir = Environment.getApexDirectory();
-            // In flattened configuration, init special-case the art directory and bind-mounts
-            // com.android.art.{release|debug} to com.android.art. At the time of writing, these
-            // directories are copied from the kArtApexDirNames variable in
-            // system/core/init/mount_namespace.cpp.
-            String[] skipDirs = {"com.android.art.release", "com.android.art.debug"};
             if (apexDir.isDirectory()) {
                 File[] files = apexDir.listFiles();
                 // listFiles might be null if system server doesn't have permission to read
                 // a directory.
                 if (files != null) {
                     for (File file : files) {
-                        if (file.isDirectory() && !file.getName().contains("@")) {
-                            boolean skip = false;
-                            for (String skipDir : skipDirs) {
-                                if (file.getName().equals(skipDir)) {
-                                    skip = true;
-                                    break;
-                                }
-                            }
-                            if (!skip) {
-                                result.add(
-                                    new ActiveApexInfo(file, Environment.getRootDirectory()));
-                            }
+                        if (file.isDirectory() && !file.getName().contains("@")
+                                // In flattened configuration, init special-cases the art directory
+                                // and bind-mounts com.android.art.debug to com.android.art.
+                                && !file.getName().equals("com.android.art.debug")) {
+                            result.add(new ActiveApexInfo(file, Environment.getRootDirectory()));
                         }
                     }
                 }

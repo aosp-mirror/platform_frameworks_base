@@ -2431,9 +2431,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         try {
             if (VDBG || DDBG) log("Setting MTU size: " + iface + ", " + mtu);
-            mNMS.setMtu(iface, mtu);
-        } catch (Exception e) {
-            Slog.e(TAG, "exception in setMtu()" + e);
+            mNetd.interfaceSetMtu(iface, mtu);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "exception in interfaceSetMtu()" + e);
         }
     }
 
@@ -6078,7 +6078,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (final String iface : interfaceDiff.added) {
                 try {
                     if (DBG) log("Adding iface " + iface + " to network " + netId);
-                    mNMS.addInterfaceToNetwork(iface, netId);
+                    mNetd.networkAddInterface(netId, iface);
                     wakeupModifyInterface(iface, caps, true);
                     bs.noteNetworkInterfaceType(iface, legacyType);
                 } catch (Exception e) {
@@ -6090,7 +6090,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 if (DBG) log("Removing iface " + iface + " from network " + netId);
                 wakeupModifyInterface(iface, caps, false);
-                mNMS.removeInterfaceFromNetwork(iface, netId);
+                mNetd.networkRemoveInterface(netId, iface);
             } catch (Exception e) {
                 loge("Exception removing interface: " + e);
             }
@@ -6256,9 +6256,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int newPermission = getNetworkPermission(newNc);
         if (oldPermission != newPermission && nai.created && !nai.isVPN()) {
             try {
-                mNMS.setNetworkPermission(nai.network.netId, newPermission);
-            } catch (RemoteException e) {
-                loge("Exception in setNetworkPermission: " + e);
+                mNetd.networkSetPermissionForNetwork(nai.network.netId, newPermission);
+            } catch (RemoteException | ServiceSpecificException e) {
+                loge("Exception in networkSetPermissionForNetwork: " + e);
             }
         }
     }
@@ -6700,11 +6700,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         try {
             if (null != newNetwork) {
-                mNMS.setDefaultNetId(newNetwork.network.netId);
+                mNetd.networkSetDefault(newNetwork.network.netId);
             } else {
-                mNMS.clearDefaultNetId();
+                mNetd.networkClearDefault();
             }
-        } catch (Exception e) {
+        } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception setting default network :" + e);
         }
 

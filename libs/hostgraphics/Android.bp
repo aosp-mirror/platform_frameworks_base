@@ -7,6 +7,8 @@ cc_library_host_static {
 
     static_libs: [
         "libbase",
+        "libmath",
+        "libutils",
     ],
 
     srcs: [
@@ -24,6 +26,7 @@ cc_library_host_static {
         "frameworks/native/libs/nativebase/include",
         "frameworks/native/libs/nativewindow/include",
         "frameworks/native/libs/arect/include",
+        "frameworks/native/libs/ui/include_private",
     ],
     export_include_dirs: ["."],
 

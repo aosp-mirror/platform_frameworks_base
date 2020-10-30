@@ -397,6 +397,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     void setOrganizer(IDisplayAreaOrganizer organizer) {
+        setOrganizer(organizer, false /* skipDisplayAreaAppeared */);
+    }
+
+    void setOrganizer(IDisplayAreaOrganizer organizer, boolean skipDisplayAreaAppeared) {
         if (mOrganizer == organizer) return;
         IDisplayAreaOrganizer lastOrganizer = mOrganizer;
         // Update the new display area organizer before calling sendDisplayAreaVanished since it
@@ -404,7 +408,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // about it.
         mOrganizer = organizer;
         sendDisplayAreaVanished(lastOrganizer);
-        sendDisplayAreaAppeared();
+        if (!skipDisplayAreaAppeared) {
+            sendDisplayAreaAppeared();
+        }
     }
 
     void sendDisplayAreaAppeared() {

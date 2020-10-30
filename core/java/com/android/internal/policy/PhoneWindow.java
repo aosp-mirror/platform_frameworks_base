@@ -2540,6 +2540,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
+        params.backgroundBlurRadius = a.getDimensionPixelSize(
+                R.styleable.Window_windowBackgroundBlurRadius, 0);
+
         if (params.windowAnimations == 0) {
             params.windowAnimations = a.getResourceId(
                     R.styleable.Window_windowAnimationStyle, 0);

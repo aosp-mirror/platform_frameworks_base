@@ -246,6 +246,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // Indicates if current device is the active source or not
     @ServiceThreadOnly
     protected boolean isActiveSource() {
+        if (getDeviceInfo() == null) {
+            return false;
+        }
+
         return getActiveSource().equals(getDeviceInfo().getLogicalAddress(),
                 getDeviceInfo().getPhysicalAddress());
     }

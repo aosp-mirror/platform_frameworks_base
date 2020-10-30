@@ -64,7 +64,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             new ArraySet<>();
     private final ArraySet<OnGroupChangeListener> mGroupChangeListeners = new ArraySet<>();
     private final Lazy<PeopleNotificationIdentifier> mPeopleNotificationIdentifier;
-    private final Optional<Lazy<Bubbles>> mBubblesOptional;
+    private final Optional<Bubbles> mBubblesOptional;
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
@@ -74,7 +74,7 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
     public NotificationGroupManagerLegacy(
             StatusBarStateController statusBarStateController,
             Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier,
-            Optional<Lazy<Bubbles>> bubblesOptional) {
+            Optional<Bubbles> bubblesOptional) {
         statusBarStateController.addCallback(this);
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesOptional = bubblesOptional;
@@ -242,8 +242,9 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         int childCount = 0;
         boolean hasBubbles = false;
         for (NotificationEntry entry : group.children.values()) {
-            if (mBubblesOptional.isPresent() && !mBubblesOptional.get().get()
-                    .isBubbleNotificationSuppressedFromShade(entry)) {
+            if (mBubblesOptional.isPresent() && !mBubblesOptional.get()
+                    .isBubbleNotificationSuppressedFromShade(
+                            entry.getKey(), entry.getSbn().getGroupKey())) {
                 childCount++;
             } else {
                 hasBubbles = true;

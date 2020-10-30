@@ -624,6 +624,20 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
+        public void uncanonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
+                RemoteCallback callback) {
+            final Bundle result = new Bundle();
+            try {
+                result.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                        uncanonicalize(callingPkg, attributionTag, uri));
+            } catch (Exception e) {
+                result.putParcelable(ContentResolver.REMOTE_CALLBACK_ERROR,
+                        new ParcelableException(e));
+            }
+            callback.sendResult(result);
+        }
+
+        @Override
         public boolean refresh(String callingPkg, String attributionTag, Uri uri, Bundle extras,
                 ICancellationSignal cancellationSignal) throws RemoteException {
             uri = validateIncomingUri(uri);

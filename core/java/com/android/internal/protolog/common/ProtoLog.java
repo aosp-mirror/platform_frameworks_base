@@ -35,6 +35,10 @@ package com.android.internal.protolog.common;
  * during build.
  */
 public class ProtoLog {
+
+    // Needs to be set directly otherwise the protologtool tries to transform the method call
+    public static boolean REQUIRE_PROTOLOGTOOL = true;
+
     /**
      * DEBUG level log.
      *
@@ -44,8 +48,10 @@ public class ProtoLog {
      */
     public static void d(IProtoLogGroup group, String messageString, Object... args) {
         // Stub, replaced by the ProtoLogTool.
-        throw new UnsupportedOperationException(
-                "ProtoLog calls MUST be processed with ProtoLogTool");
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
     }
 
     /**
@@ -57,8 +63,10 @@ public class ProtoLog {
      */
     public static void v(IProtoLogGroup group, String messageString, Object... args) {
         // Stub, replaced by the ProtoLogTool.
-        throw new UnsupportedOperationException(
-                "ProtoLog calls MUST be processed with ProtoLogTool");
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
     }
 
     /**
@@ -70,8 +78,10 @@ public class ProtoLog {
      */
     public static void i(IProtoLogGroup group, String messageString, Object... args) {
         // Stub, replaced by the ProtoLogTool.
-        throw new UnsupportedOperationException(
-                "ProtoLog calls MUST be processed with ProtoLogTool");
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
     }
 
     /**
@@ -83,8 +93,10 @@ public class ProtoLog {
      */
     public static void w(IProtoLogGroup group, String messageString, Object... args) {
         // Stub, replaced by the ProtoLogTool.
-        throw new UnsupportedOperationException(
-                "ProtoLog calls MUST be processed with ProtoLogTool");
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
     }
 
     /**
@@ -96,8 +108,10 @@ public class ProtoLog {
      */
     public static void e(IProtoLogGroup group, String messageString, Object... args) {
         // Stub, replaced by the ProtoLogTool.
-        throw new UnsupportedOperationException(
-                "ProtoLog calls MUST be processed with ProtoLogTool");
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
     }
 
     /**
@@ -109,7 +123,9 @@ public class ProtoLog {
      */
     public static void wtf(IProtoLogGroup group, String messageString, Object... args) {
         // Stub, replaced by the ProtoLogTool.
-        throw new UnsupportedOperationException(
-                "ProtoLog calls MUST be processed with ProtoLogTool");
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
     }
 }

@@ -183,8 +183,8 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
         // Consume CEC messages we already got for this newly found device.
         tv().processDelayedMessages(mDeviceLogicalAddress);
 
-        if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
-                == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+        if (HdmiUtils.isEligibleAddressForDevice(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,
+                mDeviceLogicalAddress)) {
             tv().onNewAvrAdded(deviceInfo);
         }
     }

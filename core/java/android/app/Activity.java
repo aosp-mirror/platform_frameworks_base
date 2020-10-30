@@ -2883,11 +2883,7 @@ public class Activity extends ContextThemeWrapper
      * but will always be at least three.
      */
     public int getMaxNumPictureInPictureActions() {
-        try {
-            return ActivityTaskManager.getService().getMaxNumPictureInPictureActions(mToken);
-        } catch (RemoteException e) {
-            return 0;
-        }
+        return ActivityTaskManager.getMaxNumPictureInPictureActions(this);
     }
 
     /**

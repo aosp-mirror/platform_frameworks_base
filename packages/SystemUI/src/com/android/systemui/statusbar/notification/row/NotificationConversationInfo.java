@@ -67,12 +67,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.lang.annotation.Retention;
 import java.util.Optional;
@@ -94,7 +94,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private OnUserInteractionCallback mOnUserInteractionCallback;
     private Handler mMainHandler;
     private Handler mBgHandler;
-    private Optional<Bubbles> mBubblesOptional;
+    private Optional<BubblesManager> mBubblesManagerOptional;
     private String mPackageName;
     private String mAppName;
     private int mAppUid;
@@ -223,7 +223,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             OnConversationSettingsClickListener onConversationSettingsClickListener,
-            Optional<Bubbles> bubblesOptional) {
+            Optional<BubblesManager> bubblesManagerOptional) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
@@ -242,12 +242,12 @@ public class NotificationConversationInfo extends LinearLayout implements
         mIconFactory = conversationIconFactory;
         mUserContext = userContext;
         mBubbleMetadata = bubbleMetadata;
-        mBubblesOptional = bubblesOptional;
+        mBubblesManagerOptional = bubblesManagerOptional;
         mBuilderProvider = builderProvider;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mShortcutManager = shortcutManager;
-        mShortcutInfo = entry.getRanking().getShortcutInfo();
+        mShortcutInfo = entry.getRanking().getConversationShortcutInfo();
         if (mShortcutInfo == null) {
             throw new IllegalArgumentException("Does not have required information");
         }
@@ -641,9 +641,9 @@ public class NotificationConversationInfo extends LinearLayout implements
                                 mINotificationManager.setBubblesAllowed(mAppPkg, mAppUid,
                                         BUBBLE_PREFERENCE_SELECTED);
                             }
-                            if (mBubblesOptional.isPresent()) {
+                            if (mBubblesManagerOptional.isPresent()) {
                                 post(() -> {
-                                    mBubblesOptional.get().onUserChangedImportance(mEntry);
+                                    mBubblesManagerOptional.get().onUserChangedImportance(mEntry);
                                 });
                             }
                         }

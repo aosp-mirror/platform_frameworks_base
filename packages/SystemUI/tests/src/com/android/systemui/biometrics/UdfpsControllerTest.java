@@ -132,7 +132,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
 
-        assertEquals(TEST_UDFPS_SENSOR_ID, mUdfpsController.mUdfpsSensorId);
+        assertEquals(TEST_UDFPS_SENSOR_ID, mUdfpsController.mSensorProps.sensorId);
     }
 
     private void setUpResources() {
@@ -222,8 +222,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         event.recycle();
         // THEN the event is passed to the FingerprintManager
-        verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mUdfpsSensorId), eq(0), eq(0),
-                eq(0f), eq(0f));
+        verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
+                eq(0), eq(0f), eq(0f));
         // AND the scrim and dot is shown
         verify(mUdfpsView).showScrimAndDot();
     }
@@ -236,8 +236,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0);
         // THEN the event is passed to the FingerprintManager
-        verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mUdfpsSensorId), eq(0), eq(0),
-                anyFloat(), anyFloat());
+        verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
+                eq(0), anyFloat(), anyFloat());
         // AND the scrim and dot is shown
         verify(mUdfpsView).showScrimAndDot();
     }

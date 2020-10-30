@@ -280,7 +280,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
 
         CountDownLatch latch = new CountDownLatch(1);
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOO(DO_DUMP,
+        mCaller.getHandler().sendMessageAtFrontOfQueue(mCaller.obtainMessageOOOO(DO_DUMP,
                 fd, fout, args, latch));
         try {
             if (!latch.await(5, TimeUnit.SECONDS)) {

@@ -116,7 +116,7 @@ public class NotificationFilterTest extends SysuiTestCase {
                 new NotificationGroupManagerLegacy(
                         mock(StatusBarStateController.class),
                         () -> mock(PeopleNotificationIdentifier.class),
-                        Optional.of(() -> mock(Bubbles.class))));
+                        Optional.of(mock(Bubbles.class))));
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);

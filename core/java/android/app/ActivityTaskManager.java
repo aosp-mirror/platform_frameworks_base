@@ -437,6 +437,12 @@ public class ActivityTaskManager {
         return currentUiModeSupportsErrorDialogs(config);
     }
 
+    /** @return max allowed number of actions in picture-in-picture mode. */
+    public static int getMaxNumPictureInPictureActions(@NonNull Context context) {
+        return context.getResources().getInteger(
+                com.android.internal.R.integer.config_pictureInPictureMaxNumberOfActions);
+    }
+
     /**
      * Information you can retrieve about a root task in the system.
      * @hide

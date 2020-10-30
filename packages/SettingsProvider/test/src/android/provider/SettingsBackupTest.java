@@ -127,7 +127,6 @@ public class SettingsBackupTest {
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_BINDING_CONSTANTS,
-                    Settings.Global.APP_IDLE_CONSTANTS,
                     Settings.Global.APP_OPS_CONSTANTS,
                     Settings.Global.APP_STANDBY_ENABLED,
                     Settings.Global.APP_TIME_LIMIT_USAGE_SOURCE,
@@ -443,6 +442,7 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_LOCKSCREEN,
+                    Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
@@ -745,7 +745,6 @@ public class SettingsBackupTest {
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL,
                  Settings.Secure.TAP_GESTURE,
                  Settings.Secure.NEARBY_SHARING_COMPONENT, // not user configurable
-                 Settings.Secure.WINDOW_MAGNIFICATION,
                  Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
                  Settings.Secure.SUPPRESS_DOZE,
                  Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,

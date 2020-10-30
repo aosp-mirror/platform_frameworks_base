@@ -101,11 +101,13 @@ public class SystemUIFactory {
         if (initializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
-            builder = builder.setPip(mWMComponent.getPip())
+            builder = prepareSysUIComponentBuilder(builder, mWMComponent)
+                    .setPip(mWMComponent.getPip())
                     .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setShellDump(mWMComponent.getShellDump());
         } else {
+            // TODO: Call on prepareSysUIComponentBuilder but not with real components.
             builder = builder.setPip(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
