@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -85,8 +86,10 @@ public class SystemUIFactory {
     @VisibleForTesting
     public void init(Context context, boolean fromTest)
             throws ExecutionException, InterruptedException {
+        // Only initialize components for the main system ui process running as the primary user
         final boolean initializeComponents = !fromTest
-                && android.os.Process.myUserHandle().isSystem();
+                && android.os.Process.myUserHandle().isSystem()
+                && ActivityThread.currentProcessName().equals(ActivityThread.currentPackageName());
         mRootComponent = buildGlobalRootComponent(context);
         // Stand up WMComponent
         mWMComponent = mRootComponent.getWMComponentBuilder().build();
