@@ -314,7 +314,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setCdmaRoaming(boolean isRoaming) {
-        when(mMockTm.getCdmaEnhancedRoamingIndicatorIconIndex()).thenReturn(
+        when(mMockTm.getCdmaEnhancedRoamingIndicatorDisplayNumber()).thenReturn(
                 isRoaming ? TelephonyManager.ERI_ON : TelephonyManager.ERI_OFF);
     }
 
