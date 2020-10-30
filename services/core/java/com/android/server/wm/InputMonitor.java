@@ -45,6 +45,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 
 import android.graphics.Rect;
 import android.os.Handler;
@@ -54,6 +55,7 @@ import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
@@ -503,13 +505,14 @@ final class InputMonitor {
             }
 
             if (!focus.mWinAnimator.hasSurface()) {
-                ProtoLog.d(WM_DEBUG_FOCUS_LIGHT,
-                        "Focus not requested for window=%s because it has no surface",
-                        focus);
+                Slog.v(TAG_WM, "Focus not requested for window=%" + focus
+                        + " because it has no surface.");
                 return;
             }
 
             mInputTransaction.setFocusedWindow(focus.mInputWindowHandle.token, mDisplayId);
+            EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
+                    "Focus request " + focus, "reason=UpdateInputWindows");
             mDisplayContent.mLastRequestedFocus = focus;
             ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus requested for window=%s", focus);
         }

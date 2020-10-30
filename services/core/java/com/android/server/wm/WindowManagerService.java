@@ -206,6 +206,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
+import android.util.EventLog;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -407,6 +408,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
             "persist.wm.disable_custom_task_animation";
+    static final int LOGTAG_INPUT_FOCUS = 62001;
 
     /**
      * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
@@ -8345,6 +8347,9 @@ public class WindowManagerService extends IWindowManager.Stub
             final int displayId = embeddedWindow.mDisplayId;
             if (grantFocus) {
                 t.setFocusedWindow(targetInputToken, displayId).apply();
+                EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
+                        "Focus request " + embeddedWindow.getName(),
+                        "reason=grantEmbeddedWindowFocus(true)");
             } else {
                 // Search for a new focus target
                 DisplayContent displayContent = mRoot.getDisplayContent(displayId);
@@ -8358,6 +8363,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 t.requestFocusTransfer(newFocusTarget.mInputWindowHandle.token, targetInputToken,
                         displayId).apply();
+                EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
+                        "Transfer focus request " + newFocusTarget,
+                        "reason=grantEmbeddedWindowFocus(false)");
             }
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
                     embeddedWindow.getName(), grantFocus);
@@ -8391,9 +8399,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (grantFocus) {
                 t.requestFocusTransfer(targetInputToken, hostWindow.mInputChannel.getToken(),
                         hostWindow.getDisplayId()).apply();
+                EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
+                        "Transfer focus request " + embeddedWindow.getName(),
+                        "reason=grantEmbeddedWindowFocus(true)");
             } else {
                 t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), targetInputToken,
                         hostWindow.getDisplayId()).apply();
+                EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
+                        "Transfer focus request " + hostWindow,
+                        "reason=grantEmbeddedWindowFocus(false)");
             }
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
                     embeddedWindow.getName(), grantFocus);
