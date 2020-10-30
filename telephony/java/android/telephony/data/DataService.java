@@ -17,6 +17,7 @@
 package android.telephony.data;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -30,7 +31,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.telephony.AccessNetworkConstants;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -104,6 +105,8 @@ public abstract class DataService extends Service {
     private static final int DATA_SERVICE_REQUEST_REGISTER_DATA_CALL_LIST_CHANGED      = 9;
     private static final int DATA_SERVICE_REQUEST_UNREGISTER_DATA_CALL_LIST_CHANGED    = 10;
     private static final int DATA_SERVICE_INDICATION_DATA_CALL_LIST_CHANGED            = 11;
+    private static final int DATA_SERVICE_REQUEST_START_HANDOVER                       = 12;
+    private static final int DATA_SERVICE_REQUEST_CANCEL_HANDOVER                      = 13;
 
     private final HandlerThread mHandlerThread;
 
@@ -147,7 +150,7 @@ public abstract class DataService extends Service {
          * the provided callback to notify the platform.
          *
          * @param accessNetworkType Access network type that the data call will be established on.
-         *        Must be one of {@link AccessNetworkConstants.AccessNetworkType}.
+         *        Must be one of {@link android.telephony.AccessNetworkConstants.AccessNetworkType}.
          * @param dataProfile Data profile used for data call setup. See {@link DataProfile}
          * @param isRoaming True if the device is data roaming.
          * @param allowRoaming True if data roaming is allowed by the user.
@@ -158,15 +161,45 @@ public abstract class DataService extends Service {
          * @param callback The result callback for this request.
          */
         public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
-                                  boolean isRoaming, boolean allowRoaming,
-                                  @SetupDataReason int reason,
-                                  @Nullable LinkProperties linkProperties,
-                                  @NonNull DataServiceCallback callback) {
+                boolean isRoaming, boolean allowRoaming,
+                @SetupDataReason int reason, @Nullable LinkProperties linkProperties,
+                @NonNull DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             if (callback != null) {
                 callback.onSetupDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED,
                         null);
             }
+        }
+
+        /**
+         * Setup a data connection. The data service provider must implement this method to support
+         * establishing a packet data connection. When completed or error, the service must invoke
+         * the provided callback to notify the platform.
+         *
+         * @param accessNetworkType Access network type that the data call will be established on.
+         *        Must be one of {@link android.telephony.AccessNetworkConstants.AccessNetworkType}.
+         * @param dataProfile Data profile used for data call setup. See {@link DataProfile}
+         * @param isRoaming True if the device is data roaming.
+         * @param allowRoaming True if data roaming is allowed by the user.
+         * @param reason The reason for data setup. Must be {@link #REQUEST_REASON_NORMAL} or
+         *        {@link #REQUEST_REASON_HANDOVER}.
+         * @param linkProperties If {@code reason} is {@link #REQUEST_REASON_HANDOVER}, this is the
+         *        link properties of the existing data connection, otherwise null.
+         * @param pduSessionId The pdu session id to be used for this data call.
+         *                     The standard range of values are 1-15 while 0 means no pdu session id
+         *                     was attached to this call.  Reference: 3GPP TS 24.007 section
+         *                     11.2.3.1b.
+         * @param callback The result callback for this request.
+         */
+        public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
+                boolean isRoaming, boolean allowRoaming,
+                @SetupDataReason int reason,
+                @Nullable LinkProperties linkProperties,
+                @IntRange(from = 0, to = 15) int pduSessionId,
+                @NonNull DataServiceCallback callback) {
+            /* Call the old version since the new version isn't supported */
+            setupDataCall(accessNetworkType, dataProfile, isRoaming, allowRoaming, reason,
+                    linkProperties, callback);
         }
 
         /**
@@ -220,6 +253,53 @@ public abstract class DataService extends Service {
             // The default implementation is to return unsupported.
             if (callback != null) {
                 callback.onSetDataProfileComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            }
+        }
+
+        /**
+         * Indicates that a handover has begun.  This is called on the source transport.
+         *
+         * Any resources being transferred cannot be released while a
+         * handover is underway.
+         *
+         * If a handover was unsuccessful, then the framework calls
+         * {@link DataService#cancelHandover}.  The target transport retains ownership over any of
+         * the resources being transferred.
+         *
+         * If a handover was successful, the framework calls {@link DataService#deactivateDataCall}
+         * with reason {@link DataService.REQUEST_REASON_HANDOVER}. The target transport now owns
+         * the transferred resources and is responsible for releasing them.
+         *
+         * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
+         * @param callback The result callback for this request.
+         */
+        public void startHandover(int cid, @NonNull DataServiceCallback callback) {
+            // The default implementation is to return unsupported.
+            if (callback != null) {
+                Log.d(TAG, "startHandover: " + cid);
+                callback.onHandoverStarted(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            } else {
+                Log.e(TAG, "startHandover: " + cid + ", callback is null");
+            }
+        }
+
+        /**
+         * Indicates that a handover was cancelled after a call to
+         * {@link DataService#startHandover}. This is called on the source transport.
+         *
+         * Since the handover was unsuccessful, the source transport retains ownership over any of
+         * the resources being transferred and is still responsible for releasing them.
+         *
+         * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
+         * @param callback The result callback for this request.
+         */
+        public void cancelHandover(int cid, @NonNull DataServiceCallback callback) {
+            // The default implementation is to return unsupported.
+            if (callback != null) {
+                Log.d(TAG, "cancelHandover: " + cid);
+                callback.onHandoverCancelled(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            } else {
+                Log.e(TAG, "cancelHandover: " + cid + ", callback is null");
             }
         }
 
@@ -278,16 +358,18 @@ public abstract class DataService extends Service {
         public final boolean allowRoaming;
         public final int reason;
         public final LinkProperties linkProperties;
+        public final int pduSessionId;
         public final IDataServiceCallback callback;
         SetupDataCallRequest(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
                              boolean allowRoaming, int reason, LinkProperties linkProperties,
-                             IDataServiceCallback callback) {
+                             int pduSessionId, IDataServiceCallback callback) {
             this.accessNetworkType = accessNetworkType;
             this.dataProfile = dataProfile;
             this.isRoaming = isRoaming;
             this.allowRoaming = allowRoaming;
             this.linkProperties = linkProperties;
             this.reason = reason;
+            this.pduSessionId = pduSessionId;
             this.callback = callback;
         }
     }
@@ -323,6 +405,16 @@ public abstract class DataService extends Service {
                               IDataServiceCallback callback) {
             this.dps = dps;
             this.isRoaming = isRoaming;
+            this.callback = callback;
+        }
+    }
+
+    private static final class BeginCancelHandoverRequest {
+        public final int cid;
+        public final IDataServiceCallback callback;
+        BeginCancelHandoverRequest(int cid,
+                IDataServiceCallback callback) {
+            this.cid = cid;
             this.callback = callback;
         }
     }
@@ -377,7 +469,7 @@ public abstract class DataService extends Service {
                     serviceProvider.setupDataCall(setupDataCallRequest.accessNetworkType,
                             setupDataCallRequest.dataProfile, setupDataCallRequest.isRoaming,
                             setupDataCallRequest.allowRoaming, setupDataCallRequest.reason,
-                            setupDataCallRequest.linkProperties,
+                            setupDataCallRequest.linkProperties, setupDataCallRequest.pduSessionId,
                             (setupDataCallRequest.callback != null)
                                     ? new DataServiceCallback(setupDataCallRequest.callback)
                                     : null);
@@ -437,6 +529,20 @@ public abstract class DataService extends Service {
                     } catch (RemoteException e) {
                         loge("Failed to call onDataCallListChanged. " + e);
                     }
+                    break;
+                case DATA_SERVICE_REQUEST_START_HANDOVER:
+                    if (serviceProvider == null) break;
+                    BeginCancelHandoverRequest bReq = (BeginCancelHandoverRequest) message.obj;
+                    serviceProvider.startHandover(bReq.cid,
+                            (bReq.callback != null)
+                                    ? new DataServiceCallback(bReq.callback) : null);
+                    break;
+                case DATA_SERVICE_REQUEST_CANCEL_HANDOVER:
+                    if (serviceProvider == null) break;
+                    BeginCancelHandoverRequest cReq = (BeginCancelHandoverRequest) message.obj;
+                    serviceProvider.cancelHandover(cReq.cid,
+                            (cReq.callback != null)
+                                    ? new DataServiceCallback(cReq.callback) : null);
                     break;
             }
         }
@@ -506,11 +612,11 @@ public abstract class DataService extends Service {
 
         @Override
         public void setupDataCall(int slotIndex, int accessNetworkType, DataProfile dataProfile,
-                                  boolean isRoaming, boolean allowRoaming, int reason,
-                                  LinkProperties linkProperties, IDataServiceCallback callback) {
+                boolean isRoaming, boolean allowRoaming, int reason,
+                LinkProperties linkProperties, int pduSessionId, IDataServiceCallback callback) {
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_SETUP_DATA_CALL, slotIndex, 0,
                     new SetupDataCallRequest(accessNetworkType, dataProfile, isRoaming,
-                            allowRoaming, reason, linkProperties, callback))
+                            allowRoaming, reason, linkProperties, pduSessionId, callback))
                     .sendToTarget();
         }
 
@@ -565,6 +671,29 @@ public abstract class DataService extends Service {
             }
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_UNREGISTER_DATA_CALL_LIST_CHANGED,
                     slotIndex, 0, callback).sendToTarget();
+        }
+
+        @Override
+        public void startHandover(int slotIndex, int cid, IDataServiceCallback callback) {
+            if (callback == null) {
+                loge("startHandover: callback is null");
+                return;
+            }
+            BeginCancelHandoverRequest req = new BeginCancelHandoverRequest(cid, callback);
+            mHandler.obtainMessage(DATA_SERVICE_REQUEST_START_HANDOVER,
+                    slotIndex, 0, req)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void cancelHandover(int slotIndex, int cid, IDataServiceCallback callback) {
+            if (callback == null) {
+                loge("cancelHandover: callback is null");
+                return;
+            }
+            BeginCancelHandoverRequest req = new BeginCancelHandoverRequest(cid, callback);
+            mHandler.obtainMessage(DATA_SERVICE_REQUEST_CANCEL_HANDOVER,
+                    slotIndex, 0, req).sendToTarget();
         }
     }
 
