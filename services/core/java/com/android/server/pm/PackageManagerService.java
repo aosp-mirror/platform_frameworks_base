@@ -18713,6 +18713,19 @@ public class PackageManagerService extends IPackageManager.Stub
         final String packageName = versionedPackage.getPackageName();
         final long versionCode = versionedPackage.getLongVersionCode();
         final String internalPackageName;
+
+        try {
+            if (mInjector.getLocalService(ActivityTaskManagerInternal.class)
+                    .isBaseOfLockedTask(packageName)) {
+                observer.onPackageDeleted(
+                        packageName, PackageManager.DELETE_FAILED_APP_PINNED, null);
+                EventLog.writeEvent(0x534e4554, "127605586", -1, "");
+                return;
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
         synchronized (mLock) {
             // Normalize package name to handle renamed packages and static libs
             internalPackageName = resolveInternalPackageNameLPr(packageName, versionCode);
