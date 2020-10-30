@@ -93,8 +93,8 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Sim-toegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-audio"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Gehoorapparaten"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Verbonden met gehoorapparaten"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hoortoestellen"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Verbonden met hoortoestellen"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Verbonden met audio van medium"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Verbonden met audio van telefoon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Verbonden met server voor bestandsoverdracht"</string>
@@ -111,7 +111,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Gebruiken voor audio van telefoon"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gebruiken voor bestandsoverdracht"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gebruiken voor invoer"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gebruiken voor gehoorapparaten"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gebruiken voor hoortoestellen"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Koppelen"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"KOPPELEN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuleren"</string>
@@ -127,8 +127,8 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Hoofdtelefoon"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Randapparaat voor invoer"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Linker gehoorapparaat koppelen…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Rechter gehoorapparaat koppelen…"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Linker hoortoestel koppelen…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Rechter hoortoestel koppelen…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Links: batterijniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Rechts: batterijniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi: uitgeschakeld."</string>
