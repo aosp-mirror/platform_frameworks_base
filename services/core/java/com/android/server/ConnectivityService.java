@@ -1147,7 +1147,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mKeepaliveTracker = new KeepaliveTracker(mContext, mHandler);
         mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager,
-                mContext.getSystemService(NotificationManager.class));
+                // Pass a NotificationManager obtained from a context with UserHandle.ALL, then
+                // NetworkNotificationManager can put up a notification to all users.
+                // TODO: Create NotificationManager in NetworkNotificationManager directly.
+                (NotificationManager) mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */)
+                        .getSystemService(Context.NOTIFICATION_SERVICE));
 
         final int dailyLimit = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
