@@ -126,6 +126,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         users.add(mTen);
         users.add(new UserInfo(11, "11", 0));
         users.add(new UserInfo(12, "12", 0));
+        users.add(new UserInfo(13, "13", 0));
         for (UserInfo user : users) {
             when(mUm.getUserInfo(eq(user.id))).thenReturn(user);
         }
@@ -135,6 +136,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         profileIds.add(11);
         profileIds.add(10);
         profileIds.add(12);
+        profileIds.add(13);
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
 
         mVersionString = "2";
@@ -145,11 +147,13 @@ public class ManagedServicesTest extends UiServiceTestCase {
         mExpectedPrimaryPackages.put(10, "this.is.another.package");
         mExpectedPrimaryPackages.put(11, "");
         mExpectedPrimaryPackages.put(12, "bananas!");
+        mExpectedPrimaryPackages.put(13, "non.user.set.package");
         mExpectedPrimaryComponentNames = new ArrayMap<>();
         mExpectedPrimaryComponentNames.put(0, "this.is.a.package.name/Ba:another.package/B1");
         mExpectedPrimaryComponentNames.put(10, "this.is.another.package/M1");
         mExpectedPrimaryComponentNames.put(11, "");
         mExpectedPrimaryComponentNames.put(12, "bananas!/Bananas!");
+        mExpectedPrimaryComponentNames.put(13, "non.user.set.package/M1");
         mExpectedPrimary.put(APPROVAL_BY_PACKAGE, mExpectedPrimaryPackages);
         mExpectedPrimary.put(APPROVAL_BY_COMPONENT, mExpectedPrimaryComponentNames);
 
@@ -341,6 +345,35 @@ public class ManagedServicesTest extends UiServiceTestCase {
         }
     }
 
+    /** Test that restore correctly parses the user_set attribute. */
+    @Test
+    public void testReadXml_restoresUserSet() throws Exception {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service =
+                    new TestManagedServices(
+                            getContext(), mLock, mUserProfiles, mIpm, approvalLevel);
+            String testPackage = "user.test.package";
+            String testComponent = "user.test.component/C1";
+            String resolvedValue =
+                    (approvalLevel == APPROVAL_BY_COMPONENT) ? testComponent : testPackage;
+            String xmlEntry = getXmlEntry(resolvedValue, 0, true, false);
+            XmlPullParser parser = getParserWithEntries(service, xmlEntry);
+
+            service.readXml(parser, null, true, 0);
+
+            assertFalse("Failed while parsing xml:\n" + xmlEntry,
+                    service.isPackageOrComponentUserSet(resolvedValue, 0));
+
+            xmlEntry = getXmlEntry(resolvedValue, 0, true, true);
+            parser = getParserWithEntries(service, xmlEntry);
+
+            service.readXml(parser, null, true, 0);
+
+            assertTrue("Failed while parsing xml:\n" + xmlEntry,
+                    service.isPackageOrComponentUserSet(resolvedValue, 0));
+        }
+    }
+
     /** Test that restore ignores the user id attribute and applies the data to the target user. */
     @Test
     public void testWriteReadXml_writeReadDefaults() throws Exception {
@@ -374,7 +407,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         assertEquals(1, defaults.size());
         assertEquals(new ComponentName("package", "class"), defaults.valueAt(0));
-
     }
 
     @Test
@@ -623,6 +655,47 @@ public class ManagedServicesTest extends UiServiceTestCase {
                         getContext().getContentResolver(),
                         service.getConfig().secureSettingName, userId));
                 assertContentsInAnyOrder(actual, expected);
+            }
+        }
+    }
+
+    @Test
+    public void testWriteXml_writesUserSet() throws Exception {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+            loadXml(service);
+
+            XmlSerializer serializer = new FastXmlSerializer();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+            serializer.startDocument(null, true);
+            service.writeXml(serializer, false, UserHandle.USER_ALL);
+            serializer.endDocument();
+            serializer.flush();
+
+            XmlPullParser parser = Xml.newPullParser();
+            byte[] rawOutput = baos.toByteArray();
+            parser.setInput(new BufferedInputStream(
+                    new ByteArrayInputStream(rawOutput)), null);
+            parser.nextTag();
+            for (UserInfo userInfo : mUm.getUsers()) {
+                service.readXml(parser, null, true, userInfo.id);
+            }
+
+            String resolvedUserSetComponent = approvalLevel == APPROVAL_BY_PACKAGE
+                    ? mExpectedPrimaryPackages.get(10)
+                    : mExpectedPrimaryComponentNames.get(10);
+            String resolvedNonUserSetComponent = approvalLevel == APPROVAL_BY_PACKAGE
+                    ? mExpectedPrimaryPackages.get(13)
+                    : mExpectedPrimaryComponentNames.get(13);
+
+            try {
+                assertFalse(service.isPackageOrComponentUserSet(resolvedNonUserSetComponent, 13));
+                assertTrue(service.isPackageOrComponentUserSet(resolvedUserSetComponent, 10));
+            } catch (AssertionError e) {
+                throw new AssertionError(
+                        "Assertion failed while parsing xml:\n" + new String(rawOutput), e);
             }
         }
     }
@@ -965,6 +1038,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         allowedPackages.add("package");
         allowedPackages.add("component");
         allowedPackages.add("bananas!");
+        allowedPackages.add("non.user.set.package");
 
         Set<String> actual = service.getAllowedPackages();
         assertEquals(allowedPackages.size(), actual.size());
@@ -1037,6 +1111,9 @@ public class ManagedServicesTest extends UiServiceTestCase {
         expected12.add(ComponentName.unflattenFromString("bananas!/Bananas!"));
         expected.put(12, expected12);
         expected.put(11, new ArraySet<>());
+        ArraySet<ComponentName> expected13 = new ArraySet<>();
+        expected13.add(ComponentName.unflattenFromString("non.user.set.package/M1"));
+        expected.put(13, expected13);
 
         SparseArray<ArraySet<ComponentName>> actual =
                 service.getAllowedComponents(mUserProfiles.getCurrentProfileIds());
@@ -1309,6 +1386,15 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private void loadXml(ManagedServices service) throws Exception {
+        String xmlString = createXml(service);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xmlString.getBytes())), null);
+        parser.nextTag();
+        service.readXml(parser, null, false, UserHandle.USER_ALL);
+    }
+
+    private String createXml(ManagedServices service) {
         final StringBuffer xml = new StringBuffer();
         String xmlTag = service.getConfig().xmlTag;
         xml.append("<" + xmlTag
@@ -1316,8 +1402,9 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 + (mVersionString != null ? " version=\"" + mVersionString + "\" " : "")
                 + ">\n");
         for (int userId : mExpectedPrimary.get(service.mApprovalLevel).keySet()) {
+            String pkgOrCmp = mExpectedPrimary.get(service.mApprovalLevel).get(userId);
             xml.append(getXmlEntry(
-                    mExpectedPrimary.get(service.mApprovalLevel).get(userId), userId, true));
+                    pkgOrCmp, userId, true, !(pkgOrCmp.startsWith("non.user.set.package"))));
         }
         for (int userId : mExpectedSecondary.get(service.mApprovalLevel).keySet()) {
             xml.append(getXmlEntry(
@@ -1333,11 +1420,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 + ManagedServices.ATT_APPROVED_LIST + "=\"98\" />\n");
         xml.append("</" + xmlTag + ">");
 
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(
-                new ByteArrayInputStream(xml.toString().getBytes())), null);
-        parser.nextTag();
-        service.readXml(parser, null, false, UserHandle.USER_ALL);
+        return xml.toString();
     }
 
     private XmlPullParser getParserWithEntries(ManagedServices service, String... xmlEntries)
@@ -1524,10 +1607,15 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private String getXmlEntry(String approved, int userId, boolean isPrimary) {
+        return getXmlEntry(approved, userId, isPrimary, true);
+    }
+
+    private String getXmlEntry(String approved, int userId, boolean isPrimary, boolean userSet) {
         return "<" + ManagedServices.TAG_MANAGED_SERVICES + " "
                 + ManagedServices.ATT_USER_ID + "=\"" + userId +"\" "
                 + ManagedServices.ATT_IS_PRIMARY + "=\"" + isPrimary +"\" "
                 + ManagedServices.ATT_APPROVED_LIST + "=\"" + approved +"\" "
+                + ManagedServices.ATT_USER_SET + "=\"" + (userSet ? approved : "") + "\" "
                 + "/>\n";
     }
 

@@ -1565,6 +1565,12 @@ public class NotificationManager {
         }
     }
 
+    /** @hide */
+    public void setNotificationListenerAccessGranted(
+            @NonNull ComponentName listener, boolean granted) {
+        setNotificationListenerAccessGranted(listener, granted, true);
+    }
+
     /**
      * Grants/revokes Notification Listener access to the given component for current user.
      * To grant access for a particular user, obtain this service by using the {@link Context}
@@ -1572,15 +1578,17 @@ public class NotificationManager {
      *
      * @param listener Name of component to grant/revoke access
      * @param granted Grant/revoke access
+     * @param userSet Whether the action was triggered explicitly by user
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS)
     public void setNotificationListenerAccessGranted(
-            @NonNull ComponentName listener, boolean granted) {
+            @NonNull ComponentName listener, boolean granted, boolean userSet) {
         INotificationManager service = getService();
         try {
-            service.setNotificationListenerAccessGranted(listener, granted);
+            service.setNotificationListenerAccessGranted(listener, granted, userSet);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1591,7 +1599,7 @@ public class NotificationManager {
             boolean granted) {
         INotificationManager service = getService();
         try {
-            service.setNotificationListenerAccessGrantedForUser(listener, userId, granted);
+            service.setNotificationListenerAccessGrantedForUser(listener, userId, granted, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
