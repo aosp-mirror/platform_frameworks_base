@@ -330,10 +330,10 @@
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"સૂચનાઓની સેટિંગ્સ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ"</string>
-    <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"સ્ક્રીન આપમેળે ફરશે."</string>
+    <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"સ્ક્રીન ઑટોમૅટિક રીતે ફરશે."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"સ્ક્રીન લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"સ્ક્રીન પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
-    <string name="accessibility_rotation_lock_off_changed" msgid="5772498370935088261">"સ્ક્રીન હવે આપમેળે ફરશે."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="5772498370935088261">"સ્ક્રીન હવે ઑટોમૅટિક રીતે ફરશે."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"સ્ક્રીન હવે લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"સ્ક્રીન હવે પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="dessert_case" msgid="9104973640704357717">"ડેઝર્ટ કેસ"</string>
@@ -584,7 +584,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"સાઉન્ડ સેટિંગ"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"વિસ્તૃત કરો"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"સંકુચિત કરો"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"મીડિયામાં કૅપ્શન આપમેળે ઉમેરો"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"મીડિયામાં કૅપ્શન ઑટોમૅટિક રીતે ઉમેરો"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"કૅપ્શન ટિપ બંધ કરો"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"કૅપ્શન ઓવરલે"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ચાલુ કરો"</string>
@@ -922,11 +922,11 @@
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"કદ બદલો"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા ઑટોમૅટિક રીતે બંધ થઈ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઈ શકે છે, જો તમે:\n • એવી ઍપ વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિયો, અથવા નેવિગેટ કરતી ઍપ)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ફોન ગરમ થઈ રહ્યો છે"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ફોન ઠંડો થાય ત્યાં સુધી અમુક સુવિધાઓ મર્યાદિત હોય છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
+    <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન ઑટોમૅટિક રીતે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ચાર્જરને અનપ્લગ કરો"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"આ ડિવાઇસને ચાર્જ કરવામાં કોઈ સમસ્યા છે. પાવર અડૅપ્ટર અનપ્લગ કરો અને કાળજી લેજો કદાચ કેબલ થોડો ગરમ થયો હોઈ શકે છે."</string>
