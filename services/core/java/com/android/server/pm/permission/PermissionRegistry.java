@@ -22,8 +22,6 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.GuardedBy;
-
 import java.util.Collection;
 
 /**
@@ -34,87 +32,62 @@ public class PermissionRegistry {
      * All of the permissions known to the system. The mapping is from permission
      * name to permission object.
      */
-    @GuardedBy("mLock")
     private final ArrayMap<String, Permission> mPermissions = new ArrayMap<>();
 
     /**
      * All permission trees known to the system. The mapping is from permission tree
      * name to permission object.
      */
-    @GuardedBy("mLock")
     private final ArrayMap<String, Permission> mPermissionTrees = new ArrayMap<>();
 
     /**
      * All permisson groups know to the system. The mapping is from permission group
      * name to permission group object.
      */
-    @GuardedBy("mLock")
     private final ArrayMap<String, ParsedPermissionGroup> mPermissionGroups = new ArrayMap<>();
 
     /**
      * Set of packages that request a particular app op. The mapping is from permission
      * name to package names.
      */
-    @GuardedBy("mLock")
     private final ArrayMap<String, ArraySet<String>> mAppOpPermissionPackages = new ArrayMap<>();
 
     @NonNull
-    private final Object mLock;
-
-    public PermissionRegistry(@NonNull Object lock) {
-        mLock = lock;
-    }
-
-    @GuardedBy("mLock")
-    @NonNull
-    public Collection<Permission> getPermissionsLocked() {
+    public Collection<Permission> getPermissions() {
         return mPermissions.values();
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    public Permission getPermissionLocked(@NonNull String permName) {
-        return mPermissions.get(permName);
     }
 
     @Nullable
     public Permission getPermission(@NonNull String permissionName) {
-        synchronized (mLock) {
-            return getPermissionLocked(permissionName);
-        }
+        return mPermissions.get(permissionName);
     }
 
-    @GuardedBy("mLock")
-    public void addPermissionLocked(@NonNull Permission permission) {
+    public void addPermission(@NonNull Permission permission) {
         mPermissions.put(permission.getName(), permission);
     }
 
-    @GuardedBy("mLock")
-    public void removePermissionLocked(@NonNull String permissionName) {
+    public void removePermission(@NonNull String permissionName) {
         mPermissions.remove(permissionName);
     }
 
-    @GuardedBy("mLock")
     @NonNull
-    public Collection<Permission> getPermissionTreesLocked() {
+    public Collection<Permission> getPermissionTrees() {
         return mPermissionTrees.values();
     }
 
-    @GuardedBy("mLock")
     @Nullable
-    public Permission getPermissionTreeLocked(@NonNull String permissionTreeName) {
+    public Permission getPermissionTree(@NonNull String permissionTreeName) {
         return mPermissionTrees.get(permissionTreeName);
     }
 
-    @GuardedBy("mLock")
-    public void addPermissionTreeLocked(@NonNull Permission permissionTree) {
+    public void addPermissionTree(@NonNull Permission permissionTree) {
         mPermissionTrees.put(permissionTree.getName(), permissionTree);
     }
 
     /**
      * Transfers ownership of permissions from one package to another.
      */
-    public void transferPermissionsLocked(@NonNull String oldPackageName,
+    public void transferPermissions(@NonNull String oldPackageName,
             @NonNull String newPackageName) {
         for (int i = 0; i < 2; i++) {
             ArrayMap<String, Permission> permissions = i == 0 ? mPermissionTrees : mPermissions;
@@ -124,37 +97,31 @@ public class PermissionRegistry {
         }
     }
 
-    @GuardedBy("mLock")
     @NonNull
-    public Collection<ParsedPermissionGroup> getPermissionGroupsLocked() {
+    public Collection<ParsedPermissionGroup> getPermissionGroups() {
         return mPermissionGroups.values();
     }
 
-    @GuardedBy("mLock")
     @Nullable
-    public ParsedPermissionGroup getPermissionGroupLocked(@NonNull String permissionGroupName) {
+    public ParsedPermissionGroup getPermissionGroup(@NonNull String permissionGroupName) {
         return mPermissionGroups.get(permissionGroupName);
     }
 
-    @GuardedBy("mLock")
-    public void addPermissionGroupLocked(@NonNull ParsedPermissionGroup permissionGroup) {
+    public void addPermissionGroup(@NonNull ParsedPermissionGroup permissionGroup) {
         mPermissionGroups.put(permissionGroup.getName(), permissionGroup);
     }
 
-    @GuardedBy("mLock")
     @NonNull
-    public ArrayMap<String, ArraySet<String>> getAllAppOpPermissionPackagesLocked() {
+    public ArrayMap<String, ArraySet<String>> getAllAppOpPermissionPackages() {
         return mAppOpPermissionPackages;
     }
 
-    @GuardedBy("mLock")
     @Nullable
-    public ArraySet<String> getAppOpPermissionPackagesLocked(@NonNull String permissionName) {
+    public ArraySet<String> getAppOpPermissionPackages(@NonNull String permissionName) {
         return mAppOpPermissionPackages.get(permissionName);
     }
 
-    @GuardedBy("mLock")
-    public void addAppOpPermissionPackageLocked(@NonNull String permissionName,
+    public void addAppOpPermissionPackage(@NonNull String permissionName,
             @NonNull String packageName) {
         ArraySet<String> packageNames = mAppOpPermissionPackages.get(permissionName);
         if (packageNames == null) {
@@ -164,8 +131,7 @@ public class PermissionRegistry {
         packageNames.add(packageName);
     }
 
-    @GuardedBy("mLock")
-    public void removeAppOpPermissionPackageLocked(@NonNull String permissionName,
+    public void removeAppOpPermissionPackage(@NonNull String permissionName,
             @NonNull String packageName) {
         final ArraySet<String> packageNames = mAppOpPermissionPackages.get(permissionName);
         if (packageNames == null) {
@@ -184,23 +150,7 @@ public class PermissionRegistry {
      */
     @NonNull
     public Permission enforcePermissionTree(@NonNull String permissionName, int callingUid) {
-        synchronized (mLock) {
-            return Permission.enforcePermissionTree(mPermissionTrees.values(), permissionName,
-                    callingUid);
-        }
-    }
-
-    public boolean isPermissionInstant(@NonNull String permissionName) {
-        synchronized (mLock) {
-            final Permission permission = mPermissions.get(permissionName);
-            return permission != null && permission.isInstant();
-        }
-    }
-
-    boolean isPermissionAppOp(@NonNull String permissionName) {
-        synchronized (mLock) {
-            final Permission permission = mPermissions.get(permissionName);
-            return permission != null && permission.isAppOp();
-        }
+        return Permission.enforcePermissionTree(mPermissionTrees.values(), permissionName,
+                callingUid);
     }
 }
