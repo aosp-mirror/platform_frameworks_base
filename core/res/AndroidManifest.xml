@@ -668,10 +668,6 @@
     <!-- For tether entitlement recheck-->
     <protected-broadcast
         android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
-
-    <!-- Made protected in S (was added in R) -->
-    <protected-broadcast android:name="com.android.internal.intent.action.BUGREPORT_REQUESTED" />
-
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
