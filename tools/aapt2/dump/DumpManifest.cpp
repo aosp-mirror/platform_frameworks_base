@@ -1851,6 +1851,41 @@ class SupportsGlTexture : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <property> elements. **/
+class Property : public ManifestExtractor::Element {
+ public:
+  Property() = default;
+  std::string name;
+  std::string value;
+  const int* value_int;
+  std::string resource;
+  const int* resource_int;
+
+  void Extract(xml::Element* element) override {
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    value = GetAttributeStringDefault(FindAttribute(element, VALUE_ATTR), "");
+    value_int = GetAttributeInteger(FindAttribute(element, VALUE_ATTR));
+    resource = GetAttributeStringDefault(FindAttribute(element, RESOURCE_ATTR), "");
+    resource_int = GetAttributeInteger(FindAttribute(element, RESOURCE_ATTR));
+  }
+
+  void Print(text::Printer* printer) override {
+    printer->Print(StringPrintf("property: name='%s' ", name.data()));
+    if (!value.empty()) {
+      printer->Print(StringPrintf("value='%s' ", value.data()));
+    } else if (value_int) {
+      printer->Print(StringPrintf("value='%d' ", *value_int));
+    } else {
+      if (!resource.empty()) {
+        printer->Print(StringPrintf("resource='%s' ", resource.data()));
+      } else if (resource_int) {
+        printer->Print(StringPrintf("resource='%d' ", *resource_int));
+      }
+    }
+    printer->Print("\n");
+  }
+};
+
 /** Recursively prints the extracted badging element. */
 static void Print(ManifestExtractor::Element* el, text::Printer* printer) {
   el->Print(printer);
@@ -2291,6 +2326,7 @@ T* ElementCast(ManifestExtractor::Element* element) {
       {"overlay", std::is_base_of<Overlay, T>::value},
       {"package-verifier", std::is_base_of<PackageVerifier, T>::value},
       {"permission", std::is_base_of<Permission, T>::value},
+      {"property", std::is_base_of<Property, T>::value},
       {"provider", std::is_base_of<Provider, T>::value},
       {"receiver", std::is_base_of<Receiver, T>::value},
       {"required-feature", std::is_base_of<RequiredFeature, T>::value},
@@ -2344,6 +2380,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"overlay", &CreateType<Overlay>},
           {"package-verifier", &CreateType<PackageVerifier>},
           {"permission", &CreateType<Permission>},
+          {"property", &CreateType<Property>},
           {"provider", &CreateType<Provider>},
           {"receiver", &CreateType<Receiver>},
           {"required-feature", &CreateType<RequiredFeature>},
