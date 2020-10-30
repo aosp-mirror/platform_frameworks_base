@@ -623,6 +623,9 @@
         @dimen/notification_divider_height
     </dimen>
 
+    <!-- The horizontal margin of the content in the notification shade -->
+    <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
+
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">
         @*android:dimen/notification_content_margin_top
