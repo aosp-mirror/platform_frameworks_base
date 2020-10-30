@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ਟੈਦਰਿੰਗ ਜਾਂ ਹੌਟਸਪੌਟ ਕਿਰਿਆਸ਼ੀਲ"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ਟੈਦਰਿੰਗ ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ਵੇਰਵਿਆਂ ਲਈ ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ"</string>
-</resources>

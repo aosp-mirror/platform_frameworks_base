@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"टेदरिंग किंवा हॉटस्पॉट सक्रिय"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"सेट करण्यासाठी टॅप करा."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"टेदरिंग बंद आहे"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"तपशीलांसाठी तुमच्या प्रशासकाशी संपर्क साधा"</string>
-</resources>
