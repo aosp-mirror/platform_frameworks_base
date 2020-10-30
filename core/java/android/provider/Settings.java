@@ -9054,12 +9054,6 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RESUME_BLOCKED = "qs_media_resumption_blocked";
 
         /**
-         * Controls if window magnification is enabled.
-         * @hide
-         */
-        public static final String WINDOW_MAGNIFICATION = "window_magnification";
-
-        /**
          * Controls magnification mode when magnification is enabled via a system-wide triple tap
          * gesture or the accessibility shortcut.
          *
@@ -11838,37 +11832,6 @@ public final class Settings {
         public static final String APP_TIME_LIMIT_USAGE_SOURCE = "app_time_limit_usage_source";
 
         /**
-         * App standby (app idle) specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         * <p>
-         * "idle_duration=5000,prediction_timeout=4500,screen_thresholds=0/0/60000/120000"
-         * <p>
-         * All durations are in millis.
-         * Array values are separated by forward slashes
-         * The following keys are supported:
-         *
-         * <pre>
-         * screen_thresholds                (long[4])
-         * elapsed_thresholds               (long[4])
-         * strong_usage_duration            (long)
-         * notification_seen_duration       (long)
-         * system_update_usage_duration     (long)
-         * prediction_timeout               (long)
-         * sync_adapter_duration            (long)
-         * exempted_sync_duration           (long)
-         * system_interaction_duration      (long)
-         * initial_foreground_service_start_duration (long)
-         * cross_profile_apps_share_standby_buckets  (boolean)
-         * </pre>
-         *
-         * <p>
-         * Type: string
-         * @hide
-         * @see com.android.server.usage.AppStandbyController
-         */
-        public static final String APP_IDLE_CONSTANTS = "app_idle_constants";
-
-        /**
          * Enable ART bytecode verification verifications for debuggable apps.
          * 0 = disable, 1 = enable.
          * @hide
@@ -14531,6 +14494,15 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_NEW_LOCKSCREEN = "show_new_lockscreen";
+
+        /**
+         * Whether to show new notification dismissal.
+         * Values are:
+         * 0: Disabled
+         * 1: Enabled
+         * @hide
+         */
+        public static final String SHOW_NEW_NOTIF_DISMISS = "show_new_notif_dismiss";
 
         /**
          * Block untrusted touches mode.

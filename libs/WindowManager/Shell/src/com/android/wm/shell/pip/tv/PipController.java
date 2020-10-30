@@ -224,10 +224,11 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             PipMediaController pipMediaController,
+            PipNotification pipNotification,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
-        mPipNotification = new PipNotification(context, this);
+        mPipNotification = pipNotification;
         mPipBoundsHandler = pipBoundsHandler;
         mPipMediaController = pipMediaController;
         // Ensure that we have the display info in case we get calls to update the bounds
@@ -241,6 +242,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
+
+        addListener(mPipNotification);
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_CLOSE);

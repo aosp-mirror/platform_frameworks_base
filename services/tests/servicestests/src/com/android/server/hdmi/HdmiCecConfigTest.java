@@ -26,13 +26,9 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
-import android.util.Slog;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
-import com.android.server.hdmi.cec.config.CecSettings;
-import com.android.server.hdmi.cec.config.XmlParser;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,12 +36,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.xml.datatype.DatatypeConfigurationException;
 
 @SmallTest
 @Presubmit
@@ -65,13 +55,15 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getAllCecSettings_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter, null, null);
         assertThat(hdmiCecConfig.getAllSettings()).isEmpty();
     }
 
     @Test
     public void getAllCecSettings_Empty() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
@@ -80,7 +72,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getAllCecSettings_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"hdmi_cec_enabled\""
@@ -108,13 +101,15 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getUserCecSettings_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter, null, null);
         assertThat(hdmiCecConfig.getUserSettings()).isEmpty();
     }
 
     @Test
     public void getUserCecSettings_Empty() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
@@ -123,7 +118,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getUserCecSettings_OnlyMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"hdmi_cec_enabled\""
@@ -151,7 +147,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getUserCecSettings_WithOverride() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"hdmi_cec_enabled\""
@@ -190,14 +187,16 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getAllowedValues_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter, null, null);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getAllowedValues("foo"));
     }
 
     @Test
     public void getAllowedValues_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
@@ -207,7 +206,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getAllowedValues_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"send_standby_on_sleep\""
@@ -229,14 +229,16 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getDefaultValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter, null, null);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getDefaultValue("foo"));
     }
 
     @Test
     public void getDefaultValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
@@ -246,7 +248,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getDefaultValue_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"send_standby_on_sleep\""
@@ -266,14 +269,16 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter, null, null);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getValue("foo"));
     }
 
     @Test
     public void getValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
@@ -287,7 +292,8 @@ public final class HdmiCecConfigTest {
                   Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
                   HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV))
             .thenReturn(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"send_standby_on_sleep\""
@@ -313,7 +319,8 @@ public final class HdmiCecConfigTest {
                       .NONE.name().toLowerCase()))
                 .thenReturn(HdmiProperties.power_state_change_on_active_source_lost_values
                        .STANDBY_NOW.name().toLowerCase());
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"power_state_change_on_active_source_lost\""
@@ -333,14 +340,16 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(null, null);
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter, null, null);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setValue("foo", "bar"));
     }
 
     @Test
     public void setValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "</cec-settings>", null);
@@ -350,7 +359,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setValue_NotConfigurable() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"send_standby_on_sleep\""
@@ -371,7 +381,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setValue_InvalidValue() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"send_standby_on_sleep\""
@@ -392,7 +403,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setValue_GlobalSetting_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"send_standby_on_sleep\""
@@ -414,7 +426,8 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setValue_SystemProperty_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = createHdmiCecConfig(
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<cec-settings>"
                 + "  <setting name=\"power_state_change_on_active_source_lost\""
@@ -434,23 +447,5 @@ public final class HdmiCecConfigTest {
                   HdmiCecConfig.SYSPROP_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                   HdmiProperties.power_state_change_on_active_source_lost_values
                       .STANDBY_NOW.name().toLowerCase());
-    }
-
-    private HdmiCecConfig createHdmiCecConfig(String productConfigXml, String vendorOverrideXml) {
-        CecSettings productConfig = null;
-        CecSettings vendorOverride = null;
-        try {
-            if (productConfigXml != null) {
-                productConfig = XmlParser.read(
-                        new ByteArrayInputStream(productConfigXml.getBytes()));
-            }
-            if (vendorOverrideXml != null) {
-                vendorOverride = XmlParser.read(
-                        new ByteArrayInputStream(vendorOverrideXml.getBytes()));
-            }
-        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
-            Slog.e(TAG, "Encountered an error while reading/parsing CEC config strings", e);
-        }
-        return new HdmiCecConfig(mContext, mStorageAdapter, productConfig, vendorOverride);
     }
 }

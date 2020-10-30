@@ -817,6 +817,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         LocalDisplayDevice::setDesiredDisplayModeSpecsAsync, this,
                         getDisplayTokenLocked(),
                         new SurfaceControl.DesiredDisplayConfigSpecs(baseConfigId,
+                                mDisplayModeSpecs.allowGroupSwitching,
                                 mDisplayModeSpecs.primaryRefreshRateRange.min,
                                 mDisplayModeSpecs.primaryRefreshRateRange.max,
                                 mDisplayModeSpecs.appRequestRefreshRateRange.min,

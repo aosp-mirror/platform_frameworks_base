@@ -214,6 +214,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     boolean switchTileLayout(boolean force) {
         if (mView.switchTileLayout(force, mRecords)) {
             setTiles();
+            mView.reSetLayoutListening();
             return true;
         }
         return false;

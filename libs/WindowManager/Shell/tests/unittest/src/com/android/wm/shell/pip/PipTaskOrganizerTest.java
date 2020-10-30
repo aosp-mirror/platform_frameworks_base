@@ -69,11 +69,13 @@ public class PipTaskOrganizerTest extends PipTestCase {
     private PipBoundsState mPipBoundsState;
 
     private ComponentName mComponent1;
+    private ComponentName mComponent2;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mComponent1 = new ComponentName(mContext, "component1");
+        mComponent2 = new ComponentName(mContext, "component2");
         mPipBoundsState = new PipBoundsState();
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext, mPipBoundsState,
                 mMockPipBoundsHandler, mMockPipSurfaceTransactionHelper, mMockOptionalSplitScreen,
@@ -101,29 +103,57 @@ public class PipTaskOrganizerTest extends PipTestCase {
     }
 
     @Test
+    public void startSwipePipToHome_updatesLastPipComponentName() {
+        mSpiedPipTaskOrganizer.startSwipePipToHome(mComponent1, null, null);
+
+        assertEquals(mComponent1, mPipBoundsState.getLastPipComponentName());
+    }
+
+    @Test
     public void onTaskAppeared_updatesAspectRatio() {
         final Rational aspectRatio = new Rational(2, 1);
 
-        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(
+        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
                 createPipParams(aspectRatio)), null /* leash */);
 
         assertEquals(aspectRatio.floatValue(), mPipBoundsState.getAspectRatio(), 0.01f);
     }
 
     @Test
+    public void onTaskAppeared_updatesLastPipComponentName() {
+        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1, createPipParams(null)),
+                null /* leash */);
+
+        assertEquals(mComponent1, mPipBoundsState.getLastPipComponentName());
+    }
+
+    @Test
     public void onTaskInfoChanged_updatesAspectRatioIfChanged() {
         final Rational startAspectRatio = new Rational(2, 1);
         final Rational newAspectRatio = new Rational(1, 2);
-        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(
+        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
                 createPipParams(startAspectRatio)), null /* leash */);
 
-        mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(createPipParams(newAspectRatio)));
+        mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent1,
+                createPipParams(newAspectRatio)));
 
         assertEquals(newAspectRatio.floatValue(), mPipBoundsState.getAspectRatio(), 0.01f);
     }
 
+    @Test
+    public void onTaskInfoChanged_updatesLastPipComponentName() {
+        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
+                createPipParams(null)), null /* leash */);
+
+        mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent2,
+                createPipParams(null)));
+
+        assertEquals(mComponent2, mPipBoundsState.getLastPipComponentName());
+    }
+
     private void preparePipTaskOrg() {
         final DisplayInfo info = new DisplayInfo();
+        mPipBoundsState.setDisplayInfo(info);
         when(mMockPipBoundsHandler.getDestinationBounds(any(), any())).thenReturn(new Rect());
         when(mMockPipBoundsHandler.getDestinationBounds(any(), any(), anyBoolean()))
                 .thenReturn(new Rect());
@@ -133,10 +163,12 @@ public class PipTaskOrganizerTest extends PipTestCase {
         doNothing().when(mSpiedPipTaskOrganizer).scheduleAnimateResizePip(any(), anyInt(), any());
     }
 
-    private static ActivityManager.RunningTaskInfo createTaskInfo(PictureInPictureParams params) {
+    private static ActivityManager.RunningTaskInfo createTaskInfo(
+            ComponentName componentName, PictureInPictureParams params) {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.token = mock(WindowContainerToken.class);
         info.pictureInPictureParams = params;
+        info.topActivity = componentName;
         return info;
     }
 

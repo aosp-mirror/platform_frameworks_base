@@ -110,6 +110,7 @@ static struct {
     jfieldID sourceCrop;
     jfieldID frameScale;
     jfieldID captureSecureLayers;
+    jfieldID allowProtected;
 } gCaptureArgsClassInfo;
 
 static struct {
@@ -196,6 +197,7 @@ static struct {
     jclass clazz;
     jmethodID ctor;
     jfieldID defaultConfig;
+    jfieldID allowGroupSwitching;
     jfieldID primaryRefreshRateMin;
     jfieldID primaryRefreshRateMax;
     jfieldID appRequestRefreshRateMin;
@@ -367,6 +369,8 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
             env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScale);
     captureArgs.captureSecureLayers =
             env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.captureSecureLayers);
+    captureArgs.allowProtected =
+            env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.allowProtected);
 }
 
 static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
@@ -1003,6 +1007,9 @@ static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, jo
 
     jint defaultConfig = env->GetIntField(desiredDisplayConfigSpecs,
                                           gDesiredDisplayConfigSpecsClassInfo.defaultConfig);
+    jboolean allowGroupSwitching =
+            env->GetBooleanField(desiredDisplayConfigSpecs,
+                                 gDesiredDisplayConfigSpecsClassInfo.allowGroupSwitching);
     jfloat primaryRefreshRateMin =
             env->GetFloatField(desiredDisplayConfigSpecs,
                                gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMin);
@@ -1017,6 +1024,7 @@ static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, jo
                                gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMax);
 
     size_t result = SurfaceComposerClient::setDesiredDisplayConfigSpecs(token, defaultConfig,
+                                                                        allowGroupSwitching,
                                                                         primaryRefreshRateMin,
                                                                         primaryRefreshRateMax,
                                                                         appRequestRefreshRateMin,
@@ -1029,11 +1037,13 @@ static jobject nativeGetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, job
     if (token == nullptr) return nullptr;
 
     int32_t defaultConfig;
+    bool allowGroupSwitching;
     float primaryRefreshRateMin;
     float primaryRefreshRateMax;
     float appRequestRefreshRateMin;
     float appRequestRefreshRateMax;
     if (SurfaceComposerClient::getDesiredDisplayConfigSpecs(token, &defaultConfig,
+                                                            &allowGroupSwitching,
                                                             &primaryRefreshRateMin,
                                                             &primaryRefreshRateMax,
                                                             &appRequestRefreshRateMin,
@@ -1044,8 +1054,8 @@ static jobject nativeGetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, job
 
     return env->NewObject(gDesiredDisplayConfigSpecsClassInfo.clazz,
                           gDesiredDisplayConfigSpecsClassInfo.ctor, defaultConfig,
-                          primaryRefreshRateMin, primaryRefreshRateMax, appRequestRefreshRateMin,
-                          appRequestRefreshRateMax);
+                          allowGroupSwitching, primaryRefreshRateMin, primaryRefreshRateMax,
+                          appRequestRefreshRateMin, appRequestRefreshRateMax);
 }
 
 static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
@@ -1862,9 +1872,11 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDesiredDisplayConfigSpecsClassInfo.clazz =
             MakeGlobalRefOrDie(env, desiredDisplayConfigSpecsClazz);
     gDesiredDisplayConfigSpecsClassInfo.ctor =
-            GetMethodIDOrDie(env, gDesiredDisplayConfigSpecsClassInfo.clazz, "<init>", "(IFFFF)V");
+            GetMethodIDOrDie(env, gDesiredDisplayConfigSpecsClassInfo.clazz, "<init>", "(IZFFFF)V");
     gDesiredDisplayConfigSpecsClassInfo.defaultConfig =
             GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "defaultConfig", "I");
+    gDesiredDisplayConfigSpecsClassInfo.allowGroupSwitching =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "allowGroupSwitching", "Z");
     gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMin =
             GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "primaryRefreshRateMin", "F");
     gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMax =
@@ -1881,6 +1893,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gCaptureArgsClassInfo.frameScale = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScale", "F");
     gCaptureArgsClassInfo.captureSecureLayers =
             GetFieldIDOrDie(env, captureArgsClazz, "mCaptureSecureLayers", "Z");
+    gCaptureArgsClassInfo.allowProtected =
+            GetFieldIDOrDie(env, captureArgsClazz, "mAllowProtected", "Z");
 
     jclass displayCaptureArgsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$DisplayCaptureArgs");

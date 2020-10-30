@@ -38,6 +38,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.media.MediaActionSound;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -143,6 +144,7 @@ public class ScreenshotController {
     private final AccessibilityManager mAccessibilityManager;
     private final MediaActionSound mCameraSound;
 
+    private final Binder mWindowToken;
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
@@ -178,13 +180,9 @@ public class ScreenshotController {
         mNotificationsController = screenshotNotificationsController;
         mUiEventLogger = uiEventLogger;
 
-        // Create a visual (Window) context
-        // After this, our windowToken is available from mContext.getActivityToken()
         final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
         mDisplay = dm.getDisplay(DEFAULT_DISPLAY);
-        Context displayContext = context.createDisplayContext(mDisplay);
-        mContext = new WindowContext(displayContext, WindowManager.LayoutParams.TYPE_SCREENSHOT,
-                null);
+        mContext = context.createDisplayContext(mDisplay);
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
@@ -194,6 +192,7 @@ public class ScreenshotController {
         mInDarkMode = config.isNightModeActive();
         mDirectionLTR = config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
         mOrientationPortrait = config.orientation == ORIENTATION_PORTRAIT;
+        mWindowToken = new Binder("ScreenshotController");
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
@@ -210,6 +209,7 @@ public class ScreenshotController {
         mWindowLayoutParams.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mWindowLayoutParams.setFitInsetsTypes(0 /* types */);
+        mWindowLayoutParams.token = mWindowToken;
 
         mDisplayMetrics = new DisplayMetrics();
         mDisplay.getRealMetrics(mDisplayMetrics);

@@ -3365,6 +3365,10 @@
          ratio larger than this is considered to wide and short to be usable. Currently 2.39:1. -->
     <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.39</item>
 
+    <!-- The maximum number of actions that is supported for picture-in-picture. This number
+         must be no less than 3 for back compatibility. -->
+    <integer name="config_pictureInPictureMaxNumberOfActions">3</integer>
+
     <!-- Controls the snap mode for the docked stack divider
              0 - 3 snap targets: left/top has 16:9 ratio, 1:1, and right/bottom has 16:9 ratio
              1 - 3 snap targets: fixed ratio, 1:1, (1 - fixed ratio)

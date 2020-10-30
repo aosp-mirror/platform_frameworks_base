@@ -15,6 +15,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -305,6 +308,36 @@ public class Utils {
         Drawable drawable = ta.getDrawable(0);
         ta.recycle();
         return drawable;
+    }
+
+    /**
+    * Create a color matrix suitable for a ColorMatrixColorFilter that modifies only the color but
+    * preserves the alpha for a given drawable
+    * @param color
+    * @return a color matrix that uses the source alpha and given color
+    */
+    public static ColorMatrix getAlphaInvariantColorMatrixForColor(@ColorInt int color) {
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        ColorMatrix cm = new ColorMatrix(new float[] {
+                0, 0, 0, 0, r,
+                0, 0, 0, 0, g,
+                0, 0, 0, 0, b,
+                0, 0, 0, 1, 0 });
+
+        return cm;
+    }
+
+    /**
+     * Create a ColorMatrixColorFilter to tint a drawable but retain its alpha characteristics
+     *
+     * @return a ColorMatrixColorFilter which changes the color of the output but is invariant on
+     * the source alpha
+     */
+    public static ColorFilter getAlphaInvariantColorFilterForColor(@ColorInt int color) {
+        return new ColorMatrixColorFilter(getAlphaInvariantColorMatrixForColor(color));
     }
 
     /**

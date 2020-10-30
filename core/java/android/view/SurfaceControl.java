@@ -653,12 +653,14 @@ public final class SurfaceControl implements Parcelable {
         private final Rect mSourceCrop = new Rect();
         private final float mFrameScale;
         private final boolean mCaptureSecureLayers;
+        private final boolean mAllowProtected;
 
         private CaptureArgs(Builder<? extends Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
             mSourceCrop.set(builder.mSourceCrop);
             mFrameScale = builder.mFrameScale;
             mCaptureSecureLayers = builder.mCaptureSecureLayers;
+            mAllowProtected = builder.mAllowProtected;
         }
 
         /**
@@ -671,6 +673,7 @@ public final class SurfaceControl implements Parcelable {
             private final Rect mSourceCrop = new Rect();
             private float mFrameScale = 1;
             private boolean mCaptureSecureLayers;
+            private boolean mAllowProtected;
 
             /**
              * The desired pixel format of the returned buffer.
@@ -705,6 +708,17 @@ public final class SurfaceControl implements Parcelable {
              */
             public T setCaptureSecureLayers(boolean captureSecureLayers) {
                 mCaptureSecureLayers = captureSecureLayers;
+                return getThis();
+            }
+
+            /**
+             * Whether to allow the screenshot of protected (DRM) content. Warning: The screenshot
+             * cannot be read in unprotected space.
+             *
+             * @see HardwareBuffer#USAGE_PROTECTED_CONTENT
+             */
+            public T setAllowProtected(boolean allowProtected) {
+                mAllowProtected = allowProtected;
                 return getThis();
             }
 
@@ -1907,16 +1921,23 @@ public final class SurfaceControl implements Parcelable {
         public float appRequestRefreshRateMin;
         public float appRequestRefreshRateMax;
 
+        /**
+         * If true this will allow switching between modes in different display configuration
+         * groups. This way the user may see visual interruptions when the display mode changes.
+         */
+        public boolean allowGroupSwitching;
+
         public DesiredDisplayConfigSpecs() {}
 
         public DesiredDisplayConfigSpecs(DesiredDisplayConfigSpecs other) {
             copyFrom(other);
         }
 
-        public DesiredDisplayConfigSpecs(int defaultConfig, float primaryRefreshRateMin,
-                float primaryRefreshRateMax, float appRequestRefreshRateMin,
-                float appRequestRefreshRateMax) {
+        public DesiredDisplayConfigSpecs(int defaultConfig, boolean allowGroupSwitching,
+                float primaryRefreshRateMin, float primaryRefreshRateMax,
+                float appRequestRefreshRateMin, float appRequestRefreshRateMax) {
             this.defaultConfig = defaultConfig;
+            this.allowGroupSwitching = allowGroupSwitching;
             this.primaryRefreshRateMin = primaryRefreshRateMin;
             this.primaryRefreshRateMax = primaryRefreshRateMax;
             this.appRequestRefreshRateMin = appRequestRefreshRateMin;

@@ -78,7 +78,7 @@ message GlobalSettingsProto {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
         // These are key=value lists, separated by commas.
-        optional SettingProto idle_constants = 1;
+        reserved 1; // idle_constants
         optional SettingProto standby_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto auto_restriction_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto forced_app_standby_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];

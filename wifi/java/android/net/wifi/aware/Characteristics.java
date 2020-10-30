@@ -17,10 +17,11 @@
 package android.net.wifi.aware;
 
 import android.annotation.IntDef;
-import android.net.wifi.util.SdkLevelUtil;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -92,7 +93,7 @@ public final class Characteristics implements Parcelable {
      * @return True if supported, false otherwise.
      */
     public boolean isInstantCommunicationModeSupported() {
-        if (!SdkLevelUtil.isAtLeastS()) {
+        if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return mCharacteristics.getBoolean(KEY_IS_INSTANT_COMMUNICATION_MODE_SUPPORTED);

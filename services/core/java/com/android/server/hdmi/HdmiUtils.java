@@ -16,6 +16,10 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ADDR_BACKUP_1;
+import static com.android.server.hdmi.Constants.ADDR_BACKUP_2;
+import static com.android.server.hdmi.Constants.ADDR_TV;
+
 import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
@@ -29,6 +33,8 @@ import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.Constants.FeatureOpcode;
 import com.android.server.hdmi.Constants.PathRelationship;
 
+import com.google.android.collect.Lists;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -37,6 +43,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,23 +55,38 @@ final class HdmiUtils {
 
     private static final String TAG = "HdmiUtils";
 
-    private static final int[] ADDRESS_TO_TYPE = {
-        HdmiDeviceInfo.DEVICE_TV,  // ADDR_TV
-        HdmiDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_1
-        HdmiDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_2
-        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_1
-        HdmiDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_1
-        HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,  // ADDR_AUDIO_SYSTEM
-        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_2
-        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_3
-        HdmiDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_2
-        HdmiDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_3
-        HdmiDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_4
-        HdmiDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_3
-        HdmiDeviceInfo.DEVICE_RESERVED,
-        HdmiDeviceInfo.DEVICE_RESERVED,
-        HdmiDeviceInfo.DEVICE_TV,  // ADDR_SPECIFIC_USE
-    };
+    private static final Map<Integer, List<Integer>> ADDRESS_TO_TYPE =
+            new HashMap<Integer, List<Integer>>() {
+                {
+                    put(Constants.ADDR_TV, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV));
+                    put(Constants.ADDR_RECORDER_1,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER));
+                    put(Constants.ADDR_RECORDER_2,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER));
+                    put(Constants.ADDR_TUNER_1, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
+                    put(Constants.ADDR_PLAYBACK_1,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK));
+                    put(Constants.ADDR_AUDIO_SYSTEM,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM));
+                    put(Constants.ADDR_TUNER_2, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
+                    put(Constants.ADDR_TUNER_3, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
+                    put(Constants.ADDR_PLAYBACK_2,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK));
+                    put(Constants.ADDR_RECORDER_3,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER));
+                    put(Constants.ADDR_TUNER_4, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
+                    put(Constants.ADDR_PLAYBACK_3,
+                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK));
+                    put(Constants.ADDR_BACKUP_1, Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
+                            HdmiDeviceInfo.DEVICE_RECORDER, HdmiDeviceInfo.DEVICE_TUNER,
+                            HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR));
+                    put(Constants.ADDR_BACKUP_2, Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
+                            HdmiDeviceInfo.DEVICE_RECORDER, HdmiDeviceInfo.DEVICE_TUNER,
+                            HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR));
+                    put(Constants.ADDR_SPECIFIC_USE, Lists.newArrayList(ADDR_TV));
+                    put(Constants.ADDR_UNREGISTERED, Collections.emptyList());
+                }
+            };
 
     private static final String[] DEFAULT_NAMES = {
         "TV",
@@ -79,8 +101,8 @@ final class HdmiUtils {
         "Recorder_3",
         "Tuner_4",
         "Playback_3",
-        "Reserved_1",
-        "Reserved_2",
+        "Backup_1",
+        "Backup_2",
         "Secondary_TV",
     };
 
@@ -101,21 +123,36 @@ final class HdmiUtils {
      * @return true if the given address is valid
      */
     static boolean isValidAddress(int address) {
-        return (Constants.ADDR_TV <= address && address <= Constants.ADDR_SPECIFIC_USE);
+        return (ADDR_TV <= address && address <= Constants.ADDR_SPECIFIC_USE);
+    }
+
+    static boolean isEligibleAddressForDevice(int deviceType, int logicalAddress) {
+        return isValidAddress(logicalAddress)
+                && ADDRESS_TO_TYPE.get(logicalAddress).contains(deviceType);
+    }
+
+    static boolean isEligibleAddressForCecVersion(int cecVersion, int logicalAddress) {
+        if (isValidAddress(logicalAddress)) {
+            if (logicalAddress == ADDR_BACKUP_1 || logicalAddress == ADDR_BACKUP_2) {
+                return cecVersion == Constants.VERSION_2_0;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
      * Return the device type for the given logical address.
      *
-     * @param address logical address
+     * @param logicalAddress logical address
      * @return device type for the given logical address; DEVICE_INACTIVE
      *         if the address is not valid.
      */
-    static int getTypeFromAddress(int address) {
-        if (isValidAddress(address)) {
-            return ADDRESS_TO_TYPE[address];
+    static List<Integer> getTypeFromAddress(int logicalAddress) {
+        if (isValidAddress(logicalAddress)) {
+            return ADDRESS_TO_TYPE.get(logicalAddress);
         }
-        return HdmiDeviceInfo.DEVICE_INACTIVE;
+        return Lists.newArrayList(HdmiDeviceInfo.DEVICE_INACTIVE);
     }
 
     /**
@@ -142,10 +179,10 @@ final class HdmiUtils {
      * @throws IllegalArgumentException
      */
     static void verifyAddressType(int logicalAddress, int deviceType) {
-        int actualDeviceType = getTypeFromAddress(logicalAddress);
-        if (actualDeviceType != deviceType) {
+        List<Integer> actualDeviceTypes = getTypeFromAddress(logicalAddress);
+        if (!actualDeviceTypes.contains(deviceType)) {
             throw new IllegalArgumentException("Device type missmatch:[Expected:" + deviceType
-                    + ", Actual:" + actualDeviceType);
+                    + ", Actual:" + actualDeviceTypes);
         }
     }
 

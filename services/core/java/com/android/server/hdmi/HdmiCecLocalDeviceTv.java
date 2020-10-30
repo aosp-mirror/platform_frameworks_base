@@ -1368,9 +1368,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     private boolean checkRecorder(int recorderAddress) {
         HdmiDeviceInfo device = mService.getHdmiCecNetwork().getCecDeviceInfo(recorderAddress);
-        return (device != null)
-                && (HdmiUtils.getTypeFromAddress(recorderAddress)
-                        == HdmiDeviceInfo.DEVICE_RECORDER);
+        return (device != null) && (HdmiUtils.isEligibleAddressForDevice(
+                HdmiDeviceInfo.DEVICE_RECORDER, recorderAddress));
     }
 
     private boolean checkRecordSource(byte[] recordSource) {

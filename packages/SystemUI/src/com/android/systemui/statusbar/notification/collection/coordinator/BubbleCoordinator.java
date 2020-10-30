@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -56,6 +57,7 @@ import javax.inject.Inject;
 public class BubbleCoordinator implements Coordinator {
     private static final String TAG = "BubbleCoordinator";
 
+    private final Optional<BubblesManager> mBubblesManagerOptional;
     private final Optional<Bubbles> mBubblesOptional;
     private final NotifCollection mNotifCollection;
     private final Set<String> mInterceptedDismissalEntries = new HashSet<>();
@@ -64,8 +66,10 @@ public class BubbleCoordinator implements Coordinator {
 
     @Inject
     public BubbleCoordinator(
+            Optional<BubblesManager> bubblesManagerOptional,
             Optional<Bubbles> bubblesOptional,
             NotifCollection notifCollection) {
+        mBubblesManagerOptional = bubblesManagerOptional;
         mBubblesOptional = bubblesOptional;
         mNotifCollection = notifCollection;
     }
@@ -75,8 +79,8 @@ public class BubbleCoordinator implements Coordinator {
         mNotifPipeline = pipeline;
         mNotifPipeline.addNotificationDismissInterceptor(mDismissInterceptor);
         mNotifPipeline.addFinalizeFilter(mNotifFilter);
-        if (mBubblesOptional.isPresent()) {
-            mBubblesOptional.get().addNotifCallback(mNotifCallback);
+        if (mBubblesManagerOptional.isPresent()) {
+            mBubblesManagerOptional.get().addNotifCallback(mNotifCallback);
         }
 
     }
@@ -85,7 +89,8 @@ public class BubbleCoordinator implements Coordinator {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             return mBubblesOptional.isPresent()
-                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(entry);
+                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
+                            entry.getKey(), entry.getSbn().getGroupKey());
         }
     };
 
@@ -102,9 +107,8 @@ public class BubbleCoordinator implements Coordinator {
 
         @Override
         public boolean shouldInterceptDismissal(NotificationEntry entry) {
-            // for experimental bubbles
-            if (mBubblesOptional.isPresent()
-                    && mBubblesOptional.get().handleDismissalInterception(entry)) {
+            if (mBubblesManagerOptional.isPresent()
+                    && mBubblesManagerOptional.get().handleDismissalInterception(entry)) {
                 mInterceptedDismissalEntries.add(entry.getKey());
                 return true;
             } else {
@@ -119,8 +123,7 @@ public class BubbleCoordinator implements Coordinator {
         }
     };
 
-    private final BubbleController.NotifCallback mNotifCallback =
-            new BubbleController.NotifCallback() {
+    private final BubblesManager.NotifCallback mNotifCallback = new BubblesManager.NotifCallback() {
         @Override
         public void removeNotification(
                 NotificationEntry entry,

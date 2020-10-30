@@ -159,7 +159,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
             final boolean isBubbleNotificationSuppressedFromShade = mBubblesOptional.isPresent()
-                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(ent);
+                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
+                            ent.getKey(), ent.getSbn().getGroupKey());
             if (ent.isRowDismissed() || ent.isRowRemoved()
                     || isBubbleNotificationSuppressedFromShade
                     || mFgsSectionController.hasEntry(ent)) {

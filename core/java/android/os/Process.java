@@ -725,7 +725,7 @@ public class Process {
      * Returns the identifier of this process' parent.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171962076)
     public static final int myPpid() {
         return Os.getppid();
     }

@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -50,10 +51,13 @@ import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
 
 /**
  * The DisplayModeDirector is responsible for determining what modes are allowed to be automatically
@@ -98,6 +102,29 @@ public class DisplayModeDirector {
     private DesiredDisplayModeSpecsListener mDesiredDisplayModeSpecsListener;
 
     private boolean mAlwaysRespectAppRequest;
+
+    @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
+            SWITCHING_TYPE_NONE,
+            SWITCHING_TYPE_WITHIN_GROUPS,
+            SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SwitchingType {}
+
+    // No mode switching will happen.
+    public static final int SWITCHING_TYPE_NONE = 0;
+    // Allow only refresh rate switching between modes in the same configuration group. This way
+    // only switches without visual interruptions for the user will be allowed.
+    public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1;
+    // Allow refresh rate switching between all refresh rates even if the switch with have visual
+    // interruptions for the user.
+    public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
+
+    /**
+     * The allowed refresh rate switching type. This is used by SurfaceFlinger.
+     */
+    @SwitchingType
+    private int mModeSwitchingType = SWITCHING_TYPE_WITHIN_GROUPS;
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler) {
         mContext = context;
@@ -290,14 +317,37 @@ public class DisplayModeDirector {
                                 appRequestSummary.maxRefreshRate));
             }
 
+            // If the application requests a given mode with preferredModeId function, it will be
+            // stored as baseModeId.
             int baseModeId = defaultMode.getModeId();
             if (availableModes.length > 0) {
                 baseModeId = availableModes[0];
             }
-            // filterModes function is going to filter the modes based on the voting system. If
-            // the application requests a given mode with preferredModeId function, it will be
-            // stored as baseModeId.
+            if (mModeSwitchingType == SWITCHING_TYPE_NONE) {
+                Display.Mode baseMode = null;
+                for (Display.Mode mode : modes) {
+                    if (mode.getModeId() == baseModeId) {
+                        baseMode = mode;
+                        break;
+                    }
+                }
+                if (baseMode == null) {
+                    // This should never happen.
+                    throw new IllegalStateException(
+                            "The base mode with id " + baseModeId
+                                    + " is not in the list of supported modes.");
+                }
+                float fps = baseMode.getRefreshRate();
+                return new DesiredDisplayModeSpecs(baseModeId,
+                        /*allowGroupSwitching */ false,
+                        new RefreshRateRange(fps, fps),
+                        new RefreshRateRange(fps, fps));
+            }
+
+            boolean allowGroupSwitching =
+                    mModeSwitchingType == SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS;
             return new DesiredDisplayModeSpecs(baseModeId,
+                    allowGroupSwitching,
                     new RefreshRateRange(
                             primarySummary.minRefreshRate, primarySummary.maxRefreshRate),
                     new RefreshRateRange(
@@ -385,6 +435,26 @@ public class DisplayModeDirector {
     }
 
     /**
+     * Sets the display mode switching type.
+     * @param type
+     */
+    public void setModeSwitchingType(@SwitchingType int type) {
+        synchronized (mLock) {
+            mModeSwitchingType = type;
+        }
+    }
+
+    /**
+     * Returns the display mode switching type.
+     */
+    @SwitchingType
+    public int getModeSwitchingType() {
+        synchronized (mLock) {
+            return mModeSwitchingType;
+        }
+    }
+
+    /**
      * Print the object's state and debug information into the given stream.
      *
      * @param pw The stream to dump information to.
@@ -416,6 +486,7 @@ public class DisplayModeDirector {
                     pw.println("      " + Vote.priorityToString(p) + " -> " + vote);
                 }
             }
+            pw.println("  mModeSwitchingType: " + switchingTypeToString(mModeSwitchingType));
             pw.println("  mAlwaysRespectAppRequest: " + mAlwaysRespectAppRequest);
             mSettingsObserver.dumpLocked(pw);
             mAppRequestObserver.dumpLocked(pw);
@@ -472,13 +543,25 @@ public class DisplayModeDirector {
     }
 
     private SparseArray<Vote> getOrCreateVotesByDisplay(int displayId) {
-        int index = mVotesByDisplay.indexOfKey(displayId);
         if (mVotesByDisplay.indexOfKey(displayId) >= 0) {
             return mVotesByDisplay.get(displayId);
         } else {
             SparseArray<Vote> votes = new SparseArray<>();
             mVotesByDisplay.put(displayId, votes);
             return votes;
+        }
+    }
+
+    private static String switchingTypeToString(@SwitchingType int type) {
+        switch (type) {
+            case SWITCHING_TYPE_NONE:
+                return "SWITCHING_TYPE_NONE";
+            case SWITCHING_TYPE_WITHIN_GROUPS:
+                return "SWITCHING_TYPE_WITHIN_GROUPS";
+            case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
+                return "SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS";
+            default:
+                return "Unknown SwitchingType " + type;
         }
     }
 
@@ -631,18 +714,26 @@ public class DisplayModeDirector {
      * SurfaceControl.DesiredDisplayConfigSpecs uses, and the mode ID used here.
      */
     public static final class DesiredDisplayModeSpecs {
+
         /**
          * Base mode ID. This is what system defaults to for all other settings, or
          * if the refresh rate range is not available.
          */
         public int baseModeId;
+
+        /**
+         * If true this will allow switching between modes in different display configuration
+         * groups. This way the user may see visual interruptions when the display mode changes.
+         */
+        public boolean allowGroupSwitching;
+
         /**
          * The primary refresh rate range.
          */
         public final RefreshRateRange primaryRefreshRateRange;
         /**
          * The app request refresh rate range. Lower priority considerations won't be included in
-         * this range, allowing surface flinger to consider additional refresh rates for apps that
+         * this range, allowing SurfaceFlinger to consider additional refresh rates for apps that
          * call setFrameRate(). This range will be greater than or equal to the primary refresh rate
          * range, never smaller.
          */
@@ -654,9 +745,11 @@ public class DisplayModeDirector {
         }
 
         public DesiredDisplayModeSpecs(int baseModeId,
+                boolean allowGroupSwitching,
                 @NonNull RefreshRateRange primaryRefreshRateRange,
                 @NonNull RefreshRateRange appRequestRefreshRateRange) {
             this.baseModeId = baseModeId;
+            this.allowGroupSwitching = allowGroupSwitching;
             this.primaryRefreshRateRange = primaryRefreshRateRange;
             this.appRequestRefreshRateRange = appRequestRefreshRateRange;
         }
@@ -666,10 +759,12 @@ public class DisplayModeDirector {
          */
         @Override
         public String toString() {
-            return String.format("baseModeId=%d primaryRefreshRateRange=[%.0f %.0f]"
+            return String.format("baseModeId=%d allowGroupSwitching=%b"
+                            + " primaryRefreshRateRange=[%.0f %.0f]"
                             + " appRequestRefreshRateRange=[%.0f %.0f]",
-                    baseModeId, primaryRefreshRateRange.min, primaryRefreshRateRange.max,
-                    appRequestRefreshRateRange.min, appRequestRefreshRateRange.max);
+                    baseModeId, allowGroupSwitching, primaryRefreshRateRange.min,
+                    primaryRefreshRateRange.max, appRequestRefreshRateRange.min,
+                    appRequestRefreshRateRange.max);
         }
         /**
          * Checks whether the two objects have the same values.
@@ -689,6 +784,9 @@ public class DisplayModeDirector {
             if (baseModeId != desiredDisplayModeSpecs.baseModeId) {
                 return false;
             }
+            if (allowGroupSwitching != desiredDisplayModeSpecs.allowGroupSwitching) {
+                return false;
+            }
             if (!primaryRefreshRateRange.equals(desiredDisplayModeSpecs.primaryRefreshRateRange)) {
                 return false;
             }
@@ -701,7 +799,8 @@ public class DisplayModeDirector {
 
         @Override
         public int hashCode() {
-            return Objects.hash(baseModeId, primaryRefreshRateRange, appRequestRefreshRateRange);
+            return Objects.hash(baseModeId, allowGroupSwitching, primaryRefreshRateRange,
+                    appRequestRefreshRateRange);
         }
 
         /**
@@ -709,6 +808,7 @@ public class DisplayModeDirector {
          */
         public void copyFrom(DesiredDisplayModeSpecs other) {
             baseModeId = other.baseModeId;
+            allowGroupSwitching = other.allowGroupSwitching;
             primaryRefreshRateRange.min = other.primaryRefreshRateRange.min;
             primaryRefreshRateRange.max = other.primaryRefreshRateRange.max;
             appRequestRefreshRateRange.min = other.appRequestRefreshRateRange.min;

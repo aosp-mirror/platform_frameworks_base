@@ -155,7 +155,7 @@ public class BubbleStackView extends FrameLayout
      *
      * {@hide}
      */
-    interface SurfaceSynchronizer {
+    public interface SurfaceSynchronizer {
         /**
          * Wait until requested change on a {@link View} is reflected on the screen.
          *
@@ -186,7 +186,7 @@ public class BubbleStackView extends FrameLayout
             });
         }
     };
-
+    private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
 
     private final ValueAnimator mDesaturateAndDarkenAnimator;
@@ -382,22 +382,6 @@ public class BubbleStackView extends FrameLayout
 
     @NonNull
     private final SurfaceSynchronizer mSurfaceSynchronizer;
-
-    /**
-     * Callback to run when the IME visibility changes - BubbleController uses this to update the
-     * Bubbles window focusability flags with the WindowManager.
-     */
-    public final Consumer<Boolean> mOnImeVisibilityChanged;
-
-    /**
-     * Callback to run when the bubble expand status changes.
-     */
-    private final Consumer<Boolean> mOnBubbleExpandChanged;
-
-    /**
-     * Callback to run to ask BubbleController to hide the current IME.
-     */
-    private final Runnable mHideCurrentInputMethodCallback;
 
     /**
      * The currently magnetized object, which is being dragged and will be attracted to the magnetic
@@ -733,16 +717,12 @@ public class BubbleStackView extends FrameLayout
     private BubblePositioner mPositioner;
 
     @SuppressLint("ClickableViewAccessibility")
-    public BubbleStackView(Context context, BubbleData data,
-            @Nullable SurfaceSynchronizer synchronizer,
-            FloatingContentCoordinator floatingContentCoordinator,
-            Runnable allBubblesAnimatedOutAction,
-            Consumer<Boolean> onImeVisibilityChanged,
-            Runnable hideCurrentInputMethodCallback,
-            Consumer<Boolean> onBubbleExpandChanged,
-            BubblePositioner positioner) {
+    public BubbleStackView(Context context, BubbleController bubbleController,
+            BubbleData data, @Nullable SurfaceSynchronizer synchronizer,
+            FloatingContentCoordinator floatingContentCoordinator) {
         super(context);
 
+        mBubbleController = bubbleController;
         mBubbleData = data;
 
         Resources res = getResources();
@@ -755,7 +735,7 @@ public class BubbleStackView extends FrameLayout
 
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
-        mPositioner = positioner;
+        mPositioner = mBubbleController.getPositioner();
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
@@ -767,7 +747,7 @@ public class BubbleStackView extends FrameLayout
 
         final Runnable onBubbleAnimatedOut = () -> {
             if (getBubbleCount() == 0) {
-                allBubblesAnimatedOutAction.run();
+                mBubbleController.onAllBubblesAnimatedOut();
             }
         };
 
@@ -839,7 +819,7 @@ public class BubbleStackView extends FrameLayout
         setFocusable(true);
         mBubbleContainer.bringToFront();
 
-        mBubbleOverflow = new BubbleOverflow(getContext(), this);
+        mBubbleOverflow = new BubbleOverflow(getContext(), bubbleController, this);
         mBubbleContainer.addView(mBubbleOverflow.getIconView(),
                 mBubbleContainer.getChildCount() /* index */,
                 new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -850,12 +830,9 @@ public class BubbleStackView extends FrameLayout
             showManageMenu(false);
         });
 
-        mOnImeVisibilityChanged = onImeVisibilityChanged;
-        mHideCurrentInputMethodCallback = hideCurrentInputMethodCallback;
-        mOnBubbleExpandChanged = onBubbleExpandChanged;
-
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
-            onImeVisibilityChanged.accept(insets.getInsets(WindowInsets.Type.ime()).bottom > 0);
+            mBubbleController.onImeVisibilityChanged(
+                    insets.getInsets(WindowInsets.Type.ime()).bottom > 0);
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
@@ -1299,7 +1276,7 @@ public class BubbleStackView extends FrameLayout
 
         // R constants are not final so we cannot use switch-case here.
         if (action == AccessibilityNodeInfo.ACTION_DISMISS) {
-            mBubbleData.dismissAll(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
+            mBubbleData.dismissAll(Bubbles.DISMISS_ACCESSIBILITY_ACTION);
             announceForAccessibility(
                     getResources().getString(R.string.accessibility_bubble_dismissed));
             return true;
@@ -1402,8 +1379,9 @@ public class BubbleStackView extends FrameLayout
     /**
      * The {@link Bubble} that is expanded, null if one does not exist.
      */
+    @VisibleForTesting
     @Nullable
-    BubbleViewProvider getExpandedBubble() {
+    public BubbleViewProvider getExpandedBubble() {
         return mExpandedBubble;
     }
 
@@ -1617,7 +1595,7 @@ public class BubbleStackView extends FrameLayout
 
         hideCurrentInputMethod();
 
-        mOnBubbleExpandChanged.accept(shouldExpand);
+        mBubbleController.getSysuiProxy().onStackExpandChanged(shouldExpand);
 
         if (mIsExpanded) {
             animateCollapse();
@@ -1637,7 +1615,7 @@ public class BubbleStackView extends FrameLayout
      * not.
      */
     void hideCurrentInputMethod() {
-        mHideCurrentInputMethodCallback.run();
+        mBubbleController.hideCurrentInputMethod();
     }
 
     private void beforeExpandedViewAnimation() {
@@ -2135,14 +2113,13 @@ public class BubbleStackView extends FrameLayout
             final View draggedOutBubbleView = (View) mMagnetizedObject.getUnderlyingObject();
             dismissBubbleIfExists(mBubbleData.getBubbleWithView(draggedOutBubbleView));
         } else {
-            mBubbleData.dismissAll(BubbleController.DISMISS_USER_GESTURE);
+            mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
         }
     }
 
     private void dismissBubbleIfExists(@Nullable Bubble bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-            mBubbleData.dismissBubbleWithKey(
-                    bubble.getKey(), BubbleController.DISMISS_USER_GESTURE);
+            mBubbleData.dismissBubbleWithKey(bubble.getKey(), Bubbles.DISMISS_USER_GESTURE);
         }
     }
 

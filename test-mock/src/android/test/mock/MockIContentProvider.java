@@ -162,9 +162,20 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
-            throws RemoteException {
+    public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri) {
         throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void uncanonicalizeAsync(String callingPkg, String featureId, Uri uri,
+            RemoteCallback remoteCallback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                    uncanonicalize(callingPkg, featureId, uri));
+            remoteCallback.sendResult(bundle);
+        });
     }
 
     @Override

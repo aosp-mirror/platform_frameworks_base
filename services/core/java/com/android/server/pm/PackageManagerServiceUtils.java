@@ -103,7 +103,8 @@ import java.util.zip.GZIPInputStream;
  * {@hide}
  */
 public class PackageManagerServiceUtils {
-    private final static long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
+    private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
+    private static final long MAX_CRITICAL_INFO_DUMP_SIZE = 3 * 1000 * 1000; // 3MB
 
     public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.pkg == null;
@@ -349,7 +350,12 @@ public class PackageManagerServiceUtils {
     }
 
     public static void dumpCriticalInfo(ProtoOutputStream proto) {
-        try (BufferedReader in = new BufferedReader(new FileReader(getSettingsProblemFile()))) {
+        final File file = getSettingsProblemFile();
+        final long skipSize = file.length() - MAX_CRITICAL_INFO_DUMP_SIZE;
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            if (skipSize > 0) {
+                in.skip(skipSize);
+            }
             String line = null;
             while ((line = in.readLine()) != null) {
                 if (line.contains("ignored: updated version")) continue;
@@ -360,7 +366,12 @@ public class PackageManagerServiceUtils {
     }
 
     public static void dumpCriticalInfo(PrintWriter pw, String msg) {
-        try (BufferedReader in = new BufferedReader(new FileReader(getSettingsProblemFile()))) {
+        final File file = getSettingsProblemFile();
+        final long skipSize = file.length() - MAX_CRITICAL_INFO_DUMP_SIZE;
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            if (skipSize > 0) {
+                in.skip(skipSize);
+            }
             String line = null;
             while ((line = in.readLine()) != null) {
                 if (line.contains("ignored: updated version")) continue;
