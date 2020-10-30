@@ -378,28 +378,33 @@ public final class Permission {
         }
     }
 
+    public static boolean isOverridingSystemPermission(@Nullable Permission permission,
+            @NonNull PermissionInfo permissionInfo,
+            @NonNull PackageManagerInternal packageManagerInternal) {
+        if (permission == null || Objects.equals(permission.mPermissionInfo.packageName,
+                permissionInfo.packageName)) {
+            return false;
+        }
+        if (!permission.mReconciled) {
+            return false;
+        }
+        final AndroidPackage currentPackage = packageManagerInternal.getPackage(
+                permission.mPermissionInfo.packageName);
+        if (currentPackage == null) {
+            return false;
+        }
+        return currentPackage.isSystem();
+    }
+
     @NonNull
-    static Permission createOrUpdate(PackageManagerInternal packageManagerInternal,
-            @Nullable Permission permission, @NonNull PermissionInfo permissionInfo,
-            @NonNull AndroidPackage pkg, @NonNull Collection<Permission> permissionTrees,
+    public static Permission createOrUpdate(@Nullable Permission permission,
+            @NonNull PermissionInfo permissionInfo, @NonNull AndroidPackage pkg,
+            @NonNull Collection<Permission> permissionTrees, boolean isOverridingSystemPermission,
             boolean chatty) {
         // Allow system apps to redefine non-system permissions
         boolean ownerChanged = false;
         if (permission != null && !Objects.equals(permission.mPermissionInfo.packageName,
                 permissionInfo.packageName)) {
-            final boolean currentOwnerIsSystem;
-            if (!permission.mReconciled) {
-                currentOwnerIsSystem = false;
-            } else {
-                AndroidPackage currentPackage = packageManagerInternal.getPackage(
-                        permission.mPermissionInfo.packageName);
-                if (currentPackage == null) {
-                    currentOwnerIsSystem = false;
-                } else {
-                    currentOwnerIsSystem = currentPackage.isSystem();
-                }
-            }
-
             if (pkg.isSystem()) {
                 if (permission.mType == Permission.TYPE_CONFIG && !permission.mReconciled) {
                     // It's a built-in permission and no owner, take ownership now
@@ -407,11 +412,10 @@ public final class Permission {
                     permission.mPermissionInfo = permissionInfo;
                     permission.mReconciled = true;
                     permission.mUid = pkg.getUid();
-                } else if (!currentOwnerIsSystem) {
-                    String msg = "New decl " + pkg + " of permission  "
+                } else if (!isOverridingSystemPermission) {
+                    Slog.w(TAG, "New decl " + pkg + " of permission  "
                             + permissionInfo.name + " is system; overriding "
-                            + permission.mPermissionInfo.packageName;
-                    PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                            + permission.mPermissionInfo.packageName);
                     ownerChanged = true;
                     permission = null;
                 }
