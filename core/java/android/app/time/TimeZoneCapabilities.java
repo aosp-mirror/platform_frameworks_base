@@ -180,8 +180,7 @@ public final class TimeZoneCapabilities implements Parcelable {
     public TimeZoneConfiguration tryApplyConfigChanges(
             @NonNull TimeZoneConfiguration config,
             @NonNull TimeZoneConfiguration requestedChanges) {
-        TimeZoneConfiguration.Builder newConfigBuilder =
-                new TimeZoneConfiguration.Builder(config);
+        TimeZoneConfiguration.Builder newConfigBuilder = new TimeZoneConfiguration.Builder(config);
         if (requestedChanges.hasIsAutoDetectionEnabled()) {
             if (this.getConfigureAutoDetectionEnabledCapability() < CAPABILITY_NOT_APPLICABLE) {
                 return null;
