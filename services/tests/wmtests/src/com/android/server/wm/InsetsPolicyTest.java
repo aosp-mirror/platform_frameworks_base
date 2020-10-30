@@ -29,6 +29,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -226,6 +227,40 @@ public class InsetsPolicyTest extends WindowTestsBase {
         // mTopFullscreenOpaqueWindowState is still fullscreenApp.
         verify(sbmi).setWindowState(mDisplayContent.mDisplayId, StatusBarManager.WINDOW_STATUS_BAR,
                 StatusBarManager.WINDOW_STATE_SHOWING);
+
+        // Add a system window: panel.
+        final WindowState panel = addWindow(TYPE_STATUS_BAR_SUB_PANEL, "panel");
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(panel);
+
+        // panel is the focused window, but it can only control navigation bar.
+        // Because fullscreenApp is hiding status bar.
+        InsetsSourceControl[] panelControls =
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(panel);
+        assertNotNull(panelControls);
+        assertEquals(1, panelControls.length);
+        assertEquals(ITYPE_NAVIGATION_BAR, panelControls[0].getType());
+
+        // Add notificationShade and make it can receive keys.
+        final WindowState shade = addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade");
+        shade.setHasSurface(true);
+        assertTrue(shade.canReceiveKeys());
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(panel);
+
+        // panel can control both system bars now.
+        panelControls = mDisplayContent.getInsetsStateController().getControlsForDispatch(panel);
+        assertNotNull(panelControls);
+        assertEquals(2, panelControls.length);
+
+        // Make notificationShade cannot receive keys.
+        shade.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        assertFalse(shade.canReceiveKeys());
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(panel);
+
+        // panel can only control navigation bar now.
+        panelControls = mDisplayContent.getInsetsStateController().getControlsForDispatch(panel);
+        assertNotNull(panelControls);
+        assertEquals(1, panelControls.length);
+        assertEquals(ITYPE_NAVIGATION_BAR, panelControls[0].getType());
     }
 
     @UseTestDisplay(addWindows = W_ACTIVITY)
