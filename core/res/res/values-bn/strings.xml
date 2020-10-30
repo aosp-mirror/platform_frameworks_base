@@ -1129,10 +1129,8 @@
     <string name="capital_off" msgid="7443704171014626777">"বন্ধ আছে"</string>
     <string name="checked" msgid="9179896827054513119">"টিকচিহ্ন দেওয়া আছে"</string>
     <string name="not_checked" msgid="7972320087569023342">"টিকচিহ্ন দেওয়া নেই"</string>
-    <!-- no translation found for selected (6614607926197755875) -->
-    <skip />
-    <!-- no translation found for not_selected (410652016565864475) -->
-    <skip />
+    <string name="selected" msgid="6614607926197755875">"বেছে নেওয়া হয়েছে"</string>
+    <string name="not_selected" msgid="410652016565864475">"বেছে নেওয়া হয়নি"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>

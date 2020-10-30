@@ -314,7 +314,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registres de trucades"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telèfon"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre els signes vitals"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contingut de la finestra"</string>
@@ -343,8 +343,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"desviació de les trucades sortints"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permet que l\'aplicació vegi el número que s\'està marcant durant una trucada sortint, amb l\'opció de redirigir la trucada a un altre número o bé de cancel·lar-la completament."</string>
-    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"contestar a trucades"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permet que l\'aplicació contesti a una trucada entrant."</string>
+    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"contestar a trucades telefòniques"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permet que l\'aplicació contesti a una trucada telefònica entrant."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"recepció de missatges de text (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"Permet que l\'aplicació rebi i processi missatges SMS. Això vol dir que l\'aplicació pot controlar o suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"recepció de missatges de text (MMS)"</string>
