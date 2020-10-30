@@ -48,8 +48,10 @@ class GnssNative {
         void reportMeasurementData(GnssMeasurementsEvent event);
         void reportAntennaInfo(List<GnssAntennaInfo> antennaInfos);
         void reportNavigationMessage(GnssNavigationMessage event);
+        void reportGnssPowerStats(GnssPowerStats powerStats);
         void setTopHalCapabilities(int topHalCapabilities);
         void setSubHalMeasurementCorrectionsCapabilities(int subHalCapabilities);
+        void setSubHalPowerIndicationCapabilities(int subHalCapabilities);
         void setGnssYearOfHardware(int yearOfHardware);
         void setGnssHardwareModelName(String modelName);
         void reportGnssServiceRestarted();
@@ -179,6 +181,11 @@ class GnssNative {
     }
 
     @NativeEntryPoint
+    private void reportGnssPowerStats(GnssPowerStats powerStats) {
+        mCallbacks.reportGnssPowerStats(powerStats);
+    }
+
+    @NativeEntryPoint
     private void setTopHalCapabilities(int topHalCapabilities) {
         mCallbacks.setTopHalCapabilities(topHalCapabilities);
     }
@@ -186,6 +193,11 @@ class GnssNative {
     @NativeEntryPoint
     private void setSubHalMeasurementCorrectionsCapabilities(int subHalCapabilities) {
         mCallbacks.setSubHalMeasurementCorrectionsCapabilities(subHalCapabilities);
+    }
+
+    @NativeEntryPoint
+    private void setSubHalPowerIndicationCapabilities(int subHalCapabilities) {
+        mCallbacks.setSubHalPowerIndicationCapabilities(subHalCapabilities);
     }
 
     @NativeEntryPoint

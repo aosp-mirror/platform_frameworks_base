@@ -31,6 +31,7 @@
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/3.0/IGnssPsds.h>
 #include <android/hardware/gnss/BnGnss.h>
+#include <android/hardware/gnss/BnGnssPowerIndicationCallback.h>
 #include <android/hardware/gnss/BnGnssPsdsCallback.h>
 #include <android/hardware/gnss/measurement_corrections/1.0/IMeasurementCorrections.h>
 #include <android/hardware/gnss/measurement_corrections/1.1/IMeasurementCorrections.h>
@@ -61,6 +62,7 @@ static jclass class_location;
 static jclass class_gnssNavigationMessage;
 static jclass class_gnssClock;
 static jclass class_gnssAntennaInfoBuilder;
+static jclass class_gnssPowerStats;
 static jclass class_phaseCenterOffset;
 static jclass class_sphericalCorrections;
 static jclass class_arrayList;
@@ -93,6 +95,7 @@ static jmethodID method_reportAntennaInfo;
 static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportLocationBatch;
 static jmethodID method_reportGnssServiceDied;
+static jmethodID method_reportGnssPowerStats;
 static jmethodID method_setSubHalMeasurementCorrectionsCapabilities;
 static jmethodID method_correctionsGetLatitudeDegrees;
 static jmethodID method_correctionsGetLongitudeDegrees;
@@ -126,6 +129,7 @@ static jmethodID method_gnssNavigationMessageCtor;
 static jmethodID method_gnssClockCtor;
 static jmethodID method_gnssMeasurementCtor;
 static jmethodID method_gnssAntennaInfoBuilderCtor;
+static jmethodID method_gnssPowerStatsCtor;
 static jmethodID method_phaseCenterOffsetCtor;
 static jmethodID method_sphericalCorrectionsCtor;
 static jmethodID method_arrayListCtor;
@@ -135,6 +139,7 @@ static jmethodID method_gnssAntennaInfoBuilderSetPhaseCenterOffset;
 static jmethodID method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections;
 static jmethodID method_gnssAntennaInfoBuilderSetSignalGainCorrections;
 static jmethodID method_gnssAntennaInfoBuilderBuild;
+static jmethodID method_setSubHalPowerIndicationCapabilities;
 
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
@@ -225,6 +230,9 @@ using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControlC
 
 using android::hardware::gnss::BlocklistedSource;
 using android::hardware::gnss::GnssConstellationType;
+using android::hardware::gnss::GnssPowerStats;
+using android::hardware::gnss::IGnssPowerIndication;
+using android::hardware::gnss::IGnssPowerIndicationCallback;
 using android::hardware::gnss::PsdsType;
 using IGnssAidl = android::hardware::gnss::IGnss;
 using IGnssPsdsAidl = android::hardware::gnss::IGnssPsds;
@@ -271,6 +279,7 @@ sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
 sp<IGnssMeasurement_V2_0> gnssMeasurementIface_V2_0 = nullptr;
 sp<IGnssMeasurement_V2_1> gnssMeasurementIface_V2_1 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
+sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 sp<IMeasurementCorrections_V1_0> gnssCorrectionsIface_V1_0 = nullptr;
 sp<IMeasurementCorrections_V1_1> gnssCorrectionsIface_V1_1 = nullptr;
 sp<IGnssVisibilityControl> gnssVisibilityControlIface = nullptr;
@@ -410,6 +419,8 @@ template<>
 const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
 template<>
 const char *const JavaMethodHelper<jstring>::signature_ = "(Ljava/lang/String;)V";
+template <>
+const char* const JavaMethodHelper<jdoubleArray>::signature_ = "([D)V";
 
 #define SET(setter, value) object.callSetter("set" # setter, (value))
 
@@ -931,6 +942,50 @@ Return<void> GnssCallback::gnssSetSystemInfoCb(const IGnssCallback_V2_0::GnssSys
                         info.yearOfHw);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
+}
+
+/*
+ * GnssPowerIndicationCallback class implements the callback methods for the IGnssPowerIndication
+ * interface.
+ */
+struct GnssPowerIndicationCallback : public android::hardware::gnss::BnGnssPowerIndicationCallback {
+public:
+    Status setCapabilitiesCb(const int capabilities) override;
+    Status gnssPowerStatsCb(const GnssPowerStats& data) override;
+};
+
+Status GnssPowerIndicationCallback::setCapabilitiesCb(const int capabilities) {
+    ALOGD("GnssPowerIndicationCallback::%s: %du\n", __func__, capabilities);
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setSubHalPowerIndicationCapabilities, capabilities);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Status::ok();
+}
+
+Status GnssPowerIndicationCallback::gnssPowerStatsCb(const GnssPowerStats& data) {
+    JNIEnv* env = getJniEnv();
+
+    int size = data.otherModesEnergyMilliJoule.size();
+    jdoubleArray otherModesEnergy = env->NewDoubleArray(size);
+    if (size > 0) {
+        env->SetDoubleArrayRegion(otherModesEnergy, (jsize)0, size,
+                                  &(data.otherModesEnergyMilliJoule[0]));
+    }
+    jobject gnssPowerStats =
+            env->NewObject(class_gnssPowerStats, method_gnssPowerStatsCtor,
+                           data.elapsedRealtime.flags, data.elapsedRealtime.timestampNs,
+                           data.elapsedRealtime.timeUncertaintyNs, data.totalEnergyMilliJoule,
+                           data.singlebandTrackingModeEnergyMilliJoule,
+                           data.multibandTrackingModeEnergyMilliJoule,
+                           data.singlebandAcquisitionModeEnergyMilliJoule,
+                           data.multibandAcquisitionModeEnergyMilliJoule, otherModesEnergy);
+
+    env->CallVoidMethod(mCallbacksObj, method_reportGnssPowerStats, gnssPowerStats);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(gnssPowerStats);
+    env->DeleteLocalRef(otherModesEnergy);
+    return Status::ok();
 }
 
 /*
@@ -2033,10 +2088,15 @@ static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass claz
     method_reportGnssServiceDied = env->GetMethodID(clazz, "reportGnssServiceDied", "()V");
     method_reportNfwNotification = env->GetMethodID(clazz, "reportNfwNotification",
             "(Ljava/lang/String;BLjava/lang/String;BLjava/lang/String;BZZ)V");
+    method_reportGnssPowerStats =
+            env->GetMethodID(clazz, "reportGnssPowerStats",
+                             "(Lcom/android/server/location/gnss/GnssPowerStats;)V");
     method_isInEmergencySession = env->GetMethodID(clazz, "isInEmergencySession", "()Z");
 
     method_setSubHalMeasurementCorrectionsCapabilities = env->GetMethodID(clazz,
             "setSubHalMeasurementCorrectionsCapabilities", "(I)V");
+    method_setSubHalPowerIndicationCapabilities =
+            env->GetMethodID(clazz, "setSubHalPowerIndicationCapabilities", "(I)V");
 
     jclass measCorrClass = env->FindClass("android/location/GnssMeasurementCorrections");
     method_correctionsGetLatitudeDegrees = env->GetMethodID(
@@ -2133,6 +2193,10 @@ static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass claz
     class_sphericalCorrections = (jclass)env->NewGlobalRef(sphericalCorrectionsClass);
     method_sphericalCorrectionsCtor =
             env->GetMethodID(class_sphericalCorrections, "<init>", "([[D[[D)V");
+
+    jclass gnssPowerStatsClass = env->FindClass("com/android/server/location/gnss/GnssPowerStats");
+    class_gnssPowerStats = (jclass)env->NewGlobalRef(gnssPowerStatsClass);
+    method_gnssPowerStatsCtor = env->GetMethodID(class_gnssPowerStats, "<init>", "(IJDDDDDD[D)V");
 
     jclass locationClass = env->FindClass("android/location/Location");
     class_location = (jclass) env->NewGlobalRef(locationClass);
@@ -2424,6 +2488,14 @@ static void android_location_GnssNative_init_once(JNIEnv* env, jobject obj,
         }
     }
 
+    if (gnssHalAidl != nullptr) {
+        sp<IGnssPowerIndication> gnssPowerIndication;
+        auto status = gnssHalAidl->getExtensionGnssPowerIndication(&gnssPowerIndication);
+        if (checkAidlStatus(status, "Unable to get a handle to GnssPowerIndication interface.")) {
+            gnssPowerIndicationIface = gnssPowerIndication;
+        }
+    }
+
     if (mCallbacksObj) {
         ALOGE("Callbacks already initialized");
     } else {
@@ -2569,6 +2641,16 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* /* env */, jo
         checkHidlReturn(result, "IMeasurementCorrections 1.0 setCallback() failed.");
     } else {
         ALOGI("Unable to find IMeasurementCorrections.");
+    }
+
+    // Set IGnssPowerIndication.hal callback.
+    if (gnssPowerIndicationIface != nullptr) {
+        sp<IGnssPowerIndicationCallback> gnssPowerIndicationCallback =
+                new GnssPowerIndicationCallback();
+        auto status = gnssPowerIndicationIface->setCallback(gnssPowerIndicationCallback);
+        if (!checkAidlStatus(status, "IGnssPowerIndication setCallback() failed.")) {
+            gnssPowerIndicationIface = nullptr;
+        }
     }
 
     return JNI_TRUE;
@@ -3022,6 +3104,15 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
         }
     }
     return internalStateStr;
+}
+
+static void android_location_GnssLocationProvider_request_power_stats(JNIEnv* env,
+                                                                      jobject /* obj */) {
+    if (gnssPowerIndicationIface == nullptr) {
+        return;
+    }
+    auto status = gnssPowerIndicationIface->requestGnssPowerStats();
+    checkAidlStatus(status, "IGnssPowerIndication requestGnssPowerStats() failed.");
 }
 
 static jboolean android_location_GnssLocationProvider_is_gnss_visibility_control_supported(
@@ -3810,6 +3901,12 @@ static const JNINativeMethod sVisibilityControlMethods[] = {
                     android_location_GnssVisibilityControl_enable_nfw_location_access)},
 };
 
+static const JNINativeMethod sPowerIndicationMethods[] = {
+        /* name, signature, funcPtr */
+        {"native_request_power_stats", "()V",
+         reinterpret_cast<void*>(android_location_GnssLocationProvider_request_power_stats)},
+};
+
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
     jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssAntennaInfoProvider",
                              sAntennaInfoMethods, NELEM(sAntennaInfoMethods));
@@ -3830,6 +3927,8 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
                              sConfigurationMethods, NELEM(sConfigurationMethods));
     jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssVisibilityControl",
                              sVisibilityControlMethods, NELEM(sVisibilityControlMethods));
+    jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssPowerIndicationProvider",
+                             sPowerIndicationMethods, NELEM(sPowerIndicationMethods));
     jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssLocationProvider",
                              sLocationProviderMethods, NELEM(sLocationProviderMethods));
     return jniRegisterNativeMethods(env, "com/android/server/location/gnss/GnssNative",
