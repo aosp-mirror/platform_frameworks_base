@@ -110,7 +110,7 @@ public final class TimeManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
     public boolean updateTimeZoneConfiguration(@NonNull TimeZoneConfiguration configuration) {
         if (DEBUG) {
-            Log.d(TAG, "updateConfiguration called: " + configuration);
+            Log.d(TAG, "updateTimeZoneConfiguration called: " + configuration);
         }
         try {
             return mITimeZoneDetectorService.updateConfiguration(configuration);
