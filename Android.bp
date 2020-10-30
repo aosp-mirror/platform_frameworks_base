@@ -500,7 +500,7 @@ java_library {
         // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
-	"//packages/modules/Connectivity/Tethering/tests/unit",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
 }
 
