@@ -30,6 +30,8 @@ import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
+import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
@@ -124,17 +126,19 @@ public class ScreenMediaRecorder {
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getRealMetrics(metrics);
-        int screenWidth = metrics.widthPixels;
-        int screenHeight = metrics.heightPixels;
-        int refereshRate = (int) wm.getDefaultDisplay().getRefreshRate();
-        int vidBitRate = screenHeight * screenWidth * refereshRate / VIDEO_FRAME_RATE
+        int refreshRate = (int) wm.getDefaultDisplay().getRefreshRate();
+        int[] dimens = getSupportedSize(metrics.widthPixels, metrics.heightPixels, refreshRate);
+        int width = dimens[0];
+        int height = dimens[1];
+        refreshRate = dimens[2];
+        int vidBitRate = width * height * refreshRate / VIDEO_FRAME_RATE
                 * VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO;
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         mMediaRecorder.setVideoEncodingProfileLevel(
                 MediaCodecInfo.CodecProfileLevel.AVCProfileHigh,
                 MediaCodecInfo.CodecProfileLevel.AVCLevel3);
-        mMediaRecorder.setVideoSize(screenWidth, screenHeight);
-        mMediaRecorder.setVideoFrameRate(refereshRate);
+        mMediaRecorder.setVideoSize(width, height);
+        mMediaRecorder.setVideoFrameRate(refreshRate);
         mMediaRecorder.setVideoEncodingBitRate(vidBitRate);
         mMediaRecorder.setMaxDuration(MAX_DURATION_MS);
         mMediaRecorder.setMaxFileSize(MAX_FILESIZE_BYTES);
@@ -153,8 +157,8 @@ public class ScreenMediaRecorder {
         mInputSurface = mMediaRecorder.getSurface();
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(
                 "Recording Display",
-                screenWidth,
-                screenHeight,
+                width,
+                height,
                 metrics.densityDpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                 mInputSurface,
@@ -170,6 +174,84 @@ public class ScreenMediaRecorder {
                     mMediaProjection, mAudioSource == MIC_AND_INTERNAL);
         }
 
+    }
+
+    /**
+     * Find the highest supported screen resolution and refresh rate for the given dimensions on
+     * this device, up to actual size and given rate.
+     * If possible this will return the same values as given, but values may be smaller on some
+     * devices.
+     *
+     * @param screenWidth Actual pixel width of screen
+     * @param screenHeight Actual pixel height of screen
+     * @param refreshRate Desired refresh rate
+     * @return array with supported width, height, and refresh rate
+     */
+    private int[] getSupportedSize(int screenWidth, int screenHeight, int refreshRate) {
+        double maxScale = 0;
+
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        MediaCodecInfo.VideoCapabilities maxInfo = null;
+        for (MediaCodecInfo codec : codecList.getCodecInfos()) {
+            String videoType = MediaFormat.MIMETYPE_VIDEO_AVC;
+            String[] types = codec.getSupportedTypes();
+            for (String t : types) {
+                if (!t.equalsIgnoreCase(videoType)) {
+                    continue;
+                }
+                MediaCodecInfo.CodecCapabilities capabilities =
+                        codec.getCapabilitiesForType(videoType);
+                if (capabilities != null && capabilities.getVideoCapabilities() != null) {
+                    MediaCodecInfo.VideoCapabilities vc = capabilities.getVideoCapabilities();
+
+                    int width = vc.getSupportedWidths().getUpper();
+                    int height = vc.getSupportedHeights().getUpper();
+
+                    if (width >= screenWidth && height >= screenHeight
+                            && vc.isSizeSupported(screenWidth, screenHeight)) {
+
+                        // Desired size is supported, now get the rate
+                        int maxRate = vc.getSupportedFrameRatesFor(screenWidth, screenHeight)
+                                .getUpper().intValue();
+
+                        if (maxRate < refreshRate) {
+                            refreshRate = maxRate;
+                        }
+                        Log.d(TAG, "Screen size supported at rate " + refreshRate);
+                        return new int[]{screenWidth, screenHeight, refreshRate};
+                    }
+
+                    // Otherwise, continue searching
+                    double scale = Math.min(((double) width / screenWidth),
+                            ((double) height / screenHeight));
+                    if (scale > maxScale) {
+                        maxScale = scale;
+                        maxInfo = vc;
+                    }
+                }
+            }
+        }
+
+        // Resize for max supported size
+        int scaledWidth = (int) (screenWidth * maxScale);
+        int scaledHeight = (int) (screenHeight * maxScale);
+        if (scaledWidth % maxInfo.getWidthAlignment() != 0) {
+            scaledWidth -= (scaledWidth % maxInfo.getWidthAlignment());
+        }
+        if (scaledHeight % maxInfo.getHeightAlignment() != 0) {
+            scaledHeight -= (scaledHeight % maxInfo.getHeightAlignment());
+        }
+
+        // Find max supported rate for size
+        int maxRate = maxInfo.getSupportedFrameRatesFor(scaledWidth, scaledHeight)
+                .getUpper().intValue();
+        if (maxRate < refreshRate) {
+            refreshRate = maxRate;
+        }
+
+        Log.d(TAG, "Resized by " + maxScale + ": " + scaledWidth + ", " + scaledHeight
+                + ", " + refreshRate);
+        return new int[]{scaledWidth, scaledHeight, refreshRate};
     }
 
     /**
