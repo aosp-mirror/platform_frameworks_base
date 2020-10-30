@@ -21,6 +21,8 @@ import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STA
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -33,6 +35,7 @@ import org.junit.runner.RunWith;
  * <p/>
  * Run with <code>atest DeviceStateManagerServiceTest</code>.
  */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public final class DeviceStateManagerServiceTest {
     private static final int DEFAULT_DEVICE_STATE = 0;
@@ -48,7 +51,6 @@ public final class DeviceStateManagerServiceTest {
         mProvider = new TestDeviceStateProvider();
         mPolicy = new TestDeviceStatePolicy(mProvider);
         mService = new DeviceStateManagerService(InstrumentationRegistry.getContext(), mPolicy);
-        mService.onStart();
     }
 
     @Test

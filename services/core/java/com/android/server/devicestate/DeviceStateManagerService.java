@@ -16,8 +16,8 @@
 
 package com.android.server.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -96,11 +96,11 @@ public final class DeviceStateManagerService extends SystemService {
     DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
         super(context);
         mDeviceStatePolicy = policy;
+        mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
     }
 
     @Override
     public void onStart() {
-        mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
         publishBinderService(Context.DEVICE_STATE_SERVICE, new BinderService());
     }
 
