@@ -329,7 +329,7 @@ cc_library_shared {
             ],
             shared_libs: [
                 // libbinder needs to be shared since it has global state
-		// (e.g. gDefaultServiceManager)
+                // (e.g. gDefaultServiceManager)
                 "libbinder",
                 "libhidlbase", // libhwbinder is in here
             ],
