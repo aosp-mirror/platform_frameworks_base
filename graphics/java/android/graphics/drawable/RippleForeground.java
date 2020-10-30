@@ -44,13 +44,13 @@ class RippleForeground extends RippleComponent {
             new PathInterpolator(0.4f, 0f, 0.2f, 1f);
 
     // Time it takes for the ripple to expand
-    private static final int RIPPLE_ENTER_DURATION = 225;
+    private static final int RIPPLE_ENTER_DURATION = 0;
     // Time it takes for the ripple to slide from the touch to the center point
-    private static final int RIPPLE_ORIGIN_DURATION = 225;
+    private static final int RIPPLE_ORIGIN_DURATION = 0;
 
-    private static final int OPACITY_ENTER_DURATION = 75;
-    private static final int OPACITY_EXIT_DURATION = 150;
-    private static final int OPACITY_HOLD_DURATION = OPACITY_ENTER_DURATION + 150;
+    private static final int OPACITY_ENTER_DURATION = 0;
+    private static final int OPACITY_EXIT_DURATION = 225;
+    private static final int OPACITY_HOLD_DURATION = OPACITY_ENTER_DURATION + 225;
 
     // Parent-relative values for starting position.
     private float mStartingX;
