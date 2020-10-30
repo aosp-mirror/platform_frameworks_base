@@ -489,8 +489,8 @@ public final class MediaTranscodeManager {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mPackageName = mContext.getPackageName();
-        mPid = Os.getuid();
-        mUid = Os.getpid();
+        mUid = Os.getuid();
+        mPid = Os.getpid();
         IMediaTranscodingService service = getService(false /*retry*/);
         mTranscodingClient = registerClient(service);
     }
@@ -615,7 +615,7 @@ public final class MediaTranscodeManager {
         }
 
         /* Writes the TranscodingRequest to a parcel. */
-        private TranscodingRequestParcel writeToParcel() {
+        private TranscodingRequestParcel writeToParcel(@NonNull Context context) {
             TranscodingRequestParcel parcel = new TranscodingRequestParcel();
             // TODO(hkuang): Implement all the fields here to pass to service.
             parcel.priority = mPriority;
@@ -624,6 +624,8 @@ public final class MediaTranscodeManager {
             parcel.destinationFilePath = mDestinationUri.toString();
             parcel.clientUid = mClientUid;
             parcel.clientPid = mClientPid;
+            parcel.clientPackageName = mClientUid < 0 ? context.getPackageName() :
+                context.getPackageManager().getNameForUid(mClientUid);
             parcel.requestedVideoTrackFormat = convertToVideoTrackFormat(mVideoTrackFormat);
             if (mTestConfig != null) {
                 parcel.isForTesting = true;
@@ -1203,7 +1205,8 @@ public final class MediaTranscodeManager {
                     try {
                         // Submits the request to MediaTranscoding service.
                         TranscodingSessionParcel sessionParcel = new TranscodingSessionParcel();
-                        if (!client.submitRequest(mRequest.writeToParcel(), sessionParcel)) {
+                        if (!client.submitRequest(mRequest.writeToParcel(mManager.mContext),
+                                                  sessionParcel)) {
                             mHasRetried = true;
                             throw new UnsupportedOperationException("Failed to enqueue request");
                         }
@@ -1383,7 +1386,7 @@ public final class MediaTranscodeManager {
         Objects.requireNonNull(listener, "listener must not be null");
 
         // Converts the request to TranscodingRequestParcel.
-        TranscodingRequestParcel requestParcel = transcodingRequest.writeToParcel();
+        TranscodingRequestParcel requestParcel = transcodingRequest.writeToParcel(mContext);
 
         Log.i(TAG, "Getting transcoding request " + transcodingRequest.getSourceUri());
 
