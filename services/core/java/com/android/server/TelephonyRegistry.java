@@ -340,7 +340,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     | PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED
                     | PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES
                     | PhoneStateListener.LISTEN_REGISTRATION_FAILURE
-                    | PhoneStateListener.LISTEN_BARRING_INFO;
+                    | PhoneStateListener.LISTEN_BARRING_INFO
+                    | PhoneStateListener.LISTEN_PHYSICAL_CHANNEL_CONFIGURATION;
 
     static final long READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
             PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
