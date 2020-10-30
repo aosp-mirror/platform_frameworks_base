@@ -253,36 +253,9 @@ droidstubs {
 }
 
 /////////////////////////////////////////////////////////////////////
-// Following droidstubs modules are for extra APIs for modules,
+// Following droidstub module for extra APIs for modules,
 // namely @SystemApi(client=MODULE_LIBRARIES) APIs.
 /////////////////////////////////////////////////////////////////////
-
-droidstubs {
-    name: "module-lib-api",
-    defaults: ["metalava-full-api-stubs-default"],
-    arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args + module_libs,
-
-    // Do not generate stubs as they are not needed
-    generate_stubs: false,
-
-    check_api: {
-        current: {
-            api_file: "api/module-lib-current.txt",
-            removed_api_file: "api/module-lib-removed.txt",
-        },
-        last_released: {
-            api_file: ":android.api.module-lib.latest",
-            removed_api_file: ":removed.api.module-lib.latest",
-            baseline_file: ":module-lib-api-incompatibilities-with-last-released"
-        },
-        api_lint: {
-            enabled: true,
-            new_since: ":android.api.module-lib.latest",
-            baseline_file: "api/module-lib-lint-baseline.txt",
-        },
-    },
-}
 
 droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
