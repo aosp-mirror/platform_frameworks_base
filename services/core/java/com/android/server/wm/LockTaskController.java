@@ -871,6 +871,21 @@ public class LockTaskController {
     }
 
     /**
+     * @param packageName The package to check
+     * @return Whether the package is the base of any locked task
+     */
+    boolean isBaseOfLockedTask(String packageName) {
+        for (int i = 0; i < mLockTaskModeTasks.size(); i++) {
+            final Intent bi = mLockTaskModeTasks.get(i).getBaseIntent();
+            if (bi != null && packageName.equals(bi.getComponent()
+                    .getPackageName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets the cached value of LockTask feature flags for a specific user.
      */
     private int getLockTaskFeaturesForUser(int userId) {
