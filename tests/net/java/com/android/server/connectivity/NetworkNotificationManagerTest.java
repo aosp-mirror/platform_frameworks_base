@@ -22,6 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -36,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
@@ -47,6 +49,7 @@ import com.android.server.connectivity.NetworkNotificationManager.NotificationTy
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -104,10 +107,15 @@ public class NetworkNotificationManagerTest {
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageManager()).thenReturn(mPm);
         when(mCtx.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        final Context asUserCtx = mock(Context.class, AdditionalAnswers.delegatesTo(mCtx));
+        doReturn(UserHandle.ALL).when(asUserCtx).getUser();
+        when(mCtx.createContextAsUser(eq(UserHandle.ALL), anyInt())).thenReturn(asUserCtx);
+        when(mCtx.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
+                .thenReturn(mNotificationManager);
         when(mNetworkInfo.getExtraInfo()).thenReturn("extra");
         when(mResources.getColor(anyInt(), any())).thenReturn(0xFF607D8B);
 
-        mManager = new NetworkNotificationManager(mCtx, mTelephonyManager, mNotificationManager);
+        mManager = new NetworkNotificationManager(mCtx, mTelephonyManager);
     }
 
     private void verifyTitleByNetwork(final int id, final NetworkAgentInfo nai, final int title) {
