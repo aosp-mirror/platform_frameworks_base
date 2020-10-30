@@ -2297,8 +2297,7 @@ public class AppTransition implements Dump {
      */
     boolean prepareAppTransitionOld(@TransitionOldType int transit, boolean alwaysKeepCurrent,
             @TransitionFlags int flags, boolean forceOverride) {
-        if (mService.mAtmService.getTransitionController().adaptLegacyPrepare(
-                transit, flags, forceOverride)) {
+        if (mService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
             return false;
         }
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
@@ -2334,6 +2333,9 @@ public class AppTransition implements Dump {
     }
 
     boolean prepareAppTransition(@TransitionType int transit, @TransitionFlags int flags) {
+        if (mService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
+            return false;
+        }
         mNextAppTransitionRequests.add(transit);
         mNextAppTransitionFlags |= flags;
         updateBooster();

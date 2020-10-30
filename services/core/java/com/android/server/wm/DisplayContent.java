@@ -4539,6 +4539,28 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    /**
+     * Helper that both requests a transition (using the new transition system) and prepares
+     * the legacy transition system. Use this when both systems have the same start-point.
+     *
+     * @see TransitionController#requestTransitionIfNeeded(int, int, WindowContainer)
+     * @see AppTransition#prepareAppTransition
+     */
+    void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
+            @WindowManager.TransitionFlags int flags) {
+        prepareAppTransition(transit, flags);
+        mAtmService.getTransitionController().requestTransitionIfNeeded(transit, flags,
+                null /* trigger */);
+    }
+
+    /** @see #requestTransitionAndLegacyPrepare(int, int) */
+    void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
+            @Nullable WindowContainer trigger) {
+        prepareAppTransition(transit);
+        mAtmService.getTransitionController().requestTransitionIfNeeded(transit, 0 /* flags */,
+                trigger);
+    }
+
     void executeAppTransition() {
         mAtmService.getTransitionController().setReady();
         if (mAppTransition.isTransitionSet()) {
