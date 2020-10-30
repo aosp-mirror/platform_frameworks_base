@@ -21,6 +21,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,6 +31,7 @@ import android.content.res.Resources;
 import android.net.NetworkSpecifier;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiInfo;
+import android.os.UserHandle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -83,10 +85,12 @@ public class NetworkNotificationManager {
     // Tracks the types of notifications managed by this instance, from creation to cancellation.
     private final SparseIntArray mNotificationTypeMap;
 
-    public NetworkNotificationManager(Context c, TelephonyManager t, NotificationManager n) {
+    public NetworkNotificationManager(@NonNull final Context c, @NonNull final TelephonyManager t) {
         mContext = c;
         mTelephonyManager = t;
-        mNotificationManager = n;
+        mNotificationManager =
+                (NotificationManager) c.createContextAsUser(UserHandle.ALL, 0 /* flags */)
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationTypeMap = new SparseIntArray();
     }
 
