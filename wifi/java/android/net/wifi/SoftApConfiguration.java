@@ -1021,9 +1021,17 @@ public final class SoftApConfiguration implements Parcelable {
                         + channels.size() + ") configured");
             }
             for (int i = 0; i < channels.size(); i++) {
-                if (!isChannelBandPairValid(channels.valueAt(i), channels.keyAt(i))) {
-                    throw new IllegalArgumentException("Invalid channel(" + channels.valueAt(i)
-                            + ") & band (" + channels.keyAt(i) + ") configured");
+                int channel = channels.valueAt(i);
+                int band = channels.keyAt(i);
+                if (channel == 0) {
+                    if (!isBandValid(band)) {
+                        throw new IllegalArgumentException("Invalid band type: " + band);
+                    }
+                } else {
+                    if (!isChannelBandPairValid(channel, band)) {
+                        throw new IllegalArgumentException("Invalid channel(" + channel
+                                + ") & band (" + band + ") configured");
+                    }
                 }
             }
             mChannels = channels.clone();
