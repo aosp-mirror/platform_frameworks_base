@@ -18,8 +18,10 @@ package android.media;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.graphics.GraphicBuffer;
 import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
+import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
 import android.os.Handler;
@@ -715,8 +717,9 @@ public class ImageReader implements AutoCloseable {
      * @throws IllegalStateException If the ImageReader or image have been
      *             closed, or the has been detached, or has not yet been
      *             acquired.
+     * @hide
      */
-     void detachImage(Image image) {
+     public void detachImage(Image image) {
        if (image == null) {
            throw new IllegalArgumentException("input image must not be null");
        }
@@ -898,6 +901,18 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
+        public int getPlaneCount() {
+            throwISEIfImageIsInvalid();
+            return ImageReader.this.mNumPlanes;
+        }
+
+        @Override
+        public int getFenceFd() {
+            throwISEIfImageIsInvalid();
+            return nativeGetFenceFd();
+        }
+
+        @Override
         public HardwareBuffer getHardwareBuffer() {
             throwISEIfImageIsInvalid();
             return nativeGetHardwareBuffer();
@@ -931,7 +946,7 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
-        boolean isAttachable() {
+        public boolean isAttachable() {
             throwISEIfImageIsInvalid();
             return mIsDetached.get();
         }
@@ -1048,6 +1063,7 @@ public class ImageReader implements AutoCloseable {
         private synchronized native int nativeGetWidth();
         private synchronized native int nativeGetHeight();
         private synchronized native int nativeGetFormat(int readerFormat);
+        private synchronized native int nativeGetFenceFd();
         private synchronized native HardwareBuffer nativeGetHardwareBuffer();
     }
 
@@ -1067,6 +1083,67 @@ public class ImageReader implements AutoCloseable {
      * @see #ACQUIRE_MAX_IMAGES
      */
     private synchronized native int nativeImageSetup(Image i);
+
+    /**
+     * @hide
+     */
+    public static class ImagePlane extends android.media.Image.Plane {
+        private ImagePlane(int rowStride, int pixelStride, ByteBuffer buffer) {
+            mRowStride = rowStride;
+            mPixelStride = pixelStride;
+            mBuffer = buffer;
+            /**
+             * Set the byteBuffer order according to host endianness (native
+             * order), otherwise, the byteBuffer order defaults to
+             * ByteOrder.BIG_ENDIAN.
+             */
+            mBuffer.order(ByteOrder.nativeOrder());
+        }
+
+        @Override
+        public ByteBuffer getBuffer() {
+            return mBuffer;
+        }
+
+        @Override
+        public int getPixelStride() {
+            return mPixelStride;
+        }
+
+        @Override
+        public int getRowStride() {
+            return mRowStride;
+        }
+
+        final private int mPixelStride;
+        final private int mRowStride;
+
+        private ByteBuffer mBuffer;
+    }
+
+    /**
+     * @hide
+     */
+    public static ImagePlane[] initializeImagePlanes(int numPlanes,
+            GraphicBuffer buffer, int fenceFd, int format, long timestamp, int transform,
+            int scalingMode, Rect crop) {
+
+        return nativeCreateImagePlanes(numPlanes, buffer, fenceFd, format, crop.left, crop.top,
+                crop.right, crop.bottom);
+    }
+
+    private synchronized static native ImagePlane[] nativeCreateImagePlanes(int numPlanes,
+            GraphicBuffer buffer, int fenceFd, int format, int cropLeft, int cropTop,
+            int cropRight, int cropBottom);
+
+    /**
+     * @hide
+     */
+    public static void unlockGraphicBuffer(GraphicBuffer buffer) {
+        nativeUnlockGraphicBuffer(buffer);
+    }
+
+    private synchronized static native void nativeUnlockGraphicBuffer(GraphicBuffer buffer);
 
     /**
      * We use a class initializer to allow the native code to cache some

@@ -17645,6 +17645,7 @@ package android.hardware.camera2 {
     method public void createCaptureSession(android.hardware.camera2.params.SessionConfiguration) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createCaptureSessionByOutputConfigurations(java.util.List<android.hardware.camera2.params.OutputConfiguration>, android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createConstrainedHighSpeedCaptureSession(@NonNull java.util.List<android.view.Surface>, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public void createExtensionSession(@NonNull android.hardware.camera2.params.ExtensionSessionConfiguration) throws android.hardware.camera2.CameraAccessException;
     method @NonNull public abstract android.hardware.camera2.CaptureRequest.Builder createReprocessCaptureRequest(@NonNull android.hardware.camera2.TotalCaptureResult) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createReprocessableCaptureSession(@NonNull android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.view.Surface>, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createReprocessableCaptureSessionByConfigurations(@NonNull android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
@@ -17676,8 +17677,44 @@ package android.hardware.camera2 {
     field public static final int ERROR_MAX_CAMERAS_IN_USE = 2; // 0x2
   }
 
+  public final class CameraExtensionCharacteristics {
+    method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
+    method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
+    method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
+    field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
+    field public static final int EXTENSION_BEAUTY = 1; // 0x1
+    field public static final int EXTENSION_BOKEH = 2; // 0x2
+    field public static final int EXTENSION_HDR = 3; // 0x3
+    field public static final int EXTENSION_NIGHT = 4; // 0x4
+  }
+
+  public abstract class CameraExtensionSession implements java.lang.AutoCloseable {
+    method public int capture(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
+    method public void close() throws android.hardware.camera2.CameraAccessException;
+    method @NonNull public android.hardware.camera2.CameraDevice getDevice();
+    method public int setRepeatingRequest(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
+    method public void stopRepeating() throws android.hardware.camera2.CameraAccessException;
+  }
+
+  public abstract static class CameraExtensionSession.ExtensionCaptureCallback {
+    ctor public CameraExtensionSession.ExtensionCaptureCallback();
+    method public void onCaptureFailed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureProcessStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureSequenceAborted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
+    method public void onCaptureSequenceCompleted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
+    method public void onCaptureStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, long);
+  }
+
+  public abstract static class CameraExtensionSession.StateCallback {
+    ctor public CameraExtensionSession.StateCallback();
+    method public void onClosed(@NonNull android.hardware.camera2.CameraExtensionSession);
+    method public abstract void onConfigureFailed(@NonNull android.hardware.camera2.CameraExtensionSession);
+    method public abstract void onConfigured(@NonNull android.hardware.camera2.CameraExtensionSession);
+  }
+
   public final class CameraManager {
     method @NonNull public android.hardware.camera2.CameraCharacteristics getCameraCharacteristics(@NonNull String) throws android.hardware.camera2.CameraAccessException;
+    method @NonNull public android.hardware.camera2.CameraExtensionCharacteristics getCameraExtensionCharacteristics(@NonNull String) throws android.hardware.camera2.CameraAccessException;
     method @NonNull public String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public java.util.Set<java.util.Set<java.lang.String>> getConcurrentCameraIds() throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public boolean isConcurrentSessionConfigurationSupported(@NonNull java.util.Map<java.lang.String,android.hardware.camera2.params.SessionConfiguration>) throws android.hardware.camera2.CameraAccessException;
@@ -18185,6 +18222,14 @@ package android.hardware.camera2.params {
     method public void copyElements(android.util.Rational[], int);
     method public void copyElements(int[], int);
     method public android.util.Rational getElement(int, int);
+  }
+
+  public final class ExtensionSessionConfiguration {
+    ctor public ExtensionSessionConfiguration(int, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.StateCallback);
+    method @NonNull public java.util.concurrent.Executor getExecutor();
+    method public int getExtension();
+    method @NonNull public java.util.List<android.hardware.camera2.params.OutputConfiguration> getOutputConfigurations();
+    method @NonNull public android.hardware.camera2.CameraExtensionSession.StateCallback getStateCallback();
   }
 
   public final class Face {
