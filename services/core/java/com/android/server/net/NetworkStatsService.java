@@ -552,7 +552,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         //  schedule periodic pall alarm based on {@link NetworkStatsSettings#getPollInterval()}.
         final PendingIntent pollIntent =
-                PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_NETWORK_STATS_POLL), 0);
+                PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_NETWORK_STATS_POLL),
+                        PendingIntent.FLAG_IMMUTABLE);
 
         final long currentRealtime = SystemClock.elapsedRealtime();
         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
