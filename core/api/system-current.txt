@@ -4433,9 +4433,9 @@ package android.media {
   public static class MediaTranscodeManager.TranscodingRequest.MediaFormatResolver {
     ctor public MediaTranscodeManager.TranscodingRequest.MediaFormatResolver();
     method @Nullable public android.media.MediaFormat resolveVideoFormat();
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setClientCapabilities(@NonNull android.media.ApplicationMediaCapabilities);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setSourceVideoFormatHint(@NonNull android.media.MediaFormat);
     method public boolean shouldTranscode();
-    field public static final String CAPS_SUPPORTS_HEVC = "support-hevc";
   }
 
   public static final class MediaTranscodeManager.TranscodingSession {
