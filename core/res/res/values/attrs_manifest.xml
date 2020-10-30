@@ -2834,6 +2834,38 @@
         <attr name="resource" format="reference" />
     </declare-styleable>
 
+    <!-- The <code>property</code> tag is used to attach additional data that can
+         be supplied to the parent component. A component element can contain any
+         number of <code>property</code> subelements. Valid names are any of the
+         <code>PROPERTY_</code> constants defined in the
+         {@link android.content.pm.PackageManager PackageManager} class. Values
+         are obtained using the appropriate method on the
+         {@link android.content.pm.PackageManager.Property PackageManager.Property} class.
+         <p>Ordinary values are specified through the value attribute. Resource IDs are
+         specified through the resource attribute.
+         <p>It is invalid to specify both a value and resource attributes. -->
+    <declare-styleable name="AndroidManifestProperty"
+         parent="AndroidManifestApplication
+                 AndroidManifestActivity
+                 AndroidManifestReceiver
+                 AndroidManifestProvider
+                 AndroidManifestService">
+        <attr name="name" />
+        <!-- Concrete value to assign to this property.
+             The data can later be retrieved from the property object
+             through
+             {@link android.content.pm.PackageManager.Property#getString Property.getString},
+             {@link android.content.pm.PackageManager.Property#getInteger Property.getInteger},
+             {@link android.content.pm.PackageManager.Property#getBoolean Property.getBoolean},
+             or {@link android.content.pm.PackageManager.Property#getFloat Property.getFloat}
+             depending on the type used here. -->
+        <attr name="value" />
+        <!-- The resource identifier to assign to this property.
+             The resource identifier can later be retrieved from the property object through
+             {@link android.content.pm.PackageManager.Property#getResourceId Property.getResourceId}. -->
+        <attr name="resource" />
+    </declare-styleable>
+
     <!-- The <code>intent-filter</code> tag is used to construct an
          {@link android.content.IntentFilter} object that will be used
          to determine which component can handle a particular
