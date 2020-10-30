@@ -190,7 +190,7 @@ public interface InputConnection {
      *
      * @param n The expected length of the text. This must be non-negative.
      * @param flags Supplies additional options controlling how the text is
-     * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text before the cursor position; the length of the
      * returned text might be less than <var>n</var>.
      * @throws IllegalArgumentException if {@code n} is negative.
@@ -234,7 +234,7 @@ public interface InputConnection {
      *
      * @param n The expected length of the text. This must be non-negative.
      * @param flags Supplies additional options controlling how the text is
-     * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      *
      * @return the text after the cursor position; the length of the
      * returned text might be less than <var>n</var>.
@@ -273,7 +273,7 @@ public interface InputConnection {
      * consistent with the results of the latest edits.</p>
      *
      * @param flags Supplies additional options controlling how the text is
-     * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+     * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text that is currently selected, if any, or null if
      * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
      * later, returns false when the target application does not implement
@@ -284,7 +284,8 @@ public interface InputConnection {
     /**
      * Gets the surrounding text around the current cursor, with <var>beforeLength</var> characters
      * of text before the cursor (start of the selection), <var>afterLength</var> characters of text
-     * after the cursor (end of the selection), and all of the selected text.
+     * after the cursor (end of the selection), and all of the selected text. The range are for java
+     * characters, not glyphs that can be multiple characters.
      *
      * <p>This method may fail either if the input connection has become invalid (such as its
      * process crashing), or the client is taking too long to respond with the text (it is given a
@@ -306,8 +307,8 @@ public interface InputConnection {
      *
      * @param beforeLength The expected length of the text before the cursor.
      * @param afterLength The expected length of the text after the cursor.
-     * @param flags Supplies additional options controlling how the text is returned. Defined by the
-     *              constants.
+     * @param flags Supplies additional options controlling how the text is returned. May be either
+     *              {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
      * @return an {@link android.view.inputmethod.SurroundingText} object describing the surrounding
      * text and state of selection, or null if the input connection is no longer valid, or the
      * editor can't comply with the request for some reason, or the application does not implement
@@ -394,7 +395,7 @@ public interface InputConnection {
      *
      * @param request Description of how the text should be returned.
      * {@link android.view.inputmethod.ExtractedTextRequest}
-     * @param flags Additional options to control the client, either 0 or
+     * @param flags Additional options to control the client, either {@code 0} or
      * {@link #GET_EXTRACTED_TEXT_MONITOR}.
 
      * @return an {@link android.view.inputmethod.ExtractedText}
