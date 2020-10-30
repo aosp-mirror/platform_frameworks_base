@@ -211,6 +211,7 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     unordered_map<int64_t, int> newMetricProducerMap;
     vector<sp<AnomalyTracker>> newAnomalyTrackers;
     unordered_map<int64_t, int> newAlertTrackerMap;
+    vector<sp<AlarmTracker>> newPeriodicAlarmTrackers;
     mTagIds.clear();
     mConditionToMetricMap.clear();
     mTrackerToMetricMap.clear();
@@ -226,9 +227,10 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
             mAllAnomalyTrackers, mAlertTrackerMap, mStateProtoHashes, mTagIds,
             newAtomMatchingTrackers, newAtomMatchingTrackerMap, newConditionTrackers,
             newConditionTrackerMap, newMetricProducers, newMetricProducerMap, newAnomalyTrackers,
-            newAlertTrackerMap, mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
-            mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
-            mMetricIndexesWithActivation, newStateProtoHashes, mNoReportMetricIds);
+            newAlertTrackerMap, newPeriodicAlarmTrackers, mConditionToMetricMap,
+            mTrackerToMetricMap, mTrackerToConditionMap, mActivationAtomTrackerToMetricMap,
+            mDeactivationAtomTrackerToMetricMap, mMetricIndexesWithActivation, newStateProtoHashes,
+            mNoReportMetricIds);
     mAllAtomMatchingTrackers = newAtomMatchingTrackers;
     mAtomMatchingTrackerMap = newAtomMatchingTrackerMap;
     mAllConditionTrackers = newConditionTrackers;
@@ -238,6 +240,7 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     mStateProtoHashes = newStateProtoHashes;
     mAllAnomalyTrackers = newAnomalyTrackers;
     mAlertTrackerMap = newAlertTrackerMap;
+    mAllPeriodicAlarmTrackers = newPeriodicAlarmTrackers;
     return mConfigValid;
 }
 

@@ -1017,6 +1017,7 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         unordered_map<int64_t, int>& newMetricProducerMap,
                         vector<sp<AnomalyTracker>>& newAnomalyTrackers,
                         unordered_map<int64_t, int>& newAlertTrackerMap,
+                        vector<sp<AlarmTracker>>& newPeriodicAlarmTrackers,
                         unordered_map<int, vector<int>>& conditionToMetricMap,
                         unordered_map<int, vector<int>>& trackerToMetricMap,
                         unordered_map<int, vector<int>>& trackerToConditionMap,
@@ -1081,6 +1082,12 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
         return false;
     }
 
+    // Alarms do not have any state, so we can reuse the initialization logic.
+    if (!initAlarms(config, key, periodicAlarmMonitor, timeBaseNs, currentTimeNs,
+                    newPeriodicAlarmTrackers)) {
+        ALOGE("initAlarms failed");
+        return false;
+    }
     return true;
 }
 

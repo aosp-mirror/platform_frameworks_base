@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "anomaly/AlarmMonitor.h"
+#include "anomaly/AlarmTracker.h"
 #include "condition/ConditionTracker.h"
 #include "external/StatsPullerManager.h"
 #include "matchers/AtomMatchingTracker.h"
@@ -253,6 +254,7 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         std::unordered_map<int64_t, int>& newMetricProducerMap,
                         std::vector<sp<AnomalyTracker>>& newAlertTrackers,
                         std::unordered_map<int64_t, int>& newAlertTrackerMap,
+                        std::vector<sp<AlarmTracker>>& newPeriodicAlarmTrackers,
                         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                         std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                         std::unordered_map<int, std::vector<int>>& trackerToConditionMap,

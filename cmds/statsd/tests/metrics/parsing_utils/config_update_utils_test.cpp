@@ -52,11 +52,15 @@ namespace statsd {
 namespace {
 
 ConfigKey key(123, 456);
-const int64_t timeBaseNs = 1000;
+const int64_t timeBaseNs = 1000 * NS_PER_SEC;
+
 sp<UidMap> uidMap = new UidMap();
 sp<StatsPullerManager> pullerManager = new StatsPullerManager();
 sp<AlarmMonitor> anomalyAlarmMonitor;
-sp<AlarmMonitor> periodicAlarmMonitor;
+sp<AlarmMonitor> periodicAlarmMonitor = new AlarmMonitor(
+        /*minDiffToUpdateRegisteredAlarmTimeSec=*/0,
+        [](const shared_ptr<IStatsCompanionService>&, int64_t) {},
+        [](const shared_ptr<IStatsCompanionService>&) {});
 set<int> allTagIds;
 vector<sp<AtomMatchingTracker>> oldAtomMatchingTrackers;
 unordered_map<int64_t, int> oldAtomMatchingTrackerMap;
@@ -205,6 +209,14 @@ Subscription createSubscription(string name, Subscription_RuleType type, int64_t
     subscription.set_rule_id(ruleId);
     subscription.mutable_broadcast_subscriber_details();
     return subscription;
+}
+
+Alarm createAlarm(string name, int64_t offsetMillis, int64_t periodMillis) {
+    Alarm alarm;
+    alarm.set_id(StringToId(name));
+    alarm.set_offset_millis(offsetMillis);
+    alarm.set_period_millis(periodMillis);
+    return alarm;
 }
 }  // anonymous namespace
 
@@ -3473,6 +3485,91 @@ TEST_F(ConfigUpdateTest, TestUpdateAlerts) {
     EXPECT_THAT(alert2Subscriptions, UnorderedElementsAre(subscription2.id(), subscription4.id()));
     EXPECT_THAT(newAnomalyTrackers[alert3Index]->mSubscriptions, IsEmpty());
     EXPECT_THAT(newAnomalyTrackers[alert4Index]->mSubscriptions, IsEmpty());
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateAlarms) {
+    StatsdConfig config;
+    // Add alarms.
+    Alarm alarm1 = createAlarm("Alarm1", /*offset*/ 1 * MS_PER_SEC, /*period*/ 50 * MS_PER_SEC);
+    int64_t alarm1Id = alarm1.id();
+    *config.add_alarm() = alarm1;
+
+    Alarm alarm2 = createAlarm("Alarm2", /*offset*/ 1 * MS_PER_SEC, /*period*/ 2000 * MS_PER_SEC);
+    int64_t alarm2Id = alarm2.id();
+    *config.add_alarm() = alarm2;
+
+    Alarm alarm3 = createAlarm("Alarm3", /*offset*/ 10 * MS_PER_SEC, /*period*/ 5000 * MS_PER_SEC);
+    int64_t alarm3Id = alarm3.id();
+    *config.add_alarm() = alarm3;
+
+    // Add Subscriptions.
+    Subscription subscription1 = createSubscription("S1", Subscription::ALARM, alarm1Id);
+    *config.add_subscription() = subscription1;
+    Subscription subscription2 = createSubscription("S2", Subscription::ALARM, alarm1Id);
+    *config.add_subscription() = subscription2;
+    Subscription subscription3 = createSubscription("S3", Subscription::ALARM, alarm2Id);
+    *config.add_subscription() = subscription3;
+
+    EXPECT_TRUE(initConfig(config));
+
+    ASSERT_EQ(oldAlarmTrackers.size(), 3);
+    // Config is created at statsd start time, so just add the offsets.
+    EXPECT_EQ(oldAlarmTrackers[0]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1);
+    EXPECT_EQ(oldAlarmTrackers[1]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1);
+    EXPECT_EQ(oldAlarmTrackers[2]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 10);
+
+    // Change alarm2/alarm3.
+    config.mutable_alarm(1)->set_offset_millis(5 * MS_PER_SEC);
+    config.mutable_alarm(2)->set_period_millis(10000 * MS_PER_SEC);
+
+    // Move subscription2 to be on alarm2 and make a new subscription.
+    config.mutable_subscription(1)->set_rule_id(alarm2Id);
+    Subscription subscription4 = createSubscription("S4", Subscription::ALARM, alarm1Id);
+    *config.add_subscription() = subscription4;
+
+    // Update time is 2 seconds after the base time.
+    int64_t currentTimeNs = timeBaseNs + 2 * NS_PER_SEC;
+    vector<sp<AlarmTracker>> newAlarmTrackers;
+    EXPECT_TRUE(initAlarms(config, key, periodicAlarmMonitor, timeBaseNs, currentTimeNs,
+                           newAlarmTrackers));
+
+    ASSERT_EQ(newAlarmTrackers.size(), 3);
+    // Config is updated 2 seconds after statsd start
+    // The offset has passed for alarm1, but not for alarms 2/3.
+    EXPECT_EQ(newAlarmTrackers[0]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1 + 50);
+    EXPECT_EQ(newAlarmTrackers[1]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 5);
+    EXPECT_EQ(newAlarmTrackers[2]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 10);
+
+    // Verify alarms have the correct subscriptions. Use subscription id as proxy for equivalency.
+    vector<int64_t> alarm1Subscriptions;
+    for (const Subscription& subscription : newAlarmTrackers[0]->mSubscriptions) {
+        alarm1Subscriptions.push_back(subscription.id());
+    }
+    EXPECT_THAT(alarm1Subscriptions, UnorderedElementsAre(subscription1.id(), subscription4.id()));
+    vector<int64_t> alarm2Subscriptions;
+    for (const Subscription& subscription : newAlarmTrackers[1]->mSubscriptions) {
+        alarm2Subscriptions.push_back(subscription.id());
+    }
+    EXPECT_THAT(alarm2Subscriptions, UnorderedElementsAre(subscription2.id(), subscription3.id()));
+    EXPECT_THAT(newAlarmTrackers[2]->mSubscriptions, IsEmpty());
+
+    // Verify the alarm monitor is updated accordingly once the old alarms are removed.
+    // Alarm2 fires the earliest.
+    oldAlarmTrackers.clear();
+    EXPECT_EQ(periodicAlarmMonitor->getRegisteredAlarmTimeSec(), timeBaseNs / NS_PER_SEC + 5);
+
+    // Do another update 60 seconds after config creation time, after the offsets of each alarm.
+    currentTimeNs = timeBaseNs + 60 * NS_PER_SEC;
+    newAlarmTrackers.clear();
+    EXPECT_TRUE(initAlarms(config, key, periodicAlarmMonitor, timeBaseNs, currentTimeNs,
+                           newAlarmTrackers));
+
+    ASSERT_EQ(newAlarmTrackers.size(), 3);
+    // Config is updated one minute after statsd start.
+    // Two periods have passed for alarm 1, one has passed for alarms2/3.
+    EXPECT_EQ(newAlarmTrackers[0]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1 + 2 * 50);
+    EXPECT_EQ(newAlarmTrackers[1]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 5 + 2000);
+    EXPECT_EQ(newAlarmTrackers[2]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 10 + 10000);
 }
 
 }  // namespace statsd

@@ -306,6 +306,12 @@ bool initMetrics(
         std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
         std::vector<int>& metricsWithActivation);
 
+// Initialize alarms
+// Is called both on initialize new configs and config updates since alarms do not have any state.
+bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
+                const sp<AlarmMonitor>& periodicAlarmMonitor, const int64_t timeBaseNs,
+                const int64_t currentTimeNs, std::vector<sp<AlarmTracker>>& allAlarmTrackers);
+
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp<UidMap>& uidMap,

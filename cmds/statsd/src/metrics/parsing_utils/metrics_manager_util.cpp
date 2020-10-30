@@ -1143,24 +1143,9 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
         allAlarmTrackers.push_back(
                 new AlarmTracker(startMillis, currentTimeMillis, alarm, key, periodicAlarmMonitor));
     }
-    for (int i = 0; i < config.subscription_size(); ++i) {
-        const Subscription& subscription = config.subscription(i);
-        if (subscription.rule_type() != Subscription::ALARM) {
-            continue;
-        }
-        if (subscription.subscriber_information_case() ==
-            Subscription::SubscriberInformationCase::SUBSCRIBER_INFORMATION_NOT_SET) {
-            ALOGW("subscription \"%lld\" has no subscriber info.\"", (long long)subscription.id());
-            return false;
-        }
-        const auto& itr = alarmTrackerMap.find(subscription.rule_id());
-        if (itr == alarmTrackerMap.end()) {
-            ALOGW("subscription \"%lld\" has unknown rule id: \"%lld\"",
-                  (long long)subscription.id(), (long long)subscription.rule_id());
-            return false;
-        }
-        const int trackerIndex = itr->second;
-        allAlarmTrackers[trackerIndex]->addSubscription(subscription);
+    if (!initSubscribersForSubscriptionType(config, Subscription::ALARM, alarmTrackerMap,
+                                            allAlarmTrackers)) {
+        return false;
     }
     return true;
 }
