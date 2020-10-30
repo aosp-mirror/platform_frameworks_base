@@ -991,7 +991,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         // If this provider says that grants are always required, we need to
         // consult it directly to determine if the UID has permission
         final boolean forceMet;
-        if (ENABLE_DYNAMIC_PERMISSIONS && pi.forceUriPermissions) {
+        if (ENABLE_DYNAMIC_PERMISSIONS
+                && pi.forceUriPermissions
+                && isDynamicPermissionEnabledInMP()) {
             final int providerUserId = UserHandle.getUserId(pi.applicationInfo.uid);
             final int clientUserId = UserHandle.getUserId(uid);
             if (providerUserId == clientUserId) {
@@ -1007,6 +1009,15 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         return readMet && writeMet && forceMet;
+    }
+
+    /**
+     * Returns true if the available MediaProvider version contains the changes that enable dynamic
+     * permission.
+     */
+    private boolean isDynamicPermissionEnabledInMP() {
+        // TODO(b/159995598) Check MediaProvider version.
+        return false;
     }
 
     @GuardedBy("mLock")
