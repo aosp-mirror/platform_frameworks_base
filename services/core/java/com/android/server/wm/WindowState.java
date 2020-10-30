@@ -555,8 +555,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mWindowRemovalAllowed;
 
     // Input channel and input window handle used by the input dispatcher.
-    final InputWindowHandle mInputWindowHandle;
+    final InputWindowHandleWrapper mInputWindowHandle;
     InputChannel mInputChannel;
+
+    /**
+     * The token will be assigned to {@link InputWindowHandle#token} if this window can receive
+     * input event. Note that the token of associated input window handle can be cleared if this
+     * window becomes unable to receive input, but this field will remain until the input channel
+     * is actually disposed.
+     */
+    IBinder mInputChannelToken;
 
     // Used to improve performance of toString()
     private String mStringNameCache;
@@ -855,6 +863,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         DeathRecipient deathRecipient = new DeathRecipient();
         mPowerManagerWrapper = powerManagerWrapper;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
+        mInputWindowHandle = new InputWindowHandleWrapper(new InputWindowHandle(
+                mActivityRecord != null
+                        ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
+                getDisplayId()));
+        mInputWindowHandle.setOwnerPid(s.mPid);
+        mInputWindowHandle.setOwnerUid(s.mUid);
+        mInputWindowHandle.setName(getName());
+        mInputWindowHandle.setPackageName(mAttrs.packageName);
+        mInputWindowHandle.setLayoutParamsType(mAttrs.type);
+        // Check private trusted overlay flag and window type to set trustedOverlay variable of
+        // input window handle.
+        mInputWindowHandle.setTrustedOverlay(
+                ((mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
+                        && mOwnerCanAddInternalSystemWindow)
+                        || InputMonitor.isTrustedOverlay(mAttrs.type));
         if (DEBUG) {
             Slog.v(TAG, "Window " + this + " client=" + c.asBinder()
                             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
@@ -870,7 +893,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mIsFloatingLayer = false;
             mBaseLayer = 0;
             mSubLayer = 0;
-            mInputWindowHandle = null;
             mWinAnimator = null;
             mWpcForDisplayConfigChanges = null;
             return;
@@ -918,16 +940,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedWidth = 0;
         mLastRequestedHeight = 0;
         mLayer = 0;
-        mInputWindowHandle = new InputWindowHandle(
-                mActivityRecord != null ? mActivityRecord.mInputApplicationHandle : null,
-                    getDisplayId());
-
-        //  Check private trusted overlay flag and window type to set trustedOverlay variable of
-        //  input window handle.
-        mInputWindowHandle.trustedOverlay =
-                (mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
-                && mOwnerCanAddInternalSystemWindow;
-        mInputWindowHandle.trustedOverlay |= InputMonitor.isTrustedOverlay(mAttrs.type);
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
         // during onDisplayChanged.
@@ -1495,9 +1507,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         super.onDisplayChanged(dc);
         // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
-        if (dc != null && mInputWindowHandle.displayId != dc.getDisplayId()) {
+        if (dc != null && mInputWindowHandle.getDisplayId() != dc.getDisplayId()) {
             mLayoutSeq = dc.mLayoutSeq - 1;
-            mInputWindowHandle.displayId = dc.getDisplayId();
+            mInputWindowHandle.setDisplayId(dc.getDisplayId());
         }
     }
 
@@ -2469,7 +2481,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         String name = getName();
         mInputChannel = mWmService.mInputManager.createInputChannel(name);
-        mInputWindowHandle.token = mInputChannel.getToken();
+        mInputChannelToken = mInputChannel.getToken();
+        mInputWindowHandle.setToken(mInputChannelToken);
+        mWmService.mInputToWindowMap.put(mInputChannelToken, this);
         if (outInputChannel != null) {
             mInputChannel.copyTo(outInputChannel);
         } else {
@@ -2478,7 +2492,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Create fake event receiver that simply reports all events as handled.
             mDeadWindowEventReceiver = new DeadWindowEventReceiver(mInputChannel);
         }
-        mWmService.mInputToWindowMap.put(mInputWindowHandle.token, this);
     }
 
     void disposeInputChannel() {
@@ -2486,17 +2499,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mDeadWindowEventReceiver.dispose();
             mDeadWindowEventReceiver = null;
         }
+        if (mInputChannelToken != null) {
+            // Unregister server channel first otherwise it complains about broken channel.
+            mWmService.mInputManager.removeInputChannel(mInputChannelToken);
+            mWmService.mKeyInterceptionInfoForToken.remove(mInputChannelToken);
+            mWmService.mInputToWindowMap.remove(mInputChannelToken);
+            mInputChannelToken = null;
+        }
 
-        // unregister server channel first otherwise it complains about broken channel
         if (mInputChannel != null) {
-            mWmService.mInputManager.removeInputChannel(mInputChannel.getToken());
-
             mInputChannel.dispose();
             mInputChannel = null;
         }
-        mWmService.mKeyInterceptionInfoForToken.remove(mInputWindowHandle.token);
-        mWmService.mInputToWindowMap.remove(mInputWindowHandle.token);
-        mInputWindowHandle.token = null;
+        mInputWindowHandle.setToken(null);
     }
 
     /** Returns true if the replacement window was removed. */
@@ -2566,11 +2581,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    int getSurfaceTouchableRegion(InputWindowHandle inputWindowHandle, int flags) {
+    int getSurfaceTouchableRegion(Region region, int flags) {
         final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
-        final Region region = inputWindowHandle.touchableRegion;
-        setTouchableRegionCropIfNeeded(inputWindowHandle);
-
         if (modal) {
             flags |= FLAG_NOT_TOUCH_MODAL;
             if (mActivityRecord != null) {
@@ -2592,7 +2604,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         // Translate to surface based coordinates.
-        region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
+        final Rect frame = mWindowFrames.mFrame;
+        if (frame.left != 0 || frame.top != 0) {
+            region.translate(-frame.left, -frame.top);
+        }
 
         // TODO(b/139804591): sizecompat layout needs to be reworked. Currently mFrame is post-
         // scaling but the existing logic doesn't expect that. The result is that the already-
@@ -3441,7 +3456,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 break;
             case TOUCHABLE_INSETS_REGION: {
                 outRegion.set(mGivenTouchableRegion);
-                outRegion.translate(frame.left, frame.top);
+                if (frame.left != 0 || frame.top != 0) {
+                    outRegion.translate(frame.left, frame.top);
+                }
                 break;
             }
         }
@@ -3466,22 +3483,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             getTouchableRegion(outRegion);
         }
-    }
-
-    private void setTouchableRegionCropIfNeeded(InputWindowHandle handle) {
-        final Task task = getTask();
-        if (task == null || !task.cropWindowsToStackBounds()) {
-            handle.setTouchableRegionCrop(null);
-            return;
-        }
-
-        final Task stack = task.getRootTask();
-        if (stack == null || inFreeformWindowingMode()) {
-            handle.setTouchableRegionCrop(null);
-            return;
-        }
-
-        handle.setTouchableRegionCrop(stack.getSurfaceControl());
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {

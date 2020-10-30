@@ -175,11 +175,11 @@ class EmbeddedWindowController {
 
         InputApplicationHandle getApplicationHandle() {
             if (mHostWindowState == null
-                    || mHostWindowState.mInputWindowHandle.inputApplicationHandle == null) {
+                    || mHostWindowState.mInputWindowHandle.getInputApplicationHandle() == null) {
                 return null;
             }
             return new InputApplicationHandle(
-                    mHostWindowState.mInputWindowHandle.inputApplicationHandle);
+                    mHostWindowState.mInputWindowHandle.getInputApplicationHandle());
         }
 
         InputChannel openInputChannel() {

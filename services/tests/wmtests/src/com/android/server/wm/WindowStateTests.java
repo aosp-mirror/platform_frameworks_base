@@ -63,15 +63,18 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 import android.view.DisplayCutout;
+import android.view.InputWindowHandle;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -466,10 +469,10 @@ public class WindowStateTests extends WindowTestsBase {
     public void testDisplayIdUpdatedOnReparent() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         // fake a different display
-        app.mInputWindowHandle.displayId = mDisplayContent.getDisplayId() + 1;
+        app.mInputWindowHandle.setDisplayId(mDisplayContent.getDisplayId() + 1);
         app.onDisplayChanged(mDisplayContent);
 
-        assertThat(app.mInputWindowHandle.displayId, is(mDisplayContent.getDisplayId()));
+        assertThat(app.mInputWindowHandle.getDisplayId(), is(mDisplayContent.getDisplayId()));
         assertThat(app.getDisplayId(), is(mDisplayContent.getDisplayId()));
     }
 
@@ -678,6 +681,54 @@ public class WindowStateTests extends WindowTestsBase {
         win0.mActivityRecord.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         win0.mActivityRecord.getStack().setFocusable(false);
         assertFalse(win0.canReceiveTouchInput());
+    }
+
+    @Test
+    public void testUpdateInputWindowHandle() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+        win.mAttrs.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        final InputWindowHandle handle = new InputWindowHandle(
+                win.mInputWindowHandle.getInputApplicationHandle(), win.getDisplayId());
+        final InputWindowHandleWrapper handleWrapper = new InputWindowHandleWrapper(handle);
+        final IBinder inputChannelToken = mock(IBinder.class);
+        win.mInputChannelToken = inputChannelToken;
+
+        mDisplayContent.getInputMonitor().populateInputWindowHandle(handleWrapper, win);
+
+        assertTrue(handleWrapper.isChanged());
+        assertEquals(inputChannelToken, handle.token);
+        assertEquals(win.mActivityRecord.getInputApplicationHandle(false /* update */),
+                handle.inputApplicationHandle);
+        assertEquals(win.mAttrs.inputFeatures, handle.inputFeatures);
+        assertEquals(win.isVisible(), handle.visible);
+
+        final SurfaceControl sc = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction transaction = mSystemServicesTestRule.mTransaction;
+        InputMonitor.setInputWindowInfoIfNeeded(transaction, sc, handleWrapper);
+
+        // The fields of input window handle are changed, so it must set input window info
+        // successfully. And then the changed flag should be reset.
+        verify(transaction).setInputWindowInfo(eq(sc), eq(handle));
+        assertFalse(handleWrapper.isChanged());
+        // Populate the same states again, the handle should not detect change.
+        mDisplayContent.getInputMonitor().populateInputWindowHandle(handleWrapper, win);
+        assertFalse(handleWrapper.isChanged());
+
+        // Apply the no change handle, the invocation of setInputWindowInfo should be skipped.
+        clearInvocations(transaction);
+        InputMonitor.setInputWindowInfoIfNeeded(transaction, sc, handleWrapper);
+        verify(transaction, never()).setInputWindowInfo(any(), any());
+
+        // Populate as an overlay to disable the input of window.
+        InputMonitor.populateOverlayInputInfo(handleWrapper, false /* isVisible */);
+        // The overlay attributes should be set.
+        assertTrue(handleWrapper.isChanged());
+        assertFalse(handle.focusable);
+        assertFalse(handle.visible);
+        assertNull(handle.token);
+        assertEquals(0L, handle.dispatchingTimeoutMillis);
+        assertEquals(WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL,
+                handle.inputFeatures);
     }
 
     @UseTestDisplay(addWindows = W_ACTIVITY)

@@ -8365,7 +8365,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             embeddedWindow.getName());
                     return;
                 }
-                t.requestFocusTransfer(newFocusTarget.mInputWindowHandle.token, targetInputToken,
+                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, targetInputToken,
                         displayId).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + newFocusTarget,
