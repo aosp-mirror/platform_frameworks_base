@@ -491,7 +491,7 @@ class LocationProviderManager extends
                     builder.setIntervalMillis(MIN_COARSE_INTERVAL_MS);
                 }
                 if (baseRequest.getMinUpdateIntervalMillis() < MIN_COARSE_INTERVAL_MS) {
-                    builder.clearMinUpdateIntervalMillis();
+                    builder.setMinUpdateIntervalMillis(MIN_COARSE_INTERVAL_MS);
                 }
             }
 
