@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.appsearch.external.localbackend.converter;
+package com.android.server.appsearch.external.localstorage.converter;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -50,7 +50,6 @@ public class SchemaToProtoConverterTest {
                 .addProperties(PropertyConfigProto.newBuilder()
                         .setPropertyName("subject")
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
-                        .setSchemaType("")
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
                         .setIndexingConfig(
                                 com.android.server.appsearch.proto.IndexingConfig.newBuilder()
@@ -60,7 +59,6 @@ public class SchemaToProtoConverterTest {
                 ).addProperties(PropertyConfigProto.newBuilder()
                         .setPropertyName("body")
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
-                        .setSchemaType("")
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
                         .setIndexingConfig(
                                 com.android.server.appsearch.proto.IndexingConfig.newBuilder()
@@ -94,7 +92,6 @@ public class SchemaToProtoConverterTest {
                 .addProperties(PropertyConfigProto.newBuilder()
                         .setPropertyName("artist")
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
-                        .setSchemaType("")
                         .setCardinality(PropertyConfigProto.Cardinality.Code.REPEATED)
                         .setIndexingConfig(
                                 com.android.server.appsearch.proto.IndexingConfig.newBuilder()
@@ -104,7 +101,6 @@ public class SchemaToProtoConverterTest {
                 ).addProperties(PropertyConfigProto.newBuilder()
                         .setPropertyName("pubDate")
                         .setDataType(PropertyConfigProto.DataType.Code.INT64)
-                        .setSchemaType("")
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
                         .setIndexingConfig(
                                 com.android.server.appsearch.proto.IndexingConfig.newBuilder()
