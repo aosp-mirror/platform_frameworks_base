@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -58,6 +59,7 @@ public abstract class Image implements AutoCloseable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     protected Image() {
     }
 
@@ -387,6 +389,7 @@ public abstract class Image implements AutoCloseable {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
         protected Plane() {
         }
 
