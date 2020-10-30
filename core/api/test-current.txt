@@ -2729,6 +2729,10 @@ package android.window {
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
   }
 
+  public final class SplashScreenView extends android.widget.FrameLayout {
+    method public boolean isIconAnimating();
+  }
+
   public final class StartingWindowInfo implements android.os.Parcelable {
     ctor public StartingWindowInfo();
     method public int describeContents();

@@ -43,8 +43,9 @@ import java.util.List;
 
 /**
  * Util class to create the view for a splash screen content.
+ * @hide
  */
-class SplashscreenContentDrawer {
+public class SplashscreenContentDrawer {
     private static final String TAG = StartingSurfaceDrawer.TAG;
     private static final boolean DEBUG = StartingSurfaceDrawer.DEBUG_SPLASH_SCREEN;
 
@@ -55,10 +56,13 @@ class SplashscreenContentDrawer {
     // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
     private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
     private final Context mContext;
+    private final int mMaxIconAnimationDuration;
+
     private int mIconSize;
 
-    SplashscreenContentDrawer(Context context) {
+    SplashscreenContentDrawer(Context context, int maxIconAnimationDuration) {
         mContext = context;
+        mMaxIconAnimationDuration = maxIconAnimationDuration;
     }
 
     private void updateDensity() {
@@ -90,33 +94,71 @@ class SplashscreenContentDrawer {
             return ssc;
         }
 
-        final TypedArray typedArray = context.obtainStyledAttributes(
-                com.android.internal.R.styleable.Window);
-        final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
-        typedArray.recycle();
+        final SplashScreenWindowAttrs attrs =
+                SplashScreenWindowAttrs.createWindowAttrs(context);
+        final StartingWindowViewBuilder builder = new StartingWindowViewBuilder();
         final Drawable themeBGDrawable;
-        if (resId == 0) {
+
+        if (attrs.mWindowBgColor != 0) {
+            themeBGDrawable = new ColorDrawable(attrs.mWindowBgColor);
+        } else if (attrs.mWindowBgResId != 0) {
+            themeBGDrawable = context.getDrawable(attrs.mWindowBgResId);
+        } else {
             Slog.w(TAG, "Window background not exist!");
             themeBGDrawable = createDefaultBackgroundDrawable();
-        } else {
-            themeBGDrawable = context.getDrawable(resId);
         }
-        final Drawable iconDrawable = iconRes != 0 ? context.getDrawable(iconRes)
-                : context.getPackageManager().getDefaultActivityIcon();
+        final int animationDuration;
+        final Drawable iconDrawable;
+        if (attrs.mReplaceIcon != null) {
+            iconDrawable = attrs.mReplaceIcon;
+            animationDuration = Math.max(0,
+                    Math.min(attrs.mAnimationDuration, mMaxIconAnimationDuration));
+        } else {
+            iconDrawable = iconRes != 0 ? context.getDrawable(iconRes)
+                    : context.getPackageManager().getDefaultActivityIcon();
+            animationDuration = 0;
+        }
         // TODO (b/173975965) Tracking the performance on improved splash screen.
-        final StartingWindowViewBuilder builder = new StartingWindowViewBuilder();
         return builder
                 .setWindow(win)
                 .setContext(context)
                 .setThemeDrawable(themeBGDrawable)
-                .setIconDrawable(iconDrawable).build();
+                .setIconDrawable(iconDrawable)
+                .setIconAnimationDuration(animationDuration).build();
+    }
+
+    private static class SplashScreenWindowAttrs {
+        private int mWindowBgResId = 0;
+        private int mWindowBgColor = Color.TRANSPARENT;
+        private Drawable mReplaceIcon = null;
+        private int mAnimationDuration = 0;
+
+        static SplashScreenWindowAttrs createWindowAttrs(Context context) {
+            final SplashScreenWindowAttrs attrs = new SplashScreenWindowAttrs();
+            final TypedArray typedArray = context.obtainStyledAttributes(
+                    com.android.internal.R.styleable.Window);
+            attrs.mWindowBgResId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
+            attrs.mWindowBgColor = typedArray.getColor(
+                    R.styleable.Window_windowSplashScreenBackground, Color.TRANSPARENT);
+            attrs.mReplaceIcon = typedArray.getDrawable(
+                    R.styleable.Window_windowSplashScreenAnimatedIcon);
+            attrs.mAnimationDuration = typedArray.getInt(
+                    R.styleable.Window_windowSplashScreenAnimationDuration, 0);
+            typedArray.recycle();
+            if (DEBUG) {
+                Slog.d(TAG, "window attributes color: "
+                        + Integer.toHexString(attrs.mWindowBgColor)
+                        + " icon " + attrs.mReplaceIcon + " duration " + attrs.mAnimationDuration);
+            }
+            return attrs;
+        }
     }
 
     private class StartingWindowViewBuilder {
-        // materials
         private Drawable mThemeBGDrawable;
         private Drawable mIconDrawable;
         private Window mWindow;
+        private int mIconAnimationDuration;
         private Context mContext;
 
         // result
@@ -140,6 +182,12 @@ class SplashscreenContentDrawer {
 
         StartingWindowViewBuilder setWindow(Window window) {
             mWindow = window;
+            mBuildComplete = false;
+            return this;
+        }
+
+        StartingWindowViewBuilder setIconAnimationDuration(int iconAnimationDuration) {
+            mIconAnimationDuration = iconAnimationDuration;
             mBuildComplete = false;
             return this;
         }
@@ -253,6 +301,7 @@ class SplashscreenContentDrawer {
             if (iconDrawable != null) {
                 builder.setCenterViewDrawable(iconDrawable);
             }
+            builder.setAnimationDuration(mIconAnimationDuration);
             final SplashScreenView splashScreenView = builder.build();
             if (DEBUG) {
                 Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);

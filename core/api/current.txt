@@ -1655,6 +1655,9 @@ package android {
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
+    field public static final int windowSplashScreenAnimatedIcon = 16844333; // 0x101062d
+    field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
+    field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
     field public static final int windowSplashscreenContent = 16844132; // 0x1010564
     field @Deprecated public static final int windowSwipeToDismiss = 16843763; // 0x10103f3
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c

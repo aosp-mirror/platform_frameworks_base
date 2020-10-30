@@ -17,14 +17,18 @@ package android.window;
 
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -65,6 +69,11 @@ public final class SplashScreenView extends FrameLayout {
     private int mInitBackgroundColor;
     private View mIconView;
     private Bitmap mParceledBitmap;
+
+    private Animatable mAnimatableIcon;
+    private ValueAnimator mAnimator;
+    private Runnable mAnimationFinishListener;
+
     // cache original window and status
     private Window mWindow;
     private boolean mDrawBarBackground;
@@ -81,6 +90,7 @@ public final class SplashScreenView extends FrameLayout {
         private @ColorInt int mBackgroundColor;
         private Bitmap mParceledBitmap;
         private Drawable mIconDrawable;
+        private int mIconAnimationDuration;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -125,6 +135,14 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
+         * Set the animation duration if icon is animatable.
+         */
+        public Builder setAnimationDuration(int duration) {
+            mIconAnimationDuration = duration;
+            return this;
+        }
+
+        /**
          * Create SplashScreenWindowView object from materials.
          */
         public SplashScreenView build() {
@@ -142,6 +160,7 @@ public final class SplashScreenView extends FrameLayout {
             }
             if (mIconDrawable != null) {
                 view.mIconView.setBackground(mIconDrawable);
+                view.initIconAnimation(mIconDrawable, mIconAnimationDuration);
             }
             if (mParceledBitmap != null) {
                 view.mParceledBitmap = mParceledBitmap;
@@ -178,6 +197,66 @@ public final class SplashScreenView extends FrameLayout {
      */
     public boolean isCopyable() {
         return !mNotCopyable;
+    }
+
+    void initIconAnimation(Drawable iconDrawable, int duration) {
+        if (iconDrawable instanceof Animatable) {
+            mAnimatableIcon = (Animatable) iconDrawable;
+            mAnimator = ValueAnimator.ofInt(0, 1);
+            mAnimator.setDuration(duration);
+
+            mAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mAnimatableIcon.start();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAnimatableIcon.stop();
+                    onIconAnimationFinish();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mAnimatableIcon.stop();
+                    onIconAnimationFinish();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                    // do not repeat
+                    mAnimatableIcon.stop();
+                }
+            });
+        }
+    }
+
+    private void onIconAnimationFinish() {
+        if (mAnimationFinishListener != null) {
+            mAnimationFinishListener.run();
+            mAnimationFinishListener = null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isIconAnimating() {
+        return mAnimatableIcon != null && mAnimator.isRunning();
+    }
+
+    /**
+     * @hide
+     */
+    public void startIntroAnimation(Runnable finishListener) {
+        if (mAnimatableIcon != null) {
+            mAnimationFinishListener = finishListener;
+            mAnimator.start();
+        } else if (finishListener != null) {
+            finishListener.run();
+        }
     }
 
     /**
@@ -244,6 +323,7 @@ public final class SplashScreenView extends FrameLayout {
 
     /**
      * Get the view containing the Splash Screen icon and its background.
+     * @see android.R.attr#windowSplashScreenAnimatedIcon
      */
     public @Nullable View getIconView() {
         return mIconView;

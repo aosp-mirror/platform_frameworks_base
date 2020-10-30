@@ -3066,6 +3066,9 @@
     <public name="edgeEffectType" />
     <public name="knownCerts" />
     <public name="windowBackgroundBlurRadius"/>
+    <public name="windowSplashScreenBackground"/>
+    <public name="windowSplashScreenAnimatedIcon"/>
+    <public name="windowSplashScreenAnimationDuration"/>
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
