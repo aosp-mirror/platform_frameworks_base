@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.SHELL_ROOT_LAYER_DIVIDER;
 
 import android.graphics.PixelFormat;
 import android.graphics.Region;
@@ -63,7 +64,7 @@ final class DividerWindowManager {
         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        mSystemWindows.addView(view, mLp, displayId, TYPE_DOCK_DIVIDER);
+        mSystemWindows.addView(view, mLp, displayId, SHELL_ROOT_LAYER_DIVIDER);
         mView = view;
     }
 

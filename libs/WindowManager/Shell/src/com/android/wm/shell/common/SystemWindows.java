@@ -101,13 +101,13 @@ public class SystemWindows {
      * Adds a view to system-ui window management.
      */
     public void addView(View view, WindowManager.LayoutParams attrs, int displayId,
-            int windowType) {
+            @WindowManager.ShellRootLayer int shellRootLayer) {
         PerDisplay pd = mPerDisplay.get(displayId);
         if (pd == null) {
             pd = new PerDisplay(displayId);
             mPerDisplay.put(displayId, pd);
         }
-        pd.addView(view, attrs, windowType);
+        pd.addView(view, attrs, shellRootLayer);
     }
 
     /**
@@ -149,18 +149,6 @@ public class SystemWindows {
     }
 
     /**
-     * Adds a root for system-ui window management with no views. Only useful for IME.
-     */
-    public void addRoot(int displayId, int windowType) {
-        PerDisplay pd = mPerDisplay.get(displayId);
-        if (pd == null) {
-            pd = new PerDisplay(displayId);
-            mPerDisplay.put(displayId, pd);
-        }
-        pd.addRoot(windowType);
-    }
-
-    /**
      * Get the IWindow token for a specific root.
      *
      * @param windowType A window type from {@link WindowManager}.
@@ -198,8 +186,9 @@ public class SystemWindows {
             mDisplayId = displayId;
         }
 
-        public void addView(View view, WindowManager.LayoutParams attrs, int windowType) {
-            SysUiWindowManager wwm = addRoot(windowType);
+        public void addView(View view, WindowManager.LayoutParams attrs,
+                @WindowManager.ShellRootLayer int shellRootLayer) {
+            SysUiWindowManager wwm = addRoot(shellRootLayer);
             if (wwm == null) {
                 Slog.e(TAG, "Unable to create systemui root");
                 return;
@@ -213,23 +202,22 @@ public class SystemWindows {
             mViewRoots.put(view, viewRoot);
 
             try {
-                mWmService.setShellRootAccessibilityWindow(mDisplayId, windowType,
+                mWmService.setShellRootAccessibilityWindow(mDisplayId, shellRootLayer,
                         viewRoot.getWindowToken());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error setting accessibility window for " + mDisplayId + ":"
-                        + windowType, e);
+                        + shellRootLayer, e);
             }
         }
-
-        SysUiWindowManager addRoot(int windowType) {
-            SysUiWindowManager wwm = mWwms.get(windowType);
+        SysUiWindowManager addRoot(@WindowManager.ShellRootLayer int shellRootLayer) {
+            SysUiWindowManager wwm = mWwms.get(shellRootLayer);
             if (wwm != null) {
                 return wwm;
             }
             SurfaceControl rootSurface = null;
             ContainerWindow win = new ContainerWindow();
             try {
-                rootSurface = mWmService.addShellRoot(mDisplayId, win, windowType);
+                rootSurface = mWmService.addShellRoot(mDisplayId, win, shellRootLayer);
             } catch (RemoteException e) {
             }
             if (rootSurface == null) {
@@ -238,7 +226,7 @@ public class SystemWindows {
             }
             Context displayContext = mDisplayController.getDisplayContext(mDisplayId);
             wwm = new SysUiWindowManager(mDisplayId, displayContext, rootSurface, win);
-            mWwms.put(windowType, wwm);
+            mWwms.put(shellRootLayer, wwm);
             return wwm;
         }
 

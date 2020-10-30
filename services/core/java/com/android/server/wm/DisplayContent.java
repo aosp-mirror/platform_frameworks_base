@@ -1084,23 +1084,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return token;
     }
 
-    SurfaceControl addShellRoot(@NonNull IWindow client, int windowType) {
-        ShellRoot root = mShellRoots.get(windowType);
+    SurfaceControl addShellRoot(@NonNull IWindow client,
+            @WindowManager.ShellRootLayer int shellRootLayer) {
+        ShellRoot root = mShellRoots.get(shellRootLayer);
         if (root != null) {
             if (root.getClient() == client) {
                 return root.getSurfaceControl();
             }
             root.clear();
-            mShellRoots.remove(windowType);
+            mShellRoots.remove(shellRootLayer);
         }
-        root = new ShellRoot(client, this, windowType);
+        root = new ShellRoot(client, this, shellRootLayer);
         SurfaceControl rootLeash = root.getSurfaceControl();
         if (rootLeash == null) {
             // Root didn't finish initializing, so don't add it.
             root.clear();
             return null;
         }
-        mShellRoots.put(windowType, root);
+        mShellRoots.put(shellRootLayer, root);
         SurfaceControl out = new SurfaceControl(rootLeash, "DisplayContent.addShellRoot");
         return out;
     }
