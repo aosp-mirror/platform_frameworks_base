@@ -4035,7 +4035,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public SurfaceControl addShellRoot(int displayId, IWindow client, int windowType) {
+    public SurfaceControl addShellRoot(int displayId, IWindow client,
+            @WindowManager.ShellRootLayer int shellRootLayer) {
         if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
@@ -4047,7 +4048,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null) {
                     return null;
                 }
-                return dc.addShellRoot(client, windowType);
+                return dc.addShellRoot(client, shellRootLayer);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4055,7 +4056,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target) {
+    public void setShellRootAccessibilityWindow(int displayId,
+            @WindowManager.ShellRootLayer int shellRootLayer, IWindow target) {
         if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
@@ -4067,7 +4069,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null) {
                     return;
                 }
-                ShellRoot root = dc.mShellRoots.get(windowType);
+                ShellRoot root = dc.mShellRoots.get(shellRootLayer);
                 if (root == null) {
                     return;
                 }
