@@ -227,7 +227,7 @@
     <string name="data_connection_roaming" msgid="375650836665414797">"Rouming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM karta solinmagan."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM kartasiz."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobil internet"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobil internet yoniq"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Mobil internet yoqilmagan"</string>
@@ -362,7 +362,7 @@
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Aylanmaydigan qilingan"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Tik holat"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Eniga"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Yotiq"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Joylashuv"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Joylashuvni aniqlash xizmati yoqilmagan"</string>
@@ -505,7 +505,7 @@
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Bu funksiyani taʼminlovchi xizmat ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Yozib olish yoki translatsiya boshlansinmi?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bilan yozib olinsin yoki translatsiya qilinsinmi?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> orqali yozib olish yoki translatsiya boshlansinmi?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Boshqa ko‘rsatilmasin"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hammasini tozalash"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Boshqarish"</string>

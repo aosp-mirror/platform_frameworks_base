@@ -693,7 +693,7 @@
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Αυτές οι ειδοποιήσεις θα ελαχιστοποιηθούν"</string>
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Αυτές οι ειδοποιήσεις θα εμφανίζονται σιωπηλά"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Αυτές οι ειδοποιήσεις θα σας ενημερώνουν"</string>
-    <string name="inline_blocking_helper" msgid="2891486013649543452">"Συνήθως απορρίπτετε αυτές τις ειδοποιήσεις. \nΝα εξακολουθήσουν να εμφανίζονται;"</string>
+    <string name="inline_blocking_helper" msgid="2891486013649543452">"Συνήθως παραβλέπετε αυτές τις ειδοποιήσεις. \nΝα εξακολουθήσουν να εμφανίζονται;"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Τέλος"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Εφαρμογή"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Να συνεχίσουν να εμφανίζονται αυτές οι ειδοποιήσεις;"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου. Οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εμφανίζονται σε συννεφάκι από προεπιλογή."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Κρατάει την προσοχή σας με μια κινούμενη συντόμευση προς αυτό το περιεχόμενο."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Εμφανίζεται στο επάνω μέρος της ενότητας συζητήσεων, προβάλλεται ως κινούμενο συννεφάκι, εμφανίζει τη φωτογραφία προφίλ στην οθόνη κλειδώματος"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Εμφανίζεται επάνω στις συζητήσεις, προβάλλεται ως κιν. συννεφάκι, εμφανίζει τη φωτ. προφίλ στην οθ. κλειδ."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ρυθμίσεις"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Προτεραιότητα"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν υποστηρίζει τις λειτουργίες συζήτησης"</string>

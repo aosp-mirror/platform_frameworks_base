@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"關閉省電模式"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在錄製或投放內容時，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可存取畫面上顯示的任何資訊或裝置播放的任何內容，包括密碼、付款詳情、相片、訊息和你播放的音訊。"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在錄製或投放內容時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>可存取畫面上顯示的任何資訊或裝置播放的任何內容，包括密碼、付款詳情、相片、訊息和你播放的音訊。"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在錄製或投放內容時，提供這項功能的服務可存取畫面上顯示的任何資訊或裝置播放的任何內容，包括密碼、付款詳情、相片、訊息和你播放的音訊。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要開始錄製或投放內容嗎？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"要使用「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」開始錄製或投放內容嗎？"</string>
@@ -712,7 +712,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"預設"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"泡泡"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不震動或發出聲音"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並顯示在對話部分的下方"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並調整排序到其他對話下方"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機的設定響鈴或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"利用浮動式捷徑快速存取這項內容。"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"省電模式會在電量低於 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟。"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"設定"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"我知道了"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"傾印 SysUI 記憶體快照"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"已關閉感應器"</string>
     <string name="device_services" msgid="1549944177856658705">"裝置服務"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"無標題"</string>

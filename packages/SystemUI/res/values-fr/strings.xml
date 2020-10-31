@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Économiseur de batterie activé"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Limite les performances et les données en arrière-plan."</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver l\'économiseur de batterie"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Par exemple, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore vos contenus audio lus."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, données de paiement, photos, messages ou encore contenus audio lus."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service qui fournit cette fonction aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Cela comprend, entre autres, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore les contenus audio que vous lisez."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Démarrer l\'enregistrement ou la diffusion ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Démarrer l\'enregistrement ou la diffusion avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
@@ -1025,9 +1025,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre de superposition de l\'agrandissement"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Fenêtre des commandes d\'agrandissement"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de contrôle des appareils"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes des appareils"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ajouter des commandes pour vos appareils connectés"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes de contrôle des appareils"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes des appareils"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Appuyez de manière prolongée sur le bouton Marche/Arrêt pour accéder aux commandes"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'appli pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1050,7 +1050,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Impossible de charger les commandes. Vérifiez l\'application <xliff:g id="APP">%s</xliff:g> pour vous assurer que les paramètres n\'ont pas changé."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Commandes compatibles indisponibles"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de contrôle des appareils"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes des appareils"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Ajouter"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Suggérée par <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>
