@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ڈائنیمک سسٹم تیار ہے۔ اس کا استعمال شروع کرنے کے لیے، اپنا آلہ ری سٹارٹ کریں۔"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"انسٹال جاری ہے"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"انسٹال ناکام ہو گیا"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"تصویر کی توثیق ناکام ہو گئی۔ انسٹالیشن منسوخ کریں-"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ڈسک امیج کی توثیق ناکام ہو گئی۔ انسٹالیشن منسوخ کریں۔"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"‏فی الحال ہم ایک ڈائنیمک سسٹم چلا رہے ہیں۔ Android کا اصل ورژن استعمال کرنے کے لیے ری سٹارٹ کریں۔"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"منسوخ کریں"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"مسترد کریں"</string>
