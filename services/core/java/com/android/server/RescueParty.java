@@ -56,6 +56,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,10 @@ public class RescueParty {
     private static final String PROP_VIRTUAL_DEVICE = "ro.hardware.virtual_device";
     private static final String PROP_DEVICE_CONFIG_DISABLE_FLAG =
             "persist.device_config.configuration.disable_rescue_party";
+    private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
+            "persist.device_config.configuration.disable_rescue_party_factory_reset";
+    // The DeviceConfig namespace containing all RescueParty switches.
+    private static final String NAMESPACE_CONFIGURATION = "configuration";
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
@@ -215,6 +220,10 @@ public class RescueParty {
         if (SettingsToPropertiesMapper.isNativeFlagsResetPerformed()) {
             String[] resetNativeCategories = SettingsToPropertiesMapper.getResetNativeCategories();
             for (int i = 0; i < resetNativeCategories.length; i++) {
+                // Don't let RescueParty reset the namespace for RescueParty switches.
+                if (NAMESPACE_CONFIGURATION.equals(resetNativeCategories[i])) {
+                    continue;
+                }
                 DeviceConfig.resetToDefaults(Settings.RESET_MODE_TRUSTED_DEFAULTS,
                         resetNativeCategories[i]);
             }
@@ -225,8 +234,10 @@ public class RescueParty {
      * Get the next rescue level. This indicates the next level of mitigation that may be taken.
      */
     private static int getNextRescueLevel() {
+        int maxRescueLevel = SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)
+                ? LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS : LEVEL_FACTORY_RESET;
         return MathUtils.constrain(SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
-                LEVEL_NONE, LEVEL_FACTORY_RESET);
+                LEVEL_NONE, maxRescueLevel);
     }
 
     /**
@@ -349,9 +360,27 @@ public class RescueParty {
     private static void resetDeviceConfig(Context context, int resetMode,
             @Nullable String failedPackage) {
         if (!shouldPerformScopedResets() || failedPackage == null) {
-            DeviceConfig.resetToDefaults(resetMode, /*namespace=*/ null);
+            resetAllAffectedNamespaces(context, resetMode);
         } else {
             performScopedReset(context, resetMode, failedPackage);
+        }
+    }
+
+    private static void resetAllAffectedNamespaces(Context context, int resetMode) {
+        RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
+        Set<String> allAffectedNamespaces = rescuePartyObserver.getAllAffectedNamespaceSet();
+
+        Slog.w(TAG,
+                "Performing reset for all affected namespaces: "
+                        + Arrays.toString(allAffectedNamespaces.toArray()));
+        Iterator<String> it = allAffectedNamespaces.iterator();
+        while (it.hasNext()) {
+            String namespace = it.next();
+            // Don't let RescueParty reset the namespace for RescueParty switches.
+            if (NAMESPACE_CONFIGURATION.equals(namespace)) {
+                continue;
+            }
+            DeviceConfig.resetToDefaults(resetMode, namespace);
         }
     }
 
@@ -367,16 +396,21 @@ public class RescueParty {
         RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
         Set<String> affectedNamespaces = rescuePartyObserver.getAffectedNamespaceSet(
                 failedPackage);
-        if (affectedNamespaces == null) {
-            DeviceConfig.resetToDefaults(resetMode, /*namespace=*/ null);
-        } else {
+        // If we can't find namespaces affected for current package,
+        // skip this round of reset.
+        if (affectedNamespaces != null) {
             Slog.w(TAG,
                     "Performing scoped reset for package: " + failedPackage
                             + ", affected namespaces: "
                             + Arrays.toString(affectedNamespaces.toArray()));
             Iterator<String> it = affectedNamespaces.iterator();
             while (it.hasNext()) {
-                DeviceConfig.resetToDefaults(resetMode, it.next());
+                String namespace = it.next();
+                // Don't let RescueParty reset the namespace for RescueParty switches.
+                if (NAMESPACE_CONFIGURATION.equals(namespace)) {
+                    continue;
+                }
+                DeviceConfig.resetToDefaults(resetMode, namespace);
             }
         }
     }
@@ -512,6 +546,10 @@ public class RescueParty {
 
         private synchronized Set<String> getAffectedNamespaceSet(String failedPackage) {
             return mCallingPackageNamespaceSetMap.get(failedPackage);
+        }
+
+        private synchronized Set<String> getAllAffectedNamespaceSet() {
+            return new HashSet<String>(mNamespaceCallingPackageSetMap.keySet());
         }
 
         private synchronized Set<String> getCallingPackagesSet(String namespace) {
