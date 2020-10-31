@@ -6350,6 +6350,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /*
+     * Called from {@link RootWindowContainer#ensureVisibilityAndConfig} to make sure the
+     * orientation is updated before the app becomes visible.
+     */
     void reportDescendantOrientationChangeIfNeeded() {
         // Orientation request is exposed only when we're visible. Therefore visibility change
         // will change requested orientation. Notify upward the hierarchy ladder to adjust
@@ -6365,6 +6369,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // The app is just becoming visible, and the parent Task has updated with the
             // orientation request. Update the size compat mode.
             updateSizeCompatMode();
+            if (task.isOrganized()) {
+                // WM Shell can override WM Core positioning (e.g. for letterboxing) so ensure
+                // that WM Shell is called when an activity becomes visible. Without this, WM Core
+                // will handle positioning instead of WM Shell when an app is reopened.
+                mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                        task, /* force= */ true);
+            }
         }
     }
 
