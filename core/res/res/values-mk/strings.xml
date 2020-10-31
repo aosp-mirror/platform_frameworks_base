@@ -898,7 +898,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Избирач на корисник"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Статус"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Камера"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Контроли на медиуми"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Контроли за аудио/видео содржини"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Прередувањето виџети започна."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Прередувањето виџети заврши."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Виџетот <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> е избришан."</string>
@@ -985,7 +985,7 @@
     <string name="searchview_description_search" msgid="1045552007537359343">"Пребарај"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"Пребарај барање"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"Исчисти барање"</string>
-    <string name="searchview_description_submit" msgid="6771060386117334686">"Поднеси барање"</string>
+    <string name="searchview_description_submit" msgid="6771060386117334686">"Испрати барање"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Гласовно пребарување"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Овозможи „Истражувај со допир“?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> сака да овозможи „Истражувај со допир“. Кога е вклучено „Истражувај со допир“, може да се слушнат или да се видат описи на она што е под вашиот прст или да се прават движења за комуницирање со таблетот."</string>
@@ -1122,7 +1122,7 @@
     <string name="capital_off" msgid="7443704171014626777">"ИСКЛУЧЕНО"</string>
     <string name="checked" msgid="9179896827054513119">"штиклирано"</string>
     <string name="not_checked" msgid="7972320087569023342">"не е штиклирано"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Заврши дејство со"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Активирај со"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Остварете го дејството со %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Заврши го дејството"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Отвори со"</string>
@@ -1344,7 +1344,7 @@
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Допрете за поставување"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Можеби ќе треба да го преформатирате уредот. Допрете за отстранување."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За пренесување фотографии и медиуми"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За пренесување фотографии и аудио/видео содржини"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблем со <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Допрете за да го поправите ова"</string>
@@ -1385,8 +1385,8 @@
     <string name="ext_media_status_formatting" msgid="774148701503179906">"Се форматира..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"Не е внесено"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"Не се пронајдени соодветни активности."</string>
-    <string name="permlab_route_media_output" msgid="8048124531439513118">"насочување излез за медиуми"</string>
-    <string name="permdesc_route_media_output" msgid="1759683269387729675">"Овозможува апликацијата да насочува излез за медиуми кон други надворешни уреди."</string>
+    <string name="permlab_route_media_output" msgid="8048124531439513118">"насочување излез за аудио/видео"</string>
+    <string name="permdesc_route_media_output" msgid="1759683269387729675">"Овозможува апликацијата да насочува излез за аудио/видео содржини кон други надворешни уреди."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"читање сесии на инсталирање"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Дозволува апликација да чита сесии на инсталирање. Тоа овозможува апликацијата да гледа детали за активни инсталации на пакет."</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"барање пакети за инсталирање"</string>
@@ -1436,7 +1436,7 @@
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Не е избрана датотека"</string>
     <string name="reset" msgid="3865826612628171429">"Ресетирај"</string>
-    <string name="submit" msgid="862795280643405865">"Поднеси"</string>
+    <string name="submit" msgid="862795280643405865">"Испрати"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Апликацијата за возење работи"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Допрете за да излезете од апликацијата за возење."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Назад"</string>
@@ -1773,7 +1773,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Обиди се повторно подоцна"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Се прикажува на цел екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"За да излезете, повлечете одозгора надолу."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"Разбрав"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Приказ на часови во кружно движење"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Приказ на минути во кружно движење"</string>

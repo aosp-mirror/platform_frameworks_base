@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Contrôle le niveau de zoom et le positionnement de l\'écran."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Effectuer des gestes"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet d\'appuyer sur l\'écran, de le balayer, de le pincer et d\'effectuer d\'autres gestes."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestes avec l\'empreinte digitale"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestes d\'empreinte digitale"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Peut enregistrer des gestes effectués sur le lecteur d\'empreinte digitale de l\'appareil."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre des captures d\'écran."</string>
@@ -1937,7 +1937,7 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggestions de saisie automatique</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Enregistrer dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer la <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g> et <xliff:g id="TYPE_1">%2$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> et <xliff:g id="TYPE_2">%3$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Mettre à jour cet élément dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>

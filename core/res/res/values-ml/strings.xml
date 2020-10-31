@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"ഡിസ്പ്ലേയുടെ സൂം നിലയും പൊസിഷനിംഗും നിയന്ത്രിക്കുക."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"ജെസ്‌റ്ററുകൾ നിർവഹിക്കുക"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ടാപ്പുചെയ്യാനോ സ്വൈപ്പുചെയ്യാനോ പിഞ്ചുചെയ്യാനോ മറ്റ് ജെസ്‌റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ഫിംഗർപ്രിന്റ് ജെസ്‌റ്ററുകൾ"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ഫിംഗർപ്രിന്റ് ജെസ്‌ച്ചറുകൾ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>
@@ -980,9 +980,9 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"delete"</string>
-    <string name="search_go" msgid="2141477624421347086">"തിരയൽ"</string>
+    <string name="search_go" msgid="2141477624421347086">"Search"</string>
     <string name="search_hint" msgid="455364685740251925">"തിരയുക…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"തിരയൽ"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"Search"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"തിരയൽ അന്വേഷണം"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"അന്വേഷണം മായ്‌ക്കുക"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ചോദ്യം സമർപ്പിക്കുക"</string>
@@ -1398,7 +1398,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"സൂം നിയന്ത്രണം ലഭിക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"പോവുക"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"തിരയൽ"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"Search"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"അയയ്‌ക്കുക"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"അടുത്തത്"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"പൂർത്തിയായി"</string>
@@ -1881,7 +1881,7 @@
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"Search"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണ് ഇത് മാനേജ് ചെയ്യുന്നത്."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"കൂടുതലറിയുക"</string>
