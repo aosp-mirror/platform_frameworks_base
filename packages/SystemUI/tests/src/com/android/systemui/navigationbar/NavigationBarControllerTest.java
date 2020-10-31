@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.After;
@@ -96,6 +97,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(SysUiState.class),
                         mock(BroadcastDispatcher.class),
                         mock(CommandQueue.class),
+                        Optional.of(mock(Pip.class)),
                         Optional.of(mock(SplitScreen.class)),
                         Optional.of(mock(Recents.class)),
                         () -> mock(StatusBar.class),

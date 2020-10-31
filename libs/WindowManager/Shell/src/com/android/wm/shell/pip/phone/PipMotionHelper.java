@@ -262,8 +262,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     .spring(FloatProperties.RECT_X, toBounds.left, mSpringConfig)
                     .spring(FloatProperties.RECT_Y, toBounds.top, mSpringConfig);
 
-            startBoundsAnimator(toBounds.left /* toX */, toBounds.top /* toY */,
-                    false /* dismiss */);
+            startBoundsAnimator(toBounds.left /* toX */, toBounds.top /* toY */);
         }
     }
 
@@ -292,7 +291,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .spring(FloatProperties.RECT_HEIGHT, desiredHeight, mSpringConfig)
                 .withEndActions(after);
 
-        startBoundsAnimator(destinationX, destinationY, false);
+        startBoundsAnimator(destinationX, destinationY);
     }
 
     /** Set whether we're springing-to-touch to catch up after being stuck in the dismiss target. */
@@ -364,21 +363,24 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Flings the PiP to the closest snap target.
      */
     void flingToSnapTarget(
-            float velocityX, float velocityY, @Nullable Runnable endAction) {
-        movetoTarget(velocityX, velocityY, endAction, false /* isStash */);
+            float velocityX, float velocityY, @Nullable Runnable postBoundsUpdateCallback) {
+        movetoTarget(velocityX, velocityY, postBoundsUpdateCallback, false /* isStash */);
     }
 
     /**
      * Stash PiP to the closest edge.
      */
     void stashToEdge(
-            float velocityX, float velocityY, @Nullable Runnable endAction) {
+            float velocityX, float velocityY, @Nullable Runnable postBoundsUpdateCallback) {
         mPipBoundsState.setStashed(velocityX < 0 ? STASH_TYPE_LEFT : STASH_TYPE_RIGHT);
-        movetoTarget(velocityX, velocityY, endAction, true /* isStash */);
+        movetoTarget(velocityX, velocityY, postBoundsUpdateCallback, true /* isStash */);
     }
 
     private void movetoTarget(
-            float velocityX, float velocityY, @Nullable Runnable endAction, boolean isStash) {
+            float velocityX,
+            float velocityY,
+            @Nullable Runnable postBoundsUpdateCallback,
+            boolean isStash) {
         // If we're flinging to a snap target now, we're not springing to catch up to the touch
         // location now.
         mSpringingToTouch = false;
@@ -390,8 +392,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         FloatProperties.RECT_X, velocityX, isStash ? mStashConfigX : mFlingConfigX,
                         mSpringConfig, true /* flingMustReachMinOrMax */)
                 .flingThenSpring(
-                        FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig)
-                .withEndActions(endAction);
+                        FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig);
 
         final float leftEdge = isStash
                 ? mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
@@ -407,7 +408,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 PhysicsAnimator.estimateFlingEndValue(startValueY, velocityY, mFlingConfigY);
 
         startBoundsAnimator(xEndValue /* toX */, estimatedFlingYEndValue /* toY */,
-                false /* dismiss */);
+                postBoundsUpdateCallback);
     }
 
     /**
@@ -423,8 +424,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_X, bounds.left, springConfig)
                 .spring(FloatProperties.RECT_Y, bounds.top, springConfig);
-        startBoundsAnimator(bounds.left /* toX */, bounds.top /* toY */,
-                false /* dismiss */);
+        startBoundsAnimator(bounds.left /* toX */, bounds.top /* toY */);
     }
 
     /**
@@ -440,8 +440,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .withEndActions(this::dismissPip);
 
         startBoundsAnimator(
-                getBounds().left /* toX */, getBounds().bottom + getBounds().height() /* toY */,
-                true /* dismiss */);
+                getBounds().left /* toX */, getBounds().bottom + getBounds().height() /* toY */);
 
         mDismissalPending = false;
     }
@@ -516,14 +515,21 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset());
     }
 
+    private void startBoundsAnimator(float toX, float toY) {
+        startBoundsAnimator(toX, toY, null /* postBoundsUpdateCallback */);
+    }
+
     /**
      * Starts the physics animator which will update the animated PIP bounds using physics
      * animations, as well as the TimeAnimator which will apply those bounds to PIP.
      *
      * This will also add end actions to the bounds animator that cancel the TimeAnimator and update
      * the 'real' bounds to equal the final animated bounds.
+     *
+     * If one wishes to supply a callback after all the 'real' bounds update has happened,
+     * pass @param postBoundsUpdateCallback.
      */
-    private void startBoundsAnimator(float toX, float toY, boolean dismiss) {
+    private void startBoundsAnimator(float toX, float toY, Runnable postBoundsUpdateCallback) {
         if (!mSpringingToTouch) {
             cancelPhysicsAnimation();
         }
@@ -535,9 +541,16 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 (int) toY + getBounds().height()));
 
         if (!mTemporaryBoundsPhysicsAnimator.isRunning()) {
-            mTemporaryBoundsPhysicsAnimator
-                    .addUpdateListener(mResizePipUpdateListener)
-                    .withEndActions(this::onBoundsPhysicsAnimationEnd);
+            if (postBoundsUpdateCallback != null) {
+                mTemporaryBoundsPhysicsAnimator
+                        .addUpdateListener(mResizePipUpdateListener)
+                        .withEndActions(this::onBoundsPhysicsAnimationEnd,
+                                postBoundsUpdateCallback);
+            } else {
+                mTemporaryBoundsPhysicsAnimator
+                        .addUpdateListener(mResizePipUpdateListener)
+                        .withEndActions(this::onBoundsPhysicsAnimationEnd);
+            }
         }
 
         mTemporaryBoundsPhysicsAnimator.start();

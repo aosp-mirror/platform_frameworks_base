@@ -136,6 +136,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
@@ -179,6 +180,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NavigationModeController mNavigationModeController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
+    private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
     private final SystemActions mSystemActions;
@@ -406,6 +408,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
+            Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
@@ -430,6 +433,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
+        mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
         mSystemActions = systemActions;
@@ -529,6 +533,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
         mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
+        mPipOptional.ifPresent(mNavigationBarView::registerPipExclusionBoundsChangeListener);
 
         prepareNavigationBarView();
         checkNavBarModes();

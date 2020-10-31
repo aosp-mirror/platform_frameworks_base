@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
@@ -1292,6 +1293,10 @@ public class NavigationBarView extends FrameLayout implements
         splitScreen.registerInSplitScreenListener(mDockedListener);
     }
 
+    void registerPipExclusionBoundsChangeListener(Pip pip) {
+        pip.setPipExclusionBoundsChangeListener(mPipListener);
+    }
+
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {
         pw.print("      " + caption + ": ");
         if (button == null) {
@@ -1311,5 +1316,9 @@ public class NavigationBarView extends FrameLayout implements
     private final Consumer<Boolean> mDockedListener = exists -> post(() -> {
         mDockedStackExists = exists;
         updateRecentsIcon();
+    });
+
+    private final Consumer<Rect> mPipListener = bounds -> post(() -> {
+        mEdgeBackGestureHandler.setPipStashExclusionBounds(bounds);
     });
 }

@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -160,6 +161,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
 
     private final Executor mMainExecutor;
 
+    private final Rect mPipExcludedBounds = new Rect();
     private final Region mExcludeRegion = new Region();
     private final Region mUnrestrictedExcludeRegion = new Region();
 
@@ -456,6 +458,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         return mIsEnabled && mIsBackGestureAllowed;
     }
 
+    /**
+     * Update the PiP bounds, used for exclusion calculation.
+     */
+    public void setPipStashExclusionBounds(Rect bounds) {
+        mPipExcludedBounds.set(bounds);
+    }
+
     private WindowManager.LayoutParams createLayoutParams() {
         Resources resources = mContext.getResources();
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
@@ -553,6 +562,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         // mLogGesture = false.
         if (x > 2 * (mEdgeWidthLeft + mLeftInset)
                 && x < (mDisplaySize.x - 2 * (mEdgeWidthRight + mRightInset))) {
+            return false;
+        }
+
+        // If the point is inside the PiP excluded bounds, then drop it.
+        if (mPipExcludedBounds.contains(x, y)) {
             return false;
         }
 
