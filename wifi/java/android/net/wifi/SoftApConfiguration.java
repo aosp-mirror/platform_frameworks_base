@@ -819,6 +819,11 @@ public final class SoftApConfiguration implements Parcelable {
          * Derived MAC address 1: e2:c7:60:c4:0e:b7
          * Derived MAC address 2: e2:38:9f:c4:0e:b7
          *
+         * <p>
+         * Use {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#areFeaturesSupported(long)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_MAC_ADDRESS_CUSTOMIZATION} to determine
+         * whether or not this feature is supported.
          *
          * @param bssid BSSID, or null to have the BSSID chosen by the framework. The caller is
          *              responsible for avoiding collisions.
@@ -957,9 +962,9 @@ public final class SoftApConfiguration implements Parcelable {
          * {@link #setBand(int)}.
          *
          * The channel auto selection will be offloaded to driver when
-         * {@link SoftApCapability#areFeaturesSupported(
-         * SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD)}
-         * returns true. The driver will auto select the best channel (e.g. best performance)
+         * {@link SoftApCapability#areFeaturesSupported(long)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD}
+         * return true. The driver will auto select the best channel (e.g. best performance)
          * based on environment interference. Check {@link SoftApCapability} for more detail.
          *
          * The API contains (band, channel) input since the 6GHz band uses the same channel
@@ -998,8 +1003,8 @@ public final class SoftApConfiguration implements Parcelable {
          * auto-select a valid channel from the band configured with {@link #setBands(int[])}.
          *
          * The channel auto selection will be offloaded to driver when
-         * {@link SoftApCapability#areFeaturesSupported(
-         * SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD)}
+         * {@link SoftApCapability#areFeaturesSupported(long)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD}
          * returns true. The driver will auto select the best channel (e.g. best performance)
          * based on environment interference. Check {@link SoftApCapability} for more detail.
          *
@@ -1046,14 +1051,14 @@ public final class SoftApConfiguration implements Parcelable {
          * <p>
          * <li>If not set, defaults to 0.</li>
          *
-         * This method requires hardware support. If the method is used to set a
+         * This method requires HAL support. If the method is used to set a
          * non-zero {@code maxNumberOfClients} value then
          * {@link WifiManager#startTetheredHotspot} will report error code
          * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
          *
          * <p>
          * Use {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
-         * {@link SoftApCapability#areFeaturesSupported(int)}
+         * {@link SoftApCapability#areFeaturesSupported(long)}
          * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT} to determine whether
          * or not this feature is supported.
          *
@@ -1127,13 +1132,13 @@ public final class SoftApConfiguration implements Parcelable {
          * {@link #setBlockedClientList(List)} and {@link #setAllowedClientList(List)}.
          *
          * <p>
-         * This method requires hardware support. Hardware support can be determined using
+         * This method requires HAL support. HAL support can be determined using
          * {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
-         * {@link SoftApCapability#areFeaturesSupported(int)}
+         * {@link SoftApCapability#areFeaturesSupported(long)}
          * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT}
          *
          * <p>
-         * If the method is called on a device without hardware support then starting the soft AP
+         * If the method is called on a device without HAL support then starting the soft AP
          * using {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} will fail with
          * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
          *
@@ -1182,13 +1187,13 @@ public final class SoftApConfiguration implements Parcelable {
          * to the Soft AP.
          *
          * <p>
-         * This method requires hardware support. Hardware support can be determined using
+         * This method requires HAL support. HAL support can be determined using
          * {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
-         * {@link SoftApCapability#areFeaturesSupported(int)}
+         * {@link SoftApCapability#areFeaturesSupported(long)}
          * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT}
          *
          * <p>
-         * If the method is called on a device without hardware support then starting the soft AP
+         * If the method is called on a device without HAL support then starting the soft AP
          * using {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} will fail with
          * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
          *
@@ -1210,7 +1215,14 @@ public final class SoftApConfiguration implements Parcelable {
          * <p>
          * <li>If not set, defaults to {@link #RANDOMIZATION_PERSISTENT}</li>
          *
-         * @param macRandomizationSetting One of the following setting:.
+         * <p>
+         * Requires HAL support when set to {@link #RANDOMIZATION_PERSISTENT}.
+         * Use {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#areFeaturesSupported(long)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_MAC_ADDRESS_CUSTOMIZATION} to determine
+         * whether or not this feature is supported.
+         *
+         * @param macRandomizationSetting One of the following setting:
          * {@link #RANDOMIZATION_NONE} or {@link #RANDOMIZATION_PERSISTENT}.
          * @return Builder for chaining.
          *

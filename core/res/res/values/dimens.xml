@@ -207,9 +207,6 @@
     <!-- Default padding for dialogs. -->
     <dimen name="dialog_padding">16dp</dimen>
 
-    <!-- The horizontal margin of the content in the notification shade -->
-    <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
-
     <!-- The margin on the start of the content view -->
     <dimen name="notification_content_margin_start">16dp</dimen>
 

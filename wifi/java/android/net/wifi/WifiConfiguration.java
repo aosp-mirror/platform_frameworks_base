@@ -2074,26 +2074,41 @@ public class WifiConfiguration implements Parcelable {
          */
         @RecentFailureReason
         private int mAssociationStatus = RECENT_FAILURE_NONE;
+        private long mLastUpdateTimeSinceBootMillis;
 
         /**
          * @param status the association status code for the recent failure
          */
-        public void setAssociationStatus(@RecentFailureReason int status) {
+        public void setAssociationStatus(@RecentFailureReason int status,
+                long updateTimeSinceBootMs) {
             mAssociationStatus = status;
+            mLastUpdateTimeSinceBootMillis = updateTimeSinceBootMs;
         }
         /**
          * Sets the RecentFailure to NONE
          */
         public void clear() {
             mAssociationStatus = RECENT_FAILURE_NONE;
+            mLastUpdateTimeSinceBootMillis = 0;
         }
         /**
-         * Get the recent failure code. One of {@link #RECENT_FAILURE_NONE} or
-         * {@link #RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA}.
+         * Get the recent failure code. One of {@link #RECENT_FAILURE_NONE},
+         * {@link #RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA},
+         * {@link #RECENT_FAILURE_MBO_OCE_DISCONNECT},
+         * {@link #RECENT_FAILURE_REFUSED_TEMPORARILY},
+         * {@link #RECENT_FAILURE_POOR_CHANNEL_CONDITIONS}.
+         * {@link #RECENT_FAILURE_DISCONNECTION_AP_BUSY}
          */
         @RecentFailureReason
         public int getAssociationStatus() {
             return mAssociationStatus;
+        }
+
+        /**
+         * Get the timestamp the failure status is last updated, in milliseconds since boot.
+         */
+        public long getLastUpdateTimeSinceBootMillis() {
+            return mLastUpdateTimeSinceBootMillis;
         }
     }
 
@@ -2111,7 +2126,11 @@ public class WifiConfiguration implements Parcelable {
     @IntDef(prefix = "RECENT_FAILURE_", value = {
             RECENT_FAILURE_NONE,
             RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA,
-            RECENT_FAILURE_MBO_OCE_DISCONNECT})
+            RECENT_FAILURE_MBO_OCE_DISCONNECT,
+            RECENT_FAILURE_REFUSED_TEMPORARILY,
+            RECENT_FAILURE_POOR_CHANNEL_CONDITIONS,
+            RECENT_FAILURE_DISCONNECTION_AP_BUSY
+    })
     public @interface RecentFailureReason {}
 
     /**
@@ -2136,12 +2155,39 @@ public class WifiConfiguration implements Parcelable {
     public static final int RECENT_FAILURE_MBO_OCE_DISCONNECT = 1001;
 
     /**
+     * Failed to connect because the association is rejected by the AP.
+     * IEEE 802.11 association status code 30.
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_REFUSED_TEMPORARILY = 1002;
+
+    /**
+     * Failed to connect because of excess frame loss and/or poor channel conditions.
+     * IEEE 802.11 association status code 34.
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_POOR_CHANNEL_CONDITIONS = 1003;
+
+    /**
+     * Disconnected by the AP because the AP can't handle all the associated stations.
+     * IEEE 802.11 disconnection reason code 5.
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_DISCONNECTION_AP_BUSY = 1004;
+
+    /**
      * Get the failure reason for the most recent connection attempt, or
      * {@link #RECENT_FAILURE_NONE} if there was no failure.
      *
      * Failure reasons include:
      * {@link #RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA}
-     *
+     * {@link #RECENT_FAILURE_MBO_OCE_DISCONNECT}
+     * {@link #RECENT_FAILURE_REFUSED_TEMPORARILY}
+     * {@link #RECENT_FAILURE_POOR_CHANNEL_CONDITIONS}
+     * {@link #RECENT_FAILURE_DISCONNECTION_AP_BUSY}
      * @hide
      */
     @RecentFailureReason
@@ -2479,7 +2525,8 @@ public class WifiConfiguration implements Parcelable {
             }
         }
         sbuf.append("recentFailure: ").append("Association Rejection code: ")
-                .append(recentFailure.getAssociationStatus()).append("\n");
+                .append(recentFailure.getAssociationStatus()).append(", last update time: ")
+                .append(recentFailure.getLastUpdateTimeSinceBootMillis()).append("\n");
         return sbuf.toString();
     }
 
@@ -2918,7 +2965,8 @@ public class WifiConfiguration implements Parcelable {
             numNoInternetAccessReports = source.numNoInternetAccessReports;
             noInternetAccessExpected = source.noInternetAccessExpected;
             shared = source.shared;
-            recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
+            recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus(),
+                    source.recentFailure.getLastUpdateTimeSinceBootMillis());
             mRandomizedMacAddress = source.mRandomizedMacAddress;
             macRandomizationSetting = source.macRandomizationSetting;
             randomizedMacExpirationTimeMs = source.randomizedMacExpirationTimeMs;
@@ -2995,6 +3043,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(shared ? 1 : 0);
         dest.writeString(mPasspointManagementObjectTree);
         dest.writeInt(recentFailure.getAssociationStatus());
+        dest.writeLong(recentFailure.getLastUpdateTimeSinceBootMillis());
         dest.writeParcelable(mRandomizedMacAddress, flags);
         dest.writeInt(macRandomizationSetting);
         dest.writeInt(osu ? 1 : 0);
@@ -3071,7 +3120,7 @@ public class WifiConfiguration implements Parcelable {
                 config.noInternetAccessExpected = in.readInt() != 0;
                 config.shared = in.readInt() != 0;
                 config.mPasspointManagementObjectTree = in.readString();
-                config.recentFailure.setAssociationStatus(in.readInt());
+                config.recentFailure.setAssociationStatus(in.readInt(), in.readLong());
                 config.mRandomizedMacAddress = in.readParcelable(null);
                 config.macRandomizationSetting = in.readInt();
                 config.osu = in.readInt() != 0;

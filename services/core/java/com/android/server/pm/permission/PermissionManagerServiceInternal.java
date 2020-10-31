@@ -280,21 +280,21 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
 
     /**
-     * Read permission state from package settings.
+     * Read legacy permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
      * {@code PackageSetting} which is a implementation detail that permission should not know.
      * Instead, it should retrieve the legacy state via a defined API.
      */
-    public abstract void readStateFromPackageSettingsTEMP();
+    public abstract void readLegacyPermissionStateTEMP();
 
     /**
-     * Write permission state to package settings.
+     * Write legacy permission state to package settings.
      *
      * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
      * for permission.
      */
-    public abstract void writeStateToPackageSettingsTEMP();
+    public abstract void writeLegacyPermissionStateTEMP();
 
     /**
      * Notify that a user has been removed and its permission state should be removed as well.
@@ -367,16 +367,14 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void enforceCrossUserPermission(int callingUid, int userId,
             boolean requireFullPermission, boolean checkShell,
             boolean requirePermissionWhenSameUser, @NonNull String message);
-    public abstract void enforceGrantRevokeRuntimePermissionPermissions(@NonNull String message);
-
-    public abstract @NonNull PermissionSettings getPermissionSettings();
 
     /** Grants default browser permissions to the given package */
     public abstract void grantDefaultPermissionsToDefaultBrowser(
             @NonNull String packageName, @UserIdInt int userId);
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
-    public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
+    @Nullable
+    public abstract Permission getPermissionTEMP(@NonNull String permName);
 
     /** Get all permissions that have a certain protection */
     public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtection(
@@ -536,5 +534,39 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * Removes invalid permissions which are not {@link PermissionInfo#FLAG_HARD_RESTRICTED} or
      * {@link PermissionInfo#FLAG_SOFT_RESTRICTED} from the input.
      */
-    public abstract void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissions);
+    public abstract void retainHardAndSoftRestrictedPermissions(
+            @NonNull List<String> permissionNames);
+
+    /**
+     * Read legacy permissions from legacy permission settings.
+     *
+     * TODO(zhanghai): This is a temporary method because we should not expose
+     * {@code LegacyPermissionSettings} which is a implementation detail that permission should not
+     * know. Instead, it should retrieve the legacy permissions via a defined API.
+     */
+    public abstract void readLegacyPermissionsTEMP(
+            @NonNull LegacyPermissionSettings legacyPermissionSettings);
+
+    /**
+     * Write legacy permissions to legacy permission settings.
+     *
+     * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
+     * for permission.
+     */
+    public abstract void writeLegacyPermissionsTEMP(
+            @NonNull LegacyPermissionSettings legacyPermissionSettings);
+
+    /**
+     * Transfers ownership of permissions from one package to another.
+     */
+    public abstract void transferPermissions(@NonNull String oldPackageName,
+            @NonNull String newPackageName);
+
+    /**
+     * Check whether a permission can be propagated to instant app.
+     *
+     * @param permissionName the name of the permission
+     * @return whether the permission can be propagated
+     */
+    public abstract boolean canPropagatePermissionToInstantApp(@NonNull String permissionName);
 }

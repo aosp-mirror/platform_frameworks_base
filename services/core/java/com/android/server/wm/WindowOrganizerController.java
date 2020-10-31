@@ -104,13 +104,55 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     @Override
     public void applyTransaction(WindowContainerTransaction t) {
-        applyTransaction(t, null /*callback*/, null /*transition*/);
+        enforceTaskPermission("applyTransaction()");
+        if (t == null) {
+            throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                applyTransaction(t, -1 /*syncId*/, null /*transition*/);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @Override
     public int applySyncTransaction(WindowContainerTransaction t,
             IWindowContainerTransactionCallback callback) {
-        return applyTransaction(t, callback, null /*transition*/);
+        enforceTaskPermission("applySyncTransaction()");
+        if (t == null) {
+            throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                /**
+                 * If callback is non-null we are looking to synchronize this transaction by
+                 * collecting all the results in to a SurfaceFlinger transaction and then delivering
+                 * that to the given transaction ready callback. See {@link BLASTSyncEngine} for the
+                 * details of the operation. But at a high level we create a sync operation with a
+                 * given ID and an associated callback. Then we notify each WindowContainer in this
+                 * WindowContainer transaction that it is participating in a sync operation with
+                 * that ID. Once everything is notified we tell the BLASTSyncEngine "setSyncReady"
+                 * which means that we have added everything to the set. At any point after this,
+                 * all the WindowContainers will eventually finish applying their changes and notify
+                 * the BLASTSyncEngine which will deliver the Transaction to the callback.
+                 */
+                int syncId = -1;
+                if (callback != null) {
+                    syncId = startSyncWithOrganizer(callback);
+                }
+                applyTransaction(t, syncId, null /*transition*/);
+                if (syncId >= 0) {
+                    setSyncReady(syncId);
+                }
+                return syncId;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @Override
@@ -131,7 +173,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (t == null) {
                     t = new WindowContainerTransaction();
                 }
-                applyTransaction(t, null /*callback*/, transition);
+                applyTransaction(t, -1 /*syncId*/, transition);
                 return transition;
             }
         } finally {
@@ -148,10 +190,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         try {
             synchronized (mGlobalLock) {
                 int syncId = -1;
-                if (t != null) {
-                    syncId = applyTransaction(t, callback, null /*transition*/);
+                if (t != null && callback != null) {
+                    syncId = startSyncWithOrganizer(callback);
                 }
                 getTransitionController().finishTransition(transitionToken);
+                if (t != null) {
+                    applyTransaction(t, syncId, null /*transition*/);
+                }
+                if (syncId >= 0) {
+                    setSyncReady(syncId);
+                }
                 return syncId;
             }
         } finally {
@@ -160,154 +208,114 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     /**
-     * @param callback If non-null, this will be a sync-transaction.
+     * @param syncId If non-null, this will be a sync-transaction.
      * @param transition A transition to collect changes into.
-     * @return a BLAST sync-id if this is a non-transition, sync transaction.
      */
-    private int applyTransaction(@NonNull WindowContainerTransaction t,
-            @Nullable IWindowContainerTransactionCallback callback,
+    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition) {
-        enforceTaskPermission("applySyncTransaction()");
-        int syncId = -1;
-        if (t == null) {
-            throw new IllegalArgumentException(
-                    "Null transaction passed to applySyncTransaction");
-        }
-        final long ident = Binder.clearCallingIdentity();
+        int effects = 0;
+        ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
+        mService.deferWindowLayout();
         try {
-            synchronized (mGlobalLock) {
-                int effects = 0;
-
-                /**
-                 * If callback is non-null we are looking to synchronize this transaction by
-                 * collecting all the results in to a SurfaceFlinger transaction and then delivering
-                 * that to the given transaction ready callback. See {@link BLASTSyncEngine} for the
-                 * details of the operation. But at a high level we create a sync operation with a
-                 * given ID and an associated callback. Then we notify each WindowContainer in this
-                 * WindowContainer transaction that it is participating in a sync operation with
-                 * that ID. Once everything is notified we tell the BLASTSyncEngine "setSyncReady"
-                 * which means that we have added everything to the set. At any point after this,
-                 * all the WindowContainers will eventually finish applying their changes and notify
-                 * the BLASTSyncEngine which will deliver the Transaction to the callback.
-                 */
-                if (callback != null) {
-                    syncId = startSyncWithOrganizer(callback);
+            ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
+            Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
+                    t.getChanges().entrySet().iterator();
+            while (entries.hasNext()) {
+                final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
+                final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                    continue;
                 }
-                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d",
-                        syncId);
-                mService.deferWindowLayout();
-                try {
-                    ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
-                    Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
-                            t.getChanges().entrySet().iterator();
-                    while (entries.hasNext()) {
-                        final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
-                                entries.next();
-                        final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
-                        if (wc == null || !wc.isAttached()) {
-                            Slog.e(TAG, "Attempt to operate on detached container: " + wc);
-                            continue;
-                        }
-                        // Make sure we add to the syncSet before performing
-                        // operations so we don't end up splitting effects between the WM
-                        // pending transaction and the BLASTSync transaction.
-                        if (syncId >= 0) {
-                            addToSyncSet(syncId, wc);
-                        }
+                // Make sure we add to the syncSet before performing
+                // operations so we don't end up splitting effects between the WM
+                // pending transaction and the BLASTSync transaction.
+                if (syncId >= 0) {
+                    addToSyncSet(syncId, wc);
+                }
 
-                        int containerEffect = applyWindowContainerChange(wc, entry.getValue());
-                        if (transition != null) transition.collect(wc);
-                        effects |= containerEffect;
+                int containerEffect = applyWindowContainerChange(wc, entry.getValue());
+                if (transition != null) transition.collect(wc);
+                effects |= containerEffect;
 
-                        // Lifecycle changes will trigger ensureConfig for everything.
-                        if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
-                                && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
-                            haveConfigChanges.add(wc);
-                        }
-                    }
-                    // Hierarchy changes
-                    final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
-                    for (int i = 0, n = hops.size(); i < n; ++i) {
-                        final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
-                        final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                        if (!wc.isAttached()) {
-                            Slog.e(TAG, "Attempt to operate on detached container: " + wc);
-                            continue;
-                        }
-                        if (syncId >= 0) {
-                            addToSyncSet(syncId, wc);
-                        }
+                // Lifecycle changes will trigger ensureConfig for everything.
+                if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
+                        && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
+                    haveConfigChanges.add(wc);
+                }
+            }
+            // Hierarchy changes
+            final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
+            for (int i = 0, n = hops.size(); i < n; ++i) {
+                final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
+                final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+                if (!wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                    continue;
+                }
+                if (syncId >= 0) {
+                    addToSyncSet(syncId, wc);
+                }
                         effects |= sanitizeAndApplyHierarchyOp(wc, hop);
-                        if (transition != null) {
-                            transition.collect(wc);
-                            if (hop.isReparent() && hop.getNewParent() != null) {
-                                transition.collect(WindowContainer.fromBinder(hop.getNewParent()));
-                            }
-                        }
-                    }
-                    // Queue-up bounds-change transactions for tasks which are now organized. Do
-                    // this after hierarchy ops so we have the final organized state.
-                    entries = t.getChanges().entrySet().iterator();
-                    while (entries.hasNext()) {
-                        final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
-                                entries.next();
-                        final Task task = WindowContainer.fromBinder(entry.getKey()).asTask();
-                        final Rect surfaceBounds = entry.getValue().getBoundsChangeSurfaceBounds();
-                        if (task == null || !task.isAttached() || surfaceBounds == null) {
-                            continue;
-                        }
-                        if (!task.isOrganized()) {
-                            final Task parent =
-                                    task.getParent() != null ? task.getParent().asTask() : null;
-                            // Also allow direct children of created-by-organizer tasks to be
-                            // controlled. In the future, these will become organized anyways.
-                            if (parent == null || !parent.mCreatedByOrganizer) {
-                                throw new IllegalArgumentException(
-                                        "Can't manipulate non-organized task surface " + task);
-                            }
-                        }
-                        final SurfaceControl.Transaction sft = new SurfaceControl.Transaction();
-                        final SurfaceControl sc = task.getSurfaceControl();
-                        sft.setPosition(sc, surfaceBounds.left, surfaceBounds.top);
-                        if (surfaceBounds.isEmpty()) {
-                            sft.setWindowCrop(sc, null);
-                        } else {
-                            sft.setWindowCrop(sc, surfaceBounds.width(), surfaceBounds.height());
-                        }
-                        task.setMainWindowSizeChangeTransaction(sft);
-                    }
-                    if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
-                        // Already calls ensureActivityConfig
-                        mService.mRootWindowContainer.ensureActivitiesVisible(
-                                null, 0, PRESERVE_WINDOWS);
-                    } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
-                        final PooledConsumer f = PooledLambda.obtainConsumer(
-                                ActivityRecord::ensureActivityConfiguration,
-                                PooledLambda.__(ActivityRecord.class), 0,
-                                true /* preserveWindow */);
-                        try {
-                            for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
-                                haveConfigChanges.valueAt(i).forAllActivities(f);
-                            }
-                        } finally {
-                            f.recycle();
-                        }
-                    }
-
-                    if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) == 0) {
-                        mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
-                    }
-                } finally {
-                    mService.continueWindowLayout();
-                    if (syncId >= 0) {
-                        setSyncReady(syncId);
+                if (transition != null) {
+                    transition.collect(wc);
+                    if (hop.isReparent() && hop.getNewParent() != null) {
+                        transition.collect(WindowContainer.fromBinder(hop.getNewParent()));
                     }
                 }
             }
+            // Queue-up bounds-change transactions for tasks which are now organized. Do
+            // this after hierarchy ops so we have the final organized state.
+            entries = t.getChanges().entrySet().iterator();
+            while (entries.hasNext()) {
+                final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
+                final Task task = WindowContainer.fromBinder(entry.getKey()).asTask();
+                final Rect surfaceBounds = entry.getValue().getBoundsChangeSurfaceBounds();
+                if (task == null || !task.isAttached() || surfaceBounds == null) {
+                    continue;
+                }
+                if (!task.isOrganized()) {
+                    final Task parent = task.getParent() != null ? task.getParent().asTask() : null;
+                    // Also allow direct children of created-by-organizer tasks to be
+                    // controlled. In the future, these will become organized anyways.
+                    if (parent == null || !parent.mCreatedByOrganizer) {
+                        throw new IllegalArgumentException(
+                                "Can't manipulate non-organized task surface " + task);
+                    }
+                }
+                final SurfaceControl.Transaction sft = new SurfaceControl.Transaction();
+                final SurfaceControl sc = task.getSurfaceControl();
+                sft.setPosition(sc, surfaceBounds.left, surfaceBounds.top);
+                if (surfaceBounds.isEmpty()) {
+                    sft.setWindowCrop(sc, null);
+                } else {
+                    sft.setWindowCrop(sc, surfaceBounds.width(), surfaceBounds.height());
+                }
+                task.setMainWindowSizeChangeTransaction(sft);
+            }
+            if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
+                // Already calls ensureActivityConfig
+                mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
+                final PooledConsumer f = PooledLambda.obtainConsumer(
+                        ActivityRecord::ensureActivityConfiguration,
+                        PooledLambda.__(ActivityRecord.class), 0,
+                        true /* preserveWindow */);
+                try {
+                    for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
+                        haveConfigChanges.valueAt(i).forAllActivities(f);
+                    }
+                } finally {
+                    f.recycle();
+                }
+            }
+
+            if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) == 0) {
+                mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
+            }
         } finally {
-            Binder.restoreCallingIdentity(ident);
+            mService.continueWindowLayout();
         }
-        return syncId;
     }
 
     private int applyChanges(WindowContainer container, WindowContainerTransaction.Change change) {

@@ -624,10 +624,10 @@ class WindowStateAnimator {
 
         mShownAlpha = mAlpha;
         mHaveMatrix = false;
-        mDsDx = mWin.mGlobalScale;
+        mDsDx = 1;
         mDtDx = 0;
         mDtDy = 0;
-        mDsDy = mWin.mGlobalScale;
+        mDsDy = 1;
     }
 
     private boolean shouldConsumeMainWindowSizeTransaction() {

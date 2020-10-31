@@ -22,6 +22,7 @@ import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.location.Criteria.ACCURACY_COARSE;
 import static android.location.Criteria.ACCURACY_FINE;
 import static android.location.Criteria.POWER_HIGH;
+import static android.location.LocationRequest.PASSIVE_INTERVAL;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
 import static androidx.test.ext.truth.location.LocationSubject.assertThat;
@@ -595,6 +596,38 @@ public class LocationProviderManagerTest {
                 nullable(IRemoteCallback.class));
         verify(mWakeLock).acquire(anyLong());
         verify(mWakeLock, timeout(TIMEOUT_MS)).release();
+    }
+
+    @Test
+    public void testRegisterListener_Coarse() throws Exception {
+        ILocationListener listener = createMockLocationListener();
+        mManager.registerLocationRequest(
+                new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build(),
+                IDENTITY,
+                PERMISSION_COARSE,
+                listener);
+
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+        verify(listener, times(1))
+                .onLocationChanged(any(Location.class), nullable(IRemoteCallback.class));
+    }
+
+    @Test
+    public void testRegisterListener_Coarse_Passive() throws Exception {
+        ILocationListener listener = createMockLocationListener();
+        mManager.registerLocationRequest(
+                new LocationRequest.Builder(PASSIVE_INTERVAL)
+                        .setMinUpdateIntervalMillis(0)
+                        .setWorkSource(WORK_SOURCE).build(),
+                IDENTITY,
+                PERMISSION_COARSE,
+                listener);
+
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+        verify(listener, times(1))
+                .onLocationChanged(any(Location.class), nullable(IRemoteCallback.class));
     }
 
     @Test

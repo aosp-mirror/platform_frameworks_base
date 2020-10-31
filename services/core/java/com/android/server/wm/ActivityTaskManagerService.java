@@ -161,11 +161,9 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
-import android.app.compat.CompatChanges;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.usage.UsageStatsManagerInternal;
-import android.compat.annotation.ChangeId;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -343,12 +341,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
     /** This activity is being relaunched due to a free-resize operation. */
     public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
-
-    /**
-     * Apps are blocked from starting activities in the foreground after the user presses home.
-     */
-    @ChangeId
-    public static final long BLOCK_ACTIVITY_STARTS_AFTER_HOME = 159433730L;
 
     Context mContext;
 
@@ -2635,35 +2627,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         throw new SecurityException(msg);
     }
 
-    /**
-     * Return true if app switch protection will be handled by background activity launch logic.
-     */
-    boolean getBalAppSwitchesProtectionEnabled() {
-        return CompatChanges.isChangeEnabled(BLOCK_ACTIVITY_STARTS_AFTER_HOME);
-    }
-
-    /**
-     * Return true if app switching is allowed.
-     */
-    boolean getBalAppSwitchesAllowed() {
-        if (getBalAppSwitchesProtectionEnabled()) {
-            // Apps no longer able to start BAL again until app switching is resumed.
-            return mAppSwitchesAllowedTime == 0;
-        } else {
-            // Legacy behavior, BAL logic won't block app switching.
-            return true;
-        }
-    }
-
     boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
             int callingPid, int callingUid, String name) {
-
-        // Background activity launch logic replaces app switching protection, so allow
-        // apps to start activity here now.
-        if (getBalAppSwitchesProtectionEnabled()) {
-            return true;
-        }
-
         if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
             return true;
         }
@@ -4698,10 +4663,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis() + APP_SWITCH_DELAY_TIME;
             mLastStopAppSwitchesTime = SystemClock.uptimeMillis();
             mDidAppSwitch = false;
-            // If BAL app switching enabled, app switches are blocked not delayed.
-            if (!getBalAppSwitchesProtectionEnabled()) {
-                getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
-            }
+            getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
         }
     }
 
@@ -7468,6 +7430,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             synchronized (mGlobalLock) {
                 mCompanionAppUidsMap.put(userId, result);
+            }
+        }
+
+
+        @Override
+        public boolean isBaseOfLockedTask(String packageName) {
+            synchronized (mGlobalLock) {
+                return getLockTaskController().isBaseOfLockedTask(packageName);
             }
         }
     }
