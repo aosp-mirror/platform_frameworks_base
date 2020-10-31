@@ -143,6 +143,11 @@ class MediaCarouselController @Inject constructor(
             if (newConfig == null) return
             isRtl = newConfig.layoutDirection == View.LAYOUT_DIRECTION_RTL
         }
+
+        override fun onUiModeChanged() {
+            // Only settings button needs to update for dark theme
+            inflateSettingsButton()
+        }
     }
 
     init {
