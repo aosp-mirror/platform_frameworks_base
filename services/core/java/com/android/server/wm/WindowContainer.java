@@ -1169,7 +1169,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Get the configuration orientation by the requested screen orientation
+     * Gets the configuration orientation by the requested screen orientation
      * ({@link ActivityInfo.ScreenOrientation}) of this activity.
      *
      * @return orientation in ({@link Configuration#ORIENTATION_LANDSCAPE},
@@ -1177,9 +1177,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
     int getRequestedConfigurationOrientation() {
+        return getRequestedConfigurationOrientation(false /* forDisplay */);
+    }
+
+    /**
+     * Gets the configuration orientation by the requested screen orientation
+     * ({@link ActivityInfo.ScreenOrientation}) of this activity.
+     *
+     * @param forDisplay whether it is the requested config orientation for display.
+     *                   If {@code true}, we may reverse the requested orientation if the root is
+     *                   different from the display, so that when the display rotates to the
+     *                   reversed orientation, the requested app will be in the requested
+     *                   orientation.
+     * @return orientation in ({@link Configuration#ORIENTATION_LANDSCAPE},
+     *         {@link Configuration#ORIENTATION_PORTRAIT},
+     *         {@link Configuration#ORIENTATION_UNDEFINED}).
+     */
+    int getRequestedConfigurationOrientation(boolean forDisplay) {
         int requestedOrientation = mOrientation;
         final RootDisplayArea root = getRootDisplayArea();
-        if (root != null && root.isOrientationDifferentFromDisplay()) {
+        if (forDisplay && root != null && root.isOrientationDifferentFromDisplay()) {
             // Reverse the requested orientation if the orientation of its root is different from
             // the display, so that when the display rotates to the reversed orientation, the
             // requested app will be in the requested orientation.
