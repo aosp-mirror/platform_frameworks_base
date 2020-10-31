@@ -5270,5 +5270,13 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
+
+        /**
+         * TelephonyProvider column name for RCS configuration.
+         * <p>TYPE: BLOB
+         *
+         * @hide
+         */
+        public static final String COLUMN_RCS_CONFIG = "rcs_config";
     }
 }
