@@ -221,6 +221,7 @@ public class PipTouchHandler {
                 R.dimen.pip_expanded_shortest_edge_size);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
         mPipDismissTargetHandler.updateMagneticTargetSize();
+        mMotionHelper.reloadResources();
     }
 
     private boolean shouldShowResizeHandle() {
