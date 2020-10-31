@@ -52,13 +52,19 @@ public class XmlTest {
                 Xml.newFastPullParser());
     }
 
+    @Test
+    public void testLargeValues_Binary() throws Exception {
+        doLargeValues(Xml.newBinarySerializer(),
+                Xml.newBinaryPullParser());
+    }
+
     /**
      * Verify that we can write and read large {@link String} and {@code byte[]}
      * without issues.
      */
     private static void doLargeValues(TypedXmlSerializer out, TypedXmlPullParser in)
             throws Exception {
-        final char[] chars = new char[32_768];
+        final char[] chars = new char[(1 << 16) - 1];
         Arrays.fill(chars, '!');
 
         final String string = new String(chars);
@@ -93,6 +99,12 @@ public class XmlTest {
                 Xml.newFastPullParser());
     }
 
+    @Test
+    public void testPersistableBundle_Binary() throws Exception {
+        doPersistableBundle(Xml.newBinarySerializer(),
+                Xml.newBinaryPullParser());
+    }
+
     /**
      * Verify that a complex {@link PersistableBundle} can be serialized out and
      * then parsed in with the original structure intact.
@@ -108,7 +120,7 @@ public class XmlTest {
         assertEquals(expected.toString(), actual.toString());
     }
 
-    private static PersistableBundle buildPersistableBundle() {
+    static PersistableBundle buildPersistableBundle() {
         final PersistableBundle outer = new PersistableBundle();
 
         outer.putBoolean("boolean", true);
@@ -130,7 +142,7 @@ public class XmlTest {
         return outer;
     }
 
-    private static byte[] doPersistableBundleWrite(TypedXmlSerializer out, PersistableBundle bundle)
+    static byte[] doPersistableBundleWrite(TypedXmlSerializer out, PersistableBundle bundle)
             throws Exception {
         // We purposefully omit START/END_DOCUMENT events here to verify correct
         // behavior of what PersistableBundle does internally
@@ -143,7 +155,7 @@ public class XmlTest {
         return os.toByteArray();
     }
 
-    private static PersistableBundle doPersistableBundleRead(TypedXmlPullParser in, byte[] raw)
+    static PersistableBundle doPersistableBundleRead(TypedXmlPullParser in, byte[] raw)
             throws Exception {
         final ByteArrayInputStream is = new ByteArrayInputStream(raw);
         in.setInput(is, StandardCharsets.UTF_8.name());
@@ -161,6 +173,12 @@ public class XmlTest {
     public void testVerify_Fast() throws Exception {
         doVerify(Xml.newFastSerializer(),
                 Xml.newFastPullParser());
+    }
+
+    @Test
+    public void testVerify_Binary() throws Exception {
+        doVerify(Xml.newBinarySerializer(),
+                Xml.newBinaryPullParser());
     }
 
     /**
@@ -268,7 +286,7 @@ public class XmlTest {
         assertNext(in, END_DOCUMENT);
     }
 
-    private static void assertNext(TypedXmlPullParser in, int token) throws Exception {
+    static void assertNext(TypedXmlPullParser in, int token) throws Exception {
         // We're willing to skip over empty text regions, which some
         // serializers emit transparently
         int event;
@@ -278,7 +296,7 @@ public class XmlTest {
         assertEquals("getEventType", token, in.getEventType());
     }
 
-    private static void assertNext(TypedXmlPullParser in, int token, String name, int depth)
+    static void assertNext(TypedXmlPullParser in, int token, String name, int depth)
             throws Exception {
         assertNext(in, token);
         assertEquals("getName", name, in.getName());
