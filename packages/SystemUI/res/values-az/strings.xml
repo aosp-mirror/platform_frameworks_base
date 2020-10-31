@@ -405,7 +405,7 @@
       <item quantity="one">%d cihaz</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Bildirişlər"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"İşartı"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Fənər"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera istifadə olunur"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobil data"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Data istifadəsi"</string>
@@ -791,7 +791,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Yuxarı Səhifə"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Aşağı Səhifə"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Silin"</string>
-    <string name="keyboard_key_move_home" msgid="3496502501803911971">"Əsas səhifə"</string>
+    <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Son"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Daxil edin"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Nömrələr"</string>

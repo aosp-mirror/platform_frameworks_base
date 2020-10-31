@@ -95,7 +95,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrát zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzváněcí tóny"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzvánění"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk a mikrofon zařízení"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Spustit"</string>
@@ -722,7 +722,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzace a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
@@ -1026,7 +1026,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Konverzace byla nastavena jako prioritní"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Chování prioritních konverzací:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovat v horní části sekce konverzace"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovat v horní části sekce konverzací"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Zobrazovat profilovou fotku na zámku obrazovky"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zobrazuje se jako plovoucí bublina nad aplikacemi"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Přerušit režim Nerušit"</string>
