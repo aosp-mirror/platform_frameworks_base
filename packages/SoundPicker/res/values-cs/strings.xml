@@ -16,14 +16,14 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ringtone_default" msgid="798836092118824500">"Výchozí vyzváněcí tón"</string>
+    <string name="ringtone_default" msgid="798836092118824500">"Výchozí vyzvánění"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"Výchozí zvuk oznámení"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"Výchozí zvuk budíku"</string>
-    <string name="add_ringtone_text" msgid="6642389991738337529">"Přidat vyzváněcí tón"</string>
+    <string name="add_ringtone_text" msgid="6642389991738337529">"Přidat vyzvánění"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"Přidat budík"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"Přidat oznámení"</string>
     <string name="delete_ringtone_text" msgid="201443984070732499">"Smazat"</string>
-    <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Vlastní vyzváněcí tón se nepodařilo přidat"</string>
-    <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Vlastní vyzváněcí tón se nepodařilo smazat"</string>
+    <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Vlastní vyzvánění se nepodařilo přidat"</string>
+    <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Vlastní vyzvánění se nepodařilo smazat"</string>
     <string name="app_label" msgid="3091611356093417332">"Zvuky"</string>
 </resources>
