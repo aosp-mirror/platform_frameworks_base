@@ -502,7 +502,10 @@ public class BaseInputConnection implements InputConnection {
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
-    public CharSequence getTextBeforeCursor(int length, int flags) {
+    @Nullable
+    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
+        if (length < 0) return null;
+
         final Editable content = getEditable();
         if (content == null) return null;
 
@@ -558,7 +561,10 @@ public class BaseInputConnection implements InputConnection {
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
-    public CharSequence getTextAfterCursor(int length, int flags) {
+    @Nullable
+    public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
+        if (length < 0) return null;
+
         final Editable content = getEditable();
         if (content == null) return null;
 
@@ -594,6 +600,8 @@ public class BaseInputConnection implements InputConnection {
     @Nullable
     public SurroundingText getSurroundingText(
             @IntRange(from = 0) int beforeLength, @IntRange(from = 0)  int afterLength, int flags) {
+        if (beforeLength < 0 || afterLength < 0) return null;
+
         final Editable content = getEditable();
         if (content == null) return null;
 

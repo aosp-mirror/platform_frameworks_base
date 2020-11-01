@@ -18,15 +18,14 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.fingerprint.Fingerprint;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
-import android.view.Surface;
 
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -62,7 +61,8 @@ public interface ServiceProvider {
      */
     boolean containsSensor(int sensorId);
 
-    @NonNull List<FingerprintSensorPropertiesInternal> getSensorProperties();
+    @NonNull
+    List<FingerprintSensorPropertiesInternal> getSensorProperties();
 
     void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken);
 
@@ -73,14 +73,13 @@ public interface ServiceProvider {
             @NonNull String opPackageName, long challenge);
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
-            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @Nullable Surface surface);
+            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
     void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
-            @Nullable Surface surface, int statsClient);
+            int statsClient);
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
@@ -100,9 +99,11 @@ public interface ServiceProvider {
 
     void rename(int sensorId, int fingerId, int userId, @NonNull String name);
 
-    @NonNull List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId);
+    @NonNull
+    List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId);
 
-    @LockoutTracker.LockoutMode int getLockoutModeForUser(int sensorId, int userId);
+    @LockoutTracker.LockoutMode
+    int getLockoutModeForUser(int sensorId, int userId);
 
     long getAuthenticatorId(int sensorId, int userId);
 
@@ -118,5 +119,6 @@ public interface ServiceProvider {
 
     void dumpInternal(int sensorId, @NonNull PrintWriter pw);
 
-    @NonNull ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
+    @NonNull
+    ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
 }

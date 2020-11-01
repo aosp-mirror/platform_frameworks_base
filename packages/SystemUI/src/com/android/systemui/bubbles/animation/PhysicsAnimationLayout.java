@@ -27,6 +27,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -385,7 +386,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
             View view, DynamicAnimation.ViewProperty... properties) {
         final ObjectAnimator targetAnimator = getTargetAnimatorFromView(view);
         for (DynamicAnimation.ViewProperty property : properties) {
-            final SpringAnimation animation = getAnimationFromView(property, view);
+            final SpringAnimation animation = getSpringAnimationFromView(property, view);
             if (animation != null && animation.isRunning()) {
                 return true;
             }
@@ -422,10 +423,14 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         for (int i = 0; i < getChildCount(); i++) {
             for (DynamicAnimation.ViewProperty property : properties) {
-                final DynamicAnimation anim = getAnimationAtIndex(property, i);
+                final DynamicAnimation anim = getSpringAnimationAtIndex(property, i);
                 if (anim != null) {
                     anim.cancel();
                 }
+            }
+            final ViewPropertyAnimator anim = getViewPropertyAnimatorFromView(getChildAt(i));
+            if (anim != null) {
+                anim.cancel();
             }
         }
     }
@@ -441,7 +446,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         // Cancel physics animations on the view.
         for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
-            final DynamicAnimation animationFromView = getAnimationFromView(property, view);
+            final DynamicAnimation animationFromView = getSpringAnimationFromView(property, view);
             if (animationFromView != null) {
                 animationFromView.cancel();
             }
@@ -502,15 +507,25 @@ public class PhysicsAnimationLayout extends FrameLayout {
      * Retrieves the animation of the given property from the view at the given index via the view
      * tag system.
      */
-    @Nullable private SpringAnimation getAnimationAtIndex(
+    @Nullable private SpringAnimation getSpringAnimationAtIndex(
             DynamicAnimation.ViewProperty property, int index) {
-        return getAnimationFromView(property, getChildAt(index));
+        return getSpringAnimationFromView(property, getChildAt(index));
     }
 
-    /** Retrieves the animation of the given property from the view via the view tag system. */
-    @Nullable private SpringAnimation getAnimationFromView(
+    /**
+     * Retrieves the spring animation of the given property from the view via the view tag system.
+     */
+    @Nullable private SpringAnimation getSpringAnimationFromView(
             DynamicAnimation.ViewProperty property, View view) {
         return (SpringAnimation) view.getTag(getTagIdForProperty(property));
+    }
+
+    /**
+     * Retrieves the view property animation of the given property from the view via the view tag
+     * system.
+     */
+    @Nullable private ViewPropertyAnimator getViewPropertyAnimatorFromView(View view) {
+        return (ViewPropertyAnimator) view.getTag(R.id.reorder_animator_tag);
     }
 
     /** Retrieves the target animator from the view via the view tag system. */
@@ -539,7 +554,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             final float offset = mController.getOffsetForChainedPropertyAnimation(property);
             if (nextAnimInChain < getChildCount()) {
-                final SpringAnimation nextAnim = getAnimationAtIndex(property, nextAnimInChain);
+                final SpringAnimation nextAnim = getSpringAnimationAtIndex(
+                        property, nextAnimInChain);
                 if (nextAnim != null) {
                     nextAnim.animateToFinalPosition(value + offset);
                 }
@@ -902,9 +918,9 @@ public class PhysicsAnimationLayout extends FrameLayout {
             // and TRANSLATION_Y animations ending, and call them once both have finished.
             if (mPositionEndActions != null) {
                 final SpringAnimation translationXAnim =
-                        getAnimationFromView(DynamicAnimation.TRANSLATION_X, mView);
+                        getSpringAnimationFromView(DynamicAnimation.TRANSLATION_X, mView);
                 final SpringAnimation translationYAnim =
-                        getAnimationFromView(DynamicAnimation.TRANSLATION_Y, mView);
+                        getSpringAnimationFromView(DynamicAnimation.TRANSLATION_Y, mView);
                 final Runnable waitForBothXAndY = () -> {
                     if (!translationXAnim.isRunning() && !translationYAnim.isRunning()) {
                         if (mPositionEndActions != null) {

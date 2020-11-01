@@ -168,7 +168,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         // that support new types of auto detection on the same hardware.
         if (isAutoDetectionSupported()) {
             final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
-            setAutoDetectionEnabled(autoDetectionEnabled);
+            setAutoDetectionEnabledIfRequired(autoDetectionEnabled);
 
             // Avoid writing the geo detection enabled setting for devices that do not support geo
             // time zone detection: if we wrote it down then we'd set the value explicitly, which
@@ -176,7 +176,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
             // releases that support geo detection on the same hardware.
             if (isGeoDetectionSupported()) {
                 final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
-                setGeoDetectionEnabled(userId, geoTzDetectionEnabled);
+                setGeoDetectionEnabledIfRequired(userId, geoTzDetectionEnabled);
             }
         }
     }
@@ -198,8 +198,14 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
     }
 
-    private void setAutoDetectionEnabled(boolean enabled) {
-        Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, enabled ? 1 : 0);
+    private void setAutoDetectionEnabledIfRequired(boolean enabled) {
+        // This check is racey, but the whole settings update process is racey. This check prevents
+        // a ConfigurationChangeListener callback triggering due to ContentObserver's still
+        // triggering *sometimes* for no-op updates. Because callbacks are async this is necessary
+        // for stable behavior during tests.
+        if (isAutoDetectionEnabled() != enabled) {
+            Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, enabled ? 1 : 0);
+        }
     }
 
     private boolean isLocationEnabled(@UserIdInt int userId) {
@@ -213,9 +219,12 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
                 (geoDetectionEnabledByDefault ? 1 : 0) /* defaultValue */, userId) != 0;
     }
 
-    private void setGeoDetectionEnabled(@UserIdInt int userId, boolean enabled) {
-        Settings.Secure.putIntForUser(mCr, Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
-                enabled ? 1 : 0, userId);
+    private void setGeoDetectionEnabledIfRequired(@UserIdInt int userId, boolean enabled) {
+        // See comment in setAutoDetectionEnabledIfRequired. http://b/171953500
+        if (isGeoDetectionEnabled(userId) != enabled) {
+            Settings.Secure.putIntForUser(mCr, Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
+                    enabled ? 1 : 0, userId);
+        }
     }
 
     private boolean deviceHasTelephonyNetwork() {

@@ -6334,9 +6334,10 @@ public final class Settings {
          * Comma-separated list of location providers that are enabled. Do not rely on this value
          * being present or correct, or on ContentObserver notifications on the corresponding Uri.
          *
-         * @deprecated The preferred methods for checking provider status and listening for changes
-         * are via {@link LocationManager#isProviderEnabled(String)} and
-         * {@link LocationManager#PROVIDERS_CHANGED_ACTION}.
+         * @deprecated This setting no longer exists from Android S onwards as it no longer is
+         * capable of realistically reflecting location settings. Use {@link
+         * LocationManager#isProviderEnabled(String)} or {@link LocationManager#isLocationEnabled()}
+         * instead.
          */
         @Deprecated
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";

@@ -107,11 +107,10 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
+import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
-import com.android.server.pm.permission.PermissionSettings;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import libcore.io.IoUtils;
@@ -420,7 +419,7 @@ public final class Settings {
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
 
     /** Settings and other information about permissions */
-    final PermissionSettings mPermissions;
+    final LegacyPermissionSettings mPermissions;
 
     private final LegacyPermissionDataProvider mPermissionDataProvider;
 
@@ -440,11 +439,10 @@ public final class Settings {
         mKernelMappingFilename = null;
     }
 
-    Settings(File dataDir, PermissionSettings permissionSettings,
-            RuntimePermissionsPersistence runtimePermissionsPersistence,
+    Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider, Object lock) {
         mLock = lock;
-        mPermissions = permissionSettings;
+        mPermissions = new LegacyPermissionSettings(lock);
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
                 runtimePermissionsPersistence);
         mPermissionDataProvider = permissionDataProvider;
@@ -487,10 +485,6 @@ public final class Settings {
 
     void removeRenamedPackageLPw(String pkgName) {
         mRenamedPackages.remove(pkgName);
-    }
-
-    public boolean canPropagatePermissionToInstantApp(String permName) {
-        return mPermissions.canPropagatePermissionToInstantApp(permName);
     }
 
     /** Gets and optionally creates a new shared user id. */
@@ -2128,23 +2122,14 @@ public final class Settings {
             String tagName = parser.getName();
             if (tagName.equals(TAG_ITEM)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
-
-                BasePermission bp = mPermissions.getPermission(name);
-                if (bp == null) {
-                    Slog.w(PackageManagerService.TAG, "Unknown permission: " + name);
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-                }
-
                 String grantedStr = parser.getAttributeValue(null, ATTR_GRANTED);
                 final boolean granted = grantedStr == null
                         || Boolean.parseBoolean(grantedStr);
-
                 String flagsStr = parser.getAttributeValue(null, ATTR_FLAGS);
                 final int flags = (flagsStr != null)
                         ? Integer.parseInt(flagsStr, 16) : 0;
-
-                permissionsState.putInstallPermissionState(new PermissionState(bp, granted, flags));
+                permissionsState.putInstallPermissionState(new PermissionState(name, granted,
+                        flags));
             } else {
                 Slog.w(PackageManagerService.TAG, "Unknown element under <permissions>: "
                         + parser.getName());
@@ -2865,10 +2850,6 @@ public final class Settings {
             serializer.attribute(null, "identifier", Long.toString(e.getValue()));
             serializer.endTag(null, "defined-keyset");
         }
-    }
-
-    void writePermissionLPr(XmlSerializer serializer, BasePermission bp) throws IOException {
-        bp.writeLPr(serializer);
     }
 
     boolean readLPw(@NonNull List<UserInfo> users) {
@@ -4813,13 +4794,7 @@ public final class Settings {
                         && !permissionNames.contains(perm)) {
                     continue;
                 }
-                pw.print(prefix); pw.print("    "); pw.print(perm);
-                final BasePermission bp = mPermissions.getPermission(perm);
-                if (bp != null && bp.isHardOrSoftRestricted()) {
-                    pw.println(": restricted=true");
-                } else {
-                    pw.println();
-                }
+                pw.print(prefix); pw.print("    "); pw.println(perm);
             }
         }
 
@@ -5024,7 +4999,9 @@ public final class Settings {
 
     void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
             DumpState dumpState) {
-        mPermissions.dumpPermissions(pw, packageName, permissionNames,
+        LegacyPermissionSettings.dumpPermissions(pw, packageName, permissionNames,
+                mPermissionDataProvider.getLegacyPermissions(),
+                mPermissionDataProvider.getAllAppOpPermissionPackages(),
                 (mReadExternalStorageEnforced == Boolean.TRUE), dumpState);
     }
 
@@ -5544,18 +5521,11 @@ public final class Settings {
             int permissionsSize = permissions.size();
             for (int i = 0; i < permissionsSize; i++) {
                 RuntimePermissionsState.PermissionState permission = permissions.get(i);
-
                 String name = permission.getName();
-                BasePermission basePermission = mPermissions.getPermission(name);
-                if (basePermission == null) {
-                    Slog.w(PackageManagerService.TAG, "Unknown permission:" + name);
-                    continue;
-                }
                 boolean granted = permission.isGranted();
                 int flags = permission.getFlags();
-
-                permissionsState.putRuntimePermissionState(new PermissionState(basePermission,
-                        granted, flags), userId);
+                permissionsState.putRuntimePermissionState(new PermissionState(name, granted,
+                        flags), userId);
             }
         }
 
@@ -5650,23 +5620,14 @@ public final class Settings {
                 switch (parser.getName()) {
                     case TAG_ITEM: {
                         String name = parser.getAttributeValue(null, ATTR_NAME);
-                        BasePermission bp = mPermissions.getPermission(name);
-                        if (bp == null) {
-                            Slog.w(PackageManagerService.TAG, "Unknown permission:" + name);
-                            XmlUtils.skipCurrentTag(parser);
-                            continue;
-                        }
-
                         String grantedStr = parser.getAttributeValue(null, ATTR_GRANTED);
                         final boolean granted = grantedStr == null
                                 || Boolean.parseBoolean(grantedStr);
-
                         String flagsStr = parser.getAttributeValue(null, ATTR_FLAGS);
                         final int flags = (flagsStr != null)
                                 ? Integer.parseInt(flagsStr, 16) : 0;
-
-                        permissionsState.putRuntimePermissionState(new PermissionState(bp, granted,
-                                flags), userId);
+                        permissionsState.putRuntimePermissionState(new PermissionState(name,
+                                granted, flags), userId);
                     }
                     break;
                 }

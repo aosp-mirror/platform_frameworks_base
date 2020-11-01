@@ -27,7 +27,7 @@ import com.android.internal.annotations.GuardedBy;
 public final class PermissionState {
 
     @NonNull
-    private final BasePermission mPermission;
+    private final Permission mPermission;
 
     private final Object mLock = new Object();
 
@@ -40,7 +40,7 @@ public final class PermissionState {
     @GuardedBy("mLock")
     private int mFlags;
 
-    public PermissionState(@NonNull BasePermission permission) {
+    public PermissionState(@NonNull Permission permission) {
         mPermission = permission;
     }
 
@@ -52,7 +52,7 @@ public final class PermissionState {
     }
 
     @NonNull
-    public BasePermission getPermission() {
+    public Permission getPermission() {
         return mPermission;
     }
 

@@ -19,11 +19,31 @@ package com.android.server.pm.permission;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * An interface for legacy code to read permission data in order to maintain compatibility.
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface LegacyPermissionDataProvider {
+    /**
+     * Get all the legacy permissions currently registered in the system.
+     *
+     * @return the legacy permissions
+     */
+    @NonNull
+    List<LegacyPermission> getLegacyPermissions();
+
+    /**
+     * Get all the package names requesting app op permissions.
+     *
+     * @return a map of app op permission names to package names requesting them
+     */
+    @NonNull
+    Map<String, Set<String>> getAllAppOpPermissionPackages();
+
     /**
      * Get the legacy permission state of an app ID, either a package or a shared user.
      *

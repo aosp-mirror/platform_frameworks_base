@@ -92,7 +92,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mWaitingAnimationPeriod = ANIMATION_DURATION_MS + 50;
+        mWaitingAnimationPeriod = 2 * ANIMATION_DURATION_MS;
         mWaitIntermediateAnimationPeriod = ANIMATION_DURATION_MS / 2;
         mController = new SpyWindowMagnificationController(mContext, mHandler,
                 mSfVsyncFrameProvider, null, new SurfaceControl.Transaction(),

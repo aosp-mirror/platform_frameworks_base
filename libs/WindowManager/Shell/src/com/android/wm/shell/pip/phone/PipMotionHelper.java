@@ -67,15 +67,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private final Context mContext;
     private final PipTaskOrganizer mPipTaskOrganizer;
-    private final @NonNull PipBoundsState mPipBoundsState;
+    private @NonNull PipBoundsState mPipBoundsState;
 
     private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
 
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
-
-    /** PIP's current bounds on the screen. */
-    private final Rect mBounds = new Rect();
 
     /** The bounds within which PIP's top-left coordinate is allowed to move. */
     private final Rect mMovementBounds = new Rect();
@@ -140,7 +137,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
         mMainHandler.post(() -> {
             mMenuController.updateMenuLayout(newBounds);
-            mBounds.set(newBounds);
+            mPipBoundsState.setBounds(newBounds);
         });
     };
 
@@ -196,7 +193,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mResizePipUpdateListener = (target, values) -> {
             if (!mTemporaryBounds.isEmpty()) {
                 mPipTaskOrganizer.scheduleUserResizePip(
-                        mBounds, mTemporaryBounds, null);
+                        getBounds(), mTemporaryBounds, null);
             }
         };
     }
@@ -204,7 +201,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     @NonNull
     @Override
     public Rect getFloatingBoundsOnScreen() {
-        return !mAnimatingToBounds.isEmpty() ? mAnimatingToBounds : mBounds;
+        return !mAnimatingToBounds.isEmpty() ? mAnimatingToBounds : getBounds();
     }
 
     @NonNull
@@ -223,7 +220,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     void synchronizePinnedStackBounds() {
         cancelAnimations();
-        mBounds.set(mPipBoundsState.getBounds());
         mTemporaryBounds.setEmpty();
 
         if (mPipTaskOrganizer.isInPip()) {
@@ -261,10 +257,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
             if (!isDragging) {
                 resizePipUnchecked(toBounds);
-                mBounds.set(toBounds);
+                mPipBoundsState.setBounds(toBounds);
             } else {
                 mTemporaryBounds.set(toBounds);
-                mPipTaskOrganizer.scheduleUserResizePip(mBounds, mTemporaryBounds,
+                mPipTaskOrganizer.scheduleUserResizePip(getBounds(), mTemporaryBounds,
                         (Rect newBounds) -> {
                             mMainHandler.post(() -> {
                                 mMenuController.updateMenuLayout(newBounds);
@@ -275,8 +271,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             // If PIP is 'catching up' after being stuck in the dismiss target, update the animation
             // to spring towards the new touch location.
             mTemporaryBoundsPhysicsAnimator
-                    .spring(FloatProperties.RECT_WIDTH, mBounds.width(), mSpringConfig)
-                    .spring(FloatProperties.RECT_HEIGHT, mBounds.height(), mSpringConfig)
+                    .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)
+                    .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mSpringConfig)
                     .spring(FloatProperties.RECT_X, toBounds.left, mSpringConfig)
                     .spring(FloatProperties.RECT_Y, toBounds.top, mSpringConfig);
 
@@ -292,8 +288,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             boolean flung, Function0<Unit> after) {
         final PointF targetCenter = target.getCenterOnScreen();
 
-        final float desiredWidth = mBounds.width() / 2;
-        final float desiredHeight = mBounds.height() / 2;
+        final float desiredWidth = getBounds().width() / 2;
+        final float desiredHeight = getBounds().height() / 2;
 
         final float destinationX = targetCenter.x - (desiredWidth / 2f);
         final float destinationY = targetCenter.y - (desiredHeight / 2f);
@@ -301,7 +297,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // If we're already in the dismiss target area, then there won't be a move to set the
         // temporary bounds, so just initialize it to the current bounds
         if (mTemporaryBounds.isEmpty()) {
-            mTemporaryBounds.set(mBounds);
+            mTemporaryBounds.set(getBounds());
         }
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_X, destinationX, velX, mSpringConfig)
@@ -365,15 +361,17 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // The movement bounds represent the area within which we can move PIP's top-left position.
         // The allowed area for all of PIP is those bounds plus PIP's width and height.
         mFloatingAllowedArea.set(mMovementBounds);
-        mFloatingAllowedArea.right += mBounds.width();
-        mFloatingAllowedArea.bottom += mBounds.height();
+        mFloatingAllowedArea.right += getBounds().width();
+        mFloatingAllowedArea.bottom += getBounds().height();
     }
 
     /**
      * @return the PiP bounds.
+     *
+     * TODO(b/169373982): can be private, outside callers can use PipBoundsState directly.
      */
     Rect getBounds() {
-        return mBounds;
+        return mPipBoundsState.getBounds();
     }
 
     /**
@@ -381,7 +379,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * otherwise.
      */
     Rect getPossiblyAnimatingBounds() {
-        return mTemporaryBounds.isEmpty() ? mBounds : mTemporaryBounds;
+        return mTemporaryBounds.isEmpty() ? getBounds() : mTemporaryBounds;
     }
 
     /**
@@ -407,8 +405,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mSpringingToTouch = false;
 
         mTemporaryBoundsPhysicsAnimator
-                .spring(FloatProperties.RECT_WIDTH, mBounds.width(), mSpringConfig)
-                .spring(FloatProperties.RECT_HEIGHT, mBounds.height(), mSpringConfig)
+                .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)
+                .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mSpringConfig)
                 .flingThenSpring(
                         FloatProperties.RECT_X, velocityX, isStash ? mStashConfigX : mFlingConfigX,
                         mSpringConfig, true /* flingMustReachMinOrMax */)
@@ -416,7 +414,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig)
                 .withEndActions(endAction);
 
-        final float offset = ((float) mBounds.width()) * (1.0f - STASH_RATIO);
+        final float offset = ((float) getBounds().width()) * (1.0f - STASH_RATIO);
         final float leftEdge = isStash ? mMovementBounds.left - offset : mMovementBounds.left;
         final float rightEdge = isStash ?  mMovementBounds.right + offset : mMovementBounds.right;
 
@@ -436,7 +434,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void animateToBounds(Rect bounds, PhysicsAnimator.SpringConfig springConfig) {
         if (!mTemporaryBoundsPhysicsAnimator.isRunning()) {
             // Animate from the current bounds if we're not already animating.
-            mTemporaryBounds.set(mBounds);
+            mTemporaryBounds.set(getBounds());
         }
 
         mTemporaryBoundsPhysicsAnimator
@@ -453,13 +451,13 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // Animate off the bottom of the screen, then dismiss PIP.
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_Y,
-                        mMovementBounds.bottom + mBounds.height() * 2,
+                        mMovementBounds.bottom + getBounds().height() * 2,
                         0,
                         mSpringConfig)
                 .withEndActions(this::dismissPip);
 
         startBoundsAnimator(
-                mBounds.left /* toX */, mBounds.bottom + mBounds.height() /* toY */,
+                getBounds().left /* toX */, getBounds().bottom + getBounds().height() /* toY */,
                 true /* dismiss */);
 
         mDismissalPending = false;
@@ -470,7 +468,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     float animateToExpandedState(Rect expandedBounds, Rect movementBounds,
             Rect expandedMovementBounds, Runnable callback) {
-        float savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(mBounds), movementBounds);
+        float savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(getBounds()),
+                movementBounds);
         mSnapAlgorithm.applySnapFraction(expandedBounds, expandedMovementBounds, savedSnapFraction);
         mPostPipTransitionCallback = callback;
         resizeAndAnimatePipUnchecked(expandedBounds, EXPAND_STACK_TO_MENU_DURATION);
@@ -484,7 +483,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Rect normalMovementBounds, Rect currentMovementBounds, boolean immediate) {
         if (savedSnapFraction < 0f) {
             // If there are no saved snap fractions, then just use the current bounds
-            savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(mBounds),
+            savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(getBounds()),
                     currentMovementBounds);
         }
         mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction);
@@ -525,7 +524,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 DEFAULT_FRICTION, mMovementBounds.left, mMovementBounds.right);
         mFlingConfigY = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION, mMovementBounds.top, mMovementBounds.bottom);
-        final float offset = ((float) mBounds.width()) * (1.0f - STASH_RATIO);
+        final float offset = ((float) getBounds().width()) * (1.0f - STASH_RATIO);
         mStashConfigX = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION, mMovementBounds.left - offset, mMovementBounds.right + offset);
     }
@@ -547,8 +546,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mAnimatingToBounds.set(
                 (int) toX,
                 (int) toY,
-                (int) toX + mBounds.width(),
-                (int) toY + mBounds.height());
+                (int) toX + getBounds().width(),
+                (int) toY + getBounds().height());
         setAnimatingToBounds(mAnimatingToBounds);
 
         if (!mTemporaryBoundsPhysicsAnimator.isRunning()) {
@@ -572,11 +571,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         if (!mDismissalPending
                 && !mSpringingToTouch
                 && !mMagnetizedPip.getObjectStuckToTarget()) {
-            mBounds.set(mTemporaryBounds);
+            mPipBoundsState.setBounds(mTemporaryBounds);
             if (!mDismissalPending) {
                 // do not schedule resize if PiP is dismissing, which may cause app re-open to
                 // mBounds instead of it's normal bounds.
-                mPipTaskOrganizer.scheduleFinishResizePip(mBounds);
+                mPipTaskOrganizer.scheduleFinishResizePip(getBounds());
             }
             mTemporaryBounds.setEmpty();
         }
@@ -604,7 +603,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "resizePipUnchecked: toBounds=" + toBounds
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
-        if (!toBounds.equals(mBounds)) {
+        if (!toBounds.equals(getBounds())) {
             mPipTaskOrganizer.scheduleResizePip(toBounds, mUpdateBoundsCallback);
         }
     }
@@ -657,6 +656,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mBounds=" + mBounds);
+        pw.println(innerPrefix + "mBounds=" + getBounds());
     }
 }

@@ -158,7 +158,8 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
      *
      * Asu is calculated based on 3GPP RSSI. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
-     * @return RSSI in ASU 0..31, 99, or UNAVAILABLE
+     * @return RSSI in ASU 0..31, 99, or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     @Override
     public int getAsuLevel() {

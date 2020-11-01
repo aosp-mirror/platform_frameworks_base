@@ -494,7 +494,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
                 80 /* level */, BatteryManager.BATTERY_PLUGGED_WIRELESS, 100 /* health */,
-                0 /* maxChargingWattage */);
+                0 /* maxChargingWattage */, true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
         verify(mIBatteryStats).computeChargeTimeRemaining();
@@ -506,7 +506,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
                 80 /* level */, 0 /* plugged */, 100 /* health */,
-                0 /* maxChargingWattage */);
+                0 /* maxChargingWattage */, true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
         verify(mIBatteryStats, never()).computeChargeTimeRemaining();

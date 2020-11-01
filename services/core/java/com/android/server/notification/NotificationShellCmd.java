@@ -214,7 +214,8 @@ public class NotificationShellCmd extends ShellCommand {
                     if (peekNextArg() != null) {
                         userId = Integer.parseInt(getNextArgRequired());
                     }
-                    mBinderService.setNotificationListenerAccessGrantedForUser(cn, userId, true);
+                    mBinderService.setNotificationListenerAccessGrantedForUser(
+                            cn, userId, true, true);
                 }
                 break;
                 case "disallow_listener": {
@@ -227,7 +228,8 @@ public class NotificationShellCmd extends ShellCommand {
                     if (peekNextArg() != null) {
                         userId = Integer.parseInt(getNextArgRequired());
                     }
-                    mBinderService.setNotificationListenerAccessGrantedForUser(cn, userId, false);
+                    mBinderService.setNotificationListenerAccessGrantedForUser(
+                            cn, userId, false, true);
                 }
                 break;
                 case "allow_assistant": {

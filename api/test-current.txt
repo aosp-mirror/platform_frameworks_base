@@ -270,6 +270,7 @@ package android.app {
     method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean matchesCallFilter(android.os.Bundle);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
@@ -967,6 +968,14 @@ package android.media {
     field public static final String FRAME_COUNT = "android.media.audiotrack.frameCount";
     field public static final String PORT_ID = "android.media.audiotrack.portId";
     field public static final String SAMPLE_RATE = "android.media.audiotrack.sampleRate";
+  }
+
+  public abstract class Image implements java.lang.AutoCloseable {
+    ctor protected Image();
+  }
+
+  public abstract static class Image.Plane {
+    ctor protected Image.Plane();
   }
 
   public final class MediaCas implements java.lang.AutoCloseable {

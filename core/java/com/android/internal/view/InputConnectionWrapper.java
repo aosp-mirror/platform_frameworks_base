@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.annotation.AnyThread;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
@@ -106,9 +107,13 @@ public class InputConnectionWrapper implements InputConnection {
         return null;
     }
 
+    /**
+     * See {@link InputConnection#getTextAfterCursor(int, int)}.
+     */
+    @Nullable
     @AnyThread
-    public CharSequence getTextAfterCursor(int length, int flags) {
-        if (mCancellationGroup.isCanceled()) {
+    public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
+        if (length < 0 || mCancellationGroup.isCanceled()) {
             return null;
         }
 
@@ -122,9 +127,13 @@ public class InputConnectionWrapper implements InputConnection {
         return getResultOrNull(value, "getTextAfterCursor()");
     }
 
+    /**
+     * See {@link InputConnection#getTextBeforeCursor(int, int)}.
+     */
+    @Nullable
     @AnyThread
-    public CharSequence getTextBeforeCursor(int length, int flags) {
-        if (mCancellationGroup.isCanceled()) {
+    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
+        if (length < 0 || mCancellationGroup.isCanceled()) {
             return null;
         }
 
@@ -171,10 +180,12 @@ public class InputConnectionWrapper implements InputConnection {
      * not support this protocol.
      */
     @AnyThread
-    public SurroundingText getSurroundingText(int beforeLength, int afterLength, int flags) {
-        if (mCancellationGroup.isCanceled()) {
+    public SurroundingText getSurroundingText(
+            @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength, int flags) {
+        if (beforeLength < 0 || afterLength < 0 || mCancellationGroup.isCanceled()) {
             return null;
         }
+
         if (isMethodMissing(MissingMethodFlags.GET_SURROUNDING_TEXT)) {
             // This method is not implemented.
             return null;
