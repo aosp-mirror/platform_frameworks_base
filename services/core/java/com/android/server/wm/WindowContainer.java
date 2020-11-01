@@ -1152,10 +1152,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Check if this container or its parent will handle orientation changes from descendants. It's
-     * different from the return value of {@link #onDescendantOrientationChanged(IBinder,
-     * WindowContainer)} in the sense that the return value of this method tells if this
-     * container or its parent will handle the request eventually, while the return value of the
-     * other method is if it handled the request synchronously.
+     * different from the return value of {@link #onDescendantOrientationChanged(WindowContainer)}
+     * in the sense that the return value of this method tells if this container or its parent will
+     * handle the request eventually, while the return value of the other method is if it handled
+     * the request synchronously.
      *
      * @return {@code true} if it handles or will handle orientation change in the future; {@code
      *         false} if it won't handle the change at anytime.
@@ -1221,7 +1221,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Calls {@link #setOrientation(int, IBinder, WindowContainer)} with {@code null} to the last 2
+     * Calls {@link #setOrientation(int, WindowContainer)} with {@code null} to the last 2
      * parameters.
      *
      * @param orientation the specified orientation.

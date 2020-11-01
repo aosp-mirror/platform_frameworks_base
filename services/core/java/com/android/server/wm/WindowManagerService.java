@@ -459,7 +459,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowTracing mWindowTracing;
 
-    final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
+    private final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
     // TODO: eventually unify all keyguard state in a common place instead of having it spread over
@@ -1376,6 +1376,10 @@ public class WindowManagerService extends IWindowManager.Stub
         setGlobalShadowSettings();
         mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
+    }
+
+    DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
+        return mDisplayAreaPolicyProvider;
     }
 
     private void setGlobalShadowSettings() {

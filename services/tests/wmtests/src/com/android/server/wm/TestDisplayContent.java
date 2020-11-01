@@ -37,7 +37,8 @@ import android.view.DisplayInfo;
 
 class TestDisplayContent extends DisplayContent {
 
-    private TestDisplayContent(RootWindowContainer rootWindowContainer, Display display) {
+    /** Please use the {@link Builder} to create, visible for use in test builder overrides only. */
+    TestDisplayContent(RootWindowContainer rootWindowContainer, Display display) {
         super(display, rootWindowContainer);
         // Normally this comes from display-properties as exposed by WM. Without that, just
         // hard-code to FULLSCREEN for tests.
@@ -72,7 +73,7 @@ class TestDisplayContent extends DisplayContent {
         private boolean mCanRotate = true;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         private int mPosition = POSITION_BOTTOM;
-        private final ActivityTaskManagerService mService;
+        protected final ActivityTaskManagerService mService;
         private boolean mSystemDecorations = false;
 
         Builder(ActivityTaskManagerService service, int width, int height) {
@@ -125,14 +126,16 @@ class TestDisplayContent extends DisplayContent {
             mInfo.logicalDensityDpi = dpi;
             return this;
         }
+        TestDisplayContent createInternal(Display display) {
+            return new TestDisplayContent(mService.mRootWindowContainer, display);
+        }
         TestDisplayContent build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
 
             final int displayId = SystemServicesTestRule.sNextDisplayId++;
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     mInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-            final TestDisplayContent newDisplay =
-                    new TestDisplayContent(mService.mRootWindowContainer, display);
+            final TestDisplayContent newDisplay = createInternal(display);
             // disable the normal system decorations
             final DisplayPolicy displayPolicy = newDisplay.getDisplayPolicy();
             spyOn(displayPolicy);
