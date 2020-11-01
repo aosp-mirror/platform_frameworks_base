@@ -940,7 +940,7 @@
     <string name="double_tap_toast" msgid="7065519579174882778">"ટિપ: ઝૂમ વધારવા અને ઘટાડવા માટે બે વાર ટેપ કરો."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"સ્વતઃભરણ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"સ્વતઃભરણ સેટ કરો"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> સાથે આપમેળે ભરો"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> સાથે ઑટોમૅટિક રીતે ભરો"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
