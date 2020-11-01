@@ -19,18 +19,25 @@ package com.android.systemui.statusbar.notification
 import android.app.Notification
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.graphics.drawable.AnimatedImageDrawable
 import android.os.Handler
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.ConversationLayout
+import com.android.internal.widget.MessagingImageMessage
+import com.android.internal.widget.MessagingLayout
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentView
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
+import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
+import com.android.systemui.util.children
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -55,6 +62,71 @@ class ConversationNotificationProcessor @Inject constructor(
         messagingStyle.unreadMessageCount =
                 conversationNotificationManager.getUnreadCount(entry, recoveredBuilder)
     }
+}
+
+/**
+ * Tracks state related to animated images inside of notifications. Ex: starting and stopping
+ * animations to conserve CPU and memory.
+ */
+@SysUISingleton
+class AnimatedImageNotificationManager @Inject constructor(
+    private val notificationEntryManager: NotificationEntryManager,
+    private val headsUpManager: HeadsUpManager,
+    private val statusBarStateController: StatusBarStateController
+) {
+
+    private var isStatusBarExpanded = false
+
+    /** Begins listening to state changes and updating animations accordingly. */
+    fun bind() {
+        headsUpManager.addListener(object : OnHeadsUpChangedListener {
+            override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
+                entry.row?.let { row ->
+                    updateAnimatedImageDrawables(row, animating = isHeadsUp || isStatusBarExpanded)
+                }
+            }
+        })
+        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
+            override fun onExpandedChanged(isExpanded: Boolean) {
+                isStatusBarExpanded = isExpanded
+                notificationEntryManager.activeNotificationsForCurrentUser.forEach { entry ->
+                    entry.row?.let { row ->
+                        updateAnimatedImageDrawables(row, animating = isExpanded || row.isHeadsUp)
+                    }
+                }
+            }
+        })
+        notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
+            override fun onEntryInflated(entry: NotificationEntry) {
+                entry.row?.let { row ->
+                    updateAnimatedImageDrawables(
+                            row,
+                            animating = isStatusBarExpanded || row.isHeadsUp)
+                }
+            }
+            override fun onEntryReinflated(entry: NotificationEntry) = onEntryInflated(entry)
+        })
+    }
+
+    private fun updateAnimatedImageDrawables(row: ExpandableNotificationRow, animating: Boolean) =
+            (row.layouts?.asSequence() ?: emptySequence())
+                    .flatMap { layout -> layout.allViews.asSequence() }
+                    .flatMap { view ->
+                        (view as? ConversationLayout)?.messagingGroups?.asSequence()
+                                ?: (view as? MessagingLayout)?.messagingGroups?.asSequence()
+                                ?: emptySequence()
+                    }
+                    .flatMap { messagingGroup -> messagingGroup.messageContainer.children }
+                    .mapNotNull { view ->
+                        (view as? MessagingImageMessage)
+                                ?.let { imageMessage ->
+                                    imageMessage.drawable as? AnimatedImageDrawable
+                                }
+                    }
+                    .forEach { animatedImageDrawable ->
+                        if (animating) animatedImageDrawable.start()
+                        else animatedImageDrawable.stop()
+                    }
 }
 
 /**
