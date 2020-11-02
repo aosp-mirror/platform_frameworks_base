@@ -582,13 +582,19 @@ class Face10 implements IHwBinder.DeathRecipient {
                     final FaceGenerateChallengeClient previousChallengeOwner =
                             mCurrentChallengeOwner.getInterruptedClient();
                     mCurrentChallengeOwner = null;
+
                     Slog.d(TAG, "Previous challenge owner: " + previousChallengeOwner);
                     if (previousChallengeOwner != null) {
-                        try {
-                            previousChallengeOwner.getListener()
-                                    .onChallengeInterruptFinished(mSensorId);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Unable to notify interrupt finished", e);
+                        final ClientMonitorCallbackConverter listener =
+                                previousChallengeOwner.getListener();
+                        if (listener == null) {
+                            Slog.w(TAG, "Listener is null");
+                        } else {
+                            try {
+                                listener.onChallengeInterruptFinished(mSensorId);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Unable to notify interrupt finished", e);
+                            }
                         }
                     }
                 }
