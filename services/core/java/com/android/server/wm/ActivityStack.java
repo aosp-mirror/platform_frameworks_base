@@ -1704,8 +1704,9 @@ class ActivityStack extends Task {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (shouldSleepActivities() && mLastNoHistoryActivity != null &&
-                !mLastNoHistoryActivity.finishing) {
+        if (shouldSleepActivities() && mLastNoHistoryActivity != null
+                && !mLastNoHistoryActivity.finishing
+                && mLastNoHistoryActivity != next) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
             mLastNoHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);
