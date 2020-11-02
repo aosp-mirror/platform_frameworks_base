@@ -213,8 +213,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                         ic,
                         info,
                         moreArgs.argi1 == 1 /* restarting */,
-                        startInputToken,
-                        moreArgs.argi2 == 1 /* shouldPreRenderIme */);
+                        startInputToken);
                 args.recycle();
                 moreArgs.recycle();
                 return;
@@ -340,14 +339,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
-            EditorInfo attribute, boolean restarting, boolean shouldPreRenderIme) {
+            EditorInfo attribute, boolean restarting) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = restarting ? 1 : 0;
-        args.argi2 = shouldPreRenderIme ? 1 : 0;
         args.argi3 = missingMethods;
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOO(DO_START_INPUT, startInputToken,
                 inputContext, attribute, mCancellationGroup, args));

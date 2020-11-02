@@ -24,7 +24,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
@@ -345,24 +344,6 @@ public final class InputMethodPrivilegedOperations {
         }
         try {
             ops.notifyUserAction();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Calls {@link IInputMethodPrivilegedOperations#reportPreRendered(info)}.
-     *
-     * @param info {@link EditorInfo} of the currently rendered {@link TextView}.
-     */
-    @AnyThread
-    public void reportPreRendered(EditorInfo info) {
-        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
-        if (ops == null) {
-            return;
-        }
-        try {
-            ops.reportPreRendered(info);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

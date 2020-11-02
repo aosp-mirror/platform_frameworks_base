@@ -28,6 +28,6 @@ option java_multiple_files = true;
  */
 message ImeInsetsSourceConsumerProto {
     optional InsetsSourceConsumerProto insets_source_consumer = 1;
-    optional .android.view.inputmethod.EditorInfoProto focused_editor = 2;
+    reserved 2; // focused_editor = 2
     optional bool is_requested_visible_awaiting_control = 3;
 }
