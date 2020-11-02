@@ -573,6 +573,7 @@ java_library {
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
+        "modules-utils-os",
     ],
     // For backwards compatibility.
     stem: "framework",
@@ -1156,7 +1157,6 @@ aidl_mapping {
 filegroup {
     name: "framework-telephony-common-shared-srcs",
     srcs: [
-        "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/os/RegistrantList.java",
         "core/java/android/os/Registrant.java",
         "core/java/android/util/LocalLog.java",
@@ -1237,7 +1237,6 @@ filegroup {
     name: "framework-wifi-service-shared-srcs",
     srcs: [
         "core/java/android/net/InterfaceConfiguration.java",
-        "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/util/BackupUtils.java",
         "core/java/android/util/Rational.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
