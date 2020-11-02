@@ -96,6 +96,11 @@ cc_library {
                 "libz",
             ],
         },
+        linux_glibc: {
+            srcs: [
+                "CursorWindow.cpp",
+            ],
+        },
         windows: {
             enabled: true,
         },

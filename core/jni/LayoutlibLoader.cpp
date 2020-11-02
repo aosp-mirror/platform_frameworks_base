@@ -41,6 +41,10 @@ extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_content_StringBlock(JNIEnv* env);
 extern int register_android_content_XmlBlock(JNIEnv* env);
 extern int register_android_content_res_ApkAssets(JNIEnv* env);
+extern int register_android_database_CursorWindow(JNIEnv* env);
+extern int register_android_database_SQLiteConnection(JNIEnv* env);
+extern int register_android_database_SQLiteGlobal(JNIEnv* env);
+extern int register_android_database_SQLiteDebug(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
@@ -65,6 +69,11 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
 #ifdef __linux__
         {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
         {"android.content.res.AssetManager", REG_JNI(register_android_content_AssetManager)},
+        {"android.database.CursorWindow", REG_JNI(register_android_database_CursorWindow)},
+        {"android.database.sqlite.SQLiteConnection",
+         REG_JNI(register_android_database_SQLiteConnection)},
+        {"android.database.sqlite.SQLiteGlobal", REG_JNI(register_android_database_SQLiteGlobal)},
+        {"android.database.sqlite.SQLiteDebug", REG_JNI(register_android_database_SQLiteDebug)},
 #endif
         {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
         {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},

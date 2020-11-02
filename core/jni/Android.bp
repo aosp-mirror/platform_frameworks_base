@@ -303,6 +303,11 @@ cc_library_shared {
         linux_glibc: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
+                "android_database_CursorWindow.cpp",
+                "android_database_SQLiteCommon.cpp",
+                "android_database_SQLiteConnection.cpp",
+                "android_database_SQLiteGlobal.cpp",
+                "android_database_SQLiteDebug.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
@@ -326,6 +331,7 @@ cc_library_shared {
             static_libs: [
                 "libinput",
                 "libbinderthreadstateutils",
+                "libsqlite",
             ],
             shared_libs: [
                 // libbinder needs to be shared since it has global state
