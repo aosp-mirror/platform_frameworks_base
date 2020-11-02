@@ -46,6 +46,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -81,14 +82,14 @@ import java.util.Map;
  * Supports a single instance of the {@link android.hardware.biometrics.face.V1_0} or
  * its extended minor versions.
  */
-class Face10 implements IHwBinder.DeathRecipient {
+class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     private static final String TAG = "Face10";
     private static final int ENROLL_TIMEOUT_SEC = 75;
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
 
-    @NonNull private final FaceSensorPropertiesInternal mFaceSensorProperties;
+    @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
@@ -96,23 +97,22 @@ class Face10 implements IHwBinder.DeathRecipient {
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final LockoutHalImpl mLockoutTracker;
     @NonNull private final UsageStats mUsageStats;
-    @NonNull private NotificationManager mNotificationManager;
-    private final int mSensorId;
+    @NonNull private final NotificationManager mNotificationManager;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
-
     @Nullable private IBiometricsFace mDaemon;
-    private int mCurrentUserId = UserHandle.USER_NULL;
     // If a challenge is generated, keep track of its owner. Since IBiometricsFace@1.0 only
     // supports a single in-flight challenge, we must notify the interrupted owner that its
     // challenge is no longer valid. The interrupted owner will be notified when the interrupter
     // has finished.
     @Nullable private FaceGenerateChallengeClient mCurrentChallengeOwner;
+    private int mCurrentUserId = UserHandle.USER_NULL;
+    private final int mSensorId;
 
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
         public void onUserSwitching(int newUserId) {
             scheduleInternalCleanup(newUserId);
-            scheduleGetFeature(new Binder(), newUserId,
+            scheduleGetFeature(mSensorId, new Binder(), newUserId,
                     BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
                     null, mContext.getOpPackageName());
         }
@@ -283,7 +283,7 @@ class Face10 implements IHwBinder.DeathRecipient {
             @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             boolean supportsSelfIllumination, int maxTemplatesAllowed) {
-        mFaceSensorProperties = new FaceSensorPropertiesInternal(sensorId,
+        mSensorProperties = new FaceSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength),
                 maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination);
         mContext = context;
@@ -375,9 +375,10 @@ class Face10 implements IHwBinder.DeathRecipient {
         if (halId != 0) {
             scheduleLoadAuthenticatorIds();
             scheduleInternalCleanup(ActivityManager.getCurrentUser());
-            scheduleGetFeature(new Binder(), ActivityManager.getCurrentUser(),
-                    BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
-                    null, mContext.getOpPackageName());
+            scheduleGetFeature(mSensorId, new Binder(),
+                    ActivityManager.getCurrentUser(),
+                    BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION, null,
+                    mContext.getOpPackageName());
         } else {
             Slog.e(TAG, "Unable to set callback");
             mDaemon = null;
@@ -386,116 +387,39 @@ class Face10 implements IHwBinder.DeathRecipient {
         return mDaemon;
     }
 
-    @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId) {
+    @Override
+    public boolean containsSensor(int sensorId) {
+        return mSensorId == sensorId;
+    }
+
+    @Override
+    @NonNull
+    public List<FaceSensorPropertiesInternal> getSensorProperties() {
+        final List<FaceSensorPropertiesInternal> properties = new ArrayList<>();
+        properties.add(mSensorProperties);
+        return properties;
+    }
+
+    @Override
+    @NonNull
+    public List<Face> getEnrolledFaces(int sensorId, int userId) {
+        return FaceUtils.getInstance().getBiometricsForUser(mContext, userId);
+    }
+
+    @Override
+    @LockoutTracker.LockoutMode
+    public int getLockoutModeForUser(int sensorId, int userId) {
         return mLockoutTracker.getLockoutModeForUser(userId);
     }
 
-    private void scheduleLoadAuthenticatorIds() {
-        // Note that this can be performed on the scheduler (as opposed to being done immediately
-        // when the HAL is (re)loaded, since
-        // 1) If this is truly the first time it's being performed (e.g. system has just started),
-        //    this will be run very early and way before any applications need to generate keys.
-        // 2) If this is being performed to refresh the authenticatorIds (e.g. HAL crashed and has
-        //    just been reloaded), the framework already has a cache of the authenticatorIds. This
-        //    is safe because authenticatorIds only change when A) new template has been enrolled,
-        //    or B) all templates are removed.
-        mHandler.post(() -> {
-            for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
-                final int targetUserId = user.id;
-                if (!mAuthenticatorIds.containsKey(targetUserId)) {
-                    scheduleUpdateActiveUserWithoutHandler(targetUserId);
-                }
-            }
-        });
+    @Override
+    public long getAuthenticatorId(int sensorId, int userId) {
+        return mAuthenticatorIds.get(userId);
     }
 
-    /**
-     * Schedules the {@link FaceUpdateActiveUserClient} without posting the work onto the
-     * handler. Many/most APIs are user-specific. However, the HAL requires explicit "setActiveUser"
-     * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
-     * this operation on the same lambda/runnable as those operations so that the ordering is
-     * correct.
-     */
-    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
-        final boolean hasEnrolled = !getEnrolledFaces(targetUserId).isEmpty();
-        final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
-                mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId, mCurrentUserId,
-                hasEnrolled, mAuthenticatorIds);
-        mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
-            @Override
-            public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
-                if (success) {
-                    mCurrentUserId = targetUserId;
-                }
-            }
-        });
-    }
-
-    void scheduleResetLockout(int userId, @NonNull byte[] hardwareAuthToken) {
-        mHandler.post(() -> {
-            if (getEnrolledFaces(userId).isEmpty()) {
-                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled for user: " + userId);
-                return;
-            }
-
-            scheduleUpdateActiveUserWithoutHandler(userId);
-
-            final FaceResetLockoutClient client = new FaceResetLockoutClient(mContext,
-                    mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId,
-                    hardwareAuthToken);
-            mScheduler.scheduleClientMonitor(client);
-        });
-    }
-
-    void scheduleSetFeature(@NonNull IBinder token, int userId, int feature, boolean enabled,
-            @NonNull byte[] hardwareAuthToken, @NonNull IFaceServiceReceiver receiver,
-            @NonNull String opPackageName) {
-        mHandler.post(() -> {
-            final List<Face> faces = getEnrolledFaces(userId);
-            if (faces.isEmpty()) {
-                Slog.w(TAG, "Ignoring setFeature, no templates enrolled for user: " + userId);
-                return;
-            }
-
-            scheduleUpdateActiveUserWithoutHandler(userId);
-
-            final int faceId = faces.get(0).getBiometricId();
-            final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
-                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    opPackageName, mSensorId, feature, enabled, hardwareAuthToken, faceId);
-            mScheduler.scheduleClientMonitor(client);
-        });
-    }
-
-    void scheduleGetFeature(@NonNull IBinder token, int userId, int feature,
-            @Nullable ClientMonitorCallbackConverter listener, @NonNull String opPackageName) {
-        mHandler.post(() -> {
-            final List<Face> faces = getEnrolledFaces(userId);
-            if (faces.isEmpty()) {
-                Slog.w(TAG, "Ignoring getFeature, no templates enrolled for user: " + userId);
-                return;
-            }
-
-            scheduleUpdateActiveUserWithoutHandler(userId);
-
-            final int faceId = faces.get(0).getBiometricId();
-            final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext, mLazyDaemon,
-                    token, listener, userId, opPackageName, mSensorId, feature, faceId);
-            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
-                @Override
-                public void onClientFinished(
-                        @NonNull ClientMonitor<?> clientMonitor, boolean success) {
-                    if (success && feature == BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION) {
-                        final int settingsValue = client.getValue() ? 1 : 0;
-                        Slog.d(TAG, "Updating attention value for user: " + userId
-                                + " to value: " + settingsValue);
-                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                                Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
-                                settingsValue, userId);
-                    }
-                }
-            });
-        });
+    @Override
+    public boolean isHardwareDetected(int sensorId) {
+        return getDaemon() != null;
     }
 
     /**
@@ -514,8 +438,9 @@ class Face10 implements IHwBinder.DeathRecipient {
      * The only case of conflicting challenges is currently resetLockout --> enroll. So, the second
      * option seems better as it prioritizes the new operation, which is user-facing.
      */
-    void scheduleGenerateChallenge(@NonNull IBinder token, @NonNull IFaceServiceReceiver receiver,
-            @NonNull String opPackageName) {
+    @Override
+    public void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
+            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             if (mCurrentChallengeOwner != null) {
                 final ClientMonitorCallbackConverter listener =
@@ -550,18 +475,20 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
-    void scheduleRevokeChallenge(@NonNull IBinder token, @NonNull String owner) {
+    @Override
+    public void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
+            @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
             if (mCurrentChallengeOwner != null &&
-                    !mCurrentChallengeOwner.getOwnerString().contentEquals(owner)) {
-                Slog.e(TAG, "scheduleRevokeChallenge, package: " + owner
+                    !mCurrentChallengeOwner.getOwnerString().contentEquals(opPackageName)) {
+                Slog.e(TAG, "scheduleRevokeChallenge, package: " + opPackageName
                         + " attempting to revoke challenge owned by: "
                         + mCurrentChallengeOwner.getOwnerString());
                 return;
             }
 
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
-                    mLazyDaemon, token, owner, mSensorId);
+                    mLazyDaemon, token, opPackageName, mSensorId);
             mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
                 @Override
                 public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
@@ -602,9 +529,11 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
-    void scheduleEnroll(@NonNull IBinder token, @NonNull byte[] hardwareAuthToken, int userId,
-            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName,
-            @NonNull int[] disabledFeatures, @Nullable NativeHandle surfaceHandle) {
+    @Override
+    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
+            @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
+            @NonNull String opPackageName, @NonNull int[] disabledFeatures,
+            @Nullable NativeHandle surfaceHandle) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -629,15 +558,18 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
-    void cancelEnrollment(@NonNull IBinder token) {
+    @Override
+    public void cancelEnrollment(int sensorId, @NonNull IBinder token) {
         mHandler.post(() -> {
             mScheduler.cancelEnrollment(token);
         });
     }
 
-    void scheduleAuthenticate(@NonNull IBinder token, long operationId, int userId, int cookie,
-            @NonNull ClientMonitorCallbackConverter receiver, @NonNull String opPackageName,
-            boolean restricted, int statsClient) {
+    @Override
+    public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+            int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
+            @NonNull String opPackageName, boolean restricted, int statsClient,
+            boolean isKeyguard) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -650,19 +582,15 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
-    void startPreparedClient(int cookie) {
-        mHandler.post(() -> {
-            mScheduler.startPreparedClient(cookie);
-        });
-    }
-
-    void cancelAuthentication(@NonNull IBinder token) {
+    @Override
+    public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
         mHandler.post(() -> {
             mScheduler.cancelAuthentication(token);
         });
     }
 
-    void scheduleRemove(@NonNull IBinder token, int faceId, int userId,
+    @Override
+    public void scheduleRemove(int sensorId, @NonNull IBinder token, int faceId, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
@@ -674,11 +602,82 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
+
+    @Override
+    public void scheduleResetLockout(int sensorId, int userId, @NonNull byte[] hardwareAuthToken) {
+        mHandler.post(() -> {
+            if (getEnrolledFaces(sensorId, userId).isEmpty()) {
+                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled for user: " + userId);
+                return;
+            }
+
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            final FaceResetLockoutClient client = new FaceResetLockoutClient(mContext,
+                    mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId,
+                    hardwareAuthToken);
+            mScheduler.scheduleClientMonitor(client);
+        });
+    }
+
+    @Override
+    public void scheduleSetFeature(int sensorId, @NonNull IBinder token, int userId, int feature,
+            boolean enabled, @NonNull byte[] hardwareAuthToken,
+            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            final List<Face> faces = getEnrolledFaces(sensorId, userId);
+            if (faces.isEmpty()) {
+                Slog.w(TAG, "Ignoring setFeature, no templates enrolled for user: " + userId);
+                return;
+            }
+
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            final int faceId = faces.get(0).getBiometricId();
+            final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
+                    opPackageName, mSensorId, feature, enabled, hardwareAuthToken, faceId);
+            mScheduler.scheduleClientMonitor(client);
+        });
+    }
+
+    @Override
+    public void scheduleGetFeature(int sensorId, @NonNull IBinder token, int userId, int feature,
+            @Nullable ClientMonitorCallbackConverter listener, @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            final List<Face> faces = getEnrolledFaces(sensorId, userId);
+            if (faces.isEmpty()) {
+                Slog.w(TAG, "Ignoring getFeature, no templates enrolled for user: " + userId);
+                return;
+            }
+
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            final int faceId = faces.get(0).getBiometricId();
+            final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext, mLazyDaemon,
+                    token, listener, userId, opPackageName, mSensorId, feature, faceId);
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(
+                        @NonNull ClientMonitor<?> clientMonitor, boolean success) {
+                    if (success && feature == BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION) {
+                        final int settingsValue = client.getValue() ? 1 : 0;
+                        Slog.d(TAG, "Updating attention value for user: " + userId
+                                + " to value: " + settingsValue);
+                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
+                                settingsValue, userId);
+                    }
+                }
+            });
+        });
+    }
+
     private void scheduleInternalCleanup(int userId) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
-            final List<Face> enrolledList = getEnrolledFaces(userId);
+            final List<Face> enrolledList = getEnrolledFaces(mSensorId, userId);
             final FaceInternalCleanupClient client = new FaceInternalCleanupClient(mContext,
                     mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId, enrolledList,
                     FaceUtils.getInstance(), mAuthenticatorIds);
@@ -686,25 +685,28 @@ class Face10 implements IHwBinder.DeathRecipient {
         });
     }
 
-    boolean isHardwareDetected() {
-        final IBiometricsFace daemon = getDaemon();
-        return daemon != null;
+    @Override
+    public void scheduleInternalCleanup(int sensorId, int userId) {
+        scheduleInternalCleanup(userId);
     }
 
-    @NonNull
-    FaceSensorPropertiesInternal getFaceSensorProperties() {
-        return mFaceSensorProperties;
+    @Override
+    public void startPreparedClient(int sensorId, int cookie) {
+        mHandler.post(() -> {
+            mScheduler.startPreparedClient(cookie);
+        });
     }
 
-    List<Face> getEnrolledFaces(int userId) {
-        return FaceUtils.getInstance().getBiometricsForUser(mContext, userId);
+    @Override
+    public void dumpProtoState(int sensorId, ProtoOutputStream proto) {
     }
 
-    long getAuthenticatorId(int userId) {
-        return mAuthenticatorIds.get(userId);
+    @Override
+    public void dumpProtoMetrics(int sensorId, FileDescriptor fd) {
     }
 
-    public void dump(@NonNull PrintWriter pw) {
+    @Override
+    public void dumpInternal(int sensorId, PrintWriter pw) {
         PerformanceTracker performanceTracker =
                 PerformanceTracker.getInstanceForSensorId(mSensorId);
 
@@ -739,7 +741,49 @@ class Face10 implements IHwBinder.DeathRecipient {
         pw.println(dump);
         pw.println("HAL deaths since last reboot: " + performanceTracker.getHALDeathCount());
 
+        mScheduler.dump(pw);
         mUsageStats.print(pw);
+    }
+
+    private void scheduleLoadAuthenticatorIds() {
+        // Note that this can be performed on the scheduler (as opposed to being done immediately
+        // when the HAL is (re)loaded, since
+        // 1) If this is truly the first time it's being performed (e.g. system has just started),
+        //    this will be run very early and way before any applications need to generate keys.
+        // 2) If this is being performed to refresh the authenticatorIds (e.g. HAL crashed and has
+        //    just been reloaded), the framework already has a cache of the authenticatorIds. This
+        //    is safe because authenticatorIds only change when A) new template has been enrolled,
+        //    or B) all templates are removed.
+        mHandler.post(() -> {
+            for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
+                final int targetUserId = user.id;
+                if (!mAuthenticatorIds.containsKey(targetUserId)) {
+                    scheduleUpdateActiveUserWithoutHandler(targetUserId);
+                }
+            }
+        });
+    }
+
+    /**
+     * Schedules the {@link FaceUpdateActiveUserClient} without posting the work onto the
+     * handler. Many/most APIs are user-specific. However, the HAL requires explicit "setActiveUser"
+     * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
+     * this operation on the same lambda/runnable as those operations so that the ordering is
+     * correct.
+     */
+    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
+        final boolean hasEnrolled = !getEnrolledFaces(mSensorId, targetUserId).isEmpty();
+        final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
+                mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId, mCurrentUserId,
+                hasEnrolled, mAuthenticatorIds);
+        mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+            @Override
+            public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+                if (success) {
+                    mCurrentUserId = targetUserId;
+                }
+            }
+        });
     }
 
     public void dumpHal(@NonNull FileDescriptor fd, @NonNull String[] args) {
