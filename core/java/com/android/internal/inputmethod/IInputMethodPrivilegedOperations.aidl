@@ -17,7 +17,6 @@
 package com.android.internal.inputmethod;
 
 import android.net.Uri;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IInputContentUriToken;
@@ -40,6 +39,5 @@ interface IInputMethodPrivilegedOperations {
     boolean switchToNextInputMethod(boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod();
     void notifyUserAction();
-    void reportPreRendered(in EditorInfo info);
     void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible);
 }

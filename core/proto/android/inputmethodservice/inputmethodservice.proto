@@ -39,8 +39,8 @@ message InputMethodServiceProto {
     optional .android.view.inputmethod.EditorInfoProto input_editor_info = 13;
     optional bool show_input_requested = 14;
     optional bool last_show_input_requested = 15;
-    optional bool can_pre_render = 16;
-    optional bool is_pre_rendered = 17;
+    reserved 16;  // can_pre_render
+    reserved 17;  // is_pre_rendered
     optional int32 show_input_flags = 18;
     optional int32 candidates_visibility = 19;
     optional bool fullscreen_applied = 20;

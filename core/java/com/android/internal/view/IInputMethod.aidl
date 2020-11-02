@@ -45,7 +45,7 @@ oneway interface IInputMethod {
     void unbindInput();
 
     void startInput(in IBinder startInputToken, in IInputContext inputContext, int missingMethods,
-            in EditorInfo attribute, boolean restarting, boolean preRenderImeViews);
+            in EditorInfo attribute, boolean restarting);
 
     void createSession(in InputChannel channel, IInputSessionCallback callback);
 

@@ -234,7 +234,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
-    static final int MSG_REPORT_PRE_RENDERED = 3060;
     static final int MSG_APPLY_IME_VISIBILITY = 3070;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
@@ -317,8 +316,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final class DebugFlags {
         static final DebugFlag FLAG_OPTIMIZE_START_INPUT =
                 new DebugFlag("debug.optimize_startinput", false);
-        static final DebugFlag FLAG_PRE_RENDER_IME_VIEWS =
-                new DebugFlag("persist.pre_render_ime_views", false);
     }
 
     @UserIdInt
@@ -448,10 +445,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final ClientDeathRecipient clientDeathRecipient;
 
         boolean sessionRequested;
-        // Determines if IMEs should be pre-rendered.
-        // DebugFlag can be flipped anytime. This flag is kept per-client to maintain behavior
-        // through the life of the current client.
-        boolean shouldPreRenderIme;
         SessionState curSession;
 
         @Override
@@ -3440,14 +3433,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.USER_SWITCHING;
         }
 
-        // Main feature flag that overrides other conditions and forces IME preRendering.
-        if (DEBUG) {
-            Slog.v(TAG, "IME PreRendering main flag: "
-                    + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() + ", LowRam: " + mIsLowRam);
-        }
-        // pre-rendering not supported on low-ram devices.
-        cs.shouldPreRenderIme = DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() && !mIsLowRam;
-
         final boolean sameWindowFocused = mCurFocusedWindow == windowToken;
         final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
         final boolean startInputByWinGainedFocus =
@@ -4141,19 +4126,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void reportPreRendered(IBinder token, EditorInfo info) {
-        synchronized (mMethodMap) {
-            if (!calledWithValidTokenLocked(token)) {
-                return;
-            }
-            if (mCurClient != null && mCurClient.client != null) {
-                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
-                        MSG_REPORT_PRE_RENDERED, info, mCurClient));
-            }
-        }
-    }
-
-    @BinderThread
     private void applyImeVisibility(IBinder token, IBinder windowToken, boolean setVisible) {
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
@@ -4430,7 +4402,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     setEnabledSessionInMainThread(session);
                     session.method.startInput(startInputToken, inputContext, missingMethods,
-                            editorInfo, restarting, session.client.shouldPreRenderIme);
+                            editorInfo, restarting);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4486,20 +4458,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + "reportFullscreen(" + fullscreen + ") notification to pid="
                             + clientState.pid + " uid=" + clientState.uid);
                 }
-                return true;
-            }
-            case MSG_REPORT_PRE_RENDERED: {
-                args = (SomeArgs) msg.obj;
-                final EditorInfo info = (EditorInfo) args.arg1;
-                final ClientState clientState = (ClientState) args.arg2;
-                try {
-                    clientState.client.reportPreRendered(info);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Got RemoteException sending "
-                            + "reportPreRendered(" + info + ") notification to pid="
-                            + clientState.pid + " uid=" + clientState.uid);
-                }
-                args.recycle();
                 return true;
             }
             case MSG_APPLY_IME_VISIBILITY: {
@@ -5347,7 +5305,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @ShellCommandResult
         private int refreshDebugProperties() {
             DebugFlags.FLAG_OPTIMIZE_START_INPUT.refresh();
-            DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.refresh();
             return ShellCommandResult.SUCCESS;
         }
 
@@ -5818,12 +5775,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void notifyUserAction() {
             mImms.notifyUserAction(mToken);
-        }
-
-        @BinderThread
-        @Override
-        public void reportPreRendered(EditorInfo info) {
-            mImms.reportPreRendered(mToken, info);
         }
 
         @BinderThread

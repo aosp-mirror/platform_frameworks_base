@@ -16,8 +16,6 @@
 
 package com.android.internal.view;
 
-import android.view.inputmethod.EditorInfo;
-
 import com.android.internal.view.InputBindResult;
 
 /**
@@ -30,7 +28,6 @@ oneway interface IInputMethodClient {
     void setActive(boolean active, boolean fullscreen);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
-    void reportPreRendered(in EditorInfo info);
     void applyImeVisibility(boolean setVisible);
     void updateActivityViewToScreenMatrix(int bindSequence, in float[] matrixValues);
     void setImeTraceEnabled(boolean enabled);
