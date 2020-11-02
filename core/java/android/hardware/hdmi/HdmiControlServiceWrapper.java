@@ -67,6 +67,11 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
+        public void toggleAndFollowTvPower() {
+            HdmiControlServiceWrapper.this.toggleAndFollowTvPower();
+        }
+
+        @Override
         public void queryDisplayStatus(IHdmiControlCallback callback) {
             HdmiControlServiceWrapper.this.queryDisplayStatus(callback);
         }
@@ -358,6 +363,9 @@ public final class HdmiControlServiceWrapper {
 
     /** @hide */
     public void oneTouchPlay(IHdmiControlCallback callback) {}
+
+    /** @hide */
+    public void toggleAndFollowTvPower() {}
 
     /** @hide */
     public void queryDisplayStatus(IHdmiControlCallback callback) {}

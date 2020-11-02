@@ -191,6 +191,10 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
+        public void toggleAndFollowTvPower() {
+        }
+
+        @Override
         public void queryDisplayStatus(final IHdmiControlCallback callback) {
         }
 
