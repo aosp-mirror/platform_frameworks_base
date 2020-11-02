@@ -148,17 +148,17 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
                 new AsciiValidator(3), DEST_BROADCAST);
 
+        ParameterValidator statusRequestValidator = new OneByteRangeValidator(0x01, 0x03);
         addValidationInfo(
                 Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
         addValidationInfo(
                 Constants.MESSAGE_DECK_STATUS, new OneByteRangeValidator(0x11, 0x1F), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_GIVE_DECK_STATUS,
-                new OneByteRangeValidator(0x01, 0x03),
-                DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_DECK_STATUS, statusRequestValidator, DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_PLAY, new PlayModeValidator(), DEST_DIRECT);
 
         // TODO: Handle messages for the Tuner Control.
+        addValidationInfo(
+                Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS, statusRequestValidator, DEST_DIRECT);
 
         // Messages for the Vendor Specific Commands.
         VariableLengthValidator maxLengthValidator = new VariableLengthValidator(0, 14);

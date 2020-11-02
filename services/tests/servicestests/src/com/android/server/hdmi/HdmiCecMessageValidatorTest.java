@@ -377,13 +377,20 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
-    public void isValid_giveDeckStatus() {
+    public void isValid_statusRequest() {
+        assertMessageValidity("40:08:01").isEqualTo(OK);
+        assertMessageValidity("40:08:02:5C").isEqualTo(OK);
         assertMessageValidity("40:1A:01:F8").isEqualTo(OK);
         assertMessageValidity("40:1A:03").isEqualTo(OK);
 
+        assertMessageValidity("4F:08:01").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:08:03").isEqualTo(ERROR_SOURCE);
         assertMessageValidity("4F:1A:01").isEqualTo(ERROR_DESTINATION);
         assertMessageValidity("F0:1A:03").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:08").isEqualTo(ERROR_PARAMETER_SHORT);
         assertMessageValidity("40:1A").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:08:00").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:08:05").isEqualTo(ERROR_PARAMETER);
         assertMessageValidity("40:1A:00").isEqualTo(ERROR_PARAMETER);
         assertMessageValidity("40:1A:04").isEqualTo(ERROR_PARAMETER);
     }
