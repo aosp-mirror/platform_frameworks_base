@@ -125,7 +125,6 @@ import static com.android.server.wm.Task.ActivityState.PAUSED;
 import static com.android.server.wm.Task.ActivityState.PAUSING;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
-import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.BOUNDS;
@@ -4127,6 +4126,10 @@ class Task extends WindowContainer<WindowContainer> {
         forAllActivities(r -> {
             info.addLaunchCookie(r.mLaunchCookie);
         });
+        final Task rootTask = getRootTask();
+        info.parentTaskId = rootTask == getParent() && rootTask.mCreatedByOrganizer
+                ? rootTask.mTaskId
+                : INVALID_TASK_ID;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {
@@ -4843,6 +4846,17 @@ class Task extends WindowContainer<WindowContainer> {
         return mTaskOrganizer != null;
     }
 
+    private boolean canBeOrganized() {
+        // All root tasks can be organized
+        if (isRootTask()) {
+            return true;
+        }
+
+        // Task could be organized if it's the direct child of the root created by organizer.
+        final Task rootTask = getRootTask();
+        return rootTask == getParent() && rootTask.mCreatedByOrganizer;
+    }
+
     @Override
     boolean showSurfaceOnCreation() {
         // Organized tasks handle their own surface visibility
@@ -4991,7 +5005,7 @@ class Task extends WindowContainer<WindowContainer> {
             // is created.
             return false;
         }
-        if (!isRootTask()) {
+        if (!canBeOrganized()) {
             return setTaskOrganizer(null);
         }
 

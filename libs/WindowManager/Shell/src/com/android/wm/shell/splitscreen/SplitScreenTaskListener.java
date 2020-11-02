@@ -27,8 +27,10 @@ import static com.android.wm.shell.ShellTaskOrganizer.getWindowingMode;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -36,6 +38,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.Transitions;
+import com.android.wm.shell.common.SyncTransactionQueue;
 
 import java.io.PrintWriter;
 
@@ -44,6 +48,8 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final boolean DEBUG = SplitScreenController.DEBUG;
 
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final SyncTransactionQueue mSyncQueue;
+    private final SparseArray<SurfaceControl> mLeashByTaskId = new SparseArray<>();
 
     RunningTaskInfo mPrimary;
     RunningTaskInfo mSecondary;
@@ -58,9 +64,11 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
     SplitScreenTaskListener(SplitScreenController splitScreenController,
-                    ShellTaskOrganizer shellTaskOrganizer) {
+                    ShellTaskOrganizer shellTaskOrganizer,
+                    SyncTransactionQueue syncQueue) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
+        mSyncQueue = syncQueue;
     }
 
     void init() {
@@ -93,6 +101,11 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (this) {
+            if (taskInfo.hasParentTask()) {
+                handleChildTaskAppeared(taskInfo, leash);
+                return;
+            }
+
             final int winMode = getWindowingMode(taskInfo);
             if (winMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 ProtoLog.v(WM_SHELL_TASK_ORG,
@@ -139,6 +152,11 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskVanished(RunningTaskInfo taskInfo) {
         synchronized (this) {
+            if (taskInfo.hasParentTask()) {
+                mLeashByTaskId.remove(taskInfo.taskId);
+                return;
+            }
+
             final boolean isPrimaryTask = mPrimary != null
                     && taskInfo.token.equals(mPrimary.token);
             final boolean isSecondaryTask = mSecondary != null
@@ -165,7 +183,41 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
         if (taskInfo.displayId != DEFAULT_DISPLAY) {
             return;
         }
-        mSplitScreenController.post(() -> handleTaskInfoChanged(taskInfo));
+        synchronized (this) {
+            if (taskInfo.hasParentTask()) {
+                handleChildTaskChanged(taskInfo);
+                return;
+            }
+
+            mSplitScreenController.post(() -> handleTaskInfoChanged(taskInfo));
+        }
+    }
+
+    private void handleChildTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        mLeashByTaskId.put(taskInfo.taskId, leash);
+        updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
+    }
+
+    private void handleChildTaskChanged(RunningTaskInfo taskInfo) {
+        final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
+        updateChildTaskSurface(taskInfo, leash, false /* firstAppeared */);
+    }
+
+    private void updateChildTaskSurface(
+            RunningTaskInfo taskInfo, SurfaceControl leash, boolean firstAppeared) {
+        final Rect taskBounds = taskInfo.getConfiguration().windowConfiguration.getBounds();
+        final Point taskPositionInParent = taskInfo.positionInParent;
+        final Rect corp =  new Rect(taskBounds);
+        corp.offset(-taskBounds.left, -taskBounds.top);
+        mSyncQueue.runInSync(t -> {
+            t.setWindowCrop(leash, corp);
+            t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
+            if (firstAppeared && !Transitions.ENABLE_SHELL_TRANSITIONS) {
+                t.setAlpha(leash, 1f);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                t.show(leash);
+            }
+        });
     }
 
     /**
