@@ -1111,9 +1111,30 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_NO_ISOLATED_STORAGE = AppProtoEnums.APP_OP_NO_ISOLATED_STORAGE;
 
+    /**
+     * Reserved key for 100
+     *
+     * @hide
+     */
+    public static final int OP_RESERVED_100 = 100;
+
+    /**
+     * Reserved key for 101
+     *
+     * @hide
+     */
+    public static final int OP_RESERVED_101 = 101;
+
+    /**
+     * Reserved key for 102
+     *
+     * @hide
+     */
+    public static final int OP_RESERVED_102 = 102;
+
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 100;
+    public static final int _NUM_OP = 103;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1430,6 +1451,27 @@ public class AppOpsManager {
      */
     public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
 
+    /**
+     * Reserved for 100
+     *
+     * @hide
+     */
+    public static final String OPSTR_RESERVED_100 = "android:opstr_reserved_100";
+
+    /**
+     * Reserved for 101
+     *
+     * @hide
+     */
+    public static final String OPSTR_RESERVED_101 = "android:opstr_reserved_101";
+
+    /**
+     * Reserved for 102
+     *
+     * @hide
+     */
+    public static final String OPSTR_RESERVED_102 = "android:opstr_reserved_102";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1619,6 +1661,9 @@ public class AppOpsManager {
             OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, //AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             OP_AUTO_REVOKE_MANAGED_BY_INSTALLER, //OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             OP_NO_ISOLATED_STORAGE,             // NO_ISOLATED_STORAGE
+            OP_RESERVED_100,                    // OP_RESERVED_100
+            OP_RESERVED_101,                    // OP_RESERVED_101
+            OP_RESERVED_102,                    // OP_RESERVED_102
     };
 
     /**
@@ -1725,6 +1770,9 @@ public class AppOpsManager {
             OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
             OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER,
             OPSTR_NO_ISOLATED_STORAGE,
+            OPSTR_RESERVED_100,
+            OPSTR_RESERVED_101,
+            OPSTR_RESERVED_102,
     };
 
     /**
@@ -1832,6 +1880,9 @@ public class AppOpsManager {
             "AUTO_REVOKE_PERMISSIONS_IF_UNUSED",
             "AUTO_REVOKE_MANAGED_BY_INSTALLER",
             "NO_ISOLATED_STORAGE",
+            "RESERVED_100",
+            "RESERVED_101",
+            "RESERVED_102",
     };
 
     /**
@@ -1940,6 +1991,9 @@ public class AppOpsManager {
             null, // no permission for OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // no permission for OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // no permission for OP_NO_ISOLATED_STORAGE
+            null, // OP_RESERVED_100
+            null, // OP_RESERVED_101
+            null, // OP_RESERVED_102
     };
 
     /**
@@ -2048,6 +2102,9 @@ public class AppOpsManager {
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // NO_ISOLATED_STORAGE
+            null, // OP_RESERVED_100
+            null, // OP_RESERVED_101
+            null, // OP_RESERVED_102
     };
 
     /**
@@ -2155,6 +2212,9 @@ public class AppOpsManager {
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // NO_ISOLATED_STORAGE
+            null, // OP_RESERVED_100
+            null, // OP_RESERVED_101
+            null, // OP_RESERVED_102
     };
 
     /**
@@ -2261,6 +2321,9 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             AppOpsManager.MODE_ALLOWED, // OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             AppOpsManager.MODE_ERRORED, // OP_NO_ISOLATED_STORAGE
+            AppOpsManager.MODE_ERRORED, // OP_RESERVED_100
+            AppOpsManager.MODE_ERRORED, // OP_RESERVED_101
+            AppOpsManager.MODE_ERRORED, // OP_RESERVED_102
     };
 
     /**
@@ -2371,6 +2434,9 @@ public class AppOpsManager {
             false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             true, // NO_ISOLATED_STORAGE
+            false, // OP_RESERVED_100
+            false, // OP_RESERVED_101
+            false, // OP_RESERVED_102
     };
 
     /**
