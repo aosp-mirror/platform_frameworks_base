@@ -58,6 +58,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -194,6 +195,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private KeyguardStatusViewController mKeyguardStatusViewController;
     @Mock
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
+    @Mock
+    private AuthController mAuthController;
 
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
@@ -201,6 +204,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mAuthController.isUdfpsEnrolled()).thenReturn(false);
         when(mHeadsUpCallback.getContext()).thenReturn(mContext);
         when(mView.getResources()).thenReturn(mResources);
         when(mResources.getConfiguration()).thenReturn(mConfiguration);
@@ -267,7 +271,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
                 mGroupManager,
-                mNotificationAreaController);
+                mNotificationAreaController,
+                mAuthController);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

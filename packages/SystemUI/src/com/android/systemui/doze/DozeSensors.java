@@ -156,7 +156,7 @@ public class DozeSensors {
                         findSensorWithType(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
                         true /* settingDef */,
-                        authController.hasUdfpsEnrolled() /* configured */,
+                        authController.isUdfpsEnrolled() /* configured */,
                         DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
