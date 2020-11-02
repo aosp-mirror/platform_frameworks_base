@@ -49,18 +49,38 @@ public class Credentials {
 
     public static final String INSTALL_AS_USER_ACTION = "android.credentials.INSTALL_AS_USER";
 
-    /** Key prefix for CA certificates. */
+    /**
+     * Key prefix for CA certificates.
+     *
+     * @deprecated Keystore no longer supports unstructured blobs. Public certificates are
+     *             stored in typed slots associated with a given alias.
+     */
+    @Deprecated
     public static final String CA_CERTIFICATE = "CACERT_";
 
-    /** Key prefix for user certificates. */
+    /**
+     * Key prefix for user certificates.
+     *
+     * @deprecated Keystore no longer supports unstructured blobs. Public certificates are
+     *             stored in typed slots associated with a given alias.
+     */
+    @Deprecated
     public static final String USER_CERTIFICATE = "USRCERT_";
 
-    /** Key prefix for user private and secret keys. */
+    /**
+     * Key prefix for user private and secret keys.
+     *
+     * @deprecated Keystore no longer uses alias prefixes to discriminate between entry types.
+     */
+    @Deprecated
     public static final String USER_PRIVATE_KEY = "USRPKEY_";
 
-    /** Key prefix for user secret keys.
-     *  @deprecated use {@code USER_PRIVATE_KEY} for this category instead.
+    /**
+     * Key prefix for user secret keys.
+     *
+     * @deprecated use {@code USER_PRIVATE_KEY} for this category instead.
      */
+    @Deprecated
     public static final String USER_SECRET_KEY = "USRSKEY_";
 
     /** Key prefix for VPN. */
@@ -72,7 +92,13 @@ public class Credentials {
     /** Key prefix for WIFI. */
     public static final String WIFI = "WIFI_";
 
-    /** Key prefix for App Source certificates. */
+    /**
+     * Key prefix for App Source certificates.
+     *
+     * @deprecated This was intended for FS-verity but never used. FS-verity is not
+     *             going to use this constant moving forward.
+     */
+    @Deprecated
     public static final String APP_SOURCE_CERTIFICATE = "FSV_";
 
     /** Key containing suffix of lockdown VPN profile. */
@@ -150,6 +176,7 @@ public class Credentials {
         pw.close();
         return bao.toByteArray();
     }
+
     /**
      * Convert objects from PEM format, which is used for
      * CA_CERTIFICATE and USER_CERTIFICATE entries.
@@ -167,7 +194,8 @@ public class Credentials {
             PemObject o;
             while ((o = pr.readPemObject()) != null) {
                 if (o.getType().equals("CERTIFICATE")) {
-                    Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
+                    Certificate c = cf.generateCertificate(
+                            new ByteArrayInputStream(o.getContent()));
                     result.add((X509Certificate) c);
                 } else {
                     throw new IllegalArgumentException("Unknown type " + o.getType());
