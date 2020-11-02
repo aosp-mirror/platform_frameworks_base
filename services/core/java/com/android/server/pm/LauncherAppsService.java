@@ -1563,7 +1563,7 @@ public class LauncherAppsService extends SystemService {
                             continue;
                         }
                         try {
-                            listener.onPackageProgressChanged(mUser, mPackageName, progress);
+                            listener.onPackageLoadingProgressChanged(mUser, mPackageName, progress);
                         } catch (RemoteException re) {
                             Slog.d(TAG, "Callback failed ", re);
                         }
