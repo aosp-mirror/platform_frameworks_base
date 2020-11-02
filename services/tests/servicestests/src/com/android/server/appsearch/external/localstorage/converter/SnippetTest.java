@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.appsearch.external.localbackend.converter;
+package com.android.server.appsearch.external.localstorage.converter;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -123,7 +123,7 @@ public class SnippetTest {
 
         for (SearchResultProto.ResultProto proto : searchResultProto.getResultsList()) {
             SearchResult result = SearchResultToProtoConverter.convertSearchResult(proto);
-            assertThat(result.getMatches()).isEqualTo(null);
+            assertThat(result.getMatches()).isEmpty();
         }
     }
 

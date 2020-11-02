@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.appsearch.external.localbackend.converter;
+package com.android.server.appsearch.external.localstorage.converter;
 
 import android.os.Bundle;
 
@@ -22,43 +22,32 @@ import android.annotation.NonNull;
 
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.SearchResult;
-import android.app.appsearch.SearchResults;
 
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SnippetMatchProto;
 import com.google.android.icing.proto.SnippetProto;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Translates a {@link SearchResultProto} into {@link SearchResults}.
+ * Translates a {@link SearchResultProto} into {@link SearchResult}s.
+ *
  * @hide
  */
 
 public class SearchResultToProtoConverter {
     private SearchResultToProtoConverter() {}
 
-    /** Translates a {@link SearchResultProto} into a list of {@link SearchResult}. */
-    @NonNull
-    public static List<SearchResult> convert(@NonNull SearchResultProto searchResultProto) {
-        List<SearchResult> results = new ArrayList<>(searchResultProto.getResultsCount());
-        for (int i = 0; i < searchResultProto.getResultsCount(); i++) {
-            results.add(convertSearchResult(searchResultProto.getResults(i)));
-        }
-        return results;
-    }
-
     /** Translate a {@link SearchResultProto.ResultProto} into {@link SearchResult}. */
     @NonNull
-    static SearchResult convertSearchResult(@NonNull SearchResultProto.ResultProto proto) {
+    public static SearchResult convertSearchResult(
+            @NonNull SearchResultProto.ResultProtoOrBuilder proto) {
         Bundle bundle = new Bundle();
         GenericDocument document = GenericDocumentToProtoConverter.convert(proto.getDocument());
         bundle.putBundle(SearchResult.DOCUMENT_FIELD, document.getBundle());
 
-        ArrayList<Bundle> matchList = null;
+        ArrayList<Bundle> matchList = new ArrayList<>();
         if (proto.hasSnippet()) {
-            matchList = new ArrayList<>();
             for (int i = 0; i < proto.getSnippet().getEntriesCount(); i++) {
                 SnippetProto.EntryProto entry = proto.getSnippet().getEntries(i);
                 for (int j = 0; j < entry.getSnippetMatchesCount(); j++) {

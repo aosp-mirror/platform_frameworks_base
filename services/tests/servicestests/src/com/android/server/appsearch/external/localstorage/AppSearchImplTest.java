@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.appsearch.external.localbackend;
+package com.android.server.appsearch.external.localstorage;
 
 import static com.google.common.truth.Truth.assertThat;
 
