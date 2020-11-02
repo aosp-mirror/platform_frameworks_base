@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -28,7 +29,9 @@ import android.os.NullVibrator;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
@@ -71,6 +74,9 @@ public final class InputDevice implements Parcelable {
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     private Vibrator mVibrator; // guarded by mMotionRanges during initialization
+
+    @GuardedBy("mMotionRanges")
+    private VibratorManager mVibratorManager;
 
     /**
      * A mask for input source classes.
@@ -414,6 +420,8 @@ public final class InputDevice implements Parcelable {
     public static final int KEYBOARD_TYPE_ALPHABETIC = 2;
 
     private static final int MAX_RANGES = 1000;
+
+    private static final int VIBRATOR_ID_ALL = -1;
 
     public static final @android.annotation.NonNull Parcelable.Creator<InputDevice> CREATOR =
             new Parcelable.Creator<InputDevice>() {
@@ -785,13 +793,32 @@ public final class InputDevice implements Parcelable {
         synchronized (mMotionRanges) {
             if (mVibrator == null) {
                 if (mHasVibrator) {
-                    mVibrator = InputManager.getInstance().getInputDeviceVibrator(mId);
+                    mVibrator = InputManager.getInstance().getInputDeviceVibrator(mId,
+                            VIBRATOR_ID_ALL);
                 } else {
                     mVibrator = NullVibrator.getInstance();
                 }
             }
             return mVibrator;
         }
+    }
+
+    /**
+     * Gets the vibrator manager associated with the device.
+     * Even if the device does not have a vibrator manager, the result is never null.
+     * Use {@link VibratorManager#getVibratorIds} to determine whether any vibrator is
+     * present.
+     *
+     * @return The vibrator manager associated with the device, never null.
+     */
+    @NonNull
+    public VibratorManager getVibratorManager() {
+        synchronized (mMotionRanges) {
+            if (mVibratorManager == null) {
+                mVibratorManager = InputManager.getInstance().getInputDeviceVibratorManager(mId);
+            }
+        }
+        return mVibratorManager;
     }
 
     /**

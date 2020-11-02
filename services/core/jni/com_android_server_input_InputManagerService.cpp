@@ -149,6 +149,14 @@ static struct {
     jmethodID getAffineTransform;
 } gTouchCalibrationClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID constructor;
+    jmethodID keyAt;
+    jmethodID valueAt;
+    jmethodID size;
+} gSparseArrayClassInfo;
+
 // --- Global functions ---
 
 template<typename T>
@@ -1705,19 +1713,73 @@ static void nativeVibrate(JNIEnv* env, jclass /* clazz */, jlong ptr, jint devic
             patternObj, nullptr));
     jint* amplitudes = static_cast<jint*>(env->GetPrimitiveArrayCritical(amplitudesObj, nullptr));
 
-    std::vector<VibrationElement> elements(patternSize);
+    VibrationSequence sequence(patternSize);
+    std::vector<int32_t> vibrators = im->getInputManager()->getReader()->getVibratorIds(deviceId);
     for (size_t i = 0; i < patternSize; i++) {
         // VibrationEffect.validate guarantees duration > 0.
         std::chrono::milliseconds duration(patternMillis[i]);
-        elements[i].duration = std::min(duration, MAX_VIBRATE_PATTERN_DELAY_MILLIS);
-        // TODO: (b/161629089) apply channel specific amplitudes from development API.
-        elements[i].channels = {static_cast<uint8_t>(amplitudes[i]),
-                                static_cast<uint8_t>(amplitudes[i])};
+        VibrationElement element(CHANNEL_SIZE);
+        element.duration = std::min(duration, MAX_VIBRATE_PATTERN_DELAY_MILLIS);
+        // Vibrate on both channels
+        for (int32_t channel = 0; channel < vibrators.size(); channel++) {
+            element.addChannel(vibrators[channel], static_cast<uint8_t>(amplitudes[i]));
+        }
+        sequence.addElement(element);
     }
     env->ReleasePrimitiveArrayCritical(patternObj, patternMillis, JNI_ABORT);
     env->ReleasePrimitiveArrayCritical(amplitudesObj, amplitudes, JNI_ABORT);
 
-    im->getInputManager()->getReader()->vibrate(deviceId, elements, repeat, token);
+    im->getInputManager()->getReader()->vibrate(deviceId, sequence, repeat, token);
+}
+
+static void nativeVibrateCombined(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                  jlongArray patternObj, jobject amplitudesObj, jint repeat,
+                                  jint token) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    size_t patternSize = env->GetArrayLength(patternObj);
+
+    if (patternSize > MAX_VIBRATE_PATTERN_SIZE) {
+        ALOGI("Skipped requested vibration because the pattern size is %zu "
+              "which is more than the maximum supported size of %d.",
+              patternSize, MAX_VIBRATE_PATTERN_SIZE);
+        return; // limit to reasonable size
+    }
+    const jlong* patternMillis = env->GetLongArrayElements(patternObj, nullptr);
+
+    std::array<jint*, CHANNEL_SIZE> amplitudesArray;
+    std::array<jint, CHANNEL_SIZE> vibratorIdArray;
+    jint amplSize = env->CallIntMethod(amplitudesObj, gSparseArrayClassInfo.size);
+    if (amplSize > CHANNEL_SIZE) {
+        ALOGE("Can not fit into input device vibration element.");
+        return;
+    }
+
+    for (int i = 0; i < amplSize; i++) {
+        vibratorIdArray[i] = env->CallIntMethod(amplitudesObj, gSparseArrayClassInfo.keyAt, i);
+        jintArray arr = static_cast<jintArray>(
+                env->CallObjectMethod(amplitudesObj, gSparseArrayClassInfo.valueAt, i));
+        amplitudesArray[i] = env->GetIntArrayElements(arr, nullptr);
+        if (env->GetArrayLength(arr) != patternSize) {
+            ALOGE("Amplitude length not equal to pattern length!");
+            return;
+        }
+    }
+
+    VibrationSequence sequence(patternSize);
+    for (size_t i = 0; i < patternSize; i++) {
+        VibrationElement element(CHANNEL_SIZE);
+        // VibrationEffect.validate guarantees duration > 0.
+        std::chrono::milliseconds duration(patternMillis[i]);
+        element.duration = std::min(duration, MAX_VIBRATE_PATTERN_DELAY_MILLIS);
+        for (int32_t channel = 0; channel < CHANNEL_SIZE; channel++) {
+            element.addChannel(vibratorIdArray[channel],
+                               static_cast<uint8_t>(amplitudesArray[channel][i]));
+        }
+        sequence.addElement(element);
+    }
+
+    im->getInputManager()->getReader()->vibrate(deviceId, sequence, repeat, token);
 }
 
 static void nativeCancelVibrate(JNIEnv* /* env */,
@@ -1725,6 +1787,23 @@ static void nativeCancelVibrate(JNIEnv* /* env */,
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     im->getInputManager()->getReader()->cancelVibrate(deviceId, token);
+}
+
+static bool nativeIsVibrating(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    return im->getInputManager()->getReader()->isVibrating(deviceId);
+}
+
+static jintArray nativeGetVibratorIds(JNIEnv* env, jclass clazz, jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    std::vector<int32_t> vibrators = im->getInputManager()->getReader()->getVibratorIds(deviceId);
+
+    jintArray vibIdArray = env->NewIntArray(vibrators.size());
+    if (vibIdArray != nullptr) {
+        env->SetIntArrayRegion(vibIdArray, 0, vibrators.size(), vibrators.data());
+    }
+    return vibIdArray;
 }
 
 static void nativeReloadKeyboardLayouts(JNIEnv* /* env */,
@@ -1872,7 +1951,11 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeSetInteractive", "(JZ)V", (void*)nativeSetInteractive},
         {"nativeReloadCalibration", "(J)V", (void*)nativeReloadCalibration},
         {"nativeVibrate", "(JI[J[III)V", (void*)nativeVibrate},
+        {"nativeVibrateCombined", "(JI[JLandroid/util/SparseArray;II)V",
+         (void*)nativeVibrateCombined},
         {"nativeCancelVibrate", "(JII)V", (void*)nativeCancelVibrate},
+        {"nativeIsVibrating", "(JI)Z", (void*)nativeIsVibrating},
+        {"nativeGetVibratorIds", "(JI)[I", (void*)nativeGetVibratorIds},
         {"nativeReloadKeyboardLayouts", "(J)V", (void*)nativeReloadKeyboardLayouts},
         {"nativeReloadDeviceAliases", "(J)V", (void*)nativeReloadDeviceAliases},
         {"nativeDump", "(J)Ljava/lang/String;", (void*)nativeDump},
@@ -2047,6 +2130,15 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gTouchCalibrationClassInfo.getAffineTransform, gTouchCalibrationClassInfo.clazz,
             "getAffineTransform", "()[F");
+
+    // SparseArray
+    FIND_CLASS(gSparseArrayClassInfo.clazz, "android/util/SparseArray");
+    gSparseArrayClassInfo.clazz = jclass(env->NewGlobalRef(gSparseArrayClassInfo.clazz));
+    GET_METHOD_ID(gSparseArrayClassInfo.constructor, gSparseArrayClassInfo.clazz, "<init>", "()V");
+    GET_METHOD_ID(gSparseArrayClassInfo.keyAt, gSparseArrayClassInfo.clazz, "keyAt", "(I)I");
+    GET_METHOD_ID(gSparseArrayClassInfo.valueAt, gSparseArrayClassInfo.clazz, "valueAt",
+                  "(I)Ljava/lang/Object;");
+    GET_METHOD_ID(gSparseArrayClassInfo.size, gSparseArrayClassInfo.clazz, "size", "()I");
 
     return 0;
 }
