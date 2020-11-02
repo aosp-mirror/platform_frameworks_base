@@ -327,6 +327,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShelfIconVisible;
     private boolean mAboveShelf;
     private OnUserInteractionCallback mOnUserInteractionCallback;
+    private NotificationGutsManager mNotificationGutsManager;
     private boolean mIsLowPriority;
     private boolean mIsColorized;
     private boolean mUseIncreasedCollapsedHeight;
@@ -1089,6 +1090,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         };
     }
 
+    /** The click listener for the snooze button. */
+    public View.OnClickListener getSnoozeClickListener(MenuItem item) {
+        return v -> {
+            mNotificationGutsManager.openGuts(this, 0, 0, item);
+        };
+    }
+
     private void updateClickAndFocus() {
         boolean normalChild = !isChildInGroup() || isGroupExpanded();
         boolean clickable = mOnClickListener != null && normalChild;
@@ -1555,7 +1563,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             OnUserInteractionCallback onUserInteractionCallback,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional,
+            NotificationGutsManager gutsManager) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1584,6 +1593,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mNotificationGutsManager = gutsManager;
 
         cacheIsSystemNotification();
     }

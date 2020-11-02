@@ -18,12 +18,14 @@ package com.android.systemui.statusbar.notification.row;
 
 
 import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
+import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -31,6 +33,7 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -44,6 +47,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
@@ -458,7 +462,7 @@ public class NotificationContentView extends FrameLayout {
         mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
         if (mContainingNotification != null) {
-            applyBubbleAction(mExpandedChild, mContainingNotification.getEntry());
+            applySystemActions(mExpandedChild, mContainingNotification.getEntry());
         }
     }
 
@@ -500,7 +504,7 @@ public class NotificationContentView extends FrameLayout {
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
         if (mContainingNotification != null) {
-            applyBubbleAction(mHeadsUpChild, mContainingNotification.getEntry());
+            applySystemActions(mHeadsUpChild, mContainingNotification.getEntry());
         }
     }
 
@@ -1161,8 +1165,8 @@ public class NotificationContentView extends FrameLayout {
         mForceSelectNextLayout = true;
         mPreviousExpandedRemoteInputIntent = null;
         mPreviousHeadsUpRemoteInputIntent = null;
-        applyBubbleAction(mExpandedChild, entry);
-        applyBubbleAction(mHeadsUpChild, entry);
+        applySystemActions(mExpandedChild, entry);
+        applySystemActions(mHeadsUpChild, entry);
     }
 
     private void updateAllSingleLineViews() {
@@ -1340,6 +1344,14 @@ public class NotificationContentView extends FrameLayout {
                 NOTIFICATION_BUBBLES, 0) == 1;
     }
 
+    /**
+     * Setup icon buttons provided by System UI.
+     */
+    private void applySystemActions(View layout, NotificationEntry entry) {
+        applySnoozeAction(layout);
+        applyBubbleAction(layout, entry);
+    }
+
     private void applyBubbleAction(View layout, NotificationEntry entry) {
         if (layout == null || mContainingNotification == null || mPeopleIdentifier == null) {
             return;
@@ -1385,6 +1397,45 @@ public class NotificationContentView extends FrameLayout {
                     com.android.internal.R.dimen.bubble_gone_padding_end);
             actionContainerLayout.setPaddingRelative(0, 0, paddingEnd, 0);
         }
+    }
+
+    private void applySnoozeAction(View layout) {
+        if (layout == null || mContainingNotification == null) {
+            return;
+        }
+        ImageView snoozeButton = layout.findViewById(com.android.internal.R.id.snooze_button);
+        View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
+        LinearLayout actionContainerLayout =
+                layout.findViewById(com.android.internal.R.id.actions_container_layout);
+        if (snoozeButton == null || actionContainer == null || actionContainerLayout == null) {
+            return;
+        }
+        final boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
+                SHOW_NOTIFICATION_SNOOZE, 0) == 1;
+        if (!showSnooze) {
+            snoozeButton.setVisibility(GONE);
+            return;
+        }
+
+        Resources res = mContext.getResources();
+        Drawable snoozeDrawable = res.getDrawable(R.drawable.ic_snooze);
+        mContainingNotification.updateNotificationColor();
+        snoozeDrawable.setTint(mContainingNotification.getNotificationColor());
+        snoozeButton.setImageDrawable(snoozeDrawable);
+
+        final NotificationSnooze snoozeGuts = (NotificationSnooze) LayoutInflater.from(mContext)
+                .inflate(R.layout.notification_snooze, null, false);
+        final String snoozeDescription = res.getString(
+                R.string.notification_menu_snooze_description);
+        final NotificationMenuRowPlugin.MenuItem snoozeMenuItem =
+                new NotificationMenuRow.NotificationMenuItem(
+                        mContext, snoozeDescription, snoozeGuts, R.drawable.ic_snooze);
+        snoozeButton.setContentDescription(
+                mContext.getResources().getString(R.string.notification_menu_snooze_description));
+        snoozeButton.setOnClickListener(
+                mContainingNotification.getSnoozeClickListener(snoozeMenuItem));
+        snoozeButton.setVisibility(VISIBLE);
+        actionContainer.setVisibility(VISIBLE);
     }
 
     private void applySmartReplyView(

@@ -432,7 +432,8 @@ public class NotificationTestHelper {
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mock(OnUserInteractionCallback.class),
-                Optional.of(mock(BubblesManager.class)));
+                Optional.of(mock(BubblesManager.class)),
+                mock(NotificationGutsManager.class));
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
