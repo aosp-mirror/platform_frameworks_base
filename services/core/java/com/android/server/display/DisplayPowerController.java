@@ -1815,6 +1815,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     public void dump(final PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
+            pw.println("Display Power Controller:");
+            pw.println("  mDisplayId=" + mDisplayId);
+
+            pw.println();
             pw.println("Display Power Controller Locked State:");
             pw.println("  mDisplayReadyLocked=" + mDisplayReadyLocked);
             pw.println("  mPendingRequestLocked=" + mPendingRequestLocked);
