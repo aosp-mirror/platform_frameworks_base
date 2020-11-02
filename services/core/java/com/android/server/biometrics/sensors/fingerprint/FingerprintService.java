@@ -469,6 +469,27 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
+        public boolean hasEnrolledTemplatesForAnySensor(int userId,
+                @NonNull List<FingerprintSensorPropertiesInternal> sensors,
+                @NonNull String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            for (FingerprintSensorPropertiesInternal prop : sensors) {
+                final ServiceProvider provider = getProviderForSensor(prop.sensorId);
+                if (provider == null) {
+                    Slog.w(TAG, "Null provider for sensorId: " + prop.sensorId
+                            + ", caller: " + opPackageName);
+                    continue;
+                }
+
+                if (!provider.getEnrolledFingerprints(prop.sensorId, userId).isEmpty()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override // Binder call
         public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
