@@ -256,11 +256,13 @@ static jfloatArray obtainPackedAxisValuesArray(JNIEnv* env, uint32_t minSize,
 }
 
 static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointerCoords,
-        float xOffset, float yOffset, jobject outPointerCoordsObj) {
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_X) + xOffset);
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y) + yOffset);
+                                    ui::Transform transform, jobject outPointerCoordsObj) {
+    float rawX = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_X);
+    float rawY = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y);
+    vec2 transformed = transform.transform(rawX, rawY);
+
+    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x, transformed.x);
+    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y, transformed.y);
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.pressure,
             rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.size,
@@ -433,8 +435,7 @@ static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass 
         }
         rawPointerCoords = event->getHistoricalRawPointerCoords(pointerIndex, historyPos);
     }
-    pointerCoordsFromNative(env, rawPointerCoords, event->getXOffset(), event->getYOffset(),
-            outPointerCoordsObj);
+    pointerCoordsFromNative(env, rawPointerCoords, event->getTransform(), outPointerCoordsObj);
 }
 
 static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jclass clazz,
