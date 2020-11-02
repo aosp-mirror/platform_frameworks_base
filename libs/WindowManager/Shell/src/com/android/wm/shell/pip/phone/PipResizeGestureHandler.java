@@ -47,6 +47,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
 
@@ -67,6 +68,7 @@ public class PipResizeGestureHandler {
     private final Context mContext;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipMotionHelper mMotionHelper;
+    private final PipBoundsState mPipBoundsState;
     private final int mDisplayId;
     private final Executor mMainExecutor;
     private final ScaleGestureDetector mScaleGestureDetector;
@@ -107,13 +109,15 @@ public class PipResizeGestureHandler {
     private int mCtrlType;
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
-            PipMotionHelper motionHelper, PipTaskOrganizer pipTaskOrganizer,
-            Function<Rect, Rect> movementBoundsSupplier, Runnable updateMovementBoundsRunnable,
-            PipUiEventLogger pipUiEventLogger, PipMenuActivityController menuActivityController) {
+            PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
+            PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
+            Runnable updateMovementBoundsRunnable, PipUiEventLogger pipUiEventLogger,
+            PipMenuActivityController menuActivityController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mPipBoundsHandler = pipBoundsHandler;
+        mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMovementBoundsSupplier = movementBoundsSupplier;
@@ -263,6 +267,11 @@ public class PipResizeGestureHandler {
     }
 
     private void onInputEvent(InputEvent ev) {
+        // Don't allow resize when PiP is stashed.
+        if (mPipBoundsState.isStashed()) {
+            return;
+        }
+
         if (ev instanceof MotionEvent) {
             if (mUsingPinchToZoom) {
                 mScaleGestureDetector.onTouchEvent((MotionEvent) ev);
