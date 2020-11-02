@@ -73,7 +73,7 @@
             android:id="@+id/gradient_clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="100dp"
+            android:textSize="80dp"
             android:letterSpacing="0.02"
             android:lineSpacingMultiplier=".8"
             android:includeFontPadding="false"
