@@ -1008,7 +1008,7 @@ interface ITelephony {
      * @param reason the reason the data enable change is taking place
      * @param enable true to turn on, else false
      */
-     void setDataEnabledWithReason(int subId, int reason, boolean enable);
+     void setDataEnabledForReason(int subId, int reason, boolean enable);
 
     /**
      * Return whether data is enabled for certain reason
@@ -1016,7 +1016,7 @@ interface ITelephony {
      * @param reason the reason the data enable change is taking place
      * @return true on enabled
     */
-    boolean isDataEnabledWithReason(int subId, int reason);
+    boolean isDataEnabledForReason(int subId, int reason);
 
      /**
      * Checks if manual network selection is allowed.
