@@ -34,15 +34,15 @@ public:
 
     // Sets an alarm for the given timestamp.
     // Replaces previous alarm if one already exists.
-    void startAlarm(const MetricDimensionKey& dimensionKey, const int64_t& eventTime);
+    void startAlarm(const MetricDimensionKey& dimensionKey, const int64_t& eventTime) override;
 
     // Stops the alarm.
     // If it should have already fired, but hasn't yet (e.g. because the AlarmManager is delayed),
     // declare the anomaly now.
-    void stopAlarm(const MetricDimensionKey& dimensionKey, const int64_t& timestampNs);
+    void stopAlarm(const MetricDimensionKey& dimensionKey, const int64_t& timestampNs) override;
 
     // Stop all the alarms owned by this tracker. Does not declare any anomalies.
-    void cancelAllAlarms();
+    void cancelAllAlarms() override;
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this DurationAnomalyTracker
     // and removes it from firedAlarms. The AlarmMonitor is not informed.

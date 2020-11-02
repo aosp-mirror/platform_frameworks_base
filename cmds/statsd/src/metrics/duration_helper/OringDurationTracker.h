@@ -31,7 +31,7 @@ public:
                          int conditionIndex, bool nesting, int64_t currentBucketStartNs,
                          int64_t currentBucketNum, int64_t startTimeNs, int64_t bucketSizeNs,
                          bool conditionSliced, bool fullLink,
-                         const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
+                         const std::vector<sp<AnomalyTracker>>& anomalyTrackers);
 
     OringDurationTracker(const OringDurationTracker& tracker) = default;
 
@@ -54,7 +54,7 @@ public:
             int64_t timestampNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
 
-    int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
+    int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
                                       const int64_t currentTimestamp) const override;
     void dumpStates(FILE* out, bool verbose) const override;
 

@@ -27,6 +27,7 @@
 #include "src/condition/ConditionTracker.h"
 #include "src/matchers/AtomMatchingTracker.h"
 #include "src/metrics/CountMetricProducer.h"
+#include "src/metrics/DurationMetricProducer.h"
 #include "src/metrics/GaugeMetricProducer.h"
 #include "src/metrics/MetricProducer.h"
 #include "src/metrics/ValueMetricProducer.h"
@@ -791,6 +792,93 @@ TEST(MetricsManagerTest, TestCreateConditionTrackerCombination) {
     sp<ConditionTracker> tracker = createConditionTracker(key, predicate, index, atomTrackerMap);
     EXPECT_EQ(tracker->getConditionId(), id);
     EXPECT_FALSE(tracker->IsSimpleCondition());
+}
+
+TEST(MetricsManagerTest, TestCreateAnomalyTrackerInvalidMetric) {
+    Alert alert;
+    alert.set_id(123);
+    alert.set_metric_id(1);
+    alert.set_trigger_if_sum_gt(1);
+    alert.set_num_buckets(1);
+
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    vector<sp<MetricProducer>> metricProducers;
+    // Pass in empty metric producers, causing an error.
+    EXPECT_EQ(createAnomalyTracker(alert, anomalyAlarmMonitor, {}, metricProducers), nullopt);
+}
+
+TEST(MetricsManagerTest, TestCreateAnomalyTrackerNoThreshold) {
+    int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(123);
+    alert.set_metric_id(metricId);
+    alert.set_num_buckets(1);
+
+    CountMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    vector<sp<MetricProducer>> metricProducers({new CountMetricProducer(
+            kConfigKey, metric, 0, {ConditionState::kUnknown}, wizard, 0x0123456789, 0, 0)});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    EXPECT_EQ(createAnomalyTracker(alert, anomalyAlarmMonitor, {{1, 0}}, metricProducers), nullopt);
+}
+
+TEST(MetricsManagerTest, TestCreateAnomalyTrackerMissingBuckets) {
+    int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(123);
+    alert.set_metric_id(metricId);
+    alert.set_trigger_if_sum_gt(1);
+
+    CountMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    vector<sp<MetricProducer>> metricProducers({new CountMetricProducer(
+            kConfigKey, metric, 0, {ConditionState::kUnknown}, wizard, 0x0123456789, 0, 0)});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    EXPECT_EQ(createAnomalyTracker(alert, anomalyAlarmMonitor, {{1, 0}}, metricProducers), nullopt);
+}
+
+TEST(MetricsManagerTest, TestCreateAnomalyTrackerGood) {
+    int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(123);
+    alert.set_metric_id(metricId);
+    alert.set_trigger_if_sum_gt(1);
+    alert.set_num_buckets(1);
+
+    CountMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    vector<sp<MetricProducer>> metricProducers({new CountMetricProducer(
+            kConfigKey, metric, 0, {ConditionState::kUnknown}, wizard, 0x0123456789, 0, 0)});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    EXPECT_NE(createAnomalyTracker(alert, anomalyAlarmMonitor, {{1, 0}}, metricProducers), nullopt);
+}
+
+TEST(MetricsManagerTest, TestCreateAnomalyTrackerDurationTooLong) {
+    int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(123);
+    alert.set_metric_id(metricId);
+    // Impossible for alert to fire since the time is bigger than bucketSize * numBuckets
+    alert.set_trigger_if_sum_gt(MillisToNano(TimeUnitToBucketSizeInMillis(ONE_MINUTE)) + 1);
+    alert.set_num_buckets(1);
+
+    DurationMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
+    FieldMatcher dimensions;
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    vector<sp<MetricProducer>> metricProducers({new DurationMetricProducer(
+            kConfigKey, metric, -1 /*no condition*/, {}, 1 /* start index */, 2 /* stop index */,
+            3 /* stop_all index */, false /*nesting*/, wizard, 0x0123456789, dimensions, 0, 0)});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    EXPECT_EQ(createAnomalyTracker(alert, anomalyAlarmMonitor, {{1, 0}}, metricProducers), nullopt);
 }
 
 }  // namespace statsd
