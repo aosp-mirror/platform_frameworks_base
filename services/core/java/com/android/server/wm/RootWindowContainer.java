@@ -2728,8 +2728,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }, true /* traverseTopToBottom */);
 
         for (int i = mTmpTaskLayerChangedProcs.size() - 1; i >= 0; i--) {
-            mTmpTaskLayerChangedProcs.valueAt(i).invalidateOomScoreReferenceState(
-                    true /* computeNow */);
+            mTmpTaskLayerChangedProcs.valueAt(i).computeProcessActivityState();
         }
         mTmpTaskLayerChangedProcs.clear();
     }
