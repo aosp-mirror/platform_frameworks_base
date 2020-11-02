@@ -83,6 +83,8 @@ import java.util.concurrent.TimeUnit;
 public class DragDropControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 3000;
     private static final int TEST_UID = 12345;
+    private static final int TEST_PID = 67890;
+    private static final String TEST_PACKAGE = "com.test.package";
 
     private TestDragDropController mTarget;
     private WindowState mWindow;
@@ -243,21 +245,16 @@ public class DragDropControllerTests extends WindowTestsBase {
         });
         try {
             session.validateAndResolveDragMimeTypeExtras(
-                    createClipDataForActivity(null, null), 0);
-            fail("Expected failure without pending intent and user");
-        } catch (IllegalArgumentException e) {
-            // Expected failure
-        }
-        try {
-            session.validateAndResolveDragMimeTypeExtras(
-                    createClipDataForActivity(mock(PendingIntent.class), null), 0);
+                    createClipDataForActivity(mock(PendingIntent.class), null), TEST_UID, TEST_PID,
+                    TEST_PACKAGE);
             fail("Expected failure without user");
         } catch (IllegalArgumentException e) {
             // Expected failure
         }
         try {
             session.validateAndResolveDragMimeTypeExtras(
-                    createClipDataForActivity(null, mock(UserHandle.class)), 0);
+                    createClipDataForActivity(null, mock(UserHandle.class)), TEST_UID, TEST_PID,
+                    TEST_PACKAGE);
             fail("Expected failure without pending intent");
         } catch (IllegalArgumentException e) {
             // Expected failure
@@ -286,15 +283,48 @@ public class DragDropControllerTests extends WindowTestsBase {
             public void onAnimatorScaleChanged(float scale) {}
         });
         try {
-            final ClipData clipData = new ClipData(
-                    new ClipDescription("drag", new String[] { MIMETYPE_APPLICATION_SHORTCUT }),
-                    new ClipData.Item(new Intent()));
-
-            session.validateAndResolveDragMimeTypeExtras(clipData, TEST_UID);
+            session.validateAndResolveDragMimeTypeExtras(
+                    createClipDataForShortcut(null, "test_shortcut_id", mock(UserHandle.class)),
+                    TEST_UID, TEST_PID, TEST_PACKAGE);
+            fail("Expected failure without package name");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
+        try {
+            session.validateAndResolveDragMimeTypeExtras(
+                    createClipDataForShortcut("test_package", null, mock(UserHandle.class)),
+                    TEST_UID, TEST_PID, TEST_PACKAGE);
             fail("Expected failure without shortcut id");
         } catch (IllegalArgumentException e) {
             // Expected failure
         }
+        try {
+            session.validateAndResolveDragMimeTypeExtras(
+                    createClipDataForShortcut("test_package", "test_shortcut_id", null),
+                    TEST_UID, TEST_PID, TEST_PACKAGE);
+            fail("Expected failure without package name");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
+    }
+
+    private ClipData createClipDataForShortcut(String packageName, String shortcutId,
+            UserHandle user) {
+        final Intent data = new Intent();
+        if (packageName != null) {
+            data.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+        }
+        if (shortcutId != null) {
+            data.putExtra(Intent.EXTRA_SHORTCUT_ID, shortcutId);
+        }
+        if (user != null) {
+            data.putExtra(Intent.EXTRA_USER, user);
+        }
+        final ClipData clipData = new ClipData(
+                new ClipDescription("drag", new String[] {
+                        MIMETYPE_APPLICATION_SHORTCUT}),
+                new ClipData.Item(data));
+        return clipData;
     }
 
     @Test
@@ -308,7 +338,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                     new ClipDescription("drag", new String[] { MIMETYPE_APPLICATION_TASK }),
                     new ClipData.Item(new Intent()));
 
-            session.validateAndResolveDragMimeTypeExtras(clipData, TEST_UID);
+            session.validateAndResolveDragMimeTypeExtras(clipData, TEST_UID, TEST_PID,
+                    TEST_PACKAGE);
             fail("Expected failure without task id");
         } catch (IllegalArgumentException e) {
             // Expected failure
