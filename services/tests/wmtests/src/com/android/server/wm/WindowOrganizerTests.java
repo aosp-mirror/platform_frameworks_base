@@ -976,6 +976,21 @@ public class WindowOrganizerTests extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testReparentToOrganizedTask() {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        Task rootTask = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+        final Task task1 = createStack();
+        final Task task2 = createTask(rootTask, false /* fakeDraw */);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(task1.mRemoteToken.toWindowContainerToken(),
+                rootTask.mRemoteToken.toWindowContainerToken(), true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertTrue(task1.isOrganized());
+        assertTrue(task2.isOrganized());
+    }
+
     /**
      * Verifies that task vanished is called for a specific task.
      */
