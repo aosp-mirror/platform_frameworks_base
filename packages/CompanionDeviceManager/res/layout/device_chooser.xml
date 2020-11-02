@@ -29,7 +29,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/title"
         android:layout_above="@+id/buttons"
-        style="@android:style/Widget.Material.Light.ListView"
+        style="@android:style/Widget.Material.ListView"
     />
 
     <include layout="@layout/buttons" />
