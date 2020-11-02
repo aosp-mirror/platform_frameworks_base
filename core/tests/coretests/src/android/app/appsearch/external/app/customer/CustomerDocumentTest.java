@@ -46,12 +46,12 @@ public class CustomerDocumentTest {
         CustomerDocument customerDocument = new CustomerDocument.Builder("uri1")
                 .setScore(1)
                 .setCreationTimestampMillis(0)
-                .setProperty("longKey1", 1L, 2L, 3L)
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
 
         assertThat(customerDocument.getUri()).isEqualTo("uri1");

@@ -33,11 +33,11 @@ import android.os.UserHandle;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
-import com.android.server.appsearch.external.localbackend.AppSearchImpl;
-import com.android.server.appsearch.external.localbackend.converter.GenericDocumentToProtoConverter;
-import com.android.server.appsearch.external.localbackend.converter.SchemaToProtoConverter;
-import com.android.server.appsearch.external.localbackend.converter.SearchResultToProtoConverter;
-import com.android.server.appsearch.external.localbackend.converter.SearchSpecToProtoConverter;
+import com.android.server.appsearch.external.localstorage.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.converter.GenericDocumentToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SchemaToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SearchResultToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.SchemaProto;
@@ -46,6 +46,7 @@ import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -193,7 +194,12 @@ public class AppSearchManagerService extends SystemService {
                         SearchSpecToProtoConverter.toResultSpecProto(searchSpec),
                         SearchSpecToProtoConverter.toScoringSpecProto(searchSpec));
                 List<SearchResult> searchResultList =
-                        SearchResultToProtoConverter.convert(searchResultProto);
+                        new ArrayList<>(searchResultProto.getResultsCount());
+                for (int i = 0; i < searchResultProto.getResultsCount(); i++) {
+                    SearchResult result = SearchResultToProtoConverter.convertSearchResult(
+                            searchResultProto.getResults(i));
+                    searchResultList.add(result);
+                }
                 SearchResults searchResults =
                         new SearchResults(searchResultList, searchResultProto.getNextPageToken());
                 callback.complete(AppSearchResult.newSuccessfulResult(searchResults));

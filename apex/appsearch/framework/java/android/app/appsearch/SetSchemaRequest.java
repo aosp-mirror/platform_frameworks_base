@@ -16,13 +16,17 @@
 
 package android.app.appsearch;
 
-import android.annotation.NonNull;
-import android.util.ArraySet;
+import android.annotation.SuppressLint;
 
+import android.annotation.NonNull;
+import android.app.appsearch.exceptions.AppSearchException;
+import android.util.ArraySet;
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,15 +44,13 @@ public final class SetSchemaRequest {
         mForceOverride = forceOverride;
     }
 
-    /** @hide */
-    
+    /** Returns the schemas that are part of this request. */
     @NonNull
     public Set<AppSearchSchema> getSchemas() {
         return mSchemas;
     }
 
-    /** @hide */
-    
+    /** Returns whether this request will force the schema to be overridden. */
     public boolean isForceOverride() {
         return mForceOverride;
     }

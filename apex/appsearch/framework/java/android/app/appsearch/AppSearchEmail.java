@@ -27,8 +27,6 @@ import android.app.appsearch.AppSearchSchema.PropertyConfig;
  *
  * <p>This class is a higher level implement of {@link GenericDocument}.
  *
- * <p>This class will eventually migrate to Jetpack, where it will become public API.
- *
  * @hide
  */
 
@@ -99,10 +97,9 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /**
-     * Get the from address of {@link AppSearchEmail}.
+     * Gets the from address of {@link AppSearchEmail}.
      *
-     * @return Returns the subject of {@link AppSearchEmail} or {@code null} if it's not been set
-     *         yet.
+     * @return The subject of {@link AppSearchEmail} or {@code null} if it's not been set yet.
      */
     @Nullable
     public String getFrom() {
@@ -110,10 +107,10 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /**
-     * Get the destination addresses of {@link AppSearchEmail}.
+     * Gets the destination addresses of {@link AppSearchEmail}.
      *
-     * @return Returns the destination addresses of {@link AppSearchEmail} or {@code null} if it's
-     *         not been set yet.
+     * @return The destination addresses of {@link AppSearchEmail} or {@code null} if it's not
+     *         been set yet.
      */
     @Nullable
     public String[] getTo() {
@@ -121,10 +118,9 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /**
-     * Get the CC list of {@link AppSearchEmail}.
+     * Gets the CC list of {@link AppSearchEmail}.
      *
-     * @return Returns the CC list of {@link AppSearchEmail} or {@code null} if it's not been set
-     *         yet.
+     * @return The CC list of {@link AppSearchEmail} or {@code null} if it's not been set yet.
      */
     @Nullable
     public String[] getCc() {
@@ -132,10 +128,9 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /**
-     * Get the BCC list of {@link AppSearchEmail}.
+     * Gets the BCC list of {@link AppSearchEmail}.
      *
-     * @return Returns the BCC list of {@link AppSearchEmail} or {@code null} if it's not been set
-     *         yet.
+     * @return The BCC list of {@link AppSearchEmail} or {@code null} if it's not been set yet.
      */
     @Nullable
     public String[] getBcc() {
@@ -143,10 +138,9 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /**
-     * Get the subject of {@link AppSearchEmail}.
+     * Gets the subject of {@link AppSearchEmail}.
      *
-     * @return Returns the value subject of {@link AppSearchEmail} or {@code null} if it's not been
-     *         set yet.
+     * @return The value subject of {@link AppSearchEmail} or {@code null} if it's not been set yet.
      */
     @Nullable
     public String getSubject() {
@@ -154,9 +148,9 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /**
-     * Get the body of {@link AppSearchEmail}.
+     * Gets the body of {@link AppSearchEmail}.
      *
-     * @return Returns the body of {@link AppSearchEmail} or {@code null} if it's not been set yet.
+     * @return The body of {@link AppSearchEmail} or {@code null} if it's not been set yet.
      */
     @Nullable
     public String getBody() {
@@ -169,7 +163,8 @@ public class AppSearchEmail extends GenericDocument {
     public static class Builder extends GenericDocument.Builder<AppSearchEmail.Builder> {
 
         /**
-         * Create a new {@link AppSearchEmail.Builder}
+         * Creates a new {@link AppSearchEmail.Builder}
+         *
          * @param uri The Uri of the Email.
          */
         public Builder(@NonNull String uri) {
@@ -177,56 +172,56 @@ public class AppSearchEmail extends GenericDocument {
         }
 
         /**
-         * Set the from address of {@link AppSearchEmail}
+         * Sets the from address of {@link AppSearchEmail}
          */
         @NonNull
         public AppSearchEmail.Builder setFrom(@NonNull String from) {
-            setProperty(KEY_FROM, from);
+            setPropertyString(KEY_FROM, from);
             return this;
         }
 
         /**
-         * Set the destination address of {@link AppSearchEmail}
+         * Sets the destination address of {@link AppSearchEmail}
          */
         @NonNull
         public AppSearchEmail.Builder setTo(@NonNull String... to) {
-            setProperty(KEY_TO, to);
+            setPropertyString(KEY_TO, to);
             return this;
         }
 
         /**
-         * Set the CC list of {@link AppSearchEmail}
+         * Sets the CC list of {@link AppSearchEmail}
          */
         @NonNull
         public AppSearchEmail.Builder setCc(@NonNull String... cc) {
-            setProperty(KEY_CC, cc);
+            setPropertyString(KEY_CC, cc);
             return this;
         }
 
         /**
-         * Set the BCC list of {@link AppSearchEmail}
+         * Sets the BCC list of {@link AppSearchEmail}
          */
         @NonNull
         public AppSearchEmail.Builder setBcc(@NonNull String... bcc) {
-            setProperty(KEY_BCC, bcc);
+            setPropertyString(KEY_BCC, bcc);
             return this;
         }
 
         /**
-         * Set the subject of {@link AppSearchEmail}
+         * Sets the subject of {@link AppSearchEmail}
          */
         @NonNull
         public AppSearchEmail.Builder setSubject(@NonNull String subject) {
-            setProperty(KEY_SUBJECT, subject);
+            setPropertyString(KEY_SUBJECT, subject);
             return this;
         }
 
         /**
-         * Set the body of {@link AppSearchEmail}
+         * Sets the body of {@link AppSearchEmail}
          */
         @NonNull
         public AppSearchEmail.Builder setBody(@NonNull String body) {
-            setProperty(KEY_BODY, body);
+            setPropertyString(KEY_BODY, body);
             return this;
         }
 

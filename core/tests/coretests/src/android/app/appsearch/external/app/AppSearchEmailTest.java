@@ -30,7 +30,7 @@ public class AppSearchEmailTest {
                 // Score and Property are mixed into the middle to make sure DocumentBuilder's
                 // methods can be interleaved with EmailBuilder's methods.
                 .setScore(1)
-                .setProperty("propertyKey", "propertyValue1", "propertyValue2")
+                .setPropertyString("propertyKey", "propertyValue1", "propertyValue2")
                 .setSubject("subject")
                 .setBody("EmailBody")
                 .build();

@@ -39,22 +39,22 @@ public class GenericDocumentTest {
         GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setTtlMillis(1L)
-                .setProperty("longKey1", 1L, 2L, 3L)
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
         GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
                 .setTtlMillis(1L)
-                .setProperty("longKey1", 1L, 2L, 3L)
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
         assertThat(document1).isEqualTo(document2);
         assertThat(document1.hashCode()).isEqualTo(document2.hashCode());
@@ -64,23 +64,23 @@ public class GenericDocumentTest {
     public void testDocumentEquals_DifferentOrder() {
         GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("longKey1", 1L, 2L, 3L)
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
                 .build();
 
         // Create second document with same parameter but different order.
         GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("longKey1", 1L, 2L, 3L)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
                 .build();
         assertThat(document1).isEqualTo(document2);
         assertThat(document1.hashCode()).isEqualTo(document2.hashCode());
@@ -90,13 +90,13 @@ public class GenericDocumentTest {
     public void testDocumentEquals_Failure() {
         GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("longKey1", 1L, 2L, 3L)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
                 .build();
 
         // Create second document with same order but different value.
         GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("longKey1", 1L, 2L, 4L) // Different
+                .setPropertyLong("longKey1", 1L, 2L, 4L) // Different
                 .build();
         assertThat(document1).isNotEqualTo(document2);
         assertThat(document1.hashCode()).isNotEqualTo(document2.hashCode());
@@ -106,13 +106,13 @@ public class GenericDocumentTest {
     public void testDocumentEquals_Failure_RepeatedFieldOrder() {
         GenericDocument document1 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("booleanKey1", true, false, true)
+                .setPropertyBoolean("booleanKey1", true, false, true)
                 .build();
 
         // Create second document with same order but different value.
         GenericDocument document2 = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("booleanKey1", true, true, false) // Different
+                .setPropertyBoolean("booleanKey1", true, true, false) // Different
                 .build();
         assertThat(document1).isNotEqualTo(document2);
         assertThat(document1.hashCode()).isNotEqualTo(document2.hashCode());
@@ -124,12 +124,12 @@ public class GenericDocumentTest {
                 .setCreationTimestampMillis(5L)
                 .setScore(1)
                 .setTtlMillis(1L)
-                .setProperty("longKey1", 1L)
-                .setProperty("doubleKey1", 1.0)
-                .setProperty("booleanKey1", true)
-                .setProperty("stringKey1", "test-value1")
-                .setProperty("byteKey1", sByteArray1)
-                .setProperty("documentKey1", sDocumentProperties1)
+                .setPropertyLong("longKey1", 1L)
+                .setPropertyDouble("doubleKey1", 1.0)
+                .setPropertyBoolean("booleanKey1", true)
+                .setPropertyString("stringKey1", "test-value1")
+                .setPropertyBytes("byteKey1", sByteArray1)
+                .setPropertyDocument("documentKey1", sDocumentProperties1)
                 .build();
         assertThat(document.getUri()).isEqualTo("uri1");
         assertThat(document.getTtlMillis()).isEqualTo(1L);
@@ -149,12 +149,12 @@ public class GenericDocumentTest {
     public void testDocumentGetArrayValues() {
         GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("longKey1", 1L, 2L, 3L)
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
 
         assertThat(document.getUri()).isEqualTo("uri1");
@@ -176,12 +176,12 @@ public class GenericDocumentTest {
     public void testDocument_ToString() throws Exception {
         GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
                 .setCreationTimestampMillis(5L)
-                .setProperty("longKey1", 1L, 2L, 3L)
-                .setProperty("doubleKey1", 1.0, 2.0, 3.0)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("stringKey1", "String1", "String2", "String3")
-                .setProperty("byteKey1", sByteArray1, sByteArray2)
-                .setProperty("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyLong("longKey1", 1L, 2L, 3L)
+                .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyString("stringKey1", "String1", "String2", "String3")
+                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
+                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
                 .build();
         String exceptedString = "{ key: 'creationTimestampMillis' value: 5 } "
                 + "{ key: 'namespace' value:  } "
@@ -219,9 +219,9 @@ public class GenericDocumentTest {
     public void testDocumentGetValues_DifferentTypes() {
         GenericDocument document = new GenericDocument.Builder("uri1", "schemaType1")
                 .setScore(1)
-                .setProperty("longKey1", 1L)
-                .setProperty("booleanKey1", true, false, true)
-                .setProperty("stringKey1", "test-value1", "test-value2", "test-value3")
+                .setPropertyLong("longKey1", 1L)
+                .setPropertyBoolean("booleanKey1", true, false, true)
+                .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
                 .build();
 
         // Get a value for a key that doesn't exist
@@ -246,6 +246,7 @@ public class GenericDocumentTest {
     public void testDocumentInvalid() {
         GenericDocument.Builder builder = new GenericDocument.Builder("uri1", "schemaType1");
         expectThrows(
-                IllegalArgumentException.class, () -> builder.setProperty("test", new boolean[]{}));
+                IllegalArgumentException.class,
+                () -> builder.setPropertyBoolean("test", new boolean[]{}));
     }
 }
