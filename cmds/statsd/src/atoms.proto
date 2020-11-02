@@ -442,7 +442,7 @@ message Atom {
         AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
         TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         MediaOutputOpSwitchReported mediaoutput_op_switch_reported =
-            277 [(module) = "settings"];
+            277 [(module) = "sysui"];
         CellBroadcastMessageFiltered cb_message_filtered =
             278 [(module) = "cellbroadcast"];
         TvTunerDvrStatus tv_tuner_dvr_status = 279 [(module) = "framework"];
@@ -10789,7 +10789,7 @@ message BytesTransferByTagAndMetered {
  * Logs when the Media Output Switcher finishes a media switch operation.
  *
  * Logged from:
- *  packages/apps/Settings/src/com/android/settings/media/MediaOutputSliceWorker.java
+ *  packages/SystemUI/src/com/android/systemui/media/dialog/MediaOutputMetricLogger.java
  */
 message MediaOutputOpSwitchReported {
     // Source medium type before switching.

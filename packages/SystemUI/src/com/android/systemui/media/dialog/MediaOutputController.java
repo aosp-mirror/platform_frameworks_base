@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.drawable.IconCompat;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -84,11 +85,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     @VisibleForTesting
     LocalMediaManager mLocalMediaManager;
 
+    private MediaOutputMetricLogger mMetricLogger;
+    private UiEventLogger mUiEventLogger;
+
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
-            NotificationEntryManager notificationEntryManager) {
+            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -98,6 +102,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mNotificationEntryManager = notificationEntryManager;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
+        mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
+        mUiEventLogger = uiEventLogger;
     }
 
     void start(@NonNull Callback cb) {
@@ -151,6 +157,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public void onSelectedDeviceStateChanged(MediaDevice device,
             @LocalMediaManager.MediaDeviceState int state) {
         mCallback.onRouteChanged();
+        mMetricLogger.logOutputSuccess(device.toString(), mMediaDevices);
     }
 
     @Override
@@ -161,6 +168,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     @Override
     public void onRequestFailed(int reason) {
         mCallback.onRouteChanged();
+        mMetricLogger.logOutputFailure(mMediaDevices, reason);
     }
 
     CharSequence getHeaderTitle() {
@@ -311,6 +319,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     }
 
     void connectDevice(MediaDevice device) {
+        mMetricLogger.updateOutputEndPoints(getCurrentConnectedMediaDevice(), device);
+
         ThreadUtils.postOnBackgroundThread(() -> {
             mLocalMediaManager.connectDevice(device);
         });
@@ -439,7 +449,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
 
     void launchMediaOutputDialog() {
         mCallback.dismissDialog();
-        new MediaOutputDialog(mContext, mAboveStatusbar, this);
+        new MediaOutputDialog(mContext, mAboveStatusbar, this, mUiEventLogger);
     }
 
     void launchMediaOutputGroupDialog() {

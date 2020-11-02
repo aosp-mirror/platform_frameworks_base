@@ -28,6 +28,7 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -62,6 +63,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     private MediaDevice mMediaDevice1 = mock(MediaDevice.class);
     private NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
+    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
 
     private MediaOutputGroupDialog mMediaOutputGroupDialog;
     private MediaOutputController mMediaOutputController;
@@ -71,7 +73,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputGroupDialog = new MediaOutputGroupDialog(mContext, false,
                 mMediaOutputController);
