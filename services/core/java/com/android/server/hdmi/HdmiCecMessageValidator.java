@@ -153,6 +153,10 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
         addValidationInfo(
                 Constants.MESSAGE_DECK_STATUS, new OneByteRangeValidator(0x11, 0x1F), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_GIVE_DECK_STATUS,
+                new OneByteRangeValidator(0x01, 0x03),
+                DEST_DIRECT);
 
         // TODO: Handle messages for the Tuner Control.
 
