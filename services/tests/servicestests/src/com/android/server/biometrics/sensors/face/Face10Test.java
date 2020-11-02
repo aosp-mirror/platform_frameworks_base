@@ -46,6 +46,10 @@ public class Face10Test {
     private Face10 mFace10;
     private IBinder mBinder;
 
+    private static void waitForIdle() {
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -59,11 +63,8 @@ public class Face10Test {
 
     @Test
     public void scheduleRevokeChallenge_doesNotCrash() {
-        mFace10.scheduleRevokeChallenge(mBinder, TAG);
+        mFace10.scheduleRevokeChallenge(0 /* sensorId */, 0 /* userId */, mBinder, TAG,
+                0 /* challenge */);
         waitForIdle();
-    }
-
-    private static void waitForIdle() {
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 }
