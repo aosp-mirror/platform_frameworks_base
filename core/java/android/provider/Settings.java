@@ -9758,6 +9758,14 @@ public final class Settings {
                 "render_shadows_in_compositor";
 
         /**
+         * If true, submit buffers using blast in ViewRootImpl.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_USE_BLAST_ADAPTER_VR =
+                "use_blast_adapter_vr";
+
+        /**
          * If true, submit buffers using blast in SurfaceView.
          * (0 = false, 1 = true)
          * @hide
