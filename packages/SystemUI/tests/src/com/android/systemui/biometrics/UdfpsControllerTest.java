@@ -234,10 +234,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
         // WHEN fingerprint is requested because of AOD interrupt
-        mUdfpsController.onAodInterrupt(0, 0);
+        mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
         // THEN the event is passed to the FingerprintManager
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
-                eq(0), anyFloat(), anyFloat());
+                eq(0), eq(3f) /* minor */, eq(2f) /* major */);
         // AND the scrim and dot is shown
         verify(mUdfpsView).showScrimAndDot();
     }
@@ -247,7 +247,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN AOD interrupt
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
-        mUdfpsController.onAodInterrupt(0, 0);
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it is cancelled
         mUdfpsController.onCancelAodInterrupt();
         // THEN the scrim and dot is hidden
@@ -259,7 +259,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN AOD interrupt
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
-        mUdfpsController.onAodInterrupt(0, 0);
+        mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it times out
         mFgExecutor.advanceClockToNext();
         mFgExecutor.runAllReady();

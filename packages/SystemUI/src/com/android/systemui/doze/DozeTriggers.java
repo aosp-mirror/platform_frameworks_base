@@ -131,7 +131,10 @@ public class DozeTriggers implements DozeMachine.Part {
         DOZING_UPDATE_SENSOR_WAKE_LOCKSCREEN(440),
 
         @UiEvent(doc = "Dozing updated because sensor was tapped.")
-        DOZING_UPDATE_SENSOR_TAP(441);
+        DOZING_UPDATE_SENSOR_TAP(441),
+
+        @UiEvent(doc = "Dozing updated because on display auth was triggered from AOD.")
+        DOZING_UPDATE_AUTH_TRIGGERED(442);
 
         private final int mId;
 
@@ -155,6 +158,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 case 7: return DOZING_UPDATE_SENSOR_WAKEUP;
                 case 8: return DOZING_UPDATE_SENSOR_WAKE_LOCKSCREEN;
                 case 9: return DOZING_UPDATE_SENSOR_TAP;
+                case 10: return DOZING_UPDATE_AUTH_TRIGGERED;
                 default: return null;
             }
         }
@@ -289,7 +293,8 @@ public class DozeTriggers implements DozeMachine.Part {
                     requestPulse(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, true, null);
                     // Since the gesture won't be received by the UDFPS view, manually inject an
                     // event.
-                    mAuthController.onAodInterrupt((int) screenX, (int) screenY);
+                    mAuthController.onAodInterrupt((int) screenX, (int) screenY,
+                            rawValues[2] /* major */, rawValues[3] /* minor */);
                 } else {
                     mDozeHost.extendPulse(pulseReason);
                 }
