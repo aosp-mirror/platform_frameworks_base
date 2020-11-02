@@ -305,8 +305,8 @@ public class PipMenuActivityController {
     }
 
     private boolean maybeCreateSyncApplier() {
-        if (mPipMenuView == null) {
-            Log.v(TAG, "Not going to move PiP since the menu is not created.");
+        if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
+            Log.v(TAG, "Not going to move PiP, either menu or its parent is not created.");
             return false;
         }
 

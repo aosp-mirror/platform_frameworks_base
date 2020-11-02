@@ -41,7 +41,6 @@ import android.window.WindowContainerToken;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -69,7 +68,6 @@ public class PipTaskOrganizerTest extends PipTestCase {
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
     @Mock private Optional<SplitScreen> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
-    @Mock private SystemWindows mSystemWindows;
     private PipBoundsState mPipBoundsState;
 
     private ComponentName mComponent1;
@@ -84,7 +82,7 @@ public class PipTaskOrganizerTest extends PipTestCase {
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext, mPipBoundsState,
                 mMockPipBoundsHandler, mMenuActivityController, mMockPipSurfaceTransactionHelper,
                 mMockOptionalSplitScreen, mMockdDisplayController, mMockPipUiEventLogger,
-                mMockShellTaskOrganizer, mSystemWindows));
+                mMockShellTaskOrganizer));
         preparePipTaskOrg();
     }
 
