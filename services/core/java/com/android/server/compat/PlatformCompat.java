@@ -381,6 +381,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         if (change.getLoggingOnly()) {
             return false;
         }
+        if (change.getId() == CompatChange.CTS_SYSTEM_API_CHANGEID) {
+            return false;
+        }
         if (change.getEnableSinceTargetSdk() > 0) {
             if (change.getEnableSinceTargetSdk() < sMinTargetSdk
                     || change.getEnableSinceTargetSdk() > sMaxTargetSdk) {
