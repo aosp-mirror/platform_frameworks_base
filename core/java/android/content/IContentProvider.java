@@ -152,7 +152,7 @@ public interface IContentProvider extends IInterface {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static final String descriptor = "android.content.IContentProvider";
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final int QUERY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
     static final int GET_TYPE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 1;
     static final int INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;

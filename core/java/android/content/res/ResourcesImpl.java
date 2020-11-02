@@ -83,9 +83,9 @@ public class ResourcesImpl {
 
     static final String TAG_PRELOAD = TAG + ".preload";
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final boolean TRACE_FOR_PRELOAD = false; // Do we still need it?
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final boolean TRACE_FOR_MISS_PRELOAD = false; // Do we still need it?
 
     public static final boolean TRACE_FOR_DETAILED_PRELOAD =
@@ -102,7 +102,7 @@ public class ResourcesImpl {
     private static final Object sSync = new Object();
 
     private static boolean sPreloaded;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean mPreloading;
 
     // Information about preloaded resources.  Note that they are not
@@ -160,7 +160,7 @@ public class ResourcesImpl {
 
     private PluralRules mPluralRule;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final Configuration mConfiguration = new Configuration();
 
     static {
@@ -180,7 +180,7 @@ public class ResourcesImpl {
      * @param displayAdjustments this resource's Display override and compatibility info.
      *                           Must not be null.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
@@ -199,7 +199,7 @@ public class ResourcesImpl {
         return mAssets;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     DisplayMetrics getDisplayMetrics() {
         if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
                 + "x" + mMetrics.heightPixels + " " + mMetrics.density);
@@ -227,7 +227,7 @@ public class ResourcesImpl {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void getValue(@AnyRes int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, 0, outValue, resolveRefs);

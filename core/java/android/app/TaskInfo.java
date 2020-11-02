@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class TaskInfo {
      * The id of the user the task was running as.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int userId;
 
     /**

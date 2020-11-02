@@ -130,7 +130,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         startLoadFromDisk();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void startLoadFromDisk() {
         synchronized (mLock) {
             mLoaded = false;

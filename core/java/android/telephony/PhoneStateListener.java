@@ -834,7 +834,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onDataConnectionRealTimeInfoChanged(
             DataConnectionRealTimeInfo dcRtInfo) {
         // default implementation empty
@@ -1040,7 +1040,7 @@ public class PhoneStateListener {
      * @param rawData is the byte array of the OEM hook raw data.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onOemHookRawEvent(byte[] rawData) {
         // default implementation empty
     }

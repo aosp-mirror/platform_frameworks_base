@@ -190,7 +190,7 @@ public final class ServiceManager {
      * @param dumpPriority supported dump priority levels as a bitmask
      * to access this service
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void addService(String name, IBinder service, boolean allowIsolated,
             int dumpPriority) {
         try {
