@@ -22,6 +22,7 @@ import static android.util.imetracing.ImeTracing.PROTO_ARG;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.EDITOR_INFO;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_INSETS_SOURCE_CONSUMER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INPUT_CONNECTION;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INPUT_METHOD_MANAGER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.VIEW_ROOT_IMPL;
 import static android.view.inputmethod.InputMethodManagerProto.ACTIVE;
@@ -998,9 +999,9 @@ public final class InputMethodManager {
         private final InputMethodManager mParentInputMethodManager;
         private final WeakReference<View> mServedView;
 
-        ControlledInputConnectionWrapper(Looper mainLooper, InputConnection conn,
+        ControlledInputConnectionWrapper(Looper icLooper, InputConnection conn,
                 InputMethodManager inputMethodManager, View servedView) {
-            super(mainLooper, conn);
+            super(icLooper, conn);
             mParentInputMethodManager = inputMethodManager;
             mServedView = new WeakReference<>(servedView);
         }
@@ -1045,6 +1046,18 @@ public final class InputMethodManager {
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
                     + " mServedView=" + mServedView.get()
                     + "}";
+        }
+
+        void dumpDebug(ProtoOutputStream proto, long fieldId) {
+            // Check that the call is initiated in the main thread of the current InputConnection
+            // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
+            // executed on this thread. Otherwise the messages are dispatched to the correct thread
+            // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
+            // reasons.
+            if (getInputConnection() instanceof DumpableInputConnection && Looper.myLooper()
+                    == getLooper()) {
+                ((DumpableInputConnection) getInputConnection()).dumpDebug(proto, fieldId);
+            }
         }
     }
 
@@ -2207,6 +2220,7 @@ public final class InputMethodManager {
      * @hide
      */
     public void notifyImeHidden(IBinder windowToken) {
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this);
         synchronized (mH) {
             try {
                 if (mCurMethod != null && mCurRootView != null
@@ -3311,6 +3325,9 @@ public final class InputMethodManager {
             }
             if (mImeInsetsConsumer != null) {
                 mImeInsetsConsumer.dumpDebug(proto, IME_INSETS_SOURCE_CONSUMER);
+            }
+            if (mServedInputConnectionWrapper != null) {
+                mServedInputConnectionWrapper.dumpDebug(proto, INPUT_CONNECTION);
             }
         }
     }

@@ -111,6 +111,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         }
     }
 
+    protected Looper getLooper() {
+        synchronized (mMainLooper) {
+            return mMainLooper;
+        }
+    }
+
     protected boolean isFinished() {
         synchronized (mLock) {
             return mFinished;
