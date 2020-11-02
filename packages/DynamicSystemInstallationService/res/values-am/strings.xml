@@ -13,4 +13,6 @@
     <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"ዳግም ጀምር"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"የተጣለ ተለዋዋጭ ሥርዓት"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"ዳግም ማስጀመር አይቻልም ወይም ተለዋዋጭ ሥርዓትን ይስቀሉ"</string>
+    <!-- no translation found for toast_failed_to_disable_dynsystem (3285742944977744413) -->
+    <skip />
 </resources>
