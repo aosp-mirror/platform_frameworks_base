@@ -69,6 +69,7 @@ public class WifiConfigurationTest {
         config.setPasspointManagementObjectTree(cookie);
         config.trusted = false;
         config.oemPaid = true;
+        config.oemPrivate = true;
         config.updateIdentifier = "1234";
         config.fromWifiNetworkSpecifier = true;
         config.fromWifiNetworkSuggestion = true;
@@ -91,8 +92,10 @@ public class WifiConfigurationTest {
         assertEquals(macBeforeParcel, reconfig.getRandomizedMacAddress());
         assertEquals(config.updateIdentifier, reconfig.updateIdentifier);
         assertFalse(reconfig.trusted);
-        assertTrue(config.fromWifiNetworkSpecifier);
-        assertTrue(config.fromWifiNetworkSuggestion);
+        assertTrue(reconfig.fromWifiNetworkSpecifier);
+        assertTrue(reconfig.fromWifiNetworkSuggestion);
+        assertTrue(reconfig.oemPaid);
+        assertTrue(reconfig.oemPrivate);
 
         Parcel parcelWW = Parcel.obtain();
         reconfig.writeToParcel(parcelWW, 0);
@@ -100,6 +103,32 @@ public class WifiConfigurationTest {
         parcelWW.recycle();
 
         assertArrayEquals(bytes, rebytes);
+    }
+
+    @Test
+    public void testWifiConfigurationCopyConstructor() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.trusted = false;
+        config.oemPaid = true;
+        config.oemPrivate = true;
+        config.updateIdentifier = "1234";
+        config.fromWifiNetworkSpecifier = true;
+        config.fromWifiNetworkSuggestion = true;
+        config.setRandomizedMacAddress(MacAddressUtils.createRandomUnicastAddress());
+        MacAddress macBeforeParcel = config.getRandomizedMacAddress();
+        config.subscriptionId = 1;
+        config.carrierId = 1189;
+
+        WifiConfiguration reconfig = new WifiConfiguration(config);
+
+        // lacking a useful config.equals, check two fields near the end.
+        assertEquals(macBeforeParcel, reconfig.getRandomizedMacAddress());
+        assertEquals(config.updateIdentifier, reconfig.updateIdentifier);
+        assertFalse(reconfig.trusted);
+        assertTrue(reconfig.fromWifiNetworkSpecifier);
+        assertTrue(reconfig.fromWifiNetworkSuggestion);
+        assertTrue(reconfig.oemPaid);
+        assertTrue(reconfig.oemPrivate);
     }
 
     @Test

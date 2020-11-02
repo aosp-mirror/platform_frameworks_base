@@ -164,6 +164,11 @@ public class WifiInfo implements Parcelable {
     private boolean mOemPaid;
 
     /**
+     * Whether the network is oem private or not.
+     */
+    private boolean mOemPrivate;
+
+    /**
      * OSU (Online Sign Up) AP for Passpoint R2.
      */
     private boolean mOsuAp;
@@ -327,6 +332,9 @@ public class WifiInfo implements Parcelable {
         setFrequency(-1);
         setMeteredHint(false);
         setEphemeral(false);
+        setTrusted(false);
+        setOemPaid(false);
+        setOemPrivate(false);
         setOsuAp(false);
         setRequestingPackageName(null);
         setFQDN(null);
@@ -363,7 +371,8 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
-            mTrusted = source.mOemPaid;
+            mOemPaid = source.mOemPaid;
+            mOemPrivate = source.mOemPrivate;
             mRequestingPackageName =
                     source.mRequestingPackageName;
             mOsuAp = source.mOsuAp;
@@ -722,7 +731,12 @@ public class WifiInfo implements Parcelable {
         mTrusted = trusted;
     }
 
-    /** {@hide} */
+    /**
+     * Returns true if the current Wifi network is a trusted network, false otherwise.
+     * @see WifiNetworkSuggestion.Builder#setUntrusted(boolean).
+     * {@hide}
+     */
+    @SystemApi
     public boolean isTrusted() {
         return mTrusted;
     }
@@ -732,9 +746,29 @@ public class WifiInfo implements Parcelable {
         mOemPaid = oemPaid;
     }
 
-    /** {@hide} */
+    /**
+     * Returns true if the current Wifi network is an oem paid network, false otherwise.
+     * @see WifiNetworkSuggestion.Builder#setOemPaid(boolean).
+     * {@hide}
+     */
+    @SystemApi
     public boolean isOemPaid() {
         return mOemPaid;
+    }
+
+    /** {@hide} */
+    public void setOemPrivate(boolean oemPrivate) {
+        mOemPrivate = oemPrivate;
+    }
+
+    /**
+     * Returns true if the current Wifi network is an oem private network, false otherwise.
+     * @see WifiNetworkSuggestion.Builder#setOemPrivate(boolean).
+     * {@hide}
+     */
+    @SystemApi
+    public boolean isOemPrivate() {
+        return mOemPrivate;
     }
 
     /** {@hide} */
@@ -975,6 +1009,7 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mEphemeral ? 1 : 0);
         dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(mOemPaid ? 1 : 0);
+        dest.writeInt(mOemPrivate ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
         dest.writeDouble(mSuccessfulTxPacketsPerSecond);
@@ -1021,6 +1056,7 @@ public class WifiInfo implements Parcelable {
                 info.mEphemeral = in.readInt() != 0;
                 info.mTrusted = in.readInt() != 0;
                 info.mOemPaid = in.readInt() != 0;
+                info.mOemPrivate = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
                 info.mSuccessfulTxPacketsPerSecond = in.readDouble();

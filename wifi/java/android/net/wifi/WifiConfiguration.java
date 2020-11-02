@@ -1011,6 +1011,17 @@ public class WifiConfiguration implements Parcelable {
      */
     public boolean oemPaid;
 
+
+    /**
+     * Indicate whether the network is oem private or not. Networks are considered oem private
+     * if the corresponding connection is only available to system apps.
+     *
+     * This bit can only be used by suggestion network, see
+     * {@link WifiNetworkSuggestion.Builder#setOemPrivate(boolean)}
+     * @hide
+     */
+    public boolean oemPrivate;
+
     /**
      * True if this Wifi configuration is created from a {@link WifiNetworkSuggestion},
      * false otherwise.
@@ -2249,6 +2260,7 @@ public class WifiConfiguration implements Parcelable {
         osu = false;
         trusted = true; // Networks are considered trusted by default.
         oemPaid = false;
+        oemPrivate = false;
         fromWifiNetworkSuggestion = false;
         fromWifiNetworkSpecifier = false;
         meteredHint = false;
@@ -2372,13 +2384,14 @@ public class WifiConfiguration implements Parcelable {
         if (this.osu) sbuf.append(" osu");
         if (this.trusted) sbuf.append(" trusted");
         if (this.oemPaid) sbuf.append(" oemPaid");
+        if (this.oemPrivate) sbuf.append(" oemPrivate");
         if (this.fromWifiNetworkSuggestion) sbuf.append(" fromWifiNetworkSuggestion");
         if (this.fromWifiNetworkSpecifier) sbuf.append(" fromWifiNetworkSpecifier");
         if (this.meteredHint) sbuf.append(" meteredHint");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.validatedInternetAccess || this.ephemeral || this.trusted || this.oemPaid
-                || this.fromWifiNetworkSuggestion || this.fromWifiNetworkSpecifier
-                || this.meteredHint || this.useExternalScores) {
+                || this.oemPrivate || this.fromWifiNetworkSuggestion
+                || this.fromWifiNetworkSpecifier || this.meteredHint || this.useExternalScores) {
             sbuf.append("\n");
         }
         if (this.meteredOverride != METERED_OVERRIDE_NONE) {
@@ -2943,6 +2956,7 @@ public class WifiConfiguration implements Parcelable {
             osu = source.osu;
             trusted = source.trusted;
             oemPaid = source.oemPaid;
+            oemPrivate = source.oemPrivate;
             fromWifiNetworkSuggestion = source.fromWifiNetworkSuggestion;
             fromWifiNetworkSpecifier = source.fromWifiNetworkSpecifier;
             meteredHint = source.meteredHint;
@@ -3024,6 +3038,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(ephemeral ? 1 : 0);
         dest.writeInt(trusted ? 1 : 0);
         dest.writeInt(oemPaid ? 1 : 0);
+        dest.writeInt(oemPrivate ? 1 : 0);
         dest.writeInt(fromWifiNetworkSuggestion ? 1 : 0);
         dest.writeInt(fromWifiNetworkSpecifier ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
@@ -3102,6 +3117,7 @@ public class WifiConfiguration implements Parcelable {
                 config.ephemeral = in.readInt() != 0;
                 config.trusted = in.readInt() != 0;
                 config.oemPaid = in.readInt() != 0;
+                config.oemPrivate = in.readInt() != 0;
                 config.fromWifiNetworkSuggestion =  in.readInt() != 0;
                 config.fromWifiNetworkSpecifier =  in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
