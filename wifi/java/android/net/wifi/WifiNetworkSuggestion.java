@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -180,6 +181,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
         private boolean mIsNetworkOemPaid;
 
         /**
+         * Whether this network will be brought up as OEM private (OEM_PRIVATE capability bit
+         * added).
+         */
+        private boolean mIsNetworkOemPrivate;
+
+        /**
          * Whether this network will use enhanced MAC randomization.
          */
         private boolean mIsEnhancedMacRandomizationEnabled;
@@ -206,6 +213,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mWapiEnterpriseConfig = null;
             mIsNetworkUntrusted = false;
             mIsNetworkOemPaid = false;
+            mIsNetworkOemPrivate = false;
             mPriorityGroup = 0;
             mIsEnhancedMacRandomizationEnabled = false;
             mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -667,6 +675,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * reduce it). The connectivity service may use this information to influence the overall
          * network configuration of the device.
          * <p>
+         * <li> These suggestions are only considered for network selection if a
+         * {@link NetworkRequest} without {@link NetworkCapabilities#NET_CAPABILITY_TRUSTED}
+         * capability is filed.
          * <li> An untrusted network's credentials may not be shared with the user using
          * {@link #setCredentialSharedWithUser(boolean)}.</li>
          * <li> If not set, defaults to false (i.e. network is trusted).</li>
@@ -688,7 +699,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <li>The connectivity service may use this information to influence the overall
          * network configuration of the device. This network is typically only available to system
          * apps.
-         * <li>On devices which support only 1 concurrent connection (indicated via
+         * <li>On devices which do not support concurrent connection (indicated via
          * {@link WifiManager#isMultiStaConcurrencySupported()}, Wi-Fi network selection process may
          * use this information to influence priority of the suggested network for Wi-Fi network
          * selection (most likely to reduce it).
@@ -699,6 +710,13 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <p>
          * <li> An OEM paid network's credentials may not be shared with the user using
          * {@link #setCredentialSharedWithUser(boolean)}.</li>
+         * <li> These suggestions are only considered for network selection if a
+         * {@link NetworkRequest} with {@link NetworkCapabilities#NET_CAPABILITY_OEM_PAID}
+         * capability is filed.
+         * <li> Each suggestion can have both {@link #setOemPaid(boolean)} and
+         * {@link #setOemPrivate(boolean)} set if the app wants these suggestions considered
+         * for creating either an OEM paid network or OEM private network determined based on
+         * the {@link NetworkRequest} that is active.
          * <li> If not set, defaults to false (i.e. network is not OEM paid).</li>
          *
          * @param isOemPaid Boolean indicating whether the network should be brought up as OEM paid
@@ -712,6 +730,48 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 throw new UnsupportedOperationException();
             }
             mIsNetworkOemPaid = isOemPaid;
+            return this;
+        }
+
+        /**
+         * Specifies whether the system will bring up the network (if selected) as OEM private. An
+         * OEM private network has {@link NetworkCapabilities#NET_CAPABILITY_OEM_PRIVATE} capability
+         * added.
+         * Note:
+         * <li>The connectivity service may use this information to influence the overall
+         * network configuration of the device. This network is typically only available to system
+         * apps.
+         * <li>On devices which do not support concurrent connection (indicated via
+         * {@link WifiManager#isMultiStaConcurrencySupported()}, Wi-Fi network selection process may
+         * use this information to influence priority of the suggested network for Wi-Fi network
+         * selection (most likely to reduce it).
+         * <li>On devices which support more than 1 concurrent connections (indicated via
+         * {@link WifiManager#isMultiStaConcurrencySupported()}, these OEM private networks will be
+         * brought up as a secondary concurrent connection (primary connection will be used
+         * for networks available to the user and all apps.
+         * <p>
+         * <li> An OEM private network's credentials may not be shared with the user using
+         * {@link #setCredentialSharedWithUser(boolean)}.</li>
+         * <li> These suggestions are only considered for network selection if a
+         * {@link NetworkRequest} with {@link NetworkCapabilities#NET_CAPABILITY_OEM_PRIVATE}
+         * capability is filed.
+         * <li> Each suggestion can have both {@link #setOemPaid(boolean)} and
+         * {@link #setOemPrivate(boolean)} set if the app wants these suggestions considered
+         * for creating either an OEM paid network or OEM private network determined based on
+         * the {@link NetworkRequest} that is active.
+         * <li> If not set, defaults to false (i.e. network is not OEM private).</li>
+         *
+         * @param isOemPrivate Boolean indicating whether the network should be brought up as OEM
+         *                     private (if true) or not OEM private (if false).
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setOemPrivate(boolean isOemPrivate) {
+            if (!SdkLevel.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
+            mIsNetworkOemPrivate = isOemPrivate;
             return this;
         }
 
@@ -786,6 +846,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.carrierId = mCarrierId;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             wifiConfiguration.oemPaid = mIsNetworkOemPaid;
+            wifiConfiguration.oemPrivate = mIsNetworkOemPrivate;
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
                     ? WifiConfiguration.RANDOMIZATION_ENHANCED
                     : WifiConfiguration.RANDOMIZATION_PERSISTENT;
@@ -819,6 +880,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.meteredOverride = mMeteredOverride;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             wifiConfiguration.oemPaid = mIsNetworkOemPaid;
+            wifiConfiguration.oemPrivate = mIsNetworkOemPrivate;
             wifiConfiguration.subscriptionId = mSubscriptionId;
             mPasspointConfiguration.setCarrierId(mCarrierId);
             mPasspointConfiguration.setSubscriptionId(mSubscriptionId);
@@ -935,6 +997,14 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     throw new IllegalStateException("Should not be both"
                             + "setCredentialSharedWithUser and +"
                             + "setOemPaid to true");
+                }
+                mIsSharedWithUser = false;
+            }
+            if (mIsNetworkOemPrivate) {
+                if (mIsSharedWithUserSet && mIsSharedWithUser) {
+                    throw new IllegalStateException("Should not be both"
+                            + "setCredentialSharedWithUser and +"
+                            + "setOemPrivate to true");
                 }
                 mIsSharedWithUser = false;
             }
@@ -1105,6 +1175,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isInitialAutoJoinEnabled=").append(isInitialAutoJoinEnabled)
                 .append(", isUnTrusted=").append(!wifiConfiguration.trusted)
                 .append(", isOemPaid=").append(wifiConfiguration.oemPaid)
+                .append(", isOemPrivate=").append(wifiConfiguration.oemPrivate)
                 .append(", priorityGroup=").append(priorityGroup)
                 .append(" ]");
         return sb.toString();
@@ -1209,6 +1280,18 @@ public final class WifiNetworkSuggestion implements Parcelable {
             throw new UnsupportedOperationException();
         }
         return wifiConfiguration.oemPaid;
+    }
+
+    /**
+     * @see Builder#setOemPrivate(boolean)
+     * @hide
+     */
+    @SystemApi
+    public boolean isOemPrivate() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return wifiConfiguration.oemPrivate;
     }
 
     /**

@@ -223,6 +223,34 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for OWE network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForOemPrivateEnhancedOpenNetworkWithBssid() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setBssid(MacAddress.fromString(TEST_BSSID))
+                .setOemPrivate(true)
+                .setIsEnhancedOpen(true)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertEquals(TEST_BSSID, suggestion.wifiConfiguration.BSSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.OWE));
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertTrue(suggestion.wifiConfiguration.oemPrivate);
+        assertTrue(suggestion.isOemPrivate());
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
      * {@link WifiNetworkSuggestion.Builder#build()} for SAE network.
      */
     @Test
@@ -1285,6 +1313,41 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Validate {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} set the
+     * correct value to the WifiConfiguration.
+     */
+    @Test
+    public void testSetIsNetworkAsOemPrivate() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setOemPrivate(true)
+                .build();
+        assertTrue(suggestion.isOemPrivate());
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
+    }
+
+    /**
+     * Validate {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} set the
+     * correct value to the WifiConfiguration.
+     * Also the {@link WifiNetworkSuggestion#isUserAllowedToManuallyConnect} should be false;
+     */
+    @Test
+    public void testSetIsNetworkAsOemPrivateOnPasspointNetwork() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setOemPrivate(true)
+                .build();
+        assertTrue(suggestion.isOemPrivate());
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
+    }
+
+    /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
      * when set {@link WifiNetworkSuggestion.Builder#setUntrusted(boolean)} to true and
      * set {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} to true
@@ -1315,6 +1378,24 @@ public class WifiNetworkSuggestionTest {
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setCredentialSharedWithUser(true)
                 .setOemPaid(true)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when set {@link WifiNetworkSuggestion.Builder#setOemPrivate(boolean)} to true and
+     * set {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} to true
+     * together.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetCredentialSharedWithUserWithSetIsNetworkAsOemPrivate() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setCredentialSharedWithUser(true)
+                .setOemPrivate(true)
                 .build();
     }
 
