@@ -18,8 +18,9 @@
 package com.android.internal.os;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.BasicShellCommandHandler;
 import android.os.Build;
+
+import com.android.modules.utils.BasicShellCommandHandler;
 
 import java.io.PrintStream;
 

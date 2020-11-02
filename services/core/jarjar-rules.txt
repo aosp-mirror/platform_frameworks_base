@@ -1,0 +1,2 @@
+# For ConnectivityService module
+rule com.android.modules.utils.** com.android.connectivity.utils.@1
