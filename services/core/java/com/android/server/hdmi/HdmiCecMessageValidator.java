@@ -148,7 +148,6 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
                 new AsciiValidator(3), DEST_BROADCAST);
 
-        // TODO: Handle messages for the Deck Control.
         addValidationInfo(
                 Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
         addValidationInfo(
@@ -157,6 +156,7 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_GIVE_DECK_STATUS,
                 new OneByteRangeValidator(0x01, 0x03),
                 DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_PLAY, new PlayModeValidator(), DEST_DIRECT);
 
         // TODO: Handle messages for the Tuner Control.
 
@@ -869,6 +869,25 @@ public class HdmiCecMessageValidator {
                 return ERROR_PARAMETER_SHORT;
             }
             return toErrorCode(isValidTimerStatusData(params, 0));
+        }
+    }
+
+    /**
+     * Check if the given play mode parameter is valid. A valid parameter should lie within the
+     * range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     */
+    private class PlayModeValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isWithinRange(params[0], 0x05, 0x07)
+                    || isWithinRange(params[0], 0x09, 0x0B)
+                    || isWithinRange(params[0], 0x15, 0x17)
+                    || isWithinRange(params[0], 0x19, 0x1B)
+                    || isWithinRange(params[0], 0x24, 0x25)
+                    || (params[0] == 0x20));
         }
     }
 }
