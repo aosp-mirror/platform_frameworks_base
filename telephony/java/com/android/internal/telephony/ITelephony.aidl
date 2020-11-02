@@ -975,13 +975,6 @@ interface ITelephony {
     boolean setPreferredNetworkType(int subId, int networkType);
 
     /**
-     * User enable/disable Mobile Data.
-     *
-     * @param enable true to turn on, else false
-     */
-    void setUserDataEnabled(int subId, boolean enable);
-
-    /**
      * Get the user enabled state of Mobile Data.
      *
      * TODO: remove and use isUserDataEnabled.
@@ -1002,11 +995,28 @@ interface ITelephony {
     boolean isUserDataEnabled(int subId);
 
     /**
-     * Get the overall enabled state of Mobile Data.
-     *
+     * Check if data is enabled on the device. It can be disabled by
+     * user, carrier, policy or thermal.
      * @return true on enabled
      */
     boolean isDataEnabled(int subId);
+
+    /**
+     * Control of data connection and provide the reason triggering the data connection control.
+     *
+     * @param subId user preferred subId.
+     * @param reason the reason the data enable change is taking place
+     * @param enable true to turn on, else false
+     */
+     void setDataEnabledForReason(int subId, int reason, boolean enable);
+
+    /**
+     * Return whether data is enabled for certain reason
+     * @param subId user preferred subId.       .
+     * @param reason the reason the data enable change is taking place
+     * @return true on enabled
+    */
+    boolean isDataEnabledForReason(int subId, int reason);
 
      /**
      * Checks if manual network selection is allowed.
@@ -1605,15 +1615,6 @@ interface ITelephony {
     int getCarrierIdFromMccMnc(int slotIndex, String mccmnc, boolean isSubscriptionMccMnc);
 
     /**
-     * Action set from carrier signalling broadcast receivers to enable/disable metered apns
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     * @param subId the subscription ID that this action applies to.
-     * @param enabled control enable or disable metered apns.
-     * @hide
-     */
-    void carrierActionSetMeteredApnsEnabled(int subId, boolean visible);
-
-    /**
      * Action set from carrier signalling broadcast receivers to enable/disable radio
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      * @param subId the subscription ID that this action applies to.
@@ -1649,14 +1650,6 @@ interface ITelephony {
     void getCallWaitingStatus(int subId, IIntegerConsumer callback);
 
     void setCallWaitingStatus(int subId, boolean enabled, IIntegerConsumer callback);
-
-    /**
-     * Policy control of data connection. Usually used when data limit is passed.
-     * @param enabled True if enabling the data, otherwise disabling.
-     * @param subId Subscription index
-     * @hide
-     */
-    void setPolicyDataEnabled(boolean enabled, int subId);
 
     /**
      * Get Client request stats which will contain statistical information

@@ -9160,8 +9160,10 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param enable Whether to enable mobile data.
+     * @deprecated use setDataEnabledForReason with reason DATA_ENABLED_REASON_USER instead.
      *
      */
+    @Deprecated
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setDataEnabled(boolean enable) {
@@ -9170,19 +9172,16 @@ public class TelephonyManager {
 
     /**
      * @hide
-     * @deprecated use {@link #setDataEnabled(boolean)} instead.
+     * @deprecated use {@link #setDataEnabledForReason(int, boolean)} instead.
     */
     @SystemApi
     @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setDataEnabled(int subId, boolean enable) {
         try {
-            Log.d(TAG, "setDataEnabled: enabled=" + enable);
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.setUserDataEnabled(subId, enable);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setUserDataEnabled", e);
+            setDataEnabledForReason(subId, DATA_ENABLED_REASON_USER, enable);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling setDataEnabledForReason e:" + e);
         }
     }
 
@@ -9390,15 +9389,12 @@ public class TelephonyManager {
     @Deprecated
     @SystemApi
     public boolean getDataEnabled(int subId) {
-        boolean retVal = false;
         try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                retVal = telephony.isUserDataEnabled(subId);
-        } catch (RemoteException | NullPointerException e) {
-            Log.e(TAG, "Error calling ITelephony#isUserDataEnabled", e);
+            return isDataEnabledForReason(DATA_ENABLED_REASON_USER);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling isDataEnabledForReason e:" + e);
         }
-        return retVal;
+        return false;
     }
 
     /**
@@ -10956,19 +10952,18 @@ public class TelephonyManager {
      *
      * @param enabled control enable or disable carrier data.
      * @see #resetAllCarrierActions()
+     * @deprecated use {@link #setDataEnabledForReason(int, boolean) with
+     * reason {@link #DATA_ENABLED_REASON_CARRIER}} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCarrierDataEnabled(boolean enabled) {
         try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                service.carrierActionSetMeteredApnsEnabled(
-                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setCarrierDataEnabled", e);
+            setDataEnabledForReason(DATA_ENABLED_REASON_CARRIER, enabled);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling setDataEnabledForReason e:" + e);
         }
     }
 
@@ -11054,18 +11049,142 @@ public class TelephonyManager {
     /**
      * Policy control of data connection. Usually used when data limit is passed.
      * @param enabled True if enabling the data, otherwise disabling.
+     * @deprecated use {@link #setDataEnabledForReason(int, boolean) with
+     * reason {@link #DATA_ENABLED_REASON_POLICY}} instead.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setPolicyDataEnabled(boolean enabled) {
         try {
+            setDataEnabledForReason(DATA_ENABLED_REASON_POLICY, enabled);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling setDataEnabledForReason e:" + e);
+        }
+    }
+
+    /** @hide */
+    @IntDef({
+            DATA_ENABLED_REASON_USER,
+            DATA_ENABLED_REASON_POLICY,
+            DATA_ENABLED_REASON_CARRIER,
+            DATA_ENABLED_REASON_THERMAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataEnabledReason{}
+
+    /**
+     * To indicate that user enabled or disabled data.
+     */
+    public static final int DATA_ENABLED_REASON_USER = 0;
+
+    /**
+     * To indicate that data control due to policy. Usually used when data limit is passed.
+     * Policy data on/off won't affect user settings but will bypass the
+     * settings and turns off data internally if set to {@code false}.
+     */
+    public static final int DATA_ENABLED_REASON_POLICY = 1;
+
+    /**
+     * To indicate enable or disable carrier data by the system based on carrier signalling or
+     * carrier privileged apps. Carrier data on/off won't affect user settings but will bypass the
+     * settings and turns off data internally if set to {@code false}.
+     */
+    public static final int DATA_ENABLED_REASON_CARRIER = 2;
+
+    /**
+     * To indicate enable or disable data by thermal service.
+     * Thermal data on/off won't affect user settings but will bypass the
+     * settings and turns off data internally if set to {@code false}.
+     */
+    public static final int DATA_ENABLED_REASON_THERMAL = 3;
+
+    /**
+     * Control of data connection and provide the reason triggering the data connection control.
+     * This can be called for following reasons
+     * <ol>
+     * <li>data limit is passed {@link #DATA_ENABLED_REASON_POLICY}
+     * <li>data disabled by carrier {@link #DATA_ENABLED_REASON_CARRIER}
+     * <li>data disabled by user {@link #DATA_ENABLED_REASON_USER}
+     * <li>data disabled due to thermal {@link #DATA_ENABLED_REASON_THERMAL}
+     * </ol>
+     * If any of the reason is off, then it will result in
+     * bypassing user preference and result in data to be turned off.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies
+     *      to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     *
+     * @param reason the reason the data enable change is taking place
+     * @param enabled True if enabling the data, otherwise disabling.
+     *
+     * <p>Requires Permission:
+     * The calling app has carrier privileges (see {@link #hasCarrierPrivileges}) if the reason is
+     * {@link #DATA_ENABLED_REASON_USER} or {@link #DATA_ENABLED_REASON_CARRIER} or the call app
+     * has {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} irrespective of
+     * the reason.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setDataEnabledForReason(@DataEnabledReason int reason, boolean enabled) {
+        setDataEnabledForReason(getSubId(), reason, enabled);
+    }
+
+    private void setDataEnabledForReason(int subId, @DataEnabledReason int reason,
+            boolean enabled) {
+        try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setPolicyDataEnabled(enabled, getSubId());
+                service.setDataEnabledForReason(subId, reason, enabled);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setPolicyDataEnabled", e);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Telephony#setDataEnabledForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Return whether data is enabled for certain reason .
+     *
+     * If {@link #isDataEnabledForReason} returns false, it means in data enablement for a
+     * specific reason is turned off. If any of the reason is off, then it will result in
+     * bypassing user preference and result in data to be turned off. Call
+     * {@link #isDataConnectionAllowed} in order to know whether
+     * data connection is allowed on the device.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies
+     *      to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * @param reason the reason the data enable change is taking place
+     * @return whether data is enabled for a reason.
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
+            android.Manifest.permission.READ_PHONE_STATE})
+    public boolean isDataEnabledForReason(@DataEnabledReason int reason) {
+        return isDataEnabledForReason(getSubId(), reason);
+    }
+
+    private boolean isDataEnabledForReason(int subId, @DataEnabledReason int reason) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isDataEnabledForReason(subId, reason);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Telephony#isDataEnabledForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /**
@@ -11203,10 +11322,14 @@ public class TelephonyManager {
      *   <LI>And possibly others.</LI>
      * </UL>
      * @return {@code true} if the overall data connection is allowed; {@code false} if not.
-     * @hide
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} or
+     * android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
     public boolean isDataConnectionAllowed() {
         boolean retVal = false;
         try {
