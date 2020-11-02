@@ -37,19 +37,15 @@ namespace statsd {
 AnomalyTracker::AnomalyTracker(const Alert& alert, const ConfigKey& configKey)
         : mAlert(alert), mConfigKey(configKey), mNumOfPastBuckets(mAlert.num_buckets() - 1) {
     VLOG("AnomalyTracker() called");
-    if (mAlert.num_buckets() <= 0) {
-        ALOGE("Cannot create AnomalyTracker with %lld buckets", (long long)mAlert.num_buckets());
-        return;
-    }
-    if (!mAlert.has_trigger_if_sum_gt()) {
-        ALOGE("Cannot create AnomalyTracker without threshold");
-        return;
-    }
     resetStorage();  // initialization
 }
 
 AnomalyTracker::~AnomalyTracker() {
     VLOG("~AnomalyTracker() called");
+}
+
+void AnomalyTracker::onConfigUpdated() {
+    mSubscriptions.clear();
 }
 
 void AnomalyTracker::resetStorage() {
@@ -257,6 +253,15 @@ bool AnomalyTracker::isInRefractoryPeriod(const int64_t& timestampNs,
         return timestampNs < (it->second *  (int64_t)NS_PER_SEC);
     }
     return false;
+}
+
+std::pair<bool, uint64_t> AnomalyTracker::getProtoHash() const {
+    string serializedAlert;
+    if (!mAlert.SerializeToString(&serializedAlert)) {
+        ALOGW("Unable to serialize alert %lld", (long long)mAlert.id());
+        return {false, 0};
+    }
+    return {true, Hash64(serializedAlert)};
 }
 
 void AnomalyTracker::informSubscribers(const MetricDimensionKey& key, int64_t metric_id,

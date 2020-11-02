@@ -52,11 +52,15 @@ namespace statsd {
 namespace {
 
 ConfigKey key(123, 456);
-const int64_t timeBaseNs = 1000;
+const int64_t timeBaseNs = 1000 * NS_PER_SEC;
+
 sp<UidMap> uidMap = new UidMap();
 sp<StatsPullerManager> pullerManager = new StatsPullerManager();
 sp<AlarmMonitor> anomalyAlarmMonitor;
-sp<AlarmMonitor> periodicAlarmMonitor;
+sp<AlarmMonitor> periodicAlarmMonitor = new AlarmMonitor(
+        /*minDiffToUpdateRegisteredAlarmTimeSec=*/0,
+        [](const shared_ptr<IStatsCompanionService>&, int64_t) {},
+        [](const shared_ptr<IStatsCompanionService>&) {});
 set<int> allTagIds;
 vector<sp<AtomMatchingTracker>> oldAtomMatchingTrackers;
 unordered_map<int64_t, int> oldAtomMatchingTrackerMap;
@@ -65,13 +69,13 @@ unordered_map<int64_t, int> oldConditionTrackerMap;
 vector<sp<MetricProducer>> oldMetricProducers;
 unordered_map<int64_t, int> oldMetricProducerMap;
 std::vector<sp<AnomalyTracker>> oldAnomalyTrackers;
+unordered_map<int64_t, int> oldAlertTrackerMap;
 std::vector<sp<AlarmTracker>> oldAlarmTrackers;
 unordered_map<int, std::vector<int>> tmpConditionToMetricMap;
 unordered_map<int, std::vector<int>> tmpTrackerToMetricMap;
 unordered_map<int, std::vector<int>> tmpTrackerToConditionMap;
 unordered_map<int, std::vector<int>> tmpActivationAtomTrackerToMetricMap;
 unordered_map<int, std::vector<int>> tmpDeactivationAtomTrackerToMetricMap;
-unordered_map<int64_t, int> alertTrackerMap;
 vector<int> metricsWithActivation;
 map<int64_t, uint64_t> oldStateHashes;
 std::set<int64_t> noReportMetricIds;
@@ -96,7 +100,7 @@ public:
         tmpTrackerToConditionMap.clear();
         tmpActivationAtomTrackerToMetricMap.clear();
         tmpDeactivationAtomTrackerToMetricMap.clear();
-        alertTrackerMap.clear();
+        oldAlertTrackerMap.clear();
         metricsWithActivation.clear();
         oldStateHashes.clear();
         noReportMetricIds.clear();
@@ -111,7 +115,7 @@ bool initConfig(const StatsdConfig& config) {
             oldConditionTrackers, oldConditionTrackerMap, oldMetricProducers, oldMetricProducerMap,
             oldAnomalyTrackers, oldAlarmTrackers, tmpConditionToMetricMap, tmpTrackerToMetricMap,
             tmpTrackerToConditionMap, tmpActivationAtomTrackerToMetricMap,
-            tmpDeactivationAtomTrackerToMetricMap, alertTrackerMap, metricsWithActivation,
+            tmpDeactivationAtomTrackerToMetricMap, oldAlertTrackerMap, metricsWithActivation,
             oldStateHashes, noReportMetricIds);
 }
 
@@ -187,6 +191,32 @@ ValueMetric createValueMetric(string name, const AtomMatcher& what, optional<int
         metric.add_slice_by_state(state);
     }
     return metric;
+}
+
+Alert createAlert(string name, int64_t metricId, int buckets, int64_t triggerSum) {
+    Alert alert;
+    alert.set_id(StringToId(name));
+    alert.set_metric_id(metricId);
+    alert.set_num_buckets(buckets);
+    alert.set_trigger_if_sum_gt(triggerSum);
+    return alert;
+}
+
+Subscription createSubscription(string name, Subscription_RuleType type, int64_t ruleId) {
+    Subscription subscription;
+    subscription.set_id(StringToId(name));
+    subscription.set_rule_type(type);
+    subscription.set_rule_id(ruleId);
+    subscription.mutable_broadcast_subscriber_details();
+    return subscription;
+}
+
+Alarm createAlarm(string name, int64_t offsetMillis, int64_t periodMillis) {
+    Alarm alarm;
+    alarm.set_id(StringToId(name));
+    alarm.set_offset_millis(offsetMillis);
+    alarm.set_period_millis(periodMillis);
+    return alarm;
 }
 }  // anonymous namespace
 
@@ -3243,6 +3273,305 @@ TEST_F(ConfigUpdateTest, TestUpdateMetricsMultipleTypes) {
     // Only reference to the old wizard should be the one in the test.
     EXPECT_EQ(oldConditionWizard->getStrongCount(), 1);
 }
+
+TEST_F(ConfigUpdateTest, TestAlertPreserve) {
+    StatsdConfig config;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    *config.add_count_metric() = createCountMetric("VALUE1", whatMatcher.id(), nullopt, {});
+
+    Alert alert = createAlert("Alert1", config.count_metric(0).id(), 1, 1);
+    *config.add_alert() = alert;
+    EXPECT_TRUE(initConfig(config));
+
+    UpdateStatus updateStatus = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineAlertUpdateStatus(alert, oldAlertTrackerMap, oldAnomalyTrackers,
+                                           /*replacedMetrics*/ {}, updateStatus));
+    EXPECT_EQ(updateStatus, UPDATE_PRESERVE);
+}
+
+TEST_F(ConfigUpdateTest, TestAlertMetricChanged) {
+    StatsdConfig config;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    CountMetric metric = createCountMetric("VALUE1", whatMatcher.id(), nullopt, {});
+    *config.add_count_metric() = metric;
+
+    Alert alert = createAlert("Alert1", config.count_metric(0).id(), 1, 1);
+    *config.add_alert() = alert;
+    EXPECT_TRUE(initConfig(config));
+
+    UpdateStatus updateStatus = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineAlertUpdateStatus(alert, oldAlertTrackerMap, oldAnomalyTrackers,
+                                           /*replacedMetrics*/ {metric.id()}, updateStatus));
+    EXPECT_EQ(updateStatus, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestAlertDefinitionChanged) {
+    StatsdConfig config;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    *config.add_count_metric() = createCountMetric("VALUE1", whatMatcher.id(), nullopt, {});
+
+    Alert alert = createAlert("Alert1", config.count_metric(0).id(), 1, 1);
+    *config.add_alert() = alert;
+    EXPECT_TRUE(initConfig(config));
+
+    alert.set_num_buckets(2);
+
+    UpdateStatus updateStatus = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineAlertUpdateStatus(alert, oldAlertTrackerMap, oldAnomalyTrackers,
+                                           /*replacedMetrics*/ {}, updateStatus));
+    EXPECT_EQ(updateStatus, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateAlerts) {
+    StatsdConfig config;
+    // Add atom matchers/predicates/metrics. These are mostly needed for initStatsdConfig
+    *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
+    *config.add_predicate() = CreateScreenIsOnPredicate();
+
+    CountMetric countMetric = createCountMetric("COUNT1", config.atom_matcher(0).id(), nullopt, {});
+    int64_t countMetricId = countMetric.id();
+    *config.add_count_metric() = countMetric;
+
+    DurationMetric durationMetric =
+            createDurationMetric("DURATION1", config.predicate(0).id(), nullopt, {});
+    int64_t durationMetricId = durationMetric.id();
+    *config.add_duration_metric() = durationMetric;
+
+    // Add alerts.
+    // Preserved.
+    Alert alert1 = createAlert("Alert1", durationMetricId, /*buckets*/ 1, /*triggerSum*/ 5000);
+    int64_t alert1Id = alert1.id();
+    *config.add_alert() = alert1;
+
+    // Replaced.
+    Alert alert2 = createAlert("Alert2", countMetricId, /*buckets*/ 1, /*triggerSum*/ 2);
+    int64_t alert2Id = alert2.id();
+    *config.add_alert() = alert2;
+
+    // Replaced.
+    Alert alert3 = createAlert("Alert3", durationMetricId, /*buckets*/ 3, /*triggerSum*/ 5000);
+    int64_t alert3Id = alert3.id();
+    *config.add_alert() = alert3;
+
+    // Add Subscriptions.
+    Subscription subscription1 = createSubscription("S1", Subscription::ALERT, alert1Id);
+    *config.add_subscription() = subscription1;
+    Subscription subscription2 = createSubscription("S2", Subscription::ALERT, alert1Id);
+    *config.add_subscription() = subscription2;
+    Subscription subscription3 = createSubscription("S3", Subscription::ALERT, alert2Id);
+    *config.add_subscription() = subscription3;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Add a duration tracker to the duration metric to ensure durationTrackers are updated
+    // with the proper anomalyTrackers.
+    unique_ptr<LogEvent> event = CreateScreenStateChangedEvent(
+            timeBaseNs + 1, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    oldMetricProducers[1]->onMatchedLogEvent(0, *event.get());
+
+    // Change the count metric. Causes alert2 to be replaced.
+    config.mutable_count_metric(0)->set_bucket(ONE_DAY);
+    // Change num buckets on alert3, causing replacement.
+    alert3.set_num_buckets(5);
+
+    // New alert.
+    Alert alert4 = createAlert("Alert4", durationMetricId, /*buckets*/ 3, /*triggerSum*/ 10000);
+    int64_t alert4Id = alert4.id();
+
+    // Move subscription2 to be on alert2 and make a new subscription.
+    subscription2.set_rule_id(alert2Id);
+    Subscription subscription4 = createSubscription("S4", Subscription::ALERT, alert2Id);
+
+    // Create the new config. Modify the old one to avoid adding the matchers/predicates.
+    // Add alerts in different order so the map is changed.
+    config.clear_alert();
+    *config.add_alert() = alert4;
+    const int alert4Index = 0;
+    *config.add_alert() = alert3;
+    const int alert3Index = 1;
+    *config.add_alert() = alert1;
+    const int alert1Index = 2;
+    *config.add_alert() = alert2;
+    const int alert2Index = 3;
+
+    // Subscription3 is removed.
+    config.clear_subscription();
+    *config.add_subscription() = subscription4;
+    *config.add_subscription() = subscription2;
+    *config.add_subscription() = subscription1;
+
+    // Output data structures from update metrics. Don't care about the outputs besides
+    // replacedMetrics, but need to do this so that the metrics clear their anomaly trackers.
+    unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int, vector<int>> conditionToMetricMap;
+    unordered_map<int, vector<int>> trackerToMetricMap;
+    set<int64_t> noReportMetricIds;
+    unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
+    vector<int> metricsWithActivation;
+    set<int64_t> replacedMetrics;
+    EXPECT_TRUE(updateMetrics(
+            key, config, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
+            oldAtomMatchingTrackerMap, oldAtomMatchingTrackerMap, /*replacedMatchers*/ {},
+            oldAtomMatchingTrackers, oldConditionTrackerMap, /*replacedConditions=*/{},
+            oldConditionTrackers, {ConditionState::kUnknown}, /*stateAtomIdMap*/ {},
+            /*allStateGroupMaps=*/{},
+            /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
+            newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+            metricsWithActivation, replacedMetrics));
+
+    EXPECT_EQ(replacedMetrics, set<int64_t>({countMetricId}));
+
+    unordered_map<int64_t, int> newAlertTrackerMap;
+    vector<sp<AnomalyTracker>> newAnomalyTrackers;
+    EXPECT_TRUE(updateAlerts(config, newMetricProducerMap, replacedMetrics, oldAlertTrackerMap,
+                             oldAnomalyTrackers, anomalyAlarmMonitor, newMetricProducers,
+                             newAlertTrackerMap, newAnomalyTrackers));
+
+    unordered_map<int64_t, int> expectedAlertMap = {
+            {alert1Id, alert1Index},
+            {alert2Id, alert2Index},
+            {alert3Id, alert3Index},
+            {alert4Id, alert4Index},
+    };
+    EXPECT_THAT(newAlertTrackerMap, ContainerEq(expectedAlertMap));
+
+    // Make sure preserved alerts are the same.
+    ASSERT_EQ(newAnomalyTrackers.size(), 4);
+    EXPECT_EQ(oldAnomalyTrackers[oldAlertTrackerMap.at(alert1Id)],
+              newAnomalyTrackers[newAlertTrackerMap.at(alert1Id)]);
+
+    // Make sure replaced alerts are different.
+    EXPECT_NE(oldAnomalyTrackers[oldAlertTrackerMap.at(alert2Id)],
+              newAnomalyTrackers[newAlertTrackerMap.at(alert2Id)]);
+    EXPECT_NE(oldAnomalyTrackers[oldAlertTrackerMap.at(alert3Id)],
+              newAnomalyTrackers[newAlertTrackerMap.at(alert3Id)]);
+
+    // Verify the alerts have the correct anomaly trackers.
+    ASSERT_EQ(newMetricProducers.size(), 2);
+    EXPECT_THAT(newMetricProducers[0]->mAnomalyTrackers,
+                UnorderedElementsAre(newAnomalyTrackers[alert2Index]));
+    // For durationMetric, make sure the duration trackers get the updated anomalyTrackers.
+    DurationMetricProducer* durationProducer =
+            static_cast<DurationMetricProducer*>(newMetricProducers[1].get());
+    EXPECT_THAT(
+            durationProducer->mAnomalyTrackers,
+            UnorderedElementsAre(newAnomalyTrackers[alert1Index], newAnomalyTrackers[alert3Index],
+                                 newAnomalyTrackers[alert4Index]));
+    ASSERT_EQ(durationProducer->mCurrentSlicedDurationTrackerMap.size(), 1);
+    for (const auto& durationTrackerIt : durationProducer->mCurrentSlicedDurationTrackerMap) {
+        EXPECT_EQ(durationTrackerIt.second->mAnomalyTrackers, durationProducer->mAnomalyTrackers);
+    }
+
+    // Verify alerts have the correct subscriptions. Use subscription id as proxy for equivalency.
+    vector<int64_t> alert1Subscriptions;
+    for (const Subscription& subscription : newAnomalyTrackers[alert1Index]->mSubscriptions) {
+        alert1Subscriptions.push_back(subscription.id());
+    }
+    EXPECT_THAT(alert1Subscriptions, UnorderedElementsAre(subscription1.id()));
+    vector<int64_t> alert2Subscriptions;
+    for (const Subscription& subscription : newAnomalyTrackers[alert2Index]->mSubscriptions) {
+        alert2Subscriptions.push_back(subscription.id());
+    }
+    EXPECT_THAT(alert2Subscriptions, UnorderedElementsAre(subscription2.id(), subscription4.id()));
+    EXPECT_THAT(newAnomalyTrackers[alert3Index]->mSubscriptions, IsEmpty());
+    EXPECT_THAT(newAnomalyTrackers[alert4Index]->mSubscriptions, IsEmpty());
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateAlarms) {
+    StatsdConfig config;
+    // Add alarms.
+    Alarm alarm1 = createAlarm("Alarm1", /*offset*/ 1 * MS_PER_SEC, /*period*/ 50 * MS_PER_SEC);
+    int64_t alarm1Id = alarm1.id();
+    *config.add_alarm() = alarm1;
+
+    Alarm alarm2 = createAlarm("Alarm2", /*offset*/ 1 * MS_PER_SEC, /*period*/ 2000 * MS_PER_SEC);
+    int64_t alarm2Id = alarm2.id();
+    *config.add_alarm() = alarm2;
+
+    Alarm alarm3 = createAlarm("Alarm3", /*offset*/ 10 * MS_PER_SEC, /*period*/ 5000 * MS_PER_SEC);
+    int64_t alarm3Id = alarm3.id();
+    *config.add_alarm() = alarm3;
+
+    // Add Subscriptions.
+    Subscription subscription1 = createSubscription("S1", Subscription::ALARM, alarm1Id);
+    *config.add_subscription() = subscription1;
+    Subscription subscription2 = createSubscription("S2", Subscription::ALARM, alarm1Id);
+    *config.add_subscription() = subscription2;
+    Subscription subscription3 = createSubscription("S3", Subscription::ALARM, alarm2Id);
+    *config.add_subscription() = subscription3;
+
+    EXPECT_TRUE(initConfig(config));
+
+    ASSERT_EQ(oldAlarmTrackers.size(), 3);
+    // Config is created at statsd start time, so just add the offsets.
+    EXPECT_EQ(oldAlarmTrackers[0]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1);
+    EXPECT_EQ(oldAlarmTrackers[1]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1);
+    EXPECT_EQ(oldAlarmTrackers[2]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 10);
+
+    // Change alarm2/alarm3.
+    config.mutable_alarm(1)->set_offset_millis(5 * MS_PER_SEC);
+    config.mutable_alarm(2)->set_period_millis(10000 * MS_PER_SEC);
+
+    // Move subscription2 to be on alarm2 and make a new subscription.
+    config.mutable_subscription(1)->set_rule_id(alarm2Id);
+    Subscription subscription4 = createSubscription("S4", Subscription::ALARM, alarm1Id);
+    *config.add_subscription() = subscription4;
+
+    // Update time is 2 seconds after the base time.
+    int64_t currentTimeNs = timeBaseNs + 2 * NS_PER_SEC;
+    vector<sp<AlarmTracker>> newAlarmTrackers;
+    EXPECT_TRUE(initAlarms(config, key, periodicAlarmMonitor, timeBaseNs, currentTimeNs,
+                           newAlarmTrackers));
+
+    ASSERT_EQ(newAlarmTrackers.size(), 3);
+    // Config is updated 2 seconds after statsd start
+    // The offset has passed for alarm1, but not for alarms 2/3.
+    EXPECT_EQ(newAlarmTrackers[0]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1 + 50);
+    EXPECT_EQ(newAlarmTrackers[1]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 5);
+    EXPECT_EQ(newAlarmTrackers[2]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 10);
+
+    // Verify alarms have the correct subscriptions. Use subscription id as proxy for equivalency.
+    vector<int64_t> alarm1Subscriptions;
+    for (const Subscription& subscription : newAlarmTrackers[0]->mSubscriptions) {
+        alarm1Subscriptions.push_back(subscription.id());
+    }
+    EXPECT_THAT(alarm1Subscriptions, UnorderedElementsAre(subscription1.id(), subscription4.id()));
+    vector<int64_t> alarm2Subscriptions;
+    for (const Subscription& subscription : newAlarmTrackers[1]->mSubscriptions) {
+        alarm2Subscriptions.push_back(subscription.id());
+    }
+    EXPECT_THAT(alarm2Subscriptions, UnorderedElementsAre(subscription2.id(), subscription3.id()));
+    EXPECT_THAT(newAlarmTrackers[2]->mSubscriptions, IsEmpty());
+
+    // Verify the alarm monitor is updated accordingly once the old alarms are removed.
+    // Alarm2 fires the earliest.
+    oldAlarmTrackers.clear();
+    EXPECT_EQ(periodicAlarmMonitor->getRegisteredAlarmTimeSec(), timeBaseNs / NS_PER_SEC + 5);
+
+    // Do another update 60 seconds after config creation time, after the offsets of each alarm.
+    currentTimeNs = timeBaseNs + 60 * NS_PER_SEC;
+    newAlarmTrackers.clear();
+    EXPECT_TRUE(initAlarms(config, key, periodicAlarmMonitor, timeBaseNs, currentTimeNs,
+                           newAlarmTrackers));
+
+    ASSERT_EQ(newAlarmTrackers.size(), 3);
+    // Config is updated one minute after statsd start.
+    // Two periods have passed for alarm 1, one has passed for alarms2/3.
+    EXPECT_EQ(newAlarmTrackers[0]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 1 + 2 * 50);
+    EXPECT_EQ(newAlarmTrackers[1]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 5 + 2000);
+    EXPECT_EQ(newAlarmTrackers[2]->getAlarmTimestampSec(), timeBaseNs / NS_PER_SEC + 10 + 10000);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

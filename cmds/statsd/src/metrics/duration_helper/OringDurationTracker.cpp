@@ -28,7 +28,7 @@ OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
         sp<ConditionWizard> wizard, int conditionIndex, bool nesting, int64_t currentBucketStartNs,
         int64_t currentBucketNum, int64_t startTimeNs, int64_t bucketSizeNs, bool conditionSliced,
-        bool fullLink, const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
+        bool fullLink, const vector<sp<AnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
                       currentBucketNum, startTimeNs, bucketSizeNs, conditionSliced, fullLink,
                       anomalyTrackers),
@@ -344,9 +344,8 @@ void OringDurationTracker::onStateChanged(const int64_t timestamp, const int32_t
     updateCurrentStateKey(atomId, newState);
 }
 
-int64_t OringDurationTracker::predictAnomalyTimestampNs(
-        const DurationAnomalyTracker& anomalyTracker, const int64_t eventTimestampNs) const {
-
+int64_t OringDurationTracker::predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
+                                                        const int64_t eventTimestampNs) const {
     // The anomaly threshold.
     const int64_t thresholdNs = anomalyTracker.getAnomalyThreshold();
 
