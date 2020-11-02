@@ -44,6 +44,14 @@
             </com.android.internal.widget.NotificationActionListLayout>
 
             <ImageView
+                android:id="@+id/snooze_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_vertical|end"
+                android:visibility="gone"
+                android:scaleType="centerInside"
+                />
+            <ImageView
                 android:id="@+id/bubble_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
