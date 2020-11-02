@@ -179,8 +179,8 @@ public class PipTouchHandler {
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
                 mMenuController, mPipBoundsHandler.getSnapAlgorithm(), floatingContentCoordinator);
         mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
-                        pipTaskOrganizer, this::getMovementBounds,
+                new PipResizeGestureHandler(context, pipBoundsHandler, pipBoundsState,
+                        mMotionHelper, pipTaskOrganizer, this::getMovementBounds,
                         this::updateMovementBounds, pipUiEventLogger, menuController);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mHandler);
@@ -221,6 +221,7 @@ public class PipTouchHandler {
                 R.dimen.pip_expanded_shortest_edge_size);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
         mPipDismissTargetHandler.updateMagneticTargetSize();
+        mMotionHelper.reloadResources();
     }
 
     private boolean shouldShowResizeHandle() {
@@ -463,7 +464,7 @@ public class PipTouchHandler {
         }
 
         MotionEvent ev = (MotionEvent) inputEvent;
-        if (mPipResizeGestureHandler.willStartResizeGesture(ev)) {
+        if (!mPipBoundsState.isStashed() && mPipResizeGestureHandler.willStartResizeGesture(ev)) {
             // Initialize the touch state for the gesture, but immediately reset to invalidate the
             // gesture
             mTouchState.onTouchEvent(ev);
@@ -552,6 +553,8 @@ public class PipTouchHandler {
                 break;
             }
         }
+
+        shouldDeliverToMenu |= !mPipBoundsState.isStashed();
 
         // Deliver the event to PipMenuActivity to handle button click if the menu has shown.
         if (shouldDeliverToMenu) {
@@ -715,7 +718,7 @@ public class PipTouchHandler {
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it
-            if (mMenuState != MENU_STATE_NONE) {
+            if (mMenuState != MENU_STATE_NONE && !mPipBoundsState.isStashed()) {
                 mMenuController.pokeMenu();
             }
         }
@@ -727,6 +730,7 @@ public class PipTouchHandler {
             }
 
             if (touchState.startedDragging()) {
+                mPipBoundsState.setStashed(false);
                 mSavedSnapFraction = -1f;
                 mPipDismissTargetHandler.showDismissTargetMaybe();
             }
@@ -785,12 +789,13 @@ public class PipTouchHandler {
                 if (mEnableStash
                         && (animatingBounds.right > mPipBoundsState.getDisplayBounds().right
                         || animatingBounds.left < mPipBoundsState.getDisplayBounds().left)) {
+                    mPipBoundsState.setStashed(true);
                     mMotionHelper.stashToEdge(vel.x, vel.y, this::flingEndAction /* endAction */);
                 } else {
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
                 }
-            } else if (mTouchState.isDoubleTap()) {
+            } else if (mTouchState.isDoubleTap() && !mPipBoundsState.isStashed()) {
                 // If using pinch to zoom, double-tap functions as resizing between max/min size
                 if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
                     final boolean toExpand =
@@ -809,7 +814,7 @@ public class PipTouchHandler {
                     setTouchEnabled(false);
                     mMotionHelper.expandLeavePip();
                 }
-            } else if (mMenuState != MENU_STATE_FULL) {
+            } else if (mMenuState != MENU_STATE_FULL && !mPipBoundsState.isStashed()) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
                     // User has stalled long enough for this not to be a drag or a double tap, just
                     // expand the menu
