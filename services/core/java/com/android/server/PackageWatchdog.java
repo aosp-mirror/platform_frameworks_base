@@ -684,7 +684,7 @@ public class PackageWatchdog {
         synchronized (mLock) {
             for (int observerIdx = 0; observerIdx < mAllObservers.size(); observerIdx++) {
                 ObserverInternal observer = mAllObservers.valueAt(observerIdx);
-                MonitoredPackage monitoredPackage = observer.packages.get(packageName);
+                MonitoredPackage monitoredPackage = observer.getMonitoredPackage(packageName);
 
                 if (monitoredPackage != null) {
                     int oldState = monitoredPackage.getHealthCheckStateLocked();
@@ -713,7 +713,8 @@ public class PackageWatchdog {
             Slog.d(TAG, "Received supported packages " + supportedPackages);
             Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
             while (oit.hasNext()) {
-                Iterator<MonitoredPackage> pit = oit.next().packages.values().iterator();
+                Iterator<MonitoredPackage> pit = oit.next().getMonitoredPackages()
+                        .values().iterator();
                 while (pit.hasNext()) {
                     MonitoredPackage monitoredPackage = pit.next();
                     String packageName = monitoredPackage.getName();
@@ -746,7 +747,7 @@ public class PackageWatchdog {
         while (oit.hasNext()) {
             ObserverInternal observer = oit.next();
             Iterator<MonitoredPackage> pit =
-                    observer.packages.values().iterator();
+                    observer.getMonitoredPackages().values().iterator();
             while (pit.hasNext()) {
                 MonitoredPackage monitoredPackage = pit.next();
                 String packageName = monitoredPackage.getName();
@@ -804,7 +805,8 @@ public class PackageWatchdog {
     private long getNextStateSyncMillisLocked() {
         long shortestDurationMs = Long.MAX_VALUE;
         for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
-            ArrayMap<String, MonitoredPackage> packages = mAllObservers.valueAt(oIndex).packages;
+            ArrayMap<String, MonitoredPackage> packages = mAllObservers.valueAt(oIndex)
+                    .getMonitoredPackages();
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage mp = packages.valueAt(pIndex);
                 long duration = mp.getShortestScheduleDurationMsLocked();
@@ -838,7 +840,7 @@ public class PackageWatchdog {
             if (!failedPackages.isEmpty()) {
                 onHealthCheckFailed(observer, failedPackages);
             }
-            if (observer.packages.isEmpty() && (observer.registeredObserver == null
+            if (observer.getMonitoredPackages().isEmpty() && (observer.registeredObserver == null
                     || !observer.registeredObserver.isPersistent())) {
                 Slog.i(TAG, "Discarding observer " + observer.name + ". All packages expired");
                 it.remove();
@@ -1054,7 +1056,7 @@ public class PackageWatchdog {
     private static class ObserverInternal {
         public final String name;
         @GuardedBy("mLock")
-        public final ArrayMap<String, MonitoredPackage> packages = new ArrayMap<>();
+        private final ArrayMap<String, MonitoredPackage> mPackages = new ArrayMap<>();
         @Nullable
         @GuardedBy("mLock")
         public PackageHealthObserver registeredObserver;
@@ -1073,8 +1075,8 @@ public class PackageWatchdog {
             try {
                 out.startTag(null, TAG_OBSERVER);
                 out.attribute(null, ATTR_NAME, name);
-                for (int i = 0; i < packages.size(); i++) {
-                    MonitoredPackage p = packages.valueAt(i);
+                for (int i = 0; i < mPackages.size(); i++) {
+                    MonitoredPackage p = mPackages.valueAt(i);
                     p.writeLocked(out);
                 }
                 out.endTag(null, TAG_OBSERVER);
@@ -1089,11 +1091,11 @@ public class PackageWatchdog {
         public void updatePackagesLocked(List<MonitoredPackage> packages) {
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage p = packages.get(pIndex);
-                MonitoredPackage existingPackage = this.packages.get(p.getName());
+                MonitoredPackage existingPackage = getMonitoredPackage(p.getName());
                 if (existingPackage != null) {
                     existingPackage.updateHealthCheckDuration(p.mDurationMs);
                 } else {
-                    this.packages.put(p.getName(), p);
+                    putMonitoredPackage(p);
                 }
             }
         }
@@ -1111,7 +1113,7 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         private Set<MonitoredPackage> prunePackagesLocked(long elapsedMs) {
             Set<MonitoredPackage> failedPackages = new ArraySet<>();
-            Iterator<MonitoredPackage> it = packages.values().iterator();
+            Iterator<MonitoredPackage> it = mPackages.values().iterator();
             while (it.hasNext()) {
                 MonitoredPackage p = it.next();
                 int oldState = p.getHealthCheckStateLocked();
@@ -1134,16 +1136,50 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean onPackageFailureLocked(String packageName) {
-            if (packages.get(packageName) == null && registeredObserver.isPersistent()
+            if (getMonitoredPackage(packageName) == null && registeredObserver.isPersistent()
                     && registeredObserver.mayObservePackage(packageName)) {
-                packages.put(packageName, sPackageWatchdog.newMonitoredPackage(
+                putMonitoredPackage(sPackageWatchdog.newMonitoredPackage(
                         packageName, DEFAULT_OBSERVING_DURATION_MS, false));
             }
-            MonitoredPackage p = packages.get(packageName);
+            MonitoredPackage p = getMonitoredPackage(packageName);
             if (p != null) {
                 return p.onFailureLocked();
             }
             return false;
+        }
+
+        /**
+         * Returns the map of packages monitored by this observer.
+         *
+         * @return a mapping of package names to {@link MonitoredPackage} objects.
+         */
+        @GuardedBy("mLock")
+        public ArrayMap<String, MonitoredPackage> getMonitoredPackages() {
+            return mPackages;
+        }
+
+        /**
+         * Returns the {@link MonitoredPackage} associated with a given package name if the
+         * package is being monitored by this observer.
+         *
+         * @param packageName: the name of the package.
+         * @return the {@link MonitoredPackage} object associated with the package name if one
+         *         exists, {@code null} otherwise.
+         */
+        @GuardedBy("mLock")
+        @Nullable
+        public MonitoredPackage getMonitoredPackage(String packageName) {
+            return mPackages.get(packageName);
+        }
+
+        /**
+         * Associates a {@link MonitoredPackage} with the observer.
+         *
+         * @param p: the {@link MonitoredPackage} to store.
+         */
+        @GuardedBy("mLock")
+        public void putMonitoredPackage(MonitoredPackage p) {
+            mPackages.put(p.getName(), p);
         }
 
         /**
@@ -1201,8 +1237,8 @@ public class PackageWatchdog {
         public void dump(IndentingPrintWriter pw) {
             boolean isPersistent = registeredObserver != null && registeredObserver.isPersistent();
             pw.println("Persistent: " + isPersistent);
-            for (String packageName : packages.keySet()) {
-                MonitoredPackage p = packages.get(packageName);
+            for (String packageName : mPackages.keySet()) {
+                MonitoredPackage p = getMonitoredPackage(packageName);
                 pw.println(packageName +  ": ");
                 pw.increaseIndent();
                 pw.println("# Failures: " + p.mFailureHistory.size());
