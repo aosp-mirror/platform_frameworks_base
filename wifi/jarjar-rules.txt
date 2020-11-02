@@ -36,7 +36,7 @@ rule android.net.ipmemorystore.IOnStatusListener* com.android.wifi.x.@0
 rule android.net.ipmemorystore.NetworkAttributesParcelable* com.android.wifi.x.@0
 rule android.net.ipmemorystore.SameL3NetworkResponseParcelable* com.android.wifi.x.@0
 rule android.net.ipmemorystore.StatusParcelable* com.android.wifi.x.@0
-rule android.net.networkstack.aidl.quirks.IPv6ProvisioningLossQuirk* com.android.wifi.x.@0
+rule android.net.networkstack.aidl.** com.android.wifi.x.@0
 
 # Net utils (includes Network Stack helper classes).
 rule android.net.DhcpResults* com.android.wifi.x.@0
