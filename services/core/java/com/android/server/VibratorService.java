@@ -1589,25 +1589,20 @@ public class VibratorService extends IVibratorService.Stub
             mWakeLock.setWorkSource(mTmpWorkSource);
         }
 
-        private long delayLocked(long duration) {
+        private void delayLocked(long wakeUpTime) {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "delayLocked");
             try {
-                long durationRemaining = duration;
-                if (duration > 0) {
-                    final long bedtime = duration + SystemClock.uptimeMillis();
-                    do {
-                        try {
-                            this.wait(durationRemaining);
-                        }
-                        catch (InterruptedException e) { }
-                        if (mForceStop) {
-                            break;
-                        }
-                        durationRemaining = bedtime - SystemClock.uptimeMillis();
-                    } while (durationRemaining > 0);
-                    return duration - durationRemaining;
+                long durationRemaining = wakeUpTime - SystemClock.uptimeMillis();
+                while (durationRemaining > 0) {
+                    try {
+                        this.wait(durationRemaining);
+                    }
+                    catch (InterruptedException e) { }
+                    if (mForceStop) {
+                        break;
+                    }
+                    durationRemaining = wakeUpTime - SystemClock.uptimeMillis();
                 }
-                return 0;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
@@ -1641,7 +1636,8 @@ public class VibratorService extends IVibratorService.Stub
                     final int repeat = mWaveform.getRepeatIndex();
 
                     int index = 0;
-                    long onDuration = 0;
+                    long nextStepStartTime = SystemClock.uptimeMillis();
+                    long nextVibratorStopTime = 0;
                     while (!mForceStop) {
                         if (index < len) {
                             final int amplitude = amplitudes[index];
@@ -1650,25 +1646,31 @@ public class VibratorService extends IVibratorService.Stub
                                 continue;
                             }
                             if (amplitude != 0) {
-                                if (onDuration <= 0) {
+                                long now = SystemClock.uptimeMillis();
+                                if (nextVibratorStopTime <= now) {
                                     // Telling the vibrator to start multiple times usually causes
                                     // effects to feel "choppy" because the motor resets at every on
                                     // command.  Instead we figure out how long our next "on" period
                                     // is going to be, tell the motor to stay on for the full
                                     // duration, and then wake up to change the amplitude at the
                                     // appropriate intervals.
-                                    onDuration = getTotalOnDuration(timings, amplitudes, index - 1,
-                                            repeat);
+                                    long onDuration = getTotalOnDuration(
+                                            timings, amplitudes, index - 1, repeat);
                                     doVibratorOn(onDuration, amplitude, mUid, mAttrs);
+                                    nextVibratorStopTime = now + onDuration;
                                 } else {
+                                    // Vibrator is already ON, so just change its amplitude.
                                     doVibratorSetAmplitude(amplitude);
                                 }
                             }
 
-                            long waitTime = delayLocked(duration);
-                            if (amplitude != 0) {
-                                onDuration -= waitTime;
-                            }
+                            // We wait until the time this waveform step was supposed to end,
+                            // calculated from the time it was supposed to start. All start times
+                            // are calculated from the waveform original start time by adding the
+                            // input durations. Any scheduling or processing delay should not affect
+                            // this step's perceived total duration. They will be amortized here.
+                            nextStepStartTime += duration;
+                            delayLocked(nextStepStartTime);
                         } else if (repeat < 0) {
                             break;
                         } else {
