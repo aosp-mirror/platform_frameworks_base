@@ -149,6 +149,8 @@ public class HdmiCecMessageValidator {
                 new AsciiValidator(3), DEST_BROADCAST);
 
         // TODO: Handle messages for the Deck Control.
+        addValidationInfo(
+                Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
 
         // TODO: Handle messages for the Tuner Control.
 
