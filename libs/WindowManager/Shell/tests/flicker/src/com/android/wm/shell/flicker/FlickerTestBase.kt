@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker
 
+import android.content.pm.PackageManager
 import android.os.RemoteException
 import android.os.SystemClock
 import android.platform.helpers.IAppHelper
@@ -40,6 +41,9 @@ abstract class FlickerTestBase {
     }
     val uiDevice by lazy {
         UiDevice.getInstance(instrumentation)
+    }
+    val packageManager: PackageManager by lazy {
+        instrumentation.context.getPackageManager()
     }
 
     /**
