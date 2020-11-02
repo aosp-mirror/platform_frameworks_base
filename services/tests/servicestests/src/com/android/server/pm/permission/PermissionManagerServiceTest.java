@@ -69,8 +69,7 @@ public class PermissionManagerServiceTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getContext();
-        Object lock = new Object();
-        mPermissionManagerService = new PermissionManagerService(mContext, lock, mInjector);
+        mPermissionManagerService = new PermissionManagerService(mContext, mInjector);
     }
 
     @After
