@@ -160,18 +160,20 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 return;
             }
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task info changed taskId=%d", task.mTaskId);
-            if (!task.isOrganized()) {
-                // This is safe to ignore if the task is no longer organized
-                return;
-            }
-            try {
-                // Purposely notify of task info change immediately instead of deferring (like
-                // appear and vanish) to allow info changes (such as new PIP params) to flow
-                // without waiting.
-                mTaskOrganizer.onTaskInfoChanged(taskInfo);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskInfoChanged callback", e);
-            }
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                if (!task.isOrganized()) {
+                    // This is safe to ignore if the task is no longer organized
+                    return;
+                }
+                try {
+                    // Purposely notify of task info change immediately instead of deferring (like
+                    // appear and vanish) to allow info changes (such as new PIP params) to flow
+                    // without waiting.
+                    mTaskOrganizer.onTaskInfoChanged(taskInfo);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending onTaskInfoChanged callback", e);
+                }
+            });
         }
 
         void onBackPressedOnTaskRoot(Task task) {
@@ -181,15 +183,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 // Skip if the task has not yet received taskAppeared().
                 return;
             }
-            if (!task.isOrganized()) {
-                // This is safe to ignore if the task is no longer organized
-                return;
-            }
-            try {
-                mTaskOrganizer.onBackPressedOnTaskRoot(task.getTaskInfo());
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception sending onBackPressedOnTaskRoot callback", e);
-            }
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                if (!task.isOrganized()) {
+                    // This is safe to ignore if the task is no longer organized
+                    return;
+                }
+                try {
+                    mTaskOrganizer.onBackPressedOnTaskRoot(task.getTaskInfo());
+                } catch (Exception e) {
+                    Slog.e(TAG, "Exception sending onBackPressedOnTaskRoot callback", e);
+                }
+            });
         }
     }
 
