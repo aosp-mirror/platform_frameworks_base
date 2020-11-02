@@ -18,6 +18,7 @@ package com.android.server.power;
 
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.attention.AttentionManagerInternal;
@@ -42,6 +43,7 @@ import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -66,6 +68,9 @@ public class AttentionDetector {
     /** Default value in absence of {@link DeviceConfig} override. */
     static final long DEFAULT_PRE_DIM_CHECK_DURATION_MILLIS = 2_000;
 
+    @VisibleForTesting
+    protected long mPreDimCheckDurationMillis;
+
     /** DeviceConfig flag name, describes how long to run the check beyond the screen dim event. */
     static final String KEY_POST_DIM_CHECK_DURATION_MILLIS =
             "post_dim_check_duration_millis";
@@ -73,11 +78,27 @@ public class AttentionDetector {
     /** Default value in absence of {@link DeviceConfig} override. */
     static final long DEFAULT_POST_DIM_CHECK_DURATION_MILLIS = 0;
 
+    private long mRequestedPostDimTimeoutMillis;
+
+    /**
+     * Keep the last used post dim timeout for the dumpsys (it can't be longer the dim duration).
+     */
+    private long mEffectivePostDimTimeoutMillis;
+
     /**
      * DeviceConfig flag name, describes the limit of how long the device can remain unlocked due to
      * attention checking.
      */
     static final String KEY_MAX_EXTENSION_MILLIS = "max_extension_millis";
+
+    /**
+     * The default value for the maximum time, in millis, that the phone can stay unlocked because
+     * of attention events, triggered by any user.
+     */
+    @VisibleForTesting
+    protected long mDefaultMaximumExtensionMillis;
+
+    private long mMaximumExtensionMillis;
 
     private Context mContext;
 
@@ -87,13 +108,6 @@ public class AttentionDetector {
      * Invoked whenever user attention is detected.
      */
     private final Runnable mOnUserAttention;
-
-    /**
-     * The default value for the maximum time, in millis, that the phone can stay unlocked because
-     * of attention events, triggered by any user.
-     */
-    @VisibleForTesting
-    protected long mDefaultMaximumExtensionMillis;
 
     private final Object mLock;
 
@@ -137,9 +151,6 @@ public class AttentionDetector {
     @VisibleForTesting
     AttentionCallbackInternalImpl mCallback;
 
-    /** Keep the last used post dim timeout for the dumpsys. */
-    private long mLastPostDimTimeout;
-
     public AttentionDetector(Runnable onUserAttention, Object lock) {
         mOnUserAttention = onUserAttention;
         mLock = lock;
@@ -180,6 +191,11 @@ public class AttentionDetector {
                         updateEnabledFromSettings(context);
                     }
                 }, UserHandle.USER_ALL);
+
+        readValuesFromDeviceConfig();
+        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                context.getMainExecutor(),
+                (properties) -> onDeviceConfigChange(properties.getKeyset()));
     }
 
     /** To be called in {@link PowerManagerService#updateUserActivitySummaryLocked}. */
@@ -192,8 +208,8 @@ public class AttentionDetector {
         }
 
         final long now = SystemClock.uptimeMillis();
-        final long whenToCheck = nextScreenDimming - getPreDimCheckDurationMillis();
-        final long whenToStopExtending = mLastUserActivityTime + getMaxExtensionMillis();
+        final long whenToCheck = nextScreenDimming - mPreDimCheckDurationMillis;
+        final long whenToStopExtending = mLastUserActivityTime + mMaximumExtensionMillis;
         if (now < whenToCheck) {
             if (DEBUG) {
                 Slog.d(TAG, "Do not check for attention yet, wait " + (whenToCheck - now));
@@ -220,9 +236,11 @@ public class AttentionDetector {
         mRequestId++;
         mLastActedOnNextScreenDimming = nextScreenDimming;
         mCallback = new AttentionCallbackInternalImpl(mRequestId);
+        mEffectivePostDimTimeoutMillis = Math.min(mRequestedPostDimTimeoutMillis,
+                dimDurationMillis);
         Slog.v(TAG, "Checking user attention, ID: " + mRequestId);
         final boolean sent = mAttentionManager.checkAttention(
-                getPreDimCheckDurationMillis() + getPostDimCheckDurationMillis(dimDurationMillis),
+                mPreDimCheckDurationMillis + mEffectivePostDimTimeoutMillis,
                 mCallback);
         if (!sent) {
             mRequested.set(false);
@@ -294,9 +312,9 @@ public class AttentionDetector {
     public void dump(PrintWriter pw) {
         pw.println("AttentionDetector:");
         pw.println(" mIsSettingEnabled=" + mIsSettingEnabled);
-        pw.println(" mMaxExtensionMillis=" + getMaxExtensionMillis());
-        pw.println(" preDimCheckDurationMillis=" + getPreDimCheckDurationMillis());
-        pw.println(" postDimCheckDurationMillis=" + mLastPostDimTimeout);
+        pw.println(" mMaxExtensionMillis=" + mMaximumExtensionMillis);
+        pw.println(" mPreDimCheckDurationMillis=" + mPreDimCheckDurationMillis);
+        pw.println(" mEffectivePostDimTimeout=" + mEffectivePostDimTimeoutMillis);
         pw.println(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);
         pw.println(" mAttentionServiceSupported=" + isAttentionServiceSupported());
         pw.println(" mRequested=" + mRequested);
@@ -319,7 +337,7 @@ public class AttentionDetector {
 
     /** How long to check <b>after</b> the screen dims, capped at the dim duration. */
     @VisibleForTesting
-    protected long getPostDimCheckDurationMillis(long dimDurationMillis) {
+    protected long getPostDimCheckDurationMillis() {
         final long millis = DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS,
                 DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
@@ -328,9 +346,7 @@ public class AttentionDetector {
             Slog.w(TAG, "Bad flag value supplied for: " + KEY_POST_DIM_CHECK_DURATION_MILLIS);
             return DEFAULT_POST_DIM_CHECK_DURATION_MILLIS;
         }
-
-        mLastPostDimTimeout = Math.min(millis, dimDurationMillis);
-        return mLastPostDimTimeout;
+        return millis;
     }
 
     /** How long the device can remain unlocked due to attention checking. */
@@ -346,6 +362,32 @@ public class AttentionDetector {
         }
 
         return millis;
+    }
+
+    private void onDeviceConfigChange(@NonNull Set<String> keys) {
+        for (String key : keys) {
+            switch (key) {
+                case KEY_MAX_EXTENSION_MILLIS:
+                case KEY_POST_DIM_CHECK_DURATION_MILLIS:
+                case KEY_PRE_DIM_CHECK_DURATION_MILLIS:
+                    readValuesFromDeviceConfig();
+                    return;
+                default:
+                    Slog.i(TAG, "Ignoring change on " + key);
+            }
+        }
+    }
+
+    private void readValuesFromDeviceConfig() {
+        mMaximumExtensionMillis = getMaxExtensionMillis();
+        mPreDimCheckDurationMillis = getPreDimCheckDurationMillis();
+        mRequestedPostDimTimeoutMillis = getPostDimCheckDurationMillis();
+
+        Slog.i(TAG, "readValuesFromDeviceConfig():"
+                + "\nmMaximumExtensionMillis=" + mMaximumExtensionMillis
+                + "\nmPreDimCheckDurationMillis=" + mPreDimCheckDurationMillis
+                + "\nmRequestedPostDimTimeoutMillis=" + mRequestedPostDimTimeoutMillis);
+
     }
 
     @VisibleForTesting
