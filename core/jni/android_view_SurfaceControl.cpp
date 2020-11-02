@@ -40,6 +40,7 @@
 #include <private/gui/ComposerService.h>
 #include <stdio.h>
 #include <system/graphics.h>
+#include <ui/BlurRegion.h>
 #include <ui/ConfigStoreTypes.h>
 #include <ui/DeviceProductInfo.h>
 #include <ui/DisplayConfig.h>
@@ -520,6 +521,43 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
         dst.makeInvalid();
     }
     transaction->setGeometry(ctrl, source, dst, orientation);
+}
+
+static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                 jlong nativeObject, jobjectArray regions, jint regionsLength) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    std::vector<BlurRegion> blurRegionVector;
+    const int size = regionsLength;
+    float region[10];
+    for (int i = 0; i < size; i++) {
+        jfloatArray regionArray = (jfloatArray)env->GetObjectArrayElement(regions, i);
+        env->GetFloatArrayRegion(regionArray, 0, 10, region);
+        float blurRadius = region[0];
+        float alpha = region[1];
+        float left = region[2];
+        float top = region[3];
+        float right = region[4];
+        float bottom = region[5];
+        float cornerRadiusTL = region[6];
+        float cornerRadiusTR = region[7];
+        float cornerRadiusBL = region[8];
+        float cornerRadiusBR = region[9];
+
+        blurRegionVector.push_back(BlurRegion{.blurRadius = static_cast<uint32_t>(blurRadius),
+                                              .cornerRadiusTL = cornerRadiusTL,
+                                              .cornerRadiusTR = cornerRadiusTR,
+                                              .cornerRadiusBL = cornerRadiusBL,
+                                              .cornerRadiusBR = cornerRadiusBR,
+                                              .alpha = alpha,
+                                              .left = static_cast<int>(left),
+                                              .top = static_cast<int>(top),
+                                              .right = static_cast<int>(right),
+                                              .bottom = static_cast<int>(bottom)});
+    }
+
+    transaction->setBlurRegions(ctrl, blurRegionVector);
 }
 
 static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1626,6 +1664,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetBackgroundBlurRadius },
     {"nativeSetLayerStack", "(JJI)V",
             (void*)nativeSetLayerStack },
+    {"nativeSetBlurRegions", "(JJ[[FI)V",
+            (void*)nativeSetBlurRegions },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFI)V",
