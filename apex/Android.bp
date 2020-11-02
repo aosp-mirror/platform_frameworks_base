@@ -105,6 +105,8 @@ java_defaults {
     impl_library_visibility: [":__package__"],
     stubs_source_visibility: ["//visibility:private"],
 
+    defaults_visibility: ["//visibility:private"],
+
     // Collates API usages from each module for further analysis.
     plugins: ["java_api_finder"],
 
