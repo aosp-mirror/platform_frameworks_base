@@ -835,7 +835,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!mShouldDrawNotificationBackground) {
             return;
         }
-
+        final boolean clearUndershelf = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 0 /* show background by default */) == 1;
+        if (clearUndershelf) {
+            mBackgroundPaint.setColor(Color.TRANSPARENT);
+            invalidate();
+            return;
+        }
         // Interpolate between semi-transparent notification panel background color
         // and white AOD separator.
         float colorInterpolation = MathUtils.smoothStep(0.4f /* start */, 1f /* end */,
