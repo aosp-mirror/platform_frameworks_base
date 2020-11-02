@@ -1418,6 +1418,7 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
     /** @hide Start Platform VPN without user intervention */
+    @SystemApi
     public static final String OPSTR_ACTIVATE_PLATFORM_VPN = "android:activate_platform_vpn";
     /** @hide */
     @SystemApi
