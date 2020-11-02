@@ -494,8 +494,9 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testOnAodInterrupt() {
         final int pos = 10;
-        mAuthController.onAodInterrupt(pos, pos);
-        verify(mUdfpsController).onAodInterrupt(eq(pos), eq(pos));
+        final float majorMinor = 5f;
+        mAuthController.onAodInterrupt(pos, pos, majorMinor, majorMinor);
+        verify(mUdfpsController).onAodInterrupt(eq(pos), eq(pos), eq(majorMinor), eq(majorMinor));
     }
 
     @Test
