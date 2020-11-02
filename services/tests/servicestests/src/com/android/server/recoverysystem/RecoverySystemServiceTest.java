@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IRecoverySystemProgressListener;
@@ -66,6 +68,9 @@ public class RecoverySystemServiceTest {
     private IThermalService mIThermalService;
     private FileWriter mUncryptUpdateFileWriter;
     private LockSettingsInternal mLockSettingsInternal;
+
+    private static final String FAKE_OTA_PACKAGE_NAME = "fake.ota.package";
+    private static final String FAKE_OTHER_PACKAGE_NAME = "fake.other.package";
 
     @Before
     public void setup() {
@@ -209,65 +214,99 @@ public class RecoverySystemServiceTest {
 
     @Test(expected = SecurityException.class)
     public void requestLskf_protected() {
-        doThrow(SecurityException.class).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.RECOVERY), any());
-        mRecoverySystemService.requestLskf("test", null);
-    }
-
-
-    @Test
-    public void requestLskf_nullToken_failure() {
-        assertThat(mRecoverySystemService.requestLskf(null, null), is(false));
+        when(mContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+        mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null);
     }
 
     @Test
     public void requestLskf_success() throws Exception {
         IntentSender intentSender = mock(IntentSender.class);
-        assertThat(mRecoverySystemService.requestLskf("test", intentSender), is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
         mRecoverySystemService.onPreparedForReboot(true);
         verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
     }
 
     @Test
-    public void requestLskf_subsequentRequestClearsPrepared() throws Exception {
+    public void requestLskf_subsequentRequestNotClearPrepared() throws Exception {
         IntentSender intentSender = mock(IntentSender.class);
-        assertThat(mRecoverySystemService.requestLskf("test", intentSender), is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
         mRecoverySystemService.onPreparedForReboot(true);
         verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
 
-        assertThat(mRecoverySystemService.requestLskf("test2", null), is(true));
-        assertThat(mRecoverySystemService.rebootWithLskf("test", null), is(false));
-        assertThat(mRecoverySystemService.rebootWithLskf("test2", "foobar"), is(false));
-
-        mRecoverySystemService.onPreparedForReboot(true);
-        assertThat(mRecoverySystemService.rebootWithLskf("test2", "foobar"), is(true));
-        verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "foobar", true),
+                is(true));
         verify(mIPowerManager).reboot(anyBoolean(), eq("foobar"), anyBoolean());
     }
-
 
     @Test
     public void requestLskf_requestedButNotPrepared() throws Exception {
         IntentSender intentSender = mock(IntentSender.class);
-        assertThat(mRecoverySystemService.requestLskf("test", intentSender), is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
         verify(intentSender, never()).sendIntent(any(), anyInt(), any(), any(), any());
+    }
+
+    @Test
+    public void isLskfCaptured_requestedButNotPrepared() throws Exception {
+        IntentSender intentSender = mock(IntentSender.class);
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
+        assertThat(mRecoverySystemService.isLskfCaptured(FAKE_OTA_PACKAGE_NAME), is(false));
+    }
+
+    @Test
+    public void isLskfCaptured_Prepared() throws Exception {
+        IntentSender intentSender = mock(IntentSender.class);
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
+        mRecoverySystemService.onPreparedForReboot(true);
+        verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
+        assertThat(mRecoverySystemService.isLskfCaptured(FAKE_OTA_PACKAGE_NAME), is(true));
     }
 
     @Test(expected = SecurityException.class)
     public void clearLskf_protected() {
-        doThrow(SecurityException.class).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.RECOVERY), any());
-        mRecoverySystemService.clearLskf();
+        when(mContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+        mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME);
     }
 
     @Test
     public void clearLskf_requestedThenCleared() throws Exception {
         IntentSender intentSender = mock(IntentSender.class);
-        assertThat(mRecoverySystemService.requestLskf("test", intentSender), is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
         mRecoverySystemService.onPreparedForReboot(true);
         verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
 
-        assertThat(mRecoverySystemService.clearLskf(), is(true));
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
+        verify(mLockSettingsInternal).clearRebootEscrow();
+    }
+
+    @Test
+    public void clearLskf_callerNotRequested_Success() throws Exception {
+        IntentSender intentSender = mock(IntentSender.class);
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTHER_PACKAGE_NAME), is(true));
+        verify(mLockSettingsInternal, never()).clearRebootEscrow();
+    }
+
+    @Test
+    public void clearLskf_multiClient_BothClientsClear() throws Exception {
+        IntentSender intentSender = mock(IntentSender.class);
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
+                is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, intentSender),
+                is(true));
+
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
+        verify(mLockSettingsInternal, never()).clearRebootEscrow();
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTHER_PACKAGE_NAME), is(true));
         verify(mLockSettingsInternal).clearRebootEscrow();
     }
 
@@ -279,27 +318,84 @@ public class RecoverySystemServiceTest {
 
     @Test(expected = SecurityException.class)
     public void rebootWithLskf_protected() {
-        doThrow(SecurityException.class).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.RECOVERY), any());
-        mRecoverySystemService.rebootWithLskf("test1", null);
+        when(mContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+        mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true);
     }
 
     @Test
     public void rebootWithLskf_Success() throws Exception {
-        assertThat(mRecoverySystemService.requestLskf("test", null), is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
         mRecoverySystemService.onPreparedForReboot(true);
-        assertThat(mRecoverySystemService.rebootWithLskf("test", "ab-update"), is(true));
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
+                is(true));
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
     }
 
     @Test
     public void rebootWithLskf_withoutPrepare_Failure() throws Exception {
-        assertThat(mRecoverySystemService.rebootWithLskf("test1", null), is(false));
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
+                is(false));
     }
 
     @Test
-    public void rebootWithLskf_withNullUpdateToken_Failure() throws Exception {
-        assertThat(mRecoverySystemService.rebootWithLskf(null, null), is(false));
+    public void rebootWithLskf_withNullCallerId_Failure() throws Exception {
+        assertThat(mRecoverySystemService.rebootWithLskf(null, null, true), is(false));
         verifyNoMoreInteractions(mIPowerManager);
     }
+
+    @Test
+    public void rebootWithLskf_multiClient_ClientASuccess() throws Exception {
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
+        mRecoverySystemService.onPreparedForReboot(true);
+
+        // Client B's clear won't affect client A's preparation.
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTHER_PACKAGE_NAME), is(true));
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
+                is(true));
+        verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
+    }
+
+
+    @Test
+    public void rebootWithLskf_multiClient_ClientBSuccess() throws Exception {
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
+        mRecoverySystemService.onPreparedForReboot(true);
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
+
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
+                is(false));
+        verifyNoMoreInteractions(mIPowerManager);
+
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
+        assertThat(
+                mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true),
+                is(true));
+        verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
+    }
+
+    @Test
+    public void rebootWithLskf_multiClient_BothClientsClear_Failure() throws Exception {
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
+        mRecoverySystemService.onPreparedForReboot(true);
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
+
+        // Client A clears
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
+                is(false));
+        verifyNoMoreInteractions(mIPowerManager);
+
+        // Client B clears
+        assertThat(mRecoverySystemService.clearLskf(FAKE_OTHER_PACKAGE_NAME), is(true));
+        verify(mLockSettingsInternal).clearRebootEscrow();
+        assertThat(
+                mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true),
+                is(false));
+        verifyNoMoreInteractions(mIPowerManager);
+    }
+
+    // TODO(xunchang) add more multi client tests
 }
