@@ -22,6 +22,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.UserHandle;
@@ -55,7 +56,7 @@ public class BrightnessSynchronizer {
 
     private final Queue<Object> mWriteHistory = new LinkedList<>();
 
-    private final Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -71,7 +72,6 @@ public class BrightnessSynchronizer {
 
         }
     };
-
 
     public BrightnessSynchronizer(Context context) {
         final BrightnessSyncObserver mBrightnessSyncObserver;
