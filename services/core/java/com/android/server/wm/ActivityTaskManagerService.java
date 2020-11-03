@@ -366,6 +366,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     PendingIntentController mPendingIntentController;
     IntentFirewall mIntentFirewall;
 
+    final VisibleActivityProcessTracker mVisibleActivityProcessTracker;
+
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
     /**
@@ -741,6 +743,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mSystemThread = ActivityThread.currentActivityThread();
         mUiContext = mSystemThread.getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
+        mVisibleActivityProcessTracker = new VisibleActivityProcessTracker(this);
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
         mWindowOrganizerController = new WindowOrganizerController(this);
@@ -6103,16 +6106,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean hasResumedActivity(int uid) {
-            synchronized (mGlobalLock) {
-                final ArraySet<WindowProcessController> processes = mProcessMap.getProcesses(uid);
-                for (int i = 0, n = processes.size(); i < n; i++) {
-                    final WindowProcessController process = processes.valueAt(i);
-                    if (process.hasResumedActivity()) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return mVisibleActivityProcessTracker.hasResumedActivity(uid);
         }
 
         public void setBackgroundActivityStartCallback(

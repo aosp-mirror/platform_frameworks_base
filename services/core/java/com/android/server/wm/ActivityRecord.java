@@ -445,7 +445,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private Task task;              // the task this is in.
     private long createTime = System.currentTimeMillis();
     long lastVisibleTime;         // last time this activity became visible
-    long cpuTimeAtResume;         // the cpu time of host process at the time of resuming activity
     long pauseTime;               // last time we started pausing the activity
     long launchTickTime;          // base time for launch tick messages
     long topResumedStateLossTime; // last time we reported top resumed state loss to an activity
@@ -5010,16 +5009,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         resumeKeyDispatchingLocked();
         final Task stack = getRootTask();
         mStackSupervisor.mNoAnimActivities.clear();
-
-        // Mark the point when the activity is resuming
-        // TODO: To be more accurate, the mark should be before the onCreate,
-        //       not after the onResume. But for subsequent starts, onResume is fine.
-        if (hasProcess()) {
-            cpuTimeAtResume = app.getCpuTime();
-        } else {
-            cpuTimeAtResume = 0; // Couldn't get the cpu time of process
-        }
-
         returningOptions = null;
 
         if (canTurnScreenOn()) {
