@@ -680,8 +680,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void initialize() {
-        // Initialize the power state object for the default display.
-        // In the future, we might manage multiple displays independently.
         mPowerState = new DisplayPowerState(mBlanker,
                 mColorFadeEnabled ? new ColorFade(mDisplayId) : null, mDisplayId);
 

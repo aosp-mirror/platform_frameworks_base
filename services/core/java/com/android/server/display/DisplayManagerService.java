@@ -88,6 +88,7 @@ import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -95,6 +96,7 @@ import android.view.IDisplayFoldListener;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -111,7 +113,6 @@ import com.android.server.wm.WindowManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -234,15 +235,28 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayBlanker mDisplayBlanker = new DisplayBlanker() {
         @Override
         public void requestDisplayState(int displayId, int state, float brightness) {
+            // TODO (b/168210494): Stop applying default display state to all displays.
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                return;
+            }
+            final int[] displayIds;
+            synchronized (mSyncRoot) {
+                displayIds = mLogicalDisplayMapper.getDisplayIdsLocked();
+            }
+
             // The order of operations is important for legacy reasons.
             if (state == Display.STATE_OFF) {
-                requestGlobalDisplayStateInternal(state, brightness);
+                for (int id : displayIds) {
+                    requestDisplayStateInternal(id, state, brightness);
+                }
             }
 
             mDisplayPowerCallbacks.onDisplayStateChange(state);
 
             if (state != Display.STATE_OFF) {
-                requestGlobalDisplayStateInternal(state, brightness);
+                for (int id : displayIds) {
+                    requestDisplayStateInternal(id, state, brightness);
+                }
             }
         }
     };
@@ -256,13 +270,16 @@ public final class DisplayManagerService extends SystemService {
     /** The {@link Handler} used by all {@link DisplayPowerController}s. */
     private Handler mPowerHandler;
 
-    // The overall display state, independent of changes that might influence one
-    // display or another in particular.
-    private int mGlobalDisplayState = Display.STATE_ON;
+    // A map from LogicalDisplay ID to display power state.
+    @GuardedBy("mSyncRoot")
+    private final SparseIntArray mDisplayStates = new SparseIntArray();
 
-    // The overall display brightness.
-    // For now, this only applies to the default display but we may split it up eventually.
-    private float mGlobalDisplayBrightness;
+    // A map from LogicalDisplay ID to display brightness.
+    @GuardedBy("mSyncRoot")
+    private final SparseArray<Float> mDisplayBrightnesses = new SparseArray<>();
+
+    // The default brightness.
+    private final float mDisplayDefaultBrightness;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -316,11 +333,6 @@ public final class DisplayManagerService extends SystemService {
     // DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY flag set.
     private final int mDefaultDisplayDefaultColorMode;
 
-    // Temporary list of deferred work to perform when setting the display state.
-    // Only used by requestDisplayState.  The field is self-synchronized and only
-    // intended for use inside of the requestGlobalDisplayStateInternal function.
-    private final ArrayList<Runnable> mTempDisplayStateWorkQueue = new ArrayList<Runnable>();
-
     // Lists of UIDs that are present on the displays. Maps displayId -> array of UIDs.
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
@@ -371,7 +383,7 @@ public final class DisplayManagerService extends SystemService {
         mMinimumBrightnessSpline = Spline.createSpline(lux, nits);
 
         PowerManager pm = mContext.getSystemService(PowerManager.class);
-        mGlobalDisplayBrightness = pm.getBrightnessConstraint(
+        mDisplayDefaultBrightness = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT);
         mCurrentUserId = UserHandle.USER_SYSTEM;
         ColorSpace[] colorSpaces = SurfaceControl.getCompositionColorSpaces();
@@ -588,7 +600,7 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void requestGlobalDisplayStateInternal(int state, float brightnessState) {
+    private void requestDisplayStateInternal(int displayId, int state, float brightnessState) {
         if (state == Display.STATE_UNKNOWN) {
             state = Display.STATE_ON;
         }
@@ -601,38 +613,40 @@ public final class DisplayManagerService extends SystemService {
             brightnessState = PowerManager.BRIGHTNESS_MAX;
         }
 
-        synchronized (mTempDisplayStateWorkQueue) {
-            try {
-                // Update the display state within the lock.
-                // Note that we do not need to schedule traversals here although it
-                // may happen as a side-effect of displays changing state.
-                synchronized (mSyncRoot) {
-                    if (mGlobalDisplayState == state
-                            && mGlobalDisplayBrightness == brightnessState) {
-                        return; // no change
-                    }
+        // Update the display state within the lock.
+        // Note that we do not need to schedule traversals here although it
+        // may happen as a side-effect of displays changing state.
+        final Runnable runnable;
+        final String traceMessage;
+        synchronized (mSyncRoot) {
+            final int index = mDisplayStates.indexOfKey(displayId);
 
-                    Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestGlobalDisplayState("
-                            + Display.stateToString(state)
-                            + ", brightness=" + brightnessState + ")");
-
-                    mGlobalDisplayState = state;
-                    mGlobalDisplayBrightness = brightnessState;
-                    applyGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
-                }
-
-                // Setting the display power state can take hundreds of milliseconds
-                // to complete so we defer the most expensive part of the work until
-                // after we have exited the critical section to avoid blocking other
-                // threads for a long time.
-                for (int i = 0; i < mTempDisplayStateWorkQueue.size(); i++) {
-                    mTempDisplayStateWorkQueue.get(i).run();
-                }
-                Trace.traceEnd(Trace.TRACE_TAG_POWER);
-            } finally {
-                mTempDisplayStateWorkQueue.clear();
+            if (index < 0 || (mDisplayStates.valueAt(index) == state
+                    && BrightnessSynchronizer.floatEquals(mDisplayBrightnesses.valueAt(index),
+                    brightnessState))) {
+                return; // Display no longer exists or no change.
             }
+
+            traceMessage = "requestDisplayStateInternal("
+                    + displayId + ", "
+                    + Display.stateToString(state)
+                    + ", brightness=" + brightnessState + ")";
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, traceMessage, displayId);
+
+            mDisplayStates.setValueAt(index, state);
+            mDisplayBrightnesses.setValueAt(index, brightnessState);
+            runnable = updateDisplayStateLocked(
+                    mLogicalDisplayMapper.getLocked(displayId).getPrimaryDisplayDeviceLocked());
         }
+
+        // Setting the display power state can take hundreds of milliseconds
+        // to complete so we defer the most expensive part of the work until
+        // after we have exited the critical section to avoid blocking other
+        // threads for a long time.
+        if (runnable != null) {
+            runnable.run();
+        }
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, traceMessage, displayId);
     }
 
     private class SettingsObserver extends ContentObserver {
@@ -986,6 +1000,8 @@ public final class DisplayManagerService extends SystemService {
             recordTopInsetLocked(display);
         }
         addDisplayPowerControllerLocked(displayId);
+        mDisplayStates.append(displayId, Display.STATE_OFF);
+        mDisplayBrightnesses.append(displayId, mDisplayDefaultBrightness);
 
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
@@ -1020,6 +1036,8 @@ public final class DisplayManagerService extends SystemService {
     private void handleLogicalDisplayRemovedLocked(@NonNull LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
         mDisplayPowerControllers.delete(displayId);
+        mDisplayStates.delete(displayId);
+        mDisplayBrightnesses.delete(displayId);
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         scheduleTraversalLocked(false);
@@ -1034,15 +1052,6 @@ public final class DisplayManagerService extends SystemService {
         handleLogicalDisplayChangedLocked(display);
     }
 
-    private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
-        mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
-            Runnable runnable = updateDisplayStateLocked(device);
-            if (runnable != null) {
-                workQueue.add(runnable);
-            }
-        });
-    }
-
     private Runnable updateDisplayStateLocked(DisplayDevice device) {
         // Blank or unblank the display immediately to match the state requested
         // by the display power controller (if known).
@@ -1051,12 +1060,16 @@ public final class DisplayManagerService extends SystemService {
             // TODO - b/170498827 The rules regarding what display state to apply to each
             // display will depend on the configuration/mapping of logical displays.
             // Clean up LogicalDisplay.isEnabled() mechanism once this is fixed.
-            int state = mGlobalDisplayState;
             final LogicalDisplay display = mLogicalDisplayMapper.getLocked(device);
-            if (display != null && !display.isEnabled()) {
+            final int state;
+            final int displayId = display.getDisplayIdLocked();
+            if (display.isEnabled()) {
+                state = mDisplayStates.get(displayId);
+            } else {
                 state = Display.STATE_OFF;
             }
-            return device.requestDisplayStateLocked(state, mGlobalDisplayBrightness);
+            final float brightness = mDisplayBrightnesses.get(displayId);
+            return device.requestDisplayStateLocked(state, brightness);
         }
         return null;
     }
@@ -1591,12 +1604,23 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mOnlyCode=" + mOnlyCore);
             pw.println("  mSafeMode=" + mSafeMode);
             pw.println("  mPendingTraversal=" + mPendingTraversal);
-            pw.println("  mGlobalDisplayState=" + Display.stateToString(mGlobalDisplayState));
             pw.println("  mViewports=" + mViewports);
             pw.println("  mDefaultDisplayDefaultColorMode=" + mDefaultDisplayDefaultColorMode);
             pw.println("  mWifiDisplayScanRequestCount=" + mWifiDisplayScanRequestCount);
             pw.println("  mStableDisplaySize=" + mStableDisplaySize);
             pw.println("  mMinimumBrightnessCurve=" + mMinimumBrightnessCurve);
+
+            pw.println();
+            final int displayStateCount = mDisplayStates.size();
+            pw.println("Display States: size=" + displayStateCount);
+            for (int i = 0; i < displayStateCount; i++) {
+                final int displayId = mDisplayStates.keyAt(i);
+                final int displayState = mDisplayStates.valueAt(i);
+                final float brightness = mDisplayBrightnesses.valueAt(i);
+                pw.println("  Display Id=" + displayId);
+                pw.println("  Display State=" + Display.stateToString(displayState));
+                pw.println("  Display Brightness=" + brightness);
+            }
 
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
             ipw.increaseIndent();
