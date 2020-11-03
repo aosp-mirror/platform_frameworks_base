@@ -235,6 +235,9 @@ interface IWifiManager
     void startDppAsEnrolleeInitiator(in IBinder binder, in String configuratorUri,
         in IDppCallback callback);
 
+    void startDppAsEnrolleeResponder(in IBinder binder, in String deviceInfo, int curve,
+        in IDppCallback callback);
+
     void stopDppSession();
 
     void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec);
