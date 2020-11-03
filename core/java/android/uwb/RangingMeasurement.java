@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemClock;
 
 import java.lang.annotation.Retention;
@@ -30,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public final class RangingMeasurement {
+public final class RangingMeasurement implements Parcelable {
     private final UwbAddress mRemoteDeviceAddress;
     private final @Status int mStatus;
     private final long mElapsedRealtimeNanos;
@@ -126,6 +128,42 @@ public final class RangingMeasurement {
     public AngleOfArrivalMeasurement getAngleOfArrival() {
         return mAngleOfArrivalMeasurement;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mRemoteDeviceAddress, flags);
+        dest.writeInt(mStatus);
+        dest.writeLong(mElapsedRealtimeNanos);
+        dest.writeParcelable(mDistanceMeasurement, flags);
+        dest.writeParcelable(mAngleOfArrivalMeasurement, flags);
+    }
+
+    public static final @android.annotation.NonNull Creator<RangingMeasurement> CREATOR =
+            new Creator<RangingMeasurement>() {
+                @Override
+                public RangingMeasurement createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+                    builder.setRemoteDeviceAddress(
+                            in.readParcelable(UwbAddress.class.getClassLoader()));
+                    builder.setStatus(in.readInt());
+                    builder.setElapsedRealtimeNanos(in.readLong());
+                    builder.setDistanceMeasurement(
+                            in.readParcelable(DistanceMeasurement.class.getClassLoader()));
+                    builder.setAngleOfArrivalMeasurement(
+                            in.readParcelable(AngleOfArrivalMeasurement.class.getClassLoader()));
+                    return builder.build();
+                }
+
+                @Override
+                public RangingMeasurement[] newArray(int size) {
+                    return new RangingMeasurement[size];
+                }
+    };
 
     /**
      * Builder for a {@link RangingMeasurement} object.
