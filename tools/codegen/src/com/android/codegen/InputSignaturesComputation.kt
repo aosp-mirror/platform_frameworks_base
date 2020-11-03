@@ -128,7 +128,7 @@ private fun ClassPrinter.getFullClassName(className: String): String {
 
     if (classAst.nameAsString == className) return thisPackagePrefix + classAst.nameAsString
 
-    nestedClasses.find {
+    nestedTypes.find {
         it.nameAsString == className
     }?.let { return thisClassPrefix + it.nameAsString }
 
