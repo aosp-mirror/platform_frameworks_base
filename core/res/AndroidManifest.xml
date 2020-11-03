@@ -3400,6 +3400,12 @@
     <permission android:name="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by any
+         {@link android.companion.CompanionDeviceService}s
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_COMPANION_DEVICE_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Must be required by the RuntimePermissionPresenterService to ensure
          that only the system can bind to it.
          @hide -->
