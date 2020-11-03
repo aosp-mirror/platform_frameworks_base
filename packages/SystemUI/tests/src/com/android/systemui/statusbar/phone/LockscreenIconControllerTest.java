@@ -32,7 +32,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -81,25 +80,21 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private HeadsUpManagerPhone mHeadsUpManagerPhone;
-    @Mock
-    private AuthController mAuthController;
 
     private LockscreenLockIconController mLockIconController;
     private OnAttachStateChangeListener mOnAttachStateChangeListener;
-
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mAuthController.isUdfpsEnrolled()).thenReturn(false);
         when(mLockIcon.getContext()).thenReturn(mContext);
         mLockIconController = new LockscreenLockIconController(
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
                 mShadeController, mAccessibilityController, mKeyguardIndicationController,
                 mStatusBarStateController, mConfigurationController, mNotificationWakeUpCoordinator,
                 mKeyguardBypassController, mDockManager, mKeyguardStateController, mResources,
-                mHeadsUpManagerPhone, mAuthController);
+                mHeadsUpManagerPhone);
 
         ArgumentCaptor<OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(OnAttachStateChangeListener.class);
