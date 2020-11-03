@@ -182,6 +182,70 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:0A:30").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_setAnalogueTimer_clearAnalogueTimer() {
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:13:AD:06").isEqualTo(OK);
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:03:34").isEqualTo(OK);
+
+        assertMessageValidity("0F:33:0C:08:10:1E:04:30:08:00:13:AD:06")
+                .isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:34:04:0C:16:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:13:AD:06")
+                .isEqualTo(ERROR_PARAMETER_SHORT);
+        // Out of range Day of Month
+        assertMessageValidity("04:34:20:0C:16:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Month of Year
+        assertMessageValidity("04:33:0C:00:10:1E:04:30:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Hour
+        assertMessageValidity("04:34:04:0C:18:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Minute
+        assertMessageValidity("04:33:0C:08:10:50:04:30:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Duration Hours
+        assertMessageValidity("04:34:04:0C:16:0F:64:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Minute
+        assertMessageValidity("04:33:0C:08:10:1E:04:64:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:88:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:A2:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Analogue Broadcast Type
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:03:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Analogue Frequency
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:FF:FF:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Broadcast System
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setExternalTimer_clearExternalTimer() {
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:02:04:20").isEqualTo(OK);
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:10:05:10:00").isEqualTo(OK);
+
+        assertMessageValidity("4F:A1:0C:08:15:05:04:1E:02:04:20").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F4:A2:14:09:12:28:4B:19:10:05:10:00").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:02:04").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Out of range Day of Month
+        assertMessageValidity("40:A2:28:09:12:28:4B:19:10:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Out of range Month of Year
+        assertMessageValidity("40:A1:0C:0F:15:05:04:1E:02:04:20").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Hour
+        assertMessageValidity("40:A2:14:09:1A:28:4B:19:10:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Minute
+        assertMessageValidity("40:A1:0C:08:15:48:04:1E:02:04:20").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Duration Hours
+        assertMessageValidity("40:A2:14:09:12:28:66:19:10:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Minute
+        assertMessageValidity("40:A1:0C:08:15:05:04:3F:02:04:20").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:84:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:14:04:20").isEqualTo(ERROR_PARAMETER);
+        // Invalid external source specifier
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:10:08:10:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid External PLug
+        assertMessageValidity("04:A1:0C:08:15:05:04:1E:02:04:00").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }
