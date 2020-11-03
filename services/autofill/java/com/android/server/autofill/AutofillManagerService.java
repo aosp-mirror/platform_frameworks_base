@@ -84,7 +84,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -170,7 +169,7 @@ public final class AutofillManagerService
                 // beneath it is brought back to top. Ideally, we should just hide the UI and
                 // bring it back when the activity resumes.
                 synchronized (mLock) {
-                    visitServicesLocked((s) -> s.destroyFinishedSessionsLocked());
+                    visitServicesLocked((s) -> s.forceRemoveFinishedSessionsLocked());
                 }
                 mUi.hideAll(null);
             }
@@ -386,18 +385,18 @@ public final class AutofillManagerService
     }
 
     // Called by Shell command.
-    void destroySessions(@UserIdInt int userId, IResultReceiver receiver) {
-        Slog.i(TAG, "destroySessions() for userId " + userId);
+    void removeAllSessions(@UserIdInt int userId, IResultReceiver receiver) {
+        Slog.i(TAG, "removeAllSessions() for userId " + userId);
         enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
             if (userId != UserHandle.USER_ALL) {
                 AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.destroySessionsLocked();
+                    service.forceRemoveAllSessionsLocked();
                 }
             } else {
-                visitServicesLocked((s) -> s.destroySessionsLocked());
+                visitServicesLocked((s) -> s.forceRemoveAllSessionsLocked());
             }
         }
 
