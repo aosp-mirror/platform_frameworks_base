@@ -159,6 +159,10 @@ public class HdmiCecMessageValidator {
         // TODO: Handle messages for the Tuner Control.
         addValidationInfo(
                 Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS, statusRequestValidator, DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SELECT_ANALOG_SERVICE,
+                new SelectAnalogueServiceValidator(),
+                DEST_DIRECT);
 
         // Messages for the Vendor Specific Commands.
         VariableLengthValidator maxLengthValidator = new VariableLengthValidator(0, 14);
@@ -888,6 +892,23 @@ public class HdmiCecMessageValidator {
                     || isWithinRange(params[0], 0x19, 0x1B)
                     || isWithinRange(params[0], 0x24, 0x25)
                     || (params[0] == 0x20));
+        }
+    }
+
+    /**
+     * Check if the given select analogue service parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     */
+    private class SelectAnalogueServiceValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 4) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidAnalogueBroadcastType(params[0])
+                    && isValidAnalogueFrequency(HdmiUtils.twoBytesToInt(params, 1))
+                    && isValidBroadcastSystem(params[3]));
         }
     }
 }

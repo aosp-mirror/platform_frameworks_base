@@ -409,6 +409,22 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:41:26").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_selectAnalogueService() {
+        assertMessageValidity("40:92:00:13:0F:00:96").isEqualTo(OK);
+        assertMessageValidity("40:92:02:EA:60:1F").isEqualTo(OK);
+
+        assertMessageValidity("4F:92:00:13:0F:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:92:02:EA:60:1F").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:92:00:13:0F").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Analogue Broadcast type
+        assertMessageValidity("40:92:03:EA:60:1F").isEqualTo(ERROR_PARAMETER);
+        // Invalid Analogue Frequency
+        assertMessageValidity("40:92:00:FF:FF:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Broadcast system
+        assertMessageValidity("40:92:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }
