@@ -22,6 +22,7 @@ import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.qs.QuickQSPanelController;
+import com.android.systemui.qs.customize.QSCustomizerController;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -32,6 +33,7 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {QSFragmentModule.class})
 @QSScope
 public interface QSFragmentComponent {
+
     /** Factory for building a {@link QSFragmentComponent}. */
     @Subcomponent.Factory
     interface Factory {
@@ -52,4 +54,7 @@ public interface QSFragmentComponent {
 
     /** Construct a {@link QSFooter} */
     QSFooter getQSFooter();
+
+    /** Construct a {@link QSCustomizerController}. */
+    QSCustomizerController getQSCustomizerController();
 }

@@ -52,7 +52,7 @@ public class QSDetailTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;
     private QSDetail mQsDetail;
-    private QSPanel mQsPanel;
+    private QSPanelController mQsPanelController;
     private QuickStatusBarHeader mQuickHeader;
     private ActivityStarter mActivityStarter;
     private DetailAdapter mMockDetailAdapter;
@@ -68,9 +68,9 @@ public class QSDetailTest extends SysuiTestCase {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
             mQsDetail = (QSDetail) LayoutInflater.from(mContext).inflate(R.layout.qs_detail, null);
-            mQsPanel = mock(QSPanel.class);
+            mQsPanelController = mock(QSPanelController.class);
             mQuickHeader = mock(QuickStatusBarHeader.class);
-            mQsDetail.setQsPanel(mQsPanel, mQuickHeader, mock(QSFooter.class));
+            mQsDetail.setQsPanel(mQsPanelController, mQuickHeader, mock(QSFooter.class));
 
             mMockDetailAdapter = mock(DetailAdapter.class);
             when(mMockDetailAdapter.createDetailView(any(), any(), any()))

@@ -46,12 +46,17 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
+import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+/** */
+@QSScope
 public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileStateListener {
     private static final long DRAG_LENGTH = 100;
     private static final float DRAG_SCALE = 1.2f;
@@ -78,6 +83,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final ItemDecoration mDecoration;
     private final MarginTileDecoration mMarginDecoration;
     private final int mMinNumTiles;
+    private final QSTileHost mHost;
     private int mEditIndex;
     private int mTileDividerIndex;
     private int mFocusIndex;
@@ -89,13 +95,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private Holder mCurrentDrag;
     private int mAccessibilityAction = ACTION_NONE;
     private int mAccessibilityFromIndex;
-    private QSTileHost mHost;
     private final UiEventLogger mUiEventLogger;
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
     private RecyclerView mRecyclerView;
 
-    public TileAdapter(Context context, UiEventLogger uiEventLogger) {
+    @Inject
+    public TileAdapter(Context context, QSTileHost qsHost, UiEventLogger uiEventLogger) {
         mContext = context;
+        mHost = qsHost;
         mUiEventLogger = uiEventLogger;
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
@@ -112,10 +119,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         mRecyclerView = null;
-    }
-
-    public void setHost(QSTileHost host) {
-        mHost = host;
     }
 
     public ItemTouchHelper getItemTouchHelper() {
@@ -154,9 +157,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityAction = ACTION_NONE;
     }
 
-    public void resetTileSpecs(QSTileHost host, List<String> specs) {
+    /** */
+    public void resetTileSpecs(List<String> specs) {
         // Notify the host so the tiles get removed callbacks.
-        host.changeTiles(mCurrentSpecs, specs);
+        mHost.changeTiles(mCurrentSpecs, specs);
         setTileSpecs(specs);
     }
 

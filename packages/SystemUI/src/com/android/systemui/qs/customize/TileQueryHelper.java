@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.settings.UserTracker;
@@ -50,6 +51,8 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+/** */
+@QSScope
 public class TileQueryHelper {
     private static final String TAG = "TileQueryHelper";
 
