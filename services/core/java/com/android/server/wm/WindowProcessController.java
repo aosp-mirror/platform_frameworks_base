@@ -225,8 +225,19 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @Nullable
     private final BackgroundActivityStartCallback mBackgroundActivityStartCallback;
 
-    /** The state for oom-adjustment calculation. */
-    private final OomScoreReferenceState mOomRefState;
+    // The bits used for mActivityStateFlags.
+    private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 0x10000000;
+    private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 0x20000000;
+    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 0x40000000;
+    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 0x80000000;
+    private static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
+
+    /**
+     * The state for oom-adjustment calculation. The higher 16 bits are the activity states, and the
+     * lower 16 bits are the task layer rank (see {@link Task#mLayerRank}). This field is written by
+     * window manager and read by activity manager.
+     */
+    private volatile int mActivityStateFlags = ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
 
     public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner,
@@ -240,7 +251,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm = atm;
         mDisplayId = INVALID_DISPLAY;
         mBackgroundActivityStartCallback = mAtm.getBackgroundActivityStartCallback();
-        mOomRefState = new OomScoreReferenceState(this);
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
@@ -707,7 +717,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasVisibleActivities() {
-        return (mOomRefState.mActivityStateFlags & OomScoreReferenceState.FLAG_IS_VISIBLE) != 0;
+        return (mActivityStateFlags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0;
     }
 
     @HotPath(caller = HotPath.LRU_UPDATE)
@@ -1000,34 +1010,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mHostActivities.remove(r);
     }
 
-    private static class OomScoreReferenceState extends RootWindowContainer.LockedScheduler {
-        private static final int FLAG_IS_VISIBLE = 0x10000000;
-        private static final int FLAG_IS_PAUSING = 0x20000000;
-        private static final int FLAG_IS_STOPPING = 0x40000000;
-        private static final int FLAG_IS_STOPPING_FINISHING = 0x80000000;
-        /** @see Task#mLayerRank */
-        private static final int MASK_MIN_TASK_LAYER = 0x0000ffff;
-
-        private final WindowProcessController mOwner;
-        boolean mChanged;
-
-        /**
-         * The higher 16 bits are the activity states, and the lower 16 bits are the task layer
-         * rank. This field is written by window manager and read by activity manager.
-         */
-        volatile int mActivityStateFlags = MASK_MIN_TASK_LAYER;
-
-        OomScoreReferenceState(WindowProcessController owner) {
-            super(owner.mAtm);
-            mOwner = owner;
-        }
-
-        @Override
-        public void execute() {
-            mOwner.computeOomScoreReferenceStateIfNeeded();
-        }
-    }
-
     public interface ComputeOomAdjCallback {
         void onVisibleActivity();
         void onPausedActivity();
@@ -1041,26 +1023,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public int computeOomAdjFromActivities(ComputeOomAdjCallback callback) {
-        final int flags = mOomRefState.mActivityStateFlags;
-        if ((flags & OomScoreReferenceState.FLAG_IS_VISIBLE) != 0) {
+        final int flags = mActivityStateFlags;
+        if ((flags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0) {
             callback.onVisibleActivity();
-        } else if ((flags & OomScoreReferenceState.FLAG_IS_PAUSING) != 0) {
+        } else if ((flags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
             callback.onPausedActivity();
-        } else if ((flags & OomScoreReferenceState.FLAG_IS_STOPPING) != 0) {
+        } else if ((flags & ACTIVITY_STATE_FLAG_IS_STOPPING) != 0) {
             callback.onStoppingActivity(
-                    (flags & OomScoreReferenceState.FLAG_IS_STOPPING_FINISHING) != 0);
+                    (flags & ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING) != 0);
         } else {
             callback.onOtherActivity();
         }
-        return flags & OomScoreReferenceState.MASK_MIN_TASK_LAYER;
+        return flags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
     }
 
-    void computeOomScoreReferenceStateIfNeeded() {
-        if (!mOomRefState.mChanged) {
-            return;
-        }
-        mOomRefState.mChanged = false;
-
+    void computeProcessActivityState() {
         // Since there could be more than one activities in a process record, we don't need to
         // compute the OomAdj with each of them, just need to find out the activity with the
         // "best" state, the order would be visible, pausing, stopping...
@@ -1101,36 +1078,25 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     finishing &= r.finishing;
                 }
             }
+        }
 
-            int stateFlags = minTaskLayer & OomScoreReferenceState.MASK_MIN_TASK_LAYER;
-            if (visible) {
-                stateFlags |= OomScoreReferenceState.FLAG_IS_VISIBLE;
-            } else if (best == PAUSING) {
-                stateFlags |= OomScoreReferenceState.FLAG_IS_PAUSING;
-            } else if (best == STOPPING) {
-                stateFlags |= OomScoreReferenceState.FLAG_IS_STOPPING;
-                if (finishing) {
-                    stateFlags |= OomScoreReferenceState.FLAG_IS_STOPPING_FINISHING;
-                }
+        int stateFlags = minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+        if (visible) {
+            stateFlags |= ACTIVITY_STATE_FLAG_IS_VISIBLE;
+        } else if (best == PAUSING) {
+            stateFlags |= ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED;
+        } else if (best == STOPPING) {
+            stateFlags |= ACTIVITY_STATE_FLAG_IS_STOPPING;
+            if (finishing) {
+                stateFlags |= ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING;
             }
-            mOomRefState.mActivityStateFlags = stateFlags;
         }
-    }
-
-    void invalidateOomScoreReferenceState(boolean computeNow) {
-        mOomRefState.mChanged = true;
-        if (computeNow) {
-            computeOomScoreReferenceStateIfNeeded();
-            return;
-        }
-        mOomRefState.scheduleIfNeeded();
+        mActivityStateFlags = stateFlags;
     }
 
     /** Called when the process has some oom related changes and it is going to update oom-adj. */
     private void prepareOomAdjustment() {
         mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
-        // The task layer may not change but the activity state in the same task may change.
-        computeOomScoreReferenceStateIfNeeded();
     }
 
     public int computeRelaunchReason() {

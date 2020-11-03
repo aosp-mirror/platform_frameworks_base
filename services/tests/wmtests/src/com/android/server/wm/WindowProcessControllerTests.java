@@ -291,25 +291,19 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         assertEquals(1 /* minTaskLayer */, mWpc.computeOomAdjFromActivities(callback));
         assertEquals(visible, callbackResult[0]);
 
-        // The oom state will be updated in handler from activity state change.
         callbackResult[0] = 0;
         activity.mVisibleRequested = false;
         activity.setState(Task.ActivityState.PAUSED, "test");
-        waitHandlerIdle(mAtm.mH);
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(paused, callbackResult[0]);
 
-        // updateProcessInfo with updateOomAdj=true should refresh the state immediately.
         callbackResult[0] = 0;
         activity.setState(Task.ActivityState.STOPPING, "test");
-        mWpc.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                true /* activityChange */, true /* updateOomAdj */, false /* addPendingTopUid */);
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(stopping, callbackResult[0]);
 
         callbackResult[0] = 0;
         activity.setState(Task.ActivityState.STOPPED, "test");
-        waitHandlerIdle(mAtm.mH);
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(other, callbackResult[0]);
     }
