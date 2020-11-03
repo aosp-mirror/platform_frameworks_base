@@ -3058,6 +3058,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * Cleans up the relevant stored files and information of all child sessions.
+     * <p>Cleaning up the stored files and session information is necessary for
+     * preventing the orphan children sessions.
+     * <ol>
+     *     <li>To call {@link #destroyInternal()} cleans up the stored files.</li>
+     *     <li>To call {@link #dispatchSessionFinished(int, String, Bundle)} to trigger the
+     *     procedure to clean up the information in PackageInstallerService.</li>
+     * </ol></p>
+     */
+    private void maybeCleanUpChildSessions() {
+        if (!isMultiPackage()) {
+            return;
+        }
+
+        final List<PackageInstallerSession> childSessions = getChildSessions();
+        final int size = childSessions.size();
+        for (int i = 0; i < size; ++i) {
+            final PackageInstallerSession session = childSessions.get(i);
+            session.destroyInternal();
+            session.dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned"
+                            + " because the parent session is abandoned", null);
+        }
+    }
+
     private void abandonNonStaged() {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -3068,6 +3093,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             destroyInternal();
         }
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+        maybeCleanUpChildSessions();
     }
 
     private void abandonStaged() {
@@ -3092,6 +3118,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 cleanStageDir(childSessions);
                 destroyInternal();
                 dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+                maybeCleanUpChildSessions();
             };
             if (mInPreRebootVerification) {
                 // Pre-reboot verification is ongoing. It is not safe to clean up the session yet.
