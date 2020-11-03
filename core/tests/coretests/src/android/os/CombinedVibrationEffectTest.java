@@ -26,22 +26,135 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Arrays;
+
 @Presubmit
 @RunWith(JUnit4.class)
 public class CombinedVibrationEffectTest {
 
+    private static final VibrationEffect VALID_EFFECT = VibrationEffect.createOneShot(10, 255);
+    private static final VibrationEffect INVALID_EFFECT = new VibrationEffect.OneShot(-1, -1);
+
     @Test
     public void testValidateMono() {
-        CombinedVibrationEffect.createSynced(VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+        CombinedVibrationEffect.createSynced(VALID_EFFECT);
 
         assertThrows(IllegalArgumentException.class,
-                () -> CombinedVibrationEffect.createSynced(new VibrationEffect.OneShot(-1, -1)));
+                () -> CombinedVibrationEffect.createSynced(INVALID_EFFECT));
+    }
+
+    @Test
+    public void testValidateStereo() {
+        CombinedVibrationEffect.startSynced()
+                .addVibrator(0, VALID_EFFECT)
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_TICK))
+                .combine();
+        CombinedVibrationEffect.startSynced()
+                .addVibrator(0, INVALID_EFFECT)
+                .addVibrator(0, VALID_EFFECT)
+                .combine();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> CombinedVibrationEffect.startSynced()
+                        .addVibrator(0, INVALID_EFFECT)
+                        .combine());
+    }
+
+    @Test
+    public void testValidateSequential() {
+        CombinedVibrationEffect.startSequential()
+                .addNext(0, VALID_EFFECT)
+                .addNext(CombinedVibrationEffect.createSynced(VALID_EFFECT))
+                .combine();
+        CombinedVibrationEffect.startSequential()
+                .addNext(0, VALID_EFFECT)
+                .addNext(0, VALID_EFFECT, 100)
+                .combine();
+        CombinedVibrationEffect.startSequential()
+                .addNext(CombinedVibrationEffect.startSequential()
+                        .addNext(0, VALID_EFFECT)
+                        .combine())
+                .combine();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> CombinedVibrationEffect.startSequential()
+                        .addNext(0, VALID_EFFECT, -1)
+                        .combine());
+        assertThrows(IllegalArgumentException.class,
+                () -> CombinedVibrationEffect.startSequential()
+                        .addNext(0, INVALID_EFFECT)
+                        .combine());
+        assertThrows(IllegalArgumentException.class,
+                () -> new CombinedVibrationEffect.Sequential(
+                        Arrays.asList(CombinedVibrationEffect.startSequential()
+                                .addNext(CombinedVibrationEffect.createSynced(VALID_EFFECT))
+                                .combine()),
+                        Arrays.asList(0))
+                        .validate());
+    }
+
+    @Test
+    public void testNestedSequentialAccumulatesDelays() {
+        CombinedVibrationEffect.Sequential combined =
+                (CombinedVibrationEffect.Sequential) CombinedVibrationEffect.startSequential()
+                        .addNext(CombinedVibrationEffect.startSequential()
+                                        .addNext(0, VALID_EFFECT, /* delay= */ 100)
+                                        .addNext(1, VALID_EFFECT, /* delay= */ 100)
+                                        .combine(),
+                                /* delay= */ 10)
+                        .addNext(CombinedVibrationEffect.startSequential()
+                                .addNext(0, VALID_EFFECT, /* delay= */ 100)
+                                .combine())
+                        .addNext(CombinedVibrationEffect.startSequential()
+                                        .addNext(0, VALID_EFFECT)
+                                        .addNext(0, VALID_EFFECT, /* delay= */ 100)
+                                        .combine(),
+                                /* delay= */ 10)
+                        .combine();
+
+        assertEquals(Arrays.asList(110, 100, 100, 10, 100), combined.getDelays());
+    }
+
+    @Test
+    public void testCombineEmptyFails() {
+        assertThrows(IllegalStateException.class,
+                () -> CombinedVibrationEffect.startSynced().combine());
+        assertThrows(IllegalStateException.class,
+                () -> CombinedVibrationEffect.startSequential().combine());
     }
 
     @Test
     public void testSerializationMono() {
-        CombinedVibrationEffect original = CombinedVibrationEffect.createSynced(
-                VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+        CombinedVibrationEffect original = CombinedVibrationEffect.createSynced(VALID_EFFECT);
+
+        Parcel parcel = Parcel.obtain();
+        original.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        CombinedVibrationEffect restored = CombinedVibrationEffect.CREATOR.createFromParcel(parcel);
+        assertEquals(original, restored);
+    }
+
+    @Test
+    public void testSerializationStereo() {
+        CombinedVibrationEffect original = CombinedVibrationEffect.startSynced()
+                .addVibrator(0, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(1, VibrationEffect.createOneShot(10, 255))
+                .combine();
+
+        Parcel parcel = Parcel.obtain();
+        original.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        CombinedVibrationEffect restored = CombinedVibrationEffect.CREATOR.createFromParcel(parcel);
+        assertEquals(original, restored);
+    }
+
+    @Test
+    public void testSerializationSequential() {
+        CombinedVibrationEffect original = CombinedVibrationEffect.startSequential()
+                .addNext(0, VALID_EFFECT)
+                .addNext(CombinedVibrationEffect.createSynced(VALID_EFFECT))
+                .addNext(0, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), 100)
+                .combine();
 
         Parcel parcel = Parcel.obtain();
         original.writeToParcel(parcel, 0);
