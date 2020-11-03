@@ -15,8 +15,10 @@
  */
 package com.android.server.devicepolicy;
 
+import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
+import android.util.Slog;
 
 import com.android.server.SystemService;
 
@@ -30,6 +32,9 @@ import com.android.server.SystemService;
  * should be added here to avoid build breakage in downstream branches.
  */
 abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
+
+    private static final String TAG = BaseIDevicePolicyManager.class.getSimpleName();
+
     /**
      * To be called by {@link DevicePolicyManagerService#Lifecycle} during the various boot phases.
      *
@@ -54,6 +59,16 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      * @see {@link SystemService#onStopUser}
      */
     abstract void handleStopUser(int userId);
+
+    /**
+     * Sets the {@link DevicePolicySafetyChecker}.
+     *
+     * <p>Currently, it's called only by {@code SystemServer} on
+     * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}
+     */
+    public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
+        Slog.w(TAG, "setDevicePolicySafetyChecker() not implemented by " + getClass());
+    }
 
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
     }

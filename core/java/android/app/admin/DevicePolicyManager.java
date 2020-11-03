@@ -122,6 +122,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
+// TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
  * registered with the system as a <a href="{@docRoot}guide/topics/admin/device-admin.html">device
@@ -130,6 +131,13 @@ import java.util.concurrent.Executor;
  * for that method specifies that it is restricted to either device or profile owners. Any
  * application calling an api may only pass as an argument a device administrator component it
  * owns. Otherwise, a {@link SecurityException} will be thrown.
+ *
+ * <p><b>Note: </b>on
+ * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}, some methods can
+ * throw an {@link UnsafeStateException} exception (for example, if the vehicle is moving), so
+ * callers running on automotive builds should wrap every method call under the methods provided by
+ * {@code android.car.admin.CarDevicePolicyManager}.
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>
@@ -2442,6 +2450,19 @@ public class DevicePolicyManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppsSuspensionReason {}
+
+    /** @hide */
+    // TODO(b/172376923): make it TestApi
+    public static final int OPERATION_LOCK_NOW = 1;
+
+    // TODO(b/172376923) - add all operations
+    /** @hide */
+    @IntDef(prefix = "OPERATION_", value = {
+            OPERATION_LOCK_NOW,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public static @interface DevicePolicyOperation {
+    }
 
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.

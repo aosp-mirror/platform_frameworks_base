@@ -34,6 +34,7 @@ import android.app.AppCompatCallbacks;
 import android.app.ApplicationErrorReport;
 import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
+import android.app.admin.DevicePolicySafetyChecker;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -1468,7 +1469,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
-        if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+        final DevicePolicyManagerService.Lifecycle dpms;
+        if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            dpms = null;
+        } else {
             t.traceBegin("StartLockSettingsService");
             try {
                 mSystemServiceManager.startService(LOCK_SETTINGS_SERVICE_CLASS);
@@ -1505,7 +1509,7 @@ public final class SystemServer implements Dumpable {
             // Always start the Device Policy Manager, so that the API is compatible with
             // API8.
             t.traceBegin("StartDevicePolicyManager");
-            mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
+            dpms = mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
             t.traceEnd();
 
             if (!isWatch) {
@@ -2426,6 +2430,9 @@ public final class SystemServer implements Dumpable {
                         .startService(CAR_SERVICE_HELPER_SERVICE_CLASS);
                 if (cshs instanceof Dumpable) {
                     mDumper.addDumpable((Dumpable) cshs);
+                }
+                if (cshs instanceof DevicePolicySafetyChecker) {
+                    dpms.setDevicePolicySafetyChecker((DevicePolicySafetyChecker) cshs);
                 }
                 t.traceEnd();
             }
