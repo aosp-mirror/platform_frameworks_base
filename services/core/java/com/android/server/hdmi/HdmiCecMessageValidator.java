@@ -163,6 +163,10 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_SELECT_ANALOG_SERVICE,
                 new SelectAnalogueServiceValidator(),
                 DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SELECT_DIGITAL_SERVICE,
+                new SelectDigitalServiceValidator(),
+                DEST_DIRECT);
 
         // Messages for the Vendor Specific Commands.
         VariableLengthValidator maxLengthValidator = new VariableLengthValidator(0, 14);
@@ -909,6 +913,21 @@ public class HdmiCecMessageValidator {
             return toErrorCode(isValidAnalogueBroadcastType(params[0])
                     && isValidAnalogueFrequency(HdmiUtils.twoBytesToInt(params, 1))
                     && isValidBroadcastSystem(params[3]));
+        }
+    }
+
+    /**
+     * Check if the given select digital service parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     */
+    private class SelectDigitalServiceValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 4) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidDigitalServiceIdentification(params, 0));
         }
     }
 }

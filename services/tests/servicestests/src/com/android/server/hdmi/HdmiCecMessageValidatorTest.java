@@ -425,6 +425,32 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:92:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_selectDigitalService() {
+        assertMessageValidity("40:93:00:11:CE:90:0F:00:78").isEqualTo(OK);
+        assertMessageValidity("40:93:10:13:0B:34:38").isEqualTo(OK);
+        assertMessageValidity("40:93:9A:06:F9:D3:E6").isEqualTo(OK);
+        assertMessageValidity("40:93:91:09:F4:40:C8").isEqualTo(OK);
+
+        assertMessageValidity("4F:93:00:11:CE:90:0F:00:78").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:93:10:13:0B:34:38").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:93:9A:06:F9").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("40:93:14:11:CE:90:0F:00:78").isEqualTo(ERROR_PARAMETER);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("40:93:A0:07:95:F1").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ARIB Broadcast system
+        assertMessageValidity("40:93:00:11:CE:90:0F:00").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ATSC Broadcast system
+        assertMessageValidity("40:93:10:13:0B:34").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for DVB Broadcast system
+        assertMessageValidity("40:93:18:BE:77:00:7D:01").isEqualTo(ERROR_PARAMETER);
+        // Invalid channel number format
+        assertMessageValidity("40:93:9A:10:F9:D3").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 2 part channel number
+        assertMessageValidity("40:93:91:09:F4:40").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }
