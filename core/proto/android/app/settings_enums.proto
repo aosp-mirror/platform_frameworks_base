@@ -779,6 +779,26 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: S
     ACTION_COLUMBUS_ACTION_NOTIFICATION_SHADE = 1746;
+
+    // ACTION: Settings > System > Gestures > Double tap > Require harder taps
+    // CATEGORY: SETTINGS
+    // OS: S
+    ACTION_COLUMBUS_LOW_SENSITIVITY = 1747;
+
+    // OPEN: Columbus Gesture training intro in Settings
+    // CATEGORY: SETTINGS
+    // OS: S
+    SETTINGS_COLUMBUS_GESTURE_TRAINING_INTRO = 1748;
+
+    // OPEN: Columbus Gesture training enrolling in Settings
+    // CATEGORY: SETTINGS
+    // OS: S
+    SETTINGS_COLUMBUS_GESTURE_TRAINING_ENROLLING = 1749;
+
+    // OPEN: Columbus Gesture training finished in Settings
+    // CATEGORY: SETTINGS
+    // OS: S
+    SETTINGS_COLUMBUS_GESTURE_TRAINING_FINISHED = 1750;
 }
 
 /**
