@@ -16,6 +16,9 @@
 
 package com.android.server.alarm;
 
+import static android.app.AlarmManager.ELAPSED_REALTIME;
+import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+
 import static com.android.server.alarm.Constants.TEST_CALLING_PACKAGE;
 import static com.android.server.alarm.Constants.TEST_CALLING_UID;
 
@@ -23,35 +26,50 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.runner.AndroidJUnit4;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
 
 @Presubmit
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class AlarmStoreTest {
-    private AlarmStore mAlarmStore;
 
-    @Before
-    public void setUp() {
-        mAlarmStore = new BatchingAlarmStore(null);
+    @Parameter
+    public AlarmStore mAlarmStore;
+
+    @Parameters
+    public static Object[] stores() {
+        return new AlarmStore[]{
+                new LazyAlarmStore(),
+                new BatchingAlarmStore(),
+        };
     }
 
     private static Alarm createAlarm(long whenElapsed, long windowLength) {
-        return createAlarm(AlarmManager.ELAPSED_REALTIME, whenElapsed, windowLength, 0);
+        return createAlarm(ELAPSED_REALTIME, whenElapsed, windowLength, 0);
     }
 
     private static Alarm createWakeupAlarm(long whenElapsed, long windowLength, int flags) {
-        return createAlarm(AlarmManager.ELAPSED_REALTIME_WAKEUP, whenElapsed, windowLength, flags);
+        return createAlarm(ELAPSED_REALTIME_WAKEUP, whenElapsed, windowLength, flags);
+    }
+
+    private static Alarm createAlarmClock(long whenElapsed) {
+        final AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(whenElapsed,
+                mock(PendingIntent.class));
+        return new Alarm(ELAPSED_REALTIME_WAKEUP, whenElapsed, whenElapsed, 0, 0,
+                mock(PendingIntent.class), null, null, null, 0, info, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE);
     }
 
     private static Alarm createAlarm(int type, long whenElapsed, long windowLength, int flags) {
@@ -205,5 +223,22 @@ public class AlarmStoreTest {
             return true;
         });
         assertEquals(7, mAlarmStore.getNextDeliveryTime());
+    }
+
+    @Test
+    public void alarmClockRemovalListener() {
+        final Runnable onRemoved = mock(Runnable.class);
+        mAlarmStore.setAlarmClockRemovalListener(onRemoved);
+
+        final Alarm simpleAlarm = createAlarm(5, 0);
+        final Alarm alarmClock = createAlarmClock(10);
+
+        addAlarmsToStore(simpleAlarm, alarmClock);
+
+        mAlarmStore.remove(simpleAlarm::equals);
+        verifyZeroInteractions(onRemoved);
+
+        mAlarmStore.remove(alarmClock::equals);
+        verify(onRemoved).run();
     }
 }

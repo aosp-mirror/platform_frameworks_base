@@ -40,6 +40,13 @@ public interface AlarmStore {
     void add(Alarm a);
 
     /**
+     * Adds all the given alarms to this store.
+     *
+     * @param alarms The alarms to add.
+     */
+    void addAll(ArrayList<Alarm> alarms);
+
+    /**
      * Removes alarms that pass the given predicate.
      *
      * @param whichAlarms The predicate describing the alarms to remove.
@@ -48,11 +55,17 @@ public interface AlarmStore {
     ArrayList<Alarm> remove(Predicate<Alarm> whichAlarms);
 
     /**
+     * Set a listener to be invoked whenever an alarm clock is removed by a call to
+     * {@link #remove(Predicate) remove} from this store.
+     */
+    void setAlarmClockRemovalListener(Runnable listener);
+
+    /**
      * Gets the earliest alarm with the flag {@link android.app.AlarmManager#FLAG_WAKE_FROM_IDLE}
      * based on {@link Alarm#getWhenElapsed()}.
      *
      * @return An alarm object matching the description above or {@code null} if no such alarm was
-     *         found.
+     * found.
      */
     Alarm getNextWakeFromIdleAlarm();
 
