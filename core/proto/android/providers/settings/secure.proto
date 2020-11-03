@@ -229,7 +229,7 @@ message SecureSettingsProto {
 
     optional SettingProto enhanced_voice_privacy_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    optional SettingProto force_bold_text = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto font_weight_adjustment = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Gesture {
         optional SettingProto aware_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];

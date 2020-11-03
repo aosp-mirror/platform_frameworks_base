@@ -1769,8 +1769,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
                 SecureSettingsProto.Accessibility.HIGH_TEXT_CONTRAST_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.FORCE_BOLD_TEXT,
-                SecureSettingsProto.FORCE_BOLD_TEXT);
+                Settings.Secure.FONT_WEIGHT_ADJUSTMENT,
+                SecureSettingsProto.FONT_WEIGHT_ADJUSTMENT);
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 SecureSettingsProto.Accessibility.LARGE_POINTER_ICON);
