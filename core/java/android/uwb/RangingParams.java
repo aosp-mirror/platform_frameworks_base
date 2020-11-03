@@ -19,11 +19,13 @@ package android.uwb;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.util.Duration;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,7 +38,7 @@ import java.util.Set;
  *
  *  @hide
  */
-public final class RangingParams {
+public final class RangingParams implements Parcelable {
     private final boolean mIsInitiator;
     private final boolean mIsController;
     private final Duration mSamplePeriod;
@@ -198,6 +200,62 @@ public final class RangingParams {
     public @Nullable PersistableBundle getSpecificationParameters() {
         return new PersistableBundle(mSpecificationParameters);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeBoolean(mIsInitiator);
+        dest.writeBoolean(mIsController);
+        dest.writeLong(mSamplePeriod.getSeconds());
+        dest.writeInt(mSamplePeriod.getNano());
+        dest.writeParcelable(mLocalDeviceAddress, flags);
+
+        UwbAddress[] remoteAddresses = new UwbAddress[mRemoteDeviceAddresses.size()];
+        mRemoteDeviceAddresses.toArray(remoteAddresses);
+        dest.writeParcelableArray(remoteAddresses, flags);
+
+        dest.writeInt(mChannelNumber);
+        dest.writeInt(mTransmitPreambleCodeIndex);
+        dest.writeInt(mReceivePreambleCodeIndex);
+        dest.writeInt(mStsPhyPacketType);
+        dest.writePersistableBundle(mSpecificationParameters);
+    }
+
+    public static final @android.annotation.NonNull Creator<RangingParams> CREATOR =
+            new Creator<RangingParams>() {
+                @Override
+                public RangingParams createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+                    builder.setIsInitiator(in.readBoolean());
+                    builder.setIsController(in.readBoolean());
+                    builder.setSamplePeriod(Duration.ofSeconds(in.readLong(), in.readInt()));
+                    builder.setLocalDeviceAddress(
+                            in.readParcelable(UwbAddress.class.getClassLoader()));
+
+                    UwbAddress[] remoteAddresses =
+                            in.readParcelableArray(null, UwbAddress.class);
+                    for (UwbAddress remoteAddress : remoteAddresses) {
+                        builder.addRemoteDeviceAddress(remoteAddress);
+                    }
+
+                    builder.setChannelNumber(in.readInt());
+                    builder.setTransmitPreambleCodeIndex(in.readInt());
+                    builder.setReceivePreambleCodeIndex(in.readInt());
+                    builder.setStsPhPacketType(in.readInt());
+                    builder.setSpecificationParameters(in.readPersistableBundle());
+
+                    return builder.build();
+                }
+
+                @Override
+                public RangingParams[] newArray(int size) {
+                    return new RangingParams[size];
+                }
+    };
 
     /**
      * Builder class for {@link RangingParams}.

@@ -17,6 +17,8 @@
 package android.uwb;
 
 import android.annotation.FloatRange;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Angle measurement
@@ -26,7 +28,7 @@ import android.annotation.FloatRange;
  *
  * @hide
  */
-public final class AngleMeasurement {
+public final class AngleMeasurement implements Parcelable {
     private final double mRadians;
     private final double mErrorRadians;
     private final double mConfidenceLevel;
@@ -39,7 +41,7 @@ public final class AngleMeasurement {
 
     /**
      * Angle measurement in radians
-    *
+     *
      * @return angle in radians
      */
     @FloatRange(from = -Math.PI, to = +Math.PI)
@@ -72,6 +74,35 @@ public final class AngleMeasurement {
     public double getConfidenceLevel() {
         return mConfidenceLevel;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(mRadians);
+        dest.writeDouble(mErrorRadians);
+        dest.writeDouble(mConfidenceLevel);
+    }
+
+    public static final @android.annotation.NonNull Creator<AngleMeasurement> CREATOR =
+            new Creator<AngleMeasurement>() {
+                @Override
+                public AngleMeasurement createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+                    builder.setRadians(in.readDouble());
+                    builder.setErrorRadians(in.readDouble());
+                    builder.setConfidenceLevel(in.readDouble());
+                    return builder.build();
+                }
+
+                @Override
+                public AngleMeasurement[] newArray(int size) {
+                    return new AngleMeasurement[size];
+                }
+    };
 
     /**
      * Builder class for {@link AngleMeasurement}.
