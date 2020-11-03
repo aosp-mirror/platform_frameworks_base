@@ -18,8 +18,12 @@ package android.telephony.ims.aidl;
 
 import android.net.Uri;
 import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.aidl.ICapabilityExchangeEventListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
+import android.telephony.ims.aidl.IOptionsResponseCallback;
+import android.telephony.ims.aidl.IPublishResponseCallback;
 import android.telephony.ims.aidl.IRcsFeatureListener;
+import android.telephony.ims.aidl.ISubscribeResponseCallback;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
 import java.util.List;
@@ -40,6 +44,12 @@ interface IImsRcsFeature {
             IImsCapabilityCallback c);
     oneway void queryCapabilityConfiguration(int capability, int radioTech,
             IImsCapabilityCallback c);
+    // RcsCapabilityExchangeImplBase specific api
+    oneway void setCapabilityExchangeEventListener(ICapabilityExchangeEventListener listener);
+    oneway void publishCapabilities(in String pidfXml, IPublishResponseCallback cb);
+    oneway void subscribeForCapabilities(in List<Uri> uris, ISubscribeResponseCallback cb);
+    oneway void sendOptionsCapabilityRequest(in Uri contactUri,
+            in List<String> myCapabilities, IOptionsResponseCallback cb);
     // RcsPresenceExchangeImplBase specific api
     oneway void requestCapabilities(in List<Uri> uris, int operationToken);
     oneway void updateCapabilities(in RcsContactUceCapability capabilities, int operationToken);
