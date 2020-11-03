@@ -190,6 +190,7 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
         pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
+        pw.println(innerPrefix + "mIsStashed=" + mIsStashed);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {
