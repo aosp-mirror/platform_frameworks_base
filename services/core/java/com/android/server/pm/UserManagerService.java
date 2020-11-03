@@ -3993,7 +3993,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
         Slog.i(LOG_TAG, "removeUserOrSetEphemeral u" + userId);
-        checkManageUsersPermission("Only the system can remove users");
+        checkManageOrCreateUsersPermission("Only the system can remove users");
         final String restriction = getUserRemovalRestriction(userId);
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
             Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
