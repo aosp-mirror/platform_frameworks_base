@@ -4068,7 +4068,7 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#playSoundEffect(int, float) */
     public void playSoundEffectVolume(int effectType, float volume) {
         // do not try to play the sound effect if the system stream is muted
-        if (isStreamMutedByRingerOrZenMode(STREAM_SYSTEM)) {
+        if (isStreamMute(STREAM_SYSTEM)) {
             return;
         }
 
