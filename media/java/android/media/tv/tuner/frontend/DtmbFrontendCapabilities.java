@@ -25,7 +25,7 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
-public class DtmbFrontendCapabilities extends FrontendCapabilities {
+public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
     private final int mTransmissionModeCap;
     private final int mGuardIntervalCap;
