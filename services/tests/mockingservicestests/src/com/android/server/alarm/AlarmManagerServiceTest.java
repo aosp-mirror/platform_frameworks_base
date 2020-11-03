@@ -47,6 +47,7 @@ import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_F
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LAZY_BATCHING;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
@@ -62,6 +63,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -365,7 +367,7 @@ public class AlarmManagerServiceTest {
     }
 
     private void setIdleUntilAlarm(int type, long triggerTime, PendingIntent pi) {
-        setTestAlarm(type, triggerTime, pi, 0, FLAG_IDLE_UNTIL, TEST_CALLING_UID);
+        setTestAlarm(type, triggerTime, pi, 0, FLAG_IDLE_UNTIL | FLAG_STANDALONE, TEST_CALLING_UID);
     }
 
     private void setWakeFromIdle(int type, long triggerTime, PendingIntent pi) {
@@ -407,6 +409,12 @@ public class AlarmManagerServiceTest {
     private void setDeviceConfigLong(String key, long val) {
         mDeviceConfigKeys.add(key);
         doReturn(val).when(mDeviceConfigProperties).getLong(eq(key), anyLong());
+        mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
+    }
+
+    private void setDeviceConfigBoolean(String key, boolean val) {
+        mDeviceConfigKeys.add(key);
+        doReturn(val).when(mDeviceConfigProperties).getBoolean(eq(key), anyBoolean());
         mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
     }
 
@@ -1379,6 +1387,35 @@ public class AlarmManagerServiceTest {
         for (int i = 0; i < expectedOrder.length; i++) {
             assertTrue("Unexpected alarm: " + deliveryList.get(i) + " at pos: " + i,
                     deliveryList.get(i).matches(expectedOrder[i], null));
+        }
+    }
+
+    @Test
+    public void alarmStoreMigration() {
+        setDeviceConfigBoolean(KEY_LAZY_BATCHING, false);
+        final int numAlarms = 10;
+        final PendingIntent[] pis = new PendingIntent[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            pis[i] = getNewMockPendingIntent();
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 1, pis[i]);
+        }
+
+        final ArrayList<Alarm> alarmsBefore = mService.mAlarmStore.asList();
+        assertEquals(numAlarms, alarmsBefore.size());
+        for (int i = 0; i < numAlarms; i++) {
+            final PendingIntent pi = pis[i];
+            assertTrue(i + "th PendingIntent missing: ",
+                    alarmsBefore.removeIf(a -> a.matches(pi, null)));
+        }
+
+        setDeviceConfigBoolean(KEY_LAZY_BATCHING, true);
+
+        final ArrayList<Alarm> alarmsAfter = mService.mAlarmStore.asList();
+        assertEquals(numAlarms, alarmsAfter.size());
+        for (int i = 0; i < numAlarms; i++) {
+            final PendingIntent pi = pis[i];
+            assertTrue(i + "th PendingIntent missing: ",
+                    alarmsAfter.removeIf(a -> a.matches(pi, null)));
         }
     }
 
