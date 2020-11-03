@@ -146,11 +146,6 @@ class Rollback {
     private @RollbackState int mState;
 
     /**
-     * The id of the post-reboot apk session for a staged install, if any.
-     */
-    private int mApkSessionId = -1;
-
-    /**
      * True if we are expecting the package manager to call restoreUserData
      * for this rollback because it has just been committed but the rollback
      * has not yet been fully applied.
@@ -236,7 +231,7 @@ class Rollback {
      * Constructs a pre-populated Rollback instance.
      */
     Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
-            @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress,
+            @RollbackState int state, boolean restoreUserDataInProgress,
             int userId, String installerPackageName, SparseIntArray extensionVersions) {
         this.info = info;
         mUserId = userId;
@@ -245,7 +240,6 @@ class Rollback {
         mTimestamp = timestamp;
         mStagedSessionId = stagedSessionId;
         mState = state;
-        mApkSessionId = apkSessionId;
         mRestoreUserDataInProgress = restoreUserDataInProgress;
         mExtensionVersions = Objects.requireNonNull(extensionVersions);
         // TODO(b/120200473): Include this field during persistence. This field will be used to
@@ -724,25 +718,6 @@ class Rollback {
 
         RollbackStore.deleteRollback(this);
         mState = ROLLBACK_STATE_DELETED;
-    }
-
-    /**
-     * Returns the id of the post-reboot apk session for a staged install, if any.
-     */
-    @WorkerThread
-    int getApkSessionId() {
-        assertInWorkerThread();
-        return mApkSessionId;
-    }
-
-    /**
-     * Sets the id of the post-reboot apk session for a staged install.
-     */
-    @WorkerThread
-    void setApkSessionId(int apkSessionId) {
-        assertInWorkerThread();
-        mApkSessionId = apkSessionId;
-        RollbackStore.saveRollback(this);
     }
 
     /**

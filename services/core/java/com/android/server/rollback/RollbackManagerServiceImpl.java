@@ -54,7 +54,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.ext.SdkExtensions;
 import android.provider.DeviceConfig;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.Slog;
@@ -151,10 +150,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     // The list of all rollbacks, including available and committed rollbacks.
     // Accessed on the handler thread only.
     private final List<Rollback> mRollbacks = new ArrayList<>();
-
-    // Apk sessions from a staged session with no matching rollback.
-    // Accessed on the handler thread only.
-    private final IntArray mOrphanedApkSessionIds = new IntArray();
 
     private final RollbackStore mRollbackStore;
 
@@ -647,8 +642,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 onPackageReplaced(apexPackageName);
             }
 
-            mOrphanedApkSessionIds.clear();
-
             mPackageHealthObserver.onBootCompletedAsync();
         });
     }
@@ -780,25 +773,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 ? installer.getSessionInfo(packageSession.getParentSessionId()) : packageSession;
         if (parentSession == null) {
             Slog.e(TAG, "Unable to find parent session for enabled rollback.");
-            return false;
-        }
-
-        // Check to see if this is the apk session for a staged session with
-        // rollback enabled.
-        for (int i = 0; i < mRollbacks.size(); ++i) {
-            Rollback rollback = mRollbacks.get(i);
-            if (rollback.getApkSessionId() == parentSession.getSessionId()) {
-                // This is the apk session for a staged session with rollback enabled. We do
-                // not need to create a new rollback for this session.
-                return true;
-            }
-        }
-
-        // Check to see if this is the apk session for a staged session for which rollback was
-        // cancelled.
-        if (mOrphanedApkSessionIds.indexOf(parentSession.getSessionId()) != -1) {
-            Slog.w(TAG, "Not enabling rollback for apk as no matching staged session "
-                    + "rollback exists");
             return false;
         }
 
@@ -1035,37 +1009,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 return -1;
             } else {
                 return newRollback.info.getRollbackId();
-            }
-        });
-    }
-
-    @ExtThread
-    @Override
-    public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
-        assertNotInWorkerThread();
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("notifyStagedApkSession may only be called by the system.");
-        }
-        getHandler().post(() -> {
-            assertInWorkerThread();
-            Rollback rollback = null;
-            for (int i = 0; i < mRollbacks.size(); ++i) {
-                Rollback candidate = mRollbacks.get(i);
-                if (candidate.getStagedSessionId() == originalSessionId) {
-                    rollback = candidate;
-                    break;
-                }
-            }
-            if (rollback == null) {
-                // Did not find rollback matching originalSessionId.
-                Slog.e(TAG, "notifyStagedApkSession did not find rollback for session "
-                        + originalSessionId
-                        + ". Adding orphaned apk session " + apkSessionId);
-                mOrphanedApkSessionIds.add(apkSessionId);
-            }
-
-            if (rollback != null) {
-                rollback.setApkSessionId(apkSessionId);
             }
         });
     }
