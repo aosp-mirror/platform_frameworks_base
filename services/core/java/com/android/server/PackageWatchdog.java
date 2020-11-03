@@ -68,6 +68,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -117,6 +118,9 @@ public class PackageWatchdog {
     static final int DEFAULT_TRIGGER_FAILURE_COUNT = 5;
     @VisibleForTesting
     static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
+    // Sliding window for tracking how many mitigation calls were made for a package.
+    @VisibleForTesting
+    static final long DEFAULT_DEESCALATION_WINDOW_MS = TimeUnit.HOURS.toMillis(1);
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
 
@@ -388,6 +392,7 @@ public class PackageWatchdog {
                         // Observer that will receive failure for versionedPackage
                         PackageHealthObserver currentObserverToNotify = null;
                         int currentObserverImpact = Integer.MAX_VALUE;
+                        MonitoredPackage currentMonitoredPackage = null;
 
                         // Find observer with least user impact
                         for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
@@ -396,19 +401,33 @@ public class PackageWatchdog {
                             if (registeredObserver != null
                                     && observer.onPackageFailureLocked(
                                     versionedPackage.getPackageName())) {
+                                MonitoredPackage p = observer.getMonitoredPackage(
+                                        versionedPackage.getPackageName());
+                                int mitigationCount = 1;
+                                if (p != null) {
+                                    mitigationCount = p.getMitigationCountLocked() + 1;
+                                }
                                 int impact = registeredObserver.onHealthCheckFailed(
-                                        versionedPackage, failureReason);
+                                        versionedPackage, failureReason, mitigationCount);
                                 if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                                         && impact < currentObserverImpact) {
                                     currentObserverToNotify = registeredObserver;
                                     currentObserverImpact = impact;
+                                    currentMonitoredPackage = p;
                                 }
                             }
                         }
 
                         // Execute action with least user impact
                         if (currentObserverToNotify != null) {
-                            currentObserverToNotify.execute(versionedPackage, failureReason);
+                            int mitigationCount = 1;
+                            if (currentMonitoredPackage != null) {
+                                currentMonitoredPackage.noteMitigationCallLocked();
+                                mitigationCount =
+                                        currentMonitoredPackage.getMitigationCountLocked();
+                            }
+                            currentObserverToNotify.execute(versionedPackage,
+                                    failureReason, mitigationCount);
                         }
                     }
                 }
@@ -429,7 +448,7 @@ public class PackageWatchdog {
             PackageHealthObserver registeredObserver = observer.registeredObserver;
             if (registeredObserver != null) {
                 int impact = registeredObserver.onHealthCheckFailed(
-                        failingPackage, failureReason);
+                        failingPackage, failureReason, 1);
                 if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                         && impact < currentObserverImpact) {
                     currentObserverToNotify = registeredObserver;
@@ -438,7 +457,7 @@ public class PackageWatchdog {
             }
         }
         if (currentObserverToNotify != null) {
-            currentObserverToNotify.execute(failingPackage,  failureReason);
+            currentObserverToNotify.execute(failingPackage,  failureReason, 1);
         }
     }
 
@@ -559,6 +578,8 @@ public class PackageWatchdog {
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
          * @param failureReason   the type of failure that is occurring.
+         * @param mitigationCount the number of times mitigation has been called for this package
+         *                        (including this time).
          *
          *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
@@ -566,7 +587,8 @@ public class PackageWatchdog {
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
-                @FailureReasons int failureReason);
+                @FailureReasons int failureReason,
+                int mitigationCount);
 
         /**
          * Executes mitigation for {@link #onHealthCheckFailed}.
@@ -574,10 +596,12 @@ public class PackageWatchdog {
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
          * @param failureReason   the type of failure that is occurring.
+         * @param mitigationCount the number of times mitigation has been called for this package
+         *                        (including this time).
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
         boolean execute(@Nullable VersionedPackage versionedPackage,
-                @FailureReasons int failureReason);
+                @FailureReasons int failureReason, int mitigationCount);
 
 
         /**
@@ -859,7 +883,7 @@ public class PackageWatchdog {
                         VersionedPackage versionedPkg = it.next().mPackage;
                         Slog.i(TAG, "Explicit health check failed for package " + versionedPkg);
                         registeredObserver.execute(versionedPkg,
-                                PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+                                PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK, 1);
                     }
                 }
             }
@@ -1293,6 +1317,10 @@ public class PackageWatchdog {
         // Times when package failures happen sorted in ascending order
         @GuardedBy("mLock")
         private final LongArrayQueue mFailureHistory = new LongArrayQueue();
+        // Times when an observer was called to mitigate this package's failure. Sorted in
+        // ascending order.
+        @GuardedBy("mLock")
+        private final LongArrayQueue mMitigationCalls = new LongArrayQueue();
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
         // tryPassHealthCheckLocked
@@ -1355,6 +1383,33 @@ public class PackageWatchdog {
                 mFailureHistory.clear();
             }
             return failed;
+        }
+
+        /**
+         * Notes the timestamp of a mitigation call into the observer.
+         */
+        @GuardedBy("mLock")
+        public void noteMitigationCallLocked() {
+            mMitigationCalls.addLast(mSystemClock.uptimeMillis());
+        }
+
+        /**
+         * Prunes any mitigation calls outside of the de-escalation window, and returns the
+         * number of calls that are in the window afterwards.
+         *
+         * @return the number of mitigation calls made in the de-escalation window.
+         */
+        @GuardedBy("mLock")
+        public int getMitigationCountLocked() {
+            try {
+                final long now = mSystemClock.uptimeMillis();
+                while (now - mMitigationCalls.peekFirst() > DEFAULT_DEESCALATION_WINDOW_MS) {
+                    mMitigationCalls.removeFirst();
+                }
+            } catch (NoSuchElementException ignore) {
+            }
+
+            return mMitigationCalls.size();
         }
 
         /**

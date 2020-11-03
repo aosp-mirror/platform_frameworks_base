@@ -452,7 +452,7 @@ public class RescueParty {
 
         @Override
         public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
-                @FailureReasons int failureReason) {
+                @FailureReasons int failureReason, int mitigationCount) {
             if (!isDisabled() && (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING)) {
                 return mapRescueLevelToUserImpact(getNextRescueLevel());
@@ -463,7 +463,7 @@ public class RescueParty {
 
         @Override
         public boolean execute(@Nullable VersionedPackage failedPackage,
-                @FailureReasons int failureReason) {
+                @FailureReasons int failureReason, int mitigationCount) {
             if (isDisabled()) {
                 return false;
             }
