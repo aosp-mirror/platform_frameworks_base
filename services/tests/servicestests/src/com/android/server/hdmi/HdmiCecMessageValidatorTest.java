@@ -329,6 +329,30 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:43:03").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_timerStatus() {
+        // Programmed - Space available
+        assertMessageValidity("40:35:58").isEqualTo(OK);
+        // Programmed - Not enough space available
+        assertMessageValidity("40:35:B9:32:1C:4F").isEqualTo(OK);
+        // Not programmed - Date out of range
+        assertMessageValidity("40:35:82:3B").isEqualTo(OK);
+        // Not programmed - Duplicate
+        assertMessageValidity("40:35:EE:52:0C").isEqualTo(OK);
+
+        assertMessageValidity("4F:35:58").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:35:82").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:35").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Programmed - Invalid programmed info
+        assertMessageValidity("40:35:BD").isEqualTo(ERROR_PARAMETER);
+        // Non programmed - Invalid not programmed error info
+        assertMessageValidity("40:35:DE").isEqualTo(ERROR_PARAMETER);
+        // Programmed - Might not be enough space available - Invalid duration hours
+        assertMessageValidity("40:35:BB:96:1C").isEqualTo(ERROR_PARAMETER);
+        // Not programmed - Duplicate - Invalid duration minutes
+        assertMessageValidity("40:35:EE:52:4A").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }

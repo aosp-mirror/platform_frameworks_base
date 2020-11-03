@@ -122,7 +122,6 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_RECORD_STATUS,
                 new RecordStatusInfoValidator(), DEST_DIRECT);
 
-        // TODO: Handle messages for the Timer Programming.
         addValidationInfo(
                 Constants.MESSAGE_CLEAR_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
         addValidationInfo(
@@ -141,6 +140,7 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_TIMER_CLEARED_STATUS,
                 new TimerClearedStatusValidator(),
                 DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TIMER_STATUS, new TimerStatusValidator(), DEST_DIRECT);
 
         // Messages for the System Information.
         FixedLengthValidator oneByteValidator = new FixedLengthValidator(1);
@@ -592,6 +592,46 @@ public class HdmiCecMessageValidator {
         return false;
     }
 
+    private boolean isValidProgrammedInfo(int programedInfo) {
+        return (isWithinRange(programedInfo, 0x00, 0x0B));
+    }
+
+    private boolean isValidNotProgrammedErrorInfo(int nonProgramedErrorInfo) {
+        return (isWithinRange(nonProgramedErrorInfo, 0x00, 0x0E));
+    }
+
+    private boolean isValidTimerStatusData(byte[] params, int offset) {
+        int programedIndicator = params[offset] & 0x10;
+        boolean durationAvailable = false;
+        if (programedIndicator == 0x10) {
+            // Programmed
+            int programedInfo = params[offset] & 0x0F;
+            if (isValidProgrammedInfo(programedInfo)) {
+                if (programedInfo == 0x09 || programedInfo == 0x0B) {
+                    durationAvailable = true;
+                } else {
+                    return true;
+                }
+            }
+        } else {
+            // Non programmed
+            int nonProgramedErrorInfo = params[offset] & 0x0F;
+            if (isValidNotProgrammedErrorInfo(nonProgramedErrorInfo)) {
+                if (nonProgramedErrorInfo == 0x0E) {
+                    durationAvailable = true;
+                } else {
+                    return true;
+                }
+            }
+        }
+        offset = offset + 1;
+        // Duration Available (2 bytes)
+        if (durationAvailable && params.length - offset >= 2) {
+            return (isValidDurationHours(params[offset]) && isValidMinute(params[offset + 1]));
+        }
+        return false;
+    }
+
     private class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
@@ -807,6 +847,20 @@ public class HdmiCecMessageValidator {
                 return ERROR_PARAMETER_SHORT;
             }
             return toErrorCode(isWithinRange(params[0], 0x00, 0x02) || (params[0] & 0xFF) == 0x80);
+        }
+    }
+
+    /**
+     * Check if the given timer status data parameter is valid. A valid parameter should lie within
+     * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     */
+    private class TimerStatusValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidTimerStatusData(params, 0));
         }
     }
 }
