@@ -46,6 +46,7 @@ import static android.inputmethodservice.InputMethodServiceProto.STATUS_ICON;
 import static android.inputmethodservice.InputMethodServiceProto.TOKEN;
 import static android.inputmethodservice.InputMethodServiceProto.VIEWS_CREATED;
 import static android.inputmethodservice.InputMethodServiceProto.WINDOW_VISIBLE;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
@@ -80,6 +81,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
@@ -645,7 +647,9 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void startInput(InputConnection ic, EditorInfo attribute) {
             if (DEBUG) Log.v(TAG, "startInput(): editor=" + attribute);
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.startInput");
             doStartInput(ic, attribute, false);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         /**
@@ -705,6 +709,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
             final boolean wasVisible = isInputViewShown();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
+
             applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */);
             mShowInputFlags = 0;
             mShowInputRequested = false;
@@ -717,6 +723,7 @@ public class InputMethodService extends AbstractInputMethodService {
                         : (wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         /**
@@ -748,6 +755,13 @@ public class InputMethodService extends AbstractInputMethodService {
                         + " Use requestShowSelf(int) itself");
                 return;
             }
+
+            if (Trace.isEnabled()) {
+                Binder.enableTracing();
+            } else {
+                Binder.disableTracing();
+            }
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
 
@@ -764,6 +778,7 @@ public class InputMethodService extends AbstractInputMethodService {
                         : (wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         /**
