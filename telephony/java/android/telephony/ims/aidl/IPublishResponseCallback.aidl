@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package android.telephony.ims.aidl;
 
-import android.telephony.ims.RcsContactUceCapability;
+import java.util.List;
 
 /**
- * Provides interface for RCS UCE when receive a change.
- *
+ * Interface used by the framework to receive the response of the publish
+ * request through {@link RcsCapabilityExchangeImplBase#publishCapabilities}
  * {@hide}
  */
-oneway interface IRcsUceControllerCallback {
-    void onCapabilitiesReceived(in List<RcsContactUceCapability> contactCapabilities);
-    void onComplete();
-    void onError(int errorCode);
+oneway interface IPublishResponseCallback {
+    void onCommandError(int code);
+    void onNetworkResponse(int code, String reason);
 }
