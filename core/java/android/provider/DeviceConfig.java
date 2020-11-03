@@ -218,6 +218,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
 
     /**
+     * Namespace for features related to the Profcollect native Service.
+     * These features are applied at reboot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_PROFCOLLECT_NATIVE_BOOT = "profcollect_native_boot";
+
+    /**
      * Namespace for Rollback flags that are applied immediately.
      *
      * @hide
