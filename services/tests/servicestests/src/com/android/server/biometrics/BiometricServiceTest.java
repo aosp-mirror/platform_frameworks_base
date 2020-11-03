@@ -18,6 +18,8 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import static com.android.server.biometrics.BiometricServiceStateProto.*;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -174,8 +176,7 @@ public class BiometricServiceTest {
                 0 /* vendorCode */);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_AUTH_PAUSED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_PAUSED, mBiometricService.mCurrentAuthSession.getState());
 
         mBiometricService.mCurrentAuthSession.binderDied();
         waitForIdle();
@@ -195,22 +196,18 @@ public class BiometricServiceTest {
         verify(mReceiver1.asBinder()).linkToDeath(eq(mBiometricService.mCurrentAuthSession),
                 anyInt());
 
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
         mBiometricService.mCurrentAuthSession.binderDied();
         waitForIdle();
 
         assertNotNull(mBiometricService.mCurrentAuthSession);
         verify(mBiometricService.mStatusBarService, never()).hideAuthenticationDialog();
-        assertEquals(AuthSession.STATE_CLIENT_DIED_CANCELLING,
+        assertEquals(STATE_CLIENT_DIED_CANCELLING,
                 mBiometricService.mCurrentAuthSession.getState());
 
         verify(mBiometricService.mCurrentAuthSession.mPreAuthInfo.eligibleSensors.get(0).impl)
                 .cancelAuthenticationFromService(any(),
-                        any(),
-                        anyInt(),
-                        anyInt(),
-                        anyInt());
+                        any());
 
         // Simulate ERROR_CANCELED received from HAL
         mBiometricService.mBiometricSensorReceiver.onError(
@@ -256,7 +253,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         assertNotNull(mBiometricService.mCurrentAuthSession);
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         // StatusBar showBiometricDialog invoked
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
@@ -406,7 +403,7 @@ public class BiometricServiceTest {
                 HAT);
         waitForIdle();
         // Confirmation is required
-        assertEquals(AuthSession.STATE_AUTH_PENDING_CONFIRM,
+        assertEquals(STATE_AUTH_PENDING_CONFIRM,
                 mBiometricService.mCurrentAuthSession.getState());
 
         // Enrolled, not disabled in settings, user doesn't require confirmation in settings
@@ -422,7 +419,7 @@ public class BiometricServiceTest {
                 HAT);
         waitForIdle();
         // Confirmation not required, waiting for dialog to dismiss
-        assertEquals(AuthSession.STATE_AUTHENTICATED_PENDING_SYSUI,
+        assertEquals(STATE_AUTHENTICATED_PENDING_SYSUI,
                 mBiometricService.mCurrentAuthSession.getState());
 
     }
@@ -447,8 +444,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         // Creates a pending auth session with the correct initial states
-        assertEquals(AuthSession.STATE_AUTH_CALLED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_CALLED, mBiometricService.mCurrentAuthSession.getState());
 
         // Invokes <Modality>Service#prepareForAuthentication
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -460,16 +456,12 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 any(IBiometricSensorReceiver.class),
                 anyString() /* opPackageName */,
-                cookieCaptor.capture() /* cookie */,
-                anyInt() /* callingUid */,
-                anyInt() /* callingPid */,
-                anyInt() /* callingUserId */);
+                cookieCaptor.capture() /* cookie */);
 
         // onReadyForAuthentication, mCurrentAuthSession state OK
         mBiometricService.mImpl.onReadyForAuthentication(cookieCaptor.getValue());
         waitForIdle();
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
 
         // startPreparedClient invoked
         verify(mBiometricService.mSensors.get(0).impl)
@@ -493,7 +485,7 @@ public class BiometricServiceTest {
                 HAT);
         waitForIdle();
         // Waiting for SystemUI to send dismissed callback
-        assertEquals(AuthSession.STATE_AUTHENTICATED_PENDING_SYSUI,
+        assertEquals(STATE_AUTHENTICATED_PENDING_SYSUI,
                 mBiometricService.mCurrentAuthSession.getState());
         // Notify SystemUI hardware authenticated
         verify(mBiometricService.mStatusBarService).onBiometricAuthenticated();
@@ -526,7 +518,7 @@ public class BiometricServiceTest {
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         assertEquals(Authenticators.DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mPromptInfo.getAuthenticators());
@@ -566,8 +558,7 @@ public class BiometricServiceTest {
                 HAT);
         waitForIdle();
         // Waiting for SystemUI to send confirmation callback
-        assertEquals(AuthSession.STATE_AUTH_PENDING_CONFIRM,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_PENDING_CONFIRM, mBiometricService.mCurrentAuthSession.getState());
         verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
 
         // SystemUI sends confirm, HAT is sent to keystore and client is notified.
@@ -615,8 +606,7 @@ public class BiometricServiceTest {
                 eq(BiometricConstants.BIOMETRIC_PAUSED_REJECTED),
                 eq(0 /* vendorCode */));
         verify(mReceiver1).onAuthenticationFailed();
-        assertEquals(AuthSession.STATE_AUTH_PAUSED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_PAUSED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     @Test
@@ -634,8 +624,7 @@ public class BiometricServiceTest {
                 eq(BiometricConstants.BIOMETRIC_PAUSED_REJECTED),
                 eq(0 /* vendorCode */));
         verify(mReceiver1).onAuthenticationFailed();
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     @Test
@@ -670,8 +659,7 @@ public class BiometricServiceTest {
                 0 /* vendorCode */);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_AUTH_PAUSED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_PAUSED, mBiometricService.mCurrentAuthSession.getState());
         verify(mBiometricService.mStatusBarService).onBiometricError(
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_TIMEOUT),
@@ -680,8 +668,7 @@ public class BiometricServiceTest {
         verify(mReceiver1, never()).onAuthenticationFailed();
 
         // No auth session. Pressing try again will create one.
-        assertEquals(AuthSession.STATE_AUTH_PAUSED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_PAUSED, mBiometricService.mCurrentAuthSession.getState());
 
         // Pressing "Try again" on SystemUI
         mBiometricService.mSysuiReceiver.onTryAgainPressed();
@@ -689,8 +676,7 @@ public class BiometricServiceTest {
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
         // AuthSession is now resuming
-        assertEquals(AuthSession.STATE_AUTH_PAUSED_RESUMING,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_PAUSED_RESUMING, mBiometricService.mCurrentAuthSession.getState());
 
         // Test resuming when hardware becomes ready. SystemUI should not be requested to
         // show another dialog since it's already showing.
@@ -755,8 +741,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         // Sends error to SystemUI and does not notify client yet
-        assertEquals(AuthSession.STATE_ERROR_PENDING_SYSUI,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_ERROR_PENDING_SYSUI, mBiometricService.mCurrentAuthSession.getState());
         verify(mBiometricService.mStatusBarService).onBiometricError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS),
@@ -783,8 +768,7 @@ public class BiometricServiceTest {
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_AUTH_CALLED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_CALLED, mBiometricService.mCurrentAuthSession.getState());
         mBiometricService.mBiometricSensorReceiver.onError(
                 SENSOR_ID_FINGERPRINT,
                 getCookieForPendingSession(mBiometricService.mCurrentAuthSession),
@@ -794,7 +778,7 @@ public class BiometricServiceTest {
 
         // We should be showing device credential now
         assertNotNull(mBiometricService.mCurrentAuthSession);
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         assertEquals(Authenticators.DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mPromptInfo.getAuthenticators());
@@ -873,7 +857,7 @@ public class BiometricServiceTest {
 
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
         assertNotNull(mBiometricService.mCurrentAuthSession);
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         assertEquals(Authenticators.DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mPromptInfo.getAuthenticators());
@@ -950,7 +934,7 @@ public class BiometricServiceTest {
         mBiometricService.mSysuiReceiver.onDeviceCredentialPressed();
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
@@ -961,7 +945,7 @@ public class BiometricServiceTest {
                 0 /* vendorCode */);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
     }
@@ -973,8 +957,7 @@ public class BiometricServiceTest {
                 false /* requireConfirmation */,
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
 
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
 
         mBiometricService.mBiometricSensorReceiver.onError(
                 SENSOR_ID_FINGERPRINT,
@@ -983,7 +966,7 @@ public class BiometricServiceTest {
                 0 /* vendorCode */);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         verify(mBiometricService.mStatusBarService).onBiometricError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
@@ -997,8 +980,7 @@ public class BiometricServiceTest {
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */, null /* authenticators */);
 
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
 
         mBiometricService.mBiometricSensorReceiver.onError(
                 SENSOR_ID_FINGERPRINT,
@@ -1007,7 +989,7 @@ public class BiometricServiceTest {
                 0 /* vendorCode */);
         waitForIdle();
 
-        assertEquals(AuthSession.STATE_ERROR_PENDING_SYSUI,
+        assertEquals(STATE_ERROR_PENDING_SYSUI,
                 mBiometricService.mCurrentAuthSession.getState());
         verify(mBiometricService.mStatusBarService).onBiometricError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
@@ -1031,10 +1013,7 @@ public class BiometricServiceTest {
                 eq(0 /* vendorCode */));
         verify(mBiometricService.mSensors.get(0).impl).cancelAuthenticationFromService(
                 any(),
-                any(),
-                anyInt(),
-                anyInt(),
-                anyInt());
+                any());
         assertNull(mBiometricService.mCurrentAuthSession);
     }
 
@@ -1056,10 +1035,7 @@ public class BiometricServiceTest {
         verify(mBiometricService.mSensors.get(0).impl,
                 never()).cancelAuthenticationFromService(
                 any(),
-                any(),
-                anyInt(),
-                anyInt(),
-                anyInt());
+                any());
     }
 
     @Test
@@ -1081,10 +1057,7 @@ public class BiometricServiceTest {
         verify(mBiometricService.mSensors.get(0).impl,
                 never()).cancelAuthenticationFromService(
                 any(),
-                any(),
-                anyInt(),
-                anyInt(),
-                anyInt());
+                any());
     }
 
     @Test
@@ -1104,10 +1077,7 @@ public class BiometricServiceTest {
         verify(mBiometricService.mSensors.get(0).impl,
                 never()).cancelAuthenticationFromService(
                 any(),
-                any(),
-                anyInt(),
-                anyInt(),
-                anyInt());
+                any());
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
@@ -1134,8 +1104,7 @@ public class BiometricServiceTest {
         // string is retrieved for now, but it's also very unlikely to break anyway.
         verify(mBiometricService.mStatusBarService)
                 .onBiometricHelp(anyString());
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     @Test
@@ -1145,7 +1114,7 @@ public class BiometricServiceTest {
                 false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mImpl.cancelAuthentication(mBiometricService.mCurrentAuthSession.mToken,
-                TEST_PACKAGE_NAME, 0 /* callingUId */, 0 /* callingPid */, 0 /* callingUserId */);
+                TEST_PACKAGE_NAME);
         waitForIdle();
 
         // Pretend that the HAL has responded to cancel with ERROR_CANCELED
@@ -1491,12 +1460,10 @@ public class BiometricServiceTest {
         invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1,
                 Authenticators.BIOMETRIC_STRONG);
         waitForIdle();
-        assertEquals(AuthSession.STATE_AUTH_CALLED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_CALLED, mBiometricService.mCurrentAuthSession.getState());
         startPendingAuthSession(mBiometricService);
         waitForIdle();
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     @Test
@@ -1508,8 +1475,7 @@ public class BiometricServiceTest {
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */, Authenticators.BIOMETRIC_STRONG);
         waitForIdle();
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     @Test
@@ -1522,12 +1488,10 @@ public class BiometricServiceTest {
         invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1,
                 Authenticators.BIOMETRIC_STRONG);
         waitForIdle();
-        assertEquals(AuthSession.STATE_AUTH_CALLED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_CALLED, mBiometricService.mCurrentAuthSession.getState());
         startPendingAuthSession(mBiometricService);
         waitForIdle();
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     @Test
@@ -1549,7 +1513,7 @@ public class BiometricServiceTest {
                 Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL);
         waitForIdle();
         assertNotNull(mBiometricService.mCurrentAuthSession);
-        assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
+        assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
     }
@@ -1647,8 +1611,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         assertNotNull(mBiometricService.mCurrentAuthSession);
-        assertEquals(AuthSession.STATE_AUTH_STARTED,
-                mBiometricService.mCurrentAuthSession.getState());
+        assertEquals(STATE_AUTH_STARTED, mBiometricService.mCurrentAuthSession.getState());
     }
 
     private static void startPendingAuthSession(BiometricService service) throws Exception {
@@ -1674,10 +1637,7 @@ public class BiometricServiceTest {
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
                 createTestPromptInfo(requireConfirmation, authenticators,
-                        false /* checkDevicePolicy */),
-                0 /* callingUid */,
-                0 /* callingPid */,
-                0 /* callingUserId */);
+                        false /* checkDevicePolicy */));
     }
 
     private static void invokeAuthenticateForWorkApp(IBiometricService.Stub service,
@@ -1689,10 +1649,7 @@ public class BiometricServiceTest {
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
                 createTestPromptInfo(false /* requireConfirmation */, authenticators,
-                        true /* checkDevicePolicy */),
-                0 /* callingUid */,
-                0 /* callingPid */,
-                0 /* callingUserId */);
+                        true /* checkDevicePolicy */));
     }
 
     private static PromptInfo createTestPromptInfo(

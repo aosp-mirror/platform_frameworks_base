@@ -29,6 +29,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -37,7 +38,9 @@ import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
@@ -54,6 +57,8 @@ import com.android.server.SystemService;
 import com.android.server.biometrics.sensors.face.FaceAuthenticator;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintAuthenticator;
 import com.android.server.biometrics.sensors.iris.IrisAuthenticator;
+
+import java.util.List;
 
 /**
  * System service that provides an interface for authenticating with biometrics and
@@ -138,6 +143,34 @@ public class AuthService extends SystemService {
 
     private final class AuthServiceImpl extends IAuthService.Stub {
         @Override
+        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName)
+                throws RemoteException {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mInjector.getBiometricService().createTestSession(sensorId, opPackageName);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<SensorPropertiesInternal> getSensorProperties(String opPackageName)
+                throws RemoteException {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // Get the result from BiometricService, since it is the source of truth for all
+                // biometric sensors.
+                return mInjector.getBiometricService().getSensorProperties(opPackageName);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public String getUiPackage() {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
@@ -185,8 +218,7 @@ public class AuthService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mBiometricService.authenticate(
-                        token, sessionId, userId, receiver, opPackageName, promptInfo, callingUid,
-                        callingPid, callingUserId);
+                        token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -202,13 +234,9 @@ public class AuthService extends SystemService {
                 return;
             }
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int callingUserId = UserHandle.getCallingUserId();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.cancelAuthentication(token, opPackageName, callingUid,
-                        callingPid, callingUserId);
+                mBiometricService.cancelAuthentication(token, opPackageName);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

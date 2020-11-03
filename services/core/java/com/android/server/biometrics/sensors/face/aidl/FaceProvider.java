@@ -24,6 +24,7 @@ import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
@@ -250,6 +251,12 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             props.add(mSensors.valueAt(i).getSensorProperties());
         }
         return props;
+    }
+
+    @NonNull
+    @Override
+    public FaceSensorPropertiesInternal getSensorProperties(int sensorId) {
+        return mSensors.get(sensorId).getSensorProperties();
     }
 
     @NonNull
@@ -564,6 +571,12 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
         mSensors.get(sensorId).getScheduler().dump(pw);
         mUsageStats.print(pw);
+    }
+
+    @NonNull
+    @Override
+    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        return null; // TODO
     }
 
     @Override

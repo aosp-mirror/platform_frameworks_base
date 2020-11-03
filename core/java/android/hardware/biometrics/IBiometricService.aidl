@@ -19,22 +19,28 @@ package android.hardware.biometrics;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricAuthenticator;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorPropertiesInternal;
 
 /**
  * Communication channel from AuthService to BiometricService.
  * @hide
  */
 interface IBiometricService {
+    // Creates a test session with the specified sensorId
+    ITestSession createTestSession(int sensorId, String opPackageName);
+
+    // Retrieve static sensor properties for all biometric sensors
+    List<SensorPropertiesInternal> getSensorProperties(String opPackageName);
+
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long operationId, int userId,
-            IBiometricServiceReceiver receiver, String opPackageName, in PromptInfo promptInfo,
-            int callingUid, int callingPid, int callingUserId);
+            IBiometricServiceReceiver receiver, String opPackageName, in PromptInfo promptInfo);
 
     // Cancel authentication for the given session.
-    void cancelAuthentication(IBinder token, String opPackageName, int callingUid, int callingPid,
-            int callingUserId);
+    void cancelAuthentication(IBinder token, String opPackageName);
 
     // Checks if biometrics can be used.
     int canAuthenticate(String opPackageName, int userId, int callingUserId, int authenticators);

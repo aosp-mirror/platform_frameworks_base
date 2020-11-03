@@ -19,6 +19,8 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
+import static com.android.server.biometrics.BiometricServiceStateProto.*;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -29,7 +31,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -108,10 +109,7 @@ public class AuthSessionTest {
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 0 /* operationId */,
-                0 /* userId */,
-                0 /* callingUid */,
-                0 /* callingPid */,
-                0 /* callingUserId */);
+                0 /* userId */);
 
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             assertEquals(BiometricSensor.STATE_UNKNOWN, sensor.getSensorState());
@@ -126,18 +124,12 @@ public class AuthSessionTest {
         final boolean requireConfirmation = true;
         final long operationId = 123;
         final int userId = 10;
-        final int callingUid = 100;
-        final int callingPid = 1000;
-        final int callingUserId = 10000;
 
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 operationId,
-                userId,
-                callingUid,
-                callingPid,
-                callingUserId);
+                userId);
         assertEquals(mSensors.size(), session.mPreAuthInfo.eligibleSensors.size());
 
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
@@ -156,10 +148,7 @@ public class AuthSessionTest {
                     eq(userId),
                     eq(mSensorReceiver),
                     eq(TEST_PACKAGE),
-                    eq(sensor.getCookie()),
-                    eq(callingUid),
-                    eq(callingPid),
-                    eq(callingUserId));
+                    eq(sensor.getCookie()));
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
@@ -200,10 +189,7 @@ public class AuthSessionTest {
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 operationId,
-                userId,
-                callingUid,
-                callingPid,
-                callingUserId);
+                userId);
         assertEquals(mSensors.size(), session.mPreAuthInfo.eligibleSensors.size());
 
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
@@ -225,13 +211,13 @@ public class AuthSessionTest {
         assertTrue(session.allCookiesReceived());
 
         // UDFPS does not start even if all cookies are received
-        assertEquals(AuthSession.STATE_AUTH_STARTED, session.getState());
+        assertEquals(STATE_AUTH_STARTED, session.getState());
         verify(mStatusBarService).showAuthenticationDialog(any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyInt(), any(), anyLong());
 
         // Notify AuthSession that the UI is shown. Then, UDFPS sensor should be started.
         session.onDialogAnimatedIn();
-        assertEquals(AuthSession.STATE_AUTH_STARTED_UI_SHOWING, session.getState());
+        assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         assertEquals(BiometricSensor.STATE_AUTHENTICATING,
                 session.mPreAuthInfo.eligibleSensors.get(0).getSensorState());
 
@@ -251,9 +237,7 @@ public class AuthSessionTest {
 
     private AuthSession createAuthSession(List<BiometricSensor> sensors,
             boolean checkDevicePolicyManager, @Authenticators.Types int authenticators,
-            long operationId, int userId,
-            int callingUid, int callingPid, int callingUserId)
-            throws RemoteException {
+            long operationId, int userId) throws RemoteException {
 
         final PromptInfo promptInfo = createPromptInfo(authenticators);
 
@@ -261,8 +245,8 @@ public class AuthSessionTest {
                 checkDevicePolicyManager);
         return new AuthSession(mContext, mStatusBarService, mSysuiReceiver, mKeyStore,
                 mRandom, mClientDeathReceiver, preAuthInfo, mToken, operationId, userId,
-                mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo, callingUid,
-                callingPid, callingUserId, false /* debugEnabled */, mFingerprintSensorProps);
+                mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo,
+                false /* debugEnabled */, mFingerprintSensorProps);
     }
 
     private PromptInfo createPromptInfo(@Authenticators.Types int authenticators) {
@@ -299,7 +283,7 @@ public class AuthSessionTest {
     }
 
     private void setupFace(int id, boolean confirmationAlwaysRequired) throws RemoteException {
-        IBiometricAuthenticator  faceAuthenticator = mock(IBiometricAuthenticator.class);
+        IBiometricAuthenticator faceAuthenticator = mock(IBiometricAuthenticator.class);
         when(faceAuthenticator.isHardwareDetected(any())).thenReturn(true);
         when(faceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         mSensors.add(new BiometricSensor(id,

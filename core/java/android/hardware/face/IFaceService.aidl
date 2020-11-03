@@ -17,6 +17,7 @@ package android.hardware.face;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -28,8 +29,18 @@ import android.view.Surface;
  * @hide
  */
 interface IFaceService {
+
+    // Creates a test session with the specified sensorId
+    ITestSession createTestSession(int sensorId, String opPackageName);
+
+    // Requests a proto dump of the service to the specified fd
+    byte[] dumpSensorServiceStateProto();
+
     // Retrieve static sensor properties for all face sensors
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
+
+    // Retrieve static sensor properties for the specified sensor
+    FaceSensorPropertiesInternal getSensorProperties(int sensorId, String opPackageName);
 
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long operationId, int userId, IFaceServiceReceiver receiver,
@@ -46,7 +57,7 @@ interface IFaceService {
     // startPreparedClient().
     void prepareForAuthentication(int sensorId, boolean requireConfirmation, IBinder token, long operationId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie, int callingUid, int callingPid, int callingUserId);
+            int cookie);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int sensorId, int cookie);
@@ -58,8 +69,7 @@ interface IFaceService {
     void cancelFaceDetect(IBinder token, String opPackageName);
 
     // Same as above, with extra arguments.
-    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId);
+    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName);
 
     // Start face enrollment
     void enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,

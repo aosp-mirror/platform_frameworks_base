@@ -208,7 +208,17 @@ public class BiometricManager {
     @NonNull
     @RequiresPermission(TEST_BIOMETRIC)
     public List<SensorProperties> getSensorProperties() {
-        return new ArrayList<>(); // TODO(169459906)
+        try {
+            final List<SensorPropertiesInternal> internalProperties =
+                    mService.getSensorProperties(mContext.getOpPackageName());
+            final List<SensorProperties> properties = new ArrayList<>();
+            for (SensorPropertiesInternal internalProp : internalProperties) {
+                properties.add(SensorProperties.from(internalProp));
+            }
+            return properties;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -219,7 +229,12 @@ public class BiometricManager {
     @NonNull
     @RequiresPermission(TEST_BIOMETRIC)
     public BiometricTestSession createTestSession(int sensorId) {
-        return null; // TODO(169459906)
+        try {
+            return new BiometricTestSession(mContext,
+                    mService.createTestSession(sensorId, mContext.getOpPackageName()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

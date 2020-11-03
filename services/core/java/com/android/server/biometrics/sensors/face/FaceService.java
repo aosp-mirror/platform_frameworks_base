@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
@@ -38,8 +39,8 @@ import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.NativeHandle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -140,6 +141,34 @@ public class FaceService extends SystemService implements BiometricServiceCallba
      * Receives the incoming binder calls from FaceManager.
      */
     private final class FaceServiceWrapper extends IFaceService.Stub {
+        @Override
+        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for createTestSession, sensorId: " + sensorId);
+                return null;
+            }
+
+            return provider.createTestSession(sensorId, opPackageName);
+        }
+
+        @Override
+        public byte[] dumpSensorServiceStateProto() {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ProtoOutputStream proto = new ProtoOutputStream();
+            for (ServiceProvider provider : mServiceProviders) {
+                for (FaceSensorPropertiesInternal props : provider.getSensorProperties()) {
+                    provider.dumpProtoState(props.sensorId, proto);
+                }
+            }
+            proto.flush();
+            return proto.getBytes();
+        }
+
         @Override // Binder call
         public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(
                 String opPackageName) {
@@ -151,6 +180,21 @@ public class FaceService extends SystemService implements BiometricServiceCallba
             Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
                     + ", sensors: " + properties.size());
             return properties;
+        }
+
+        @Override // Binder call
+        public FaceSensorPropertiesInternal getSensorProperties(int sensorId,
+                @NonNull String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "No matching sensor for getSensorProperties, sensorId: " + sensorId
+                        + ", caller: " + opPackageName);
+                return null;
+            }
+
+            return provider.getSensorProperties(sensorId);
         }
 
         @Override // Binder call
@@ -270,8 +314,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         @Override // Binder call
         public void prepareForAuthentication(int sensorId, boolean requireConfirmation,
                 IBinder token, long operationId, int userId,
-                IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
-                int callingUid, int callingPid, int callingUserId) {
+                IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -326,7 +369,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
 
         @Override // Binder call
         public void cancelAuthenticationFromService(int sensorId, final IBinder token,
-                final String opPackageName, int callingUid, int callingPid, int callingUserId) {
+                final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);

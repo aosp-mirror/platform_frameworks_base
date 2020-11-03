@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
+import android.annotation.Nullable;
+import android.hardware.biometrics.fingerprint.V2_1.FingerprintError;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
 import android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint;
 import android.os.RemoteException;
@@ -24,6 +26,9 @@ import android.os.RemoteException;
  * Test HAL that provides only provides no-ops.
  */
 public class TestHal extends IBiometricsFingerprint.Stub {
+    @Nullable
+    private IBiometricsFingerprintClientCallback mCallback;
+
     @Override
     public boolean isUdfps(int sensorId) {
         return false;
@@ -41,6 +46,7 @@ public class TestHal extends IBiometricsFingerprint.Stub {
 
     @Override
     public long setNotify(IBiometricsFingerprintClientCallback clientCallback) {
+        mCallback = clientCallback;
         return 0;
     }
 
@@ -65,7 +71,10 @@ public class TestHal extends IBiometricsFingerprint.Stub {
     }
 
     @Override
-    public int cancel() {
+    public int cancel() throws RemoteException {
+        if (mCallback != null) {
+            mCallback.onError(0, FingerprintError.ERROR_CANCELED, 0 /* vendorCode */);
+        }
         return 0;
     }
 
