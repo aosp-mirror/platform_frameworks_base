@@ -26,6 +26,8 @@ import android.view.View;
 
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
+import java.util.function.Consumer;
+
 /** Containing logic for the rotation button in nav bar. */
 public class RotationContextButton extends ContextualButton implements
         NavigationModeController.ModeChangedListener, RotationButton {
@@ -41,6 +43,18 @@ public class RotationContextButton extends ContextualButton implements
     @Override
     public void setRotationButtonController(RotationButtonController rotationButtonController) {
         mRotationButtonController = rotationButtonController;
+    }
+
+    @Override
+    public void setVisibilityChangedCallback(Consumer<Boolean> visibilityChangedCallback) {
+        setListener(new ContextButtonListener() {
+            @Override
+            public void onVisibilityChanged(ContextualButton button, boolean visible) {
+                if (visibilityChangedCallback != null) {
+                    visibilityChangedCallback.accept(visible);
+                }
+            }
+        });
     }
 
     @Override

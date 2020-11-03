@@ -743,7 +743,6 @@ public class StagingManager {
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
         params.installFlags |= PackageManager.INSTALL_STAGED;
-        // TODO(b/129744602): use the userid from the original session.
         if (preReboot) {
             params.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
             params.installFlags |= PackageManager.INSTALL_DRY_RUN;
@@ -753,7 +752,7 @@ public class StagingManager {
         try {
             int apkSessionId = mPi.createSession(
                     params, originalSession.getInstallerPackageName(),
-                    0 /* UserHandle.SYSTEM */);
+                    originalSession.userId);
             PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
             apkSession.open();
             for (int i = 0, size = apkFilePaths.size(); i < size; i++) {
@@ -811,10 +810,9 @@ public class StagingManager {
             if (preReboot) {
                 params.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
             }
-            // TODO(b/129744602): use the userid from the original session.
             final int apkParentSessionId = mPi.createSession(
                     params, session.getInstallerPackageName(),
-                    0 /* UserHandle.SYSTEM */);
+                    session.userId);
             final PackageInstallerSession apkParentSession = mPi.getSession(apkParentSessionId);
             try {
                 apkParentSession.open();

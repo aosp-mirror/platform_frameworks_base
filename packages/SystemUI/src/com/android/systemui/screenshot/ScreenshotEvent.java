@@ -56,7 +56,9 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     @UiEvent(doc = "screenshot interaction timed out")
     SCREENSHOT_INTERACTION_TIMEOUT(310),
     @UiEvent(doc = "screenshot explicitly dismissed")
-    SCREENSHOT_EXPLICIT_DISMISSAL(311);
+    SCREENSHOT_EXPLICIT_DISMISSAL(311),
+    @UiEvent(doc = "screenshot reentered for new screenshot")
+    SCREENSHOT_REENTERED(640);
 
     private final int mId;
 

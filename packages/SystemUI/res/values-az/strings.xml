@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Davam edin"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Ləğv edin"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Paylaşın"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Silin"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Ekranın video çəkimi ləğv edildi"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Ekranın video çəkimi yadda saxlanıldı. Baxmaq üçün klikləyin"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Ekranın video çəkimi silindi"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ekranın video çəkiminin silinməsi zamanı xəta baş verdi"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"İcazələr əldə edilmədi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ekranın yazılması ilə bağlı xəta"</string>
@@ -405,7 +403,7 @@
       <item quantity="one">%d cihaz</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Bildirişlər"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"İşartı"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Fənər"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera istifadə olunur"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobil data"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Data istifadəsi"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Yuxarı 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Yuxarı 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Aşağı tam ekran"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyi, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Redaktə etmək üçün iki dəfə tıklayın."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Əlavə etmək üçün iki dəfə tıklayın."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> köçürün"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> silin"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="POSITION">%2$d</xliff:g> pozisiyasına <xliff:g id="TILE_NAME">%1$s</xliff:g> əlavə edin"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="POSITION">%2$d</xliff:g> pozisiyasına <xliff:g id="TILE_NAME">%1$s</xliff:g> köçürün"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"lövhəni silin"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"sona lövhə əlavə edin"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Lövhəni köçürün"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Lövhə əlavə edin"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyinə köçürün"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyinə əlavə edin"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyi"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Sürətli ayarlar redaktoru."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> bildiriş: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Tətbiq bölünmüş ekran ilə işləməyə bilər."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Əvvəlkinə keçin"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ölçüsünü dəyişin"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"İstiliyə görə telefon söndü"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon indi normal işləyir"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonunuz indi normal işləyir.\nƏtraflı məlumat üçün toxunun"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon çox isti idi və soyumaq üçün söndü. Hazırda telefon normal işləyir.\n\n Telefon bu hallarda çox isti ola bilər:\n 	• Çox resurslu tətbiq istifadə etsəniz (oyun, video və ya naviqasiya tətbiqi kimi)\n	• Böyük həcmli fayl endirsəniz və ya yükləsəniz\n	• Telefonu yüksək temperaturda istifadə etsəniz"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon qızmağa başlayır"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır.\nƏtraflı məlumat üçün toxunun"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefonunuz avtomatik olaraq soyumağa başlayacaq. Telefon istifadəsinə davam edə bilərsiniz, lakin sürəti yavaşlaya bilər.\n\nTelefonunuz soyuduqdan sonra normal işləyəcək."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Adapteri cərəyandan ayırın"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Bu cihazın batareya yığmasında problem var. Adapteri cərəyandan ayırın. Ehtiyatlı olun, kabel isti ola bilər."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ayarlar"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Anladım"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="TYPES_LIST">%2$s</xliff:g> tətbiqlərindən istifadə edir."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Tətbiqlər <xliff:g id="TYPES_LIST">%s</xliff:g> istifadə edir."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" və "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"məkan"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensorlar deaktivdir"</string>
     <string name="device_services" msgid="1549944177856658705">"Cihaz Xidmətləri"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Başlıq yoxdur"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tövsiyələr yüklənir"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Cari sessiyanı gizlədin."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Gizlədin"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"İmtina edin"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Davam edin"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ayarlar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Aktiv deyil, tətbiqi yoxlayın"</string>

@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="7542498253319440408">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Մուտքագրեք PUK, որն 8 կամ ավել թիվ ունի:"</string>
     <string name="needPuk" msgid="7321876090152422918">"Ձեր SIM քարտը PUK-ով կողպված է: Մուտքագրեք PUK կոդը այն ապակողպելու համար:"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Մուտքագրեք PUK2-ը` SIM քարտն արգելահանելու համար:"</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Մուտքագրեք PUK2-ը՝ SIM քարտն արգելահանելու համար:"</string>
     <string name="enablePin" msgid="2543771964137091212">"Ձախողվեց: Միացրեք SIM/RUIM կողպումը:"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն արգելափակվելու է:</item>
@@ -409,7 +409,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Թույլ է տալիս հավելվածին փոփոխել ձեր պլանշետի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Թույլ է տալիս հավելվածին փոփոխել Android TV սարքի զանգերի մատյանը, այդ թվում՝ մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել՝ ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Թույլ է տալիս հավելվածին փոփոխել ձեր հեռախոսի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"օգտագործել մարմնի սենսորները (օրինակ` սրտի կծկումների հաճախականության չափիչ)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"օգտագործել մարմնի սենսորները (օրինակ՝ սրտի կծկումների հաճախականության չափիչ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Հավելվածին թույլ է տալիս մուտք ունենալ սենսորների տվյալներին, որոնք վերահսկում են ձեր ֆիզիկական վիճակը, օրինակ՝ ձեր սրտի զարկերը:"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -428,7 +428,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"տեղադրության մասին տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Այս հավելվածը ցանկացած ժամանակ կարող է տեսնել տեղադրության տվյալները, նույնիսկ երբ այն ակտիվ չէ։"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"փոխել ձեր աուդիո կարգավորումները"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ` ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ՝ ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ձայնագրել աուդիո ֆայլ"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"Այս հավելվածը ցանկացած պահի կարող է ձայնագրել խոսափողի օգնությամբ:"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ուղարկել հրամաններ SIM քարտին"</string>
@@ -493,7 +493,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"փոխել միացված կապը"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Թույլ է տալիս հավելվածին փոխել կապված ցանցի միացման կարգավիճակը:"</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"դիտել Wi-Fi կապերը"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Թույլ է տալիս հավելվածին տեսնել Wi-Fi ցանցի տեղեկություններ, ինչպես օրինակ` արդյոք Wi-Fi-ը միացված է, թե` ոչ, և միացված Wi-Fi սարքի անունը:"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Թույլ է տալիս հավելվածին տեսնել Wi-Fi ցանցի տեղեկություններ, ինչպես օրինակ՝ արդյոք Wi-Fi-ը միացված է, թե` ոչ, և միացված Wi-Fi սարքի անունը:"</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"միանալ Wi-Fi-ին և անջատվել դրանից"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Թույլ է տալիս հավելվածին միանալ Wi-Fi մուտքի կետերին և անջատվել այդ կետերից, ինչպես նաև կատարել սարքի կարգավորման փոփոխություններ Wi-Fi ցանցերի համար:"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"թույլատրել Բազմասփյուռ Wi-Fi-ի ընդունումը"</string>
@@ -612,7 +612,7 @@
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Դեմքի պատկերակ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"կարդալ համաժամացման կարգավորումները"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Թույլ է տալիս հավելվածին կարդալ համաժամացման կարգավորումները հաշվի համար: Օրինակ` այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամացված է հաշվի հետ:"</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Թույլ է տալիս հավելվածին կարդալ համաժամացման կարգավորումները հաշվի համար: Օրինակ՝ այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամացված է հաշվի հետ:"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"համաժամացումը փոխարկել միացվածի և անջատվածի"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Թույլ է տալիս հավելվածին փոփոխել համաժամացման կարգավորումները հաշվի համար: Օրինակ, այն կարող է օգտագործվել` միացնելու Մարդիկ հավելվածի համաժամացումը հաշվի հետ:"</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"կարդալ համաժամացման վիճակագրությունը"</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Ապակողպելու կամ շտապ կանչ անելու համար սեղմեք «Ընտրացանկ»"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Ապակողպելու համար սեղմեք Ցանկը:"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Հավաքեք սխեման` ապակողպելու համար"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Շտապ կանչ"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Շտապ կանչ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Վերադառնալ զանգին"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Ճիշտ է:"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Կրկին փորձեք"</string>
@@ -873,7 +873,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Մոռացե՞լ եք սխեման:"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Հաշվի ապակողպում"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Չափից շատ սխեմայի փորձեր"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ապակողպելու համար` մուտք գործեք ձեր Google հաշվով:"</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ապակողպելու համար՝ մուտք գործեք ձեր Google հաշվով:"</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Օգտանուն (էլփոստ)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Գաղտնաբառ"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Մուտք գործել"</string>
@@ -1404,7 +1404,7 @@
     <string name="ime_action_done" msgid="6299921014822891569">"Պատրաստ է"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"Նախորդ"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Կատարել"</string>
-    <string name="dial_number_using" msgid="6060769078933953531">"Հավաքել հեռախոսահամարը`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
+    <string name="dial_number_using" msgid="6060769078933953531">"Հավաքել հեռախոսահամարը՝\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Ստեղծել կոնտակտ`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ մի քանի հավելվածներին թույլտվություն է անհրաժեշտ՝ այժմ և հետագայում ձեր հաշվի տվյալներն օգտագործելու համար։"</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Թույլատրե՞լ"</string>
@@ -1474,7 +1474,7 @@
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Ավելացնել"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Նվազեցնել"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> հպեք և պահեք:"</string>
-    <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Սահեցրեք վերև` ավելացնելու համար, և ներքև` նվազեցնելու համար:"</string>
+    <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Սահեցրեք վերև՝ ավելացնելու համար, և ներքև՝ նվազեցնելու համար:"</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Աճեցնել րոպեն"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Նվազեցնել րոպեն"</string>
     <string name="time_picker_increment_hour_button" msgid="3063572723197178242">"Աճեցնել ժամը"</string>
@@ -1598,7 +1598,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Վերամուտքագրեք ճիշտ PUK ծածկագիրը: Կրկնվող փորձերը ընդմիշտ կկասեցնեն SIM քարտը:"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN ծածկագրերը չեն համընկնում"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Չափից շատ սխեմայի փորձեր"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Ապակողպելու համար` մուտք գործեք ձեր Google հաշվով:"</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Ապակողպելու համար՝ մուտք գործեք ձեր Google հաշվով:"</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Օգտանուն (էլփոստ)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Գաղտնաբառը"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Մուտք գործել"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը.\n\n•Միացնում է մուգ թեման։\n•Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը.\n\n•Միացնում է մուգ թեման։\n•Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը:"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n\n• Միացնում է մուգ թեման։\n• Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n\n• Միացնում է մուգ թեման։\n• Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
@@ -1894,7 +1894,7 @@
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
-    <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS հավելվածը"</string>
+    <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS-ների փոխանակման հավելվածը"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Որոշ գործառույթներ կարող են չաշխատել"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Աշխատանքային պրոֆիլը կողպված է"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Հպեք՝ այն ապակողպելու համար"</string>
@@ -1979,7 +1979,7 @@
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Չհաջողվեց վերականգնել դյուրանցումը, քանի որ հավելվածների ստորագրությունները տարբեր են"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Չհաջողվեց վերականգնել դյուրանցումը"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Դյուրանցումն անջատված է"</string>
-    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ՀԵՌԱՑՆԵԼ"</string>
+    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ԱՊԱՏԵՂԱԴՐԵԼ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ԲԱՑԵԼ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Հայտնաբերվել է վնասաբեր հավելված"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>

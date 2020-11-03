@@ -62,17 +62,17 @@ import java.util.Set;
  * to release the native resources used by the TextToSpeech engine.
  *
  * Apps targeting Android 11 that use text-to-speech should declare {@link
- * TextToSpeech.Engine#INTENT_ACTION_TTS_SERVICE} in the <code><queries></code> elements of their
+ * TextToSpeech.Engine#INTENT_ACTION_TTS_SERVICE} in the {@code queries} elements of their
  * manifest:
  *
- * <code>
- * <queries>
+ * <pre>
+ * &lt;queries&gt;
  *   ...
- *  <intent>
- *      <action android:name="android.intent.action.TTS_SERVICE" />
- *  </intent>
- * </queries>
- * </code>
+ *  &lt;intent&gt;
+ *      &lt;action android:name="android.intent.action.TTS_SERVICE" /&gt;
+ *  &lt;/intent&gt;
+ * &lt;/queries&gt;
+ * </pre>
  */
 public class TextToSpeech {
 
@@ -254,18 +254,17 @@ public class TextToSpeech {
      * </ul>
      *
      * Apps targeting Android 11 that use text-to-speech should declare {@link
-     * #INTENT_ACTION_TTS_SERVICE} in the <code><queries></code> elements of their
+     * TextToSpeech.Engine#INTENT_ACTION_TTS_SERVICE} in the {@code queries} elements of their
      * manifest:
      *
-     * <code>
-     * <queries>
+     * <pre>
+     * &lt;queries&gt;
      *   ...
-     *  <intent>
-     *      <action android:name="android.intent.action.TTS_SERVICE" />
-     *  </intent>
-     * </queries>
-     * </code>
-
+     *  &lt;intent&gt;
+     *      &lt;action android:name="android.intent.action.TTS_SERVICE" /&gt;
+     *  &lt;/intent&gt;
+     * &lt;/queries&gt;
+     * </pre>
      */
     public class Engine {
 

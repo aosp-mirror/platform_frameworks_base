@@ -29,7 +29,10 @@ import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 
+import static androidx.lifecycle.Lifecycle.State.RESUMED;
+
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
+import static com.android.systemui.charging.WirelessChargingLayout.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
@@ -45,6 +48,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -113,6 +117,10 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
+
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -205,7 +213,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -237,7 +244,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, KeyguardStateController.Callback,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
-        StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback {
+        StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback,
+        LifecycleOwner, BatteryController.BatteryStateChangeCallback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -586,7 +594,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private final UserSwitcherController mUserSwitcherController;
     private final NetworkController mNetworkController;
-    private final BatteryController mBatteryController;
+    private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
+    protected final BatteryController mBatteryController;
     protected boolean mPanelExpanded;
     private UiModeManager mUiModeManager;
     protected boolean mIsKeyguard;
@@ -935,6 +944,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mConfigurationController.addCallback(this);
 
+        mBatteryController.observe(mLifecycle, this);
+        mLifecycle.setCurrentState(RESUMED);
+
         // set the initial view visibility
         int disabledFlags1 = result.mDisabledFlags1;
         int disabledFlags2 = result.mDisabledFlags2;
@@ -1101,22 +1113,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAmbientIndicationContainer = mNotificationShadeWindowView.findViewById(
                 R.id.ambient_indication_container);
 
-        // TODO: Find better place for this callback.
-        mBatteryController.addCallback(new BatteryStateChangeCallback() {
-            @Override
-            public void onPowerSaveChanged(boolean isPowerSave) {
-                mHandler.post(mCheckBarModes);
-                if (mDozeServiceHost != null) {
-                    mDozeServiceHost.firePowerSaveChanged(isPowerSave);
-                }
-            }
-
-            @Override
-            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                // noop
-            }
-        });
-
         mAutoHideController.setStatusBar(new AutoHideUiElement() {
             @Override
             public void synchronizeState() {
@@ -1265,6 +1261,25 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mLifecycle;
+    }
+
+    @Override
+    public void onPowerSaveChanged(boolean isPowerSave) {
+        mHandler.post(mCheckBarModes);
+        if (mDozeServiceHost != null) {
+            mDozeServiceHost.firePowerSaveChanged(isPowerSave);
+        }
+    }
+
+    @Override
+    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        // noop
     }
 
     @VisibleForTesting
@@ -2369,24 +2384,43 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showWirelessChargingAnimation(int batteryLevel) {
+        showChargingAnimation(batteryLevel, UNKNOWN_BATTERY_LEVEL, 0);
+    }
+
+    protected void showChargingAnimation(int batteryLevel, int transmittingBatteryLevel,
+            long animationDelay) {
         if (mDozing || mKeyguardManager.isKeyguardLocked()) {
             // on ambient or lockscreen, hide notification panel
             WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    batteryLevel, new WirelessChargingAnimation.Callback() {
+                    transmittingBatteryLevel, batteryLevel,
+                    new WirelessChargingAnimation.Callback() {
                         @Override
                         public void onAnimationStarting() {
+                            mNotificationShadeWindowController.setRequestTopUi(true, TAG);
                             CrossFadeHelper.fadeOut(mNotificationPanelViewController.getView(), 1);
                         }
 
                         @Override
                         public void onAnimationEnded() {
                             CrossFadeHelper.fadeIn(mNotificationPanelViewController.getView());
+                            mNotificationShadeWindowController.setRequestTopUi(false, TAG);
                         }
-                    }, mDozing).show();
+                    }, mDozing).show(animationDelay);
         } else {
             // workspace
             WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    batteryLevel, null, false).show();
+                    transmittingBatteryLevel, batteryLevel,
+                    new WirelessChargingAnimation.Callback() {
+                        @Override
+                        public void onAnimationStarting() {
+                            mNotificationShadeWindowController.setRequestTopUi(true, TAG);
+                        }
+
+                        @Override
+                        public void onAnimationEnded() {
+                            mNotificationShadeWindowController.setRequestTopUi(false, TAG);
+                        }
+                    }, false).show(animationDelay);
         }
     }
 
@@ -3947,7 +3981,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateScrimController();
         mLockscreenLockIconController.onBiometricAuthModeChanged(
                 mBiometricUnlockController.isWakeAndUnlock(),
-                mBiometricUnlockController.isBiometricUnlock());
+                mBiometricUnlockController.isBiometricUnlock(),
+                mBiometricUnlockController.getBiometricType());
     }
 
     @VisibleForTesting

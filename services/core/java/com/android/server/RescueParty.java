@@ -454,10 +454,14 @@ public class RescueParty {
         public boolean mayObservePackage(String packageName) {
             PackageManager pm = mContext.getPackageManager();
             try {
-                // A package is a Mainline module if this is non-null
+                // A package is a module if this is non-null
                 if (pm.getModuleInfo(packageName, 0) != null) {
                     return true;
                 }
+            } catch (PackageManager.NameNotFoundException ignore) {
+            }
+
+            try {
                 ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
                 return (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK;
             } catch (PackageManager.NameNotFoundException e) {

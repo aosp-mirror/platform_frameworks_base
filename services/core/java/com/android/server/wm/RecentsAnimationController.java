@@ -702,6 +702,11 @@ public class RecentsAnimationController implements DeathRecipient {
                         "cleanupAnimation(): Notify animation finished mPendingAnimations=%d "
                                 + "reorderMode=%d",
                         mPendingAnimations.size(), reorderMode);
+        if (reorderMode != REORDER_MOVE_TO_ORIGINAL_POSITION) {
+            // Notify the state at the beginning because the removeAnimation may notify the
+            // transition is finished. This is a signal that there will be a next transition.
+            mDisplayContent.mFixedRotationTransitionListener.notifyRecentsWillBeTop();
+        }
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
             if (reorderMode == REORDER_MOVE_TO_TOP || reorderMode == REORDER_KEEP_IN_PLACE) {
@@ -742,8 +747,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         mTargetActivityRecord.token);
             }
         }
-        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation(
-                reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION /* moveRecentsToBack */);
+        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
 
         // Notify that the animation has ended
         if (mStatusBar != null) {

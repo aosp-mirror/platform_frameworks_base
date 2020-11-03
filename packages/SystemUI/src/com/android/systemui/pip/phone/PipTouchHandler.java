@@ -34,7 +34,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Size;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
@@ -55,13 +54,13 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DismissCircleView;
@@ -94,6 +93,8 @@ public class PipTouchHandler {
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final PipBoundsHandler mPipBoundsHandler;
+    private final PipUiEventLogger mPipUiEventLogger;
+
     private PipResizeGestureHandler mPipResizeGestureHandler;
     private IPinnedStackController mPinnedStackController;
 
@@ -132,9 +133,6 @@ public class PipTouchHandler {
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
-    // The current resized bounds, changed by user resize.
-    // This is used during expand/un-expand to save/restore the user's resized size.
-    @VisibleForTesting Rect mResizedBounds = new Rect();
 
     // The reference inset bounds, used to determine the dismiss fraction
     private Rect mInsetBounds = new Rect();
@@ -198,11 +196,7 @@ public class PipTouchHandler {
 
         @Override
         public void onPipDismiss() {
-            Pair<ComponentName, Integer> topPipActivity = PipUtils.getTopPipActivity(mContext,
-                    mActivityManager);
-            if (topPipActivity.first != null) {
-                MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext, topPipActivity);
-            }
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_TAP_TO_REMOVE);
             mTouchState.removeDoubleTapTimeoutCallback();
             mMotionHelper.dismissPip();
         }
@@ -223,7 +217,8 @@ public class PipTouchHandler {
             FloatingContentCoordinator floatingContentCoordinator,
             DeviceConfigProxy deviceConfig,
             PipSnapAlgorithm pipSnapAlgorithm,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            PipUiEventLogger pipUiEventLogger) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -237,8 +232,8 @@ public class PipTouchHandler {
                 mSnapAlgorithm, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
-                        deviceConfig, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, sysUiState);
+                        deviceConfig, pipTaskOrganizer, menuController, this::getMovementBounds,
+                        this::updateMovementBounds, sysUiState, pipUiEventLogger);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()),
@@ -258,6 +253,8 @@ public class PipTouchHandler {
         mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
                 pipTaskOrganizer, pipSnapAlgorithm, this::onAccessibilityShowMenu,
                 this::updateMovementBounds, mHandler);
+
+        mPipUiEventLogger = pipUiEventLogger;
 
         mTargetView = new DismissCircleView(context);
         mTargetViewContainer = new FrameLayout(context);
@@ -303,11 +300,8 @@ public class PipTouchHandler {
                     hideDismissTarget();
                 });
 
-                Pair<ComponentName, Integer> topPipActivity = PipUtils.getTopPipActivity(mContext,
-                        mActivityManager);
-                if (topPipActivity.first != null) {
-                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext, topPipActivity);
-                }
+                mPipUiEventLogger.log(
+                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
             }
         });
 
@@ -379,7 +373,6 @@ public class PipTouchHandler {
 
             mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
         }
-        mResizedBounds.setEmpty();
         mPipResizeGestureHandler.onActivityUnpinned();
     }
 
@@ -389,9 +382,8 @@ public class PipTouchHandler {
         mMotionHelper.synchronizePinnedStackBounds();
         updateMovementBounds();
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
-            // updates mResizedBounds only if it's an entering PiP animation
-            // mResized should be otherwise updated in setMenuState.
-            mResizedBounds.set(mMotionHelper.getBounds());
+            // Set the initial bounds as the user resize bounds.
+            mPipResizeGestureHandler.setUserResizeBounds(mMotionHelper.getBounds());
         }
 
         if (mShowPipMenuOnAnimationEnd) {
@@ -430,8 +422,21 @@ public class PipTouchHandler {
         }
     }
 
+    /**
+     * Responds to IPinnedStackListener on resetting aspect ratio for the pinned window.
+     */
+    public void onAspectRatioChanged() {
+        mPipResizeGestureHandler.invalidateUserResizeBounds();
+    }
+
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
+        // Set the user resized bounds equal to the new normal bounds in case they were
+        // invalidated (e.g. by an aspect ratio change).
+        if (mPipResizeGestureHandler.getUserResizeBounds().isEmpty()) {
+            mPipResizeGestureHandler.setUserResizeBounds(normalBounds);
+        }
+
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
         final boolean fromDisplayRotationChanged = (mDisplayRotation != displayRotation);
         if (fromDisplayRotationChanged) {
@@ -804,9 +809,7 @@ public class PipTouchHandler {
             // Save the current snap fraction and if we do not drag or move the PiP, then
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
             // fraction and snap to the closest edge.
-            // Also save the current resized bounds so when the menu disappears, we can restore it.
             if (resize) {
-                mResizedBounds.set(mMotionHelper.getBounds());
                 Rect expandedBounds = new Rect(mExpandedBounds);
                 mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                         mMovementBounds, mExpandedMovementBounds, callback);
@@ -835,7 +838,7 @@ public class PipTouchHandler {
                 }
 
                 if (mDeferResizeToNormalBoundsUntilRotation == -1) {
-                    Rect restoreBounds = new Rect(mResizedBounds);
+                    Rect restoreBounds = new Rect(getUserResizeBounds());
                     Rect restoredMovementBounds = new Rect();
                     mSnapAlgorithm.getMovementBounds(restoreBounds, mInsetBounds,
                             restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
@@ -852,8 +855,10 @@ public class PipTouchHandler {
         // If pip menu has dismissed, we should register the A11y ActionReplacingConnection for pip
         // as well, or it can't handle a11y focus and pip menu can't perform any action.
         onRegistrationChanged(menuState == MENU_STATE_NONE);
-        if (menuState != MENU_STATE_CLOSE) {
-            MetricsLoggerWrapper.logPictureInPictureMenuVisible(mContext, menuState == MENU_STATE_FULL);
+        if (menuState == MENU_STATE_NONE) {
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_HIDE_MENU);
+        } else if (menuState == MENU_STATE_FULL) {
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_SHOW_MENU);
         }
     }
 
@@ -884,6 +889,10 @@ public class PipTouchHandler {
      */
     public Rect getNormalBounds() {
         return mNormalBounds;
+    }
+
+    Rect getUserResizeBounds() {
+        return mPipResizeGestureHandler.getUserResizeBounds();
     }
 
     /**

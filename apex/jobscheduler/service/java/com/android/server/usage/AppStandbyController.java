@@ -455,9 +455,6 @@ public class AppStandbyController implements AppStandbyInternal {
 
             mSystemServicesReady = true;
 
-            // Offload to handler thread to avoid boot time impact.
-            mHandler.post(AppStandbyController.this::updatePowerWhitelistCache);
-
             boolean userFileExists;
             synchronized (mAppIdleLock) {
                 userFileExists = mAppIdleHistory.userFileExists(UserHandle.USER_SYSTEM);
@@ -474,7 +471,9 @@ public class AppStandbyController implements AppStandbyInternal {
             setChargingState(mInjector.isCharging());
 
             // Offload to handler thread after boot completed to avoid boot time impact. This means
-            // that headless system apps may be put in a lower bucket until boot has completed.
+            // that app standby buckets may be slightly out of date and headless system apps may be
+            // put in a lower bucket until boot has completed.
+            mHandler.post(AppStandbyController.this::updatePowerWhitelistCache);
             mHandler.post(this::loadHeadlessSystemAppCache);
         }
     }
@@ -1120,6 +1119,10 @@ public class AppStandbyController implements AppStandbyInternal {
 
             if (isDeviceProvisioningPackage(packageName)) {
                 return STANDBY_BUCKET_EXEMPTED;
+            }
+
+            if (mInjector.isWellbeingPackage(packageName)) {
+                return STANDBY_BUCKET_WORKING_SET;
             }
         }
 
@@ -1930,6 +1933,7 @@ public class AppStandbyController implements AppStandbyInternal {
          */
         @GuardedBy("mPowerWhitelistedApps")
         private final ArraySet<String> mPowerWhitelistedApps = new ArraySet<>();
+        private String mWellbeingApp = null;
 
         Injector(Context context, Looper looper) {
             mContext = context;
@@ -1963,6 +1967,9 @@ public class AppStandbyController implements AppStandbyInternal {
                 if (activityManager.isLowRamDevice() || ActivityManager.isSmallBatteryDevice()) {
                     mAutoRestrictedBucketDelayMs = 12 * ONE_HOUR;
                 }
+
+                final PackageManager packageManager = mContext.getPackageManager();
+                mWellbeingApp = packageManager.getWellbeingPackageName();
             }
             mBootPhase = phase;
         }
@@ -2005,6 +2012,14 @@ public class AppStandbyController implements AppStandbyInternal {
             synchronized (mPowerWhitelistedApps) {
                 return mPowerWhitelistedApps.contains(packageName);
             }
+        }
+
+        /**
+         * Returns {@code true} if the supplied package is the wellbeing app. Otherwise,
+         * returns {@code false}.
+         */
+        boolean isWellbeingPackage(String packageName) {
+            return mWellbeingApp != null && mWellbeingApp.equals(packageName);
         }
 
         void updatePowerWhitelistCache() {

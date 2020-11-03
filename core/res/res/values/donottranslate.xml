@@ -23,7 +23,7 @@
     <!-- @hide DO NOT TRANSLATE. Control aspect ratio of lock pattern -->
     <string name="lock_pattern_view_aspect">square</string>
     <!-- @hide DO NOT TRANSLATE. ICU pattern for "Mon, 14 January" -->
-    <string name="icu_abbrev_wday_month_day_no_year">eeeMMMMd</string>
+    <string name="icu_abbrev_wday_month_day_no_year">EEEMMMMd</string>
     <!-- @hide DO NOT TRANSLATE. date formatting pattern for system ui.-->
     <string name="system_ui_date_pattern">@string/icu_abbrev_wday_month_day_no_year</string>
     <!-- @hide DO NOT TRANSLATE Spans within this text are applied to style composing regions

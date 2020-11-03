@@ -330,10 +330,8 @@ public class DisplayRotation {
         // It's also not likely to rotate a TV screen.
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
-        final boolean forceDesktopMode =
-                mService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay;
         mDefaultFixedToUserRotation =
-                (isCar || isTv || mService.mIsPc || forceDesktopMode)
+                (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode())
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
                 // $ adb shell wm size reset

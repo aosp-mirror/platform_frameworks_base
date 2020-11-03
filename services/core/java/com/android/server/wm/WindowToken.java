@@ -172,6 +172,12 @@ class WindowToken extends WindowContainer<WindowState> {
                 }
             }
         }
+
+        /** The state may not only be used by self. Make sure to leave the influence by others. */
+        void disassociate(WindowToken token) {
+            mAssociatedTokens.remove(token);
+            mRotatedContainers.remove(token);
+        }
     }
 
     private class DeathRecipient implements IBinder.DeathRecipient {
@@ -531,7 +537,7 @@ class WindowToken extends WindowContainer<WindowState> {
     void applyFixedRotationTransform(DisplayInfo info, DisplayFrames displayFrames,
             Configuration config) {
         if (mFixedRotationTransformState != null) {
-            return;
+            mFixedRotationTransformState.disassociate(this);
         }
         mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
                 new Configuration(config), mDisplayContent.getRotation());
@@ -539,8 +545,7 @@ class WindowToken extends WindowContainer<WindowState> {
         mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames,
                 mFixedRotationTransformState.mInsetsState,
                 mFixedRotationTransformState.mBarContentFrames);
-        onConfigurationChanged(getParent().getConfiguration());
-        notifyFixedRotationTransform(true /* enabled */);
+        onFixedRotationStatePrepared();
     }
 
     /**
@@ -548,17 +553,34 @@ class WindowToken extends WindowContainer<WindowState> {
      * one. This takes the same effect as {@link #applyFixedRotationTransform}.
      */
     void linkFixedRotationTransform(WindowToken other) {
-        if (mFixedRotationTransformState != null) {
+        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
+        if (fixedRotationState == null || mFixedRotationTransformState == fixedRotationState) {
             return;
         }
-        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
-        if (fixedRotationState == null) {
-            return;
+        if (mFixedRotationTransformState != null) {
+            mFixedRotationTransformState.disassociate(this);
         }
         mFixedRotationTransformState = fixedRotationState;
         fixedRotationState.mAssociatedTokens.add(this);
-        onConfigurationChanged(getParent().getConfiguration());
+        onFixedRotationStatePrepared();
+    }
+
+    /**
+     * Makes the rotated states take effect for this window container and its client process.
+     * This should only be called when {@link #mFixedRotationTransformState} is non-null.
+     */
+    private void onFixedRotationStatePrepared() {
+        // Send the adjustment info first so when the client receives configuration change, it can
+        // get the rotated display metrics.
         notifyFixedRotationTransform(true /* enabled */);
+        // Resolve the rotated configuration.
+        onConfigurationChanged(getParent().getConfiguration());
+        final ActivityRecord r = asActivityRecord();
+        if (r != null && r.hasProcess()) {
+            // The application needs to be configured as in a rotated environment for compatibility.
+            // This registration will send the rotated configuration to its process.
+            r.app.registerActivityConfigurationListener(r);
+        }
     }
 
     /**
@@ -609,13 +631,10 @@ class WindowToken extends WindowContainer<WindowState> {
         // The state is cleared at the end, because it is used to indicate that other windows can
         // use seamless rotation when applying rotation to display.
         for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
-            state.mAssociatedTokens.get(i).cleanUpFixedRotationTransformState();
+            final WindowToken token = state.mAssociatedTokens.get(i);
+            token.mFixedRotationTransformState = null;
+            token.notifyFixedRotationTransform(false /* enabled */);
         }
-    }
-
-    private void cleanUpFixedRotationTransformState() {
-        mFixedRotationTransformState = null;
-        notifyFixedRotationTransform(false /* enabled */);
     }
 
     /** Notifies application side to enable or disable the rotation adjustment of display info. */
@@ -681,8 +700,9 @@ class WindowToken extends WindowContainer<WindowState> {
         if (!isFixedRotationTransforming()) {
             return null;
         }
-        return new FixedRotationAdjustments(mFixedRotationTransformState.mDisplayInfo.rotation,
-                mFixedRotationTransformState.mDisplayInfo.displayCutout);
+        final DisplayInfo displayInfo = mFixedRotationTransformState.mDisplayInfo;
+        return new FixedRotationAdjustments(displayInfo.rotation, displayInfo.appWidth,
+                displayInfo.appHeight, displayInfo.displayCutout);
     }
 
     @Override

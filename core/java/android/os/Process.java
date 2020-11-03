@@ -947,7 +947,7 @@ public class Process {
 
     /**
      * Enable or disable the freezer. When enable == false all frozen processes are unfrozen,
-     * but aren't removed from the freezer. Processes can still be added or removed
+     * but aren't removed from the freezer. While in this state, processes can be added or removed
      * by using setProcessFrozen, but they won't actually be frozen until the freezer is enabled
      * again. If enable == true the freezer is enabled again, and all processes
      * in the freezer (including the ones added while the freezer was disabled) are frozen.

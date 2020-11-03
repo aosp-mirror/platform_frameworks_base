@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -621,5 +622,9 @@ public abstract class PlayerBase {
                 "volume control");
         Log.w(className, "See the documentation of " + opName + " for what to use instead with " +
                 "android.media.AudioAttributes to qualify your playback use case");
+    }
+
+    protected String getCurrentOpPackageName() {
+        return TextUtils.emptyIfNull(ActivityThread.currentOpPackageName());
     }
 }

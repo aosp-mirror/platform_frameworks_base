@@ -144,7 +144,7 @@
     <protected-broadcast android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.UUID" />
     <protected-broadcast android:name="android.bluetooth.device.action.MAS_INSTANCE" />
-    <protected-broadcast android:name="android.bluetooth.action.ALIAS_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ALIAS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
     <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.ACL_CONNECTED" />
@@ -1340,7 +1340,7 @@
         android:priority="800" />
 
     <!-- Allows an application to access data from sensors that the user uses to
-         measure what is happening inside his/her body, such as heart rate.
+         measure what is happening inside their body, such as heart rate.
          <p>Protection level: dangerous -->
     <permission android:name="android.permission.BODY_SENSORS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -5035,6 +5035,10 @@
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|appPredictor" />
+
+    <!-- @hide Allows an application to create/destroy input consumer. -->
+    <permission android:name="android.permission.INPUT_CONSUMER"
+                android:protectionLevel="signature" />
 
     <!-- Attribution for Country Detector. -->
     <attribution android:tag="CountryDetector" android:label="@string/country_detector"/>

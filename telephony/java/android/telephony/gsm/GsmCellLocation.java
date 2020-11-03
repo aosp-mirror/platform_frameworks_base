@@ -55,7 +55,7 @@ public class GsmCellLocation extends CellLocation {
     }
 
     /**
-     * @return gsm cell id, -1 if unknown, 0xffff max legal value
+     * @return gsm cell id, -1 if unknown or invalid, 0xffff max legal value
      */
     public int getCid() {
         return mCid;

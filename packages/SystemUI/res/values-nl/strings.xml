@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Hervatten"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Annuleren"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Delen"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Verwijderen"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Schermopname geannuleerd"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Schermopname opgeslagen, tik om te bekijken"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Schermopname verwijderd"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Fout bij verwijderen van schermopname"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Kan rechten niet ophalen"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fout bij starten van schermopname"</string>
@@ -354,7 +352,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Invoer"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Gehoorapparaten"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hoortoestellen"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Inschakelen..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Helderheid"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch draaien"</string>
@@ -392,7 +390,7 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Kleuren omkeren"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modus voor kleurcorrectie"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Meer instellingen"</string>
-    <string name="quick_settings_done" msgid="2163641301648855793">"Gereed"</string>
+    <string name="quick_settings_done" msgid="2163641301648855793">"Klaar"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Verbonden"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Verbonden, batterij <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Verbinding maken…"</string>
@@ -433,7 +431,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppen"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Apparaat"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Veeg omhoog om te schakelen tussen apps"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Swipe omhoog om te schakelen tussen apps"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Sleep naar rechts om snel tussen apps te schakelen"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Overzicht in-/uitschakelen"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Opgeladen"</string>
@@ -452,12 +450,12 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Minder urgente meldingen onderaan"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Tik nog eens om te openen"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Veeg omhoog om te openen"</string>
-    <string name="keyguard_retry" msgid="886802522584053523">"Veeg omhoog om het opnieuw te proberen"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Swipe omhoog om te openen"</string>
+    <string name="keyguard_retry" msgid="886802522584053523">"Swipe omhoog om het opnieuw te proberen"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dit apparaat is eigendom van je organisatie"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="phone_hint" msgid="6682125338461375925">"Vegen voor telefoon"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"Vegen vanaf pictogram voor spraakassistent"</string>
+    <string name="phone_hint" msgid="6682125338461375925">"Swipen voor telefoon"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"Swipen vanaf icoon voor spraakassistent"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Vegen voor camera"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Helemaal stil. Hiermee worden schermlezers ook op stil gezet."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Helemaal stil"</string>
@@ -566,7 +564,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Vertrouwde gegevens openen"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Je beheerder heeft netwerkregistratie ingeschakeld, waarmee verkeer op je apparaat wordt bijgehouden.\n\nNeem contact op met je beheerder voor meer informatie."</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Je hebt een app toestemming gegeven voor het instellen van een VPN-verbinding.\n\nMet deze app kan je apparaat- en netwerkactiviteit worden gecontroleerd, inclusief e-mails, apps en websites."</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Je hebt een app rechten gegeven voor het instellen van een VPN-verbinding.\n\nMet deze app kan je apparaat- en netwerkactiviteit worden gecontroleerd, inclusief e-mails, apps en websites."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan je netwerkactiviteit controleren, inclusief e-mails, apps en websites.\n\nNeem contact op met je beheerder voor meer informatie.\n\nJe bent ook verbonden met een VPN, waarmee je netwerkactiviteit kan worden gecontroleerd."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Je bent verbonden met <xliff:g id="APPLICATION">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden."</string>
@@ -644,7 +642,7 @@
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth en wifi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Systeem-UI-tuner"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Percentage ingebouwde batterij weergeven"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Accupercentage weergeven in het pictogram op de statusbalk wanneer er niet wordt opgeladen"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Accupercentage weergeven in het icoon op de statusbalk wanneer er niet wordt opgeladen"</string>
     <string name="quick_settings" msgid="6211774484997470203">"Snelle instellingen"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusbalk"</string>
     <string name="overview" msgid="3522318590458536816">"Overzicht"</string>
@@ -694,7 +692,7 @@
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Deze meldingen worden zonder geluid weergegeven"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Deze meldingen stellen je op de hoogte"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Meestal sluit je deze meldingen. \nWil je ze blijven weergeven?"</string>
-    <string name="inline_done_button" msgid="6043094985588909584">"Gereed"</string>
+    <string name="inline_done_button" msgid="6043094985588909584">"Klaar"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Toepassen"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Deze meldingen blijven weergeven?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Meldingen stoppen"</string>
@@ -712,11 +710,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standaard"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubbel"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Geen geluid of trilling"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt op een lagere positie in het gedeelte met gesprekken weergegeven"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt lager in het gedeelte met gesprekken weergegeven"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gedeelte met gesprekken weergegeven, verschijnt als zwevende bubbel, geeft de profielfoto weer op het vergrendelscherm"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gespreksgedeelte weergegeven, verschijnt als zwevende bubbel, geeft profielfoto weer op vergrendelscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
@@ -741,7 +739,7 @@
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Meldingen van dit kanaal toestaan"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"Meer instellingen"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Aanpassen"</string>
-    <string name="notification_done" msgid="6215117625922713976">"Gereed"</string>
+    <string name="notification_done" msgid="6215117625922713976">"Klaar"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Ongedaan maken"</string>
     <string name="demote" msgid="6225813324237153980">"Deze melding markeren als geen gesprek"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Belangrijk gesprek"</string>
@@ -853,8 +851,8 @@
     <string name="accessibility_key" msgid="3471162841552818281">"Aangepaste navigatieknop"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Toetscode links"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Toetscode rechts"</string>
-    <string name="left_icon" msgid="5036278531966897006">"Pictogram links"</string>
-    <string name="right_icon" msgid="1103955040645237425">"Pictogram rechts"</string>
+    <string name="left_icon" msgid="5036278531966897006">"Icoon links"</string>
+    <string name="right_icon" msgid="1103955040645237425">"Icoon rechts"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Houd vast en sleep om tegels toe te voegen"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Houd vast en sleep om tegels opnieuw in te delen"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Sleep hier naartoe om te verwijderen"</string>
@@ -864,12 +862,12 @@
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"Uren, minuten en seconden weergeven"</item>
     <item msgid="1271006222031257266">"Uren en minuten weergeven (standaard)"</item>
-    <item msgid="6135970080453877218">"Dit pictogram niet weergeven"</item>
+    <item msgid="6135970080453877218">"Dit icoon niet weergeven"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"Percentage altijd weergeven"</item>
     <item msgid="3805744470661798712">"Percentage weergeven tijdens opladen (standaard)"</item>
-    <item msgid="8619482474544321778">"Dit pictogram niet weergeven"</item>
+    <item msgid="8619482474544321778">"Dit icoon niet weergeven"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Pictogrammen voor meldingen met lage prioriteit weergeven"</string>
     <string name="other" msgid="429768510980739978">"Overig"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Bovenste scherm 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Bovenste scherm 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Onderste scherm op volledig scherm"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Positie <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dubbeltik om te bewerken."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dubbeltik om toe te voegen."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> verplaatsen"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> verwijderen"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> toevoegen aan positie <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> verplaatsen naar positie <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"tegel verwijderen"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"tegel toevoegen aan einde"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Tegel verplaatsen"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tegel toevoegen"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Verplaatsen naar <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Toevoegen aan positie <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Positie <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor voor \'Snelle instellingen\'."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-melding: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"App werkt mogelijk niet met gesplitst scherm."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Teruggaan naar vorige"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Formaat aanpassen"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefoon uitgezet wegens hitte"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Je telefoon presteert nu weer zoals gebruikelijk"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Je telefoon functioneert nu weer zoals gebruikelijk.\nTik voor meer informatie"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Je telefoon was te warm en is uitgeschakeld om af te koelen. Je telefoon presteert nu weer zoals gebruikelijk.\n\nJe telefoon kan warm worden als je:\n	• bronintensieve apps gebruikt (zoals game-, video-, of navigatie-apps),\n	• grote bestanden up- of downloadt,\n	• je telefoon gebruikt bij hoge temperaturen."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Onderhoudsstappen bekijken"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"De telefoon wordt warm"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Bepaalde functies zijn beperkt terwijl de telefoon afkoelt"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Bepaalde functies zijn beperkt terwijl de telefoon afkoelt.\nTik voor meer informatie"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Je telefoon probeert automatisch af te koelen. Je kunt je telefoon nog steeds gebruiken, maar deze kan langzamer werken.\n\nZodra de telefoon is afgekoeld, werkt deze weer normaal."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Onderhoudsstappen bekijken"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Oplader loskoppelen"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Er is een probleem met het opladen van dit apparaat. Koppel de voedingsadapter los. Wees voorzichtig, want de kabel kan warm zijn."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Onderhoudsstappen bekijken"</string>
@@ -973,7 +974,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Mobiele data uitzetten?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Je hebt dan geen toegang meer tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen nog beschikbaar via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"je provider"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een rechtenverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> toestaan om segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weer te geven?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Deze kan informatie lezen van <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Deze kan acties uitvoeren in <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Instellingen"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> gebruikt je <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps gebruiken je <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" en "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"camera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"locatie"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"microfoon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensoren uit"</string>
     <string name="device_services" msgid="1549944177856658705">"Apparaatservices"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Geen titel"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Aanbevelingen laden"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"De huidige sessie verbergen."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Verbergen"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Sluiten"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Hervatten"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Instellingen"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>

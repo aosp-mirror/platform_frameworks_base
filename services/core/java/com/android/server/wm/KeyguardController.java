@@ -49,7 +49,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 
 import java.io.PrintWriter;
 
@@ -73,11 +72,14 @@ class KeyguardController {
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
+    private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
+
 
     KeyguardController(ActivityTaskManagerService service,
             ActivityStackSupervisor stackSupervisor) {
         mService = service;
         mStackSupervisor = stackSupervisor;
+        mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl("keyguard");
     }
 
     void setWindowManager(WindowManagerService windowManager) {
@@ -411,17 +413,17 @@ class KeyguardController {
 
     private void updateKeyguardSleepToken(int displayId) {
         final KeyguardDisplayState state = getDisplay(displayId);
-        if (isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken == null) {
-            state.acquiredSleepToken();
-        } else if (!isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken != null) {
-            state.releaseSleepToken();
+        if (isKeyguardUnoccludedOrAodShowing(displayId)) {
+            state.mSleepTokenAcquirer.acquire(displayId);
+        } else if (!isKeyguardUnoccludedOrAodShowing(displayId)) {
+            state.mSleepTokenAcquirer.release(displayId);
         }
     }
 
     private KeyguardDisplayState getDisplay(int displayId) {
         KeyguardDisplayState state = mDisplayStates.get(displayId);
         if (state == null) {
-            state = new KeyguardDisplayState(mService, displayId);
+            state = new KeyguardDisplayState(mService, displayId, mSleepTokenAcquirer);
             mDisplayStates.append(displayId, state);
         }
         return state;
@@ -442,29 +444,18 @@ class KeyguardController {
         private ActivityRecord mDismissingKeyguardActivity;
         private boolean mRequestDismissKeyguard;
         private final ActivityTaskManagerService mService;
-        private SleepToken mSleepToken;
+        private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
 
-        KeyguardDisplayState(ActivityTaskManagerService service, int displayId) {
+        KeyguardDisplayState(ActivityTaskManagerService service, int displayId,
+                ActivityTaskManagerInternal.SleepTokenAcquirer acquirer) {
             mService = service;
             mDisplayId = displayId;
+            mSleepTokenAcquirer = acquirer;
         }
 
         void onRemoved() {
             mDismissingKeyguardActivity = null;
-            releaseSleepToken();
-        }
-
-        void acquiredSleepToken() {
-            if (mSleepToken == null) {
-                mSleepToken = mService.acquireSleepToken("keyguard", mDisplayId);
-            }
-        }
-
-        void releaseSleepToken() {
-            if (mSleepToken != null) {
-                mSleepToken.release();
-                mSleepToken = null;
-            }
+            mSleepTokenAcquirer.release(mDisplayId);
         }
 
         void visibilitiesUpdated(KeyguardController controller, DisplayContent display) {

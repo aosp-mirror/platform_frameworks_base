@@ -1937,7 +1937,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // Context#getPackageName() for getting package name that matches with the PID/UID,
                 // but it doesn't tell which package has created the MediaController, so useless.
                 return hasMediaControlPermission(controllerPid, controllerUid)
-                        || hasEnabledNotificationListener(userId, controllerPackageName);
+                        || hasEnabledNotificationListener(
+                                userId, controllerPackageName, controllerUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2001,29 +2002,29 @@ public class MediaSessionService extends SystemService implements Monitor {
             return resolvedUserId;
         }
 
-        private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName)
-                throws RemoteException {
-            // You may not access another user's content as an enabled listener.
-            final int userId = UserHandle.getUserId(resolvedUserId);
-            if (resolvedUserId != userId) {
+        private boolean hasEnabledNotificationListener(int callingUserId,
+                String controllerPackageName, int controllerUid) throws RemoteException {
+            int controllerUserId = UserHandle.getUserHandleForUid(controllerUid).getIdentifier();
+            if (callingUserId != controllerUserId) {
+                // Enabled notification listener only works within the same user.
                 return false;
             }
 
             // TODO(jaewan): (Post-P) Propose NotificationManager#hasEnabledNotificationListener(
             //               String pkgName) to notification team for optimization
             final List<ComponentName> enabledNotificationListeners =
-                    mNotificationManager.getEnabledNotificationListeners(userId);
+                    mNotificationManager.getEnabledNotificationListeners(controllerUserId);
             if (enabledNotificationListeners != null) {
                 for (int i = 0; i < enabledNotificationListeners.size(); i++) {
-                    if (TextUtils.equals(packageName,
+                    if (TextUtils.equals(controllerPackageName,
                             enabledNotificationListeners.get(i).getPackageName())) {
                         return true;
                     }
                 }
             }
             if (DEBUG) {
-                Log.d(TAG, packageName + " (uid=" + resolvedUserId + ") doesn't have an enabled "
-                        + "notification listener");
+                Log.d(TAG, controllerPackageName + " (uid=" + controllerUid
+                        + ") doesn't have an enabled notification listener");
             }
             return false;
         }

@@ -26,6 +26,8 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.utils.leaks.FakeBatteryController;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,17 +39,19 @@ import java.util.List;
 @RunWith(AndroidTestingRunner.class)
 public class FalsingDataProviderTest extends ClassifierTest {
 
+    private FakeBatteryController mFakeBatteryController;
     private FalsingDataProvider mDataProvider;
 
     @Before
     public void setup() {
         super.setup();
+        mFakeBatteryController = new FakeBatteryController(getLeakCheck());
         DisplayMetrics displayMetrics = new DisplayMetrics();
         displayMetrics.xdpi = 100;
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(displayMetrics);
+        mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController);
     }
 
     @After
@@ -245,5 +249,13 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(appendMoveEvent(-3, 10));
         assertThat(mDataProvider.isUp(), is(false));
         mDataProvider.onSessionEnd();
+    }
+
+    @Test
+    public void test_isWirelessCharging() {
+        assertThat(mDataProvider.isWirelessCharging(), is(false));
+
+        mFakeBatteryController.setWirelessCharging(true);
+        assertThat(mDataProvider.isWirelessCharging(), is(true));
     }
 }

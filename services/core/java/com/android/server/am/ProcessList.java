@@ -2908,25 +2908,26 @@ public final class ProcessList {
         if ((expecting == null) || (old == expecting)) {
             mProcessNames.remove(name, uid);
         }
-        if (old != null && old.uidRecord != null) {
-            old.uidRecord.numProcs--;
-            old.uidRecord.procRecords.remove(old);
-            if (old.uidRecord.numProcs == 0) {
+        final ProcessRecord record = expecting != null ? expecting : old;
+        if (record != null && record.uidRecord != null) {
+            final UidRecord uidRecord = record.uidRecord;
+            uidRecord.numProcs--;
+            uidRecord.procRecords.remove(record);
+            if (uidRecord.numProcs == 0) {
                 // No more processes using this uid, tell clients it is gone.
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                        "No more processes in " + old.uidRecord);
-                mService.enqueueUidChangeLocked(old.uidRecord, -1, UidRecord.CHANGE_GONE);
+                        "No more processes in " + uidRecord);
+                mService.enqueueUidChangeLocked(uidRecord, -1, UidRecord.CHANGE_GONE);
                 EventLogTags.writeAmUidStopped(uid);
                 mActiveUids.remove(uid);
                 mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT,
                         ActivityManager.PROCESS_CAPABILITY_NONE);
             }
-            old.uidRecord = null;
+            record.uidRecord = null;
         }
         mIsolatedProcesses.remove(uid);
         mGlobalIsolatedUids.freeIsolatedUidLocked(uid);
         // Remove the (expected) ProcessRecord from the app zygote
-        final ProcessRecord record = expecting != null ? expecting : old;
         if (record != null && record.appZygote) {
             removeProcessFromAppZygoteLocked(record);
         }

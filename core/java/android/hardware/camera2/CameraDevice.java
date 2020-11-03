@@ -683,6 +683,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *<p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as described by
      * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
      * following guaranteed streams (when streaming concurrently with other devices)</p>
+     * <p> Note: The sizes mentioned for these concurrent streams are the maximum sizes guaranteed
+     * to be supported. Sizes smaller than these, obtained by {@link StreamConfigurationMap#getOutputSizes} for a particular format, are supported as well. </p>
      *
      * <table>
      * <tr><th colspan="5">Concurrent stream guaranteed configurations</th></tr>
@@ -696,7 +698,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation.
+     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation. </p>
      *
      * <p> For guaranteed concurrent stream configurations:</p>
      * <p> sVGA refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or

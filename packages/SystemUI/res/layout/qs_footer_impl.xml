@@ -62,7 +62,7 @@
                 android:gravity="center_vertical"
                 android:focusable="true"
                 android:singleLine="true"
-                android:ellipsize="end"
+                android:ellipsize="marquee"
                 android:textAppearance="@style/TextAppearance.QS.Status"
                 android:layout_marginEnd="4dp"
                 android:visibility="gone"/>

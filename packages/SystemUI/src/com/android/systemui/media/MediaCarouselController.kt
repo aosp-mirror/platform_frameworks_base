@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -22,6 +23,7 @@ import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
+import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -41,7 +43,7 @@ class MediaCarouselController @Inject constructor(
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val activityStarter: ActivityStarter,
     @Main executor: DelayableExecutor,
-    mediaManager: MediaDataFilter,
+    private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager
 ) {
@@ -103,13 +105,12 @@ class MediaCarouselController @Inject constructor(
     private val mediaCarousel: MediaScrollView
     private val mediaCarouselScrollHandler: MediaCarouselScrollHandler
     val mediaFrame: ViewGroup
-    val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
     private lateinit var settingsButton: View
-    private val mediaData: MutableMap<String, MediaData> = mutableMapOf()
     private val mediaContent: ViewGroup
     private val pageIndicator: PageIndicator
     private val visualStabilityCallback: VisualStabilityManager.Callback
     private var needsReordering: Boolean = false
+    private var keysNeedRemoval = mutableSetOf<String>()
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -123,7 +124,7 @@ class MediaCarouselController @Inject constructor(
         set(value) {
             if (field != value) {
                 field = value
-                for (player in mediaPlayers.values) {
+                for (player in MediaPlayerData.players()) {
                     player.setListening(field)
                 }
             }
@@ -135,6 +136,7 @@ class MediaCarouselController @Inject constructor(
         }
 
         override fun onOverlayChanged() {
+            recreatePlayers()
             inflateSettingsButton()
         }
 
@@ -150,7 +152,7 @@ class MediaCarouselController @Inject constructor(
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
         mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
                 executor, mediaManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
-                falsingManager)
+                this::closeGuts, falsingManager)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -160,6 +162,10 @@ class MediaCarouselController @Inject constructor(
                 needsReordering = false
                 reorderAllPlayers()
             }
+
+            keysNeedRemoval.forEach { removePlayer(it) }
+            keysNeedRemoval.clear()
+
             // Let's reset our scroll position
             mediaCarouselScrollHandler.scrollToStart()
         }
@@ -167,20 +173,23 @@ class MediaCarouselController @Inject constructor(
                 true /* persistent */)
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-                oldKey?.let { mediaData.remove(it) }
-                if (!data.active && !Utils.useMediaResumption(context)) {
-                    // This view is inactive, let's remove this! This happens e.g when dismissing /
-                    // timing out a view. We still have the data around because resumption could
-                    // be on, but we should save the resources and release this.
-                    onMediaDataRemoved(key)
+                addOrUpdatePlayer(key, oldKey, data)
+                val canRemove = data.isPlaying?.let { !it } ?: data.isClearable && !data.active
+                if (canRemove && !Utils.useMediaResumption(context)) {
+                    // This view isn't playing, let's remove this! This happens e.g when
+                    // dismissing/timing out a view. We still have the data around because
+                    // resumption could be on, but we should save the resources and release this.
+                    if (visualStabilityManager.isReorderingAllowed) {
+                        onMediaDataRemoved(key)
+                    } else {
+                        keysNeedRemoval.add(key)
+                    }
                 } else {
-                    mediaData.put(key, data)
-                    addOrUpdatePlayer(key, oldKey, data)
+                    keysNeedRemoval.remove(key)
                 }
             }
 
             override fun onMediaDataRemoved(key: String) {
-                mediaData.remove(key)
                 removePlayer(key)
             }
         })
@@ -223,53 +232,36 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun reorderAllPlayers() {
-        for (mediaPlayer in mediaPlayers.values) {
-            val view = mediaPlayer.view?.player
-            if (mediaPlayer.isPlaying && mediaContent.indexOfChild(view) != 0) {
-                mediaContent.removeView(view)
-                mediaContent.addView(view, 0)
+        mediaContent.removeAllViews()
+        for (mediaPlayer in MediaPlayerData.players()) {
+            mediaPlayer.view?.let {
+                mediaContent.addView(it.player)
             }
         }
         mediaCarouselScrollHandler.onPlayersChanged()
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
-        // If the key was changed, update entry
-        val oldData = mediaPlayers[oldKey]
-        if (oldData != null) {
-            val oldData = mediaPlayers.remove(oldKey)
-            mediaPlayers.put(key, oldData!!)?.let {
-                Log.wtf(TAG, "new key $key already exists when migrating from $oldKey")
-            }
-        }
-        var existingPlayer = mediaPlayers[key]
+        val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
         if (existingPlayer == null) {
-            existingPlayer = mediaControlPanelFactory.get()
-            existingPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context),
-                    mediaContent))
-            existingPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
-            mediaPlayers[key] = existingPlayer
+            var newPlayer = mediaControlPanelFactory.get()
+            newPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context), mediaContent))
+            newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
-            existingPlayer.view?.player?.setLayoutParams(lp)
-            existingPlayer.bind(data)
-            existingPlayer.setListening(currentlyExpanded)
-            updatePlayerToState(existingPlayer, noAnimation = true)
-            if (existingPlayer.isPlaying) {
-                mediaContent.addView(existingPlayer.view?.player, 0)
-            } else {
-                mediaContent.addView(existingPlayer.view?.player)
-            }
+            newPlayer.view?.player?.setLayoutParams(lp)
+            newPlayer.bind(data, key)
+            newPlayer.setListening(currentlyExpanded)
+            MediaPlayerData.addMediaPlayer(key, data, newPlayer)
+            updatePlayerToState(newPlayer, noAnimation = true)
+            reorderAllPlayers()
         } else {
-            existingPlayer.bind(data)
-            if (existingPlayer.isPlaying &&
-                    mediaContent.indexOfChild(existingPlayer.view?.player) != 0) {
-                if (visualStabilityManager.isReorderingAllowed) {
-                    mediaContent.removeView(existingPlayer.view?.player)
-                    mediaContent.addView(existingPlayer.view?.player, 0)
-                } else {
-                    needsReordering = true
-                }
+            existingPlayer.bind(data, key)
+            MediaPlayerData.addMediaPlayer(key, data, existingPlayer)
+            if (visualStabilityManager.isReorderingAllowed) {
+                reorderAllPlayers()
+            } else {
+                needsReordering = true
             }
         }
         updatePageIndicator()
@@ -277,29 +269,30 @@ class MediaCarouselController @Inject constructor(
         mediaCarousel.requiresRemeasuring = true
         // Check postcondition: mediaContent should have the same number of children as there are
         // elements in mediaPlayers.
-        if (mediaPlayers.size != mediaContent.childCount) {
+        if (MediaPlayerData.players().size != mediaContent.childCount) {
             Log.wtf(TAG, "Size of players list and number of views in carousel are out of sync")
         }
     }
 
-    private fun removePlayer(key: String) {
-        val removed = mediaPlayers.remove(key)
+    private fun removePlayer(key: String, dismissMediaData: Boolean = true) {
+        val removed = MediaPlayerData.removeMediaPlayer(key)
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
             mediaContent.removeView(removed.view?.player)
             removed.onDestroy()
             mediaCarouselScrollHandler.onPlayersChanged()
             updatePageIndicator()
+
+            if (dismissMediaData) {
+                // Inform the media manager of a potentially late dismissal
+                mediaManager.dismissMediaData(key, 0L)
+            }
         }
     }
 
     private fun recreatePlayers() {
-        // Note that this will scramble the order of players. Actively playing sessions will, at
-        // least, still be put in the front. If we want to maintain order, then more work is
-        // needed.
-        mediaData.forEach {
-            key, data ->
-            removePlayer(key)
+        MediaPlayerData.mediaData().forEach { (key, data) ->
+            removePlayer(key, dismissMediaData = false)
             addOrUpdatePlayer(key = key, oldKey = null, data = data)
         }
     }
@@ -337,7 +330,7 @@ class MediaCarouselController @Inject constructor(
             currentStartLocation = startLocation
             currentEndLocation = endLocation
             currentTransitionProgress = progress
-            for (mediaPlayer in mediaPlayers.values) {
+            for (mediaPlayer in MediaPlayerData.players()) {
                 updatePlayerToState(mediaPlayer, immediately)
             }
             maybeResetSettingsCog()
@@ -386,7 +379,7 @@ class MediaCarouselController @Inject constructor(
     private fun updateCarouselDimensions() {
         var width = 0
         var height = 0
-        for (mediaPlayer in mediaPlayers.values) {
+        for (mediaPlayer in MediaPlayerData.players()) {
             val controller = mediaPlayer.mediaViewController
             // When transitioning the view to gone, the view gets smaller, but the translation
             // Doesn't, let's add the translation
@@ -448,7 +441,7 @@ class MediaCarouselController @Inject constructor(
             this.desiredLocation = desiredLocation
             this.desiredHostState = it
             currentlyExpanded = it.expansion > 0
-            for (mediaPlayer in mediaPlayers.values) {
+            for (mediaPlayer in MediaPlayerData.players()) {
                 if (animate) {
                     mediaPlayer.mediaViewController.animatePendingStateChange(
                             duration = duration,
@@ -466,6 +459,12 @@ class MediaCarouselController @Inject constructor(
                 }
             }
             updateCarouselSize()
+        }
+    }
+
+    fun closeGuts() {
+        MediaPlayerData.players().forEach {
+            it.closeGuts(true)
         }
     }
 
@@ -489,5 +488,51 @@ class MediaCarouselController @Inject constructor(
             // Update the padding after layout; view widths are used in RTL to calculate scrollX
             mediaCarouselScrollHandler.playerWidthPlusPadding = playerWidthPlusPadding
         }
+    }
+}
+
+@VisibleForTesting
+internal object MediaPlayerData {
+    private data class MediaSortKey(
+        val data: MediaData,
+        val updateTime: Long = 0
+    )
+
+    private val comparator =
+        compareByDescending<MediaSortKey> { it.data.isPlaying }
+        .thenByDescending { it.data.isLocalSession }
+        .thenByDescending { !it.data.resumption }
+        .thenByDescending { it.updateTime }
+
+    private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
+    private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()
+
+    fun addMediaPlayer(key: String, data: MediaData, player: MediaControlPanel) {
+        removeMediaPlayer(key)
+        val sortKey = MediaSortKey(data, System.currentTimeMillis())
+        mediaData.put(key, sortKey)
+        mediaPlayers.put(sortKey, player)
+    }
+
+    fun getMediaPlayer(key: String, oldKey: String?): MediaControlPanel? {
+        // If the key was changed, update entry
+        oldKey?.let {
+            if (it != key) {
+                mediaData.remove(it)?.let { sortKey -> mediaData.put(key, sortKey) }
+            }
+        }
+        return mediaData.get(key)?.let { mediaPlayers.get(it) }
+    }
+
+    fun removeMediaPlayer(key: String) = mediaData.remove(key)?.let { mediaPlayers.remove(it) }
+
+    fun mediaData() = mediaData.entries.map { e -> Pair(e.key, e.value.data) }
+
+    fun players() = mediaPlayers.values
+
+    @VisibleForTesting
+    fun clear() {
+        mediaData.clear()
+        mediaPlayers.clear()
     }
 }

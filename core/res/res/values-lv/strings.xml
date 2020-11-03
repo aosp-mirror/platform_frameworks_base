@@ -832,7 +832,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Nospiediet Izvēlne, lai atbloķētu, vai veiciet ārkārtas zvanu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Lai atbloķētu, nospiediet vienumu Izvēlne."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Zīmējiet kombināciju, lai atbloķētu."</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Ārkārtas situācija"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Ārkārtas izsaukums"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Atpakaļ pie zvana"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Pareizi!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Mēģināt vēlreiz"</string>
@@ -1815,8 +1815,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Labi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas darbības fonā, noteikti vizuālie efekti un citas funkcijas, piemēram, “Ok Google”.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas darbības fonā, noteikti vizuālie efekti un citas funkcijas, piemēram, “Ok Google”."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Lai paildzinātu akumulatora darbības laiku, ieslēdzot akumulatora enerģijas taupīšanas režīmu, tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas fonā veiktās darbības, daži vizuālie efekti un citas funkcijas, piemēram, “Ok Google”.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Lai paildzinātu akumulatora darbības laiku, ieslēdzot akumulatora enerģijas taupīšanas režīmu, tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas fonā veiktās darbības, daži vizuālie efekti un citas funkcijas, piemēram, “Ok Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ieslēgt"</string>
@@ -2032,9 +2032,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"rāda pāri citām lietotnēm jūsu ekrānā"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora jaudas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akumulatora jaudas taupīšanas režīms"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akumulatora jaudas taupīšanas režīms ir izslēgts"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akumulatora enerģijas taupīšanas režīms"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akumulatora enerģijas taupīšanas režīms ir izslēgts"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Tālruņa uzlādes līmenis ir pietiekams. Funkcijas vairs netiek ierobežotas."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Planšetdatora uzlādes līmenis ir pietiekams. Funkcijas vairs netiek ierobežotas."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Ierīces uzlādes līmenis ir pietiekams. Funkcijas vairs netiek ierobežotas."</string>

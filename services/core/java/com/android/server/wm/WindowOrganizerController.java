@@ -335,7 +335,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     }
                 }
             } else {
-                throw new RuntimeException("Reparenting leaf Tasks is not supported now.");
+                throw new RuntimeException("Reparenting leaf Tasks is not supported now. " + task);
             }
         } else {
             // Ugh, of course ActivityStack has its own special reorder logic...

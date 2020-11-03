@@ -48,6 +48,9 @@ java_test_host {
     name: "MultiUserRollbackTest",
     srcs: ["MultiUserRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
+    static_libs: [
+        "frameworks-base-hostutils",
+    ],
     test_suites: ["general-tests"],
     test_config: "MultiUserRollbackTest.xml",
 }

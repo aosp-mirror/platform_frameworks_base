@@ -221,6 +221,14 @@ public class UserInfo implements Parcelable {
     public boolean preCreated;
 
     /**
+     * When {@code true}, it indicates this user was created by converting a {@link #preCreated}
+     * user.
+     *
+     * <p><b>NOTE: </b>only used for debugging purposes, it's not set when marshalled to a parcel.
+     */
+    public boolean convertedFromPreCreated;
+
+    /**
      * Creates a UserInfo whose user type is determined automatically by the flags according to
      * {@link #getDefaultUserType}; can only be used for user types handled there.
      */
@@ -413,6 +421,7 @@ public class UserInfo implements Parcelable {
         lastLoggedInFingerprint = orig.lastLoggedInFingerprint;
         partial = orig.partial;
         preCreated = orig.preCreated;
+        convertedFromPreCreated = orig.convertedFromPreCreated;
         profileGroupId = orig.profileGroupId;
         restrictedProfileParentId = orig.restrictedProfileParentId;
         guestToRemove = orig.guestToRemove;
@@ -440,6 +449,7 @@ public class UserInfo implements Parcelable {
                 + ", type=" + userType
                 + ", flags=" + flagsToString(flags)
                 + (preCreated ? " (pre-created)" : "")
+                + (convertedFromPreCreated ? " (converted)" : "")
                 + (partial ? " (partial)" : "")
                 + "]";
     }

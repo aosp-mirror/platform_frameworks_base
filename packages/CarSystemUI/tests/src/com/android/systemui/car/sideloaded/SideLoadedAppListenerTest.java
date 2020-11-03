@@ -35,6 +35,7 @@ import android.view.DisplayInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.car.CarSystemUiTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
@@ -218,7 +220,7 @@ public class SideLoadedAppListenerTest extends SysuiTestCase {
 
         verify(mSideLoadedAppStateController, never()).onUnsafeTaskCreatedOnDisplay(any());
         verify(mSideLoadedAppStateController).onSafeTaskDisplayedOnDisplay(display1);
-        verify(mSideLoadedAppStateController, never()).onUnsafeTaskDisplayedOnDisplay(display2);
+        verify(mSideLoadedAppStateController).onUnsafeTaskDisplayedOnDisplay(display2);
         verify(mSideLoadedAppStateController).onSafeTaskDisplayedOnDisplay(display3);
         verify(mSideLoadedAppStateController, never()).onUnsafeTaskDisplayedOnDisplay(display1);
         verify(mSideLoadedAppStateController).onUnsafeTaskDisplayedOnDisplay(display2);

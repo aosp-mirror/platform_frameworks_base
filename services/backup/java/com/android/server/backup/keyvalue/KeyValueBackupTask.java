@@ -649,16 +649,33 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mReporter.onStartPackageBackup(PM_PACKAGE);
         mCurrentPackage = new PackageInfo();
         mCurrentPackage.packageName = PM_PACKAGE;
-
         try {
-            extractPmAgentData(mCurrentPackage);
+            // If we can't even extractPmAgentData(), then we treat the local state as
+            // compromised, just in case. This means that we will clear data and will
+            // start from a clean slate in the next attempt. It's not clear whether that's
+            // the right thing to do, but matches what we have historically done.
+            try {
+                extractPmAgentData(mCurrentPackage);
+            } catch (TaskException e) {
+                throw TaskException.stateCompromised(e); // force stateCompromised
+            }
+            // During sendDataToTransport, we generally trust any thrown TaskException
+            // about whether stateCompromised because those are likely transient;
+            // clearing state for those would have the potential to lead to cascading
+            // failures, as discussed in http://b/144030477.
+            // For specific status codes (e.g. TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED),
+            // cleanUpAgentForTransportStatus() or theoretically handleTransportStatus()
+            // still have the opportunity to perform additional clean-up tasks.
             int status = sendDataToTransport(mCurrentPackage);
             cleanUpAgentForTransportStatus(status);
         } catch (AgentException | TaskException e) {
             mReporter.onExtractPmAgentDataError(e);
             cleanUpAgentForError(e);
-            // PM agent failure is task failure.
-            throw TaskException.stateCompromised(e);
+            if (e instanceof TaskException) {
+                throw (TaskException) e;
+            } else {
+                throw TaskException.stateCompromised(e); // PM agent failure is task failure.
+            }
         }
     }
 

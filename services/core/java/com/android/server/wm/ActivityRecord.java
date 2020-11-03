@@ -70,7 +70,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.PERSIST_ACROSS_REBOOTS;
 import static android.content.pm.ActivityInfo.PERSIST_ROOT_ONLY;
@@ -1671,7 +1671,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static int getLockTaskLaunchMode(ActivityInfo aInfo, @Nullable ActivityOptions options) {
         int lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
-        if (aInfo.applicationInfo.isPrivilegedApp()
+        // Non-priv apps are not allowed to use always or never, fall back to default
+        if (!aInfo.applicationInfo.isPrivilegedApp()
                 && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
                 || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
             lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
@@ -1679,7 +1680,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (options != null) {
             final boolean useLockTask = options.getLockTaskMode();
             if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
-                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
             }
         }
         return lockTaskLaunchMode;
@@ -2543,7 +2544,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityStack stack = getRootTask();
         final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
-                && stack.isFocusedStackOnDisplay();
+                && stack.isFocusedStackOnDisplay()
+                // Do not adjust focus task because the task will be reused to launch new activity.
+                && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
@@ -4732,6 +4735,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
             }
             setState(STARTED, "makeActiveIfNeeded");
+
+            // Update process info while making an activity from invisible to visible, to make
+            // sure the process state is updated to foreground.
+            if (app != null) {
+                app.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                        true /* activityChange */, true /* updateOomAdj */,
+                        true /* addPendingTopUid */);
+            }
+
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                         StartActivityItem.obtain());

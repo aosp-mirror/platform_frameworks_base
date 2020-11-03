@@ -186,14 +186,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     // Last configuration that was reported to the process.
     private final Configuration mLastReportedConfiguration = new Configuration();
-    // Configuration that is waiting to be dispatched to the process.
-    private Configuration mPendingConfiguration;
-    private final Configuration mNewOverrideConfig = new Configuration();
+    /** Whether the process configuration is waiting to be dispatched to the process. */
+    private boolean mHasPendingConfigurationChange;
     // Registered display id as a listener to override config change
     private int mDisplayId;
     private ActivityRecord mConfigActivityRecord;
     // Whether the activity config override is allowed for this process.
     private volatile boolean mIsActivityConfigOverrideAllowed = true;
+    /** Non-zero to pause dispatching process configuration change. */
+    private int mPauseConfigurationDispatchCount;
+
     /**
      * Activities that hosts some UI drawn by the current process. The activities live
      * in another process. This is used to check if the process is currently showing anything
@@ -1116,8 +1118,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         onMergedOverrideConfigurationChanged(Configuration.EMPTY);
     }
 
-    private void registerActivityConfigurationListener(ActivityRecord activityRecord) {
-        if (activityRecord == null || activityRecord.containsListener(this)) {
+    void registerActivityConfigurationListener(ActivityRecord activityRecord) {
+        if (activityRecord == null || activityRecord.containsListener(this)
+                // Check for the caller from outside of this class.
+                || !mIsActivityConfigOverrideAllowed) {
             return;
         }
         // A process can only register to one activityRecord to listen to the override configuration
@@ -1168,11 +1172,26 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @Override
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
+    }
+
+    @Override
     public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
+        super.onRequestedOverrideConfigurationChanged(mergedOverrideConfig);
+    }
+
+    @Override
+    void resolveOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveOverrideConfiguration(newParentConfig);
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         // Make sure that we don't accidentally override the activity type.
-        mNewOverrideConfig.setTo(mergedOverrideConfig);
-        mNewOverrideConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
-        super.onRequestedOverrideConfigurationChanged(mNewOverrideConfig);
+        resolvedConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        // Activity has an independent ActivityRecord#mConfigurationSeq. If this process registers
+        // activity configuration, its config seq shouldn't go backwards by activity configuration.
+        // Otherwise if other places send wpc.getConfiguration() to client, the configuration may
+        // be ignored due to the seq is older.
+        resolvedConfig.seq = newParentConfig.seq;
     }
 
     private void updateConfiguration() {
@@ -1190,11 +1209,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (mListener.isCached()) {
             // This process is in a cached state. We will delay delivering the config change to the
             // process until the process is no longer cached.
-            if (mPendingConfiguration == null) {
-                mPendingConfiguration = new Configuration(config);
-            } else {
-                mPendingConfiguration.setTo(config);
-            }
+            mHasPendingConfigurationChange = true;
             return;
         }
 
@@ -1202,6 +1217,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     private void dispatchConfigurationChange(Configuration config) {
+        if (mPauseConfigurationDispatchCount > 0) {
+            mHasPendingConfigurationChange = true;
+            return;
+        }
+        mHasPendingConfigurationChange = false;
         if (mThread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
@@ -1228,12 +1248,36 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    private void setLastReportedConfiguration(Configuration config) {
+    void setLastReportedConfiguration(Configuration config) {
         mLastReportedConfiguration.setTo(config);
     }
 
     Configuration getLastReportedConfiguration() {
         return mLastReportedConfiguration;
+    }
+
+    void pauseConfigurationDispatch() {
+        mPauseConfigurationDispatchCount++;
+    }
+
+    void resumeConfigurationDispatch() {
+        mPauseConfigurationDispatchCount--;
+    }
+
+    /**
+     * This is called for sending {@link android.app.servertransaction.LaunchActivityItem}.
+     * The caller must call {@link #setLastReportedConfiguration} if the delivered configuration
+     * is newer.
+     */
+    Configuration prepareConfigurationForLaunchingActivity() {
+        final Configuration config = getConfiguration();
+        if (mHasPendingConfigurationChange) {
+            mHasPendingConfigurationChange = false;
+            // The global configuration may not change, so the client process may have the same
+            // config seq. This increment ensures that the client won't ignore the configuration.
+            config.seq = mAtm.increaseConfigurationSeqLocked();
+        }
+        return config;
     }
 
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
@@ -1327,10 +1371,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public void onProcCachedStateChanged(boolean isCached) {
         if (!isCached) {
             synchronized (mAtm.mGlobalLockWithoutBoost) {
-                if (mPendingConfiguration != null) {
-                    final Configuration config = mPendingConfiguration;
-                    mPendingConfiguration = null;
-                    dispatchConfigurationChange(config);
+                if (mHasPendingConfigurationChange) {
+                    dispatchConfigurationChange(getConfiguration());
                 }
             }
         }

@@ -86,7 +86,7 @@ class GnssNetworkConnectivityHandler {
 
     // Default time limit in milliseconds for the ConnectivityManager to find a suitable
     // network with SUPL connectivity or report an error.
-    private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 10 * 1000;
+    private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 20 * 1000;
 
     private static final int HASH_MAP_INITIAL_CAPACITY_TO_TRACK_CONNECTED_NETWORKS = 5;
 

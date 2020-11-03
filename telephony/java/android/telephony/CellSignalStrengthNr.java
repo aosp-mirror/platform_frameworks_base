@@ -54,12 +54,12 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     };
 
     // Lifted from Default carrier configs and max range of SSRSRQ
-    // Boundaries: [-20 dB, -3 dB]
+    // Boundaries: [-43 dB, 20 dB]
     private int[] mSsRsrqThresholds = new int[] {
-            -16, /* SIGNAL_STRENGTH_POOR */
-            -12, /* SIGNAL_STRENGTH_MODERATE */
-            -9, /* SIGNAL_STRENGTH_GOOD */
-            -6  /* SIGNAL_STRENGTH_GREAT */
+            -31, /* SIGNAL_STRENGTH_POOR */
+            -19, /* SIGNAL_STRENGTH_MODERATE */
+            -7, /* SIGNAL_STRENGTH_GOOD */
+            6  /* SIGNAL_STRENGTH_GREAT */
     };
 
     // Lifted from Default carrier configs and max range of SSSINR
@@ -149,7 +149,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mCsiRsrq = inRangeOrUnavailable(csiRsrq, -20, -3);
         mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
         mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
-        mSsRsrq = inRangeOrUnavailable(ssRsrq, -20, -3);
+        mSsRsrq = inRangeOrUnavailable(ssRsrq, -43, 20);
         mSsSinr = inRangeOrUnavailable(ssSinr, -23, 40);
         updateLevel(null, null);
     }
@@ -183,8 +183,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * Reference: 3GPP TS 38.215.
-     * Range: -20 dB to -3 dB.
+     * Reference: 3GPP TS 38.215; 3GPP TS 38.133 section 10
+     * Range: -43 dB to 20 dB.
      * @return SS reference signal received quality, {@link CellInfo#UNAVAILABLE} means unreported
      * value.
      */

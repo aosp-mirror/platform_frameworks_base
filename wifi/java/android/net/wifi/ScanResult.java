@@ -581,12 +581,18 @@ public final class ScanResult implements Parcelable {
      * 6 GHz band frequency of first channel in MHz
      * @hide
      */
-    public static final int BAND_6_GHZ_START_FREQ_MHZ = 5945;
+    public static final int BAND_6_GHZ_START_FREQ_MHZ = 5955;
     /**
      * 6 GHz band frequency of last channel in MHz
      * @hide
      */
-    public static final int BAND_6_GHZ_END_FREQ_MHZ = 7105;
+    public static final int BAND_6_GHZ_END_FREQ_MHZ = 7115;
+
+    /**
+     * 6 GHz band operating class 136 channel 2 center frequency in MHz
+     * @hide
+     */
+    public static final int BAND_6_GHZ_OP_CLASS_136_CH_2_FREQ_MHZ = 5935;
 
     /**
      * Utility function to check if a frequency within 2.4 GHz band
@@ -618,7 +624,10 @@ public final class ScanResult implements Parcelable {
      * @hide
      */
     public static boolean is6GHz(int freqMhz) {
-        return freqMhz >= BAND_6_GHZ_START_FREQ_MHZ && freqMhz <= BAND_6_GHZ_END_FREQ_MHZ;
+        if (freqMhz == BAND_6_GHZ_OP_CLASS_136_CH_2_FREQ_MHZ) {
+            return true;
+        }
+        return (freqMhz >= BAND_6_GHZ_START_FREQ_MHZ && freqMhz <= BAND_6_GHZ_END_FREQ_MHZ);
     }
 
     /**
@@ -649,6 +658,9 @@ public final class ScanResult implements Parcelable {
         }
         if (band == WifiScanner.WIFI_BAND_6_GHZ) {
             if (channel >= BAND_6_GHZ_FIRST_CH_NUM && channel <= BAND_6_GHZ_LAST_CH_NUM) {
+                if (channel == 2) {
+                    return BAND_6_GHZ_OP_CLASS_136_CH_2_FREQ_MHZ;
+                }
                 return ((channel - BAND_6_GHZ_FIRST_CH_NUM) * 5) + BAND_6_GHZ_START_FREQ_MHZ;
             } else {
                 return UNSPECIFIED;
@@ -673,6 +685,9 @@ public final class ScanResult implements Parcelable {
         } else if (is5GHz(freqMhz)) {
             return ((freqMhz - BAND_5_GHZ_START_FREQ_MHZ) / 5) + BAND_5_GHZ_FIRST_CH_NUM;
         } else if (is6GHz(freqMhz)) {
+            if (freqMhz == BAND_6_GHZ_OP_CLASS_136_CH_2_FREQ_MHZ) {
+                return 2;
+            }
             return ((freqMhz - BAND_6_GHZ_START_FREQ_MHZ) / 5) + BAND_6_GHZ_FIRST_CH_NUM;
         }
 

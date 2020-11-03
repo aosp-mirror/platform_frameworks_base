@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Nastavi"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Otkaži"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Deli"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Izbriši"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Snimanje ekrana je otkazano"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Snimak ekrana je sačuvan, dodirnite da biste pregledali"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Snimak ekrana je izbrisan"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Došlo je do problema pri brisanju snimka ekrana"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Preuzimanje dozvola nije uspelo"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Greška pri pokretanju snimanja ekrana"</string>
@@ -889,12 +887,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Gornji ekran 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Gornji ekran 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Režim celog ekrana za donji ekran"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g>. pozicija, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dvaput dodirnite da biste izmenili."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dvaput dodirnite da biste dodali."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Premesti pločicu <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Ukloni pločicu <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Dodajte „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ na poziciju <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Premestite „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ na poziciju <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"uklonili pločicu"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"dodali pločicu na kraj"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Premestite pločicu"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Dodajte pločicu"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Premestite na <xliff:g id="POSITION">%1$d</xliff:g>. poziciju"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Dodajte na <xliff:g id="POSITION">%1$d</xliff:g>. poziciju"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g>. pozicija"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Uređivač za Brza podešavanja."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Obaveštenja za <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikacija možda neće funkcionisati sa podeljenim ekranom."</string>
@@ -927,11 +926,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Pređi na prethodno"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Promenite veličinu"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog toplote"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon sada normalno radi"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon sada normalno radi.\nDodirnite za više informacija"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon je bio prevruć, pa se isključio da se ohladi. Sada radi normalno.\n\nTelefon može previše da se ugreje ako:\n	• Koristite aplikacije koje zahtevaju puno resursa (npr. video igre, video ili aplikacije za navigaciju)\n	• Preuzimate/otpremate velike datoteke\n	• Koristite telefon na visokoj temperaturi"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Pogledajte upozorenja"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon se zagrejao"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Neke funkcije su ograničene dok se telefon ne ohladi"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Neke funkcije su ograničene dok se telefon ne ohladi.\nDodirnite za više informacija"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon će automatski pokušati da se ohladi. I dalje ćete moći da koristite telefon, ali će sporije reagovati.\n\nKada se telefon ohladi, normalno će raditi."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pogledajte upozorenja"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Isključite punjač iz napajanja"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Došlo je do problema sa punjenjem ovog uređaja. Isključite adapter iz napajanja i budite pažljivi jer kabl može da bude topao."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Pogledajte upozorenja"</string>
@@ -993,6 +994,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Podešavanja"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Važi"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Izdvoji SysUI mem."</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> koristi <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacije koriste <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kameru"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"lokaciju"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzori su isključeni"</string>
     <string name="device_services" msgid="1549944177856658705">"Usluge za uređaje"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez naslova"</string>
@@ -1072,7 +1080,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavaju se preporuke"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mediji"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Sakrijte aktuelnu sesiju."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sakrij"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Podešavanja"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno. Vidite aplikaciju"</string>

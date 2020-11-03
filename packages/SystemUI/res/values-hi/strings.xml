@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"फिर से शुरू करें"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द करें"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेयर करें"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"मिटाएं"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रीन रिकॉर्डिंग रद्द कर दी गई"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"स्क्रीन रिकॉर्डिंग सेव की गई, देखने के लिए टैप करें"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"स्क्रीन रिकॉर्डिंग मिटा दी गई"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रिकॉर्डिंग मिटाने में गड़बड़ी हुई"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"मंज़ूरी नहीं मिल सकी"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन को रिकॉर्ड करने में गड़बड़ी आ रही है"</string>
@@ -514,7 +512,7 @@
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नई सूचनाएं"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"बिना आवाज़ किए मिलने वाली सूचनाएं"</string>
-    <string name="notification_section_header_alerting" msgid="5581175033680477651">"वाइब्रेशन या आवाज़ के साथ मिलने वाली सूचनाएं"</string>
+    <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाएं"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
@@ -714,11 +712,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफ़ॉल्ट"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और \'बातचीत\', सेक्शन में सबसे नीचे दिखती है"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और बातचीत, सेक्शन में सबसे नीचे दिखती है"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत की सुविधा, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
@@ -886,12 +884,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ऊपर की स्क्रीन को 50% बनाएं"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ऊपर की स्क्रीन को 30% बनाएं"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"नीचे की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. में बदलाव करने के लिए दो बार छूएं."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. जोड़ने के लिए दो बार छूएं."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को ले जाएं"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> निकालें"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर जाेड़ें"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर ले जाएं"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"टाइल हटाएं"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"टाइल को आखिरी पोज़िशन पर जोड़ें"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"टाइल को किसी और पोज़िशन पर ले जाएं"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"टाइल जोड़ें"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"टाइल को <xliff:g id="POSITION">%1$d</xliff:g> पोज़िशन पर ले जाएं"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"टाइल को <xliff:g id="POSITION">%1$d</xliff:g> पोज़िशन पर जोड़ें"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"टाइल की पोज़िशन <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"त्वरित सेटिंग संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"हो सकता है कि ऐप्लिकेशन विभाजित स्क्रीन के साथ काम ना करे."</string>
@@ -924,11 +923,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"पिछले पर जाएं"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"आकार बदलें"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"गर्म होने की वजह से फ़ोन बंद हुआ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"आपका फ़ोन अब सामान्य रूप से चल रहा है"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"आपका फ़ोन सामान्य रूप से काम कर रहा है.\nज़्यादा जानकारी के लिए टैप करें"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"फ़ोन बहुत गर्म हो गया था, इसलिए ठंडा होने के लिए बंद हो गया. फ़ोन अब अच्छे से चल रहा है.\n\nफ़ोन तब बहुत गर्म हो सकता है जब आप:\n	• ज़्यादा रिसॉर्स का इस्तेमाल करने वाले ऐप्लिकेशन चलाते हैं (जैसे गेमिंग, वीडियो या नेविगेशन ऐप्लिकेशन)\n	• बड़ी फ़ाइलें डाउनलोड या अपलोड करते हैं\n	• ज़्यादा तापमान में फ़ोन का इस्तेमाल करते हैं"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"डिवाइस के रखरखाव के तरीके देखें"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"फ़ोन गर्म हो रहा है"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"फ़ोन के ठंडा होने के दौरान कुछ सुविधाएं सीमित होती हैं"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"फ़ोन के ठंडा होने तक कुछ सुविधाएं काम नहीं करतीं.\nज़्यादा जानकारी के लिए टैप करें"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अब भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"डिवाइस के रखरखाव के तरीके देखें"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"चार्जर निकालें"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"इस डिवाइस को चार्ज करने में समस्या हुई. पावर अडैप्टर का प्लग निकालें. ऐसा करते समय सावधानी बरतें क्योंकि तार गर्म हो सकता है."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"प्रबंधन से जुड़े चरण देखें"</string>
@@ -990,6 +991,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"सेटिंग"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"ठीक है"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> आपकी <xliff:g id="TYPES_LIST">%2$s</xliff:g> का इस्तेमाल कर रहा है."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ऐप्लिकेशन आपकी <xliff:g id="TYPES_LIST">%s</xliff:g> का इस्तेमाल कर रहे हैं."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" और "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"कैमरा"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"जगह"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"माइक्रोफ़ोन"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेंसर बंद हैं"</string>
     <string name="device_services" msgid="1549944177856658705">"डिवाइस सेवाएं"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
@@ -1068,7 +1076,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सुझाव लोड हो रहे हैं"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"इस मीडिया सेशन को छिपाएं."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"छिपाएं"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"खारिज करें"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"फिर से शुरू करें"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>

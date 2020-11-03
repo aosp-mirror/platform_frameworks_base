@@ -37,6 +37,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -85,6 +86,9 @@ public class PipTouchHandlerTest extends SysuiTestCase {
     @Mock
     private SysUiState mSysUiState;
 
+    @Mock
+    private PipUiEventLogger mPipUiEventLogger;
+
     private PipSnapAlgorithm mPipSnapAlgorithm;
     private PipMotionHelper mMotionHelper;
     private PipResizeGestureHandler mPipResizeGestureHandler;
@@ -104,7 +108,7 @@ public class PipTouchHandlerTest extends SysuiTestCase {
         mPipTouchHandler = new PipTouchHandler(mContext, mActivityManager,
                 mPipMenuActivityController, mInputConsumerController, mPipBoundsHandler,
                 mPipTaskOrganizer, mFloatingContentCoordinator, mDeviceConfigProxy,
-                mPipSnapAlgorithm, mSysUiState);
+                mPipSnapAlgorithm, mSysUiState, mPipUiEventLogger);
         mMotionHelper = Mockito.spy(mPipTouchHandler.getMotionHelper());
         mPipResizeGestureHandler = Mockito.spy(mPipTouchHandler.getPipResizeGestureHandler());
         mPipTouchHandler.setPipMotionHelper(mMotionHelper);

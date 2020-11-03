@@ -37,7 +37,7 @@
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ինտերնետ կապ չկա"</string>
     <string name="saved_network" msgid="7143698034077223645">"Ով է պահել՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
-    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Ավտոմատ միացել է ցանցերի վարկանիշի մատակարարի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Միացված է %1$s-ի միջոցով"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Միացված է <xliff:g id="NAME">%1$s</xliff:g>-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Հասանելի է %1$s-ի միջոցով"</string>
@@ -57,7 +57,7 @@
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Գրանցումն ավարտված է: Միացում…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"Շատ դանդաղ"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Դանդաղ"</string>
-    <string name="speed_label_okay" msgid="1253594383880810424">"Հաստատել"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"Լավ"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"Միջին"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Արագ"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Շատ արագ"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Ցուցադրել Bluetooth սարքերն առանց անունների"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Միացնել Gabeldorsche-ը"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Տվյալների լավացված փոխանակում"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-ի տարբերակ"</string>
@@ -344,7 +343,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Թարմացվելիս ընդգծել սարքաշարի ծածկույթները կանաչ գույնով"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Վրիպազերծել GPU գերազանցումները"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Կասեցնել HW վրադրումները"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Միշտ օգտագործել GPU-ն` էկրանի կազմման համար"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Միշտ օգտագործել GPU-ն՝ էկրանի կազմման համար"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Նմանակել գունատարածքը"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Ակտիվացնել OpenGL հետքերը"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Անջատել USB աուդիո երթուղումը"</string>
@@ -494,7 +493,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Ավելացնել ժամանակը:"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Պակասեցնել ժամանակը:"</string>
     <string name="cancel" msgid="5665114069455378395">"Չեղարկել"</string>
-    <string name="okay" msgid="949938843324579502">"Հաստատել"</string>
+    <string name="okay" msgid="949938843324579502">"Եղավ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Միացնել"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Միացրեք «Չանհանգստացնել» ռեժիմը"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Երբեք"</string>

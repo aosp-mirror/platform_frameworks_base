@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"បន្ត"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"បោះបង់"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ចែករំលែក"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"លុប"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"បាន​បោះបង់​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"បានរក្សាទុក​ការថត​សកម្មភាព​អេក្រង់។ សូមចុច​ដើម្បី​មើល"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"បានលុប​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"មានបញ្ហា​ក្នុងការ​លុបការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"មិនអាច​ទទួលបាន​ការអនុញ្ញាត​ទេ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"មានបញ្ហា​ក្នុងការ​ចាប់ផ្ដើម​ថត​អេក្រង់"</string>
@@ -421,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"បើក​នៅម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"រហូតដល់​ម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"រចនាប័ទ្ម​ងងឹត"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"កម្មវិធីសន្សំថ្ម"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"បើក​នៅពេល​ថ្ងៃលិច"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"រហូត​ដល់​ពេល​ថ្ងៃរះ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"បើកនៅម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -502,10 +500,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"កម្មវិធីសន្សំថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"បិទ​កម្មវិធី​សន្សំ​ថ្ម"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬបញ្ជូន។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"សេវាកម្មដែល​ផ្ដល់​មុខងារ​នេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែល​អាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬ​ដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬបញ្ជូន។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"សេវាកម្មដែល​ផ្ដល់​មុខងារ​នេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែល​អាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬ​ដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬបញ្ជូន​មែនទេ?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"ចាប់ផ្ដើម​ថត ឬបញ្ជូន​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"គ្រប់គ្រង"</string>
@@ -768,7 +766,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"ការប្រើប្រាស់ថ្ម"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"កម្មវិធីសន្សំថ្មមិនអាចប្រើបានអំឡុងពេលសាកថ្មទេ"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"កម្មវិធីសន្សំថ្ម"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"កាត់បន្ថយប្រតិបត្តិការ និងទិន្នន័យផ្ទៃខាងក្រោយ"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ប៊ូតុង <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ខាងលើ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ខាងលើ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"អេក្រង់ពេញខាងក្រោម"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ទីតាំង <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>, ប៉ះពីរដងដើម្បីកែ"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>, ប៉ះពីរដងដើម្បីបន្ថែម"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"ផ្លាស់ទី <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"យក <xliff:g id="TILE_NAME">%1$s</xliff:g> ចេញ"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"បញ្ចូល <xliff:g id="TILE_NAME">%1$s</xliff:g> ទៅទីតាំង <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"ផ្លាស់ទី <xliff:g id="TILE_NAME">%1$s</xliff:g> ទៅទីតាំង <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ដកប្រអប់ចេញ"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"បញ្ចូល​ប្រអប់ទៅ​ខាងចុង"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ផ្លាស់ទី​ប្រអប់"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"បញ្ចូល​ប្រអប់"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ផ្លាស់​ទីទៅ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"បញ្ចូលទៅ​ទីតាំងទី <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ទីតាំងទី <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"កម្មវិធីកែការកំណត់រហ័ស"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ការជូនដំណឹង៖ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"កម្មវិធីអាចនឹងមិនដំណើរការនៅលើអេក្រង់បំបែកទេ"</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"រំលងទៅក្រោយ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ប្ដូរ​ទំហំ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ទូរសព្ទ​បាន​បិទដោយសារ​វា​ឡើងកម្តៅ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ឥឡូវនេះ​ទូរសព្ទ​របស់អ្នក​កំពុង​ដំណើរការ​ធម្មតា"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ឥឡូវនេះ ទូរសព្ទ​របស់អ្នក​កំពុងដំណើរការ​ជាធម្មតា។\nសូមចុច​ដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ទូរសព្ទ​របស់អ្នក​ក្តៅពេក ដូច្នេះ​វាបាន​បិទ​ដើម្បី​បន្ថយ​កម្តៅ។ ឥឡូវនេះ ​ទូរសព្ទ​របស់អ្នក​កំពុង​ដំណើរការ​ធម្មតា។\n\nទូរសព្ទ​របស់អ្នក​អាចនឹង​ឡើង​កម្តៅ​ខ្លាំងជ្រុល ប្រសិន​បើអ្នក៖\n	• ប្រើប្រាស់​កម្មវិធី​ដែល​ប្រើប្រាស់ទិន្នន័យច្រើនក្នុងរយៈពេលខ្លី (ដូចជាហ្គេម វីដេអូ ឬកម្មវិធីរុករក)\n	• ទាញយក ឬ​បង្ហោះ​ឯកសារដែលមានទំហំធំ\n	• ប្រើប្រាស់​ទូរសព្ទ​របស់អ្នក​នៅកន្លែង​មានសីតុណ្ហភាព​ខ្ពស់"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"មើលជំហាន​ថែទាំ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ទូរសព្ទ​នេះ​កំពុង​កើន​កម្តៅ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"មុខងារ​មួយ​ចំនួន​នឹង​មិន​អាច​ប្រើ​បាន​ពេញលេញ​នោះ​ទេ ខណៈពេល​ដែល​ទូរសព្ទ​កំពុង​បញ្ចុះ​កម្តៅ"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"មុខងារ​មួយចំនួន​នឹងមិនអាច​ប្រើបានពេញលេញ​នោះទេ ខណៈពេល​ដែលទូរសព្ទ​កំពុងបញ្ចុះកម្ដៅ។\nសូមចុច​ដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ទូរសព្ទ​របស់អ្នក​នឹង​ព្យាយាម​បញ្ចុះ​កម្តៅ​ដោយ​ស្វ័យប្រវត្តិ។ អ្នក​នៅតែ​អាច​ប្រើ​ទូរសព្ទ​របស់អ្នក​បាន​ដដែល​ ប៉ុន្តែ​វា​នឹង​ដំណើរ​ការ​យឺត​ជាង​មុន។\n\nបន្ទាប់​ពី​ទូរសព្ទ​របស់អ្នក​ត្រជាក់​ជាង​មុន​ហើយ វា​នឹង​ដំណើរការ​ដូច​ធម្មតា។"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"មើលជំហាន​ថែទាំ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ផ្ដាច់ឆ្នាំងសាក"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"មាន​បញ្ហា​ក្នុងការសាកថ្ម​ឧបករណ៍​នេះ។ សូមផ្ដាច់​ឆ្នាំងសាក ហើយ​ប្រុងប្រយ័ត្ន ដោយសារ​ខ្សែ​អាចមាន​កម្ដៅ​ក្ដៅ។"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"មើលជំហាន​ថែទាំ"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ការកំណត់"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"យល់ហើយ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"ចម្លង SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> កំពុងប្រើ <xliff:g id="TYPES_LIST">%2$s</xliff:g> របស់អ្នក។"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"កម្មវិធី​កំពុងប្រើ <xliff:g id="TYPES_LIST">%s</xliff:g> របស់អ្នក។"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" និង "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"កាមេរ៉ា"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"ទីតាំង"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"មីក្រូហ្វូន"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"បិទឧបករណ៍​ចាប់សញ្ញា"</string>
     <string name="device_services" msgid="1549944177856658705">"សេវាកម្មឧបករណ៍"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"គ្មាន​ចំណងជើង"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"មេឌៀ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"លាក់វគ្គ​បច្ចុប្បន្ន។"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"លាក់"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ច្រាន​ចោល"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ការកំណត់"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>

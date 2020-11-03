@@ -248,7 +248,7 @@ class DisplayWindowSettings {
         writeSettingsIfNeeded(entry, displayInfo);
     }
 
-    private int getWindowingModeLocked(Entry entry, int displayId) {
+    private int getWindowingModeLocked(Entry entry, DisplayContent dc) {
         int windowingMode = entry != null ? entry.mWindowingMode
                 : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         // This display used to be in freeform, but we don't support freeform anymore, so fall
@@ -259,10 +259,8 @@ class DisplayWindowSettings {
         }
         // No record is present so use default windowing mode policy.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-            final boolean forceDesktopMode = mService.mForceDesktopModeOnExternalDisplays
-                    && displayId != Display.DEFAULT_DISPLAY;
             windowingMode = mService.mAtmService.mSupportsFreeformWindowManagement
-                    && (mService.mIsPc || forceDesktopMode)
+                    && (mService.mIsPc || dc.forceDesktopMode())
                     ? WindowConfiguration.WINDOWING_MODE_FREEFORM
                     : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         }
@@ -272,7 +270,7 @@ class DisplayWindowSettings {
     int getWindowingModeLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final Entry entry = getEntry(displayInfo);
-        return getWindowingModeLocked(entry, dc.getDisplayId());
+        return getWindowingModeLocked(entry, dc);
     }
 
     void setWindowingModeLocked(DisplayContent dc, int mode) {
@@ -382,7 +380,7 @@ class DisplayWindowSettings {
         final Entry entry = getOrCreateEntry(displayInfo);
 
         // Setting windowing mode first, because it may override overscan values later.
-        dc.setWindowingMode(getWindowingModeLocked(entry, dc.getDisplayId()));
+        dc.setWindowingMode(getWindowingModeLocked(entry, dc));
 
         dc.getDisplayRotation().restoreSettings(entry.mUserRotationMode,
                 entry.mUserRotation, entry.mFixedToUserRotation);

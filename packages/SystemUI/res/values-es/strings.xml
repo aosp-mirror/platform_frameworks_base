@@ -98,7 +98,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonido de tu dispositivo, como música, llamadas y tonos de llamada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio y micrófono del dispositivo"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Empezar"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques en la pantalla"</string>
@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Seguir"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancelar"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Eliminar"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Se ha cancelado la grabación de la pantalla"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Se ha guardado la grabación de la pantalla; toca para verla"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Se ha eliminado la grabación de la pantalla"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"No se ha podido eliminar la grabación de la pantalla"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No se han podido obtener los permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
@@ -397,7 +395,7 @@
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Conectando..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Zona Wi-Fi"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Punto de acceso"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
@@ -502,10 +500,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactivar Ahorro de batería"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Empezar a grabar o enviar contenido?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Quieres iniciar la grabación o el envío de contenido con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Iniciar grabación o el envío de contenido en <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
@@ -662,7 +660,7 @@
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Zona Wi-Fi"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Punto de acceso"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
@@ -712,11 +710,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminado"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbuja"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración y se muestra más abajo en la sección de conversaciones"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración, y se muestra más abajo en la sección de conversaciones"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones en forma de burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, como burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Superior 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Superior 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Pantalla inferior completa"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Posición <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Toca dos veces para cambiarla."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Toca dos veces para añadirlo."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Quitar <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Añadir <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar icono"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"añadir icono al final"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover icono"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Añadir icono"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Añadir a la posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor de ajustes rápidos."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Es posible que la aplicación no funcione con la pantalla dividida."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Volver al anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Cambiar tamaño"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Teléfono apagado por calor"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"El teléfono ahora funciona con normalidad"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"El teléfono ya funciona con normalidad.\nToca para ver más información"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"El teléfono se había calentado demasiado y se ha apagado para enfriarse. Ahora funciona con normalidad.\n\nPuede calentarse demasiado si:\n	• Usas aplicaciones que consumen muchos recursos (p. ej., apps de juegos, vídeos o navegación)\n	• Descargas o subes archivos grandes\n	• Lo usas a altas temperaturas"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver pasos de mantenimiento"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"El teléfono se está calentando"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Se limitan algunas funciones mientras el teléfono se enfría"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Se han limitado algunas funciones mientras el teléfono se enfría.\nToca para ver más información"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"El teléfono intentará enfriarse. Puedes seguir utilizándolo, pero es posible que funcione con mayor lentitud.\n\nUna vez que se haya enfriado, funcionará con normalidad."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver pasos de mantenimiento"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Desconecta el cargador"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"No se puede cargar el dispositivo. Desconecta el adaptador de corriente con cuidado, ya que el cable puede estar caliente."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ver pasos de mantenimiento"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Entendido"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Volcar pila de SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> está usando tu <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Hay aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" y "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"cámara"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"ubicación"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"micrófono"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensores desactivados"</string>
     <string name="device_services" msgid="1549944177856658705">"Servicios del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ocultar la sesión."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Cerrar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ajustes"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>

@@ -61,6 +61,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -98,6 +99,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import dagger.Lazy;
+
 /**
  * Unit tests for {@link NotificationEntryManager}. This test will not test any interactions with
  * inflation. Instead, for functional inflation tests, see
@@ -126,6 +129,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private LeakDetector mLeakDetector;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NotificationRowBinder mNotificationRowBinder;
+    @Mock private Lazy<BubbleController> mBubbleControllerLazy;
 
     private int mId;
     private NotificationEntry mEntry;
@@ -200,6 +204,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mNotificationRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
+                mBubbleControllerLazy,
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
         mEntryManager.setUpWithPresenter(mPresenter);

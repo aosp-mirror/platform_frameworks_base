@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"استئناف"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"إلغاء"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"مشاركة"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"حذف"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"تمّ إلغاء تسجيل الشاشة."</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"تمّ حفظ تسجيل الشاشة، انقر لعرضه."</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"تمّ حذف تسجيل الشاشة."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"حدث خطأ أثناء حذف تسجيل الشاشة."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"تعذّر الحصول على أذونات."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"حدث خطأ في بدء تسجيل الشاشة"</string>
@@ -234,7 +232,7 @@
     <string name="not_default_data_content_description" msgid="6757881730711522517">"لم يتم الضبط على استخدام البيانات"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"غير مفعّلة"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"التوصيل عبر البلوتوث"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطائرة."</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطيران."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"‏ليس هناك شريحة SIM."</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
@@ -269,10 +267,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تفعيل Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"الجوّال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطيران."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"كتم الصوت تمامًا"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"المنبِّهات فقط"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"عدم الإزعاج"</string>
@@ -320,7 +318,7 @@
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"تم الوصول إلى حد البيانات الذي عيَّنته. لم يُعد بإمكانك استخدام بيانات الجوال.\n\nفي حالة الاستئناف، قد يتم تطبيق الرسوم لاستخدام البيانات."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"استئناف"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"‏جارٍ البحث عن GPS"</string>
-    <string name="gps_notification_found_text" msgid="3145873880174658526">"‏تم تعيين الموقع بواسطة GPS"</string>
+    <string name="gps_notification_found_text" msgid="3145873880174658526">"‏تم ضبط الموقع بواسطة GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"طلبات الموقع نشطة"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"أجهزة الاستشعار غير مفعّلة"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"محو جميع الإشعارات."</string>
@@ -666,7 +664,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطائرة"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="add_tile" msgid="6239678623873086686">"إضافة فئة"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"إرسال فئة"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد"</string>
@@ -699,7 +697,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"عناصر التحكم في إشعارات التشغيل"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"تشغيل"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"إيقاف"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة القفل وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك ضبط مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة القفل وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"الإشعارات"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"لن تتلقى هذه الإشعارات بعد الآن."</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"سيتم تصغير هذه الإشعارات."</string>
@@ -904,12 +902,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ضبط حجم النافذة العلوية ليكون ٥٠%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ضبط حجم النافذة العلوية ليكون ٣٠%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"عرض النافذة السفلية بملء الشاشة"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. انقر مرّتين للتعديل."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. انقر مرّتين للإضافة."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"نقل <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"إزالة <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"إضافة <xliff:g id="TILE_NAME">%1$s</xliff:g> إلى الموضع <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"نقل <xliff:g id="TILE_NAME">%1$s</xliff:g> إلى الموضع <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"إزالة بطاقة"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"إضافة بطاقة إلى نهاية الإعدادات السريعة"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"نقل بطاقة"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"إضافة بطاقة"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"الانتقال إلى <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"الإضافة إلى الموضع <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"الموضع: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"برنامج تعديل الإعدادات السريعة."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"إشعار <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"يمكن ألا يعمل التطبيق مع وضع تقسيم الشاشة."</string>
@@ -942,11 +941,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"التخطي إلى السابق"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"تغيير الحجم"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف الهاتف بسبب الحرارة"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"يعمل هاتفك الآن بشكل طبيعي"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"يعمل هاتفك الآن بشكل طبيعي.\nانقر للحصول على مزيد من المعلومات."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ارتفعت درجة حرارة هاتفك بشدة، لذا تم إيقاف تشغيله لخفض درجة حرارته. يعمل هاتفك الآن بشكل طبيعي.\n\nقد ترتفع بشدة درجة حرارة هاتفك إذا:\n	• استخدمت تطبيقات كثيفة الاستخدام لموارد الجهاز (مثل الألعاب أو الفيديو أو تطبيقات التنقل)\n	• نزَّلت أو حمَّلت ملفات كبيرة الحجم\n	• استخدمت هاتفك وسط أجواء مرتفعة الحرارة"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"الاطّلاع على خطوات العناية"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"تزداد درجة حرارة الهاتف"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف.\nانقر للحصول على مزيد من المعلومات."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"سيحاول الهاتف تخفيض درجة حرارته تلقائيًا. سيظل بإمكانك استخدام هاتفك، ولكن قد يعمل بشكل أبطأ.\n\nبعد أن تنخفض درجة حرارة الهاتف، سيستعيد سرعته المعتادة."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"الاطّلاع على خطوات العناية"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"فصل الشاحن"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"هناك مشكلة في شحن هذا الجهاز. يُرجى فصل محوِّل الطاقة بحرص لأن الكابل قد يكون ساخنًا."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"الاطّلاع على خطوات العناية"</string>
@@ -1008,6 +1009,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"حسنًا"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏تفريغ ذاكرة SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"الكاميرا"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"الموقع"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"الميكروفون"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"إيقاف أجهزة الاستشعار"</string>
     <string name="device_services" msgid="1549944177856658705">"خدمات الأجهزة"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بلا عنوان"</string>
@@ -1062,7 +1070,7 @@
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"تمت الإضافة إلى المفضّلة"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"تمت الإضافة إلى المفضّلة، الموضع <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"تمت الإزالة من المفضّلة"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"إضافة إلى المُفضلة"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"إضافة إلى المحتوى المفضّل"</string>
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"إزالة من المفضّلة"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"نقل إلى الموضع <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
@@ -1090,7 +1098,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"الوسائط"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"إخفاء الجلسة الحالية"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"إخفاء"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"إغلاق"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>

@@ -91,6 +91,11 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
                 R.integer.config_userSwitchTransitionViewShownTimeoutMs);
     }
 
+    @Override
+    protected int getInsetTypesToFit() {
+        return 0;
+    }
+
     /**
      * Makes the user switch transition view appear and draws the content inside of it if a user
      * that is different from the previous user is provided and if the dialog is not already

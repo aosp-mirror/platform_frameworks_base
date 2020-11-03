@@ -468,10 +468,10 @@
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Permet que l\'aplicació impedeixi que el dispositiu Android TV entri en repòs."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permet que l\'aplicació impedeixi que el telèfon entri en repòs."</string>
-    <string name="permlab_transmitIr" msgid="8077196086358004010">"transmissió d\'infraroigs"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Permet que l\'aplicació utilitzi el transmissor d\'infraroigs de la tauleta."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Permet que l\'aplicació faci servir el transmissor d\'infraroigs del dispositiu Android TV."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permet que l\'aplicació utilitzi el transmissor d\'infraroigs del telèfon."</string>
+    <string name="permlab_transmitIr" msgid="8077196086358004010">"transmissió d\'infrarojos"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Permet que l\'aplicació utilitzi el transmissor d\'infrarojos de la tauleta."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Permet que l\'aplicació faci servir el transmissor d\'infrarojos del dispositiu Android TV."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permet que l\'aplicació utilitzi el transmissor d\'infrarojos del telèfon."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"establir fons de pantalla"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permet que l\'aplicació estableixi el fons de pantalla del sistema."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ajustament de la mida del fons de pantalla"</string>
@@ -541,7 +541,7 @@
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No s\'ha reconegut"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"S\'ha cancel·lat l\'autenticació"</string>
-    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha establert cap PIN, patró o contrasenya"</string>
+    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha definit cap PIN, patró o contrasenya"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor d\'empremtes dactilars està brut. Neteja\'l i torna-ho a provar."</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Premeu Menú per desbloquejar-lo o per fer una trucada d\'emergència."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Premeu Menú per desbloquejar."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dibuixeu el patró de desbloqueig"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergència"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Trucada d\'emergència"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Torna a la trucada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcte!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Torna-ho a provar"</string>
@@ -988,8 +988,8 @@
     <string name="searchview_description_submit" msgid="6771060386117334686">"Envia la consulta"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Cerca per veu"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Vols activar l\'exploració tàctil?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb la tauleta."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb el telèfon."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interaccionar amb la tauleta."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interaccionar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Fa 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Fa més d\'1 mes"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"S\'ha establert el so de silenci"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volum en trucada per Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volum de l\'alarma"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volum d\'alarma"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volum de notificacions"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volum"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volum del Bluetooth"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per allargar la durada de la bateria, la funció Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Per allargar la durada de la bateria, la funció Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>

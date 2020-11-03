@@ -395,6 +395,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int EMS = LINES;
     private static final int PIXELS = 2;
 
+    // Maximum text length for single line input.
+    private static final int MAX_LENGTH_FOR_SINGLE_LINE_EDIT_TEXT = 5000;
+    private InputFilter.LengthFilter mSingleLineLengthFilter = null;
+
     private static final RectF TEMP_RECTF = new RectF();
 
     /** @hide */
@@ -1589,7 +1593,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Same as setSingleLine(), but make sure the transformation method and the maximum number
         // of lines of height are unchanged for multi-line TextViews.
         setInputTypeSingleLine(singleLine);
-        applySingleLine(singleLine, singleLine, singleLine);
+        applySingleLine(singleLine, singleLine, singleLine,
+                // Does not apply automated max length filter since length filter will be resolved
+                // later in this function.
+                false
+        );
 
         if (singleLine && getKeyListener() == null && ellipsize == ELLIPSIZE_NOT_SET) {
             ellipsize = ELLIPSIZE_END;
@@ -1633,7 +1641,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setTransformationMethod(PasswordTransformationMethod.getInstance());
         }
 
-        if (maxlength >= 0) {
+        // For addressing b/145128646
+        // For the performance reason, we limit characters for single line text field.
+        if (bufferType == BufferType.EDITABLE && singleLine && maxlength == -1) {
+            mSingleLineLengthFilter = new InputFilter.LengthFilter(
+                MAX_LENGTH_FOR_SINGLE_LINE_EDIT_TEXT);
+        }
+
+        if (mSingleLineLengthFilter != null) {
+            setFilters(new InputFilter[] { mSingleLineLengthFilter });
+        } else if (maxlength >= 0) {
             setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxlength) });
         } else {
             setFilters(NO_FILTERS);
@@ -6590,7 +6607,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mSingleLine != singleLine || forceUpdate) {
             // Change single line mode, but only change the transformation if
             // we are not in password mode.
-            applySingleLine(singleLine, !isPassword, true);
+            applySingleLine(singleLine, !isPassword, true, true);
         }
 
         if (!isSuggestionsEnabled()) {
@@ -10229,6 +10246,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Note that the default conditions are not necessarily those that were in effect prior this
      * method, and you may want to reset these properties to your custom values.
      *
+     * Note that due to performance reasons, by setting single line for the EditText, the maximum
+     * text length is set to 5000 if no other character limitation are applied.
+     *
      * @attr ref android.R.styleable#TextView_singleLine
      */
     @android.view.RemotableViewMethod
@@ -10236,7 +10256,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Could be used, but may break backward compatibility.
         // if (mSingleLine == singleLine) return;
         setInputTypeSingleLine(singleLine);
-        applySingleLine(singleLine, true, true);
+        applySingleLine(singleLine, true, true, true);
     }
 
     /**
@@ -10256,14 +10276,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void applySingleLine(boolean singleLine, boolean applyTransformation,
-            boolean changeMaxLines) {
+            boolean changeMaxLines, boolean changeMaxLength) {
         mSingleLine = singleLine;
+
         if (singleLine) {
             setLines(1);
             setHorizontallyScrolling(true);
             if (applyTransformation) {
                 setTransformationMethod(SingleLineTransformationMethod.getInstance());
             }
+
+            if (!changeMaxLength) return;
+
+            // Single line length filter is only applicable editable text.
+            if (mBufferType != BufferType.EDITABLE) return;
+
+            final InputFilter[] prevFilters = getFilters();
+            for (InputFilter filter: getFilters()) {
+                // We don't add LengthFilter if already there.
+                if (filter instanceof InputFilter.LengthFilter) return;
+            }
+
+            if (mSingleLineLengthFilter == null) {
+                mSingleLineLengthFilter = new InputFilter.LengthFilter(
+                    MAX_LENGTH_FOR_SINGLE_LINE_EDIT_TEXT);
+            }
+
+            final InputFilter[] newFilters = new InputFilter[prevFilters.length + 1];
+            System.arraycopy(prevFilters, 0, newFilters, 0, prevFilters.length);
+            newFilters[prevFilters.length] = mSingleLineLengthFilter;
+
+            setFilters(newFilters);
+
+            // Since filter doesn't apply to existing text, trigger filter by setting text.
+            setText(getText());
         } else {
             if (changeMaxLines) {
                 setMaxLines(Integer.MAX_VALUE);
@@ -10272,6 +10318,47 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(null);
             }
+
+            if (!changeMaxLength) return;
+
+            // Single line length filter is only applicable editable text.
+            if (mBufferType != BufferType.EDITABLE) return;
+
+            final InputFilter[] prevFilters = getFilters();
+            if (prevFilters.length == 0) return;
+
+            // Short Circuit: if mSingleLineLengthFilter is not allocated, nobody sets automated
+            // single line char limit filter.
+            if (mSingleLineLengthFilter == null) return;
+
+            // If we need to remove mSingleLineLengthFilter, we need to allocate another array.
+            // Since filter list is expected to be small and want to avoid unnecessary array
+            // allocation, check if there is mSingleLengthFilter first.
+            int targetIndex = -1;
+            for (int i = 0; i < prevFilters.length; ++i) {
+                if (prevFilters[i] == mSingleLineLengthFilter) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            if (targetIndex == -1) return;  // not found. Do nothing.
+
+            if (prevFilters.length == 1) {
+                setFilters(NO_FILTERS);
+                return;
+            }
+
+            // Create new array which doesn't include mSingleLengthFilter.
+            final InputFilter[] newFilters = new InputFilter[prevFilters.length - 1];
+            System.arraycopy(prevFilters, 0, newFilters, 0, targetIndex);
+            System.arraycopy(
+                    prevFilters,
+                    targetIndex + 1,
+                    newFilters,
+                    targetIndex,
+                    prevFilters.length - targetIndex - 1);
+            setFilters(newFilters);
+            mSingleLineLengthFilter = null;
         }
     }
 

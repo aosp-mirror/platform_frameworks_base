@@ -1,0 +1,21 @@
+<!--
+   Copyright (C) 2020 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector android:height="24dp" android:tint="?android:attr/colorControlNormal" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+  <path android:fillColor="@android:color/white" android:fillType="evenOdd" android:pathData="M11.29,9.79c0.39,0.39,1.02,0.39,1.41,0l2-2C14.89,7.61,15,7.35,15,7.09V4 c0-1.1-0.9-2-2-2h-2C9.9,2,9,2.9,9,4v3.09c0,0.27,0.11,0.52,0.29,0.71L11.29,9.79z"/>
+  <path android:fillColor="@android:color/white" android:fillType="evenOdd" android:pathData="M20,9h-3.09c-0.27,0-0.52,0.11-0.71,0.29l-2,2c-0.39,0.39-0.39,1.02,0,1.41l2,2 c0.19,0.19,0.44,0.29,0.71,0.29H20c1.1,0,2-0.9,2-2v-2C22,9.9,21.1,9,20,9z"/>
+  <path android:fillColor="@android:color/white" android:fillType="evenOdd" android:pathData="M9.79,11.29l-2-2C7.61,9.11,7.35,9,7.09,9H4c-1.1,0-2,0.9-2,2v2c0,1.1,0.9,2,2,2 h3.09c0.27,0,0.52-0.11,0.71-0.29l2-2C10.18,12.32,10.18,11.68,9.79,11.29z"/>
+  <path android:fillColor="@android:color/white" android:fillType="evenOdd" android:pathData="M12.71,14.21c-0.39-0.39-1.02-0.39-1.41,0l-2,2C9.11,16.39,9,16.65,9,16.91V20 c0,1.1,0.9,2,2,2h2c1.1,0,2-0.9,2-2v-3.09c0-0.27-0.11-0.52-0.29-0.71L12.71,14.21z"/>
+</vector>

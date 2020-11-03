@@ -203,10 +203,10 @@ public final class ImsConferenceState implements Parcelable {
                     for (String key : participantData.keySet()) {
                         sb.append(key);
                         sb.append("=");
-                        if (ENDPOINT.equals(key) || USER.equals(key)) {
-                            sb.append(Rlog.pii(TAG, participantData.get(key)));
-                        } else {
+                        if (STATUS.equals(key)) {
                             sb.append(participantData.get(key));
+                        } else {
+                            sb.append(Rlog.pii(TAG, participantData.get(key)));
                         }
                         sb.append(", ");
                     }

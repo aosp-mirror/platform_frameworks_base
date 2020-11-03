@@ -161,8 +161,9 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
 
                 @Override
                 public void onFailure(int requestId, CharSequence message) {
+                    String errorMessage = message == null ? "" : String.valueOf(message);
                     fillRequest.completeExceptionally(
-                            new RuntimeException(String.valueOf(message)));
+                            new RuntimeException(errorMessage));
                 }
             });
             return fillRequest;

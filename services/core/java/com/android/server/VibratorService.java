@@ -1066,18 +1066,18 @@ public class VibratorService extends IVibratorService.Stub
         return attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY);
     }
 
-    private int getAppOpMode(Vibration vib) {
+    private int getAppOpMode(int uid, String packageName, VibrationAttributes attrs) {
         int mode = mAppOps.checkAudioOpNoThrow(AppOpsManager.OP_VIBRATE,
-                vib.attrs.getAudioAttributes().getUsage(), vib.uid, vib.opPkg);
+                attrs.getAudioAttributes().getUsage(), uid, packageName);
         if (mode == AppOpsManager.MODE_ALLOWED) {
-            mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, vib.uid, vib.opPkg);
+            mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, uid, packageName);
         }
 
-        if (mode == AppOpsManager.MODE_IGNORED && shouldBypassDnd(vib.attrs)) {
+        if (mode == AppOpsManager.MODE_IGNORED && shouldBypassDnd(attrs)) {
             // If we're just ignoring the vibration op then this is set by DND and we should ignore
             // if we're asked to bypass. AppOps won't be able to record this operation, so make
             // sure we at least note it in the logs for debugging.
-            Slog.d(TAG, "Bypassing DND for vibration: " + vib);
+            Slog.d(TAG, "Bypassing DND for vibrate from uid " + uid);
             mode = AppOpsManager.MODE_ALLOWED;
         }
         return mode;
@@ -1099,7 +1099,7 @@ public class VibratorService extends IVibratorService.Stub
             return false;
         }
 
-        final int mode = getAppOpMode(vib);
+        final int mode = getAppOpMode(vib.uid, vib.opPkg, vib.attrs);
         if (mode != AppOpsManager.MODE_ALLOWED) {
             if (mode == AppOpsManager.MODE_ERRORED) {
                 // We might be getting calls from within system_server, so we don't actually
@@ -1774,11 +1774,19 @@ public class VibratorService extends IVibratorService.Stub
                 return SCALE_MUTE;
             }
             if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
-                        vib.getUid(), -1 /*owningUid*/, true /*exported*/)
+                    vib.getUid(), -1 /*owningUid*/, true /*exported*/)
                     != PackageManager.PERMISSION_GRANTED) {
                 Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
                         + " tried to play externally controlled vibration"
                         + " without VIBRATE permission, ignoring.");
+                return SCALE_MUTE;
+            }
+
+            int mode = getAppOpMode(vib.getUid(), vib.getPackage(), vib.getVibrationAttributes());
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                if (mode == AppOpsManager.MODE_ERRORED) {
+                    Slog.w(TAG, "Would be an error: external vibrate from uid " + vib.getUid());
+                }
                 return SCALE_MUTE;
             }
 

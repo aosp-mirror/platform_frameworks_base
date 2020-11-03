@@ -68,6 +68,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
@@ -2079,7 +2080,10 @@ public class ExifInterface {
         try {
             // Move the original file to temporary file.
             if (mFilename != null) {
-                tempFile = new File(mFilename + ".tmp");
+                String parent = originalFile.getParent();
+                String name = originalFile.getName();
+                String tempPrefix = UUID.randomUUID().toString() + "_";
+                tempFile = new File(parent, tempPrefix + name);
                 if (!originalFile.renameTo(tempFile)) {
                     throw new IOException("Couldn't rename to " + tempFile.getAbsolutePath());
                 }

@@ -61,12 +61,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
     private ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
+    private ScreenshotSmartActions mScreenshotSmartActions;
     private Handler mHandler;
 
     @Before
     public void setup() {
         mSmartActionsProvider = mock(
                 ScreenshotNotificationSmartActionsProvider.class);
+        mScreenshotSmartActions = new ScreenshotSmartActions();
         mHandler = mock(Handler.class);
     }
 
@@ -82,7 +84,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         when(smartActionsProvider.getActions(any(), any(), any(), any(), any()))
             .thenThrow(RuntimeException.class);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                ScreenshotSmartActions.getSmartActionsFuture(
+                mScreenshotSmartActions.getSmartActionsFuture(
                         "", Uri.parse("content://authority/data"), bitmap, smartActionsProvider,
                         true, UserHandle.getUserHandleForUid(UserHandle.myUserId()));
         assertNotNull(smartActionsFuture);
@@ -100,7 +102,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         int timeoutMs = 1000;
         when(smartActionsFuture.get(timeoutMs, TimeUnit.MILLISECONDS)).thenThrow(
                 RuntimeException.class);
-        List<Notification.Action> actions = ScreenshotSmartActions.getSmartActions(
+        List<Notification.Action> actions = mScreenshotSmartActions.getSmartActions(
                 "", smartActionsFuture, timeoutMs, mSmartActionsProvider);
         assertEquals(Collections.emptyList(), actions);
     }
@@ -111,7 +113,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
             throws Exception {
         doThrow(RuntimeException.class).when(mSmartActionsProvider).notifyOp(any(), any(), any(),
                 anyLong());
-        ScreenshotSmartActions.notifyScreenshotOp(null, mSmartActionsProvider, null, null, -1);
+        mScreenshotSmartActions.notifyScreenshotOp(null, mSmartActionsProvider, null, null, -1);
     }
 
     // Tests for a non-hardware bitmap, ScreenshotNotificationSmartActionsProvider is never invoked
@@ -122,7 +124,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.RGB_565);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                ScreenshotSmartActions.getSmartActionsFuture(
+                mScreenshotSmartActions.getSmartActionsFuture(
                         "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider,
                         true, UserHandle.getUserHandleForUid(UserHandle.myUserId()));
         verify(mSmartActionsProvider, never()).getActions(any(), any(), any(), any(), any());
@@ -136,7 +138,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
     public void testScreenshotNotificationSmartActionsProviderInvokedOnce() {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
-        ScreenshotSmartActions.getSmartActionsFuture(
+        mScreenshotSmartActions.getSmartActionsFuture(
                 "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider, true,
                 UserHandle.getUserHandleForUid(UserHandle.myUserId()));
         verify(mSmartActionsProvider, times(1)).getActions(any(), any(), any(), any(), any());
@@ -152,7 +154,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
                 SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
                         mContext, null, mHandler);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                ScreenshotSmartActions.getSmartActionsFuture("", null, bitmap,
+                mScreenshotSmartActions.getSmartActionsFuture("", null, bitmap,
                         actionsProvider,
                         true, UserHandle.getUserHandleForUid(UserHandle.myUserId()));
         assertNotNull(smartActionsFuture);
@@ -172,7 +174,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
-        SaveImageInBackgroundTask task = new SaveImageInBackgroundTask(mContext, data);
+        SaveImageInBackgroundTask task =
+                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
 
         Notification.Action shareAction = task.createShareAction(mContext, mContext.getResources(),
                 Uri.parse("Screenshot_123.png"));
@@ -198,7 +201,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
-        SaveImageInBackgroundTask task = new SaveImageInBackgroundTask(mContext, data);
+        SaveImageInBackgroundTask task =
+                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
 
         Notification.Action editAction = task.createEditAction(mContext, mContext.getResources(),
                 Uri.parse("Screenshot_123.png"));
@@ -224,7 +228,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.finisher = null;
         data.mActionsReadyListener = null;
-        SaveImageInBackgroundTask task = new SaveImageInBackgroundTask(mContext, data);
+        SaveImageInBackgroundTask task =
+                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
 
         Notification.Action deleteAction = task.createDeleteAction(mContext,
                 mContext.getResources(),

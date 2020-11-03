@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Genoptag"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Annuller"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Del"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Slet"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Skærmoptagelsen er annulleret"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Skærmoptagelsen er gemt. Tryk for at se den."</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Skærmoptagelsen er slettet"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Der opstod en fejl ved sletning af skærmoptagelsen"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Det lykkedes ikke et hente tilladelserne"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Skærmoptagelsen kunne ikke startes"</string>
@@ -716,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan ringe eller vibrere baseret på telefonens indstillinger"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan ringe eller vibrere baseret på telefonens indstillinger. Samtaler fra <xliff:g id="APP_NAME">%1$s</xliff:g> vises som standard i bobler."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fastholder din opmærksomhed med en svævende genvej til indholdet."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Vises øverst i samtalesektionen, som en svævende boble og med profilbillede på låseskærmen"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Vises øverst i samtalesektionen som en svævende boble og med profilbillede på låseskærmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Indstillinger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke samtalefunktioner"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Øverste 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Øverste 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Vis nederste del i fuld skærm"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Position <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tryk to gange for at redigere."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Tryk to gange for at tilføje."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Flyt <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Fjern <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Føj <xliff:g id="TILE_NAME">%1$s</xliff:g> til position <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Flyt <xliff:g id="TILE_NAME">%1$s</xliff:g> til position <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern kortet"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj kortet til slutningen"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt kortet"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj et kort"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flyt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Føj til placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Placering <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redigeringsværktøj til Kvikmenu."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-notifikation: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Appen fungerer muligvis ikke i opdelt skærm."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Gå til forrige"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Rediger størrelse"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonen slukkede pga. varme"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Din telefon kører nu normalt"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Din telefon kører nu normalt.\nTryk for at få flere oplysninger"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Din telefon var blevet for varm, så den slukkede for at køle ned. Din telefon kører nu igen normalt. \n\nDin telefon kan blive for varm, hvis du:\n	• Bruger ressourcekrævende apps (f.eks. spil, video eller navigation)\n	• Downloader eller uploader store filer\n	• Bruger din telefon i varme omgivelser"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se håndteringsvejledning"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefonen er ved at blive varm"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Nogle funktioner er begrænsede, mens telefonen køler ned"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nogle funktioner er begrænsede, mens telefonen køler ned.\nTryk for at få flere oplysninger"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Frakobl opladeren"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Der er et problem med opladning af denne enhed. Frakobl strømadapteren, og vær forsigtig, da kablet kan være varmt."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Se vejledningen i pleje"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Indstillinger"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Gem SysUI-heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> anvender enhedens <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps anvender enhedens <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"placering"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Deaktiver sensorer"</string>
     <string name="device_services" msgid="1549944177856658705">"Enhedstjenester"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen titel"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Indlæser anbefalinger"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medie"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Skjul den aktuelle session."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skjul"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Luk"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Genoptag"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Indstillinger"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Tjek appen"</string>

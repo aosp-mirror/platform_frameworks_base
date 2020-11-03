@@ -43,14 +43,14 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -596,9 +596,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private IntArray mDisplayAccessUIDs = new IntArray();
 
     /** All tokens used to put activities on this stack to sleep (including mOffToken) */
-    final ArrayList<ActivityTaskManagerInternal.SleepToken> mAllSleepTokens = new ArrayList<>();
-    /** The token acquired by ActivityStackSupervisor to put stacks on the display to sleep */
-    ActivityTaskManagerInternal.SleepToken mOffToken;
+    final ArrayList<RootWindowContainer.SleepToken> mAllSleepTokens = new ArrayList<>();
+    /** The token acquirer to put stacks on the display to sleep */
+    private final ActivityTaskManagerInternal.SleepTokenAcquirer mOffTokenAcquirer;
 
     private boolean mSleeping;
 
@@ -934,6 +934,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAtmService = mWmService.mAtmService;
         mDisplay = display;
         mDisplayId = display.getDisplayId();
+        mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
@@ -1495,6 +1496,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // intermediate orientation change, it is more stable to freeze the display.
                 return false;
             }
+            if (r.isState(RESUMED) && !r.getRootTask().mInResumeTopActivity) {
+                // If the activity is executing or has done the lifecycle callback, use normal
+                // rotation animation so the display info can be updated immediately (see
+                // updateDisplayAndOrientation). This prevents a compatibility issue such as
+                // calling setRequestedOrientation in Activity#onCreate and then get display info.
+                // If fixed rotation is applied, the display rotation will still be the old one,
+                // unless the client side gets the rotation again after the adjustments arrive.
+                return false;
+            }
         } else if (r != topRunningActivity()) {
             // If the transition has not started yet, the activity must be the top.
             return false;
@@ -1572,7 +1582,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // the heavy operations. This also benefits that the states of multiple activities
             // are handled together.
             r.linkFixedRotationTransform(prevRotatedLaunchingApp);
-            setFixedRotationLaunchingAppUnchecked(r, rotation);
+            if (r != mFixedRotationTransitionListener.mAnimatingRecents) {
+                // Only update the record for normal activity so the display orientation can be
+                // updated when the transition is done if it becomes the top. And the case of
+                // recents can be handled when the recents animation is finished.
+                setFixedRotationLaunchingAppUnchecked(r, rotation);
+            }
             return;
         }
 
@@ -3548,7 +3563,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
         return mWmService.mDisplayWindowSettings.shouldShowImeLocked(this)
-                || mWmService.mForceDesktopModeOnExternalDisplays;
+                || forceDesktopMode();
+    }
+
+    boolean forceDesktopMode() {
+        return mWmService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay && !isPrivate();
     }
 
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
@@ -4780,7 +4799,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean supportsSystemDecorations() {
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || mWmService.mForceDesktopModeOnExternalDisplays)
+                || forceDesktopMode())
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
@@ -4977,7 +4996,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
 
             // Apply restriction if necessary.
-            if (needsGestureExclusionRestrictions(w, mLastDispatchedSystemUiVisibility)) {
+            if (needsGestureExclusionRestrictions(w, false /* ignoreRequest */)) {
 
                 // Processes the region along the left edge.
                 remainingLeftRight[0] = addToGlobalAndConsumeLimit(local, outExclusion, leftEdge,
@@ -4994,7 +5013,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 outExclusion.op(middle, Op.UNION);
                 middle.recycle();
             } else {
-                boolean loggable = needsGestureExclusionRestrictions(w, 0 /* lastSysUiVis */);
+                boolean loggable = needsGestureExclusionRestrictions(w, true /* ignoreRequest */);
                 if (loggable) {
                     addToGlobalAndConsumeLimit(local, outExclusion, leftEdge,
                             Integer.MAX_VALUE, w, EXCLUSION_LEFT);
@@ -5016,17 +5035,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * @return Whether gesture exclusion area should be restricted from the window depending on the
-     *         current SystemUI visibility flags.
+     * Returns whether gesture exclusion area should be restricted from the window depending on the
+     * window/activity types and the requested navigation bar visibility and the behavior.
+     *
+     * @param win The target window.
+     * @param ignoreRequest If this is {@code true}, only the window/activity types are considered.
+     * @return {@code true} if the gesture exclusion restrictions are needed.
      */
-    private static boolean needsGestureExclusionRestrictions(WindowState win, int sysUiVisibility) {
+    private static boolean needsGestureExclusionRestrictions(WindowState win,
+            boolean ignoreRequest) {
         final int type = win.mAttrs.type;
-        final int stickyHideNavFlags =
-                SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         final boolean stickyHideNav =
-                (sysUiVisibility & stickyHideNavFlags) == stickyHideNavFlags;
-        return !stickyHideNav && type != TYPE_INPUT_METHOD && type != TYPE_NOTIFICATION_SHADE
-                && win.getActivityType() != ACTIVITY_TYPE_HOME;
+                !win.getRequestedInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                        && win.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+        return (!stickyHideNav || ignoreRequest) && type != TYPE_INPUT_METHOD
+                && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME;
     }
 
     /**
@@ -5042,7 +5065,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 && type != TYPE_APPLICATION_STARTING
                 && type != TYPE_NAVIGATION_BAR
                 && (attrs.flags & FLAG_NOT_TOUCHABLE) == 0
-                && needsGestureExclusionRestrictions(win, 0 /* sysUiVisibility */)
+                && needsGestureExclusionRestrictions(win, true /* ignoreRequest */)
                 && win.getDisplayContent().mDisplayPolicy.hasSideGestures();
     }
 
@@ -5168,11 +5191,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int displayId = mDisplay.getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             final int displayState = mDisplay.getState();
-            if (displayState == Display.STATE_OFF && mOffToken == null) {
-                mOffToken = mAtmService.acquireSleepToken("Display-off", displayId);
-            } else if (displayState == Display.STATE_ON && mOffToken != null) {
-                mOffToken.release();
-                mOffToken = null;
+            if (displayState == Display.STATE_OFF) {
+                mOffTokenAcquirer.acquire(mDisplayId);
+            } else if (displayState == Display.STATE_ON) {
+                mOffTokenAcquirer.release(mDisplayId);
             }
         }
         mWmService.requestTraversal();
@@ -5424,7 +5446,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayPolicy.release();
 
         if (!mAllSleepTokens.isEmpty()) {
-            mRootWindowContainer.mSleepTokens.removeAll(mAllSleepTokens);
+            mAllSleepTokens.forEach(token ->
+                    mRootWindowContainer.mSleepTokens.remove(token.mHashKey));
             mAllSleepTokens.clear();
             mAtmService.updateSleepIfNeededLocked();
         }
@@ -5641,6 +5664,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         private ActivityRecord mAnimatingRecents;
 
+        /** Whether {@link #mAnimatingRecents} is going to be the top activity. */
+        private boolean mRecentsWillBeTop;
+
         /**
          * If the recents activity has a fixed orientation which is different from the current top
          * activity, it will be rotated before being shown so we avoid a screen rotation animation
@@ -5666,10 +5692,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          * If {@link #mAnimatingRecents} still has fixed rotation, it should be moved to top so we
          * don't clear {@link #mFixedRotationLaunchingApp} that will be handled by transition.
          */
-        void onFinishRecentsAnimation(boolean moveRecentsToBack) {
+        void onFinishRecentsAnimation() {
             final ActivityRecord animatingRecents = mAnimatingRecents;
+            final boolean recentsWillBeTop = mRecentsWillBeTop;
             mAnimatingRecents = null;
-            if (!moveRecentsToBack) {
+            mRecentsWillBeTop = false;
+            if (recentsWillBeTop) {
                 // The recents activity will be the top, such as staying at recents list or
                 // returning to home (if home and recents are the same activity).
                 return;
@@ -5692,6 +5720,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
+        void notifyRecentsWillBeTop() {
+            mRecentsWillBeTop = true;
+        }
+
         /**
          * Return {@code true} if there is an ongoing animation to the "Recents" activity and this
          * activity as a fixed orientation so shouldn't be rotated.
@@ -5710,6 +5742,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // due to wait for previous activity to be paused if it supports PiP that ignores the
             // effect of resume-while-pausing.
             if (r == null || r == mAnimatingRecents) {
+                return;
+            }
+            if (mAnimatingRecents != null && mRecentsWillBeTop) {
+                // The activity is not the recents and it should be moved to back later, so it is
+                // better to keep its current appearance for the next transition. Otherwise the
+                // display orientation may be updated too early and the layout procedures at the
+                // end of finishing recents animation is skipped. That causes flickering because
+                // the surface of closing app hasn't updated to invisible.
                 return;
             }
             if (mFixedRotationLaunchingApp == null) {
@@ -5760,6 +5800,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
+        }
+
+        /**
+         * Notifies the remote insets controller that the top focused window has changed.
+         *
+         * @param packageName The name of the package that is open in the top focused window.
+         */
+        void topFocusedWindowChanged(String packageName) {
+            try {
+                mRemoteInsetsController.topFocusedWindowChanged(packageName);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to deliver package in top focused window change", e);
+            }
         }
 
         void notifyInsetsChanged() {

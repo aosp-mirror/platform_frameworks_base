@@ -191,6 +191,38 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         }
     }
 
+    /** Checks if a {@link MotionEvent} is an action to open the panel.
+     * @param e {@link MotionEvent} to check.
+     * @return true only if opening action.
+     */
+    protected boolean isOpeningAction(MotionEvent e) {
+        if (mAnimateDirection == POSITIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_DOWN;
+        }
+
+        if (mAnimateDirection == NEGATIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_UP;
+        }
+
+        return false;
+    }
+
+    /** Checks if a {@link MotionEvent} is an action to close the panel.
+     * @param e {@link MotionEvent} to check.
+     * @return true only if closing action.
+     */
+    protected boolean isClosingAction(MotionEvent e) {
+        if (mAnimateDirection == POSITIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_UP;
+        }
+
+        if (mAnimateDirection == NEGATIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_DOWN;
+        }
+
+        return false;
+    }
+
     /* ***************************************************************************************** *
      * Panel Animation
      * ***************************************************************************************** */
@@ -206,7 +238,6 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         }
 
         onAnimateCollapsePanel();
-        getOverlayViewGlobalStateController().setWindowFocusable(false);
         animatePanel(mClosingVelocity, /* isClosing= */ true);
     }
 
@@ -243,8 +274,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
      * Depending on certain conditions, determines whether to fully expand or collapse the panel.
      */
     protected void maybeCompleteAnimation(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_UP
-                && isPanelVisible()) {
+        if (isClosingAction(event) && isPanelVisible()) {
             if (mSettleClosePercentage < mPercentageFromEndingEdge) {
                 animatePanel(DEFAULT_FLING_VELOCITY, false);
             } else {
@@ -266,14 +296,17 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
             float from = getCurrentStartPosition(rect);
             if (from != to) {
                 animate(from, to, velocity, isClosing);
-                return;
             }
+
+            // If we swipe down the notification panel all the way to the bottom of the screen
+            // (i.e. from == to), then we have finished animating the panel.
+            return;
         }
 
         // We will only be here if the shade is being opened programmatically or via button when
         // height of the layout was not calculated.
-        ViewTreeObserver notificationTreeObserver = getLayout().getViewTreeObserver();
-        notificationTreeObserver.addOnGlobalLayoutListener(
+        ViewTreeObserver panelTreeObserver = getLayout().getViewTreeObserver();
+        panelTreeObserver.addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
@@ -381,7 +414,6 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
             getOverlayViewGlobalStateController().hideView(/* panelViewController= */ this);
         }
         getLayout().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        getOverlayViewGlobalStateController().setWindowFocusable(visible);
     }
 
     /* ***************************************************************************************** *
@@ -476,6 +508,11 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         return mIsTracking;
     }
 
+    /** Sets whether the panel is currently tracking or not. */
+    protected final void setIsTracking(boolean isTracking) {
+        mIsTracking = isTracking;
+    }
+
     /** Returns {@code true} if the panel is currently animating. */
     protected final boolean isAnimating() {
         return mIsAnimating;
@@ -514,7 +551,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
             }
             setPanelVisible(true);
 
-            // clips the view for the notification shade when the user scrolls to open.
+            // clips the view for the panel when the user scrolls to open.
             setViewClipBounds((int) event2.getRawY());
 
             // Initially the scroll starts with height being zero. This checks protects from divide
@@ -569,11 +606,11 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
                 boolean isInClosingDirection = mAnimateDirection * distanceY > 0;
 
                 // This check is to figure out if onScroll was called while swiping the card at
-                // bottom of the list. At that time we should not allow notification shade to
+                // bottom of the panel. At that time we should not allow panel to
                 // close. We are also checking for the upwards swipe gesture here because it is
-                // possible if a user is closing the notification shade and while swiping starts
+                // possible if a user is closing the panel and while swiping starts
                 // to open again but does not fling. At that time we should allow the
-                // notification shade to close fully or else it would stuck in between.
+                // panel to close fully or else it would stuck in between.
                 if (Math.abs(getLayout().getHeight() - y)
                         > SWIPE_DOWN_MIN_DISTANCE && isInClosingDirection) {
                     setViewClipBounds((int) y);

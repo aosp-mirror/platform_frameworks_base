@@ -14,7 +14,7 @@ import javax.inject.Inject
 class MediaHost @Inject constructor(
     private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
-    private val mediaDataFilter: MediaDataFilter,
+    private val mediaDataManager: MediaDataManager,
     private val mediaHostStatesManager: MediaHostStatesManager
 ) : MediaHostState by state {
     lateinit var hostView: UniqueObjectHostView
@@ -79,12 +79,12 @@ class MediaHost @Inject constructor(
                 // be a delay until the views and the controllers are initialized, leaving us
                 // with either a blank view or the controllers not yet initialized and the
                 // measuring wrong
-                mediaDataFilter.addListener(listener)
+                mediaDataManager.addListener(listener)
                 updateViewVisibility()
             }
 
             override fun onViewDetachedFromWindow(v: View?) {
-                mediaDataFilter.removeListener(listener)
+                mediaDataManager.removeListener(listener)
             }
         })
 
@@ -113,9 +113,9 @@ class MediaHost @Inject constructor(
 
     private fun updateViewVisibility() {
         visible = if (showsOnlyActiveMedia) {
-            mediaDataFilter.hasActiveMedia()
+            mediaDataManager.hasActiveMedia()
         } else {
-            mediaDataFilter.hasAnyMedia()
+            mediaDataManager.hasAnyMedia()
         }
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {

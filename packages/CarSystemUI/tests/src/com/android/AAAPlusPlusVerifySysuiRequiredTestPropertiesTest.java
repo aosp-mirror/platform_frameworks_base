@@ -33,6 +33,7 @@ import androidx.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
 
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.car.CarSystemUiTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,7 @@ import java.util.Collections;
  * test suite causes errors, such as the incorrect settings provider being cached.
  * For an example, see {@link com.android.systemui.DependencyTest}.
  */
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestCase {

@@ -63,6 +63,7 @@ android_test {
         "services.net",
     ],
     libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
         "android.test.runner",
         "android.test.base",
         "android.test.mock",

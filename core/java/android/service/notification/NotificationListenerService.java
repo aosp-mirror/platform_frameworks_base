@@ -1903,6 +1903,17 @@ public abstract class NotificationListenerService extends Service {
         /**
          * @hide
          */
+        public @NonNull Ranking withAudiblyAlertedInfo(@Nullable Ranking previous) {
+            if (previous != null && previous.mLastAudiblyAlertedMs > 0
+                    && this.mLastAudiblyAlertedMs <= 0) {
+                this.mLastAudiblyAlertedMs = previous.mLastAudiblyAlertedMs;
+            }
+            return this;
+        }
+
+        /**
+         * @hide
+         */
         public void populate(Ranking other) {
             populate(other.mKey,
                     other.mRank,

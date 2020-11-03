@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaRoute2Info;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -55,7 +56,6 @@ class BluetoothRouteProvider {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String HEARING_AID_ROUTE_ID_PREFIX = "HEARING_AID_";
-    private static BluetoothRouteProvider sInstance;
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     // Maps hardware address to BluetoothRouteInfo
@@ -79,19 +79,21 @@ class BluetoothRouteProvider {
     private final BroadcastReceiver mBroadcastReceiver = new BluetoothBroadcastReceiver();
     private final BluetoothProfileListener mProfileListener = new BluetoothProfileListener();
 
-    static synchronized BluetoothRouteProvider getInstance(@NonNull Context context,
+    /**
+     * Create an instance of {@link BluetoothRouteProvider}.
+     * It may return {@code null} if Bluetooth is not supported on this hardware platform.
+     */
+    @Nullable
+    static BluetoothRouteProvider createInstance(@NonNull Context context,
             @NonNull BluetoothRoutesUpdatedListener listener) {
         Objects.requireNonNull(context);
         Objects.requireNonNull(listener);
 
-        if (sInstance == null) {
-            BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (btAdapter == null) {
-                return null;
-            }
-            sInstance = new BluetoothRouteProvider(context, btAdapter, listener);
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (btAdapter == null) {
+            return null;
         }
-        return sInstance;
+        return new BluetoothRouteProvider(context, btAdapter, listener);
     }
 
     private BluetoothRouteProvider(Context context, BluetoothAdapter btAdapter,
@@ -103,7 +105,7 @@ class BluetoothRouteProvider {
         buildBluetoothRoutes();
     }
 
-    public void start() {
+    public void start(UserHandle user) {
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.A2DP);
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.HEARING_AID);
 
@@ -118,7 +120,8 @@ class BluetoothRouteProvider {
         addEventReceiver(BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED,
                 deviceStateChangedReceiver);
 
-        mContext.registerReceiver(mBroadcastReceiver, mIntentFilter, null, null);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, user,
+                mIntentFilter, null, null);
     }
 
     /**

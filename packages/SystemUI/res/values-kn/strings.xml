@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ಮುಂದುವರಿಸಿ"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ರದ್ದುಮಾಡಿ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ಅಳಿಸಿ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ, ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅಳಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ಅನುಮತಿಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲವಾಗಿದೆ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
@@ -125,7 +123,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ಪರದೆಯನ್ನು ತಿರುಗಿಸಿ"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ಸಮಗ್ರ ನೋಟ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"ಹುಡುಕಿ"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ಕ್ಯಾಮರಾ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ಫೋನ್"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
@@ -389,7 +387,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ವೈ-ಫೈ ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ಪ್ರಕಾಶಮಾನ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ಸ್ವಯಂ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣಗಳನ್ನು ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ ಮೋಡ್"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ಮುಗಿದಿದೆ"</string>
@@ -441,7 +439,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ಪೂರ್ಣಗೊಳ್ಳುವವರೆಗೆ"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ಚಾರ್ಜ್‌ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"ನೆಟ್‌ವರ್ಕ್\n ವೀಕ್ಷಿಸಬಹುದಾಗಿರುತ್ತದೆ"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"ಹುಡುಕಿ"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಮೇಲಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಎಡಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ಅಲಾರಾಂಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಹಾಗೂ ನೀವು ಸೂಚಿಸಿರುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ನೀವು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
@@ -502,10 +500,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಆಫ್ ಮಾಡಿ"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>, ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಗೋಚರಿಸುವ ಅಥವಾ ರೆಕಾರ್ಡಿಂಗ್ ಅಥವಾ ಬಿತ್ತರಿಸುವಾಗ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಆಗುವ ಎಲ್ಲಾ ಮಾಹಿತಿಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರುತ್ತವೆ. ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಆಡಿಯೊ ಪ್ಲೇಬ್ಯಾಕ್‌ನಂತಹ ಮಾಹಿತಿಯನ್ನು ಇದು ಒಳಗೊಂಡಿದೆ."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಬಿತ್ತರಿಸುವಾಗ ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ ಕಾಣಿಸುವ ಸಕಲ ಮಾಹಿತಿಗೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಪ್ರವೇಶ ಹೊಂದಿರುತ್ತದೆ. ಇದು ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಆಡಿಯೊ ಪ್ಲೇಬ್ಯಾಕ್‌ನಂತಹ ಮಾಹಿತಿಯನ್ನು ಕೂಡ ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ಈ ವೈಶಿಷ್ಟ್ಯವು ಒದಗಿಸುವ ಸೇವೆಗಳು, ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಗೋಚರಿಸುವ ಅಥವಾ ರೆಕಾರ್ಡಿಂಗ್ ಅಥವಾ ಬಿತ್ತರಿಸುವಾಗ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಆಗುವ ಎಲ್ಲಾ ಮಾಹಿತಿಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರುತ್ತವೆ. ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಆಡಿಯೊ ಪ್ಲೇಬ್ಯಾಕ್‌ನಂತಹ ಮಾಹಿತಿಯನ್ನು ಇದು ಒಳಗೊಂಡಿದೆ."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ರೆಕಾರ್ಡಿಂಗ್ ಅಥವಾ ಬಿತ್ತರಿಸುವಿಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಬೇಕೆ?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಬಳಸಿಕೊಂಡು ರೆಕಾರ್ಡಿಂಗ್ ಅಥವಾ ಬಿತ್ತರಿಸುವುದನ್ನು ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಮೂಲಕ ರೆಕಾರ್ಡಿಂಗ್, ಬಿತ್ತರಿಸುವುದನ್ನು ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ನಿರ್ವಹಿಸಿ"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"50% ಮೇಲಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"30% ಮೇಲಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"ಕೆಳಗಿನ ಪೂರ್ಣ ಪರದೆ"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ಸ್ಥಳ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. ಎಡಿಟ್ ಮಾಡಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ಸೇರಿಸಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ಸರಿಸಿ"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ಅನ್ನು <xliff:g id="POSITION">%2$d</xliff:g> ಗೆ ಸೇರಿಸಿ"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ಅನ್ನು <xliff:g id="POSITION">%2$d</xliff:g> ಗೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ಟೈಲ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ಕೊನೆಯಲ್ಲಿ ಟೈಲ್ ಸೇರಿಸಿ"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ಟೈಲ್ ಸರಿಸಿ"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ಇಲ್ಲಿಗೆ ಸರಿಸಿ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ಸ್ಥಾನಕ್ಕೆ ಸೇರಿಸಿ"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ಸ್ಥಾನ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳ ಎಡಿಟರ್."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ಅಧಿಸೂಚನೆ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"ವಿಭಜಿಸಿದ ಪರದೆಯಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ಹಿಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ಫೋನ್ ಬಿಸಿಯಾಗಿದ್ದರಿಂದ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ಈಗ ನಿಮ್ಮ ಫೋನ್ ಎಂದಿನಂತೆ ಕೆಲಸ ಮಾಡುತ್ತಿದೆ"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ನಿಮ್ಮ ಫೋನ್ ಈಗ ಎಂದಿನಂತೆ ರನ್ ಆಗುತ್ತಿದೆ.\nಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ನಿಮ್ಮ ಫೋನ್ ತುಂಬಾ ಬಿಸಿಯಾಗಿತ್ತು, ತಣ್ಣಗಾಗಲು ಅದು ತಾನಾಗಿ ಆಫ್ ಆಗಿದೆ. ಈಗ ನಿಮ್ಮ ಫೋನ್ ಎಂದಿನಂತೆ ಕೆಲಸ ಮಾಡುತ್ತಿದೆ.\n\nನಿಮ್ಮ ಫೋನ್ ಬಿಸಿಯಾಗಲು ಕಾರಣಗಳು:\n	• ಹೆಚ್ಚು ಸಂಪನ್ಮೂಲ ಉಪಯೋಗಿಸುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಬಳಕೆ (ಉದಾ, ಗೇಮಿಂಗ್, ವೀಡಿಯೊ/ನ್ಯಾವಿಗೇಶನ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು)\n	• ದೊಡ್ಡ ಫೈಲ್‌ಗಳ ಡೌನ್‌ಲೋಡ್ ಅಥವಾ ಅಪ್‌ಲೋಡ್\n	• ಅಧಿಕ ಉಷ್ಣಾಂಶದಲ್ಲಿ ಫೋನಿನ ಬಳಕೆ"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ಫೋನ್ ಬಿಸಿಯಾಗುತ್ತಿದೆ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸಲಾಗುತ್ತದೆ\nಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ನಿಮ್ಮ ಫೋನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಣ್ಣಗಾಗಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಈಗಲೂ ಬಳಸಬಹುದಾಗಿರುತ್ತದೆ, ಆದರೆ ಇದು ನಿಧಾನವಾಗಿರಬಹುದು.\n\nಒಮ್ಮೆ ನಿಮ್ಮ ಫೋನ್ ತಣ್ಣಗಾದ ನಂತರ ಇದು ಸಾಮಾನ್ಯ ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ಚಾರ್ಜರ್ ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ಈ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡುತ್ತಿರುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ. ಪವರ್ ಅಡಾಪ್ಟರ್ ಅನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ ಮತ್ತು ಕೇಬಲ್ ಬೆಚ್ಚಗಿರಬೇಕೆಂದು ಜಾಗ್ರತೆ ವಹಿಸಿ."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ಕಾಳಜಿ ಹಂತಗಳನ್ನು ನೋಡಿ"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ಅನ್ನು <xliff:g id="APP">%1$s</xliff:g> ಬಳಸುತ್ತಿದೆ."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%s</xliff:g> ಅನ್ನು ಆ್ಯಪ್‌ಗಳು ಬಳಸುತ್ತಿವೆ."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ಮತ್ತು "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"ಕ್ಯಾಮರಾ"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"ಸ್ಥಳ"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"ಮೈಕ್ರೋಫೋನ್‌"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್"</string>
     <string name="device_services" msgid="1549944177856658705">"ಸಾಧನ ಸೇವೆಗಳು"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ಯಾವುದೇ ಶೀರ್ಷಿಕೆಯಿಲ್ಲ"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ಮಾಧ್ಯಮ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ಪ್ರಸ್ತುತ ಸೆಶನ್ ಅನ್ನು ಮರೆಮಾಡಿ."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ಮರೆಮಾಡಿ"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ಪುನರಾರಂಭಿಸಿ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ನಿಷ್ಕ್ರಿಯ, ಆ್ಯಪ್ ಪರಿಶೀಲಿಸಿ"</string>

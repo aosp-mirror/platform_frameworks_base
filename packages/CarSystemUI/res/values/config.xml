@@ -24,11 +24,44 @@
 
     <bool name="config_enableFullscreenUserSwitcher">true</bool>
 
-    <!-- configure which system ui bars should be displayed -->
+    <!-- Configure which system bars should be displayed. -->
     <bool name="config_enableTopNavigationBar">true</bool>
     <bool name="config_enableLeftNavigationBar">false</bool>
     <bool name="config_enableRightNavigationBar">false</bool>
     <bool name="config_enableBottomNavigationBar">true</bool>
+
+    <!-- Configure the type of each system bar. Each system bar must have a unique type. -->
+    <!--    STATUS_BAR = 0-->
+    <!--    NAVIGATION_BAR = 1-->
+    <!--    STATUS_BAR_EXTRA = 2-->
+    <!--    NAVIGATION_BAR_EXTRA = 3-->
+    <integer name="config_topSystemBarType">0</integer>
+    <integer name="config_leftSystemBarType">2</integer>
+    <integer name="config_rightSystemBarType">3</integer>
+    <integer name="config_bottomSystemBarType">1</integer>
+
+    <!-- Configure the relative z-order among the system bars. When two system bars overlap (e.g.
+         if both top bar and left bar are enabled, it creates an overlapping space in the upper left
+         corner), the system bar with the higher z-order takes the overlapping space and padding is
+         applied to the other bar.-->
+    <!-- NOTE: If two overlapping system bars have the same z-order, SystemBarConfigs will throw a
+         RuntimeException, since their placing order cannot be determined. Bars that do not overlap
+         are allowed to have the same z-order. -->
+    <!-- NOTE: If the z-order of a bar is 10 or above, it will also appear on top of HUN's.    -->
+    <integer name="config_topSystemBarZOrder">1</integer>
+    <integer name="config_leftSystemBarZOrder">0</integer>
+    <integer name="config_rightSystemBarZOrder">0</integer>
+    <integer name="config_bottomSystemBarZOrder">10</integer>
+
+    <!-- If set to true, the corresponding system bar will be hidden when Keyboard (IME) appears.
+         NOTE: hideBottomSystemBarKeyboard must not be overlaid directly here. To change its value,
+         overlay config_automotiveHideNavBarForKeyboard in framework/base/core/res/res. -->
+    <bool name="config_hideTopSystemBarForKeyboard">false</bool>
+    <bool name="config_hideBottomSystemBarForKeyboard">
+        @*android:bool/config_automotiveHideNavBarForKeyboard
+    </bool>
+    <bool name="config_hideLeftSystemBarForKeyboard">false</bool>
+    <bool name="config_hideRightSystemBarForKeyboard">false</bool>
 
     <!-- Disable normal notification rendering; we handle that ourselves -->
     <bool name="config_renderNotifications">false</bool>

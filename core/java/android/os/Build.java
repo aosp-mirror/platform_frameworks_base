@@ -135,8 +135,8 @@ public class Build {
      *
      * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
      * restrictions, and apps are recommended to use resettable identifiers (see <a
-     * href="c"> Best practices for unique identifiers</a>). This method can be invoked if one of
-     * the following requirements is met:
+     * href="/training/articles/user-data-ids">Best practices for unique identifiers</a>). This
+     * method can be invoked if one of the following requirements is met:
      * <ul>
      *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
      *     is a privileged permission that can only be granted to apps preloaded on the device.
@@ -1006,15 +1006,33 @@ public class Build {
 
         /**
          * Q.
-         * <p>
-         * <em>Why? Why, to give you a taste of your future, a preview of things
-         * to come. Con permiso, Capitan. The hall is rented, the orchestra
-         * engaged. It's now time to see if you can dance.</em>
+         *
+         * <p>Applications targeting this or a later release will get these new changes in behavior.
+         * For more information about this release, see the
+         * <a href="/about/versions/10">Android 10 overview</a>.</p>
+         * <ul>
+         * <li><a href="/about/versions/10/behavior-changes-all">Behavior changes: all apps</a></li>
+         * <li><a href="/about/versions/10/behavior-changes-10">Behavior changes: apps targeting API
+         * 29+</a></li>
+         * </ul>
+         *
          */
         public static final int Q = 29;
 
         /**
          * R.
+         *
+         * <p>Applications targeting this or a later release will get these new changes in behavior.
+         * For more information about this release, see the
+         * <a href="/about/versions/11">Android 11 overview</a>.</p>
+         * <ul>
+         * <li><a href="/about/versions/11/behavior-changes-all">Behavior changes: all apps</a></li>
+         * <li><a href="/about/versions/11/behavior-changes-11">Behavior changes: Apps targeting
+         * Android 11</a></li>
+         * <li><a href="/about/versions/11/non-sdk-11">Updates to non-SDK interface restrictions
+         * in Android 11</a></li>
+         * </ul>
+         *
          */
         public static final int R = 30;
     }

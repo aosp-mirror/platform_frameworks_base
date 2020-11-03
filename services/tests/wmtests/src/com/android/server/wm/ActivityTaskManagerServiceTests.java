@@ -225,5 +225,27 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
         mockSession.finishMocking();
     }
+
+    @Test
+    public void testResumeNextActivityOnCrashedAppDied() {
+        mSupervisor.beginDeferResume();
+        final ActivityRecord homeActivity = new ActivityBuilder(mService)
+                .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
+                .build();
+        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true).build();
+        mSupervisor.endDeferResume();
+        // Assume the activity is finishing and hidden because it was crashed.
+        activity.finishing = true;
+        activity.mVisibleRequested = false;
+        activity.setVisible(false);
+        activity.getRootTask().mPausingActivity = activity;
+        homeActivity.setState(ActivityStack.ActivityState.PAUSED, "test");
+
+        // Even the visibility states are invisible, the next activity should be resumed because
+        // the crashed activity was pausing.
+        mService.mInternal.handleAppDied(activity.app, false /* restarting */,
+                null /* finishInstrumentationCallback */);
+        assertEquals(ActivityStack.ActivityState.RESUMED, homeActivity.getState());
+    }
 }
 

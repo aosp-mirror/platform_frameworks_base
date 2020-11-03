@@ -50,16 +50,15 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_ui_mode_night);
-    private final UiModeManager mUiModeManager;
+    private UiModeManager mUiModeManager;
     private final BatteryController mBatteryController;
     private final LocationController mLocationController;
-
     @Inject
     public UiModeNightTile(QSHost host, ConfigurationController configurationController,
             BatteryController batteryController, LocationController locationController) {
         super(host);
         mBatteryController = batteryController;
-        mUiModeManager = mContext.getSystemService(UiModeManager.class);
+        mUiModeManager = host.getUserContext().getSystemService(UiModeManager.class);
         mLocationController = locationController;
         configurationController.observe(getLifecycle(), this);
         batteryController.observe(getLifecycle(), this);

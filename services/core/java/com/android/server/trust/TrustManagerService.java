@@ -123,6 +123,8 @@ public class TrustManagerService extends SystemService {
     private static final String TRUST_TIMEOUT_ALARM_TAG = "TrustManagerService.trustTimeoutForUser";
     private static final long TRUST_TIMEOUT_IN_MILLIS = 4 * 60 * 60 * 1000;
 
+    private static final String PRIV_NAMESPACE = "http://schemas.android.com/apk/prv/res/android";
+
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
     private final Receiver mReceiver = new Receiver();
@@ -808,8 +810,8 @@ public class TrustManagerService extends SystemService {
             TypedArray sa = res
                     .obtainAttributes(attrs, com.android.internal.R.styleable.TrustAgent);
             cn = sa.getString(com.android.internal.R.styleable.TrustAgent_settingsActivity);
-            canUnlockProfile = sa.getBoolean(
-                    com.android.internal.R.styleable.TrustAgent_unlockProfile, false);
+            canUnlockProfile = attrs.getAttributeBooleanValue(
+                    PRIV_NAMESPACE, "unlockProfile", false);
             sa.recycle();
         } catch (PackageManager.NameNotFoundException e) {
             caughtException = e;

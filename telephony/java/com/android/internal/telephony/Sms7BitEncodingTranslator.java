@@ -65,13 +65,7 @@ public class Sms7BitEncodingTranslator {
             return "";
         }
 
-        if (!mIs7BitTranslationTableLoaded) {
-            mTranslationTableCommon = new SparseIntArray();
-            mTranslationTableGSM = new SparseIntArray();
-            mTranslationTableCDMA = new SparseIntArray();
-            load7BitTranslationTableFromXml();
-            mIs7BitTranslationTableLoaded = true;
-        }
+        ensure7BitTranslationTableLoaded();
 
         if ((mTranslationTableCommon != null && mTranslationTableCommon.size() > 0) ||
                 (mTranslationTableGSM != null && mTranslationTableGSM.size() > 0) ||
@@ -115,6 +109,8 @@ public class Sms7BitEncodingTranslator {
          */
         int translation = -1;
 
+        ensure7BitTranslationTableLoaded();
+
         if (mTranslationTableCommon != null) {
             translation = mTranslationTableCommon.get(c, -1);
         }
@@ -152,6 +148,18 @@ public class Sms7BitEncodingTranslator {
         }
         else {
             return GsmAlphabet.isGsmSeptets(c);
+        }
+    }
+
+    private static void ensure7BitTranslationTableLoaded() {
+        synchronized (Sms7BitEncodingTranslator.class) {
+            if (!mIs7BitTranslationTableLoaded) {
+                mTranslationTableCommon = new SparseIntArray();
+                mTranslationTableGSM = new SparseIntArray();
+                mTranslationTableCDMA = new SparseIntArray();
+                load7BitTranslationTableFromXml();
+                mIs7BitTranslationTableLoaded = true;
+            }
         }
     }
 
