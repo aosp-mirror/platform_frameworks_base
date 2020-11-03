@@ -57,6 +57,7 @@ import com.android.server.wm.WindowManagerInternal;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -466,8 +467,13 @@ public class CameraServiceProxy extends SystemService
                     streamProtos[i].firstCaptureLatencyMillis = streamStats.getStartLatencyMs();
                     streamProtos[i].maxHalBuffers = streamStats.getMaxHalBuffers();
                     streamProtos[i].maxAppBuffers = streamStats.getMaxAppBuffers();
+                    streamProtos[i].histogramType = streamStats.getHistogramType();
+                    streamProtos[i].histogramBins = streamStats.getHistogramBins();
+                    streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
 
                     if (CameraServiceProxy.DEBUG) {
+                        String histogramTypeName =
+                                cameraHistogramTypeToString(streamProtos[i].histogramType);
                         Slog.v(TAG, "Stream " + i + ": width " + streamProtos[i].width
                                 + ", height " + streamProtos[i].height
                                 + ", format " + streamProtos[i].format
@@ -478,7 +484,12 @@ public class CameraServiceProxy extends SystemService
                                 + ", firstCaptureLatencyMillis "
                                 + streamProtos[i].firstCaptureLatencyMillis
                                 + ", maxHalBuffers " + streamProtos[i].maxHalBuffers
-                                + ", maxAppBuffers " + streamProtos[i].maxAppBuffers);
+                                + ", maxAppBuffers " + streamProtos[i].maxAppBuffers
+                                + ", histogramType " + histogramTypeName
+                                + ", histogramBins "
+                                + Arrays.toString(streamProtos[i].histogramBins)
+                                + ", histogramCounts "
+                                + Arrays.toString(streamProtos[i].histogramCounts));
                     }
                 }
             }
@@ -795,6 +806,16 @@ public class CameraServiceProxy extends SystemService
             default: break;
         }
         return "CAMERA_FACING_UNKNOWN";
+    }
+
+    private static String cameraHistogramTypeToString(int cameraHistogramType) {
+        switch (cameraHistogramType) {
+            case CameraStreamStats.HISTOGRAM_TYPE_CAPTURE_LATENCY:
+                return "HISTOGRAM_TYPE_CAPTURE_LATENCY";
+            default:
+                break;
+        }
+        return "HISTOGRAM_TYPE_UNKNOWN";
     }
 
 }
