@@ -44,6 +44,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.provider.Settings.Global.DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS;
 import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -197,7 +198,6 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -576,6 +576,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final PackageManagerInternal mPmInternal;
     private final TestUtilityService mTestUtilityService;
 
+    final DisplayWindowSettingsProvider mDisplayWindowSettingsProvider;
     final DisplayWindowSettings mDisplayWindowSettings;
 
     /** If the system should display notifications for apps displaying an alert window. */
@@ -799,6 +800,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
+        private final Uri mIgnoreVendorDisplaySettingsUri = Settings.Global.getUriFor(
+                DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS);
 
         public SettingsObserver() {
             super(new Handler());
@@ -822,6 +825,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mIgnoreVendorDisplaySettingsUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -863,6 +868,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mRenderShadowsInCompositorUri.equals(uri)) {
                 setShadowRenderer();
+                return;
+            }
+
+            if (mIgnoreVendorDisplaySettingsUri.equals(uri)) {
+                updateIgnoreVendorDisplaySettings();
                 return;
             }
 
@@ -954,6 +964,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
 
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
+        }
+
+        void updateIgnoreVendorDisplaySettings() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final boolean ignoreVendorSettings = Settings.Global.getInt(resolver,
+                    DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS, 0) != 0;
+            synchronized (mGlobalLock) {
+                mDisplayWindowSettingsProvider.setVendorSettingsIgnored(ignoreVendorSettings);
+                mRoot.forAllDisplays(display -> {
+                    mDisplayWindowSettings.applySettingsToDisplayLocked(display);
+                    display.reconfigureDisplayLocked();
+                });
+            }
         }
     }
 
@@ -1213,7 +1236,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mSurfaceFactory = surfaceFactory;
         mTransaction = mTransactionFactory.get();
 
-        mDisplayWindowSettings = new DisplayWindowSettings(this);
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
@@ -1311,6 +1333,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mForceDesktopModeOnExternalDisplays = Settings.Global.getInt(resolver,
                 DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
+
+        final boolean ignoreVendorDisplaySettings = Settings.Global.getInt(resolver,
+                DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS, 0) != 0;
+        mDisplayWindowSettingsProvider = new DisplayWindowSettingsProvider();
+        mDisplayWindowSettingsProvider.setVendorSettingsIgnored(ignoreVendorDisplaySettings);
+        mDisplayWindowSettings = new DisplayWindowSettings(this, mDisplayWindowSettingsProvider);
 
         IntentFilter filter = new IntentFilter();
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.

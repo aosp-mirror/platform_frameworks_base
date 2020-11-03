@@ -20,12 +20,16 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.provider.Settings.Global.DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
@@ -37,6 +41,9 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+
+import java.util.List;
 
 /**
  * Test for {@link WindowManagerService.SettingsObserver}.
@@ -121,6 +128,36 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
             mWm.mSettingsObserver.onChange(false, enableSizeCompatFreeformUri);
 
             assertEquals(mWm.mAtmService.mSizeCompatFreeform, enableSizeCompatFreeform);
+        }
+    }
+
+    @Test
+    public void testEnabledIgnoreVendorDisplaySettings() {
+        try (SettingsSession ignoreVendorDisplaySettingsSession = new
+                SettingsSession(DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS)) {
+            final boolean ignoreVendorDisplaySettings =
+                    !ignoreVendorDisplaySettingsSession.getSetting();
+            final Uri ignoreVendorDisplaySettingUri =
+                    ignoreVendorDisplaySettingsSession.setSetting(ignoreVendorDisplaySettings);
+
+            clearInvocations(mWm.mRoot);
+            clearInvocations(mWm.mDisplayWindowSettings);
+
+            mWm.mSettingsObserver.onChange(false /* selfChange */, ignoreVendorDisplaySettingUri);
+
+            assertEquals(mWm.mDisplayWindowSettingsProvider.getVendorSettingsIgnored(),
+                    ignoreVendorDisplaySettings);
+
+            ArgumentCaptor<DisplayContent> captor =
+                    ArgumentCaptor.forClass(DisplayContent.class);
+            verify(mWm.mDisplayWindowSettings, times(mWm.mRoot.mChildren.size()))
+                    .applySettingsToDisplayLocked(captor.capture());
+            List<DisplayContent> configuredDisplays = captor.getAllValues();
+            for (DisplayContent dc : mWm.mRoot.mChildren) {
+                assertTrue(configuredDisplays.contains(dc));
+            }
+
+            verify(mWm.mRoot, atLeastOnce()).performSurfacePlacement();
         }
     }
 
