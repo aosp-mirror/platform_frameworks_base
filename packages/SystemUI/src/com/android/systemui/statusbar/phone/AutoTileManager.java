@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
 import com.android.systemui.util.UserAwareController;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -60,6 +61,7 @@ public class AutoTileManager implements UserAwareController {
     protected final Context mContext;
     protected final QSTileHost mHost;
     protected final Handler mHandler;
+    protected final SecureSettings mSecureSettings;
     protected final AutoAddTracker mAutoTracker;
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
@@ -71,6 +73,7 @@ public class AutoTileManager implements UserAwareController {
     public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
             QSTileHost host,
             @Background Handler handler,
+            SecureSettings secureSettings,
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
@@ -78,6 +81,7 @@ public class AutoTileManager implements UserAwareController {
             CastController castController) {
         mContext = context;
         mHost = host;
+        mSecureSettings = secureSettings;
         mCurrentUser = mHost.getUserContext().getUser();
         mAutoTracker = autoAddTrackerBuilder.setUserId(mCurrentUser.getIdentifier()).build();
         mHandler = handler;
@@ -170,7 +174,7 @@ public class AutoTileManager implements UserAwareController {
                 String spec = split[1];
                 // Populate all the settings. As they may not have been added in other users
                 AutoAddSetting s = new AutoAddSetting(
-                        mContext, mHandler, setting, mCurrentUser.getIdentifier(), spec);
+                        mSecureSettings, mHandler, setting, mCurrentUser.getIdentifier(), spec);
                 mAutoAddSettingList.add(s);
             } else {
                 Log.w(TAG, "Malformed item in array: " + tile);
@@ -321,13 +325,13 @@ public class AutoTileManager implements UserAwareController {
         private final String mSpec;
 
         AutoAddSetting(
-                Context context,
+                SecureSettings secureSettings,
                 Handler handler,
                 String setting,
                 int userId,
                 String tileSpec
         ) {
-            super(context, handler, setting, userId);
+            super(secureSettings, handler, setting, userId);
             mSpec = tileSpec;
         }
 

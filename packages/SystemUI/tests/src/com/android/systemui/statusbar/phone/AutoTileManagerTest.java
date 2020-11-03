@@ -22,31 +22,22 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableContentResolver;
-import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -61,6 +52,8 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,10 +93,12 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Mock private Context mUserContext;
 
     private AutoTileManager mAutoTileManager;
+    private SecureSettings mSecureSettings;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mSecureSettings = new FakeSettings();
 
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsAutoAdd,
@@ -119,7 +114,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
         when(mUserContext.getUser()).thenReturn(UserHandle.of(USER));
 
-        mAutoTileManager = createAutoTileManager(new MyContextWrapper(mContext));
+        mAutoTileManager = createAutoTileManager(mContext);
         mAutoTileManager.init();
     }
 
@@ -138,6 +133,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             CastController castController) {
         return new AutoTileManager(context, autoAddTrackerBuilder, mQsTileHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
+                mSecureSettings,
                 hotspotController,
                 dataSaverController,
                 managedProfileController,
@@ -342,7 +338,6 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Test
     public void testSettingTileAdded_onChanged() {
         changeValue(TEST_SETTING, 1);
-        waitForIdleSync();
         verify(mAutoAddTracker).setTileAdded(TEST_SPEC);
         verify(mQsTileHost).addTile(TEST_SPEC);
     }
@@ -350,7 +345,6 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Test
     public void testSettingTileAddedComponentAtEnd_onChanged() {
         changeValue(TEST_SETTING_COMPONENT, 1);
-        waitForIdleSync();
         verify(mAutoAddTracker).setTileAdded(TEST_CUSTOM_SPEC);
         verify(mQsTileHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT)
             , /* end */ true);
@@ -359,10 +353,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Test
     public void testSettingTileAdded_onlyOnce() {
         changeValue(TEST_SETTING, 1);
-        waitForIdleSync();
-        TestableLooper.get(this).processAllMessages();
         changeValue(TEST_SETTING, 2);
-        waitForIdleSync();
         verify(mAutoAddTracker).setTileAdded(TEST_SPEC);
         verify(mQsTileHost).addTile(TEST_SPEC);
     }
@@ -370,7 +361,6 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Test
     public void testSettingTileNotAdded_onChangedTo0() {
         changeValue(TEST_SETTING, 0);
-        waitForIdleSync();
         verify(mAutoAddTracker, never()).setTileAdded(TEST_SPEC);
         verify(mQsTileHost, never()).addTile(TEST_SPEC);
     }
@@ -380,7 +370,6 @@ public class AutoTileManagerTest extends SysuiTestCase {
         when(mAutoAddTracker.isAdded(TEST_SPEC)).thenReturn(true);
 
         changeValue(TEST_SETTING, 1);
-        waitForIdleSync();
         verify(mAutoAddTracker, never()).setTileAdded(TEST_SPEC);
         verify(mQsTileHost, never()).addTile(TEST_SPEC);
     }
@@ -401,28 +390,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     // Will only notify if it's listening
     private void changeValue(String key, int value) {
-        SecureSetting s = mAutoTileManager.getSecureSettingForKey(key);
-        Settings.Secure.putInt(mContext.getContentResolver(), key, value);
-        if (s != null && s.isListening()) {
-            s.onChange(false);
-        }
-    }
-
-    class MyContextWrapper extends ContextWrapper {
-
-        private TestableContentResolver mSpiedTCR;
-
-        MyContextWrapper(TestableContext context) {
-            super(context);
-            mSpiedTCR = spy(context.getContentResolver());
-            doNothing().when(mSpiedTCR).registerContentObserver(any(), anyBoolean(), any(),
-                    anyInt());
-            doNothing().when(mSpiedTCR).unregisterContentObserver(any());
-        }
-
-        @Override
-        public ContentResolver getContentResolver() {
-            return mSpiedTCR;
-        }
+        mSecureSettings.putIntForUser(key, value, USER);
+        TestableLooper.get(this).processAllMessages();
     }
 }
