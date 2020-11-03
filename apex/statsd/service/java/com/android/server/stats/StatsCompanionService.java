@@ -54,6 +54,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -194,40 +195,38 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 int numRecords = 0;
                 // Add in all the apps for every user/profile.
                 for (UserHandle userHandle : users) {
-                    List<PackageInfo> pi =
-                            pm.getInstalledPackagesAsUser(PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                            | PackageManager.MATCH_ANY_USER
-                                            | PackageManager.MATCH_APEX,
-                                    userHandle.getIdentifier());
-                    for (int j = 0; j < pi.size(); j++) {
-                        if (pi.get(j).applicationInfo != null) {
+                    List<PackageInfo> packagesPlusApex = getAllPackagesWithApex(pm, userHandle);
+                    for (int j = 0; j < packagesPlusApex.size(); j++) {
+                        if (packagesPlusApex.get(j).applicationInfo != null) {
                             String installer;
                             try {
-                                installer = pm.getInstallerPackageName(pi.get(j).packageName);
+                                installer = pm.getInstallerPackageName(
+                                        packagesPlusApex.get(j).packageName);
                             } catch (IllegalArgumentException e) {
                                 installer = "";
                             }
                             long applicationInfoToken =
                                     output.start(ProtoOutputStream.FIELD_TYPE_MESSAGE
                                             | ProtoOutputStream.FIELD_COUNT_REPEATED
-                                                    | APPLICATION_INFO_FIELD_ID);
+                                            | APPLICATION_INFO_FIELD_ID);
                             output.write(ProtoOutputStream.FIELD_TYPE_INT32
-                                    | ProtoOutputStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
-                                            pi.get(j).applicationInfo.uid);
+                                            | ProtoOutputStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
+                                    packagesPlusApex.get(j).applicationInfo.uid);
                             output.write(ProtoOutputStream.FIELD_TYPE_INT64
-                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
-                                            | VERSION_FIELD_ID, pi.get(j).getLongVersionCode());
+                                            | ProtoOutputStream.FIELD_COUNT_SINGLE
+                                            | VERSION_FIELD_ID,
+                                    packagesPlusApex.get(j).getLongVersionCode());
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                            | ProtoOutputStream.FIELD_COUNT_SINGLE
+                                            | VERSION_STRING_FIELD_ID,
+                                    packagesPlusApex.get(j).versionName);
                             output.write(ProtoOutputStream.FIELD_TYPE_STRING
                                     | ProtoOutputStream.FIELD_COUNT_SINGLE
-                                    | VERSION_STRING_FIELD_ID,
-                                            pi.get(j).versionName);
+                                    | PACKAGE_NAME_FIELD_ID, packagesPlusApex.get(j).packageName);
                             output.write(ProtoOutputStream.FIELD_TYPE_STRING
-                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
-                                            | PACKAGE_NAME_FIELD_ID, pi.get(j).packageName);
-                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
-                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
+                                            | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | INSTALLER_FIELD_ID,
-                                                    installer == null ? "" : installer);
+                                    installer == null ? "" : installer);
                             numRecords++;
                             output.end(applicationInfoToken);
                         }
@@ -243,6 +242,26 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 backgroundThread.interrupt();
             }
         });
+    }
+
+    private static List<PackageInfo> getAllPackagesWithApex(PackageManager pm,
+            UserHandle userHandle) {
+        // We want all the uninstalled packages because uninstalled package uids can still be logged
+        // to statsd.
+        List<PackageInfo> allPackages = new ArrayList<>(
+                pm.getInstalledPackagesAsUser(PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_ANY_USER,
+                        userHandle.getIdentifier()));
+        // We make a second query to package manager for the apex modules because package manager
+        // returns both installed and uninstalled apexes with
+        // PackageManager.MATCH_UNINSTALLED_PACKAGES flag. We only want active apexes because
+        // inactive apexes can conflict with active ones.
+        for (PackageInfo packageInfo : pm.getInstalledPackages(PackageManager.MATCH_APEX)) {
+            if (packageInfo.isApex) {
+                allPackages.add(packageInfo);
+            }
+        }
+        return allPackages;
     }
 
     private static class WakelockThread extends Thread {
