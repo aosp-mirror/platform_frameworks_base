@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 
 import android.annotation.NonNull;
@@ -40,6 +41,7 @@ import com.android.systemui.tuner.TunerService;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Controller for {@link QSPanel}.
@@ -74,11 +76,13 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
+            @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory) {
-        super(view, qstileHost, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
+        super(view, qstileHost, qsCustomizerController, mediaHost, metricsLogger, uiEventLogger,
+                dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
@@ -94,6 +98,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Override
     public void onInit() {
+        super.init();
         mQsCustomizerController.init();
         mBrightnessSlider.init();
     }
@@ -163,11 +168,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         } else {
             mBrightnessController.unregisterCallbacks();
         }
-    }
-
-    /** */
-    public MediaHost getMediaHost() {
-        return mView.getMediaHost();
     }
 
     /** */
