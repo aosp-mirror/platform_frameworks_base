@@ -58,7 +58,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
     protected final MediaHost mMediaHost;
-    private final MetricsLogger mMetricsLogger;
+    protected final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
     private final DumpManager mDumpManager;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();

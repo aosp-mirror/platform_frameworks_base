@@ -35,11 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.RemeasuringLinearLayout;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -77,7 +74,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected BrightnessSlider mToggleSliderController;
 
     private final H mHandler = new H();
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     /** Whether or not the QS media player feature is enabled. */
     protected boolean mUsingMediaPlayer;
     private int mVisualMarginStart;
@@ -104,7 +100,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Nullable
     private ViewGroup mHeaderContainer;
     private PageIndicator mFooterPageIndicator;
-    private boolean mGridContentVisible = true;
     private int mContentMarginStart;
     private int mContentMarginEnd;
     private int mVisualTilePadding;
@@ -367,15 +362,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         mDivider = findViewById(R.id.divider);
     }
 
-
-    /**
-     * Sets the listening state of the current layout to the state of the view. Used after
-     * switching layouts.
-     */
-    public void reSetLayoutListening() {
-        mTileLayout.setListening(mListening);
-    }
-
     private void updateHorizontalLinearLayoutMargins() {
         if (mHorizontalLinearLayout != null && !displayMediaMarginsOnMedia()) {
             LayoutParams lp = (LayoutParams) mHorizontalLinearLayout.getLayoutParams();
@@ -634,14 +620,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         fireScanStateChanged(scanState);
     }
 
-    void setGridContentVisibility(boolean visible) {
-        int newVis = visible ? VISIBLE : INVISIBLE;
-        setVisibility(newVis);
-        if (mGridContentVisible != visible) {
-            mMetricsLogger.visibility(MetricsEvent.QS_PANEL, newVis);
-        }
-        mGridContentVisible = visible;
-    }
     private void fireShowingDetail(DetailAdapter detail, int x, int y) {
         if (mCallback != null) {
             mCallback.onShowingDetail(detail, x, y);
@@ -869,7 +847,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
 
         /**
-         * Set the max number of collums to show
+         * Set the max number of columns to show
          *
          * @param maxColumns the maximum
          *

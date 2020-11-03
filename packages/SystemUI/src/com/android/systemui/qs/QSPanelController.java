@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
@@ -58,6 +59,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final BrightnessSlider mBrightnessSlider;
 
+    private BrightnessMirrorController mBrightnessMirrorController;
+    private boolean mGridContentVisible = true;
+
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
         @Override
@@ -70,7 +74,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             updateBrightnessMirror();
         }
     };
-    private BrightnessMirrorController mBrightnessMirrorController;
 
     private final BrightnessMirrorController.BrightnessMirrorListener mBrightnessMirrorListener =
             mirror -> updateBrightnessMirror();
@@ -243,7 +246,12 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** */
     public void setGridContentVisibility(boolean visible) {
-        mView.setGridContentVisibility(visible);
+        int newVis = visible ? View.VISIBLE : View.INVISIBLE;
+        setVisibility(newVis);
+        if (mGridContentVisible != visible) {
+            mMetricsLogger.visibility(MetricsEvent.QS_PANEL, newVis);
+        }
+        mGridContentVisible = visible;
     }
 
     public boolean isLayoutRtl() {
