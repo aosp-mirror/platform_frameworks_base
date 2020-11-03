@@ -44,6 +44,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -156,7 +157,7 @@ public class DozeSensors {
                         findSensorWithType(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
                         true /* settingDef */,
-                        authController.isUdfpsEnrolled() /* configured */,
+                        authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser()),
                         DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
