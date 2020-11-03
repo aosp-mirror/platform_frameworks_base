@@ -569,7 +569,8 @@ public class StagingManager {
         }
     }
 
-    private void resumeSession(@NonNull PackageInstallerSession session) {
+    private void resumeSession(@NonNull PackageInstallerSession session)
+            throws PackageManagerException {
         Slog.d(TAG, "Resuming session " + session.sessionId);
 
         final boolean hasApex = sessionContainsApex(session);
@@ -633,10 +634,8 @@ public class StagingManager {
             if (apexSessionInfo == null) {
                 final String errorMsg = "apexd did not know anything about a staged session "
                         + "supposed to be activated";
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        errorMsg);
-                abortCheckpoint(session.sessionId, errorMsg);
-                return;
+                throw new PackageManagerException(
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
             }
             if (isApexSessionFailed(apexSessionInfo)) {
                 String errorMsg = "APEX activation failed. Check logcat messages from apexd "
@@ -645,10 +644,8 @@ public class StagingManager {
                     errorMsg = "Session reverted due to crashing native process: "
                             + mNativeFailureReason;
                 }
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        errorMsg);
-                abortCheckpoint(session.sessionId, errorMsg);
-                return;
+                throw new PackageManagerException(
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
             }
             if (!apexSessionInfo.isActivated && !apexSessionInfo.isSuccess) {
                 // Apexd did not apply the session for some unknown reason. There is no
@@ -656,42 +653,20 @@ public class StagingManager {
                 // it as failed.
                 final String errorMsg = "Staged session " + session.sessionId + "at boot "
                         + "didn't activate nor fail. Marking it as failed anyway.";
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        errorMsg);
-                abortCheckpoint(session.sessionId, errorMsg);
-                return;
+                throw new PackageManagerException(
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
             }
         }
         // Handle apk and apk-in-apex installation
-        try {
-            if (hasApex) {
-                checkInstallationOfApkInApexSuccessful(session);
-                snapshotAndRestoreForApexSession(session);
-                Slog.i(TAG, "APEX packages in session " + session.sessionId
-                        + " were successfully activated. Proceeding with APK packages, if any");
-            }
-            // The APEX part of the session is activated, proceed with the installation of APKs.
-            Slog.d(TAG, "Installing APK packages in session " + session.sessionId);
-            installApksInSession(session);
-        } catch (PackageManagerException e) {
-            session.setStagedSessionFailed(e.error, e.getMessage());
-            abortCheckpoint(session.sessionId, e.getMessage());
-
-            // If checkpoint is not supported, we have to handle failure for one staged session.
-            if (!hasApex) {
-                return;
-            }
-
-            if (!mApexManager.revertActiveSessions()) {
-                Slog.e(TAG, "Failed to abort APEXd session");
-            } else {
-                Slog.e(TAG,
-                        "Successfully aborted apexd session. Rebooting device in order to revert "
-                                + "to the previous state of APEXd.");
-                mPowerManager.reboot(null);
-            }
-            return;
+        if (hasApex) {
+            checkInstallationOfApkInApexSuccessful(session);
+            snapshotAndRestoreForApexSession(session);
+            Slog.i(TAG, "APEX packages in session " + session.sessionId
+                    + " were successfully activated. Proceeding with APK packages, if any");
         }
+        // The APEX part of the session is activated, proceed with the installation of APKs.
+        Slog.d(TAG, "Installing APK packages in session " + session.sessionId);
+        installApksInSession(session);
 
         Slog.d(TAG, "Marking session " + session.sessionId + " as applied");
         session.setStagedSessionApplied();
@@ -725,6 +700,25 @@ public class StagingManager {
             }
         }
         return ret;
+    }
+
+    void onInstallationFailure(PackageInstallerSession session, PackageManagerException e) {
+        session.setStagedSessionFailed(e.error, e.getMessage());
+        abortCheckpoint(session.sessionId, e.getMessage());
+
+        // If checkpoint is not supported, we have to handle failure for one staged session.
+        if (!sessionContainsApex(session)) {
+            return;
+        }
+
+        if (!mApexManager.revertActiveSessions()) {
+            Slog.e(TAG, "Failed to abort APEXd session");
+        } else {
+            Slog.e(TAG,
+                    "Successfully aborted apexd session. Rebooting device in order to revert "
+                            + "to the previous state of APEXd.");
+            mPowerManager.reboot(null);
+        }
     }
 
     @NonNull
@@ -1190,7 +1184,16 @@ public class StagingManager {
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
-            resumeSession(session);
+            try {
+                resumeSession(session);
+            } catch (PackageManagerException e) {
+                onInstallationFailure(session, e);
+            } catch (Exception e) {
+                Slog.e(TAG, "Staged install failed due to unhandled exception", e);
+                onInstallationFailure(session, new PackageManagerException(
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Staged install failed due to unhandled exception: " + e));
+            }
         }
     }
 
