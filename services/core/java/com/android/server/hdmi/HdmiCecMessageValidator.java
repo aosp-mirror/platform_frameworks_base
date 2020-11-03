@@ -126,11 +126,21 @@ public class HdmiCecMessageValidator {
         addValidationInfo(
                 Constants.MESSAGE_CLEAR_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
         addValidationInfo(
+                Constants.MESSAGE_CLEAR_DIGITAL_TIMER, new DigitalTimerValidator(), DEST_DIRECT);
+        addValidationInfo(
                 Constants.MESSAGE_CLEAR_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
         addValidationInfo(
                 Constants.MESSAGE_SET_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
         addValidationInfo(
+                Constants.MESSAGE_SET_DIGITAL_TIMER, new DigitalTimerValidator(), DEST_DIRECT);
+        addValidationInfo(
                 Constants.MESSAGE_SET_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SET_TIMER_PROGRAM_TITLE, new AsciiValidator(1, 14), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_TIMER_CLEARED_STATUS,
+                new TimerClearedStatusValidator(),
+                DEST_DIRECT);
 
         // Messages for the System Information.
         FixedLengthValidator oneByteValidator = new FixedLengthValidator(1);
@@ -460,6 +470,95 @@ public class HdmiCecMessageValidator {
     }
 
     /**
+     * Check if the given value is a ARIB type. A valid value is one which falls within the range
+     * description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value Digital Broadcast System
+     * @return true if the Digital Broadcast System is ARIB type
+     */
+    private boolean isAribDbs(int value) {
+        return (value == 0x00 || isWithinRange(value, 0x08, 0x0A));
+    }
+
+    /**
+     * Check if the given value is a ATSC type. A valid value is one which falls within the range
+     * description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value Digital Broadcast System
+     * @return true if the Digital Broadcast System is ATSC type
+     */
+    private boolean isAtscDbs(int value) {
+        return (value == 0x01 || isWithinRange(value, 0x10, 0x12));
+    }
+
+    /**
+     * Check if the given value is a DVB type. A valid value is one which falls within the range
+     * description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value Digital Broadcast System
+     * @return true if the Digital Broadcast System is DVB type
+     */
+    private boolean isDvbDbs(int value) {
+        return (value == 0x02 || isWithinRange(value, 0x18, 0x1B));
+    }
+
+    /**
+     * Check if the given value is a valid Digital Broadcast System. A valid value is one which
+     * falls within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     *
+     * @param value Digital Broadcast System
+     * @return true if the Digital Broadcast System is valid
+     */
+    private boolean isValidDigitalBroadcastSystem(int value) {
+        return (isAribDbs(value) || isAtscDbs(value) || isDvbDbs(value));
+    }
+
+    /**
+     * Check if the given value is a valid Digital Service Identification. A valid value is one
+     * which falls within the range description defined in CEC 1.4 Specification : Operand
+     * Descriptions (Section 17)
+     *
+     * @param params Digital Timer Message parameters
+     * @param offset start offset of Digital Service Identification
+     * @return true if the Digital Service Identification is valid
+     */
+    private boolean isValidDigitalServiceIdentification(byte[] params, int offset) {
+        // MSB contains Service Identification Method
+        int serviceIdentificationMethod = params[offset] & 0x80;
+        // Last 7 bits contains Digital Broadcast System
+        int digitalBroadcastSystem = params[offset] & 0x7F;
+        offset = offset + 1;
+        if (serviceIdentificationMethod == 0x00) {
+            // Services identified by Digital IDs
+            if (isAribDbs(digitalBroadcastSystem)) {
+                // Validate ARIB type have 6 byte data
+                return params.length - offset >= 6;
+            } else if (isAtscDbs(digitalBroadcastSystem)) {
+                // Validate ATSC type have 4 byte data
+                return params.length - offset >= 4;
+            } else if (isDvbDbs(digitalBroadcastSystem)) {
+                // Validate DVB type have 6 byte data
+                return params.length - offset >= 6;
+            }
+        } else if (serviceIdentificationMethod == 0x80) {
+            // Services identified by Channel
+            if (isValidDigitalBroadcastSystem(digitalBroadcastSystem)) {
+                // First 6 bits contain Channel Number Format
+                int channelNumberFormat = params[offset] & 0xFC;
+                if (channelNumberFormat == 0x04) {
+                    // Validate it contains 1-part Channel Number data (16 bits)
+                    return params.length - offset >= 3;
+                } else if (channelNumberFormat == 0x08) {
+                    // Validate it contains Major Channel Number and Minor Channel Number (26 bits)
+                    return params.length - offset >= 4;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Check if the given value is a valid External Plug. A valid value is one which falls within
      * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
      *
@@ -650,6 +749,30 @@ public class HdmiCecMessageValidator {
     }
 
     /**
+     * Check if the given Digital Timer message parameters are valid. Valid parameters should adhere
+     * to message description of Digital Timer defined in CEC 1.4 Specification : Message
+     * Descriptions for Timer Programming Feature (CEC Table 12)
+     */
+    private class DigitalTimerValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 11) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(
+                    isValidDayOfMonth(params[0]) // Day of Month
+                            && isValidMonthOfYear(params[1]) // Month of Year
+                            && isValidHour(params[2]) // Start Time - Hour
+                            && isValidMinute(params[3]) // Start Time - Minute
+                            && isValidDurationHours(params[4]) // Duration - Duration Hours
+                            && isValidMinute(params[5]) // Duration - Minute
+                            && isValidRecordingSequence(params[6]) // Recording Sequence
+                            && isValidDigitalServiceIdentification(
+                                    params, 7)); // Digital Service Identification
+        }
+    }
+
+    /**
      * Check if the given External Timer message parameters are valid. Valid parameters should
      * adhere to message description of External Timer defined in CEC 1.4 Specification : Message
      * Descriptions for Timer Programming Feature (CEC Table 12)
@@ -669,6 +792,21 @@ public class HdmiCecMessageValidator {
                             && isValidMinute(params[5]) // Duration - Minute
                             && isValidRecordingSequence(params[6]) // Recording Sequence
                             && isValidExternalSource(params, 7)); // External Source
+        }
+    }
+
+    /**
+     * Check if the given timer cleared status parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     */
+    private class TimerClearedStatusValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isWithinRange(params[0], 0x00, 0x02) || (params[0] & 0xFF) == 0x80);
         }
     }
 }
