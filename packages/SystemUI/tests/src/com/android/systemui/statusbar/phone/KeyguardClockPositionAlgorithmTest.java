@@ -384,7 +384,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
                 mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, mPreferredClockY,
                 mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG, false /* bypassEnabled */,
-                0 /* unlockedStackScrollerPadding */);
+                0 /* unlockedStackScrollerPadding */, false /* udfpsEnrolled */);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }

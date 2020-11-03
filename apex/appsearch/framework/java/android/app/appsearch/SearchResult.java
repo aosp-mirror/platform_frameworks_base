@@ -49,19 +49,22 @@ public final class SearchResult {
     @NonNull
     private final Bundle mDocumentBundle;
 
+    /** Cache of the inflated document. Comes from inflating mDocumentBundle at first use. */
     @Nullable
     private GenericDocument mDocument;
 
-    @Nullable
-    private final List<Bundle> mMatchBundles;
-
     /**
-     * Contains a list of Snippets that matched the request. Only populated when requested in
-     * both {@link SearchSpec.Builder#setSnippetCount(int)}
-     * and {@link SearchSpec.Builder#setSnippetCountPerProperty(int)}.
+     * Contains a list of MatchInfo bundles that matched the request.
+     *
+     * Only populated when requested in both {@link SearchSpec.Builder#setSnippetCount} and
+     * {@link SearchSpec.Builder#setSnippetCountPerProperty}.
      *
      * @see #getMatches()
      */
+    @NonNull
+    private final List<Bundle> mMatchBundles;
+
+    /** Cache of the inflated matches. Comes from inflating mMatchBundles at first use. */
     @Nullable
     private List<MatchInfo> mMatches;
 
@@ -70,7 +73,7 @@ public final class SearchResult {
     public SearchResult(@NonNull Bundle bundle) {
         mBundle = Preconditions.checkNotNull(bundle);
         mDocumentBundle = Preconditions.checkNotNull(bundle.getBundle(DOCUMENT_FIELD));
-        mMatchBundles = bundle.getParcelableArrayList(MATCHES_FIELD);
+        mMatchBundles = Preconditions.checkNotNull(bundle.getParcelableArrayList(MATCHES_FIELD));
     }
 
     /** @hide */
@@ -93,19 +96,16 @@ public final class SearchResult {
     }
 
     /**
-     * Contains a list of Snippets that matched the request. Only populated when requested in
-     * both {@link SearchSpec.Builder#setSnippetCount(int)}
-     * and {@link SearchSpec.Builder#setSnippetCountPerProperty(int)}.
+     * Contains a list of Snippets that matched the request.
      *
-     * @return  List of matches based on {@link SearchSpec}, if snippeting is disabled and this
-     * method is called it will return {@code null}. Users can also restrict snippet population
-     * using {@link SearchSpec.Builder#setSnippetCount} and
-     * {@link SearchSpec.Builder#setSnippetCountPerProperty(int)}, for all results after that
-     * value this method will return {@code null}.
+     * @return List of matches based on {@link SearchSpec}. If snippeting is disabled using
+     * {@link SearchSpec.Builder#setSnippetCount} or
+     * {@link SearchSpec.Builder#setSnippetCountPerProperty}, for all results after that
+     * value, this method returns an empty list.
      */
-    @Nullable
+    @NonNull
     public List<MatchInfo> getMatches() {
-        if (mMatchBundles != null && mMatches == null) {
+        if (mMatches == null) {
             mMatches = new ArrayList<>(mMatchBundles.size());
             for (int i = 0; i < mMatchBundles.size(); i++) {
                 MatchInfo matchInfo = new MatchInfo(getDocument(), mMatchBundles.get(i));
@@ -119,8 +119,8 @@ public final class SearchResult {
      * Snippet: It refers to a substring of text from the content of document that is returned as a
      * part of search result.
      * This class represents a match objects for any Snippets that might be present in
-     * {@link SearchResults} from query. Using this class user can get the full text, exact matches
-     * and Snippets of document content for a given match.
+     * {@link SearchResults} from query. Using this class
+     * user can get the full text, exact matches and Snippets of document content for a given match.
      *
      * <p>Class Example 1:
      * A document contains following text in property subject:

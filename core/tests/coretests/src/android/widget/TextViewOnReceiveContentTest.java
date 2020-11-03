@@ -63,12 +63,12 @@ import org.mockito.Mockito;
 
 /**
  * Tests for {@link TextViewOnReceiveContentCallback}. Most of the test cases are in the CTS test
- * {@link android.widget.cts.TextViewOnReceiveContentCallbackTest}. This class tests some internal
+ * {@link android.widget.cts.TextViewOnReceiveContentTest}. This class tests some internal
  * implementation details, e.g. fallback to the keyboard image API.
  */
 @MediumTest
 @RunWith(AndroidJUnit4.class)
-public class TextViewOnReceiveContentCallbackTest {
+public class TextViewOnReceiveContentTest {
     private static final Uri SAMPLE_CONTENT_URI = Uri.parse("content://com.example/path");
 
     @Rule

@@ -4255,18 +4255,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         mInjector.getPackageManager().getPackagesForUid(
                                 mInjector.binderGetCallingUid()))
                 .write();
-        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        final CallerIdentity caller = getCallerIdentity();
 
-        if (parent) {
-            enforceProfileOwnerOrSystemUser();
-        }
-        enforceUserUnlocked(callingUserId);
+        Preconditions.checkCallAuthorization(!parent || (isDeviceOwner(caller)
+                        || isProfileOwner(caller) || isSystemUid(caller)),
+                "Only profile owner, device owner and system may call this method.");
+        enforceUserUnlocked(caller.getUserId());
         mContext.enforceCallingOrSelfPermission(
                 REQUEST_PASSWORD_COMPLEXITY,
                 "Must have " + REQUEST_PASSWORD_COMPLEXITY + " permission.");
 
         synchronized (getLockObject()) {
-            final int credentialOwner = getCredentialOwner(callingUserId, parent);
+            final int credentialOwner = getCredentialOwner(caller.getUserId(), parent);
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return metrics == null ? PASSWORD_COMPLEXITY_NONE : metrics.determineComplexity();
         }
@@ -7299,7 +7299,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean hasDeviceOwner() {
-        enforceDeviceOwnerOrManageUsers();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
         return mOwners.hasDeviceOwner();
     }
 
@@ -8353,32 +8354,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean hasCrossUsersPermission(CallerIdentity caller, int userHandle) {
         return (userHandle == caller.getUserId()) || isSystemUid(caller) || isRootUid(caller)
                 || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS);
-    }
-
-    private void enforceDeviceOwnerOrManageUsers() {
-        final CallerIdentity caller = getCallerIdentity();
-        if (isDeviceOwner(caller)) {
-            return;
-        }
-        Preconditions.checkCallAuthorization(canManageUsers(caller));
-    }
-
-    private void enforceProfileOwnerOrSystemUser() {
-        final CallerIdentity caller = getCallerIdentity();
-        if (isDeviceOwner(caller) || isProfileOwner(caller)) {
-            return;
-        }
-        Preconditions.checkState(isSystemUid(caller),
-                "Only profile owner, device owner and system may call this method.");
-    }
-
-    private void enforceProfileOwnerOrFullCrossUsersPermission(CallerIdentity caller,
-            int userId) {
-        if ((userId == caller.getUserId()) && (isProfileOwner(caller) || isDeviceOwner(caller))) {
-            // Device Owner/Profile Owner may access the user it runs on.
-            return;
-        }
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
     }
 
     private boolean canUserUseLockTaskLocked(int userId) {
@@ -12458,7 +12433,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-        enforceDeviceOwnerOrManageUsers();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
         synchronized (getLockObject()) {
             final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
             return deviceOwnerAdmin == null ? null : deviceOwnerAdmin.organizationName;
@@ -13605,19 +13581,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public long getLastSecurityLogRetrievalTime() {
-        enforceDeviceOwnerOrManageUsers();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
         return getUserData(UserHandle.USER_SYSTEM).mLastSecurityLogRetrievalTime;
      }
 
     @Override
     public long getLastBugReportRequestTime() {
-        enforceDeviceOwnerOrManageUsers();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
         return getUserData(UserHandle.USER_SYSTEM).mLastBugReportRequestTime;
      }
 
     @Override
     public long getLastNetworkLogRetrievalTime() {
-        enforceDeviceOwnerOrManageUsers();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
         return getUserData(UserHandle.USER_SYSTEM).mLastNetworkLogsRetrievalTime;
     }
 
@@ -13721,15 +13700,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isCurrentInputMethodSetByOwner() {
-        enforceProfileOwnerOrSystemUser();
-        return getUserData(mInjector.userHandleGetCallingUserId()).mCurrentInputMethodSet;
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwner(caller) || isSystemUid(caller),
+                "Only profile owner, device owner and system may call this method.");
+        return getUserData(caller.getUserId()).mCurrentInputMethodSet;
     }
 
     @Override
     public StringParceledListSlice getOwnerInstalledCaCerts(@NonNull UserHandle user) {
         final int userId = user.getIdentifier();
         final CallerIdentity caller = getCallerIdentity();
-        enforceProfileOwnerOrFullCrossUsersPermission(caller, userId);
+        Preconditions.checkCallAuthorization((userId == caller.getUserId())
+                || isProfileOwner(caller) || isDeviceOwner(caller)
+                || hasFullCrossUsersPermission(caller, userId));
+
         synchronized (getLockObject()) {
             return new StringParceledListSlice(
                     new ArrayList<>(getUserData(userId).mOwnerInstalledCaCerts));

@@ -20,7 +20,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
@@ -92,7 +91,7 @@ public class FullBackup {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static public native int backupToTar(String packageName, String domain,
             String linkdomain, String rootpath, String path, FullBackupDataOutput output);
 

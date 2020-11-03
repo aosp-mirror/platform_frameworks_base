@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -244,6 +245,13 @@ class UdfpsController implements DozeReceiver {
         mView.dozeTimeTick();
     }
 
+    /**
+     * @return where the UDFPS exists on the screen in pixels.
+     */
+    public RectF getSensorLocation() {
+        return mView.getSensorRect();
+    }
+
     private void setShowOverlay(boolean show) {
         if (show == mIsOverlayRequested) {
             return;
@@ -337,7 +345,7 @@ class UdfpsController implements DozeReceiver {
      * This is intented to be called in response to a sensor that triggers an AOD interrupt for the
      * fingerprint sensor.
      */
-    void onAodInterrupt(int screenX, int screenY) {
+    void onAodInterrupt(int screenX, int screenY, float major, float minor) {
         if (mIsAodInterruptActive) {
             return;
         }
@@ -348,7 +356,7 @@ class UdfpsController implements DozeReceiver {
         mCancelAodTimeoutAction = mFgExecutor.executeDelayed(this::onCancelAodInterrupt,
                 AOD_INTERRUPT_TIMEOUT_MILLIS);
         // using a hard-coded value for major and minor until it is available from the sensor
-        onFingerDown(screenX, screenY, 13.0f, 13.0f);
+        onFingerDown(screenX, screenY, minor, major);
     }
 
     /**

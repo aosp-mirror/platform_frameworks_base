@@ -41,6 +41,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableResources;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -114,8 +115,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         when(mTransaction.remove(any())).thenReturn(mTransaction);
         when(mTransaction.setGeometry(any(), any(), any(),
                 anyInt())).thenReturn(mTransaction);
-        mResources = Mockito.spy(mContext.getResources());
-        when(mContext.getResources()).thenReturn(mResources);
+        mResources = getContext().getOrCreateTestableResources().getResources();
         mWindowMagnificationController = new WindowMagnificationController(mContext,
                 mHandler, mSfVsyncFrameProvider,
                 mMirrorWindowControl, mTransaction, mWindowMagnifierCallback);
@@ -222,7 +222,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
     }
 
-
     @Test
     public void onDensityChanged_enabled_updateDimensionsAndResetWindowMagnification() {
         mInstrumentation.runOnMainSync(() -> {
@@ -309,5 +308,42 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         verify(mWindowManager).updateViewLayout(eq(mMirrorView), any());
+    }
+
+    @Test
+    public void enableWindowMagnification_hasA11yWindowTitle() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        ArgumentCaptor<WindowManager.LayoutParams> paramsArgumentCaptor = ArgumentCaptor.forClass(
+                WindowManager.LayoutParams.class);
+        verify(mWindowManager).addView(eq(mMirrorView), paramsArgumentCaptor.capture());
+        assertEquals(getContext().getResources().getString(
+                com.android.internal.R.string.android_system_label),
+                paramsArgumentCaptor.getValue().accessibilityTitle);
+    }
+
+    @Test
+    public void onLocaleChanged_enabled_updateA11yWindowTitle() {
+        final String newA11yWindowTitle = "new a11y window title";
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+        final TestableResources testableResources = getContext().getOrCreateTestableResources();
+        testableResources.addOverride(com.android.internal.R.string.android_system_label,
+                newA11yWindowTitle);
+        when(mContext.getResources()).thenReturn(testableResources.getResources());
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_LOCALE);
+        });
+
+        ArgumentCaptor<WindowManager.LayoutParams> paramsArgumentCaptor = ArgumentCaptor.forClass(
+                WindowManager.LayoutParams.class);
+        verify(mWindowManager).updateViewLayout(eq(mMirrorView), paramsArgumentCaptor.capture());
+        assertEquals(newA11yWindowTitle, paramsArgumentCaptor.getValue().accessibilityTitle);
     }
 }

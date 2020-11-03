@@ -187,6 +187,7 @@ import android.window.ClientWindowFrames;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
@@ -653,6 +654,9 @@ public final class ViewRootImpl implements ViewParent,
     private final ImeFocusController mImeFocusController;
 
     private ScrollCaptureConnection mScrollCaptureConnection;
+
+    private final BackgroundBlurDrawable.Aggregator mBlurRegionAggregator =
+            new BackgroundBlurDrawable.Aggregator(this);
 
     /**
      * @return {@link ImeFocusController} for this instance.
@@ -3819,6 +3823,8 @@ public final class ViewRootImpl implements ViewParent,
     private HardwareRenderer.FrameCompleteCallback createFrameCompleteCallback(Handler handler,
             boolean reportNextDraw, ArrayList<Runnable> commitCallbacks) {
         return frameNr -> {
+            mBlurRegionAggregator.dispatchBlurTransactionIfNeeded(frameNr);
+
             // Use a new transaction here since mRtBLASTSyncTransaction can only be accessed by
             // the render thread and mSurfaceChangedTransaction can only be accessed by the UI
             // thread. The temporary transaction is used so mRtBLASTSyncTransaction can be merged
@@ -3849,7 +3855,8 @@ public final class ViewRootImpl implements ViewParent,
                 .captureFrameCommitCallbacks();
         final boolean needFrameCompleteCallback =
                 mNextDrawUseBLASTSyncTransaction || mReportNextDraw
-                        || (commitCallbacks != null && commitCallbacks.size() > 0);
+                        || (commitCallbacks != null && commitCallbacks.size() > 0)
+                        || mBlurRegionAggregator.hasRegions();
         if (needFrameCompleteCallback) {
             mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(
                     createFrameCompleteCallback(mAttachInfo.mHandler, mReportNextDraw,
@@ -9913,6 +9920,36 @@ public final class ViewRootImpl implements ViewParent,
                 t.merge(mRtBLASTSyncTransaction);
             }
         }
+    }
+
+    /**
+     * Sends a list of blur regions to SurfaceFlinger, tagged with a frame.
+     *
+     * @param regionCopy List of regions
+     * @param frameNumber Frame where it should be applied (or current when using BLAST)
+     */
+    public void dispatchBlurRegions(float[][] regionCopy, long frameNumber) {
+        final SurfaceControl surfaceControl = getSurfaceControl();
+        if (!surfaceControl.isValid()) {
+            return;
+        }
+        if (useBLAST()) {
+            synchronized (getBlastTransactionLock()) {
+                getBLASTSyncTransaction().setBlurRegions(surfaceControl, regionCopy);
+            }
+        } else {
+            SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+            transaction.setBlurRegions(surfaceControl, regionCopy);
+            transaction.deferTransactionUntil(surfaceControl, getSurfaceControl(), frameNumber);
+            transaction.apply();
+        }
+    }
+
+    /**
+     * Creates a background blur drawable for the backing {@link Surface}.
+     */
+    public BackgroundBlurDrawable createBackgroundBlurDrawable() {
+        return mBlurRegionAggregator.createBackgroundBlurDrawable(mContext);
     }
 
     SurfaceControl.Transaction getBLASTSyncTransaction() {

@@ -209,6 +209,9 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     map<int64_t, uint64_t> newStateProtoHashes;
     vector<sp<MetricProducer>> newMetricProducers;
     unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<AnomalyTracker>> newAnomalyTrackers;
+    unordered_map<int64_t, int> newAlertTrackerMap;
+    vector<sp<AlarmTracker>> newPeriodicAlarmTrackers;
     mTagIds.clear();
     mConditionToMetricMap.clear();
     mTrackerToMetricMap.clear();
@@ -221,11 +224,13 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
             mConfigKey, config, mUidMap, mPullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, currentTimeNs, mAllAtomMatchingTrackers, mAtomMatchingTrackerMap,
             mAllConditionTrackers, mConditionTrackerMap, mAllMetricProducers, mMetricProducerMap,
-            mStateProtoHashes, mTagIds, newAtomMatchingTrackers, newAtomMatchingTrackerMap,
-            newConditionTrackers, newConditionTrackerMap, newMetricProducers, newMetricProducerMap,
-            mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
-            mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
-            mMetricIndexesWithActivation, newStateProtoHashes, mNoReportMetricIds);
+            mAllAnomalyTrackers, mAlertTrackerMap, mStateProtoHashes, mTagIds,
+            newAtomMatchingTrackers, newAtomMatchingTrackerMap, newConditionTrackers,
+            newConditionTrackerMap, newMetricProducers, newMetricProducerMap, newAnomalyTrackers,
+            newAlertTrackerMap, newPeriodicAlarmTrackers, mConditionToMetricMap,
+            mTrackerToMetricMap, mTrackerToConditionMap, mActivationAtomTrackerToMetricMap,
+            mDeactivationAtomTrackerToMetricMap, mMetricIndexesWithActivation, newStateProtoHashes,
+            mNoReportMetricIds);
     mAllAtomMatchingTrackers = newAtomMatchingTrackers;
     mAtomMatchingTrackerMap = newAtomMatchingTrackerMap;
     mAllConditionTrackers = newConditionTrackers;
@@ -233,6 +238,9 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     mAllMetricProducers = newMetricProducers;
     mMetricProducerMap = newMetricProducerMap;
     mStateProtoHashes = newStateProtoHashes;
+    mAllAnomalyTrackers = newAnomalyTrackers;
+    mAlertTrackerMap = newAlertTrackerMap;
+    mAllPeriodicAlarmTrackers = newPeriodicAlarmTrackers;
     return mConfigValid;
 }
 

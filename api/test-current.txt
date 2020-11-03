@@ -290,6 +290,7 @@ package android.app {
     method @NonNull public android.content.res.Configuration getConfiguration();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
     method @NonNull public android.window.WindowContainerToken getToken();
+    method public boolean hasParentTask();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
@@ -1801,6 +1802,7 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getSupportedRadioAccessFamily();
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);

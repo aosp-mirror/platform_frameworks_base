@@ -100,6 +100,9 @@ interface IFingerprintService {
     // Determine if a user has at least one enrolled fingerprint
     boolean hasEnrolledFingerprints(int userId, String opPackageName);
 
+    // Determine if a user has at least one enrolled fingerprint in any of the specified sensors
+    boolean hasEnrolledTemplatesForAnySensor(int userId, in List<FingerprintSensorPropertiesInternal> sensors, String opPackageName);
+
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int userId);
 

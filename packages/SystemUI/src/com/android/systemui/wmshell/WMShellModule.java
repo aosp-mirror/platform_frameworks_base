@@ -131,10 +131,9 @@ public class WMShellModule {
             PipMenuActivityController menuActivityController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
-            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
-            SystemWindows systemWindows) {
+            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsHandler,
                 menuActivityController, pipSurfaceTransactionHelper, splitScreenOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer, systemWindows);
+                displayController, pipUiEventLogger, shellTaskOrganizer);
     }
 }

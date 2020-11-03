@@ -208,7 +208,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /** Lock to protect internal data access */
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     /** Internal connection to the package manager */
     private final PackageManagerInternal mPackageManagerInt;
@@ -271,13 +271,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private PermissionPolicyInternal mPermissionPolicyInternal;
 
     /**
-     * For each foreground/background permission the mapping:
-     * Background permission -> foreground permissions
-     */
-    @GuardedBy("mLock")
-    private ArrayMap<String, List<String>> mBackgroundPermissions;
-
-    /**
      * A permission backup might contain apps that are not installed. In this case we delay the
      * restoration until the app is installed.
      *
@@ -295,7 +288,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @GuardedBy("mLock")
     private CheckPermissionDelegate mCheckPermissionDelegate;
 
-    @GuardedBy("mLock")
+    @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
 
     @GuardedBy("mLock")
@@ -372,14 +365,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     };
 
-    PermissionManagerService(Context context,
-            @NonNull Object externalLock) {
-        this(context, externalLock, new Injector(context));
+    PermissionManagerService(@NonNull Context context) {
+        this(context, new Injector(context));
     }
 
     @VisibleForTesting
-    PermissionManagerService(Context context, @NonNull Object externalLock,
-            @NonNull Injector injector) {
+    PermissionManagerService(@NonNull Context context, @NonNull Injector injector) {
         mInjector = injector;
         // The package info cache is the cache for package and permission information.
         // Disable the package info and package permission caches locally but leave the
@@ -388,7 +379,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mInjector.disablePackageNamePermissionCache();
 
         mContext = context;
-        mLock = externalLock;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
@@ -447,8 +437,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * NOTE: The external lock is temporary and should be removed. This needs to be a
      * lock created by the permission manager itself.
      */
-    public static PermissionManagerServiceInternal create(Context context,
-            @NonNull Object externalLock) {
+    @NonNull
+    public static PermissionManagerServiceInternal create(@NonNull Context context) {
         final PermissionManagerServiceInternal permMgrInt =
                 LocalServices.getService(PermissionManagerServiceInternal.class);
         if (permMgrInt != null) {
@@ -457,8 +447,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         PermissionManagerService permissionService =
                 (PermissionManagerService) ServiceManager.getService("permissionmgr");
         if (permissionService == null) {
-            permissionService =
-                    new PermissionManagerService(context, externalLock);
+            permissionService = new PermissionManagerService(context);
             ServiceManager.addService("permissionmgr", permissionService);
         }
         return LocalServices.getService(PermissionManagerServiceInternal.class);
@@ -959,6 +948,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return PackageManager.PERMISSION_DENIED;
     }
 
+    @GuardedBy("mLock")
     private boolean checkSinglePermissionInternalLocked(@NonNull UidPermissionState uidState,
             @NonNull String permissionName, boolean isInstantApp) {
         if (!uidState.isPermissionGranted(permissionName)) {
@@ -1029,6 +1019,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return PackageManager.PERMISSION_DENIED;
     }
 
+    @GuardedBy("mLock")
     private boolean checkSingleUidPermissionInternalLocked(int uid,
             @NonNull String permissionName) {
         ArraySet<String> permissions = mSystemPermissions.get(uid);
@@ -1094,9 +1085,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
                 "addOnPermissionsChangeListener");
 
-        synchronized (mLock) {
-            mOnPermissionChangeListeners.addListenerLocked(listener);
-        }
+        mOnPermissionChangeListeners.addListener(listener);
     }
 
     @Override
@@ -1104,9 +1093,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(Binder.getCallingUid()) != null) {
             throw new SecurityException("Instant applications don't have access to this method");
         }
-        synchronized (mLock) {
-            mOnPermissionChangeListeners.removeListenerLocked(listener);
-        }
+        mOnPermissionChangeListeners.removeListener(listener);
     }
 
     @Override
@@ -3068,6 +3055,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @return The updated value of the {@code updatedUserIds} parameter
      */
+    @GuardedBy("mLock")
     private @NonNull int[] revokePermissionsNoLongerImplicitLocked(@NonNull UidPermissionState ps,
             @NonNull AndroidPackage pkg, int userId, @NonNull int[] updatedUserIds) {
         String pkgName = pkg.getPackageName();
@@ -3120,6 +3108,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param ps The permission state of the package
      * @param pkg The package requesting the permissions
      */
+    @GuardedBy("mLock")
     private void inheritPermissionStateToNewImplicitPermissionLocked(
             @NonNull ArraySet<String> sourcePerms, @NonNull String newPerm,
             @NonNull UidPermissionState ps, @NonNull AndroidPackage pkg) {
@@ -3191,6 +3180,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @return  List of users for which the permission state has been changed
      */
+    @GuardedBy("mLock")
     private @NonNull int[] setInitialGrantForNewImplicitPermissionsLocked(
             @NonNull UidPermissionState origPs, @NonNull UidPermissionState ps,
             @NonNull AndroidPackage pkg, @NonNull ArraySet<String> newImplicitPermissions,
@@ -3582,11 +3572,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         + packageName + " (" + pkg.getPath()
                         + ") not in privapp-permissions whitelist");
                 if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
-                    if (mPrivappPermissionsViolations == null) {
-                        mPrivappPermissionsViolations = new ArraySet<>();
+                    synchronized (mLock) {
+                        if (mPrivappPermissionsViolations == null) {
+                            mPrivappPermissionsViolations = new ArraySet<>();
+                        }
+                        mPrivappPermissionsViolations.add(packageName + " (" + pkg.getPath() + "): "
+                                + permissionName);
                     }
-                    mPrivappPermissionsViolations.add(packageName + " (" + pkg.getPath() + "): "
-                            + permissionName);
                 }
             }
         }
@@ -3952,6 +3944,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return affectedUserId;
     }
 
+    @GuardedBy("mLock")
     private boolean revokeUnusedSharedUserPermissionsLocked(
             List<AndroidPackage> pkgList, UidPermissionState uidState) {
         // Collect all used permissions in the UID
@@ -4044,35 +4037,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /**
-     * Cache background->foreground permission mapping.
-     *
-     * <p>This is only run once.
-     */
-    private void cacheBackgroundToForegoundPermissionMapping() {
-        synchronized (mLock) {
-            if (mBackgroundPermissions == null) {
-                // Cache background -> foreground permission mapping.
-                // Only system declares background permissions, hence mapping does never change.
-                mBackgroundPermissions = new ArrayMap<>();
-                for (Permission bp : mRegistry.getPermissions()) {
-                    if (bp.getBackgroundPermission() != null) {
-                        String fgPerm = bp.getName();
-                        String bgPerm = bp.getBackgroundPermission();
-
-                        List<String> fgPerms = mBackgroundPermissions.get(bgPerm);
-                        if (fgPerms == null) {
-                            fgPerms = new ArrayList<>();
-                            mBackgroundPermissions.put(bgPerm, fgPerms);
-                        }
-
-                        fgPerms.add(fgPerm);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Update all packages on the volume, <u>beside</u> the changing package. If the changing
      * package is set too, all packages are updated.
      */
@@ -4144,8 +4108,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             Slog.i(TAG, "Permission ownership changed. Updating all permissions.");
             flags |= UPDATE_PERMISSIONS_ALL;
         }
-
-        cacheBackgroundToForegoundPermissionMapping();
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "restorePermissionState");
         // Now update the permissions for all packages.
@@ -4252,7 +4214,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             }
                         });
                     }
-                    mRegistry.removePermission(bp.getName());
+                    synchronized (mLock) {
+                        mRegistry.removePermission(bp.getName());
+                    }
                     continue;
                 }
                 final AndroidPackage sourcePkg =
@@ -4551,6 +4515,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return builder.toString();
     }
 
+    @GuardedBy("mLock")
     private int calculateCurrentPermissionFootprintLocked(@NonNull Permission permissionTree) {
         int size = 0;
         for (final Permission permission : mRegistry.getPermissions()) {
@@ -4559,6 +4524,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return size;
     }
 
+    @GuardedBy("mLock")
     private void enforcePermissionCapLocked(PermissionInfo info, Permission tree) {
         // We calculate the max size of permissions defined by this uid and throw
         // if that plus the size of 'info' would exceed our stated maximum.
@@ -4572,9 +4538,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private void systemReady() {
         mSystemReady = true;
-        if (mPrivappPermissionsViolations != null) {
-            throw new IllegalStateException("Signature|privileged permissions not in "
-                    + "privapp-permissions whitelist: " + mPrivappPermissionsViolations);
+
+        synchronized (mLock) {
+            if (mPrivappPermissionsViolations != null) {
+                throw new IllegalStateException("Signature|privileged permissions not in "
+                        + "privapp-permissions whitelist: " + mPrivappPermissionsViolations);
+            }
         }
 
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
@@ -4642,29 +4611,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mMetricsLogger.write(log);
     }
 
-    /**
-     * Get the mapping of background permissions to their foreground permissions.
-     *
-     * <p>Only initialized in the system server.
-     *
-     * @return the map &lt;bg permission -> list&lt;fg perm&gt;&gt;
-     */
-    public @Nullable ArrayMap<String, List<String>> getBackgroundPermissions() {
-        return mBackgroundPermissions;
-    }
-
+    @GuardedBy("mLock")
     @Nullable
     private UidPermissionState getUidStateLocked(@NonNull PackageSetting ps,
             @UserIdInt int userId) {
         return getUidStateLocked(ps.getAppId(), userId);
     }
 
+    @GuardedBy("mLock")
     @Nullable
     private UidPermissionState getUidStateLocked(@NonNull AndroidPackage pkg,
             @UserIdInt int userId) {
         return getUidStateLocked(pkg.getUid(), userId);
     }
 
+    @GuardedBy("mLock")
     @Nullable
     private UidPermissionState getUidStateLocked(@AppIdInt int appId, @UserIdInt int userId) {
         final UserPermissionState userState = mState.getUserState(userId);
@@ -4707,6 +4668,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         });
     }
 
+    @GuardedBy("mLock")
     private void readLegacyPermissionStatesLocked(@NonNull UidPermissionState uidState,
             @NonNull Collection<LegacyPermissionState.PermissionState> permissionStates) {
         for (final LegacyPermissionState.PermissionState permissionState : permissionStates) {
@@ -5371,12 +5333,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        public void addListenerLocked(IOnPermissionsChangeListener listener) {
+        public void addListener(IOnPermissionsChangeListener listener) {
             mPermissionListeners.register(listener);
-
         }
 
-        public void removeListenerLocked(IOnPermissionsChangeListener listener) {
+        public void removeListener(IOnPermissionsChangeListener listener) {
             mPermissionListeners.unregister(listener);
         }
 

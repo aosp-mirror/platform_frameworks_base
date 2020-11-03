@@ -15,6 +15,7 @@
  */
 package com.android.server.camera;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -39,6 +40,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
@@ -48,6 +50,8 @@ import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,9 +83,18 @@ public class CameraServiceProxy extends SystemService
 
     // Handler message codes
     private static final int MSG_SWITCH_USER = 1;
+    private static final int MSG_NOTIFY_DEVICE_STATE = 2;
 
     private static final int RETRY_DELAY_TIME = 20; //ms
     private static final int RETRY_TIMES = 60;
+
+    @IntDef(flag = true, prefix = { "DEVICE_STATE_" }, value = {
+            ICameraService.DEVICE_STATE_BACK_COVERED,
+            ICameraService.DEVICE_STATE_FRONT_COVERED,
+            ICameraService.DEVICE_STATE_FOLDED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DeviceStateFlags {}
 
     // Maximum entries to keep in usage history before dumping out
     private static final int MAX_USAGE_HISTORY = 100;
@@ -94,6 +107,15 @@ public class CameraServiceProxy extends SystemService
     private final Object mLock = new Object();
     private Set<Integer> mEnabledCameraUsers;
     private int mLastUser;
+    // The current set of device state flags. May be different from mLastReportedDeviceState if the
+    // native camera service has not been notified of the change.
+    @GuardedBy("mLock")
+    @DeviceStateFlags
+    private int mDeviceState;
+    // The most recent device state flags reported to the native camera server.
+    @GuardedBy("mLock")
+    @DeviceStateFlags
+    private int mLastReportedDeviceState;
 
     private ICameraService mCameraServiceRaw;
 
@@ -185,6 +207,7 @@ public class CameraServiceProxy extends SystemService
                 return;
             }
             notifySwitchWithRetries(RETRY_TIMES);
+            notifyDeviceStateWithRetries(RETRY_TIMES);
         }
 
         @Override
@@ -218,11 +241,54 @@ public class CameraServiceProxy extends SystemService
         mLogWriterService.allowCoreThreadTimeOut(true);
     }
 
+    /**
+     * Sets the device state bits set within {@code deviceStateFlags} leaving all other bits the
+     * same.
+     * <p>
+     * Calling requires permission {@link android.Manifest.permission#CAMERA_SEND_SYSTEM_EVENTS}.
+     *
+     * @param deviceStateFlags a bitmask of the device state bits that should be set.
+     *
+     * @see #clearDeviceStateFlags(int)
+     */
+    public void setDeviceStateFlags(@DeviceStateFlags int deviceStateFlags) {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_NOTIFY_DEVICE_STATE);
+            mDeviceState |= deviceStateFlags;
+            if (mDeviceState != mLastReportedDeviceState) {
+                notifyDeviceStateWithRetriesLocked(RETRY_TIMES);
+            }
+        }
+    }
+
+    /**
+     * Clears the device state bits set within {@code deviceStateFlags} leaving all other bits the
+     * same.
+     * <p>
+     * Calling requires permission {@link android.Manifest.permission#CAMERA_SEND_SYSTEM_EVENTS}.
+     *
+     * @param deviceStateFlags a bitmask of the device state bits that should be cleared.
+     *
+     * @see #setDeviceStateFlags(int)
+     */
+    public void clearDeviceStateFlags(@DeviceStateFlags int deviceStateFlags) {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_NOTIFY_DEVICE_STATE);
+            mDeviceState &= ~deviceStateFlags;
+            if (mDeviceState != mLastReportedDeviceState) {
+                notifyDeviceStateWithRetriesLocked(RETRY_TIMES);
+            }
+        }
+    }
+
     @Override
     public boolean handleMessage(Message msg) {
         switch(msg.what) {
             case MSG_SWITCH_USER: {
                 notifySwitchWithRetries(msg.arg1);
+            } break;
+            case MSG_NOTIFY_DEVICE_STATE: {
+                notifyDeviceStateWithRetries(msg.arg1);
             } break;
             default: {
                 Slog.e(TAG, "CameraServiceProxy error, invalid message: " + msg.what);
@@ -386,6 +452,25 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
+    @Nullable
+    private ICameraService getCameraServiceRawLocked() {
+        if (mCameraServiceRaw == null) {
+            IBinder cameraServiceBinder = getBinderService(CAMERA_SERVICE_BINDER_NAME);
+            if (cameraServiceBinder == null) {
+                return null;
+            }
+            try {
+                cameraServiceBinder.linkToDeath(this, /*flags*/ 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not link to death of native camera service");
+                return null;
+            }
+
+            mCameraServiceRaw = ICameraService.Stub.asInterface(cameraServiceBinder);
+        }
+        return mCameraServiceRaw;
+    }
+
     private void switchUserLocked(int userHandle) {
         Set<Integer> currentUserHandles = getEnabledUserHandles(userHandle);
         mLastUser = userHandle;
@@ -431,20 +516,10 @@ public class CameraServiceProxy extends SystemService
     private boolean notifyCameraserverLocked(int eventType, Set<Integer> updatedUserHandles) {
         // Forward the user switch event to the native camera service running in the cameraserver
         // process.
-        if (mCameraServiceRaw == null) {
-            IBinder cameraServiceBinder = getBinderService(CAMERA_SERVICE_BINDER_NAME);
-            if (cameraServiceBinder == null) {
-                Slog.w(TAG, "Could not notify cameraserver, camera service not available.");
-                return false; // Camera service not active, cannot evict user clients.
-            }
-            try {
-                cameraServiceBinder.linkToDeath(this, /*flags*/ 0);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Could not link to death of native camera service");
-                return false;
-            }
-
-            mCameraServiceRaw = ICameraService.Stub.asInterface(cameraServiceBinder);
+        ICameraService cameraService = getCameraServiceRawLocked();
+        if (cameraService == null) {
+            Slog.w(TAG, "Could not notify cameraserver, camera service not available.");
+            return false;
         }
 
         try {
@@ -454,6 +529,43 @@ public class CameraServiceProxy extends SystemService
             // Not much we can do if camera service is dead.
             return false;
         }
+        return true;
+    }
+
+    private void notifyDeviceStateWithRetries(int retries) {
+        synchronized (mLock) {
+            notifyDeviceStateWithRetriesLocked(retries);
+        }
+    }
+
+    private void notifyDeviceStateWithRetriesLocked(int retries) {
+        if (notifyDeviceStateChangeLocked(mDeviceState)) {
+            return;
+        }
+        if (retries <= 0) {
+            return;
+        }
+        Slog.i(TAG, "Could not notify camera service of device state change, retrying...");
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_NOTIFY_DEVICE_STATE, retries - 1,
+                0, null), RETRY_DELAY_TIME);
+    }
+
+    private boolean notifyDeviceStateChangeLocked(@DeviceStateFlags int deviceState) {
+        // Forward the state to the native camera service running in the cameraserver process.
+        ICameraService cameraService = getCameraServiceRawLocked();
+        if (cameraService == null) {
+            Slog.w(TAG, "Could not notify cameraserver, camera service not available.");
+            return false;
+        }
+
+        try {
+            mCameraServiceRaw.notifyDeviceStateChange(deviceState);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Could not notify cameraserver, remote exception: " + e);
+            // Not much we can do if camera service is dead.
+            return false;
+        }
+        mLastReportedDeviceState = deviceState;
         return true;
     }
 

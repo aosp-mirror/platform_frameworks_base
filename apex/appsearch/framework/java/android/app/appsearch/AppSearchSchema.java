@@ -16,10 +16,12 @@
 
 package android.app.appsearch;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import android.app.appsearch.exceptions.IllegalSchemaException;
 import android.util.ArraySet;
@@ -28,6 +30,8 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -39,13 +43,8 @@ import java.util.Set;
  * @hide
  */
 public final class AppSearchSchema {
-    /** @hide */
-    
-    public static final String SCHEMA_TYPE_FIELD = "schemaType";
-
-    /** @hide */
-    
-    public static final String PROPERTIES_FIELD = "properties";
+    private static final String SCHEMA_TYPE_FIELD = "schemaType";
+    private static final String PROPERTIES_FIELD = "properties";
 
     private final Bundle mBundle;
 
@@ -71,10 +70,35 @@ public final class AppSearchSchema {
         return mBundle.toString();
     }
 
+    /** Returns the name of this schema type, e.g. Email. */
+    @NonNull
+    public String getSchemaTypeName() {
+        return mBundle.getString(SCHEMA_TYPE_FIELD, "");
+    }
+
+    /**
+     * Returns the list of {@link PropertyConfig}s that are part of this schema.
+     *
+     * <p>This method creates a new list when called.
+     */
+    @NonNull
+    public List<PropertyConfig> getProperties() {
+        ArrayList<Bundle> propertyBundles =
+                mBundle.getParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD);
+        if (propertyBundles.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<PropertyConfig> ret = new ArrayList<>(propertyBundles.size());
+        for (int i = 0; i < propertyBundles.size(); i++) {
+            ret.add(new PropertyConfig(propertyBundles.get(i)));
+        }
+        return ret;
+    }
+
     /** Builder for {@link AppSearchSchema objects}. */
     public static final class Builder {
         private final String mTypeName;
-        private final ArrayList<Bundle> mProperties = new ArrayList<>();
+        private final ArrayList<Bundle> mPropertyBundles = new ArrayList<>();
         private final Set<String> mPropertyNames = new ArraySet<>();
         private boolean mBuilt = false;
 
@@ -85,15 +109,19 @@ public final class AppSearchSchema {
         }
 
         /** Adds a property to the given type. */
+        // TODO(b/171360120): MissingGetterMatchingBuilder expects a method called getPropertys, but
+        //  we provide the (correct) method getProperties. Once the bug referenced in this TODO is
+        //  fixed, remove this SuppressLint.
+        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public AppSearchSchema.Builder addProperty(@NonNull PropertyConfig propertyConfig) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkNotNull(propertyConfig);
-            if (!mPropertyNames.add(propertyConfig.mName)) {
-                throw new IllegalSchemaException(
-                        "Property defined more than once: " + propertyConfig.mName);
+            String name = propertyConfig.getName();
+            if (!mPropertyNames.add(name)) {
+                throw new IllegalSchemaException("Property defined more than once: " + name);
             }
-            mProperties.add(propertyConfig.mBundle);
+            mPropertyBundles.add(propertyConfig.mBundle);
             return this;
         }
 
@@ -107,7 +135,7 @@ public final class AppSearchSchema {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Bundle bundle = new Bundle();
             bundle.putString(AppSearchSchema.SCHEMA_TYPE_FIELD, mTypeName);
-            bundle.putParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD, mProperties);
+            bundle.putParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD, mPropertyBundles);
             mBuilt = true;
             return new AppSearchSchema(bundle);
         }
@@ -120,29 +148,12 @@ public final class AppSearchSchema {
      * a property.
      */
     public static final class PropertyConfig {
-        /** @hide */
-        
-        public static final String NAME_FIELD = "name";
-
-        /** @hide */
-        
-        public static final String DATA_TYPE_FIELD = "dataType";
-
-        /** @hide */
-        
-        public static final String SCHEMA_TYPE_FIELD = "schemaType";
-
-        /** @hide */
-        
-        public static final String CARDINALITY_FIELD = "cardinality";
-
-        /** @hide */
-        
-        public static final String INDEXING_TYPE_FIELD = "indexingType";
-
-        /** @hide */
-        
-        public static final String TOKENIZER_TYPE_FIELD = "tokenizerType";
+        private static final String NAME_FIELD = "name";
+        private static final String DATA_TYPE_FIELD = "dataType";
+        private static final String SCHEMA_TYPE_FIELD = "schemaType";
+        private static final String CARDINALITY_FIELD = "cardinality";
+        private static final String INDEXING_TYPE_FIELD = "indexingType";
+        private static final String TOKENIZER_TYPE_FIELD = "tokenizerType";
 
         /**
          * Physical data-types of the contents of the property.
@@ -259,17 +270,54 @@ public final class AppSearchSchema {
         /** Tokenization for plain text. */
         public static final int TOKENIZER_TYPE_PLAIN = 1;
 
-        final String mName;
         final Bundle mBundle;
 
-        PropertyConfig(@NonNull String name, @NonNull Bundle bundle) {
-            mName = Preconditions.checkNotNull(name);
+        PropertyConfig(@NonNull Bundle bundle) {
             mBundle = Preconditions.checkNotNull(bundle);
         }
 
         @Override
         public String toString() {
             return mBundle.toString();
+        }
+
+        /** Returns the name of this property. */
+        @NonNull
+        public String getName() {
+            return mBundle.getString(NAME_FIELD, "");
+        }
+
+        /** Returns the type of data the property contains (e.g. string, int, bytes, etc). */
+        public @DataType int getDataType() {
+            return mBundle.getInt(DATA_TYPE_FIELD, -1);
+        }
+
+        /**
+         * Returns the logical schema-type of the contents of this property.
+         *
+         * <p>Only set when {@link #getDataType} is set to {@link #DATA_TYPE_DOCUMENT}.
+         * Otherwise, it is {@code null}.
+         */
+        @Nullable
+        public String getSchemaType() {
+            return mBundle.getString(SCHEMA_TYPE_FIELD);
+        }
+
+        /**
+         * Returns the cardinality of the property (whether it is optional, required or repeated).
+         */
+        public @Cardinality int getCardinality() {
+            return mBundle.getInt(CARDINALITY_FIELD, -1);
+        }
+
+        /** Returns how the property is indexed. */
+        public @IndexingType int getIndexingType() {
+            return mBundle.getInt(INDEXING_TYPE_FIELD);
+        }
+
+        /** Returns how this property is tokenized (split into words). */
+        public @TokenizerType int getTokenizerType() {
+            return mBundle.getInt(TOKENIZER_TYPE_FIELD);
         }
 
         /**
@@ -286,13 +334,11 @@ public final class AppSearchSchema {
          * is also required.
          */
         public static final class Builder {
-            private final String mName;
             private final Bundle mBundle = new Bundle();
             private boolean mBuilt = false;
 
             /** Creates a new {@link PropertyConfig.Builder}. */
             public Builder(@NonNull String propertyName) {
-                mName = Preconditions.checkNotNull(propertyName);
                 mBundle.putString(NAME_FIELD, propertyName);
             }
 
@@ -386,7 +432,7 @@ public final class AppSearchSchema {
                     throw new IllegalSchemaException("Missing field: cardinality");
                 }
                 mBuilt = true;
-                return new PropertyConfig(mName, mBundle);
+                return new PropertyConfig(mBundle);
             }
         }
     }

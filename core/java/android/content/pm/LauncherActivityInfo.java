@@ -91,16 +91,9 @@ public class LauncherActivityInfo {
     }
 
     /**
-     * @return whether the package is still loading.
+     * @return Package loading progress, range between [0, 1].
      */
-    public boolean isLoading() {
-        return mInternal.getIncrementalStatesInfo().isLoading();
-    }
-
-    /**
-     * @return Package loading progress
-     */
-    public float getProgress() {
+    public float getLoadingProgress() {
         return mInternal.getIncrementalStatesInfo().getProgress();
     }
 

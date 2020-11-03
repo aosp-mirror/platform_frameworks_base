@@ -155,6 +155,7 @@ public:
     // Update appropriate state on config updates. Primarily, all indices need to be updated.
     // This metric and all of its dependencies are guaranteed to be preserved across the update.
     // This function also updates several maps used by metricsManager.
+    // This function clears all anomaly trackers. All anomaly trackers need to be added again.
     bool onConfigUpdated(
             const StatsdConfig& config, const int configIndex, const int metricIndex,
             const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
@@ -237,9 +238,6 @@ public:
                 dumpLatency, str_set, protoOutput);
     }
 
-    // Update appropriate state on config updates. Primarily, all indices need to be updated.
-    // This metric and all of its dependencies are guaranteed to be preserved across the update.
-    // This function also updates several maps used by metricsManager.
     virtual bool onConfigUpdatedLocked(
             const StatsdConfig& config, const int configIndex, const int metricIndex,
             const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
@@ -338,15 +336,19 @@ public:
         return mSlicedStateAtoms;
     }
 
-    /* If alert is valid, adds an AnomalyTracker and returns it. If invalid, returns nullptr. */
+    /* Adds an AnomalyTracker and returns it. */
     virtual sp<AnomalyTracker> addAnomalyTracker(const Alert &alert,
                                                  const sp<AlarmMonitor>& anomalyAlarmMonitor) {
         std::lock_guard<std::mutex> lock(mMutex);
         sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, mConfigKey);
-        if (anomalyTracker != nullptr) {
-            mAnomalyTrackers.push_back(anomalyTracker);
-        }
+        mAnomalyTrackers.push_back(anomalyTracker);
         return anomalyTracker;
+    }
+
+    /* Adds an AnomalyTracker that has already been created */
+    virtual void addAnomalyTracker(sp<AnomalyTracker>& anomalyTracker) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mAnomalyTrackers.push_back(anomalyTracker);
     }
     // End: getters/setters
 protected:
@@ -571,6 +573,7 @@ protected:
     FRIEND_TEST(ConfigUpdateTest, TestUpdateGaugeMetrics);
     FRIEND_TEST(ConfigUpdateTest, TestUpdateDurationMetrics);
     FRIEND_TEST(ConfigUpdateTest, TestUpdateMetricsMultipleTypes);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateAlerts);
 };
 
 }  // namespace statsd

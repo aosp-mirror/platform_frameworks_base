@@ -135,6 +135,8 @@ public final class SurfaceControl implements Parcelable {
             int blurRadius);
     private static native void nativeSetLayerStack(long transactionObj, long nativeObject,
             int layerStack);
+    private static native void nativeSetBlurRegions(long transactionObj, long nativeObj,
+            float[][] regions, int length);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -2954,6 +2956,21 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Specify what regions should be blurred on the {@link SurfaceControl}.
+         *
+         * @param sc SurfaceControl.
+         * @param regions List of regions that will have blurs.
+         * @return itself.
+         * @see BlurRegion#toFloatArray()
+         * @hide
+         */
+        public Transaction setBlurRegions(SurfaceControl sc, float[][] regions) {
+            checkPreconditions(sc);
+            nativeSetBlurRegions(mNativeObject, sc.mNativeObject, regions, regions.length);
+            return this;
+        }
+
+        /**
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
@@ -3481,5 +3498,65 @@ public final class SurfaceControl implements Parcelable {
      */
     public static Transaction getGlobalTransaction() {
         return sGlobalTransaction;
+    }
+
+    /**
+     * Wrapper for sending blur data to SurfaceFlinger.
+     * @hide
+     */
+    public static final class BlurRegion {
+        public int blurRadius;
+        public float cornerRadiusTL;
+        public float cornerRadiusTR;
+        public float cornerRadiusBL;
+        public float cornerRadiusBR;
+        public float alpha = 1;
+        public boolean visible = true;
+        public final Rect rect = new Rect();
+
+        private final float[] mFloatArray = new float[10];
+
+        public BlurRegion() {
+        }
+
+        public BlurRegion(BlurRegion other) {
+            rect.set(other.rect);
+            blurRadius = other.blurRadius;
+            alpha = other.alpha;
+            cornerRadiusTL = other.cornerRadiusTL;
+            cornerRadiusTR = other.cornerRadiusTR;
+            cornerRadiusBL = other.cornerRadiusBL;
+            cornerRadiusBR = other.cornerRadiusBR;
+        }
+
+        /**
+         * Serializes this class into a float array that's more JNI friendly.
+         */
+        public float[] toFloatArray() {
+            mFloatArray[0] = blurRadius;
+            mFloatArray[1] = alpha;
+            mFloatArray[2] = rect.left;
+            mFloatArray[3] = rect.top;
+            mFloatArray[4] = rect.right;
+            mFloatArray[5] = rect.bottom;
+            mFloatArray[6] = cornerRadiusTL;
+            mFloatArray[7] = cornerRadiusTR;
+            mFloatArray[8] = cornerRadiusBL;
+            mFloatArray[9] = cornerRadiusBR;
+            return mFloatArray;
+        }
+
+        @Override
+        public String toString() {
+            return "BlurRegion{"
+                    + "blurRadius=" + blurRadius
+                    + ", corners={" + cornerRadiusTL
+                    + "," + cornerRadiusTR
+                    + "," + cornerRadiusBL
+                    + "," + cornerRadiusBR
+                    + "}, alpha=" + alpha
+                    + ", rect=" + rect
+                    + "}";
+        }
     }
 }

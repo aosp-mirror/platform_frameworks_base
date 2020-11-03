@@ -37,6 +37,7 @@ public final class PipBoundsState {
 
     private final @NonNull Rect mBounds = new Rect();
     private float mAspectRatio;
+    private boolean mIsStashed;
     private PipReentryState mPipReentryState;
     private ComponentName mLastPipComponentName;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -52,6 +53,20 @@ public final class PipBoundsState {
     @NonNull
     public Rect getBounds() {
         return new Rect(mBounds);
+    }
+
+    /**
+     * Dictate where PiP currently should be stashed or not.
+     */
+    public void setStashed(boolean isStashed) {
+        mIsStashed = isStashed;
+    }
+
+    /**
+     * Whether PiP is stashed or not.
+     */
+    public boolean isStashed() {
+        return mIsStashed;
     }
 
     public void setAspectRatio(float aspectRatio) {
