@@ -32,7 +32,7 @@ interface IFaceService {
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
     // Authenticate the given sessionId with a face
-    void authenticate(IBinder token, long operationId, int userid, IFaceServiceReceiver receiver,
+    void authenticate(IBinder token, long operationId, int userId, IFaceServiceReceiver receiver,
             String opPackageName);
 
     // Uses the face hardware to detect for the presence of a face, without giving details
@@ -83,10 +83,10 @@ interface IFaceService {
     boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
-    void generateChallenge(IBinder token, int sensorId, IFaceServiceReceiver receiver, String opPackageName);
+    void generateChallenge(IBinder token, int sensorId, int userId, IFaceServiceReceiver receiver, String opPackageName);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    void revokeChallenge(IBinder token, int sensorId, String opPackageName);
+    void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);

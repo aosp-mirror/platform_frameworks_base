@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.RectF;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
@@ -42,6 +43,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -243,16 +245,25 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     /**
+     * @return where the UDFPS exists on the screen in pixels.
+     */
+    public RectF getUdfpsRegion() {
+        return mUdfpsController == null ? null : mUdfpsController.getSensorLocation();
+    }
+
+    /**
      * Requests fingerprint scan.
      *
      * @param screenX X position of long press
      * @param screenY Y position of long press
+     * @param major length of the major axis. See {@link MotionEvent#AXIS_TOOL_MAJOR}.
+     * @param minor length of the minor axis. See {@link MotionEvent#AXIS_TOOL_MINOR}.
      */
-    public void onAodInterrupt(int screenX, int screenY) {
+    public void onAodInterrupt(int screenX, int screenY, float major, float minor) {
         if (mUdfpsController == null) {
             return;
         }
-        mUdfpsController.onAodInterrupt(screenX, screenY);
+        mUdfpsController.onAodInterrupt(screenX, screenY, major, minor);
     }
 
     /**
@@ -475,7 +486,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
    /**
      * Whether the current user has a UDFP enrolled.
      */
-    public boolean hasUdfpsEnrolled() {
+    public boolean isUdfpsEnrolled() {
         // TODO: (b/171392825) right now only checks whether the UDFPS sensor exists on this device
         //  but not whether user has enrolled or not
         return mUdfpsController != null;

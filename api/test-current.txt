@@ -290,6 +290,7 @@ package android.app {
     method @NonNull public android.content.res.Configuration getConfiguration();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
     method @NonNull public android.window.WindowContainerToken getToken();
+    method public boolean hasParentTask();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {

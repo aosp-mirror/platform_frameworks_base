@@ -196,6 +196,10 @@ public class UdfpsView extends View implements DozeReceiver,
         canvas.restore();
     }
 
+    RectF getSensorRect() {
+        return new RectF(mSensorRect);
+    }
+
     void setHbmSupported(boolean hbmSupported) {
         mHbmSupported = hbmSupported;
     }

@@ -3553,6 +3553,7 @@
   <java-symbol type="id" name="clip_to_padding_tag" />
   <java-symbol type="id" name="clip_children_tag" />
   <java-symbol type="id" name="bubble_button" />
+  <java-symbol type="id" name="snooze_button" />
   <java-symbol type="dimen" name="bubble_visible_padding_end" />
   <java-symbol type="dimen" name="bubble_gone_padding_end" />
   <java-symbol type="dimen" name="text_size_body_2_material" />
@@ -4078,6 +4079,7 @@
   <java-symbol type="integer" name="config_defaultBinderHeavyHitterAutoSamplerBatchSize" />
   <java-symbol type="dimen" name="config_defaultBinderHeavyHitterAutoSamplerThreshold" />
 
+  <java-symbol type="dimen" name="default_background_blur_radius" />
   <java-symbol type="array" name="config_keep_warming_services" />
   <java-symbol type="string" name="config_display_features" />
   <java-symbol type="array" name="config_internalFoldedPhysicalDisplayIds" />

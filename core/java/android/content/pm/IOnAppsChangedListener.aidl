@@ -33,5 +33,5 @@ oneway interface IOnAppsChangedListener {
             in Bundle launcherExtras);
     void onPackagesUnsuspended(in UserHandle user, in String[] packageNames);
     void onShortcutChanged(in UserHandle user, String packageName, in ParceledListSlice shortcuts);
-    void onPackageProgressChanged(in UserHandle user, String packageName, float progress);
+    void onPackageLoadingProgressChanged(in UserHandle user, String packageName, float progress);
 }

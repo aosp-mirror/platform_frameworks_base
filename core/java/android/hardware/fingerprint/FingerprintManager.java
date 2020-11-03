@@ -766,6 +766,26 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Checks if the specified user has enrollments in any of the specified sensors.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean hasEnrolledTemplatesForAnySensor(int userId,
+            @NonNull List<FingerprintSensorPropertiesInternal> sensors) {
+        if (mService == null) {
+            Slog.w(TAG, "hasEnrolledTemplatesForAnySensor: no fingerprint service");
+            return false;
+        }
+
+        try {
+            return mService.hasEnrolledTemplatesForAnySensor(userId, sensors,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
@@ -778,7 +798,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         try {
             mService.setUdfpsOverlayController(controller);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -795,7 +815,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         try {
             mService.onPointerDown(sensorId, x, y, minor, major);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -812,7 +832,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         try {
             mService.onPointerUp(sensorId);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -885,9 +905,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
-        return new ArrayList<>();
     }
 
     /**

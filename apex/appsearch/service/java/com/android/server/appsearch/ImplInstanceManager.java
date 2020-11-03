@@ -24,7 +24,7 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.util.SparseArray;
 
-import com.android.server.appsearch.external.localbackend.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 
 import java.io.File;
 

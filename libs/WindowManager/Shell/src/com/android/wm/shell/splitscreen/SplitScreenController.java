@@ -117,7 +117,7 @@ public class SplitScreenController implements SplitScreen,
         mTransactionPool = transactionPool;
         mWindowManagerProxy = new WindowManagerProxy(syncQueue, shellTaskOrganizer);
         mTaskOrganizer = shellTaskOrganizer;
-        mSplits = new SplitScreenTaskListener(this, shellTaskOrganizer);
+        mSplits = new SplitScreenTaskListener(this, shellTaskOrganizer, syncQueue);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
                 shellTaskOrganizer);
         mRotationController =

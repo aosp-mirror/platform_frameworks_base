@@ -248,6 +248,20 @@ public class ShellTaskOrganizerTests {
     }
 
     @Test
+    public void testGetParentTaskListener() {
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
+        TrackingTaskListener mwListener = new TrackingTaskListener();
+        mOrganizer.onTaskAppeared(task1, null);
+        mOrganizer.addListenerForTaskId(mwListener, task1.taskId);
+        RunningTaskInfo task2 = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
+        task2.parentTaskId = task1.taskId;
+
+        mOrganizer.onTaskAppeared(task2, null);
+
+        assertTrue(mwListener.appeared.contains(task2));
+    }
+
+    @Test
     public void testTaskInfoToTaskListenerType_whenLetterboxBoundsPassed_returnsLetterboxType() {
         RunningTaskInfo taskInfo = createTaskInfo(
                 /* taskId */ 1,

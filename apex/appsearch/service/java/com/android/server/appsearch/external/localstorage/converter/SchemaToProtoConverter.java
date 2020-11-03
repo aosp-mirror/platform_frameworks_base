@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.appsearch.external.localbackend.converter;
-
-import android.os.Bundle;
+package com.android.server.appsearch.external.localstorage.converter;
 
 import android.annotation.NonNull;
 
@@ -28,7 +26,7 @@ import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
 import com.google.android.icing.proto.TermMatchType;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Translates an {@link AppSearchSchema} into a {@link SchemaTypeConfigProto}.
@@ -45,31 +43,26 @@ public final class SchemaToProtoConverter {
     @NonNull
     public static SchemaTypeConfigProto convert(@NonNull AppSearchSchema schema) {
         Preconditions.checkNotNull(schema);
-        Bundle bundle = schema.getBundle();
         SchemaTypeConfigProto.Builder protoBuilder =
-                SchemaTypeConfigProto.newBuilder()
-                        .setSchemaType(bundle.getString(AppSearchSchema.SCHEMA_TYPE_FIELD, ""));
-        ArrayList<Bundle> properties =
-                bundle.getParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD);
-        if (properties != null) {
-            for (int i = 0; i < properties.size(); i++) {
-                PropertyConfigProto propertyProto = convertProperty(properties.get(i));
-                protoBuilder.addProperties(propertyProto);
-            }
+                SchemaTypeConfigProto.newBuilder().setSchemaType(schema.getSchemaTypeName());
+        List<AppSearchSchema.PropertyConfig> properties = schema.getProperties();
+        for (int i = 0; i < properties.size(); i++) {
+            PropertyConfigProto propertyProto = convertProperty(properties.get(i));
+            protoBuilder.addProperties(propertyProto);
         }
         return protoBuilder.build();
     }
 
     @NonNull
-    private static PropertyConfigProto convertProperty(@NonNull Bundle bundle) {
-        Preconditions.checkNotNull(bundle);
+    private static PropertyConfigProto convertProperty(
+            @NonNull AppSearchSchema.PropertyConfig property) {
+        Preconditions.checkNotNull(property);
         PropertyConfigProto.Builder propertyConfigProto = PropertyConfigProto.newBuilder()
-                .setPropertyName(bundle.getString(AppSearchSchema.PropertyConfig.NAME_FIELD, ""));
+                .setPropertyName(property.getName());
         IndexingConfig.Builder indexingConfig = IndexingConfig.newBuilder();
 
         // Set dataType
-        @AppSearchSchema.PropertyConfig.DataType int dataType =
-                bundle.getInt(AppSearchSchema.PropertyConfig.DATA_TYPE_FIELD);
+        @AppSearchSchema.PropertyConfig.DataType int dataType = property.getDataType();
         PropertyConfigProto.DataType.Code dataTypeProto =
                 PropertyConfigProto.DataType.Code.forNumber(dataType);
         if (dataTypeProto == null) {
@@ -78,12 +71,13 @@ public final class SchemaToProtoConverter {
         propertyConfigProto.setDataType(dataTypeProto);
 
         // Set schemaType
-        propertyConfigProto.setSchemaType(
-                bundle.getString(AppSearchSchema.PropertyConfig.SCHEMA_TYPE_FIELD, ""));
+        String schemaType = property.getSchemaType();
+        if (schemaType != null) {
+            propertyConfigProto.setSchemaType(schemaType);
+        }
 
         // Set cardinality
-        @AppSearchSchema.PropertyConfig.Cardinality int cardinality =
-                bundle.getInt(AppSearchSchema.PropertyConfig.CARDINALITY_FIELD);
+        @AppSearchSchema.PropertyConfig.Cardinality int cardinality = property.getCardinality();
         PropertyConfigProto.Cardinality.Code cardinalityProto =
                 PropertyConfigProto.Cardinality.Code.forNumber(cardinality);
         if (cardinalityProto == null) {
@@ -92,8 +86,7 @@ public final class SchemaToProtoConverter {
         propertyConfigProto.setCardinality(cardinalityProto);
 
         // Set indexingType
-        @AppSearchSchema.PropertyConfig.IndexingType int indexingType =
-                bundle.getInt(AppSearchSchema.PropertyConfig.INDEXING_TYPE_FIELD);
+        @AppSearchSchema.PropertyConfig.IndexingType int indexingType = property.getIndexingType();
         TermMatchType.Code termMatchTypeProto;
         switch (indexingType) {
             case AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE:
@@ -112,7 +105,7 @@ public final class SchemaToProtoConverter {
 
         // Set tokenizerType
         @AppSearchSchema.PropertyConfig.TokenizerType int tokenizerType =
-                bundle.getInt(AppSearchSchema.PropertyConfig.TOKENIZER_TYPE_FIELD);
+                property.getTokenizerType();
         IndexingConfig.TokenizerType.Code tokenizerTypeProto =
                 IndexingConfig.TokenizerType.Code.forNumber(tokenizerType);
         if (tokenizerTypeProto == null) {

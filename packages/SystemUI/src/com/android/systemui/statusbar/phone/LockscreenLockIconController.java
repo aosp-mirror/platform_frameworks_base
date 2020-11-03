@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.View.GONE;
+
 import static com.android.systemui.statusbar.phone.LockIcon.STATE_BIOMETRICS_ERROR;
 import static com.android.systemui.statusbar.phone.LockIcon.STATE_LOCKED;
 import static com.android.systemui.statusbar.phone.LockIcon.STATE_LOCK_OPEN;
@@ -37,6 +39,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
@@ -74,6 +77,7 @@ public class LockscreenLockIconController {
     private final KeyguardStateController mKeyguardStateController;
     private final Resources mResources;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
+    private final AuthController mAuthController;
     private boolean mKeyguardShowing;
     private boolean mKeyguardJustShown;
     private boolean mBlockUpdates;
@@ -322,7 +326,8 @@ public class LockscreenLockIconController {
             @Nullable DockManager dockManager,
             KeyguardStateController keyguardStateController,
             @Main Resources resources,
-            HeadsUpManagerPhone headsUpManagerPhone) {
+            HeadsUpManagerPhone headsUpManagerPhone,
+            AuthController authController) {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -337,6 +342,7 @@ public class LockscreenLockIconController {
         mKeyguardStateController = keyguardStateController;
         mResources = resources;
         mHeadsUpManagerPhone = headsUpManagerPhone;
+        mAuthController = authController;
 
         mKeyguardIndicationController.setLockIconController(this);
     }
@@ -502,6 +508,11 @@ public class LockscreenLockIconController {
      * @return true if the visibility changed
      */
     private boolean updateIconVisibility() {
+        if (mAuthController.isUdfpsEnrolled()) {
+            boolean changed = mLockIcon.getVisibility() == GONE;
+            mLockIcon.setVisibility(GONE);
+            return changed;
+        }
         boolean onAodOrDocked = mStatusBarStateController.isDozing() || mDocked;
         boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
         boolean fingerprintOrBypass = mFingerprintUnlock
