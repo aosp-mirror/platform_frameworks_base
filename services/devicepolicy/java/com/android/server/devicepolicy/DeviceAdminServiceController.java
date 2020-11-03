@@ -26,12 +26,12 @@ import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.PersistentConnection;
 import com.android.server.appbinding.AppBindingUtils;
 

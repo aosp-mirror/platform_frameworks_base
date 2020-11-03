@@ -18,11 +18,11 @@ package com.android.server.devicepolicy;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
+import android.util.IndentingPrintWriter;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.IndentingPrintWriter;
 
 /**
  * Implementation of {@link DevicePolicyCache}, to which {@link DevicePolicyManagerService} pushes
