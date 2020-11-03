@@ -550,9 +550,9 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Lisää vieras"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Poista vieras"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Vieras"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Ota valokuva"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"Ota kuva"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Valitse kuva"</string>
-    <string name="user_image_photo_selector" msgid="433658323306627093">"Valitse valokuva"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"Valitse kuva"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Laitteen oletusasetus"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Ei käytössä"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Käytössä"</string>
