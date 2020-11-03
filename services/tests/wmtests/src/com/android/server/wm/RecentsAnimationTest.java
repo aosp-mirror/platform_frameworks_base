@@ -93,8 +93,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
         ActivityRecord recentActivity = new ActivityBuilder(mAtm)
                 .setComponent(mRecentsComponent)
-                .setCreateTask(true)
-                .setStack(recentsStack)
+                .setTask(recentsStack)
                 .build();
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         topActivity.getRootTask().moveToFront("testRecentsActivityVisiblility");
@@ -124,7 +123,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         ActivityRecord topRunningHomeActivity = homeStack.topRunningActivity();
         if (topRunningHomeActivity == null) {
             topRunningHomeActivity = new ActivityBuilder(mAtm)
-                    .setStack(homeStack)
+                    .setParentTask(homeStack)
                     .setCreateTask(true)
                     .build();
         }
@@ -182,7 +181,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         Task recentsStack = defaultTaskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
         ActivityRecord recentActivity = new ActivityBuilder(mAtm).setComponent(
-                mRecentsComponent).setCreateTask(true).setStack(recentsStack).build();
+                mRecentsComponent).setCreateTask(true).setParentTask(recentsStack).build();
         WindowProcessController app = recentActivity.app;
         recentActivity.app = null;
 
@@ -214,7 +213,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         if (targetActivity == null) {
             targetActivity = new ActivityBuilder(mAtm)
                     .setCreateTask(true)
-                    .setStack(homeStack)
+                    .setParentTask(homeStack)
                     .build();
         }
 
@@ -222,7 +221,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         ActivityRecord anotherHomeActivity = new ActivityBuilder(mAtm)
                 .setComponent(new ComponentName(mContext.getPackageName(), "Home2"))
                 .setCreateTask(true)
-                .setStack(homeStack)
+                .setParentTask(homeStack)
                 .build();
         // Start an activity on top so the recents activity can be started.
         new ActivityBuilder(mAtm)
@@ -255,21 +254,21 @@ public class RecentsAnimationTest extends WindowTestsBase {
         new ActivityBuilder(mAtm)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
                 .setCreateTask(true)
-                .setStack(fullscreenStack)
+                .setParentTask(fullscreenStack)
                 .build();
         Task recentsStack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
         new ActivityBuilder(mAtm)
                 .setComponent(mRecentsComponent)
                 .setCreateTask(true)
-                .setStack(recentsStack)
+                .setParentTask(recentsStack)
                 .build();
         Task fullscreenStack2 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         new ActivityBuilder(mAtm)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App2"))
                 .setCreateTask(true)
-                .setStack(fullscreenStack2)
+                .setParentTask(fullscreenStack2)
                 .build();
 
         // Start the recents animation
@@ -296,21 +295,21 @@ public class RecentsAnimationTest extends WindowTestsBase {
         new ActivityBuilder(mAtm)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
                 .setCreateTask(true)
-                .setStack(fullscreenStack)
+                .setParentTask(fullscreenStack)
                 .build();
         Task recentsStack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
         new ActivityBuilder(mAtm)
                 .setComponent(mRecentsComponent)
                 .setCreateTask(true)
-                .setStack(recentsStack)
+                .setParentTask(recentsStack)
                 .build();
         Task fullscreenStack2 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         new ActivityBuilder(mAtm)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App2"))
                 .setCreateTask(true)
-                .setStack(fullscreenStack2)
+                .setParentTask(fullscreenStack2)
                 .build();
 
         // Start the recents animation
@@ -331,7 +330,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         Task homeStack = taskDisplayArea.getStack(WINDOWING_MODE_UNDEFINED,
                 ACTIVITY_TYPE_HOME);
         ActivityRecord otherUserHomeActivity = new ActivityBuilder(mAtm)
-                .setStack(homeStack)
+                .setParentTask(homeStack)
                 .setCreateTask(true)
                 .setComponent(new ComponentName(mContext.getPackageName(), "Home2"))
                 .build();
@@ -342,7 +341,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         new ActivityBuilder(mAtm)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
                 .setCreateTask(true)
-                .setStack(fullscreenStack)
+                .setParentTask(fullscreenStack)
                 .build();
 
         doReturn(TEST_USER_ID).when(mAtm).getCurrentUserId();

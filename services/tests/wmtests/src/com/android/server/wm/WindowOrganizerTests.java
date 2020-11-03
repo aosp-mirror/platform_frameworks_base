@@ -389,8 +389,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack = taskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(stack).build();
         taskDisplayArea.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mDisplayContent.setFocusedApp(activity);
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
@@ -428,8 +427,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack = taskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(stack).build();
         mDisplayContent.setFocusedApp(activity);
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -780,7 +778,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     };
 
     private ActivityRecord makePipableActivity() {
-        final ActivityRecord record = createActivityRecord(mDisplayContent,
+        final ActivityRecord record = createActivityRecordWithParentTask(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         record.info.flags |= ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
         spyOn(record);
@@ -849,7 +847,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         final Task stack = createStack();
         final Task task = createTask(stack);
-        final ActivityRecord record = createActivityRecordInTask(stack.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecord(stack.mDisplayContent, task);
 
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
@@ -885,10 +883,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task stack = createStack();
         final Task task = createTask(stack);
-        final ActivityRecord activity = createActivityRecordInTask(stack.mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecord(stack.mDisplayContent, task);
         final Task stack2 = createStack();
         final Task task2 = createTask(stack2);
-        final ActivityRecord activity2 = createActivityRecordInTask(stack.mDisplayContent, task2);
+        final ActivityRecord activity2 = createActivityRecord(stack.mDisplayContent, task2);
 
         assertTrue(stack.isOrganized());
         assertTrue(stack2.isOrganized());
