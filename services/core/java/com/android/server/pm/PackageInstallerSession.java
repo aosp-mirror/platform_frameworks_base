@@ -2536,6 +2536,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Full install must include a base package");
             }
+            if (baseApk.isSplitRequired && stagedSplits.size() <= 1) {
+                throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
+                        "Missing split for " + mPackageName);
+            }
         } else {
             final ApplicationInfo appInfo = pkgInfo.applicationInfo;
             ParseResult<PackageLite> pkgLiteResult = ApkLiteParseUtils.parsePackageLite(
@@ -2646,6 +2650,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedInheritedFiles.addAll(libFilesToInherit);
                 }
             }
+            // For the case of split required, failed if no splits existed
+            if (baseApk.isSplitRequired) {
+                final int existingSplits = ArrayUtils.size(existing.splitNames);
+                final boolean allSplitsRemoved = (existingSplits == removeSplitList.size());
+                final boolean onlyBaseFileStaged = (stagedSplits.size() == 1
+                        && stagedSplits.contains(null));
+                if (allSplitsRemoved && (stagedSplits.isEmpty() || onlyBaseFileStaged)) {
+                    throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
+                            "Missing split for " + mPackageName);
+                }
+            }
         }
         if (baseApk.useEmbeddedDex) {
             for (File file : mResolvedStagedFiles) {
@@ -2656,10 +2671,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             + mPackageName);
                 }
             }
-        }
-        if (baseApk.isSplitRequired && stagedSplits.size() <= 1) {
-            throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
-                    "Missing split for " + mPackageName);
         }
 
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
