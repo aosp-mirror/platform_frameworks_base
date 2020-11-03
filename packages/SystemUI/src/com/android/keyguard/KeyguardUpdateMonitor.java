@@ -289,6 +289,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final DevicePolicyManager mDevicePolicyManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private boolean mLogoutEnabled;
+    // cached value to avoid IPCs
+    private boolean mIsUdfpsEnrolled;
     // If the user long pressed the lock icon, disabling face auth for the current session.
     private boolean mLockIconPressed;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -1857,7 +1859,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void updateLockScreenMode() {
         mLockScreenMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_LOCKSCREEN, mAuthController.isUdfpsEnrolled() ? 1 : 0);
+                Settings.Global.SHOW_NEW_LOCKSCREEN,
+                isUdfpsEnrolled() ? 1 : 0);
+    }
+
+    private void updateUdfpsEnrolled(int userId) {
+        mIsUdfpsEnrolled = mAuthController.isUdfpsEnrolled(userId);
+    }
+    public boolean isUdfpsEnrolled() {
+        return mIsUdfpsEnrolled;
     }
 
     private final UserSwitchObserver mUserSwitchObserver = new UserSwitchObserver() {
@@ -2098,6 +2108,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = getCurrentUser();
+        updateUdfpsEnrolled(userId);
         if (isUnlockWithFingerprintPossible(userId)) {
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
@@ -3069,6 +3080,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     + " expected=" + (shouldListenForFingerprint() ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
+            pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
         }
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
             final int userId = ActivityManager.getCurrentUser();
