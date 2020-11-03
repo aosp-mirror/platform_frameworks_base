@@ -53,12 +53,12 @@ interface IFingerprintService {
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
-    void prepareForAuthentication(IBinder token, long operationId, int userId,
+    void prepareForAuthentication(int sensorId, IBinder token, long operationId, int userId,
             IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
             int callingUid, int callingPid, int callingUserId);
 
     // Starts authentication with the previously prepared client.
-    void startPreparedClient(int cookie);
+    void startPreparedClient(int sensorId, int cookie);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
@@ -68,7 +68,7 @@ interface IFingerprintService {
 
     // Same as above, except this is protected by the MANAGE_BIOMETRIC signature permission. Takes
     // an additional uid, pid, userid.
-    void cancelAuthenticationFromService(IBinder token, String opPackageName,
+    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName,
             int callingUid, int callingPid, int callingUserId);
 
     // Start fingerprint enrollment
@@ -88,8 +88,11 @@ interface IFingerprintService {
     // Get a list of enrolled fingerprints in the given userId.
     List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName);
 
-    // Determine if HAL is loaded and ready
-    boolean isHardwareDetected(String opPackageName);
+    // Determine if the HAL is loaded and ready. Meant to support the deprecated FingerprintManager APIs
+    boolean isHardwareDetectedDeprecated(String opPackageName);
+
+    // Determine if the specified HAL is loaded and ready
+    boolean isHardwareDetected(int sensorId, String opPackageName);
 
     // Get a pre-enrollment authentication token
     void generateChallenge(IBinder token, int sensorId, int userId, IFingerprintServiceReceiver receiver, String opPackageName);
@@ -97,17 +100,20 @@ interface IFingerprintService {
     // Finish an enrollment sequence and invalidate the authentication token
     void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
-    // Determine if a user has at least one enrolled fingerprint
-    boolean hasEnrolledFingerprints(int userId, String opPackageName);
+    // Determine if a user has at least one enrolled fingerprint. Meant to support the deprecated FingerprintManager APIs
+    boolean hasEnrolledFingerprintsDeprecated(int userId, String opPackageName);
+
+    // Determine if a user has at least one enrolled fingerprint.
+    boolean hasEnrolledFingerprints(int sensorId, int userId, String opPackageName);
 
     // Determine if a user has at least one enrolled fingerprint in any of the specified sensors
     boolean hasEnrolledTemplatesForAnySensor(int userId, in List<FingerprintSensorPropertiesInternal> sensors, String opPackageName);
 
     // Return the LockoutTracker status for the specified user
-    int getLockoutModeForUser(int userId);
+    int getLockoutModeForUser(int sensorId, int userId);
 
     // Gets the authenticator ID for fingerprint
-    long getAuthenticatorId(int callingUserId);
+    long getAuthenticatorId(int sensorId, int callingUserId);
 
     // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(IBinder token, int sensorId, int userId, in byte[] hardwareAuthToken, String opPackageNAame);
