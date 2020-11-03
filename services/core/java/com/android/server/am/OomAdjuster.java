@@ -500,6 +500,7 @@ public final class OomAdjuster {
         final ProcessRecord topApp = mService.getTopAppLocked();
         // Clear any pending ones because we are doing a full update now.
         mPendingProcessSet.clear();
+        mService.mAppProfiler.mHasPreviousProcess = mService.mAppProfiler.mHasHomeProcess = false;
         updateOomAdjLockedInner(oomAdjReason, topApp , null, null, true, true);
     }
 
