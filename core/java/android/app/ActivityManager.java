@@ -1693,6 +1693,13 @@ public class ActivityManager {
         @Deprecated
         public int affiliatedTaskId;
 
+        /**
+         * Information of organized child tasks.
+         *
+         * @hide
+         */
+        public ArrayList<RecentTaskInfo> childrenTaskInfos = new ArrayList<>();
+
         public RecentTaskInfo() {
         }
 
@@ -1708,6 +1715,7 @@ public class ActivityManager {
         public void readFromParcel(Parcel source) {
             id = source.readInt();
             persistentId = source.readInt();
+            childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader());
             super.readFromParcel(source);
         }
 
@@ -1715,6 +1723,7 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(persistentId);
+            dest.writeList(childrenTaskInfos);
             super.writeToParcel(dest, flags);
         }
 
