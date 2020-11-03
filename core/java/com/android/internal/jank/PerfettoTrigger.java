@@ -17,15 +17,12 @@
 //TODO (165884885): Make PerfettoTrigger more generic and move it to another package.
 package com.android.internal.jank;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * A trigger implementation with perfetto backend.
@@ -35,23 +32,14 @@ public class PerfettoTrigger {
     private static final String TAG = PerfettoTrigger.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final String TRIGGER_COMMAND = "/system/bin/trigger_perfetto";
-    private static final String[] TRIGGER_TYPE_NAMES = new String[] { "jank-tracker" };
-    public static final int TRIGGER_TYPE_JANK = 0;
-
-    /** @hide */
-    @IntDef({
-            TRIGGER_TYPE_JANK
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface TriggerType {}
 
     /**
-     * @param type the trigger type
+     * @param triggerName The name of the trigger. Must match the value defined in the AOT
+     *                    Perfetto config.
      */
-    public static void trigger(@NonNull @TriggerType int type) {
+    public static void trigger(String triggerName) {
         try {
-            Token token = new Token(type, TRIGGER_TYPE_NAMES[type]);
-            ProcessBuilder pb = new ProcessBuilder(TRIGGER_COMMAND, token.getName());
+            ProcessBuilder pb = new ProcessBuilder(TRIGGER_COMMAND, triggerName);
             if (DEBUG) {
                 StringBuilder sb = new StringBuilder();
                 for (String arg : pb.command()) {
@@ -64,7 +52,7 @@ public class PerfettoTrigger {
                 readConsoleOutput(process);
             }
         } catch (IOException | InterruptedException e) {
-            Log.w(TAG, "Failed to trigger " + type, e);
+            Log.w(TAG, "Failed to trigger " + triggerName, e);
         }
     }
 
@@ -82,34 +70,4 @@ public class PerfettoTrigger {
             Log.d(TAG, "err message=" + errLine.toString());
         }
     }
-
-    /**
-     * Token which is used to trigger perfetto.
-     */
-    public static class Token {
-        private int mType;
-        private String mName;
-
-        Token(@TriggerType int type, String name) {
-            mType = type;
-            mName = name;
-        }
-
-        /**
-         * Get trigger type.
-         * @return trigger type, should be @TriggerType
-         */
-        public int getType() {
-            return mType;
-        }
-
-        /**
-         * Get name of this token as the argument while triggering perfetto.
-         * @return name
-         */
-        public String getName() {
-            return mName;
-        }
-    }
-
 }
