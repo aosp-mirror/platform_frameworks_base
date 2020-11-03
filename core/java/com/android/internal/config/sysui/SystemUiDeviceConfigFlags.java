@@ -430,6 +430,11 @@ public final class SystemUiDeviceConfigFlags {
     public static final String USE_BACK_GESTURE_ML_MODEL = "use_back_gesture_ml_model";
 
     /**
+     * (string) The name of the ML model for Back Gesture.
+     */
+    public static final String BACK_GESTURE_ML_MODEL_NAME = "back_gesture_ml_model_name";
+
+    /**
      * (float) Threshold for Back Gesture ML model prediction.
      */
     public static final String BACK_GESTURE_ML_MODEL_THRESHOLD = "back_gesture_ml_model_threshold";
