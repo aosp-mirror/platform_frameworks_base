@@ -15,6 +15,7 @@
 
 package com.android.server.inputmethod;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
@@ -110,6 +111,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -3106,6 +3108,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
             if (!calledFromValidUserLocked()) {
@@ -3133,6 +3136,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         SoftInputShowHideReason.SHOW_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
         }
     }
@@ -3225,6 +3229,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final long ident = Binder.clearCallingIdentity();
             try {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
                     // We need to check if this is the current client with
@@ -3248,6 +3253,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         SoftInputShowHideReason.HIDE_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
         }
     }
@@ -3310,43 +3316,52 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
         }
-        final int callingUserId = UserHandle.getCallingUserId();
-        final int userId;
-        if (attribute != null && attribute.targetInputMethodUser != null
-                && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "Using EditorInfo.targetInputMethodUser requires INTERACT_ACROSS_USERS_FULL.");
-            userId = attribute.targetInputMethodUser.getIdentifier();
-            if (!mUserManagerInternal.isUserRunning(userId)) {
-                // There is a chance that we hit here because of race condition.  Let's just return
-                // an error code instead of crashing the caller process, which at least has
-                // INTERACT_ACROSS_USERS_FULL permission thus is likely to be an important process.
-                Slog.e(TAG, "User #" + userId + " is not running.");
-                return InputBindResult.INVALID_USER;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                    "IMMS.startInputOrWindowGainedFocus");
+            final int callingUserId = UserHandle.getCallingUserId();
+            final int userId;
+            if (attribute != null && attribute.targetInputMethodUser != null
+                    && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
+                mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "Using EditorInfo.targetInputMethodUser requires"
+                                + " INTERACT_ACROSS_USERS_FULL.");
+                userId = attribute.targetInputMethodUser.getIdentifier();
+                if (!mUserManagerInternal.isUserRunning(userId)) {
+                    // There is a chance that we hit here because of race condition.  Let's just
+                    // return an error code instead of crashing the caller process, which at least
+                    // has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an important
+                    // process.
+                    Slog.e(TAG, "User #" + userId + " is not running.");
+                    return InputBindResult.INVALID_USER;
+                }
+            } else {
+                userId = callingUserId;
             }
-        } else {
-            userId = callingUserId;
-        }
-        final InputBindResult result;
-        synchronized (mMethodMap) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                result = startInputOrWindowGainedFocusInternalLocked(startInputReason, client,
-                        windowToken, startInputFlags, softInputMode, windowFlags, attribute,
-                        inputContext, missingMethods, unverifiedTargetSdkVersion, userId);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            final InputBindResult result;
+            synchronized (mMethodMap) {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    result = startInputOrWindowGainedFocusInternalLocked(startInputReason, client,
+                            windowToken, startInputFlags, softInputMode, windowFlags, attribute,
+                            inputContext, missingMethods, unverifiedTargetSdkVersion, userId);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
+            if (result == null) {
+                // This must never happen, but just in case.
+                Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
+                        + InputMethodDebug.startInputReasonToString(startInputReason)
+                        + " windowFlags=#" + Integer.toHexString(windowFlags)
+                        + " editorInfo=" + attribute);
+                return InputBindResult.NULL;
+            }
+
+            return result;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (result == null) {
-            // This must never happen, but just in case.
-            Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
-                    + InputMethodDebug.startInputReasonToString(startInputReason)
-                    + " windowFlags=#" + Integer.toHexString(windowFlags)
-                    + " editorInfo=" + attribute);
-            return InputBindResult.NULL;
-        }
-        return result;
     }
 
     @NonNull
@@ -4124,6 +4139,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private void applyImeVisibility(IBinder token, IBinder windowToken, boolean setVisible) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -4145,6 +4161,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mWindowManagerInternal.showImePostLayout(mShowRequestWindowMap.get(windowToken));
             }
         }
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     private void setInputMethodWithSubtypeIdLocked(IBinder token, String id, int subtypeId) {
@@ -4172,6 +4189,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     private void hideMySoftInput(@NonNull IBinder token, int flags) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -4186,10 +4204,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @BinderThread
     private void showMySoftInput(@NonNull IBinder token, int flags) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
@@ -4202,6 +4222,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     void setEnabledSessionInMainThread(SessionState session) {
