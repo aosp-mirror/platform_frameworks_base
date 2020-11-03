@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -44,7 +43,6 @@ import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -68,14 +66,14 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.vibrator.InputDeviceDelegate;
 import com.android.server.vibrator.VibrationScaler;
 import com.android.server.vibrator.VibrationSettings;
-
-import libcore.util.NativeAllocationRegistry;
+import com.android.server.vibrator.VibratorController;
+import com.android.server.vibrator.VibratorController.OnVibrationCompleteListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,8 +86,6 @@ public class VibratorService extends IVibratorService.Stub {
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     private static final boolean DEBUG = false;
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
-
-    private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = {0, 30, 100, 30};
 
     // Default vibration attributes. Used when vibration is requested without attributes
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
@@ -104,16 +100,11 @@ public class VibratorService extends IVibratorService.Stub {
     private final LinkedList<VibrationInfo> mPreviousExternalVibrations;
     private final LinkedList<VibrationInfo> mPreviousVibrations;
     private final int mPreviousVibrationsLimit;
-    private final boolean mAllowPriorityVibrationsInLowPowerMode;
-    private final List<Integer> mSupportedEffects;
-    private final List<Integer> mSupportedPrimitives;
-    private final long mCapabilities;
-    private final int mDefaultVibrationAmplitude;
-    private final SparseArray<VibrationEffect> mFallbackEffects;
     private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
     private final WorkSource mTmpWorkSource = new WorkSource();
     private final Handler mH;
     private final Object mLock = new Object();
+    private final VibratorController mVibratorController;
 
     private final Context mContext;
     private final PowerManager.WakeLock mWakeLock;
@@ -125,50 +116,14 @@ public class VibratorService extends IVibratorService.Stub {
     private VibrationScaler mVibrationScaler;
     private InputDeviceDelegate mInputDeviceDelegate;
 
-    private final NativeWrapper mNativeWrapper;
     private volatile VibrateWaveformThread mThread;
 
     @GuardedBy("mLock")
     private Vibration mCurrentVibration;
     private int mCurVibUid = -1;
     private ExternalVibrationHolder mCurrentExternalVibration;
-    private boolean mVibratorUnderExternalControl;
     private boolean mLowPowerMode;
-    @GuardedBy("mLock")
-    private boolean mIsVibrating;
-    @GuardedBy("mLock")
-    private final RemoteCallbackList<IVibratorStateListener> mVibratorStateListeners =
-            new RemoteCallbackList<>();
     private SparseArray<Vibration> mAlwaysOnEffects = new SparseArray<>();
-
-    static native long vibratorInit(OnCompleteListener listener);
-
-    static native long vibratorGetFinalizer();
-
-    static native boolean vibratorExists(long nativeServicePtr);
-
-    static native void vibratorOn(long nativeServicePtr, long milliseconds, long vibrationId);
-
-    static native void vibratorOff(long nativeServicePtr);
-
-    static native void vibratorSetAmplitude(long nativeServicePtr, int amplitude);
-
-    static native int[] vibratorGetSupportedEffects(long nativeServicePtr);
-
-    static native int[] vibratorGetSupportedPrimitives(long nativeServicePtr);
-
-    static native long vibratorPerformEffect(
-            long nativeServicePtr, long effect, long strength, long vibrationId);
-
-    static native void vibratorPerformComposedEffect(long nativeServicePtr,
-            VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId);
-
-    static native void vibratorSetExternalControl(long nativeServicePtr, boolean enabled);
-
-    static native long vibratorGetCapabilities(long nativeServicePtr);
-    static native void vibratorAlwaysOnEnable(long nativeServicePtr, long id, long effect,
-            long strength);
-    static native void vibratorAlwaysOnDisable(long nativeServicePtr, long id);
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
@@ -180,21 +135,36 @@ public class VibratorService extends IVibratorService.Stub {
             mProcStatesCache.delete(uid);
         }
 
-        @Override public void onUidActive(int uid) {
+        @Override
+        public void onUidActive(int uid) {
         }
 
-        @Override public void onUidIdle(int uid, boolean disabled) {
+        @Override
+        public void onUidIdle(int uid, boolean disabled) {
         }
 
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
+        @Override
+        public void onUidCachedChanged(int uid, boolean cached) {
         }
     };
 
-    /** Listener for vibration completion callbacks from native. */
-    public interface OnCompleteListener {
+    /**
+     * Implementation of {@link OnVibrationCompleteListener} with a weak reference to this service.
+     */
+    private static final class VibrationCompleteListener implements OnVibrationCompleteListener {
+        private WeakReference<VibratorService> mServiceRef;
 
-        /** Callback triggered when vibration is complete, identified by {@link Vibration#id}. */
-        void onComplete(long vibrationId);
+        VibrationCompleteListener(VibratorService service) {
+            mServiceRef = new WeakReference<>(service);
+        }
+
+        @Override
+        public void onComplete(int vibratorId, long vibrationId) {
+            VibratorService service = mServiceRef.get();
+            if (service != null) {
+                service.onVibrationComplete(vibrationId);
+            }
+        }
     }
 
     /** Holder for a {@link VibrationEffect}. */
@@ -489,18 +459,13 @@ public class VibratorService extends IVibratorService.Stub {
 
     @VisibleForTesting
     VibratorService(Context context, Injector injector) {
-        mNativeWrapper = injector.getNativeWrapper();
         mH = injector.createHandler(Looper.myLooper());
-
-        mNativeWrapper.vibratorInit(this::onVibrationComplete);
+        mVibratorController = injector.createVibratorController(
+                new VibrationCompleteListener(this));
 
         // Reset the hardware to a default state, in case this is a runtime
         // restart instead of a fresh boot.
-        mNativeWrapper.vibratorOff();
-
-        mSupportedEffects = asList(mNativeWrapper.vibratorGetSupportedEffects());
-        mSupportedPrimitives = asList(mNativeWrapper.vibratorGetSupportedPrimitives());
-        mCapabilities = mNativeWrapper.vibratorGetCapabilities();
+        mVibratorController.off();
 
         mContext = context;
         PowerManager pm = context.getSystemService(PowerManager.class);
@@ -516,12 +481,6 @@ public class VibratorService extends IVibratorService.Stub {
         mPreviousVibrationsLimit = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_previousVibrationsDumpLimit);
 
-        mDefaultVibrationAmplitude = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultVibrationAmplitude);
-
-        mAllowPriorityVibrationsInLowPowerMode = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_allowPriorityVibrationsInLowPowerMode);
-
         mPreviousRingVibrations = new LinkedList<>();
         mPreviousNotificationVibrations = new LinkedList<>();
         mPreviousAlarmVibrations = new LinkedList<>();
@@ -532,40 +491,7 @@ public class VibratorService extends IVibratorService.Stub {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mIntentReceiver, filter);
 
-        VibrationEffect clickEffect = createEffectFromResource(
-                com.android.internal.R.array.config_virtualKeyVibePattern);
-        VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
-                DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS, -1 /*repeatIndex*/);
-        VibrationEffect heavyClickEffect = createEffectFromResource(
-                com.android.internal.R.array.config_longPressVibePattern);
-        VibrationEffect tickEffect = createEffectFromResource(
-                com.android.internal.R.array.config_clockTickVibePattern);
-
-        mFallbackEffects = new SparseArray<>();
-        mFallbackEffects.put(VibrationEffect.EFFECT_CLICK, clickEffect);
-        mFallbackEffects.put(VibrationEffect.EFFECT_DOUBLE_CLICK, doubleClickEffect);
-        mFallbackEffects.put(VibrationEffect.EFFECT_TICK, tickEffect);
-        mFallbackEffects.put(VibrationEffect.EFFECT_HEAVY_CLICK, heavyClickEffect);
-
-        mFallbackEffects.put(VibrationEffect.EFFECT_TEXTURE_TICK,
-                VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
-
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
-    }
-
-    private VibrationEffect createEffectFromResource(int resId) {
-        long[] timings = getLongIntArray(mContext.getResources(), resId);
-        return createEffectFromTimings(timings);
-    }
-
-    private static VibrationEffect createEffectFromTimings(long[] timings) {
-        if (timings == null || timings.length == 0) {
-            return null;
-        } else if (timings.length == 1) {
-            return VibrationEffect.createOneShot(timings[0], VibrationEffect.DEFAULT_AMPLITUDE);
-        } else {
-            return VibrationEffect.createWaveform(timings, -1);
-        }
     }
 
     public void systemReady() {
@@ -627,7 +553,12 @@ public class VibratorService extends IVibratorService.Stub {
 
     @Override // Binder call
     public boolean hasVibrator() {
-        return doVibratorExists();
+        // For now, we choose to ignore the presence of input devices that have vibrators
+        // when reporting whether the device has a vibrator.  Applications often use this
+        // information to decide whether to enable certain features so they expect the
+        // result of hasVibrator() to be constant.  For now, just report whether
+        // the device has a built-in vibrator.
+        return mVibratorController.isAvailable();
     }
 
     @Override // Binder call
@@ -635,32 +566,7 @@ public class VibratorService extends IVibratorService.Stub {
         if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
             throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
         }
-        synchronized (mLock) {
-            return mIsVibrating;
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void notifyStateListenerLocked(IVibratorStateListener listener) {
-        try {
-            listener.onVibrating(mIsVibrating);
-        } catch (RemoteException | RuntimeException e) {
-            Slog.e(TAG, "Vibrator callback failed to call", e);
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void notifyStateListenersLocked() {
-        final int length = mVibratorStateListeners.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                final IVibratorStateListener listener =
-                        mVibratorStateListeners.getBroadcastItem(i);
-                notifyStateListenerLocked(listener);
-            }
-        } finally {
-            mVibratorStateListeners.finishBroadcast();
-        }
+        return mVibratorController.isVibrating();
     }
 
     @Override // Binder call
@@ -668,19 +574,7 @@ public class VibratorService extends IVibratorService.Stub {
         if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
             throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
         }
-        synchronized (mLock) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (!mVibratorStateListeners.register(listener)) {
-                    return false;
-                }
-                // Notify its callback after new client registered.
-                notifyStateListenerLocked(listener);
-                return true;
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
+        return mVibratorController.registerVibratorStateListener(listener);
     }
 
     @Override // Binder call
@@ -689,49 +583,25 @@ public class VibratorService extends IVibratorService.Stub {
         if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
             throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
         }
-        synchronized (mLock) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                return mVibratorStateListeners.unregister(listener);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
+        return mVibratorController.unregisterVibratorStateListener(listener);
     }
 
     @Override // Binder call
     public boolean hasAmplitudeControl() {
         // Input device vibrators always support amplitude controls.
-        return mInputDeviceDelegate.isAvailable() || hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL);
+        return mInputDeviceDelegate.isAvailable()
+                || mVibratorController.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL);
     }
 
     @Override // Binder call
     public int[] areEffectsSupported(int[] effectIds) {
-        int[] supported = new int[effectIds.length];
-        if (mSupportedEffects == null) {
-            Arrays.fill(supported, Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN);
-        } else {
-            for (int i = 0; i < effectIds.length; i++) {
-                supported[i] = mSupportedEffects.contains(effectIds[i])
-                        ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
-                        : Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
-            }
-        }
-        return supported;
+        return mVibratorController.areEffectsSupported(effectIds);
     }
 
     @Override // Binder call
     public boolean[] arePrimitivesSupported(int[] primitiveIds) {
-        boolean[] supported = new boolean[primitiveIds.length];
-        if (!hasCapability(IVibrator.CAP_COMPOSE_EFFECTS) || mSupportedPrimitives == null) {
-            return supported;
-        }
-        for (int i = 0; i < primitiveIds.length; i++) {
-            supported[i] = mSupportedPrimitives.contains(primitiveIds[i]);
-        }
-        return supported;
+        return mVibratorController.arePrimitivesSupported(primitiveIds);
     }
-
 
     private static List<Integer> asList(int... vals) {
         if (vals == null) {
@@ -750,14 +620,14 @@ public class VibratorService extends IVibratorService.Stub {
         if (!hasPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)) {
             throw new SecurityException("Requires VIBRATE_ALWAYS_ON permission");
         }
-        if (!hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+        if (!mVibratorController.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
             Slog.e(TAG, "Always-on effects not supported.");
             return false;
         }
         if (effect == null) {
             synchronized (mLock) {
                 mAlwaysOnEffects.delete(alwaysOnId);
-                mNativeWrapper.vibratorAlwaysOnDisable(alwaysOnId);
+                mVibratorController.updateAlwaysOn(alwaysOnId, /* effect= */ null);
             }
         } else {
             if (!verifyVibrationEffect(effect)) {
@@ -827,18 +697,6 @@ public class VibratorService extends IVibratorService.Stub {
         }
 
         return attrs;
-    }
-
-    private static long[] getLongIntArray(Resources r, int resid) {
-        int[] ar = r.getIntArray(resid);
-        if (ar == null) {
-            return null;
-        }
-        long[] out = new long[ar.length];
-        for (int i = 0; i < ar.length; i++) {
-            out[i] = ar[i];
-        }
-        return out;
     }
 
     @Override // Binder call
@@ -1004,7 +862,7 @@ public class VibratorService extends IVibratorService.Stub {
                 endVibrationLocked(mCurrentExternalVibration, status);
                 mCurrentExternalVibration.externalVibration.mute();
                 mCurrentExternalVibration = null;
-                setVibratorUnderExternalControl(false);
+                mVibratorController.setExternalControl(false);
             }
             doVibratorOff();
             reportFinishVibrationLocked(status);
@@ -1205,13 +1063,13 @@ public class VibratorService extends IVibratorService.Stub {
     }
 
     private void updateAlwaysOnLocked(int id, Vibration vib) {
+        VibrationEffect.Prebaked effect;
         if (!shouldVibrate(vib)) {
-            mNativeWrapper.vibratorAlwaysOnDisable(id);
+            effect = null;
         } else {
-            VibrationEffect.Prebaked scaled = mVibrationScaler.scale(vib.effect,
-                    vib.attrs.getUsage());
-            mNativeWrapper.vibratorAlwaysOnEnable(id, scaled.getId(), scaled.getEffectStrength());
+            effect = mVibrationScaler.scale(vib.effect, vib.attrs.getUsage());
         }
+        mVibratorController.updateAlwaysOn(id, effect);
     }
 
     private void updateAlwaysOnLocked() {
@@ -1222,19 +1080,10 @@ public class VibratorService extends IVibratorService.Stub {
         }
     }
 
-    private boolean doVibratorExists() {
-        // For now, we choose to ignore the presence of input devices that have vibrators
-        // when reporting whether the device has a vibrator.  Applications often use this
-        // information to decide whether to enable certain features so they expect the
-        // result of hasVibrator() to be constant.  For now, just report whether
-        // the device has a built-in vibrator.
-        return mNativeWrapper.vibratorExists();
-    }
-
     private void doVibratorOn(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOn");
         try {
-            final VibrationEffect.OneShot oneShot = vib.effect.resolve(mDefaultVibrationAmplitude);
+            final VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
             if (DEBUG) {
                 Slog.d(TAG, "Turning vibrator on for " + oneShot.getDuration() + " ms"
                         + " with amplitude " + oneShot.getAmplitude() + ".");
@@ -1250,17 +1099,11 @@ public class VibratorService extends IVibratorService.Stub {
                 // Note: ordering is important here! Many haptic drivers will reset their
                 // amplitude when enabled, so we always have to enable first, then set the
                 // amplitude.
-                mNativeWrapper.vibratorOn(oneShot.getDuration(), vib.id);
-                doVibratorSetAmplitude(oneShot.getAmplitude());
+                mVibratorController.on(oneShot.getDuration(), vib.id);
+                mVibratorController.setAmplitude(oneShot.getAmplitude());
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
-        }
-    }
-
-    private void doVibratorSetAmplitude(int amplitude) {
-        if (hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
-            mNativeWrapper.vibratorSetAmplitude(amplitude);
         }
     }
 
@@ -1273,7 +1116,7 @@ public class VibratorService extends IVibratorService.Stub {
             noteVibratorOffLocked();
             boolean inputDevicesAvailable = mInputDeviceDelegate.cancelVibrateIfAvailable();
             if (!inputDevicesAvailable) {
-                mNativeWrapper.vibratorOff();
+                mVibratorController.off();
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -1309,8 +1152,7 @@ public class VibratorService extends IVibratorService.Stub {
             // Input devices don't support prebaked effect, so skip trying it with them and allow
             // fallback to be attempted.
             if (!mInputDeviceDelegate.isAvailable()) {
-                long duration = mNativeWrapper.vibratorPerformEffect(
-                        prebaked.getId(), prebaked.getEffectStrength(), vib.id);
+                long duration = mVibratorController.on(prebaked, vib.id);
                 if (duration > 0) {
                     noteVibratorOnLocked(vib.uid, duration);
                     return;
@@ -1323,7 +1165,7 @@ public class VibratorService extends IVibratorService.Stub {
             if (!prebaked.shouldFallback()) {
                 return;
             }
-            VibrationEffect effect = getFallbackEffect(prebaked.getId());
+            VibrationEffect effect = mVibrationSettings.getFallbackEffect(prebaked.getId());
             if (effect == null) {
                 Slog.w(TAG, "Failed to play prebaked effect, no fallback");
                 return;
@@ -1353,31 +1195,21 @@ public class VibratorService extends IVibratorService.Stub {
                 mCurrentVibration = null;
                 endVibrationLocked(vib, VibrationInfo.Status.FORWARDED_TO_INPUT_DEVICES);
                 return;
-            } else if (!hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+            } else if (!mVibratorController.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
                 // The set current vibration is not actually playing, so drop it.
                 mCurrentVibration = null;
                 endVibrationLocked(vib, VibrationInfo.Status.IGNORED_UNSUPPORTED);
                 return;
             }
 
-            PrimitiveEffect[] primitiveEffects =
-                    composed.getPrimitiveEffects().toArray(new PrimitiveEffect[0]);
-            mNativeWrapper.vibratorPerformComposedEffect(primitiveEffects, vib.id);
+            mVibratorController.on(composed, vib.id);
 
             // Composed effects don't actually give us an estimated duration, so we just guess here.
-            noteVibratorOnLocked(vib.uid, 10 * primitiveEffects.length);
+            noteVibratorOnLocked(vib.uid, 10 * composed.getPrimitiveEffects().size());
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
 
-    }
-
-    private boolean hasCapability(long capability) {
-        return (mCapabilities & capability) == capability;
-    }
-
-    private VibrationEffect getFallbackEffect(int effectId) {
-        return mFallbackEffects.get(effectId);
     }
 
     private static boolean isNotification(int usageHint) {
@@ -1402,10 +1234,6 @@ public class VibratorService extends IVibratorService.Stub {
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.VIBRATOR_STATE_CHANGED, uid, null,
                     FrameworkStatsLog.VIBRATOR_STATE_CHANGED__STATE__ON, millis);
             mCurVibUid = uid;
-            if (!mIsVibrating) {
-                mIsVibrating = true;
-                notifyStateListenersLocked();
-            }
         } catch (RemoteException e) {
         }
     }
@@ -1419,22 +1247,6 @@ public class VibratorService extends IVibratorService.Stub {
             } catch (RemoteException e) { }
             mCurVibUid = -1;
         }
-        if (mIsVibrating) {
-            mIsVibrating = false;
-            notifyStateListenersLocked();
-        }
-    }
-
-    private void setVibratorUnderExternalControl(boolean externalControl) {
-        if (DEBUG) {
-            if (externalControl) {
-                Slog.d(TAG, "Vibrator going under external control.");
-            } else {
-                Slog.d(TAG, "Taking back control of vibrator.");
-            }
-        }
-        mVibratorUnderExternalControl = externalControl;
-        mNativeWrapper.vibratorSetExternalControl(externalControl);
     }
 
     private void dumpInternal(PrintWriter pw) {
@@ -1452,14 +1264,9 @@ public class VibratorService extends IVibratorService.Stub {
             } else {
                 pw.println("null");
             }
-            pw.println("  mVibratorUnderExternalControl=" + mVibratorUnderExternalControl);
-            pw.println("  mIsVibrating=" + mIsVibrating);
-            pw.println("  mVibratorStateListeners Count="
-                    + mVibratorStateListeners.getRegisteredCallbackCount());
             pw.println("  mLowPowerMode=" + mLowPowerMode);
+            pw.println("  mVibratorController=" + mVibratorController);
             pw.println("  mVibrationSettings=" + mVibrationSettings);
-            pw.println("  mSupportedEffects=" + mSupportedEffects);
-            pw.println("  mSupportedPrimitives=" + mSupportedPrimitives);
             pw.println();
             pw.println("  Previous ring vibrations:");
             for (VibrationInfo info : mPreviousRingVibrations) {
@@ -1501,9 +1308,9 @@ public class VibratorService extends IVibratorService.Stub {
                 mCurrentExternalVibration.toInfo().dumpProto(proto,
                         VibratorServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
             }
-            proto.write(VibratorServiceDumpProto.IS_VIBRATING, mIsVibrating);
+            proto.write(VibratorServiceDumpProto.IS_VIBRATING, mVibratorController.isVibrating());
             proto.write(VibratorServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
-                    mVibratorUnderExternalControl);
+                    mVibratorController.isUnderExternalControl());
             proto.write(VibratorServiceDumpProto.LOW_POWER_MODE, mLowPowerMode);
             proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
                     mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_TOUCH));
@@ -1629,7 +1436,7 @@ public class VibratorService extends IVibratorService.Stub {
                                     nextVibratorStopTime = now + onDuration;
                                 } else {
                                     // Vibrator is already ON, so just change its amplitude.
-                                    doVibratorSetAmplitude(amplitude);
+                                    mVibratorController.setAmplitude(amplitude);
                                 }
                             } else {
                                 // Previous vibration should have already finished, but we make sure
@@ -1691,95 +1498,12 @@ public class VibratorService extends IVibratorService.Stub {
         }
     }
 
-    /** Wrapper around the static-native methods of {@link VibratorService} for tests. */
-    @VisibleForTesting
-    public static class NativeWrapper {
-
-        private long mNativeServicePtr = 0;
-
-        /** Checks if vibrator exists on device. */
-        public boolean vibratorExists() {
-            return VibratorService.vibratorExists(mNativeServicePtr);
-        }
-
-        /** Initializes connection to vibrator HAL service. */
-        public void vibratorInit(OnCompleteListener listener) {
-            mNativeServicePtr = VibratorService.vibratorInit(listener);
-            long finalizerPtr = VibratorService.vibratorGetFinalizer();
-
-            if (finalizerPtr != 0) {
-                NativeAllocationRegistry registry =
-                        NativeAllocationRegistry.createMalloced(
-                                VibratorService.class.getClassLoader(), finalizerPtr);
-                registry.registerNativeAllocation(this, mNativeServicePtr);
-            }
-        }
-
-        /** Turns vibrator on for given time. */
-        public void vibratorOn(long milliseconds, long vibrationId) {
-            VibratorService.vibratorOn(mNativeServicePtr, milliseconds, vibrationId);
-        }
-
-        /** Turns vibrator off. */
-        public void vibratorOff() {
-            VibratorService.vibratorOff(mNativeServicePtr);
-        }
-
-        /** Sets the amplitude for the vibrator to run. */
-        public void vibratorSetAmplitude(int amplitude) {
-            VibratorService.vibratorSetAmplitude(mNativeServicePtr, amplitude);
-        }
-
-        /** Returns all predefined effects supported by the device vibrator. */
-        public int[] vibratorGetSupportedEffects() {
-            return VibratorService.vibratorGetSupportedEffects(mNativeServicePtr);
-        }
-
-        /** Returns all compose primitives supported by the device vibrator. */
-        public int[] vibratorGetSupportedPrimitives() {
-            return VibratorService.vibratorGetSupportedPrimitives(mNativeServicePtr);
-        }
-
-        /** Turns vibrator on to perform one of the supported effects. */
-        public long vibratorPerformEffect(long effect, long strength, long vibrationId) {
-            return VibratorService.vibratorPerformEffect(
-                    mNativeServicePtr, effect, strength, vibrationId);
-        }
-
-        /** Turns vibrator on to perform one of the supported composed effects. */
-        public void vibratorPerformComposedEffect(
-                VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId) {
-            VibratorService.vibratorPerformComposedEffect(mNativeServicePtr, effect,
-                    vibrationId);
-        }
-
-        /** Enabled the device vibrator to be controlled by another service. */
-        public void vibratorSetExternalControl(boolean enabled) {
-            VibratorService.vibratorSetExternalControl(mNativeServicePtr, enabled);
-        }
-
-        /** Returns all capabilities of the device vibrator. */
-        public long vibratorGetCapabilities() {
-            return VibratorService.vibratorGetCapabilities(mNativeServicePtr);
-        }
-
-        /** Enable always-on vibration with given id and effect. */
-        public void vibratorAlwaysOnEnable(long id, long effect, long strength) {
-            VibratorService.vibratorAlwaysOnEnable(mNativeServicePtr, id, effect, strength);
-        }
-
-        /** Disable always-on vibration for given id. */
-        public void vibratorAlwaysOnDisable(long id) {
-            VibratorService.vibratorAlwaysOnDisable(mNativeServicePtr, id);
-        }
-    }
-
     /** Point of injection for test dependencies */
     @VisibleForTesting
     static class Injector {
 
-        NativeWrapper getNativeWrapper() {
-            return new NativeWrapper();
+        VibratorController createVibratorController(OnVibrationCompleteListener listener) {
+            return new VibratorController(/* vibratorId= */ 0, listener);
         }
 
         Handler createHandler(Looper looper) {
@@ -1845,7 +1569,7 @@ public class VibratorService extends IVibratorService.Stub {
 
         @Override
         public int onExternalVibrationStart(ExternalVibration vib) {
-            if (!hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+            if (!mVibratorController.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
                 return IExternalVibratorService.SCALE_MUTE;
             }
             if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
@@ -1880,8 +1604,11 @@ public class VibratorService extends IVibratorService.Stub {
                 if (mCurrentExternalVibration == null) {
                     // If we're not under external control right now, then cancel any normal
                     // vibration that may be playing and ready the vibrator for external control.
+                    if (DEBUG) {
+                        Slog.d(TAG, "Vibrator going under external control.");
+                    }
                     doCancelVibrateLocked(VibrationInfo.Status.CANCELLED);
-                    setVibratorUnderExternalControl(true);
+                    mVibratorController.setExternalControl(true);
                 } else {
                     endVibrationLocked(mCurrentExternalVibration, VibrationInfo.Status.CANCELLED);
                 }
@@ -1929,7 +1656,7 @@ public class VibratorService extends IVibratorService.Stub {
                         mCurrentExternalDeathRecipient);
                 mCurrentExternalDeathRecipient = null;
                 mCurrentExternalVibration = null;
-                setVibratorUnderExternalControl(false);
+                mVibratorController.setExternalControl(false);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
@@ -2127,19 +1854,19 @@ public class VibratorService extends IVibratorService.Stub {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runCapabilities");
             try (PrintWriter pw = getOutPrintWriter();) {
                 pw.println("Vibrator capabilities:");
-                if (hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+                if (mVibratorController.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
                     pw.println("  Always on effects");
                 }
-                if (hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+                if (mVibratorController.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
                     pw.println("  Compose effects");
                 }
-                if (hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
+                if (mVibratorController.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
                     pw.println("  Amplitude control");
                 }
-                if (hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+                if (mVibratorController.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
                     pw.println("  External control");
                 }
-                if (hasCapability(IVibrator.CAP_EXTERNAL_AMPLITUDE_CONTROL)) {
+                if (mVibratorController.hasCapability(IVibrator.CAP_EXTERNAL_AMPLITUDE_CONTROL)) {
                     pw.println("  External amplitude control");
                 }
                 pw.println("");
