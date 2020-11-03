@@ -57,16 +57,7 @@ public class PackageCacher {
      * Returns the cache key for a specified {@code packageFile} and {@code flags}.
      */
     private String getCacheKey(File packageFile, int flags) {
-        StringBuilder sb = new StringBuilder();
-
-        // To support packages with the same file name across partitions, use the partition name
-        // as a prefix. The cache should only be used for cases where the file paths have been
-        // established using the unique partition names, without canonicalization, so any links
-        // which would point to the same partition name should be handled separately.
-        String cachePrefix = packageFile.toPath().getName(0).toString();
-        sb.append(cachePrefix);
-        sb.append('-');
-        sb.append(packageFile.getName());
+        StringBuilder sb = new StringBuilder(packageFile.getName());
         sb.append('-');
         sb.append(flags);
 
