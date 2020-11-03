@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -1088,8 +1089,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 installerPackageName) == PackageManager.PERMISSION_GRANTED;
 
-        // For now only allow rollbacks for allowlisted packages or for testing.
-        return (isRollbackAllowlisted(packageName) && manageRollbacksGranted)
+        // For now only allow rollbacks for modules, allowlisted packages, or for testing.
+        return (isRollbackAllowed(packageName) && manageRollbacksGranted)
             || testManageRollbacksGranted;
     }
 
@@ -1097,8 +1098,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
      * Returns true is this package is eligible for enabling rollback.
      */
     @AnyThread
-    private boolean isRollbackAllowlisted(String packageName) {
-        return SystemConfig.getInstance().getRollbackWhitelistedPackages().contains(packageName);
+    private boolean isRollbackAllowed(String packageName) {
+        return SystemConfig.getInstance().getRollbackWhitelistedPackages().contains(packageName)
+                || isModule(packageName);
+    }
+    /**
+     * Returns true if the package name is the name of a module.
+     */
+    @AnyThread
+    private boolean isModule(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        final ModuleInfo moduleInfo;
+        try {
+            moduleInfo = pm.getModuleInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        return moduleInfo != null;
     }
 
     /**
