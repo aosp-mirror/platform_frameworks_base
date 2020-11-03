@@ -37,9 +37,6 @@ import java.util.zip.GZIPOutputStream
 class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
 
     companion object {
-        private const val TEST_PKG_NAME = "com.android.server.pm.test.test_app"
-        private const val VERSION_STUB = "PackageManagerTestAppStub.apk"
-        private const val VERSION_ONE = "PackageManagerTestAppVersion1.apk"
 
         /**
          * How many total users on device to test, including primary. This will clean up any
@@ -88,6 +85,12 @@ class SystemStubMultiUserDisableUninstallTest : BaseHostJUnit4Test() {
 
             usersToRemove.forEach {
                 savedDevice?.removeUser(it)
+            }
+
+            savedDevice?.let { device ->
+                savedPreparer?.let { preparer ->
+                    HostUtils.deleteAllTestPackages(device, preparer)
+                }
             }
 
             savedDevice?.uninstallPackage(TEST_PKG_NAME)

@@ -545,6 +545,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_SYSTEM_EXT = 1 << 21;
     static final int SCAN_AS_ODM = 1 << 22;
     static final int SCAN_AS_APK_IN_APEX = 1 << 23;
+    static final int SCAN_EXPECTED_BETTER = 1 << 24;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -804,11 +805,12 @@ public class PackageManagerService extends IPackageManager.Stub
     final SparseIntArray mIsolatedOwners = new SparseIntArray();
 
     /**
-     * Tracks new system packages [received in an OTA] that we expect to
-     * find updated user-installed versions. Keys are package name, values
-     * are package location.
+     * Tracks packages that we expect to find updated versions of on disk.
+     * Keys are package name, values are package location and package version code.
+     *
+     * @see #expectBetter(String, File, long)
      */
-    final private ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
+    private final ArrayMap<String, List<Pair<File, Long>>> mExpectingBetter = new ArrayMap<>();
 
     /**
      * Tracks existing packages prior to receiving an OTA. Keys are package name.
@@ -3349,7 +3351,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + ", versionCode=" + ps.versionCode
                                     + "; scanned versionCode=" + scannedPkg.getLongVersionCode());
                             removePackageLI(scannedPkg, true);
-                            mExpectingBetter.put(ps.name, ps.getPath());
+                            expectBetter(ps.name, ps.getPath(), ps.versionCode);
                         }
 
                         continue;
@@ -3379,7 +3381,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             // We're expecting that the system app should remain disabled, but add
                             // it to expecting better to recover in case the data version cannot
                             // be scanned.
-                            mExpectingBetter.put(disabledPs.name, disabledPs.getPath());
+                            expectBetter(disabledPs.name, disabledPs.getPath(),
+                                    disabledPs.versionCode);
                         }
                     }
                 }
@@ -3480,38 +3483,48 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int i = 0; i < mExpectingBetter.size(); i++) {
                     final String packageName = mExpectingBetter.keyAt(i);
                     if (!mPackages.containsKey(packageName)) {
-                        final File scanFile = mExpectingBetter.valueAt(i);
-
                         logCriticalInfo(Log.WARN, "Expected better " + packageName
                                 + " but never showed up; reverting to system");
 
-                        @ParseFlags int reparseFlags = 0;
-                        @ScanFlags int rescanFlags = 0;
-                        for (int i1 = mDirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
-                            final ScanPartition partition = mDirsToScanAsSystem.get(i1);
-                            if (partition.containsPrivApp(scanFile)) {
-                                reparseFlags = systemParseFlags;
-                                rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
-                                        | partition.scanFlag;
-                                break;
-                            }
-                            if (partition.containsApp(scanFile)) {
-                                reparseFlags = systemParseFlags;
-                                rescanFlags = systemScanFlags | partition.scanFlag;
-                                break;
-                            }
-                        }
-                        if (rescanFlags == 0) {
-                            Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
-                            continue;
-                        }
-                        mSettings.enableSystemPackageLPw(packageName);
+                        final List<Pair<File, Long>> scanFiles = mExpectingBetter.valueAt(i);
+                        // Sort ascending and iterate backwards to take highest version code
+                        Collections.sort(scanFiles,
+                                (first, second) -> Long.compare(first.second, second.second));
+                        for (int index = scanFiles.size() - 1; index >= 0; index--) {
+                            File scanFile = scanFiles.get(index).first;
 
-                        try {
-                            scanPackageTracedLI(scanFile, reparseFlags, rescanFlags, 0, null);
-                        } catch (PackageManagerException e) {
-                            Slog.e(TAG, "Failed to parse original system package: "
-                                    + e.getMessage());
+                            @ParseFlags int reparseFlags = 0;
+                            @ScanFlags int rescanFlags = 0;
+                            for (int i1 = mDirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
+                                final ScanPartition partition = mDirsToScanAsSystem.get(i1);
+                                if (partition.containsPrivApp(scanFile)) {
+                                    reparseFlags = systemParseFlags;
+                                    rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
+                                            | partition.scanFlag;
+                                    break;
+                                }
+                                if (partition.containsApp(scanFile)) {
+                                    reparseFlags = systemParseFlags;
+                                    rescanFlags = systemScanFlags | partition.scanFlag;
+                                    break;
+                                }
+                            }
+                            if (rescanFlags == 0) {
+                                Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
+                                continue;
+                            }
+                            mSettings.enableSystemPackageLPw(packageName);
+
+                            rescanFlags |= SCAN_EXPECTED_BETTER;
+
+                            try {
+                                scanPackageTracedLI(scanFile, reparseFlags, rescanFlags, 0, null);
+                                // Take first success and break out of for loop
+                                break;
+                            } catch (PackageManagerException e) {
+                                Slog.e(TAG, "Failed to parse original system package: "
+                                        + e.getMessage());
+                            }
                         }
                     }
                 }
@@ -3898,6 +3911,33 @@ public class PackageManagerService extends IPackageManager.Stub
                     UserHandle.USER_SYSTEM, "android");
             logCriticalInfo(Log.ERROR, "Stub disabled; pkg: " + pkgName);
         }
+    }
+
+    /**
+     * Mark a package as skipped during initial scan, expecting a more up to date version to be
+     * available on the scan of a higher priority partition. This can be either a system partition
+     * or the data partition.
+     *
+     * If for some reason that newer version cannot be scanned successfully, the data structure
+     * created here will be used to backtrack in the scanning process to try and take the highest
+     * version code of the package left on disk that scans successfully.
+     *
+     * This can occur if an OTA adds a new system package which the user has already installed an
+     * update on data for. Or if the device image includes multiple versions of the same package,
+     * for cases where the maintainer of a higher priority partition wants to update an app on
+     * a lower priority partition before shipping a device to users.
+     *
+     * @param pkgName the package name identifier to queue under
+     * @param codePath the path to re-scan if needed
+     * @param knownVersionCode the version of the package so that the set of files can be sorted
+     */
+    private void expectBetter(String pkgName, File codePath, long knownVersionCode) {
+        List<Pair<File, Long>> pairs = mExpectingBetter.get(pkgName);
+        if (pairs == null) {
+            pairs = new ArrayList<>(0);
+            mExpectingBetter.put(pkgName, pairs);
+        }
+        pairs.add(Pair.create(codePath, knownVersionCode));
     }
 
     /**
@@ -11271,7 +11311,23 @@ public class PackageManagerService extends IPackageManager.Stub
                 isUpdatedSystemApp = disabledPkgSetting != null;
             }
             applyPolicy(parsedPackage, parseFlags, scanFlags, mPlatformPackage, isUpdatedSystemApp);
-            assertPackageIsValid(parsedPackage, parseFlags, scanFlags);
+            try {
+                assertPackageIsValid(parsedPackage, pkgSetting, parseFlags, scanFlags);
+            } catch (PackageManagerException e) {
+                if (e.error == INSTALL_FAILED_VERSION_DOWNGRADE
+                        && ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0)
+                        && ((scanFlags & SCAN_BOOTING) != 0)) {
+                    if (pkgSetting != null && pkgSetting.getPkg() == null) {
+                        // If a package for the pkgSetting hasn't already been found, this is
+                        // skipping a downgrade on a lower priority partition, and so a later scan
+                        // is expected to fill the package.
+                        expectBetter(pkgSetting.name, new File(parsedPackage.getPath()),
+                                parsedPackage.getLongVersionCode());
+                    }
+                }
+
+                throw e;
+            }
 
             SharedUserSetting sharedUserSetting = null;
             if (parsedPackage.getSharedUserId() != null) {
@@ -12123,9 +12179,9 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @throws PackageManagerException If the package fails any of the validation checks
      */
-    private void assertPackageIsValid(AndroidPackage pkg, final @ParseFlags int parseFlags,
-            final @ScanFlags int scanFlags)
-                    throws PackageManagerException {
+    private void assertPackageIsValid(AndroidPackage pkg,
+            @Nullable PackageSetting existingPkgSetting, final @ParseFlags int parseFlags,
+            final @ScanFlags int scanFlags) throws PackageManagerException {
         if ((parseFlags & PackageParser.PARSE_ENFORCE_CODE) != 0) {
             assertCodePolicy(pkg);
         }
@@ -12140,11 +12196,11 @@ public class PackageManagerService extends IPackageManager.Stub
         // after OTA.
         final boolean isUserInstall = (scanFlags & SCAN_BOOTING) == 0;
         final boolean isFirstBootOrUpgrade = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
+        String pkgName = pkg.getPackageName();
         if ((isUserInstall || isFirstBootOrUpgrade)
-                && mApexManager.isApexPackage(pkg.getPackageName())) {
+                && mApexManager.isApexPackage(pkgName)) {
             throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
-                    pkg.getPackageName()
-                            + " is an APEX package and can't be installed as an APK.");
+                    pkgName + " is an APEX package and can't be installed as an APK.");
         }
 
         // Make sure we're not adding any bogus keyset info
@@ -12153,7 +12209,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         synchronized (mLock) {
             // The special "android" package can only be defined once
-            if (pkg.getPackageName().equals("android")) {
+            if (pkgName.equals("android")) {
                 if (mAndroidApplication != null) {
                     Slog.w(TAG, "*************************************************");
                     Slog.w(TAG, "Core android package being redefined.  Skipping.");
@@ -12164,12 +12220,46 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            // A package name must be unique; don't allow duplicates
-            if ((scanFlags & SCAN_NEW_INSTALL) == 0
-                    && mPackages.containsKey(pkg.getPackageName())) {
-                throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
-                        "Application package " + pkg.getPackageName()
-                        + " already installed.  Skipping duplicate.");
+            final long newLongVersionCode = pkg.getLongVersionCode();
+            if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
+                boolean runDuplicateCheck = false;
+
+                // It's possible to re-scan a package if an updated system app was expected, but
+                // no update on /data could be found. To avoid infinitely looping, a flag is passed
+                // in when re-scanning and this first branch is skipped if the flag is set.
+                if ((scanFlags & SCAN_EXPECTED_BETTER) == 0 && existingPkgSetting != null) {
+                    long existingLongVersionCode = existingPkgSetting.versionCode;
+                    if (newLongVersionCode <= existingLongVersionCode) {
+                        // Must check that real name is equivalent, as it's possible to downgrade
+                        // version code if the package is actually a different package taking over
+                        // a package name through <original-package/>. It is assumed that this
+                        // migration is one time, one way, and that there is no failsafe if this
+                        // doesn't hold true.
+                        if (Objects.equals(existingPkgSetting.realName, pkg.getRealPackage())) {
+                            if (newLongVersionCode != existingLongVersionCode) {
+                                throw new PackageManagerException(
+                                        INSTALL_FAILED_VERSION_DOWNGRADE,
+                                        "Ignoring lower version " + newLongVersionCode
+                                                + " for package " + pkgName
+                                                + " with expected version "
+                                                + existingLongVersionCode);
+                            }
+                        }
+                    } else if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0
+                            && (scanFlags & SCAN_BOOTING) != 0) {
+                        // During system boot scan, if there's already a package known, but this
+                        // package is higher version, use it instead, ignoring the duplicate check.
+                        // This will store the higher version in the setting object, and the above
+                        // branch/exception will cause future scans to skip the lower versions.
+                        runDuplicateCheck = false;
+                    }
+                }
+
+                if (runDuplicateCheck && mPackages.containsKey(pkgName)) {
+                    throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
+                            "Application package " + pkgName
+                                    + " already installed.  Skipping duplicate.");
+                }
             }
 
             if (pkg.isStaticSharedLibrary()) {
@@ -12289,8 +12379,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 }
-                if (pkg.getLongVersionCode() < minVersionCode
-                        || pkg.getLongVersionCode() > maxVersionCode) {
+                if (newLongVersionCode < minVersionCode
+                        || newLongVersionCode > maxVersionCode) {
                     throw new PackageManagerException("Static shared"
                             + " lib version codes must be ordered as lib versions");
                 }
@@ -12305,11 +12395,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // to the user-installed location. If we don't allow this change, any newer,
             // user-installed version of the application will be ignored.
             if ((scanFlags & SCAN_REQUIRE_KNOWN) != 0) {
-                if (mExpectingBetter.containsKey(pkg.getPackageName())) {
-                    Slog.w(TAG, "Relax SCAN_REQUIRE_KNOWN requirement for package "
-                            + pkg.getPackageName());
+                if (mExpectingBetter.containsKey(pkgName)) {
+                    Slog.w(TAG, "Relax SCAN_REQUIRE_KNOWN requirement for package " + pkgName);
                 } else {
-                    PackageSetting known = mSettings.getPackageLPr(pkg.getPackageName());
+                    PackageSetting known = mSettings.getPackageLPr(pkgName);
                     if (known != null) {
                         if (DEBUG_PACKAGE_SCANNING) {
                             Log.d(TAG, "Examining " + pkg.getPath()
@@ -12317,14 +12406,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                         if (!pkg.getPath().equals(known.getPathString())) {
                             throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
-                                    "Application package " + pkg.getPackageName()
+                                    "Application package " + pkgName
                                     + " found at " + pkg.getPath()
                                     + " but expected at " + known.getPathString()
                                     + "; ignoring.");
                         }
                     } else {
                         throw new PackageManagerException(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                                "Application package " + pkg.getPackageName()
+                                "Application package " + pkgName
                                 + " not found; ignoring.");
                     }
                 }
@@ -12347,7 +12436,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             INSTALL_FAILED_PROCESS_NOT_DEFINED,
                             "Can't install because application tag's process attribute "
                                     + pkg.getProcessName()
-                                    + " (in package " + pkg.getPackageName()
+                                    + " (in package " + pkgName
                                     + ") is not included in the <processes> list");
                 }
                 assertPackageProcesses(pkg, pkg.getActivities(), procs, "activity");
@@ -12371,7 +12460,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             pkg.getSigningDetails().signatures)) {
                         throw new PackageManagerException("Apps that share a user with a " +
                                 "privileged app must themselves be marked as privileged. " +
-                                pkg.getPackageName() + " shares privileged user " +
+                                pkgName + " shares privileged user " +
                                 pkg.getSharedUserId() + ".");
                     }
                 }
@@ -12388,21 +12477,21 @@ public class PackageManagerService extends IPackageManager.Stub
                         // upgraded.
                         Objects.requireNonNull(mOverlayConfig,
                                 "Parsing non-system dir before overlay configs are initialized");
-                        if (!mOverlayConfig.isMutable(pkg.getPackageName())) {
+                        if (!mOverlayConfig.isMutable(pkgName)) {
                             throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
+                                    + pkgName
                                     + " is static and cannot be upgraded.");
                         }
                     } else {
                         if ((scanFlags & SCAN_AS_VENDOR) != 0) {
                             if (pkg.getTargetSdkVersion() < getVendorPartitionVersion()) {
-                                Slog.w(TAG, "System overlay " + pkg.getPackageName()
+                                Slog.w(TAG, "System overlay " + pkgName
                                         + " targets an SDK below the required SDK level of vendor"
                                         + " overlays (" + getVendorPartitionVersion() + ")."
                                         + " This will become an install error in a future release");
                             }
                         } else if (pkg.getTargetSdkVersion() < Build.VERSION.SDK_INT) {
-                            Slog.w(TAG, "System overlay " + pkg.getPackageName()
+                            Slog.w(TAG, "System overlay " + pkgName
                                     + " targets an SDK below the required SDK level of system"
                                     + " overlays (" + Build.VERSION.SDK_INT + ")."
                                     + " This will become an install error in a future release");
@@ -12418,7 +12507,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (!comparePackageSignatures(platformPkgSetting,
                                 pkg.getSigningDetails().signatures)) {
                             throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
+                                    + pkgName
                                     + " must target Q or later, "
                                     + "or be signed with the platform certificate");
                         }
@@ -12440,7 +12529,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 // check reference signature
                                 if (mOverlayConfigSignaturePackage == null) {
                                     throw new PackageManagerException("Overlay "
-                                            + pkg.getPackageName() + " and target "
+                                            + pkgName + " and target "
                                             + pkg.getOverlayTarget() + " signed with"
                                             + " different certificates, and the overlay lacks"
                                             + " <overlay android:targetName>");
@@ -12450,7 +12539,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 if (!comparePackageSignatures(refPkgSetting,
                                         pkg.getSigningDetails().signatures)) {
                                     throw new PackageManagerException("Overlay "
-                                            + pkg.getPackageName() + " signed with a different "
+                                            + pkgName + " signed with a different "
                                             + "certificate than both the reference package and "
                                             + "target " + pkg.getOverlayTarget() + ", and the "
                                             + "overlay lacks <overlay android:targetName>");
@@ -12470,7 +12559,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (pkg.getSigningDetails().signatureSchemeVersion < minSignatureSchemeVersion) {
                     throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                             "No signature found in package of version " + minSignatureSchemeVersion
-                                    + " or newer for package " + pkg.getPackageName());
+                                    + " or newer for package " + pkgName);
                 }
             }
         }
