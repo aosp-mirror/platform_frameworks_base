@@ -88,7 +88,10 @@ interface IHdmiControlService {
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
     List<String> getUserCecSettings();
-    List<String> getAllowedCecSettingValues(String name);
-    String getCecSettingValue(String name);
-    void setCecSettingValue(String name, String value);
+    List<String> getAllowedCecSettingStringValues(String name);
+    int[] getAllowedCecSettingIntValues(String name);
+    String getCecSettingStringValue(String name);
+    void setCecSettingStringValue(String name, String value);
+    int getCecSettingIntValue(String name);
+    void setCecSettingIntValue(String name, int value);
 }
