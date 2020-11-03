@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
@@ -116,10 +114,8 @@ public class AppTransitionTests extends WindowTestsBase {
         final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
         // Create 2 app window tokens to represent 2 activity window.
-        final ActivityRecord activity1 = createTestActivityRecord(dc1,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord activity2 = createTestActivityRecord(dc2,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord activity1 = createActivityRecord(dc1);
+        final ActivityRecord activity2 = createActivityRecord(dc2);
 
         activity1.allDrawn = true;
         activity1.startingDisplayed = true;
@@ -153,7 +149,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
         final Task stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord activity1 = createTestActivityRecord(dc1);
+        final ActivityRecord activity1 = createNonAttachedActivityRecord(dc1);
         task1.addChild(activity1, 0);
 
         // Simulate same app is during opening / closing transition set stage.

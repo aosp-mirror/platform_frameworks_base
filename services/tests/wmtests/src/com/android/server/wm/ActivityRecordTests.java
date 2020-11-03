@@ -131,8 +131,9 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mStack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
-        mTask = mStack.getBottomMostTask();
+        mTask = new TaskBuilder(mSupervisor)
+                .setCreateParentTask(true).setCreateActivity(true).build();
+        mStack = mTask.getRootTask();
         mActivity = mTask.getTopNonFinishingActivity();
 
         setBooted(mAtm);
@@ -787,7 +788,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Have two tasks (topRootableTask and mTask) as the children of mStack.
         ActivityRecord topActivity = new ActivityBuilder(mActivity.mAtmService)
                 .setCreateTask(true)
-                .setStack(mStack)
+                .setParentTask(mStack)
                 .build();
         Task topRootableTask = topActivity.getTask();
         topRootableTask.moveToFront("test");
