@@ -16,8 +16,6 @@
 
 package com.android.tests.rollback.host;
 
-import static com.android.tests.rollback.host.WatchdogEventLogger.watchdogEventOccurred;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +29,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -98,12 +95,11 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
             // Verify rollback was executed after health check deadline
             runPhase("testNetworkFailedRollback_Phase3");
 
-            List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+            assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
                     REASON_EXPLICIT_HEALTH_CHECK, null));
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+            assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
                     null, null));
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
+            assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
         } finally {
             // Reconnect internet again so we won't break tests which assume internet available
             getDevice().executeShellCommand("svc wifi enable");
@@ -134,8 +130,7 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
         // Verify rollback was not executed after health check deadline
         runPhase("testNetworkPassedDoesNotRollback_Phase3");
 
-        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
-        assertEquals(watchdogEventOccurred(watchdogEvents, null, null,
+        assertEquals(mLogger.watchdogEventOccurred(null, null,
                 REASON_EXPLICIT_HEALTH_CHECK, null), false);
     }
 }
