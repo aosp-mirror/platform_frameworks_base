@@ -33,6 +33,12 @@ import org.junit.runner.RunWith
 class InvalidNewSystemAppTest : BaseHostJUnit4Test() {
 
     companion object {
+        private const val TEST_PKG_NAME = "com.android.server.pm.test.test_app"
+        private const val VERSION_ONE = "PackageManagerTestAppVersion1.apk"
+        private const val VERSION_TWO = "PackageManagerTestAppVersion2.apk"
+        private const val VERSION_THREE_INVALID = "PackageManagerTestAppVersion3Invalid.apk"
+        private const val VERSION_FOUR = "PackageManagerTestAppVersion4.apk"
+
         @get:ClassRule
         val deviceRebootRule = SystemPreparer.TestRuleDelegate(true)
     }
@@ -49,7 +55,7 @@ class InvalidNewSystemAppTest : BaseHostJUnit4Test() {
     @Before
     @After
     fun removeApk() {
-        HostUtils.deleteAllTestPackages(device, preparer)
+        device.uninstallPackage(TEST_PKG_NAME)
         preparer.deleteFile(filePath.parent.toString())
                 .reboot()
     }
