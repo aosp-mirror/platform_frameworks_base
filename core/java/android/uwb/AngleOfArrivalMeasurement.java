@@ -18,13 +18,15 @@ package android.uwb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Represents an angle of arrival measurement between two devices using Ultra Wideband
  *
  * @hide
  */
-public final class AngleOfArrivalMeasurement {
+public final class AngleOfArrivalMeasurement implements Parcelable {
     private final AngleMeasurement mAzimuthAngleMeasurement;
     private final AngleMeasurement mAltitudeAngleMeasurement;
 
@@ -69,6 +71,38 @@ public final class AngleOfArrivalMeasurement {
     public AngleMeasurement getAltitude() {
         return mAltitudeAngleMeasurement;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mAzimuthAngleMeasurement, flags);
+        dest.writeParcelable(mAltitudeAngleMeasurement, flags);
+    }
+
+    public static final @android.annotation.NonNull Creator<AngleOfArrivalMeasurement> CREATOR =
+            new Creator<AngleOfArrivalMeasurement>() {
+                @Override
+                public AngleOfArrivalMeasurement createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+
+                    builder.setAzimuthAngleMeasurement(
+                            in.readParcelable(AngleMeasurement.class.getClassLoader()));
+
+                    builder.setAltitudeAngleMeasurement(
+                            in.readParcelable(AngleMeasurement.class.getClassLoader()));
+
+                    return builder.build();
+                }
+
+                @Override
+                public AngleOfArrivalMeasurement[] newArray(int size) {
+                    return new AngleOfArrivalMeasurement[size];
+                }
+            };
 
     /**
      * Builder class for {@link AngleOfArrivalMeasurement}.
