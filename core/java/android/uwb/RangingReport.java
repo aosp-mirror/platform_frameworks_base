@@ -17,6 +17,8 @@
 package android.uwb;
 
 import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.List;
  *
  * @hide
  */
-public final class RangingReport {
+public final class RangingReport implements Parcelable {
     private final List<RangingMeasurement> mRangingMeasurements;
 
     private RangingReport(@NonNull List<RangingMeasurement> rangingMeasurements) {
@@ -47,6 +49,31 @@ public final class RangingReport {
     public List<RangingMeasurement> getMeasurements() {
         return mRangingMeasurements;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(mRangingMeasurements);
+    }
+
+    public static final @android.annotation.NonNull Creator<RangingReport> CREATOR =
+            new Creator<RangingReport>() {
+                @Override
+                public RangingReport createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+                    builder.addMeasurements(in.createTypedArrayList(RangingMeasurement.CREATOR));
+                    return builder.build();
+                }
+
+                @Override
+                public RangingReport[] newArray(int size) {
+                    return new RangingReport[size];
+                }
+    };
 
     /**
      * Builder for {@link RangingReport} object
