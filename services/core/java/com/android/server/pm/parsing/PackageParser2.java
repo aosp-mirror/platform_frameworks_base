@@ -135,7 +135,7 @@ public class PackageParser2 implements AutoCloseable {
     }
 
     /**
-     * TODO(b/155493909): Document new package parsing
+     * TODO(b/135203078): Document new package parsing
      */
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches)
