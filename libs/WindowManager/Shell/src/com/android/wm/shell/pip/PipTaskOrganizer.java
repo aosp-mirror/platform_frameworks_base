@@ -63,7 +63,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.phone.PipMenuActivityController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
@@ -137,7 +136,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipBoundsState mPipBoundsState;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipMenuActivityController mMenuActivityController;
-    private final SystemWindows mSystemWindows;
     private final PipAnimationController mPipAnimationController;
     private final PipUiEventLogger mPipUiEventLoggerLogger;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
@@ -270,14 +268,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Optional<SplitScreen> splitScreenOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
-            @NonNull ShellTaskOrganizer shellTaskOrganizer,
-            @NonNull SystemWindows systemWindows) {
+            @NonNull ShellTaskOrganizer shellTaskOrganizer) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsState = pipBoundsState;
         mPipBoundsHandler = boundsHandler;
         mMenuActivityController = menuActivityController;
-        mSystemWindows = systemWindows;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
@@ -499,9 +495,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         if (mShouldIgnoreEnteringPipTransition) {
+            final Rect destinationBounds = mPipBoundsState.getBounds();
             // animation is finished in the Launcher and here we directly apply the final touch.
-            applyEnterPipSyncTransaction(mPipBoundsState.getBounds(),
-                    () -> sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP));
+            applyEnterPipSyncTransaction(destinationBounds, () -> {
+                // ensure menu's settled in its final bounds first
+                finishResizeForMenu(destinationBounds);
+                sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
+            });
             mShouldIgnoreEnteringPipTransition = false;
             return;
         }
@@ -995,16 +995,21 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         } else if (isInPipDirection(direction) && type == ANIM_TYPE_ALPHA) {
             // TODO: Synchronize this correctly in #applyEnterPipSyncTransaction
-            runOnMainHandler(() -> {
-                mMenuActivityController.movePipMenu(null, null, destinationBounds);
-                mMenuActivityController.updateMenuBounds(destinationBounds);
-            });
+            finishResizeForMenu(destinationBounds);
             return;
         }
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareFinishResizeTransaction(destinationBounds, direction, tx, wct);
         applyFinishBoundsResize(wct, direction);
+        finishResizeForMenu(destinationBounds);
+    }
+
+    private void finishResizeForMenu(Rect destinationBounds) {
+        if (mMenuActivityController == null) {
+            if (DEBUG) Log.d(TAG, "mMenuActivityController is null");
+            return;
+        }
         runOnMainHandler(() -> {
             mMenuActivityController.movePipMenu(null, null, destinationBounds);
             mMenuActivityController.updateMenuBounds(destinationBounds);
