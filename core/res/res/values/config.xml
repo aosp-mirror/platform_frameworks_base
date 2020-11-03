@@ -1678,7 +1678,7 @@
          to be explicitly declared in this resource to be enabled.
              * SDK level 28 makes the following algorithms mandatory : "cbc(aes)", "hmac(md5)",
                "hmac(sha1)", "hmac(sha256)", "hmac(sha384)", "hmac(sha512)", "rfc4106(gcm(aes))"
-             * SDK level 30 makes the following algorithms mandatory : "rfc3686(ctr(aes))",
+             * SDK level 31 makes the following algorithms mandatory : "rfc3686(ctr(aes))",
                "xcbc(aes)", "rfc7539esp(chacha20,poly1305)"
      -->
     <string-array name="config_optionalIpSecAlgorithms" translatable="false">
