@@ -32,6 +32,7 @@ import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.app.compat.CompatChanges;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
@@ -61,7 +62,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import java.io.File;
@@ -509,6 +509,12 @@ public class BackupManagerService extends IBackupManager.Stub {
      */
     @Override
     public boolean isBackupServiceActive(int userId) {
+        int callingUid = Binder.getCallingUid();
+        if (CompatChanges.isChangeEnabled(
+                BackupManager.IS_BACKUP_SERVICE_ACTIVE_ENFORCE_PERMISSION_IN_SERVICE, callingUid)) {
+            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                    "isBackupServiceActive");
+        }
         synchronized (mStateLock) {
             return !mGlobalDisable && isBackupActivatedForUser(userId);
         }
