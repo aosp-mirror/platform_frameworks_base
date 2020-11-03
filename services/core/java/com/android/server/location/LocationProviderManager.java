@@ -677,15 +677,14 @@ class LocationProviderManager extends
         @Override
         public void onAlarm() {
             if (D) {
-                Log.d(TAG, "removing " + getIdentity() + " from " + mName
-                        + " provider due to expiration at " + TimeUtils.formatRealtime(
-                        mExpirationRealtimeMs));
+                Log.d(TAG, mName + " provider registration " + getIdentity()
+                        + " expired at " + TimeUtils.formatRealtime(mExpirationRealtimeMs));
             }
 
             synchronized (mLock) {
-                remove();
                 // no need to remove alarm after it's fired
                 mExpirationRealtimeMs = Long.MAX_VALUE;
+                remove();
             }
         }
 
@@ -700,6 +699,10 @@ class LocationProviderManager extends
             // check expiration time - alarm is not guaranteed to go off at the right time,
             // especially for short intervals
             if (SystemClock.elapsedRealtime() >= mExpirationRealtimeMs) {
+                if (D) {
+                    Log.d(TAG, mName + " provider registration " + getIdentity()
+                            + " expired at " + TimeUtils.formatRealtime(mExpirationRealtimeMs));
+                }
                 remove();
                 return null;
             }
@@ -781,8 +784,8 @@ class LocationProviderManager extends
                         boolean remove = ++mNumLocationsDelivered >= getRequest().getMaxUpdates();
                         if (remove) {
                             if (D) {
-                                Log.d(TAG, "removing " + getIdentity() + " from " + mName
-                                        + " provider due to number of updates");
+                                Log.d(TAG, mName + " provider registration " + getIdentity()
+                                        + " finished after " + mNumLocationsDelivered + " updates");
                             }
 
                             synchronized (mLock) {
@@ -848,14 +851,14 @@ class LocationProviderManager extends
             onTransportFailure(exception);
         }
 
-        private void onTransportFailure(Exception exception) {
-            if (exception instanceof RemoteException) {
-                Log.w(TAG, "registration " + this + " removed", exception);
+        private void onTransportFailure(Exception e) {
+            if (e instanceof RemoteException) {
+                Log.w(TAG, mName + " provider registration " + getIdentity() + " removed", e);
                 synchronized (mLock) {
                     remove();
                 }
             } else {
-                throw new AssertionError(exception);
+                throw new AssertionError(e);
             }
         }
 
@@ -863,7 +866,7 @@ class LocationProviderManager extends
         public void binderDied() {
             try {
                 if (D) {
-                    Log.d(TAG, mName + " provider client died: " + getIdentity());
+                    Log.d(TAG, mName + " provider registration " + getIdentity() + " died");
                 }
 
                 synchronized (mLock) {
@@ -910,19 +913,23 @@ class LocationProviderManager extends
             onTransportFailure(exception);
         }
 
-        private void onTransportFailure(Exception exception) {
-            if (exception instanceof PendingIntent.CanceledException) {
-                Log.w(TAG, "registration " + this + " removed", exception);
+        private void onTransportFailure(Exception e) {
+            if (e instanceof RemoteException) {
+                Log.w(TAG, mName + " provider registration " + getIdentity() + " removed", e);
                 synchronized (mLock) {
                     remove();
                 }
             } else {
-                throw new AssertionError(exception);
+                throw new AssertionError(e);
             }
         }
 
         @Override
         public void onCancelled(PendingIntent intent) {
+            if (D) {
+                Log.d(TAG, mName + " provider registration " + getIdentity() + " cancelled");
+            }
+
             synchronized (mLock) {
                 remove();
             }
@@ -932,19 +939,11 @@ class LocationProviderManager extends
     protected final class GetCurrentLocationListenerRegistration extends Registration implements
             IBinder.DeathRecipient, OnAlarmListener {
 
-        private volatile LocationTransport mTransport;
-
         private long mExpirationRealtimeMs = Long.MAX_VALUE;
 
         protected GetCurrentLocationListenerRegistration(LocationRequest request,
                 CallerIdentity identity, LocationTransport transport, int permissionLevel) {
             super(request, identity, transport, permissionLevel);
-            mTransport = transport;
-        }
-
-        @Override
-        protected void onListenerUnregister() {
-            mTransport = null;
         }
 
         @GuardedBy("mLock")
@@ -995,31 +994,27 @@ class LocationProviderManager extends
         @GuardedBy("mLock")
         @Override
         protected void onProviderListenerInactive() {
-            if (!getRequest().isLocationSettingsIgnored()) {
-                // if we go inactive for any reason, fail immediately
-                executeOperation(acceptLocationChange(null));
-            }
+            // if we go inactive for any reason, fail immediately
+            executeOperation(acceptLocationChange(null));
         }
 
         void deliverNull() {
             synchronized (mLock) {
-                executeSafely(getExecutor(), () -> mTransport, acceptLocationChange(null));
+                executeOperation(acceptLocationChange(null));
             }
         }
 
         @Override
         public void onAlarm() {
             if (D) {
-                Log.d(TAG, "removing " + getIdentity() + " from " + mName
-                        + " provider due to expiration at " + TimeUtils.formatRealtime(
-                        mExpirationRealtimeMs));
+                Log.d(TAG, mName + " provider registration " + getIdentity()
+                        + " expired at " + TimeUtils.formatRealtime(mExpirationRealtimeMs));
             }
 
             synchronized (mLock) {
                 // no need to remove alarm after it's fired
                 mExpirationRealtimeMs = Long.MAX_VALUE;
-
-                deliverNull();
+                executeOperation(acceptLocationChange(null));
             }
         }
 
@@ -1034,12 +1029,16 @@ class LocationProviderManager extends
             // check expiration time - alarm is not guaranteed to go off at the right time,
             // especially for short intervals
             if (SystemClock.elapsedRealtime() >= mExpirationRealtimeMs) {
+                if (D) {
+                    Log.d(TAG, mName + " provider registration " + getIdentity()
+                            + " expired at " + TimeUtils.formatRealtime(mExpirationRealtimeMs));
+                }
                 fineLocation = null;
             }
 
             // lastly - note app ops
-            if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(getPermissionLevel()),
-                    getIdentity())) {
+            if (fineLocation != null && !mAppOpsHelper.noteOpNoThrow(
+                    LocationPermissions.asAppOp(getPermissionLevel()), getIdentity())) {
                 if (D) {
                     Log.w(TAG, "noteOp denied for " + getIdentity());
                 }
@@ -1068,10 +1067,23 @@ class LocationProviderManager extends
         }
 
         @Override
+        public void onOperationFailure(ListenerOperation<LocationTransport> operation,
+                Exception e) {
+            if (e instanceof RemoteException) {
+                Log.w(TAG, mName + " provider registration " + getIdentity() + " removed", e);
+                synchronized (mLock) {
+                    remove();
+                }
+            } else {
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
         public void binderDied() {
             try {
                 if (D) {
-                    Log.d(TAG, mName + " provider client died: " + getIdentity());
+                    Log.d(TAG, mName + " provider registration " + getIdentity() + " died");
                 }
 
                 synchronized (mLock) {
