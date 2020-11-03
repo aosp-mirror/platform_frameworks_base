@@ -31,6 +31,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
+import android.provider.DeviceConfig;
 import android.util.Log;
 
 import com.android.server.IoThread;
@@ -66,6 +67,14 @@ public final class ProfcollectForwardingService extends SystemService {
             throw new AssertionError("only one service instance allowed");
         }
         sSelfService = this;
+    }
+
+    /**
+     * Check whether profcollect is enabled through device config.
+     */
+    public static boolean enabled() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT, "enabled",
+            false);
     }
 
     @Override
