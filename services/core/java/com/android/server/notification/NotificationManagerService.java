@@ -5498,6 +5498,8 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mCallState=" + callStateToString(mCallState));
                     pw.println("  mSystemReady=" + mSystemReady);
                     pw.println("  mMaxPackageEnqueueRate=" + mMaxPackageEnqueueRate);
+                    pw.println("  hideSilentStatusBar="
+                            + mPreferencesHelper.shouldHideSilentStatusIcons());
                 }
                 pw.println("  mArchive=" + mArchive.toString());
                 Iterator<Pair<StatusBarNotification, Integer>> iter = mArchive.descendingIterator();
