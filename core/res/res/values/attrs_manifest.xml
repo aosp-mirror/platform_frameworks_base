@@ -1001,8 +1001,9 @@
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
-        <!-- The user has enabled or disabled displaying all text in bold -->
-        <flag name="forceBoldText" value="0x10000000" />
+        <!-- The font weight adjustment value has changed. Used to reflect the user increasing font
+             weight. -->
+        <flag name="fontWeightAdjustment" value="0x10000000" />
     </attr>
 
     <!-- Indicate that the activity can be launched as the embedded child of another
