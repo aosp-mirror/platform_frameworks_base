@@ -4315,6 +4315,10 @@
     <permission android:name="android.permission.WRITE_DREAM_STATE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows applications to read whether ambient display is suppressed. -->
+    <permission android:name="android.permission.READ_DREAM_SUPPRESSION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allow an application to read and write the cache partition.
          @hide -->
     <permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"
