@@ -23,6 +23,15 @@ import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.FileOutputStream
 
+internal const val TEST_PKG_NAME = "com.android.server.pm.test.test_app"
+internal const val VERSION_STUB = "PackageManagerTestAppStub.apk"
+internal const val VERSION_ONE = "PackageManagerTestAppVersion1.apk"
+internal const val VERSION_TWO = "PackageManagerTestAppVersion2.apk"
+internal const val VERSION_THREE = "PackageManagerTestAppVersion3.apk"
+internal const val VERSION_THREE_INVALID = "PackageManagerTestAppVersion3Invalid.apk"
+internal const val VERSION_FOUR = "PackageManagerTestAppVersion4.apk"
+internal const val VERSION_OVERRIDE = "PackageManagerTestAppOriginalOverride.apk"
+
 internal fun SystemPreparer.pushApk(javaResourceName: String, partition: Partition) =
         pushResourceFile(javaResourceName, HostUtils.makePathForApk(javaResourceName, partition)
                 .toString())
@@ -89,12 +98,25 @@ internal fun retryUntilSuccess(block: () -> Boolean) {
 
 internal object HostUtils {
 
-    fun getDataDir(device: ITestDevice, pkgName: String) =
-            device.executeShellCommand("dumpsys package $pkgName")
-                    .lineSequence()
-                    .map(String::trim)
-                    .single { it.startsWith("dataDir=") }
-                    .removePrefix("dataDir=")
+    /**
+     * Since most of the tests use the same test APKs, consolidate the logic for deleting them
+     * before and after a test runs. This also ensures that a failing test doesn't leave an APK on
+     * device that could spill over to another test when developing locally.
+     *
+     * Iterates all partitions since different tests use different partitions.
+     */
+    fun deleteAllTestPackages(device: ITestDevice, preparer: SystemPreparer) {
+        Partition.values().forEach { partition ->
+            device.uninstallPackage(TEST_PKG_NAME)
+            preparer.deleteApkFolders(partition, VERSION_ONE, VERSION_TWO, VERSION_THREE,
+                    VERSION_THREE_INVALID, VERSION_FOUR, VERSION_OVERRIDE)
+        }
+
+        // TODO: There is an optimization that can be made here by hooking into the SystemPreparer's
+        //  reboot rule, avoiding a reboot cycle by doing the delete in line the built in @After
+        //  reboot.
+        preparer.reboot()
+    }
 
     fun makePathForApk(fileName: String, partition: Partition) =
             makePathForApk(File(fileName), partition)
@@ -136,13 +158,34 @@ internal object HostUtils {
             }
             .map(String::trim)
 
+    fun getDataDir(device: ITestDevice, pkgName: String) =
+            packageSection(device, pkgName)
+                    .singleOrNull { it.startsWith("dataDir=") }
+                    ?.removePrefix("dataDir=")
+
+    /** Return all code paths for a package. This will include hidden system package code paths. */
     fun getCodePaths(device: ITestDevice, pkgName: String) =
-            device.executeShellCommand("pm dump $pkgName")
-                    .lineSequence()
-                    .map(String::trim)
+            (packageSection(device, pkgName) +
+                    packageSection(device, pkgName, "Hidden system packages"))
                     .filter { it.startsWith("codePath=") }
                     .map { it.removePrefix("codePath=") }
                     .toList()
+
+    fun getVersionCode(device: ITestDevice, pkgName: String) =
+            packageSection(device, pkgName)
+                    .filter { it.startsWith("versionCode=") }
+                    .map { it.removePrefix("versionCode=") }
+                    .map { it.takeWhile { !it.isWhitespace() } }
+                    .map { it.toInt() }
+                    .firstOrNull()
+
+    fun getPrivateFlags(device: ITestDevice, pkgName: String) =
+            packageSection(device, pkgName)
+                    .filter { it.startsWith("privateFlags=") }
+                    .map { it.removePrefix("privateFlags=[ ") }
+                    .map { it.removeSuffix(" ]") }
+                    .map { it.split(" ") }
+                    .firstOrNull()
 
     private fun userIdLineSequence(device: ITestDevice, pkgName: String) =
             packageSection(device, pkgName)
