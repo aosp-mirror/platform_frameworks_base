@@ -315,11 +315,113 @@ number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. 
 number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
     </plurals>
 
+    <!-- Time displayed on typographic clock face, which displays the time in words.
+             Example:
+
+                 It's
+                 Four
+                 Twenty
+                 Nine
+
+         This string requires two arguments: the first in the hours of the time and
+         the second is the minutes of the time. The hours string is obtained from
+         string-array type_clock_hours below and the minutes string is obtained
+         from string-array type_clock_minutes below.
+
+    [CHAR LIMIT=8] -->
+    <plurals name="type_clock_header">
+        <item quantity="one"><annotation name="color">It\u2019s</annotation>\n^1\n^2</item>
+        <item quantity="few"><annotation name="color">It\u2019s</annotation>\n^1\n^2</item>
+        <item quantity="other"><annotation name="color">It\u2019s</annotation>\n^1\n^2</item>
+    </plurals>
+
+    <!-- Hour displayed in words on the typographic clock face. [CHAR LIMIT=12] -->
+    <string-array name="type_clock_hours">
+        <item>Twelve</item>
+        <item>One</item>
+        <item>Two</item>
+        <item>Three</item>
+        <item>Four</item>
+        <item>Five</item>
+        <item>Six</item>
+        <item>Seven</item>
+        <item>Eight</item>
+        <item>Nine</item>
+        <item>Ten</item>
+        <item>Eleven</item>
+    </string-array>
+
+    <!-- Minutes displayed in words on the typographic clock face. [CHAR LIMIT=20] -->
+    <string-array name="type_clock_minutes">
+        <item>O\u2019Clock</item>
+        <item>Oh One</item>
+        <item>Oh Two</item>
+        <item>Oh Three</item>
+        <item>Oh Four</item>
+        <item>Oh Five</item>
+        <item>Oh Six</item>
+        <item>Oh Seven</item>
+        <item>Oh Eight</item>
+        <item>Oh Nine</item>
+        <item>Ten</item>
+        <item>Eleven</item>
+        <item>Twelve</item>
+        <item>Thirteen</item>
+        <item>Fourteen</item>
+        <item>Fifteen</item>
+        <item>Sixteen</item>
+        <item>Seventeen</item>
+        <item>Eighteen</item>
+        <item>Nineteen</item>
+        <item>Twenty</item>
+        <item>Twenty\nOne</item>
+        <item>Twenty\nTwo</item>
+        <item>Twenty\nThree</item>
+        <item>Twenty\nFour</item>
+        <item>Twenty\nFive</item>
+        <item>Twenty\nSix</item>
+        <item>Twenty\nSeven</item>
+        <item>Twenty\nEight</item>
+        <item>Twenty\nNine</item>
+        <item>Thirty</item>
+        <item>Thirty\nOne</item>
+        <item>Thirty\nTwo</item>
+        <item>Thirty\nThree</item>
+        <item>Thirty\nFour</item>
+        <item>Thirty\nFive</item>
+        <item>Thirty\nSix</item>
+        <item>Thirty\nSeven</item>
+        <item>Thirty\nEight</item>
+        <item>Thirty\nNine</item>
+        <item>Forty</item>
+        <item>Forty\nOne</item>
+        <item>Forty\nTwo</item>
+        <item>Forty\nThree</item>
+        <item>Forty\nFour</item>
+        <item>Forty\nFive</item>
+        <item>Forty\nSix</item>
+        <item>Forty\nSeven</item>
+        <item>Forty\nEight</item>
+        <item>Forty\nNine</item>
+        <item>Fifty</item>
+        <item>Fifty\nOne</item>
+        <item>Fifty\nTwo</item>
+        <item>Fifty\nThree</item>
+        <item>Fifty\nFour</item>
+        <item>Fifty\nFive</item>
+        <item>Fifty\nSix</item>
+        <item>Fifty\nSeven</item>
+        <item>Fifty\nEight</item>
+        <item>Fifty\nNine</item>
+    </string-array>
+
     <!-- Name of the "Default" clock face, which is the clock face that will be shown by default. [CHAR LIMIT=15]-->
     <string name="clock_title_default">Default</string>
     <!-- Name of the "Bubble" clock face, which is an analog clock with hands shaped like large bubbles [CHAR LIMIT=15]-->
     <string name="clock_title_bubble">Bubble</string>
     <!-- Name of the "Analog" clock face [CHAR LIMIT=15]-->
     <string name="clock_title_analog">Analog</string>
+    <!-- Name of the "Typographic" clock face [CHAR LIMIT=15]-->
+    <string name="clock_title_type">Type</string>
 
 </resources>
