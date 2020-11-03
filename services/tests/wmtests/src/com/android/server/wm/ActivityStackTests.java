@@ -43,10 +43,10 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
-import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
-import static com.android.server.wm.Task.STACK_VISIBILITY_INVISIBLE;
-import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
+import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.TaskDisplayArea.getStackAbove;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -123,7 +123,7 @@ public class ActivityStackTests extends WindowTestsBase {
         final Task destStack = mDefaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
-        mTask.reparent(destStack, true /* toTop */, Task.REPARENT_KEEP_STACK_AT_FRONT,
+        mTask.reparent(destStack, true /* toTop */, Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT,
                 false /* animate */, true /* deferResume*/,
                 "testResumedActivityFromTaskReparenting");
 
@@ -140,7 +140,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
         final Task destStack = mDefaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask.reparent(destStack, true /*toTop*/, REPARENT_MOVE_STACK_TO_FRONT, false, false,
+        mTask.reparent(destStack, true /*toTop*/, REPARENT_MOVE_ROOT_TASK_TO_FRONT, false, false,
                 "testResumedActivityFromActivityReparenting");
 
         assertNull(mStack.getResumedActivity());
@@ -418,10 +418,10 @@ public class ActivityStackTests extends WindowTestsBase {
         assertFalse(homeStack.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE, homeStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE, homeStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 splitScreenSecondary.getVisibility(null /* starting */));
 
         // Home stack should be visible if one of the halves of split-screen is translucent.
@@ -429,11 +429,11 @@ public class ActivityStackTests extends WindowTestsBase {
         assertTrue(homeStack.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 homeStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 splitScreenSecondary.getVisibility(null /* starting */));
 
         final Task splitScreenSecondary2 =
@@ -444,9 +444,9 @@ public class ActivityStackTests extends WindowTestsBase {
         doReturn(false).when(splitScreenSecondary2).isTranslucent(any());
         assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         // First split-screen secondary should be visible behind another translucent split-screen
@@ -454,9 +454,9 @@ public class ActivityStackTests extends WindowTestsBase {
         doReturn(true).when(splitScreenSecondary2).isTranslucent(any());
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         final Task assistantStack = createStackForShouldBeVisibleTest(
@@ -469,13 +469,13 @@ public class ActivityStackTests extends WindowTestsBase {
         assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertFalse(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 assistantStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE,
                 splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         // Split-screen stacks should be visible behind a translucent fullscreen stack.
@@ -484,13 +484,13 @@ public class ActivityStackTests extends WindowTestsBase {
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 assistantStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         // Assistant stack shouldn't be visible behind translucent split-screen stack,
@@ -505,25 +505,25 @@ public class ActivityStackTests extends WindowTestsBase {
             assertTrue(assistantStack.shouldBeVisible(null /* starting */));
             assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
             assertFalse(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-            assertEquals(STACK_VISIBILITY_VISIBLE,
+            assertEquals(TASK_VISIBILITY_VISIBLE,
                     assistantStack.getVisibility(null /* starting */));
-            assertEquals(STACK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_VISIBILITY_INVISIBLE,
                     splitScreenPrimary.getVisibility(null /* starting */));
-            assertEquals(STACK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_VISIBILITY_INVISIBLE,
                     splitScreenSecondary.getVisibility(null /* starting */));
-            assertEquals(STACK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_VISIBILITY_INVISIBLE,
                     splitScreenSecondary2.getVisibility(null /* starting */));
         } else {
             assertFalse(assistantStack.shouldBeVisible(null /* starting */));
             assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
             assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-            assertEquals(STACK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_VISIBILITY_INVISIBLE,
                     assistantStack.getVisibility(null /* starting */));
-            assertEquals(STACK_VISIBILITY_VISIBLE,
+            assertEquals(TASK_VISIBILITY_VISIBLE,
                     splitScreenPrimary.getVisibility(null /* starting */));
-            assertEquals(STACK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_VISIBILITY_INVISIBLE,
                     splitScreenSecondary.getVisibility(null /* starting */));
-            assertEquals(STACK_VISIBILITY_VISIBLE,
+            assertEquals(TASK_VISIBILITY_VISIBLE,
                     splitScreenSecondary2.getVisibility(null /* starting */));
         }
     }
@@ -548,33 +548,33 @@ public class ActivityStackTests extends WindowTestsBase {
         // Re-parent home to split secondary.
         homeStack.reparent(splitSecondary, POSITION_TOP);
         // Current tasks should be visible.
-        assertEquals(STACK_VISIBILITY_VISIBLE, splitPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE, splitSecondary.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, splitPrimary.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, splitSecondary.getVisibility(null /* starting */));
         // Home task should still be visible even though it is a child of another visible task.
-        assertEquals(STACK_VISIBILITY_VISIBLE, homeStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, homeStack.getVisibility(null /* starting */));
 
 
         // Add fullscreen translucent task that partially occludes split tasks
         final Task translucentStack = createStandardStackForVisibilityTest(
                 WINDOWING_MODE_FULLSCREEN, true /* translucent */);
         // Fullscreen translucent task should be visible
-        assertEquals(STACK_VISIBILITY_VISIBLE, translucentStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, translucentStack.getVisibility(null /* starting */));
         // Split tasks should be visible behind translucent
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitSecondary.getVisibility(null /* starting */));
         // Home task should be visible behind translucent since its parent is visible behind
         // translucent.
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 homeStack.getVisibility(null /* starting */));
 
 
         // Hide split-secondary
         splitSecondary.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, true /* set */);
         // Home split secondary and home task should be invisible.
-        assertEquals(STACK_VISIBILITY_INVISIBLE, splitSecondary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE, homeStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_INVISIBLE, splitSecondary.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_INVISIBLE, homeStack.getVisibility(null /* starting */));
     }
 
     @Test
@@ -586,9 +586,9 @@ public class ActivityStackTests extends WindowTestsBase {
                 createStandardStackForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         true /* translucent */);
 
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 bottomStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 translucentStack.getVisibility(null /* starting */));
     }
 
@@ -604,10 +604,10 @@ public class ActivityStackTests extends WindowTestsBase {
                 createStandardStackForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         false /* translucent */);
 
-        assertEquals(STACK_VISIBILITY_INVISIBLE, bottomStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE, bottomStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_INVISIBLE,
                 translucentStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE, opaqueStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, opaqueStack.getVisibility(null /* starting */));
     }
 
     @Test
@@ -622,10 +622,10 @@ public class ActivityStackTests extends WindowTestsBase {
                 createStandardStackForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         true /* translucent */);
 
-        assertEquals(STACK_VISIBILITY_INVISIBLE, bottomStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_INVISIBLE, bottomStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 opaqueStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 translucentStack.getVisibility(null /* starting */));
     }
 
@@ -638,9 +638,9 @@ public class ActivityStackTests extends WindowTestsBase {
                 createStandardStackForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         true /* translucent */);
 
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 bottomTranslucentStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 translucentStack.getVisibility(null /* starting */));
     }
 
@@ -653,9 +653,9 @@ public class ActivityStackTests extends WindowTestsBase {
                 createStandardStackForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         false /* translucent */);
 
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_VISIBILITY_INVISIBLE,
                 bottomTranslucentStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE, opaqueStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, opaqueStack.getVisibility(null /* starting */));
     }
 
     @Test
@@ -669,15 +669,15 @@ public class ActivityStackTests extends WindowTestsBase {
         final Task pinnedStack = createStackForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
-        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 bottomStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_VISIBILITY_VISIBLE,
                 translucentStack.getVisibility(null /* starting */));
         // Add an activity to the pinned stack so it isn't considered empty for visibility check.
         final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm)
                 .setTask(pinnedStack)
                 .build();
-        assertEquals(STACK_VISIBILITY_VISIBLE, pinnedStack.getVisibility(null /* starting */));
+        assertEquals(TASK_VISIBILITY_VISIBLE, pinnedStack.getVisibility(null /* starting */));
     }
 
     @Test
