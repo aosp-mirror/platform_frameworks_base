@@ -198,6 +198,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.service.attestation.ImpressionToken;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.sysprop.SurfaceFlingerProperties;
@@ -764,6 +765,8 @@ public class WindowManagerService extends IWindowManager.Stub
     SettingsObserver mSettingsObserver;
     final EmbeddedWindowController mEmbeddedWindowController;
     final AnrController mAnrController;
+
+    private final ImpressionAttestationController mImpressionAttestationController;
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -1365,6 +1368,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
                 mContext.getResources());
 
+        mImpressionAttestationController = new ImpressionAttestationController(mContext);
         setGlobalShadowSettings();
         mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
@@ -8428,5 +8432,65 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             SystemClock.sleep(durationMs);
         }
+    }
+
+    @Override
+    public String[] getSupportedImpressionAlgorithms() {
+        return mImpressionAttestationController.getSupportedImpressionAlgorithms();
+    }
+
+    @Override
+    public boolean verifyImpressionToken(ImpressionToken impressionToken) {
+        return mImpressionAttestationController.verifyImpressionToken(impressionToken);
+    }
+
+    ImpressionToken generateImpressionToken(Session session, IWindow window,
+            Rect boundsInWindow, String hashAlgorithm) {
+        final SurfaceControl displaySurfaceControl;
+        final Rect boundsInDisplay = new Rect(boundsInWindow);
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, window, false);
+            if (win == null) {
+                Slog.w(TAG, "Failed to generate impression token. Invalid window");
+                return null;
+            }
+
+            DisplayContent displayContent = win.getDisplayContent();
+            if (displayContent == null) {
+                Slog.w(TAG, "Failed to generate impression token. Window is not on a display");
+                return null;
+            }
+
+            displaySurfaceControl = displayContent.getSurfaceControl();
+            mImpressionAttestationController.calculateImpressionTokenBoundsLocked(win,
+                    boundsInWindow, boundsInDisplay);
+
+            if (boundsInDisplay.isEmpty()) {
+                Slog.w(TAG, "Failed to generate impression token. Bounds are not on screen");
+                return null;
+            }
+        }
+
+        // A screenshot of the entire display is taken rather than just the window. This is
+        // because if we take a screenshot of the window, it will not include content that might
+        // be covering it with the same uid. We want to make sure we include content that's
+        // covering to ensure we get as close as possible to what the user sees
+        final int uid = session.mUid;
+        SurfaceControl.LayerCaptureArgs args =
+                new SurfaceControl.LayerCaptureArgs.Builder(displaySurfaceControl)
+                        .setUid(uid)
+                        .setSourceCrop(boundsInDisplay)
+                        .build();
+
+        SurfaceControl.ScreenshotHardwareBuffer screenshotHardwareBuffer =
+                SurfaceControl.captureLayers(args);
+        if (screenshotHardwareBuffer == null
+                || screenshotHardwareBuffer.getHardwareBuffer() == null) {
+            Slog.w(TAG, "Failed to generate impression token. Failed to take screenshot");
+            return null;
+        }
+
+        return mImpressionAttestationController.generateImpressionToken(
+                screenshotHardwareBuffer.getHardwareBuffer(), boundsInWindow, hashAlgorithm);
     }
 }

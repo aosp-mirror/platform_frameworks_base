@@ -5680,4 +5680,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         return count;
     }
+
+    MagnificationSpec getMagnificationSpec() {
+        return mMagnificationSpec;
+    }
 }
