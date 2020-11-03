@@ -30,77 +30,96 @@ public interface RILConstants {
 
     // from RIL_Errno
     int SUCCESS = 0;
-    int RADIO_NOT_AVAILABLE = 1;              /* If radio did not start or is resetting */
+    int RADIO_NOT_AVAILABLE = 1;                    /* If radio did not start or is resetting */
     int GENERIC_FAILURE = 2;
-    int PASSWORD_INCORRECT = 3;               /* for PIN/PIN2 methods only! */
-    int SIM_PIN2 = 4;                         /* Operation requires SIM PIN2 to be entered */
-    int SIM_PUK2 = 5;                         /* Operation requires SIM PIN2 to be entered */
+    int PASSWORD_INCORRECT = 3;                     /* for PIN/PIN2 methods only! */
+    int SIM_PIN2 = 4;                               /* Operation requires SIM PIN2 to be entered */
+    int SIM_PUK2 = 5;                               /* Operation requires SIM PIN2 to be entered */
     int REQUEST_NOT_SUPPORTED = 6;
     int REQUEST_CANCELLED = 7;
-    int OP_NOT_ALLOWED_DURING_VOICE_CALL = 8; /* data operation is not allowed during voice call in
-                                                 class C */
-    int OP_NOT_ALLOWED_BEFORE_REG_NW = 9;     /* request is not allowed before device registers to
-                                                 network */
-    int SMS_SEND_FAIL_RETRY = 10;             /* send sms fail and need retry */
-    int SIM_ABSENT = 11;                      /* ICC card is absent */
-    int SUBSCRIPTION_NOT_AVAILABLE = 12;      /* fail to find CDMA subscription from specified
-                                                 location */
-    int MODE_NOT_SUPPORTED = 13;              /* HW does not support preferred network type */
-    int FDN_CHECK_FAILURE = 14;               /* send operation barred error when FDN is enabled */
-    int ILLEGAL_SIM_OR_ME = 15;               /* network selection failure due
-                                                 to wrong SIM/ME and no
-                                                 retries needed */
-    int MISSING_RESOURCE = 16;                /* no logical channel available */
-    int NO_SUCH_ELEMENT = 17;                 /* application not found on SIM */
-    int DIAL_MODIFIED_TO_USSD = 18;           /* DIAL request modified to USSD */
-    int DIAL_MODIFIED_TO_SS = 19;             /* DIAL request modified to SS */
-    int DIAL_MODIFIED_TO_DIAL = 20;           /* DIAL request modified to DIAL with different data*/
-    int USSD_MODIFIED_TO_DIAL = 21;           /* USSD request modified to DIAL */
-    int USSD_MODIFIED_TO_SS = 22;             /* USSD request modified to SS */
-    int USSD_MODIFIED_TO_USSD = 23;           /* USSD request modified to different USSD request */
-    int SS_MODIFIED_TO_DIAL = 24;             /* SS request modified to DIAL */
-    int SS_MODIFIED_TO_USSD = 25;             /* SS request modified to USSD */
-    int SUBSCRIPTION_NOT_SUPPORTED = 26;      /* Subscription not supported */
-    int SS_MODIFIED_TO_SS = 27;               /* SS request modified to different SS request */
-    int SIM_ALREADY_POWERED_OFF = 29;         /* SAP: 0x03, Error card aleready powered off */
-    int SIM_ALREADY_POWERED_ON = 30;          /* SAP: 0x05, Error card already powered on */
-    int SIM_DATA_NOT_AVAILABLE = 31;          /* SAP: 0x06, Error data not available */
+    int OP_NOT_ALLOWED_DURING_VOICE_CALL = 8;       /* data operation is not allowed during voice
+                                                       call in class C */
+    int OP_NOT_ALLOWED_BEFORE_REG_NW = 9;           /* request is not allowed before device
+                                                       registers to network */
+    int SMS_SEND_FAIL_RETRY = 10;                   /* send sms fail and need retry */
+    int SIM_ABSENT = 11;                            /* ICC card is absent */
+    int SUBSCRIPTION_NOT_AVAILABLE = 12;            /* fail to find CDMA subscription from specified
+                                                       location */
+    int MODE_NOT_SUPPORTED = 13;                    /* HW does not support preferred network type */
+    int FDN_CHECK_FAILURE = 14;                     /* send operation barred error when FDN is
+                                                       enabled */
+    int ILLEGAL_SIM_OR_ME = 15;                     /* network selection failure due to wrong
+                                                       SIM/ME and no retries needed */
+    int MISSING_RESOURCE = 16;                      /* no logical channel available */
+    int NO_SUCH_ELEMENT = 17;                       /* application not found on SIM */
+    int DIAL_MODIFIED_TO_USSD = 18;                 /* DIAL request modified to USSD */
+    int DIAL_MODIFIED_TO_SS = 19;                   /* DIAL request modified to SS */
+    int DIAL_MODIFIED_TO_DIAL = 20;                 /* DIAL request modified to DIAL with
+                                                       different data*/
+    int USSD_MODIFIED_TO_DIAL = 21;                 /* USSD request modified to DIAL */
+    int USSD_MODIFIED_TO_SS = 22;                   /* USSD request modified to SS */
+    int USSD_MODIFIED_TO_USSD = 23;                 /* USSD request modified to different USSD
+                                                       request */
+    int SS_MODIFIED_TO_DIAL = 24;                   /* SS request modified to DIAL */
+    int SS_MODIFIED_TO_USSD = 25;                   /* SS request modified to USSD */
+    int SUBSCRIPTION_NOT_SUPPORTED = 26;            /* Subscription not supported */
+    int SS_MODIFIED_TO_SS = 27;                     /* SS request modified to different SS
+                                                       request */
+    int SIM_ALREADY_POWERED_OFF = 29;               /* SAP: 0x03, Error card aleready powered off */
+    int SIM_ALREADY_POWERED_ON = 30;                /* SAP: 0x05, Error card already powered on */
+    int SIM_DATA_NOT_AVAILABLE = 31;                /* SAP: 0x06, Error data not available */
     int SIM_SAP_CONNECT_FAILURE = 32;
     int SIM_SAP_MSG_SIZE_TOO_LARGE = 33;
     int SIM_SAP_MSG_SIZE_TOO_SMALL = 34;
     int SIM_SAP_CONNECT_OK_CALL_ONGOING = 35;
-    int LCE_NOT_SUPPORTED = 36;               /* Link Capacity Estimation (LCE) not supported */
-    int NO_MEMORY = 37;                       /* Not sufficient memory to process the request */
-    int INTERNAL_ERR = 38;                    /* Hit unexpected vendor internal error scenario */
-    int SYSTEM_ERR = 39;                      /* Hit platform or system error */
-    int MODEM_ERR = 40;                       /* Hit unexpected modem error */
-    int INVALID_STATE = 41;                   /* Unexpected request for the current state */
-    int NO_RESOURCES = 42;                    /* Not sufficient resource to process the request */
-    int SIM_ERR = 43;                         /* Received error from SIM card */
-    int INVALID_ARGUMENTS = 44;               /* Received invalid arguments in request */
-    int INVALID_SIM_STATE = 45;               /* Can not process the request in current SIM state */
-    int INVALID_MODEM_STATE = 46;             /* Can not process the request in current Modem state */
-    int INVALID_CALL_ID = 47;                 /* Received invalid call id in request */
-    int NO_SMS_TO_ACK = 48;                   /* ACK received when there is no SMS to ack */
-    int NETWORK_ERR = 49;                     /* Received error from network */
-    int REQUEST_RATE_LIMITED = 50;            /* Operation denied due to overly-frequent requests */
-    int SIM_BUSY = 51;                        /* SIM is busy */
-    int SIM_FULL = 52;                        /* The target EF is full */
-    int NETWORK_REJECT = 53;                  /* Request is rejected by network */
-    int OPERATION_NOT_ALLOWED = 54;           /* Not allowed the request now */
-    int EMPTY_RECORD = 55;                    /* The request record is empty */
-    int INVALID_SMS_FORMAT = 56;              /* Invalid sms format */
-    int ENCODING_ERR = 57;                    /* Message not encoded properly */
-    int INVALID_SMSC_ADDRESS = 58;            /* SMSC address specified is invalid */
-    int NO_SUCH_ENTRY = 59;                   /* No such entry present to perform the request */
-    int NETWORK_NOT_READY = 60;               /* Network is not ready to perform the request */
-    int NOT_PROVISIONED = 61;                 /* Device doesnot have this value provisioned */
-    int NO_SUBSCRIPTION = 62;                 /* Device doesnot have subscription */
-    int NO_NETWORK_FOUND = 63;                /* Network cannot be found */
-    int DEVICE_IN_USE = 64;                   /* Operation cannot be performed because the device
-                                                 is currently in use */
-    int ABORTED = 65;                         /* Operation aborted */
-    int INVALID_RESPONSE = 66;                /* Invalid response sent by vendor code */
+    int LCE_NOT_SUPPORTED = 36;                     /* Link Capacity Estimation (LCE) not
+                                                       supported */
+    int NO_MEMORY = 37;                             /* Not sufficient memory to process the
+                                                       request */
+    int INTERNAL_ERR = 38;                          /* Hit unexpected vendor internal error
+                                                       scenario */
+    int SYSTEM_ERR = 39;                            /* Hit platform or system error */
+    int MODEM_ERR = 40;                             /* Hit unexpected modem error */
+    int INVALID_STATE = 41;                         /* Unexpected request for the current state */
+    int NO_RESOURCES = 42;                          /* Not sufficient resource to process the
+                                                       request */
+    int SIM_ERR = 43;                               /* Received error from SIM card */
+    int INVALID_ARGUMENTS = 44;                     /* Received invalid arguments in request */
+    int INVALID_SIM_STATE = 45;                     /* Can not process the request in current SIM
+                                                       state */
+    int INVALID_MODEM_STATE = 46;                   /* Can not process the request in current Modem
+                                                       state */
+    int INVALID_CALL_ID = 47;                       /* Received invalid call id in request */
+    int NO_SMS_TO_ACK = 48;                         /* ACK received when there is no SMS to ack */
+    int NETWORK_ERR = 49;                           /* Received error from network */
+    int REQUEST_RATE_LIMITED = 50;                  /* Operation denied due to overly-frequent
+                                                       requests */
+    int SIM_BUSY = 51;                              /* SIM is busy */
+    int SIM_FULL = 52;                              /* The target EF is full */
+    int NETWORK_REJECT = 53;                        /* Request is rejected by network */
+    int OPERATION_NOT_ALLOWED = 54;                 /* Not allowed the request now */
+    int EMPTY_RECORD = 55;                          /* The request record is empty */
+    int INVALID_SMS_FORMAT = 56;                    /* Invalid sms format */
+    int ENCODING_ERR = 57;                          /* Message not encoded properly */
+    int INVALID_SMSC_ADDRESS = 58;                  /* SMSC address specified is invalid */
+    int NO_SUCH_ENTRY = 59;                         /* No such entry present to perform the
+                                                       request */
+    int NETWORK_NOT_READY = 60;                     /* Network is not ready to perform the
+                                                       request */
+    int NOT_PROVISIONED = 61;                       /* Device doesnot have this value
+                                                       provisioned */
+    int NO_SUBSCRIPTION = 62;                       /* Device doesnot have subscription */
+    int NO_NETWORK_FOUND = 63;                      /* Network cannot be found */
+    int DEVICE_IN_USE = 64;                         /* Operation cannot be performed because the
+                                                       device is currently in use */
+    int ABORTED = 65;                               /* Operation aborted */
+    int INVALID_RESPONSE = 66;                      /* Invalid response sent by vendor code */
+    int SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED = 67; /* 1X voice and SMS are not allowed
+                                                       simulteneously */
+    int ACCESS_BARRED = 68;                         /* SMS access is barred */
+    int BLOCKED_DUE_TO_CALL = 69;                   /* SMS is blocked due to call control */
+    int RF_HARDWARE_ISSUE = 70;                     /* RF HW issue is detected */
+    int NO_RF_CALIBRATION_INFO = 71;                /* No RF calibration in device */
 
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
