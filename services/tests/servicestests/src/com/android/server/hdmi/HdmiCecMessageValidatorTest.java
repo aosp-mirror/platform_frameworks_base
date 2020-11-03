@@ -452,6 +452,51 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_tunerDeviceStatus() {
+        // Displaying digital tuner
+        assertMessageValidity("40:07:00:00:11:CE:90:0F:00:78").isEqualTo(OK);
+        assertMessageValidity("40:07:80:10:13:0B:34:38").isEqualTo(OK);
+        assertMessageValidity("40:07:00:9A:06:F9:D3:E6").isEqualTo(OK);
+        assertMessageValidity("40:07:00:91:09:F4:40:C8").isEqualTo(OK);
+        // Not displaying tuner
+        assertMessageValidity("40:07:01").isEqualTo(OK);
+        assertMessageValidity("40:07:81:07:64:B9:02").isEqualTo(OK);
+        // Displaying analogue tuner
+        assertMessageValidity("40:07:02:00:13:0F:00:96").isEqualTo(OK);
+        assertMessageValidity("40:07:82:02:EA:60:1F").isEqualTo(OK);
+
+        assertMessageValidity("4F:07:00:00:11:CE:90:0F:00:78").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:07:82:02:EA:60:1F").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:07").isEqualTo(ERROR_PARAMETER_SHORT);
+
+        // Invalid display info
+        assertMessageValidity("40:07:09:A1:8C:17:51").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:07:A7:0C:29").isEqualTo(ERROR_PARAMETER);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("40:07:00:14:11:CE:90:0F:00:78").isEqualTo(ERROR_PARAMETER);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("40:07:80:A0:07:95:F1").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ARIB Broadcast system
+        assertMessageValidity("40:07:00:00:11:CE:90:0F:00").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ATSC Broadcast system
+        assertMessageValidity("40:07:80:10:13:0B:34").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for DVB Broadcast system
+        assertMessageValidity("40:07:00:18:BE:77:00:7D:01").isEqualTo(ERROR_PARAMETER);
+        // Invalid channel number format
+        assertMessageValidity("40:07:80:9A:10:F9:D3").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 1 part channel number
+        assertMessageValidity("40:07:00:90:04:F7").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 2 part channel number
+        assertMessageValidity("40:07:80:91:09:F4:40").isEqualTo(ERROR_PARAMETER);
+        // Invalid Analogue Broadcast type
+        assertMessageValidity("40:07:02:03:EA:60:1F").isEqualTo(ERROR_PARAMETER);
+        // Invalid Analogue Frequency
+        assertMessageValidity("40:07:82:00:FF:FF:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Broadcast system
+        assertMessageValidity("40:07:02:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
     public void isValid_UserControlPressed() {
         assertMessageValidity("40:44:07").isEqualTo(OK);
         assertMessageValidity("40:44:52:A7").isEqualTo(OK);
