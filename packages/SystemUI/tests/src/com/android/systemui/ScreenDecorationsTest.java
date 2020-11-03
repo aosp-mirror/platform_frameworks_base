@@ -64,6 +64,8 @@ import com.android.systemui.R.dimen;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,6 +86,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private ScreenDecorations mScreenDecorations;
     private WindowManager mWindowManager;
     private DisplayManager mDisplayManager;
+    private SecureSettings mSecureSettings;
     private Handler mMainHandler;
     @Mock
     private TunerService mTunerService;
@@ -98,6 +101,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
         mMainHandler = new Handler(mTestableLooper.getLooper());
+        mSecureSettings = new FakeSettings();
 
         mWindowManager = mock(WindowManager.class);
         WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
@@ -111,7 +115,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mDisplayManager.getDisplay(anyInt())).thenReturn(display);
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
 
-        mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler,
+        mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler, mSecureSettings,
                 mBroadcastDispatcher, mTunerService, mUserTracker) {
             @Override
             public void start() {

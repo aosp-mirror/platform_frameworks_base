@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Binds;
 import dagger.Module;
@@ -48,14 +49,24 @@ public interface QSModule {
             AutoAddTracker.Builder autoAddTrackerBuilder,
             QSTileHost host,
             @Background Handler handler,
+            SecureSettings secureSettings,
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
             NightDisplayListener nightDisplayListener,
             CastController castController) {
-        AutoTileManager manager = new AutoTileManager(context, autoAddTrackerBuilder,
-                host, handler, hotspotController, dataSaverController, managedProfileController,
-                nightDisplayListener, castController);
+        AutoTileManager manager = new AutoTileManager(
+                context,
+                autoAddTrackerBuilder,
+                host,
+                handler,
+                secureSettings,
+                hotspotController,
+                dataSaverController,
+                managedProfileController,
+                nightDisplayListener,
+                castController
+        );
         manager.init();
         return manager;
     }
