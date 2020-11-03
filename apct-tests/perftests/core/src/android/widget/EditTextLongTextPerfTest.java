@@ -43,8 +43,8 @@ public class EditTextLongTextPerfTest {
     @Parameters(name = "{0}")
     public static Collection cases() {
         return Arrays.asList(new Object[][] {
-            { "10x30K", 10, 30000 },
-            { "300x1K", 300, 1000 },
+            { "10x3K", 10, 3000 },
+            { "30x1K", 30, 1000 },
         });
     }
 
