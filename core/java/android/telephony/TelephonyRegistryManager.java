@@ -332,12 +332,12 @@ public class TelephonyRegistryManager {
     /**
      * Notify {@link ServiceState} update on certain subscription.
      *
-     * @param subId for which the service state changed.
      * @param slotIndex for which the service state changed. Can be derived from subId except
      * subId is invalid.
+     * @param subId for which the service state changed.
      * @param state service state e.g, in service, out of service or roaming status.
      */
-    public void notifyServiceStateChanged(int subId, int slotIndex, @NonNull ServiceState state) {
+    public void notifyServiceStateChanged(int slotIndex, int subId, @NonNull ServiceState state) {
         try {
             sRegistry.notifyServiceStateForPhoneId(slotIndex, subId, state);
         } catch (RemoteException ex) {
@@ -348,12 +348,12 @@ public class TelephonyRegistryManager {
     /**
      * Notify {@link SignalStrength} update on certain subscription.
      *
-     * @param subId for which the signalstrength changed.
      * @param slotIndex for which the signalstrength changed. Can be derived from subId except when
      * subId is invalid.
+     * @param subId for which the signalstrength changed.
      * @param signalStrength e.g, signalstrength level {@see SignalStrength#getLevel()}
      */
-    public void notifySignalStrengthChanged(int subId, int slotIndex,
+    public void notifySignalStrengthChanged(int slotIndex, int subId,
             @NonNull SignalStrength signalStrength) {
         try {
             sRegistry.notifySignalStrengthForPhoneId(slotIndex, subId, signalStrength);
@@ -366,13 +366,13 @@ public class TelephonyRegistryManager {
      * Notify changes to the message-waiting indicator on certain subscription. e.g, The status bar
      * uses message waiting indicator to determine when to display the voicemail icon.
      *
-     * @param subId for which message waiting indicator changed.
      * @param slotIndex for which message waiting indicator changed. Can be derived from subId
      * except when subId is invalid.
+     * @param subId for which message waiting indicator changed.
      * @param msgWaitingInd {@code true} indicates there is message-waiting indicator, {@code false}
      * otherwise.
      */
-    public void notifyMessageWaitingChanged(int subId, int slotIndex, boolean msgWaitingInd) {
+    public void notifyMessageWaitingChanged(int slotIndex, int subId, boolean msgWaitingInd) {
         try {
             sRegistry.notifyMessageWaitingChangedForPhoneId(slotIndex, subId, msgWaitingInd);
         } catch (RemoteException ex) {
@@ -413,9 +413,9 @@ public class TelephonyRegistryManager {
     /**
      * Notify changes to default (Internet) data connection state on certain subscription.
      *
-     * @param subId for which data connection state changed.
      * @param slotIndex for which data connections state changed. Can be derived from subId except
      * when subId is invalid.
+     * @param subId for which data connection state changed.
      * @param preciseState the PreciseDataConnectionState
      *
      * @see PreciseDataConnectionState
@@ -434,13 +434,13 @@ public class TelephonyRegistryManager {
     /**
      * Notify {@link CallQuality} change on certain subscription.
      *
-     * @param subId for which call quality state changed.
      * @param slotIndex for which call quality state changed. Can be derived from subId except when
      * subId is invalid.
+     * @param subId for which call quality state changed.
      * @param callQuality Information about call quality e.g, call quality level
      * @param networkType associated with this data connection. e.g, LTE
      */
-    public void notifyCallQualityChanged(int subId, int slotIndex, @NonNull CallQuality callQuality,
+    public void notifyCallQualityChanged(int slotIndex, int subId, @NonNull CallQuality callQuality,
         @NetworkType int networkType) {
         try {
             sRegistry.notifyCallQualityChanged(callQuality, slotIndex, subId, networkType);
@@ -452,11 +452,11 @@ public class TelephonyRegistryManager {
     /**
      * Notify emergency number list changed on certain subscription.
      *
-     * @param subId for which emergency number list changed.
      * @param slotIndex for which emergency number list changed. Can be derived from subId except
      * when subId is invalid.
+     * @param subId for which emergency number list changed.
      */
-    public void notifyEmergencyNumberList(int subId, int slotIndex) {
+    public void notifyEmergencyNumberList( int slotIndex, int subId) {
         try {
             sRegistry.notifyEmergencyNumberList(slotIndex, subId);
         } catch (RemoteException ex) {
@@ -497,13 +497,13 @@ public class TelephonyRegistryManager {
     /**
      * Notify radio power state changed on certain subscription.
      *
-     * @param subId for which radio power state changed.
      * @param slotIndex for which radio power state changed. Can be derived from subId except when
      * subId is invalid.
+     * @param subId for which radio power state changed.
      * @param radioPowerState the current modem radio state.
      */
-    public void notifyRadioPowerStateChanged(int subId, int slotIndex,
-        @RadioPowerState int radioPowerState) {
+    public void notifyRadioPowerStateChanged(int slotIndex, int subId,
+            @RadioPowerState int radioPowerState) {
         try {
             sRegistry.notifyRadioPowerStateChanged(slotIndex, subId, radioPowerState);
         } catch (RemoteException ex) {
@@ -541,13 +541,13 @@ public class TelephonyRegistryManager {
      * Notify data activation state changed on certain subscription.
      * @see TelephonyManager#getDataActivationState()
      *
-     * @param subId for which data activation state changed.
      * @param slotIndex for which data activation state changed. Can be derived from subId except
      * when subId is invalid.
+     * @param subId for which data activation state changed.
      * @param activationState sim activation state e.g, activated.
      */
-    public void notifyDataActivationStateChanged(int subId, int slotIndex,
-        @SimActivationState int activationState) {
+    public void notifyDataActivationStateChanged(int slotIndex, int subId,
+            @SimActivationState int activationState) {
         try {
             sRegistry.notifySimActivationStateChangedForPhoneId(slotIndex, subId,
                     SIM_ACTIVATION_TYPE_DATA, activationState);
@@ -560,13 +560,13 @@ public class TelephonyRegistryManager {
      * Notify voice activation state changed on certain subscription.
      * @see TelephonyManager#getVoiceActivationState()
      *
-     * @param subId for which voice activation state changed.
      * @param slotIndex for which voice activation state changed. Can be derived from subId except
      * subId is invalid.
+     * @param subId for which voice activation state changed.
      * @param activationState sim activation state e.g, activated.
      */
-    public void notifyVoiceActivationStateChanged(int subId, int slotIndex,
-        @SimActivationState int activationState) {
+    public void notifyVoiceActivationStateChanged(int slotIndex, int subId,
+            @SimActivationState int activationState) {
         try {
             sRegistry.notifySimActivationStateChangedForPhoneId(slotIndex, subId,
                     SIM_ACTIVATION_TYPE_VOICE, activationState);
@@ -579,9 +579,9 @@ public class TelephonyRegistryManager {
      * Notify User mobile data state changed on certain subscription. e.g, mobile data is enabled
      * or disabled.
      *
-     * @param subId for which mobile data state has changed.
      * @param slotIndex for which mobile data state has changed. Can be derived from subId except
      * when subId is invalid.
+     * @param subId for which mobile data state has changed.
      * @param state {@code true} indicates mobile data is enabled/on. {@code false} otherwise.
      */
     public void notifyUserMobileDataStateChanged(int slotIndex, int subId, boolean state) {
@@ -602,7 +602,7 @@ public class TelephonyRegistryManager {
      * @param telephonyDisplayInfo The display info.
      */
     public void notifyDisplayInfoChanged(int slotIndex, int subscriptionId,
-                                         @NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
+            @NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
         try {
             sRegistry.notifyDisplayInfoChanged(slotIndex, subscriptionId, telephonyDisplayInfo);
         } catch (RemoteException ex) {
@@ -643,14 +643,14 @@ public class TelephonyRegistryManager {
      * Notify precise call state changed on certain subscription, including foreground, background
      * and ringcall states.
      *
-     * @param subId for which precise call state changed.
      * @param slotIndex for which precise call state changed. Can be derived from subId except when
      * subId is invalid.
+     * @param subId for which precise call state changed.
      * @param ringCallPreciseState ringCall state.
      * @param foregroundCallPreciseState foreground call state.
      * @param backgroundCallPreciseState background call state.
      */
-    public void notifyPreciseCallState(int subId, int slotIndex,
+    public void notifyPreciseCallState(int slotIndex, int subId,
             @PreciseCallStates int ringCallPreciseState,
             @PreciseCallStates int foregroundCallPreciseState,
             @PreciseCallStates int backgroundCallPreciseState) {
@@ -793,9 +793,10 @@ public class TelephonyRegistryManager {
      * @param reason Reason for data enabled/disabled. See {@code REASON_*} in
      * {@link TelephonyManager}.
      */
-    public void notifyDataEnabled(boolean enabled, @TelephonyManager.DataEnabledReason int reason) {
+    public void notifyDataEnabled(int slotIndex, int subId, boolean enabled,
+            @TelephonyManager.DataEnabledReason int reason) {
         try {
-            sRegistry.notifyDataEnabled(enabled, reason);
+            sRegistry.notifyDataEnabled(slotIndex, subId, enabled, reason);
         } catch (RemoteException ex) {
             // system server crash
         }
