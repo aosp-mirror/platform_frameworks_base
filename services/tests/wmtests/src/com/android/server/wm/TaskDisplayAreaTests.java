@@ -79,7 +79,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
         assertFalse(mPinnedStack.isVisible());
-        final ActivityRecord pinnedApp = createTestActivityRecord(mDisplayContent);
+        final ActivityRecord pinnedApp = createNonAttachedActivityRecord(mDisplayContent);
         pinnedTask.addChild(pinnedApp, 0 /* addPos */);
         assertTrue(mPinnedStack.isVisible());
     }
@@ -94,7 +94,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity = createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         task.addChild(activity, 0 /* addPos */);
         final TaskDisplayArea taskDisplayArea = activity.getDisplayArea();
         activity.mNeedsAnimationBoundsLayer = true;
@@ -236,7 +236,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         ActivityRecord homeActivity = rootHomeTask.getTopNonFinishingActivity();
         if (homeActivity == null) {
             homeActivity = new ActivityBuilder(mWm.mAtmService)
-                    .setStack(rootHomeTask).setCreateTask(true).build();
+                    .setParentTask(rootHomeTask).setCreateTask(true).build();
         }
         homeActivity.setVisible(false);
         homeActivity.mVisibleRequested = true;
@@ -255,10 +255,10 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         final Task secondStack = secondTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(firstStack).build();
-        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(secondStack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(firstStack).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(secondStack).build();
 
         // Activity on TDA1 is focused
         mDisplayContent.setFocusedApp(firstActivity);
@@ -284,8 +284,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack = taskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(stack).build();
 
         mDisplayContent.setFocusedApp(activity);
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);

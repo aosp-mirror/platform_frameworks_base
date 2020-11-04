@@ -18,15 +18,25 @@ package android.uwb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.Arrays;
 
 /**
  * A class representing a UWB address
  *
  * @hide
  */
-public final class UwbAddress {
+public final class UwbAddress implements Parcelable {
     public static final int SHORT_ADDRESS_BYTE_LENGTH = 2;
     public static final int EXTENDED_ADDRESS_BYTE_LENGTH = 8;
+
+    private final byte[] mAddressBytes;
+
+    private UwbAddress(byte[] address) {
+        mAddressBytes = address;
+    }
 
     /**
      * Create a {@link UwbAddress} from a byte array.
@@ -37,12 +47,16 @@ public final class UwbAddress {
      *
      * @param address a byte array to convert to a {@link UwbAddress}
      * @return a {@link UwbAddress} created from the input byte array
-     * @throw IllegableArumentException when the length is not one of
+     * @throws IllegalArgumentException when the length is not one of
      *       {@link #SHORT_ADDRESS_BYTE_LENGTH} or {@link #EXTENDED_ADDRESS_BYTE_LENGTH} bytes
      */
     @NonNull
-    public static UwbAddress fromBytes(byte[] address) throws IllegalArgumentException {
-        throw new UnsupportedOperationException();
+    public static UwbAddress fromBytes(@NonNull byte[] address) throws IllegalArgumentException {
+        if (address.length != SHORT_ADDRESS_BYTE_LENGTH
+                && address.length != EXTENDED_ADDRESS_BYTE_LENGTH) {
+            throw new IllegalArgumentException("Invalid UwbAddress length " + address.length);
+        }
+        return new UwbAddress(address);
     }
 
     /**
@@ -52,7 +66,7 @@ public final class UwbAddress {
      */
     @NonNull
     public byte[] toBytes() {
-        throw new UnsupportedOperationException();
+        return mAddressBytes;
     }
 
     /**
@@ -61,22 +75,55 @@ public final class UwbAddress {
      * {@link #EXTENDED_ADDRESS_BYTE_LENGTH}.
      */
     public int size() {
-        throw new UnsupportedOperationException();
+        return mAddressBytes.length;
     }
 
     @NonNull
     @Override
     public String toString() {
-        throw new UnsupportedOperationException();
+        StringBuilder builder = new StringBuilder("0x");
+        for (byte addressByte : mAddressBytes) {
+            builder.append(String.format("%02X", addressByte));
+        }
+        return builder.toString();
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        throw new UnsupportedOperationException();
+        if (obj instanceof UwbAddress) {
+            return Arrays.equals(mAddressBytes, ((UwbAddress) obj).toBytes());
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Arrays.hashCode(mAddressBytes);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mAddressBytes.length);
+        dest.writeByteArray(mAddressBytes);
+    }
+
+    public static final @android.annotation.NonNull Creator<UwbAddress> CREATOR =
+            new Creator<UwbAddress>() {
+                @Override
+                public UwbAddress createFromParcel(Parcel in) {
+                    byte[] address = new byte[in.readInt()];
+                    in.readByteArray(address);
+                    return UwbAddress.fromBytes(address);
+                }
+
+                @Override
+                public UwbAddress[] newArray(int size) {
+                    return new UwbAddress[size];
+                }
+    };
 }

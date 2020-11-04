@@ -55,6 +55,8 @@ public:
     sp<AnomalyTracker> addAnomalyTracker(const Alert &alert,
                                          const sp<AlarmMonitor>& anomalyAlarmMonitor) override;
 
+    void addAnomalyTracker(sp<AnomalyTracker>& anomalyTracker) override;
+
     void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
                         const HashableDimensionKey& primaryKey, const FieldValue& oldState,
                         const FieldValue& newState) override;
@@ -128,6 +130,8 @@ private:
             std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
             std::vector<int>& metricsWithActivation) override;
 
+    void addAnomalyTrackerLocked(sp<AnomalyTracker>& anomalyTracker);
+
     const DurationMetric_AggregationType mAggregationType;
 
     // Index of the SimpleAtomMatcher which defines the start.
@@ -164,9 +168,6 @@ private:
     std::unique_ptr<DurationTracker> createDurationTracker(
             const MetricDimensionKey& eventKey) const;
 
-    // This hides the base class's std::vector<sp<AnomalyTracker>> mAnomalyTrackers
-    std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
-
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
@@ -185,6 +186,7 @@ private:
     FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestMaxDurationWithSplitInNextBucket);
 
     FRIEND_TEST(ConfigUpdateTest, TestUpdateDurationMetrics);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateAlerts);
 };
 
 }  // namespace statsd

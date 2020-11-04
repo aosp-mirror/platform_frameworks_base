@@ -53,13 +53,4 @@ public interface RollbackManagerInternal {
      * @return The rollback id if rollback was enabled successfully, or -1 if not.
      */
     int notifyStagedSession(int sessionId);
-
-    /**
-     * Used by the staging manager to notify the RollbackManager of the apk
-     * session for a staged session.
-     *
-     * @param originalSessionId The original session ID where this apk session belongs
-     * @param apkSessionId The ID of this apk session
-     */
-    void notifyStagedApkSession(int originalSessionId, int apkSessionId);
 }

@@ -38,6 +38,7 @@ import static com.android.server.location.LocationPermissions.PERMISSION_NONE;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.PendingIntent;
@@ -107,6 +108,8 @@ import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
 
 import java.io.FileDescriptor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -141,6 +144,14 @@ class LocationProviderManager extends
     // minimum amount of request delay in order to respect the delay, below this value the request
     // will just be scheduled immediately
     private static final long MIN_REQUEST_DELAY_MS = 30 * 1000;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATE_STARTED, STATE_STOPPING, STATE_STOPPED})
+    private @interface State {}
+
+    private static final int STATE_STARTED = 0;
+    private static final int STATE_STOPPING = 1;
+    private static final int STATE_STOPPED = 2;
 
     protected interface LocationTransport {
 
@@ -1082,7 +1093,7 @@ class LocationProviderManager extends
     protected final Context mContext;
 
     @GuardedBy("mLock")
-    private boolean mStarted;
+    private @State int mState;
 
     // maps of user id to value
     @GuardedBy("mLock")
@@ -1148,7 +1159,7 @@ class LocationProviderManager extends
         mContext = context;
         mName = Objects.requireNonNull(name);
         mPassiveManager = passiveManager;
-        mStarted = false;
+        mState = STATE_STOPPED;
         mEnabled = new SparseBooleanArray(2);
         mLastLocations = new SparseArray<>(2);
 
@@ -1180,7 +1191,8 @@ class LocationProviderManager extends
 
     public void startManager() {
         synchronized (mLock) {
-            mStarted = true;
+            Preconditions.checkState(mState == STATE_STOPPED);
+            mState = STATE_STARTED;
 
             mUserHelper.addListener(mUserChangedListener);
             mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
@@ -1197,6 +1209,9 @@ class LocationProviderManager extends
 
     public void stopManager() {
         synchronized (mLock) {
+            Preconditions.checkState(mState == STATE_STARTED);
+            mState = STATE_STOPPING;
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 onEnabledChanged(UserHandle.USER_ALL);
@@ -1205,11 +1220,19 @@ class LocationProviderManager extends
                 Binder.restoreCallingIdentity(identity);
             }
 
+            setRealProvider(null);
+            setMockProvider(null);
+
             mUserHelper.removeListener(mUserChangedListener);
             mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
+            // if external entities are registering listeners it's their responsibility to
+            // unregister them before stopManager() is called
             Preconditions.checkState(mEnabledListeners.isEmpty());
-            mStarted = false;
+
+            mEnabled.clear();
+            mLastLocations.clear();
+            mState = STATE_STOPPED;
         }
     }
 
@@ -1252,21 +1275,21 @@ class LocationProviderManager extends
 
     public void addEnabledListener(ProviderEnabledListener listener) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             mEnabledListeners.add(listener);
         }
     }
 
     public void removeEnabledListener(ProviderEnabledListener listener) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             mEnabledListeners.remove(listener);
         }
     }
 
-    public void setRealProvider(AbstractLocationProvider provider) {
+    public void setRealProvider(@Nullable AbstractLocationProvider provider) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -1279,7 +1302,7 @@ class LocationProviderManager extends
 
     public void setMockProvider(@Nullable MockProvider provider) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
 
             mLocationEventLog.logProviderMocked(mName, provider != null);
 
@@ -1408,7 +1431,7 @@ class LocationProviderManager extends
 
         Location location;
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             LastLocation lastLocation = mLastLocations.get(userId);
             if (lastLocation == null) {
                 location = null;
@@ -1430,7 +1453,7 @@ class LocationProviderManager extends
 
     public void injectLastLocation(Location location, int userId) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             if (getLastLocationUnsafe(userId, PERMISSION_FINE, false, Long.MAX_VALUE) == null) {
                 setLastLocation(location, userId);
             }
@@ -1478,7 +1501,7 @@ class LocationProviderManager extends
                         permissionLevel);
 
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             final long ident = Binder.clearCallingIdentity();
             try {
                 putRegistration(callback.asBinder(), registration);
@@ -1520,7 +1543,7 @@ class LocationProviderManager extends
                 permissionLevel);
 
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             final long ident = Binder.clearCallingIdentity();
             try {
                 putRegistration(listener.asBinder(), registration);
@@ -1539,7 +1562,7 @@ class LocationProviderManager extends
                 permissionLevel);
 
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             final long identity = Binder.clearCallingIdentity();
             try {
                 putRegistration(pendingIntent, registration);
@@ -1551,7 +1574,7 @@ class LocationProviderManager extends
 
     public void unregisterLocationRequest(ILocationListener listener) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             final long identity = Binder.clearCallingIdentity();
             try {
                 removeRegistration(listener.asBinder());
@@ -1563,7 +1586,7 @@ class LocationProviderManager extends
 
     public void unregisterLocationRequest(PendingIntent pendingIntent) {
         synchronized (mLock) {
-            Preconditions.checkState(mStarted);
+            Preconditions.checkState(mState != STATE_STOPPED);
             final long identity = Binder.clearCallingIdentity();
             try {
                 removeRegistration(pendingIntent);
@@ -1890,6 +1913,10 @@ class LocationProviderManager extends
 
     private void onUserChanged(int userId, int change) {
         synchronized (mLock) {
+            if (mState == STATE_STOPPED) {
+                return;
+            }
+
             switch (change) {
                 case UserListener.CURRENT_USER_CHANGED:
                     updateRegistrations(
@@ -1907,6 +1934,10 @@ class LocationProviderManager extends
 
     private void onLocationEnabledChanged(int userId) {
         synchronized (mLock) {
+            if (mState == STATE_STOPPED) {
+                return;
+            }
+
             onEnabledChanged(userId);
         }
     }
@@ -2105,7 +2136,7 @@ class LocationProviderManager extends
 
         Preconditions.checkArgument(userId >= 0);
 
-        boolean enabled = mStarted
+        boolean enabled = mState == STATE_STARTED
                 && mProvider.getState().allowed
                 && mSettingsHelper.isLocationEnabled(userId);
 

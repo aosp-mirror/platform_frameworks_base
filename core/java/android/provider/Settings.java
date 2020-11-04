@@ -9773,6 +9773,14 @@ public final class Settings {
         public static final String DEVELOPMENT_USE_BLAST_ADAPTER_SV =
                 "use_blast_adapter_sv";
 
+        /**
+         * If {@code true}, vendor provided window manager display settings will be ignored.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS =
+                "ignore_vendor_display_settings";
+
        /**
         * Whether user has enabled development settings.
         */

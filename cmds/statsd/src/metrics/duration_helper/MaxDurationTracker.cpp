@@ -30,7 +30,7 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        int64_t currentBucketStartNs, int64_t currentBucketNum,
                                        int64_t startTimeNs, int64_t bucketSizeNs,
                                        bool conditionSliced, bool fullLink,
-                                       const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
+                                       const vector<sp<AnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
                       currentBucketNum, startTimeNs, bucketSizeNs, conditionSliced, fullLink,
                       anomalyTrackers) {
@@ -288,7 +288,7 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
     // Note that we don't update mDuration here since it's only updated during noteStop.
 }
 
-int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
+int64_t MaxDurationTracker::predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
                                                       const int64_t currentTimestamp) const {
     // The allowed time we can continue in the current state is the
     // (anomaly threshold) - max(elapsed time of the started mInfos).

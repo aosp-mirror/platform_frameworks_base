@@ -712,10 +712,10 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Put 2 tasks in the same stack (simulate the behavior of home stack).
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setStack(rootTask)
+                .setParentTask(rootTask)
                 .setCreateTask(true).build();
         new ActivityBuilder(mAtm)
-                .setStack(activity.getRootTask())
+                .setParentTask(activity.getRootTask())
                 .setCreateTask(true).build();
 
         // Create a top finishing activity.

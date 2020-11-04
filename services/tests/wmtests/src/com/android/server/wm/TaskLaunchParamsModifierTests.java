@@ -1351,7 +1351,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
         final Task stack = display.getDefaultTaskDisplayArea()
                 .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
-        return new ActivityBuilder(mAtm).setStack(stack).setCreateTask(true).build();
+        return new ActivityBuilder(mAtm).setTask(stack).build();
     }
 
     private void addFreeformTaskTo(TestDisplayContent display, Rect bounds) {

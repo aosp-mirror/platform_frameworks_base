@@ -474,6 +474,28 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testAppendOrganizedChildTaskInfo() {
+        final Task root = createTaskBuilder(".CreatedByOrganizerRoot").build();
+        root.mCreatedByOrganizer = true;
+        // Add organized and non-organized child.
+        final Task child1 = createTaskBuilder(".Task1").setParentTask(root).build();
+        final Task child2 = createTaskBuilder(".Task2").setParentTask(root).build();
+        doReturn(true).when(child1).isOrganized();
+        doReturn(false).when(child2).isOrganized();
+        mRecentTasks.add(root);
+
+        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
+        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
+        final List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0 /* callingUid */).getList();
+
+        // Make sure only organized child will be appended.
+        final List<RecentTaskInfo> childrenTaskInfos = infos.get(0).childrenTaskInfos;
+        assertEquals(childrenTaskInfos.size(), 1);
+        assertEquals(childrenTaskInfos.get(0).taskId, child1.mTaskId);
+    }
+
+    @Test
     public void testAddTasksHomeClearUntrackedTasks_expectFinish() {
         // There may be multiple tasks with the same base intent by flags (FLAG_ACTIVITY_NEW_TASK |
         // FLAG_ACTIVITY_MULTIPLE_TASK). If the previous task is still active, it should be removed

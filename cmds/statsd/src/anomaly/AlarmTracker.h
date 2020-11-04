@@ -73,6 +73,7 @@ protected:
 
     FRIEND_TEST(AlarmTrackerTest, TestTriggerTimestamp);
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateAlarms);
 };
 
 }  // namespace statsd

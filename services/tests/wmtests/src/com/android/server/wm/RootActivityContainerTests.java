@@ -117,12 +117,10 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testReplacingTaskInPinnedStack() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(mFullscreenStack).build();
-        final Task task = firstActivity.getTask();
-
-        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(task)
-                .setStack(mFullscreenStack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(mFullscreenStack).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(mFullscreenStack).build();
 
         mFullscreenStack.moveToFront("testReplacingTaskInPinnedStack");
 
@@ -152,12 +150,12 @@ public class RootActivityContainerTests extends WindowTestsBase {
 
     @Test
     public void testMovingBottomMostStackActivityToPinnedStack() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(mFullscreenStack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(mFullscreenStack).build();
         final Task task = firstActivity.getTask();
 
-        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(task)
-                .setStack(mFullscreenStack).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(mFullscreenStack).build();
 
         mFullscreenStack.moveTaskToBack(task);
 
@@ -287,8 +285,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final int originalStackCount = defaultTaskDisplayArea.getStackCount();
         final Task stack = defaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setTask(stack).build();
 
         assertEquals(originalStackCount + 1, defaultTaskDisplayArea.getStackCount());
 
@@ -311,17 +308,15 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final int originalStackCount = defaultTaskDisplayArea.getStackCount();
         final Task stack = defaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setTask(stack).build();
         assertEquals(originalStackCount + 1, defaultTaskDisplayArea.getStackCount());
 
         final DisplayContent dc = defaultTaskDisplayArea.getDisplayContent();
-        final TaskDisplayArea secondTaskDisplayArea = WindowTestsBase.createTaskDisplayArea(
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
                 dc, mRootWindowContainer.mWmService, "TestTaskDisplayArea", FEATURE_VENDOR_FIRST);
         final Task secondStack = secondTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        new ActivityBuilder(mAtm).setCreateTask(true).setStack(secondStack)
-                .setUseProcess(firstActivity.app).build();
+        new ActivityBuilder(mAtm).setTask(secondStack).setUseProcess(firstActivity.app).build();
         assertEquals(1, secondTaskDisplayArea.getStackCount());
 
         // Let's pretend that the app has crashed.
@@ -339,8 +334,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
                 .getDefaultTaskDisplayArea();
         final Task stack = defaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(stack).build();
 
         // Created stacks are focusable by default.
         assertTrue(stack.isTopActivityFocusable());
@@ -353,8 +347,8 @@ public class RootActivityContainerTests extends WindowTestsBase {
 
         final Task pinnedStack = defaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(pinnedStack).build();
+        final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm)
+                .setTask(pinnedStack).build();
 
         // We should not be focusable when in pinned mode
         assertFalse(pinnedStack.isTopActivityFocusable());
@@ -363,13 +357,9 @@ public class RootActivityContainerTests extends WindowTestsBase {
         // Add flag forcing focusability.
         pinnedActivity.info.flags |= FLAG_ALWAYS_FOCUSABLE;
 
-        // We should not be focusable when in pinned mode
+        // Task with FLAG_ALWAYS_FOCUSABLE should be focusable.
         assertTrue(pinnedStack.isTopActivityFocusable());
         assertTrue(pinnedActivity.isFocusable());
-
-        // Without the overridding activity, stack should not be focusable.
-        pinnedStack.removeChild(pinnedActivity.getTask(), "testFocusability");
-        assertFalse(pinnedStack.isTopActivityFocusable());
     }
 
     /**

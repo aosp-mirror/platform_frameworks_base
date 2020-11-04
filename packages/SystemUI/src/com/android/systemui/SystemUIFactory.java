@@ -188,7 +188,7 @@ public class SystemUIFactory {
      * This method is overridden in vendor specific implementation of Sys UI.
      */
     public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
-            AssetManager am) {
+            AssetManager am, String modelName) {
         return new BackGestureTfClassifierProvider();
     }
 }

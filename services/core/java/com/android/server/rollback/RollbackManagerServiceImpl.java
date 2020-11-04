@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -53,7 +54,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.ext.SdkExtensions;
 import android.provider.DeviceConfig;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.Slog;
@@ -150,10 +150,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     // The list of all rollbacks, including available and committed rollbacks.
     // Accessed on the handler thread only.
     private final List<Rollback> mRollbacks = new ArrayList<>();
-
-    // Apk sessions from a staged session with no matching rollback.
-    // Accessed on the handler thread only.
-    private final IntArray mOrphanedApkSessionIds = new IntArray();
 
     private final RollbackStore mRollbackStore;
 
@@ -646,8 +642,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 onPackageReplaced(apexPackageName);
             }
 
-            mOrphanedApkSessionIds.clear();
-
             mPackageHealthObserver.onBootCompletedAsync();
         });
     }
@@ -779,25 +773,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 ? installer.getSessionInfo(packageSession.getParentSessionId()) : packageSession;
         if (parentSession == null) {
             Slog.e(TAG, "Unable to find parent session for enabled rollback.");
-            return false;
-        }
-
-        // Check to see if this is the apk session for a staged session with
-        // rollback enabled.
-        for (int i = 0; i < mRollbacks.size(); ++i) {
-            Rollback rollback = mRollbacks.get(i);
-            if (rollback.getApkSessionId() == parentSession.getSessionId()) {
-                // This is the apk session for a staged session with rollback enabled. We do
-                // not need to create a new rollback for this session.
-                return true;
-            }
-        }
-
-        // Check to see if this is the apk session for a staged session for which rollback was
-        // cancelled.
-        if (mOrphanedApkSessionIds.indexOf(parentSession.getSessionId()) != -1) {
-            Slog.w(TAG, "Not enabling rollback for apk as no matching staged session "
-                    + "rollback exists");
             return false;
         }
 
@@ -1038,37 +1013,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         });
     }
 
-    @ExtThread
-    @Override
-    public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
-        assertNotInWorkerThread();
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("notifyStagedApkSession may only be called by the system.");
-        }
-        getHandler().post(() -> {
-            assertInWorkerThread();
-            Rollback rollback = null;
-            for (int i = 0; i < mRollbacks.size(); ++i) {
-                Rollback candidate = mRollbacks.get(i);
-                if (candidate.getStagedSessionId() == originalSessionId) {
-                    rollback = candidate;
-                    break;
-                }
-            }
-            if (rollback == null) {
-                // Did not find rollback matching originalSessionId.
-                Slog.e(TAG, "notifyStagedApkSession did not find rollback for session "
-                        + originalSessionId
-                        + ". Adding orphaned apk session " + apkSessionId);
-                mOrphanedApkSessionIds.add(apkSessionId);
-            }
-
-            if (rollback != null) {
-                rollback.setApkSessionId(apkSessionId);
-            }
-        });
-    }
-
     /**
      * Returns true if the installer is allowed to enable rollback for the
      * given named package, false otherwise.
@@ -1088,8 +1032,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 installerPackageName) == PackageManager.PERMISSION_GRANTED;
 
-        // For now only allow rollbacks for allowlisted packages or for testing.
-        return (isRollbackAllowlisted(packageName) && manageRollbacksGranted)
+        // For now only allow rollbacks for modules, allowlisted packages, or for testing.
+        return (isRollbackAllowed(packageName) && manageRollbacksGranted)
             || testManageRollbacksGranted;
     }
 
@@ -1097,8 +1041,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
      * Returns true is this package is eligible for enabling rollback.
      */
     @AnyThread
-    private boolean isRollbackAllowlisted(String packageName) {
-        return SystemConfig.getInstance().getRollbackWhitelistedPackages().contains(packageName);
+    private boolean isRollbackAllowed(String packageName) {
+        return SystemConfig.getInstance().getRollbackWhitelistedPackages().contains(packageName)
+                || isModule(packageName);
+    }
+    /**
+     * Returns true if the package name is the name of a module.
+     */
+    @AnyThread
+    private boolean isModule(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        final ModuleInfo moduleInfo;
+        try {
+            moduleInfo = pm.getModuleInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        return moduleInfo != null;
     }
 
     /**

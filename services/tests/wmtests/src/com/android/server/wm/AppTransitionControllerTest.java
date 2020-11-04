@@ -132,13 +132,11 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_visibilityAlreadyUpdated() {
-        // [DisplayContent] -+- [TaskStack1] - [Task1] - [ActivityRecord1] (opening, visible)
-        //                   +- [TaskStack2] - [Task2] - [ActivityRecord2] (closing, invisible)
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity1 = createTestActivityRecord(stack1);
+        // [DisplayContent] -+- [Task1] - [ActivityRecord1] (opening, visible)
+        //                   +- [Task2] - [ActivityRecord2] (closing, invisible)
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
 
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity2 = createTestActivityRecord(stack2);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
         activity2.mVisibleRequested = false;
 
@@ -161,16 +159,14 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_visibilityAlreadyUpdated_butForcedTransitionRequested() {
-        // [DisplayContent] -+- [TaskStack1] - [Task1] - [ActivityRecord1] (closing, invisible)
-        //                   +- [TaskStack2] - [Task2] - [ActivityRecord2] (opening, visible)
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity1 = createTestActivityRecord(stack1);
+        // [DisplayContent] -+- [Task1] - [ActivityRecord1] (closing, invisible)
+        //                   +- [Task2] - [ActivityRecord2] (opening, visible)
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(true);
         activity1.mVisibleRequested = true;
         activity1.mRequestForceTransition = true;
 
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity2 = createTestActivityRecord(stack2);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
         activity2.mVisibleRequested = false;
         activity2.mRequestForceTransition = true;
@@ -195,10 +191,8 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     public void testGetAnimationTargets_exitingBeforeTransition() {
         // Create another non-empty task so the animation target won't promote to task display area.
-        createTestActivityRecord(
-                mDisplayContent.getDefaultTaskDisplayArea().getOrCreateRootHomeTask());
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity = createTestActivityRecord(stack);
+        createActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
         activity.setVisible(false);
         activity.mIsExiting = true;
 
@@ -208,19 +202,18 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Animate closing apps even if it's not visible when it is exiting before we had a chance
         // to play the transition animation.
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{stack}),
+                new ArraySet<>(new WindowContainer[]{activity.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         new ArraySet<>(), closing, false /* visible */));
     }
 
     @Test
     public void testGetAnimationTargets_windowsAreBeingReplaced() {
-        // [DisplayContent] -+- [TaskStack1] - [Task1] - [ActivityRecord1] (opening, visible)
-        //                                                      +- [AppWindow1] (being-replaced)
-        //                   +- [TaskStack2] - [Task2] - [ActivityRecord2] (closing, invisible)
-        //                                                      +- [AppWindow2] (being-replaced)
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity1 = createTestActivityRecord(stack1);
+        // [DisplayContent] -+- [Task1] - [ActivityRecord1] (opening, visible)
+        //                                       +- [AppWindow1] (being-replaced)
+        //                   +- [Task2] - [ActivityRecord2] (closing, invisible)
+        //                                       +- [AppWindow2] (being-replaced)
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("AppWindow1");
@@ -228,8 +221,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         appWindow1.mWillReplaceWindow = true;
         activity1.addWindow(appWindow1);
 
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity2 = createTestActivityRecord(stack2);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
         activity2.mVisibleRequested = false;
         attrs.setTitle("AppWindow2");
@@ -246,7 +238,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Don't animate closing apps if it's already invisible even though its windows are being
         // replaced.
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{stack1}),
+                new ArraySet<>(new WindowContainer[]{activity1.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, true /* visible */));
         assertEquals(
@@ -257,24 +249,22 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_openingClosingInDifferentTask() {
-        // [DisplayContent] -+- [TaskStack1] - [Task1] -+- [ActivityRecord1] (opening, invisible)
-        //                   |                          +- [ActivityRecord2] (invisible)
+        // [DisplayContent] -+- [Task1] -+- [ActivityRecord1] (opening, invisible)
+        //                   |           +- [ActivityRecord2] (invisible)
         //                   |
-        //                   +- [TaskStack2] - [Task2] -+- [ActivityRecord3] (closing, visible)
-        //                                              +- [ActivityRecord4] (invisible)
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task1);
+        //                   +- [Task2] -+- [ActivityRecord3] (closing, visible)
+        //                               +- [ActivityRecord4] (invisible)
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                activity1.getTask());
         activity2.setVisible(false);
         activity2.mVisibleRequested = false;
 
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task2 = createTaskInStack(stack2, 0 /* userId */);
-        final ActivityRecord activity3 = createActivityRecordInTask(mDisplayContent, task2);
-        final ActivityRecord activity4 = createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity3 = createActivityRecord(mDisplayContent);
+        final ActivityRecord activity4 = createActivityRecord(mDisplayContent,
+                activity3.getTask());
         activity4.setVisible(false);
         activity4.mVisibleRequested = false;
 
@@ -286,25 +276,24 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Promote animation targets to TaskStack level. Invisible ActivityRecords don't affect
         // promotion decision.
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{stack1}),
+                new ArraySet<>(new WindowContainer[]{activity1.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, true /* visible */));
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{stack2}),
+                new ArraySet<>(new WindowContainer[]{activity3.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
     }
 
     @Test
     public void testGetAnimationTargets_openingClosingInSameTask() {
-        // [DisplayContent] - [TaskStack] - [Task] -+- [ActivityRecord1] (opening, invisible)
-        //                                          +- [ActivityRecord2] (closing, visible)
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task);
+        // [DisplayContent] - [Task] -+- [ActivityRecord1] (opening, invisible)
+        //                            +- [ActivityRecord2] (closing, visible)
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                activity1.getTask());
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -325,26 +314,24 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_animateOnlyTranslucentApp() {
-        // [DisplayContent] -+- [TaskStack1] - [Task1] -+- [ActivityRecord1] (opening, invisible)
-        //                   |                          +- [ActivityRecord2] (visible)
+        // [DisplayContent] -+- [Task1] -+- [ActivityRecord1] (opening, invisible)
+        //                   |           +- [ActivityRecord2] (visible)
         //                   |
-        //                   +- [TaskStack2] - [Task2] -+- [ActivityRecord3] (closing, visible)
-        //                                              +- [ActivityRecord4] (visible)
+        //                   +- [Task2] -+- [ActivityRecord3] (closing, visible)
+        //                               +- [ActivityRecord4] (visible)
 
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;
         activity1.setOccludesParent(false);
 
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                activity1.getTask());
 
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task2 = createTaskInStack(stack2, 0 /* userId */);
-        final ActivityRecord activity3 = createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity3 = createActivityRecord(mDisplayContent);
         activity3.setOccludesParent(false);
-        final ActivityRecord activity4 = createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity4 = createActivityRecord(mDisplayContent,
+                activity3.getTask());
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -365,28 +352,26 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetAnimationTargets_animateTranslucentAndOpaqueApps() {
-        // [DisplayContent] -+- [TaskStack1] - [Task1] -+- [ActivityRecord1] (opening, invisible)
-        //                   |                          +- [ActivityRecord2] (opening, invisible)
+        // [DisplayContent] -+- [Task1] -+- [ActivityRecord1] (opening, invisible)
+        //                   |           +- [ActivityRecord2] (opening, invisible)
         //                   |
-        //                   +- [TaskStack2] - [Task2] -+- [ActivityRecord3] (closing, visible)
-        //                                              +- [ActivityRecord4] (closing, visible)
+        //                   +- [Task2] -+- [ActivityRecord3] (closing, visible)
+        //                               +- [ActivityRecord4] (closing, visible)
 
-        final Task stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;
         activity1.setOccludesParent(false);
 
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                activity1.getTask());
         activity2.setVisible(false);
         activity2.mVisibleRequested = true;
 
-        final Task stack2 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task2 = createTaskInStack(stack2, 0 /* userId */);
-        final ActivityRecord activity3 = createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity3 = createActivityRecord(mDisplayContent);
         activity3.setOccludesParent(false);
-        final ActivityRecord activity4 = createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity4 = createActivityRecord(mDisplayContent,
+                activity3.getTask());
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -398,26 +383,24 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Promote animation targets to TaskStack level even though opening (closing) app is
         // translucent as long as all visible siblings animate at the same time.
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{stack1}),
+                new ArraySet<>(new WindowContainer[]{activity1.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, true /* visible */));
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{stack2}),
+                new ArraySet<>(new WindowContainer[]{activity3.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
     }
 
     @Test
-    public void testGetAnimationTargets_stackContainsMultipleTasks() {
-        // [DisplayContent] - [TaskStack] -+- [Task1] - [ActivityRecord1] (opening, invisible)
-        //                                 +- [Task2] - [ActivityRecord2] (closing, visible)
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task1);
+    public void testGetAnimationTargets_taskContainsMultipleTasks() {
+        // [DisplayContent] - [Task] -+- [Task1] - [ActivityRecord1] (opening, invisible)
+        //                            +- [Task2] - [ActivityRecord2] (closing, visible)
+        final Task parentTask = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity1 = createActivityRecordWithParentTask(parentTask);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;
-        final Task task2 = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task2);
+        final ActivityRecord activity2 = createActivityRecordWithParentTask(parentTask);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -426,11 +409,11 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Promote animation targets up to Task level, not beyond.
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{task1}),
+                new ArraySet<>(new WindowContainer[]{activity1.getTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, true /* visible */));
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{task2}),
+                new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
     }

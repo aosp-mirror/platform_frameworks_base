@@ -860,6 +860,33 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHandleCloseControls_persistAutomatic()
+            throws Exception {
+        mNotificationChannel.unlockFields(USER_LOCKED_IMPORTANCE);
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                null,
+                null,
+                mUiEventLogger,
+                true,
+                false,
+                true,
+                true);
+
+        mNotificationInfo.handleCloseControls(true, false);
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, times(1)).unlockNotificationChannel(
+                anyString(), eq(TEST_UID), any());
+    }
+
+    @Test
     public void testHandleCloseControls_DoesNotUpdateNotificationChannelIfUnchanged()
             throws Exception {
         int originalImportance = mNotificationChannel.getImportance();
@@ -1015,16 +1042,17 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mUiEventLogger,
                 true,
                 false,
-                false,
-                false);
+                true,
+                true);
 
         mNotificationInfo.findViewById(R.id.automatic).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
         mNotificationInfo.handleCloseControls(true, false);
 
         mTestableLooper.processAllMessages();
-        assertTrue(mNotificationChannel.hasUserSetImportance());
-        assertEquals(mNotificationChannel.getImportance(), IMPORTANCE_DEFAULT);
+        verify(mMockINotificationManager, times(1)).unlockNotificationChannel(
+                anyString(), eq(TEST_UID), any());
+        assertEquals(IMPORTANCE_DEFAULT, mNotificationChannel.getImportance());
     }
 
     @Test

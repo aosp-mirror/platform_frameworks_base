@@ -810,7 +810,7 @@ public class WindowContainerTests extends WindowTestsBase {
     public void testOnDisplayChanged() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity = createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
         stack.getDisplayArea().removeStack(stack);
@@ -853,17 +853,17 @@ public class WindowContainerTests extends WindowTestsBase {
     public void testTaskCanApplyAnimation() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent, task);
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent, task);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent, task);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent, task);
         verifyWindowContainerApplyAnimation(task, activity1, activity2);
     }
 
     @Test
     public void testStackCanApplyAnimation() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity2 = createActivityRecordInTask(mDisplayContent,
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
                 createTaskInStack(stack, 0 /* userId */));
-        final ActivityRecord activity1 = createActivityRecordInTask(mDisplayContent,
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
                 createTaskInStack(stack, 0 /* userId */));
         verifyWindowContainerApplyAnimation(stack, activity1, activity2);
     }

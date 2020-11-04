@@ -41,50 +41,37 @@ import java.util.function.Predicate;
  */
 public class BatchingAlarmStore implements AlarmStore {
 
-    private ArrayList<Batch> mAlarmBatches = new ArrayList<>();
+    private final ArrayList<Batch> mAlarmBatches = new ArrayList<>();
     private int mSize;
-    private AlarmClockRemovalListener mAlarmClockRemovalListener;
+    private Runnable mOnAlarmClockRemoved;
 
     interface Stats {
         int REBATCH_ALL_ALARMS = 0;
     }
 
-    final StatLogger mStatLogger = new StatLogger("Alarm store stats", new String[]{
+    final StatLogger mStatLogger = new StatLogger("BatchingAlarmStore stats", new String[]{
             "REBATCH_ALL_ALARMS",
     });
 
-    private static final Comparator<Batch> sBatchOrder = (b1, b2) -> {
-        long when1 = b1.mStart;
-        long when2 = b2.mStart;
-        if (when1 > when2) {
-            return 1;
-        }
-        if (when1 < when2) {
-            return -1;
-        }
-        return 0;
-    };
+    private static final Comparator<Batch> sBatchOrder = Comparator.comparingLong(b -> b.mStart);
 
-    private static final Comparator<Alarm> sIncreasingTimeOrder = (a1, a2) -> {
-        long when1 = a1.getWhenElapsed();
-        long when2 = a2.getWhenElapsed();
-        if (when1 > when2) {
-            return 1;
-        }
-        if (when1 < when2) {
-            return -1;
-        }
-        return 0;
-    };
-
-    BatchingAlarmStore(AlarmClockRemovalListener listener) {
-        mAlarmClockRemovalListener = listener;
-    }
+    private static final Comparator<Alarm> sIncreasingTimeOrder = Comparator.comparingLong(
+            Alarm::getWhenElapsed);
 
     @Override
     public void add(Alarm a) {
         insertAndBatchAlarm(a);
         mSize++;
+    }
+
+    @Override
+    public void addAll(ArrayList<Alarm> alarms) {
+        if (alarms == null) {
+            return;
+        }
+        for (final Alarm a : alarms) {
+            add(a);
+        }
     }
 
     @Override
@@ -103,6 +90,11 @@ public class BatchingAlarmStore implements AlarmStore {
             rebatchAllAlarms();
         }
         return removed;
+    }
+
+    @Override
+    public void setAlarmClockRemovalListener(Runnable listener) {
+        mOnAlarmClockRemoved = listener;
     }
 
     @Override
@@ -317,8 +309,8 @@ public class BatchingAlarmStore implements AlarmStore {
                 Alarm alarm = mAlarms.get(i);
                 if (predicate.test(alarm)) {
                     removed.add(mAlarms.remove(i));
-                    if (alarm.alarmClock != null && mAlarmClockRemovalListener != null) {
-                        mAlarmClockRemovalListener.onRemoved();
+                    if (alarm.alarmClock != null && mOnAlarmClockRemoved != null) {
+                        mOnAlarmClockRemoved.run();
                     }
                     if (isTimeTickAlarm(alarm)) {
                         // This code path is not invoked when delivering alarms, only when removing
@@ -387,10 +379,5 @@ public class BatchingAlarmStore implements AlarmStore {
 
             proto.end(token);
         }
-    }
-
-    @FunctionalInterface
-    interface AlarmClockRemovalListener {
-        void onRemoved();
     }
 }

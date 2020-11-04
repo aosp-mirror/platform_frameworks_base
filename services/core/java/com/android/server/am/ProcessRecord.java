@@ -1875,16 +1875,24 @@ class ProcessRecord implements WindowProcessListener {
 
     boolean getCachedIsHomeProcess() {
         if (mCachedIsHomeProcess == VALUE_INVALID) {
-            mCachedIsHomeProcess = getWindowProcessController().isHomeProcess()
-                    ? VALUE_TRUE : VALUE_FALSE;
+            if (getWindowProcessController().isHomeProcess()) {
+                mCachedIsHomeProcess = VALUE_TRUE;
+                mService.mAppProfiler.mHasHomeProcess = true;
+            } else {
+                mCachedIsHomeProcess = VALUE_FALSE;
+            }
         }
         return mCachedIsHomeProcess == VALUE_TRUE;
     }
 
     boolean getCachedIsPreviousProcess() {
         if (mCachedIsPreviousProcess == VALUE_INVALID) {
-            mCachedIsPreviousProcess = getWindowProcessController().isPreviousProcess()
-                    ? VALUE_TRUE : VALUE_FALSE;
+            if (getWindowProcessController().isPreviousProcess()) {
+                mCachedIsPreviousProcess = VALUE_TRUE;
+                mService.mAppProfiler.mHasPreviousProcess = true;
+            } else {
+                mCachedIsPreviousProcess = VALUE_FALSE;
+            }
         }
         return mCachedIsPreviousProcess == VALUE_TRUE;
     }

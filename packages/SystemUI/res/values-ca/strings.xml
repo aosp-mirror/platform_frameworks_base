@@ -182,6 +182,8 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Bateria: dues barres."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Bateria: tres barres."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria carregada."</string>
+    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
+    <skip />
     <string name="accessibility_no_phone" msgid="8828412144430247025">"No hi ha senyal de telèfon."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Senyal de telèfon: una barra"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Senyal de telèfon: dues barres."</string>
@@ -446,7 +448,7 @@
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalitza"</string>
-    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades telefòniques."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificacions menys urgents a continuació"</string>
@@ -520,6 +522,7 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"El perfil es pot supervisar"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"És possible que la xarxa estigui supervisada."</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"És possible que la xarxa estigui supervisada"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"El teu pare o la teva mare gestionen aquest dispositiu"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"La teva organització és propietària del dispositiu i és possible que supervisi el trànsit de xarxa"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> és propietària d\'aquest dispositiu i és possible que supervisi el trànsit de xarxa"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Aquest dispositiu pertany a la teva organització i està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -544,6 +547,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Desactiva la VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconnecta la VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Consulta les polítiques"</string>
+    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Mostra els controls"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"El dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"El dispositiu pertany a la teva organització.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"La teva organització ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit a la xarxa segura se supervisi o es modifiqui."</string>
@@ -567,6 +571,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Has donat permís a una aplicació per configurar una connexió VPN.\n\nAquesta aplicació pot supervisar el dispositiu i l\'activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil de treball.\n\nL\'administrador pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador.\n\nA més, estàs connectat a una VPN, que també pot supervisar la teva activitat a la xarxa."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"El teu pare o la teva mare gestionen aquest dispositiu, i poden veure i gestionar informació com ara les aplicacions que utilitzes, la teva ubicació i el teu temps de connexió."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
@@ -1089,4 +1094,8 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincula un dispositiu nou"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilació"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"El número de compilació s\'ha copiat al porta-retalls."</string>
+    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
+    <skip />
+    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
+    <skip />
 </resources>

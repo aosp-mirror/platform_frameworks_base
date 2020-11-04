@@ -17,6 +17,27 @@
 package android.view;
 
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.view.View.STATUS_BAR_DISABLE_BACK;
+import static android.view.View.STATUS_BAR_DISABLE_CLOCK;
+import static android.view.View.STATUS_BAR_DISABLE_EXPAND;
+import static android.view.View.STATUS_BAR_DISABLE_HOME;
+import static android.view.View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
+import static android.view.View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
+import static android.view.View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
+import static android.view.View.STATUS_BAR_DISABLE_RECENT;
+import static android.view.View.STATUS_BAR_DISABLE_SEARCH;
+import static android.view.View.STATUS_BAR_DISABLE_SYSTEM_INFO;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
+import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowInsets.Side.BOTTOM;
 import static android.view.WindowInsets.Side.LEFT;
 import static android.view.WindowInsets.Side.RIGHT;
@@ -2725,6 +2746,38 @@ public interface WindowManager extends ViewManager {
         public int preferredDisplayModeId;
 
         /**
+         * An internal annotation for flags that can be specified to {@link #systemUiVisibility}
+         * and {@link #subtreeSystemUiVisibility}.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "" }, value = {
+            SYSTEM_UI_FLAG_VISIBLE,
+            SYSTEM_UI_FLAG_LOW_PROFILE,
+            SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+            SYSTEM_UI_FLAG_FULLSCREEN,
+            SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+            SYSTEM_UI_FLAG_LAYOUT_STABLE,
+            SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
+            SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
+            SYSTEM_UI_FLAG_IMMERSIVE,
+            SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
+            SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+            STATUS_BAR_DISABLE_EXPAND,
+            STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
+            STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
+            STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
+            STATUS_BAR_DISABLE_SYSTEM_INFO,
+            STATUS_BAR_DISABLE_HOME,
+            STATUS_BAR_DISABLE_BACK,
+            STATUS_BAR_DISABLE_CLOCK,
+            STATUS_BAR_DISABLE_RECENT,
+            STATUS_BAR_DISABLE_SEARCH,
+        })
+        public @interface SystemUiVisibilityFlags {}
+
+        /**
          * Control the visibility of the status bar.
          *
          * @see View#STATUS_BAR_VISIBLE
@@ -2733,6 +2786,7 @@ public interface WindowManager extends ViewManager {
          * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
          * instead.
          */
+        @SystemUiVisibilityFlags
         @Deprecated
         public int systemUiVisibility;
 
@@ -2741,6 +2795,7 @@ public interface WindowManager extends ViewManager {
          * The ui visibility as requested by the views in this hierarchy.
          * the combined value should be systemUiVisibility | subtreeSystemUiVisibility.
          */
+        @SystemUiVisibilityFlags
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int subtreeSystemUiVisibility;
 
@@ -2753,7 +2808,6 @@ public interface WindowManager extends ViewManager {
          */
         @UnsupportedAppUsage
         public boolean hasSystemUiListeners;
-
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
@@ -2921,6 +2975,19 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
 
         /**
+         * An internal annotation for flags that can be specified to {@link #inputFeatures}.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
+            INPUT_FEATURE_DISABLE_POINTER_GESTURES,
+            INPUT_FEATURE_NO_INPUT_CHANNEL,
+            INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+        })
+        public @interface InputFeatureFlags {}
+
+        /**
          * Control special features of the input subsystem.
          *
          * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
@@ -2928,6 +2995,7 @@ public interface WindowManager extends ViewManager {
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
          * @hide
          */
+        @InputFeatureFlags
         @UnsupportedAppUsage
         public int inputFeatures;
 

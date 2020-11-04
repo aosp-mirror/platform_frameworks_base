@@ -47,7 +47,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -82,7 +81,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
 import android.window.ITaskOrganizer;
-import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.AttributeCache;
@@ -248,48 +246,19 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return createActivityRecord(dc, windowingMode, activityType);
     }
 
-    ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode, int activityType) {
-        return createTestActivityRecord(dc, windowingMode, activityType);
+    WindowState createAppWindow(Task task, int type, String name) {
+        final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
+        task.addChild(activity, 0);
+        return createWindow(null, type, activity, name);
     }
 
-    ActivityRecord createTestActivityRecord(DisplayContent dc, int windowingMode,
-            int activityType) {
-        final Task stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
-        return createTestActivityRecord(stack);
-    }
-
-    /** Creates an {@link ActivityRecord} and adds it to the specified {@link Task}. */
-    static ActivityRecord createActivityRecordInTask(DisplayContent dc, Task task) {
-        final ActivityRecord activity = createTestActivityRecord(dc);
-        task.addChild(activity, POSITION_TOP);
-        return activity;
-    }
-
-    /** Creates an {@link ActivityRecord} and adds it to the specified {@link Task}. */
-    static ActivityRecord createActivityRecordInTask(Task task) {
-        return createActivityRecordInTask(task.getDisplayContent(), task);
-    }
-
-    static ActivityRecord createTestActivityRecord(DisplayContent dc) {
-        final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService).build();
-        postCreateActivitySetup(activity, dc);
-        return activity;
-    }
-
-    static ActivityRecord createTestActivityRecord(Task stack) {
-        final ActivityRecord activity = new ActivityBuilder(stack.mAtmService)
-                .setStack(stack)
-                .setCreateTask(true)
-                .build();
-        postCreateActivitySetup(activity, stack.getDisplayContent());
-        return activity;
-    }
-
-    private static void postCreateActivitySetup(ActivityRecord activity, DisplayContent dc) {
-        activity.onDisplayChanged(dc);
-        activity.setOccludesParent(true);
-        activity.setVisible(true);
-        activity.mVisibleRequested = true;
+    // TODO: Move these calls to a builder?
+    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
+            IWindow iwindow) {
+        final WindowToken token = createWindowToken(
+                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
+        return createWindow(parent, type, token, name, 0 /* ownerId */,
+                false /* ownerCanAddInternalSystemWindow */, iwindow);
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
@@ -304,31 +273,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 : createWindow(parent, type, parent.mToken, name, ownerId);
     }
 
-    WindowState createWindowOnStack(WindowState parent, int windowingMode, int activityType,
+    WindowState createWindow(WindowState parent, int windowingMode, int activityType,
             int type, DisplayContent dc, String name) {
         final WindowToken token = createWindowToken(dc, windowingMode, activityType, type);
         return createWindow(parent, type, token, name);
     }
 
-    WindowState createAppWindow(Task task, int type, String name) {
-        final ActivityRecord activity = createTestActivityRecord(task.getDisplayContent());
-        task.addChild(activity, 0);
-        return createWindow(null, type, activity, name);
-    }
-
-    // TODO: Move these calls to a builder?
-    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
-            IWindow iwindow) {
-        final WindowToken token = createWindowToken(
-                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
-        return createWindow(parent, type, token, name, 0 /* ownerId */,
-                false /* ownerCanAddInternalSystemWindow */, iwindow);
-    }
-
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(
-                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
-        return createWindow(parent, type, token, name, 0 /* ownerId */);
+        return createWindow(
+                parent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type, dc, name);
     }
 
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
@@ -444,6 +397,87 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 .setParentTask(stack)
                 .build();
         return task;
+    }
+
+    /** Creates an {@link ActivityRecord}. */
+    static ActivityRecord createNonAttachedActivityRecord(DisplayContent dc) {
+        final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService)
+                .setOnTop(true)
+                .build();
+        postCreateActivitySetup(activity, dc);
+        return activity;
+    }
+
+    /**
+     * Creates an {@link ActivityRecord} and adds it to a new created {@link Task}.
+     * [Task] - [ActivityRecord]
+     */
+    ActivityRecord createActivityRecord(DisplayContent dc) {
+        return createActivityRecord(dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+    }
+
+    /**
+     * Creates an {@link ActivityRecord} and adds it to a new created {@link Task}.
+     * [Task] - [ActivityRecord]
+     */
+    ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode,
+            int activityType) {
+        final Task task = createTaskStackOnDisplay(windowingMode, activityType, dc);
+        return createActivityRecord(dc, task);
+    }
+
+    /**
+     *  Creates an {@link ActivityRecord} and adds it to the specified {@link Task}.
+     * [Task] - [ActivityRecord]
+     */
+    static ActivityRecord createActivityRecord(Task task) {
+        return createActivityRecord(task.getDisplayContent(), task);
+    }
+
+    /**
+     * Creates an {@link ActivityRecord} and adds it to the specified {@link Task}.
+     * [Task] - [ActivityRecord]
+     */
+    static ActivityRecord createActivityRecord(DisplayContent dc, Task task) {
+        final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService)
+                .setTask(task)
+                .setOnTop(true)
+                .build();
+        postCreateActivitySetup(activity, dc);
+        return activity;
+    }
+
+    /**
+     * Creates an {@link ActivityRecord} and adds it to a new created {@link Task}.
+     * Then adds the new created {@link Task} to a new created parent {@link Task}
+     * [Task1] - [Task2] - [ActivityRecord]
+     */
+    ActivityRecord createActivityRecordWithParentTask(DisplayContent dc, int windowingMode,
+            int activityType) {
+        final Task task = createTaskStackOnDisplay(windowingMode, activityType, dc);
+        return createActivityRecordWithParentTask(task);
+    }
+
+    /**
+     * Creates an {@link ActivityRecord} and adds it to a new created {@link Task}.
+     * Then adds the new created {@link Task} to the specified parent {@link Task}
+     * [Task1] - [Task2] - [ActivityRecord]
+     */
+    static ActivityRecord createActivityRecordWithParentTask(Task parentTask) {
+        final ActivityRecord activity = new ActivityBuilder(parentTask.mAtmService)
+                .setParentTask(parentTask)
+                .setCreateTask(true)
+                .setOnTop(true)
+                .build();
+        postCreateActivitySetup(activity, parentTask.getDisplayContent());
+        return activity;
+    }
+
+    private static void postCreateActivitySetup(ActivityRecord activity, DisplayContent dc) {
+        activity.onDisplayChanged(dc);
+        activity.setOccludesParent(true);
+        activity.setVisible(true);
+        activity.mVisibleRequested = true;
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
@@ -614,19 +648,20 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private String mProcessName = "name";
         private String mAffinity;
         private int mUid = 12345;
-        private boolean mCreateTask;
-        private Task mStack;
+        private boolean mCreateTask = false;
+        private Task mParentTask;
         private int mActivityFlags;
         private int mLaunchMode;
         private int mResizeMode = RESIZE_MODE_RESIZEABLE;
         private float mMaxAspectRatio;
         private int mScreenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-        private boolean mLaunchTaskBehind;
+        private boolean mLaunchTaskBehind = false;
         private int mConfigChanges;
         private int mLaunchedFromPid;
         private int mLaunchedFromUid;
         private WindowProcessController mWpc;
         private Bundle mIntentExtras;
+        private boolean mOnTop = false;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -667,8 +702,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        ActivityBuilder setStack(Task stack) {
-            mStack = stack;
+        ActivityBuilder setParentTask(Task parentTask) {
+            mParentTask = parentTask;
             return this;
         }
 
@@ -732,6 +767,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setOnTop(boolean onTop) {
+            mOnTop = onTop;
+            return this;
+        }
+
         ActivityRecord build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
@@ -752,11 +792,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mCreateTask) {
                 mTask = new TaskBuilder(mService.mStackSupervisor)
                         .setComponent(mComponent)
-                        .setParentTask(mStack).build();
-            } else if (mTask == null && mStack != null && DisplayContent.alwaysCreateStack(
-                    mStack.getWindowingMode(), mStack.getActivityType())) {
+                        .setParentTask(mParentTask).build();
+            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateStack(
+                    mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
                 // The stack can be the task root.
-                mTask = mStack;
+                mTask = mParentTask;
             }
 
             Intent intent = new Intent();
@@ -800,6 +840,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 // to set it somewhere else since we can't mock resources.
                 doReturn(true).when(activity).occludesParent();
                 doReturn(true).when(activity).fillsParent();
+                if (mOnTop) {
+                    mTask.moveToFront("createActivity");
+                }
                 mTask.addChild(activity);
                 // Make visible by default...
                 activity.setVisible(true);
@@ -992,8 +1035,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             // Create child task with activity.
             if (mCreateActivity) {
                 new ActivityBuilder(mSupervisor.mService)
-                        .setCreateTask(true)
-                        .setStack(task)
+                        .setTask(task)
                         .build();
                 if (mOnTop) {
                     // We move the task to front again in order to regain focus after activity

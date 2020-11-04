@@ -101,6 +101,7 @@ bool MetricProducer::onConfigUpdatedLocked(
     }
     mEventActivationMap = newEventActivationMap;
     mEventDeactivationMap = newEventDeactivationMap;
+    mAnomalyTrackers.clear();
     return true;
 }
 

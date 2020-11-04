@@ -71,8 +71,8 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
      */
     @Test
     public void testStoppingActivityRemovedWhenResumed() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(mFullscreenStack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(mFullscreenStack).build();
         mSupervisor.mStoppingActivities.add(firstActivity);
 
         firstActivity.completeResumeLocked();
@@ -85,8 +85,8 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
      */
     @Test
     public void testReportWaitingActivityLaunchedIfNeeded() {
-        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(mFullscreenStack).build();
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(mFullscreenStack).build();
 
         final WaitResult taskToFrontWait = new WaitResult();
         mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
@@ -153,7 +153,7 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
     @Test
     public void testNotifyTaskFocusChanged() {
         final ActivityRecord fullScreenActivityA = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(mFullscreenStack).build();
+                .setParentTask(mFullscreenStack).build();
         final Task taskA = fullScreenActivityA.getTask();
 
         final TaskChangeNotificationController taskChangeNotifier =
@@ -166,7 +166,7 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
         reset(taskChangeNotifier);
 
         final ActivityRecord fullScreenActivityB = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setStack(mFullscreenStack).build();
+                .setParentTask(mFullscreenStack).build();
         final Task taskB = fullScreenActivityB.getTask();
 
         mAtm.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");

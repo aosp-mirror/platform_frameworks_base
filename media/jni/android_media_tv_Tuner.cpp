@@ -140,6 +140,7 @@ using ::android::hardware::tv::tuner::V1_1::FrontendAnalogAftFlag;
 using ::android::hardware::tv::tuner::V1_1::FrontendAnalogSettingsExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendBandwidth;
 using ::android::hardware::tv::tuner::V1_1::FrontendCableTimeInterleaveMode;
+using ::android::hardware::tv::tuner::V1_1::FrontendDvbcBandwidth;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbsScanType;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbcSettingsExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbsSettingsExt1_1;
@@ -2725,9 +2726,13 @@ static void getDvbcFrontendSettingsExt1_1(JNIEnv *env, const jobject& settings,
     FrontendCableTimeInterleaveMode interleaveMode =
             static_cast<FrontendCableTimeInterleaveMode>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mInterleaveMode", "I")));
+    FrontendDvbcBandwidth bandwidth =
+            static_cast<FrontendDvbcBandwidth>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mBandwidth", "I")));
 
     FrontendDvbcSettingsExt1_1 dvbcExt1_1 {
         .interleaveMode = interleaveMode,
+        .bandwidth = bandwidth,
     };
     settingsExt1_1.settingExt.dvbc(dvbcExt1_1);
 }

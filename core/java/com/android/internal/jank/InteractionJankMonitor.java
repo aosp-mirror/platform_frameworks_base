@@ -319,11 +319,11 @@ public class InteractionJankMonitor {
      * Trigger the perfetto daemon to collect and upload data.
      */
     @VisibleForTesting
-    public void trigger() {
+    public void trigger(Session session) {
         synchronized (this) {
             if (!mInitialized) return;
             mWorker.getThreadHandler().post(
-                    () -> PerfettoTrigger.trigger(PerfettoTrigger.TRIGGER_TYPE_JANK));
+                    () -> PerfettoTrigger.trigger(session.getPerfettoTrigger()));
         }
     }
 
@@ -350,9 +350,12 @@ public class InteractionJankMonitor {
             return getStatsdInteractionType() != NO_STATSD_LOGGING;
         }
 
+        public String getPerfettoTrigger() {
+            return String.format("interaction-jank-monitor-%d", mCujType);
+        }
+
         public String getName() {
             return "Cuj<" + getCuj() + ">";
         }
     }
-
 }

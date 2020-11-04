@@ -1147,6 +1147,14 @@ public class Notification implements Parcelable
     public static final String EXTRA_PICTURE = "android.picture";
 
     /**
+     * {@link #extras} key: this is a content description of the big picture supplied from
+     * {@link BigPictureStyle#bigPicture(Bitmap)}, supplied to
+     * {@link BigPictureStyle#bigPictureContentDescription(CharSequence)}.
+     */
+    public static final String EXTRA_PICTURE_CONTENT_DESCRIPTION =
+            "android.pictureContentDescription";
+
+    /**
      * {@link #extras} key: An array of CharSequences to show in {@link InboxStyle} expanded
      * notifications, each of which was supplied to {@link InboxStyle#addLine(CharSequence)}.
      */
@@ -6728,6 +6736,7 @@ public class Notification implements Parcelable
         private Bitmap mPicture;
         private Icon mBigLargeIcon;
         private boolean mBigLargeIconSet = false;
+        private CharSequence mPictureContentDescription;
 
         public BigPictureStyle() {
         }
@@ -6754,6 +6763,16 @@ public class Notification implements Parcelable
          */
         public BigPictureStyle setSummaryText(CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
+            return this;
+        }
+
+        /**
+         * Set the content description of the big picture.
+         */
+        @NonNull
+        public BigPictureStyle bigPictureContentDescription(
+                @Nullable CharSequence contentDescription) {
+            mPictureContentDescription = contentDescription;
             return this;
         }
 
@@ -6870,6 +6889,11 @@ public class Notification implements Parcelable
             }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
+
+            if (mPictureContentDescription != null) {
+                contentView.setContentDescription(R.id.big_picture, mPictureContentDescription);
+            }
+
             return contentView;
         }
 
@@ -6881,6 +6905,10 @@ public class Notification implements Parcelable
 
             if (mBigLargeIconSet) {
                 extras.putParcelable(EXTRA_LARGE_ICON_BIG, mBigLargeIcon);
+            }
+            if (mPictureContentDescription != null) {
+                extras.putCharSequence(EXTRA_PICTURE_CONTENT_DESCRIPTION,
+                        mPictureContentDescription);
             }
             extras.putParcelable(EXTRA_PICTURE, mPicture);
         }
@@ -6896,6 +6924,12 @@ public class Notification implements Parcelable
                 mBigLargeIconSet = true;
                 mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
             }
+
+            if (extras.containsKey(EXTRA_PICTURE_CONTENT_DESCRIPTION)) {
+                mPictureContentDescription =
+                        extras.getCharSequence(EXTRA_PICTURE_CONTENT_DESCRIPTION);
+            }
+
             mPicture = extras.getParcelable(EXTRA_PICTURE);
         }
 

@@ -5725,7 +5725,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setModulation(int);
   }
 
-  public class DtmbFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+  public final class DtmbFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
     method public int getBandwidthCapability();
     method public int getCodeRateCapability();
     method public int getGuardIntervalCapability();
@@ -5734,7 +5734,7 @@ package android.media.tv.tuner.frontend {
     method public int getTransmissionModeCapability();
   }
 
-  public class DtmbFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+  public final class DtmbFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder builder();
     method public int getBandwidth();
     method public int getCodeRate();
@@ -5797,6 +5797,7 @@ package android.media.tv.tuner.frontend {
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder();
     method public int getAnnex();
+    method public int getBandwidth();
     method public long getInnerFec();
     method public int getModulation();
     method public int getOuterFec();
@@ -5808,6 +5809,11 @@ package android.media.tv.tuner.frontend {
     field public static final int ANNEX_B = 2; // 0x2
     field public static final int ANNEX_C = 4; // 0x4
     field public static final int ANNEX_UNDEFINED = 0; // 0x0
+    field public static final int BANDWIDTH_5MHZ = 1; // 0x1
+    field public static final int BANDWIDTH_6MHZ = 2; // 0x2
+    field public static final int BANDWIDTH_7MHZ = 4; // 0x4
+    field public static final int BANDWIDTH_8MHZ = 8; // 0x8
+    field public static final int BANDWIDTH_UNDEFINED = 0; // 0x0
     field public static final int MODULATION_AUTO = 1; // 0x1
     field public static final int MODULATION_MOD_128QAM = 16; // 0x10
     field public static final int MODULATION_MOD_16QAM = 2; // 0x2
@@ -5837,6 +5843,7 @@ package android.media.tv.tuner.frontend {
   public static class DvbcFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setBandwidth(int);
     method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setInnerFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
@@ -6130,17 +6137,17 @@ package android.media.tv.tuner.frontend {
     method public int getBer();
     method @NonNull public int[] getBers();
     method @NonNull public int[] getCodeRates();
+    method @NonNull public int[] getExtendedModulations();
     method public int getFreqOffset();
     method public int getGuardInterval();
     method public int getHierarchy();
     method public long getInnerFec();
     method @NonNull public int[] getInterleaving();
-    method @NonNull public int[] getIsdbtSegment();
+    method @IntRange(from=0, to=255) @NonNull public int[] getIsdbtSegment();
     method @NonNull public boolean[] getLayerErrors();
     method public int getLnbVoltage();
     method public int getMer();
     method public int getModulation();
-    method @NonNull public int[] getModulationsExt();
     method public int getPer();
     method public int getPerBer();
     method public int getPlpId();
@@ -6149,7 +6156,7 @@ package android.media.tv.tuner.frontend {
     method public int getSnr();
     method public int getSpectralInversion();
     method public int getSymbolRate();
-    method public int getSystemId();
+    method @IntRange(from=0, to=65535) public int getSystemId();
     method public int getTransmissionMode();
     method @NonNull public int[] getTsDataRate();
     method public int getUec();
@@ -9478,6 +9485,7 @@ package android.provider {
     field public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
     field public static final String NAMESPACE_PERMISSIONS = "permissions";
     field public static final String NAMESPACE_PRIVACY = "privacy";
+    field public static final String NAMESPACE_PROFCOLLECT_NATIVE_BOOT = "profcollect_native_boot";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
     field public static final String NAMESPACE_RUNTIME = "runtime";

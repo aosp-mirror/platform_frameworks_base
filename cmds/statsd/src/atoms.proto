@@ -9754,6 +9754,7 @@ message RebootEscrowRecoveryReported {
 
 /**
  * Global display pipeline metrics reported by SurfaceFlinger.
+ * Metrics exist beginning in Android 11.
  * Pulled from:
  *    frameworks/native/services/surfaceflinger/TimeStats/TimeStats.cpp
  */
@@ -9785,18 +9786,48 @@ message SurfaceflingerStatsGlobalInfo {
     // perform due to falling back into GPU composition.
     optional FrameTimingHistogram render_engine_timing = 8
         [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Number of frames where SF saw a frame, based on its frame timeline.
+    // Frame timelines may include transactions without updating buffer contents.
+    // Introduced in Android 12.
+    optional int32 total_timeline_frames = 9;
+    // Number of frames where SF saw a janky frame.
+    // Introduced in Android 12.
+    optional int32 total_janky_frames = 10;
+    // Number of janky frames where SF spent a long time on the CPU.
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_with_long_cpu = 11;
+    // Number of janky frames where SF spent a long time on the GPU.
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_with_long_gpu = 12;
+    // Number of janky frames where SF missed the frame deadline, but there
+    // was not an attributed reason (e.g., maybe HWC missed?)
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_sf_unattributed = 13;
+    // Number of janky frames where the app missed the frame deadline, but
+    // there was not an attributed reason
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_app_unattributed = 14;
+
+    // Next ID: 15
 }
 
 /**
  * Per-layer display pipeline metrics reported by SurfaceFlinger.
- * The number of layers uploaded will be restricted due to size limitations.
+ * Metrics exist beginning in Android 11.
+ * The number of layers uploaded may be restricted due to size limitations.
  * Pulled from:
  *    frameworks/native/services/surfaceflinger/TimeStats/TimeStats.cpp
  */
 message SurfaceflingerStatsLayerInfo {
+    // UID of the application who submitted this layer for presentation
+    // This is intended to be used as a dimension for surfacing rendering
+    // statistics to applications.
+    // Introduced in Android 12.
+    optional int32 uid = 12 [(is_uid) = true];
     // The layer for this set of metrics
-    // For now we can infer that the package name is included in the layer
-    // name.
+    // In many scenarios the package name is included in the layer name, e.g.,
+    // layers created by Window Manager. But this is not a guarantee - in the
+    // general case layer names are arbitrary debug names.
     optional string layer_name = 1;
     // Total number of frames presented
     optional int64 total_frames = 2;
@@ -9830,6 +9861,29 @@ message SurfaceflingerStatsLayerInfo {
     optional int64 late_acquire_frames = 10;
     // Frames latched early because the desired present time was bad
     optional int64 bad_desired_present_frames = 11;
+    // Number of frames where SF saw a frame, based on its frame timeline.
+    // Frame timelines may include transactions without updating buffer contents.
+    // Introduced in Android 12.
+    optional int32 total_timeline_frames = 13;
+    // Number of frames where SF saw a janky frame.
+    // Introduced in Android 12.
+    optional int32 total_janky_frames = 14;
+    // Number of janky frames where SF spent a long time on the CPU.
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_with_long_cpu = 15;
+    // Number of janky frames where SF spent a long time on the GPU.
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_with_long_gpu = 16;
+    // Number of janky frames where SF missed the frame deadline, but there
+    // was not an attributed reason (e.g., maybe HWC missed?)
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_sf_unattributed = 17;
+    // Number of janky frames where the app missed the frame deadline, but
+    // there was not an attributed reason
+    // Introduced in Android 12.
+    optional int32 total_janky_frames_app_unattributed = 18;
+
+    // Next ID: 19
 }
 
 /**

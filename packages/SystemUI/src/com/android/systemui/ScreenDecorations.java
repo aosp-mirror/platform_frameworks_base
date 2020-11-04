@@ -89,6 +89,7 @@ import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,6 +121,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final Handler mMainHandler;
     private final TunerService mTunerService;
+    private final SecureSettings mSecureSettings;
     private DisplayManager.DisplayListener mDisplayListener;
     private CameraAvailabilityListener mCameraListener;
     private final UserTracker mUserTracker;
@@ -199,11 +201,13 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     @Inject
     public ScreenDecorations(Context context,
             @Main Handler handler,
+            SecureSettings secureSettings,
             BroadcastDispatcher broadcastDispatcher,
             TunerService tunerService,
             UserTracker userTracker) {
         super(context);
         mMainHandler = handler;
+        mSecureSettings = secureSettings;
         mBroadcastDispatcher = broadcastDispatcher;
         mTunerService = tunerService;
         mUserTracker = userTracker;
@@ -309,7 +313,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
-                mColorInversionSetting = new SecureSetting(mContext, mHandler,
+                mColorInversionSetting = new SecureSetting(mSecureSettings, mHandler,
                         Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                         mUserTracker.getUserId()) {
                     @Override

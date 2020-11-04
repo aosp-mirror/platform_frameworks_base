@@ -814,6 +814,35 @@ optional<sp<MetricProducer>> createGaugeMetricProducerAndUpdateMetadata(
                                     pullerManager, eventActivationMap, eventDeactivationMap)};
 }
 
+optional<sp<AnomalyTracker>> createAnomalyTracker(
+        const Alert& alert, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+        const unordered_map<int64_t, int>& metricProducerMap,
+        vector<sp<MetricProducer>>& allMetricProducers) {
+    const auto& itr = metricProducerMap.find(alert.metric_id());
+    if (itr == metricProducerMap.end()) {
+        ALOGW("alert \"%lld\" has unknown metric id: \"%lld\"", (long long)alert.id(),
+              (long long)alert.metric_id());
+        return nullopt;
+    }
+    if (!alert.has_trigger_if_sum_gt()) {
+        ALOGW("invalid alert: missing threshold");
+        return nullopt;
+    }
+    if (alert.trigger_if_sum_gt() < 0 || alert.num_buckets() <= 0) {
+        ALOGW("invalid alert: threshold=%f num_buckets= %d", alert.trigger_if_sum_gt(),
+              alert.num_buckets());
+        return nullopt;
+    }
+    const int metricIndex = itr->second;
+    sp<MetricProducer> metric = allMetricProducers[metricIndex];
+    sp<AnomalyTracker> anomalyTracker = metric->addAnomalyTracker(alert, anomalyAlarmMonitor);
+    if (anomalyTracker == nullptr) {
+        // The ALOGW for this invalid alert was already displayed in addAnomalyTracker().
+        return nullopt;
+    }
+    return {anomalyTracker};
+}
+
 bool initAtomMatchingTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
                               unordered_map<int64_t, int>& atomMatchingTrackerMap,
                               vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
@@ -1079,49 +1108,17 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<int64_t, int>& m
                 vector<sp<AnomalyTracker>>& allAnomalyTrackers) {
     for (int i = 0; i < config.alert_size(); i++) {
         const Alert& alert = config.alert(i);
-        const auto& itr = metricProducerMap.find(alert.metric_id());
-        if (itr == metricProducerMap.end()) {
-            ALOGW("alert \"%lld\" has unknown metric id: \"%lld\"", (long long)alert.id(),
-                  (long long)alert.metric_id());
-            return false;
-        }
-        if (!alert.has_trigger_if_sum_gt()) {
-            ALOGW("invalid alert: missing threshold");
-            return false;
-        }
-        if (alert.trigger_if_sum_gt() < 0 || alert.num_buckets() <= 0) {
-            ALOGW("invalid alert: threshold=%f num_buckets= %d", alert.trigger_if_sum_gt(),
-                  alert.num_buckets());
-            return false;
-        }
-        const int metricIndex = itr->second;
-        sp<MetricProducer> metric = allMetricProducers[metricIndex];
-        sp<AnomalyTracker> anomalyTracker = metric->addAnomalyTracker(alert, anomalyAlarmMonitor);
-        if (anomalyTracker == nullptr) {
-            // The ALOGW for this invalid alert was already displayed in addAnomalyTracker().
-            return false;
-        }
         alertTrackerMap.insert(std::make_pair(alert.id(), allAnomalyTrackers.size()));
-        allAnomalyTrackers.push_back(anomalyTracker);
+        optional<sp<AnomalyTracker>> anomalyTracker = createAnomalyTracker(
+                alert, anomalyAlarmMonitor, metricProducerMap, allMetricProducers);
+        if (!anomalyTracker) {
+            return false;
+        }
+        allAnomalyTrackers.push_back(anomalyTracker.value());
     }
-    for (int i = 0; i < config.subscription_size(); ++i) {
-        const Subscription& subscription = config.subscription(i);
-        if (subscription.rule_type() != Subscription::ALERT) {
-            continue;
-        }
-        if (subscription.subscriber_information_case() ==
-            Subscription::SubscriberInformationCase::SUBSCRIBER_INFORMATION_NOT_SET) {
-            ALOGW("subscription \"%lld\" has no subscriber info.\"", (long long)subscription.id());
-            return false;
-        }
-        const auto& itr = alertTrackerMap.find(subscription.rule_id());
-        if (itr == alertTrackerMap.end()) {
-            ALOGW("subscription \"%lld\" has unknown rule id: \"%lld\"",
-                  (long long)subscription.id(), (long long)subscription.rule_id());
-            return false;
-        }
-        const int anomalyTrackerIndex = itr->second;
-        allAnomalyTrackers[anomalyTrackerIndex]->addSubscription(subscription);
+    if (!initSubscribersForSubscriptionType(config, Subscription::ALERT, alertTrackerMap,
+                                            allAnomalyTrackers)) {
+        return false;
     }
     return true;
 }
@@ -1146,24 +1143,9 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
         allAlarmTrackers.push_back(
                 new AlarmTracker(startMillis, currentTimeMillis, alarm, key, periodicAlarmMonitor));
     }
-    for (int i = 0; i < config.subscription_size(); ++i) {
-        const Subscription& subscription = config.subscription(i);
-        if (subscription.rule_type() != Subscription::ALARM) {
-            continue;
-        }
-        if (subscription.subscriber_information_case() ==
-            Subscription::SubscriberInformationCase::SUBSCRIBER_INFORMATION_NOT_SET) {
-            ALOGW("subscription \"%lld\" has no subscriber info.\"", (long long)subscription.id());
-            return false;
-        }
-        const auto& itr = alarmTrackerMap.find(subscription.rule_id());
-        if (itr == alarmTrackerMap.end()) {
-            ALOGW("subscription \"%lld\" has unknown rule id: \"%lld\"",
-                  (long long)subscription.id(), (long long)subscription.rule_id());
-            return false;
-        }
-        const int trackerIndex = itr->second;
-        allAlarmTrackers[trackerIndex]->addSubscription(subscription);
+    if (!initSubscribersForSubscriptionType(config, Subscription::ALARM, alarmTrackerMap,
+                                            allAlarmTrackers)) {
+        return false;
     }
     return true;
 }

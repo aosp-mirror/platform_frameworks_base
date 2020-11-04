@@ -47,6 +47,9 @@ interface IImsRcsController {
     // ImsUceAdapter specific
     void requestCapabilities(int subId, String callingPackage, String callingFeatureId,
             in List<Uri> contactNumbers, IRcsUceControllerCallback c);
+    void requestNetworkAvailability(int subId, String callingPackage,
+            String callingFeatureId, in Uri contactNumber,
+            IRcsUceControllerCallback c);
     int getUcePublishState(int subId);
     boolean isUceSettingEnabled(int subId, String callingPackage, String callingFeatureId);
     void setUceSettingEnabled(int subId, boolean isEnabled);

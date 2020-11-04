@@ -71,7 +71,7 @@ public:
                     sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                     int64_t currentBucketStartNs, int64_t currentBucketNum, int64_t startTimeNs,
                     int64_t bucketSizeNs, bool conditionSliced, bool fullLink,
-                    const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
+                    const std::vector<sp<AnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mTrackerId(id),
           mEventKey(eventKey),
@@ -93,6 +93,7 @@ public:
         sp<ConditionWizard> tmpWizard = mWizard;
         mWizard = wizard;
         mConditionTrackerIndex = conditionTrackerIndex;
+        mAnomalyTrackers.clear();
     };
 
     virtual void noteStart(const HashableDimensionKey& key, bool condition, const int64_t eventTime,
@@ -120,7 +121,7 @@ public:
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Predict the anomaly timestamp given the current status.
-    virtual int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
+    virtual int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
                                               const int64_t currentTimestamp) const = 0;
     // Dump internal states for debugging
     virtual void dumpStates(FILE* out, bool verbose) const = 0;
@@ -131,6 +132,10 @@ public:
 
     // Replace old value with new value for the given state atom.
     virtual void updateCurrentStateKey(const int32_t atomId, const FieldValue& newState) = 0;
+
+    void addAnomalyTracker(sp<AnomalyTracker>& anomalyTracker) {
+        mAnomalyTrackers.push_back(anomalyTracker);
+    }
 
 protected:
     int64_t getCurrentBucketEndTimeNs() const {
@@ -218,13 +223,14 @@ protected:
 
     bool mHasLinksToAllConditionDimensionsInTracker;
 
-    std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
+    std::vector<sp<AnomalyTracker>> mAnomalyTrackers;
 
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm);
 
     FRIEND_TEST(ConfigUpdateTest, TestUpdateDurationMetrics);
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateAlerts);
 };
 
 }  // namespace statsd

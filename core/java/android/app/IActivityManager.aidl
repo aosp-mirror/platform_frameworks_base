@@ -342,6 +342,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void unregisterProcessObserver(in IProcessObserver observer);
     boolean isIntentSenderTargetedToPackage(in IIntentSender sender);
+    boolean isIntentSenderImmutable(in IIntentSender sender);
     @UnsupportedAppUsage
     void updatePersistentConfiguration(in Configuration values);
     void updatePersistentConfigurationWithAttribution(in Configuration values,

@@ -20,11 +20,11 @@ package android.stats.tls;
 // external/conscrypt/{android,platform}/src/main/java/org/conscrypt/Platform.java
 enum Protocol {
     UNKNOWN_PROTO = 0;
-    SSLv3 = 1;
-    TLSv1 = 2;
-    TLSv1_1 = 3;
-    TLSv1_2 = 4;
-    TLSv1_3 = 5;
+    SSL_V3 = 1;
+    TLS_V1 = 2;
+    TLS_V1_1 = 3;
+    TLS_V1_2 = 4;
+    TLS_V1_3 = 5;
 }
 
 // Cipher suites' ids are based on IANA's database:

@@ -223,6 +223,40 @@ public class DvbcFrontendSettings extends FrontendSettings {
     public static final int TIME_INTERLEAVE_MODE_128_4 = android.hardware.tv.tuner.V1_1.Constants
             .FrontendCableTimeInterleaveMode.INTERLEAVING_128_4;
 
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "BANDWIDTH_",
+            value = {BANDWIDTH_UNDEFINED, BANDWIDTH_5MHZ, BANDWIDTH_6MHZ, BANDWIDTH_7MHZ,
+                    BANDWIDTH_8MHZ})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Bandwidth {}
+
+    /**
+     * Bandwidth undefined.
+     */
+    public static final int BANDWIDTH_UNDEFINED =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.UNDEFINED;
+    /**
+     * 5 MHz bandwidth.
+     */
+    public static final int BANDWIDTH_5MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_5MHZ;
+    /**
+     * 6 MHz bandwidth.
+     */
+    public static final int BANDWIDTH_6MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_6MHZ;
+    /**
+     * 7 MHz bandwidth.
+     */
+    public static final int BANDWIDTH_7MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_7MHZ;
+    /**
+     * 8 MHz bandwidth.
+     */
+    public static final int BANDWIDTH_8MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_8MHZ;
+
 
     private final int mModulation;
     private final long mInnerFec;
@@ -232,9 +266,11 @@ public class DvbcFrontendSettings extends FrontendSettings {
     private final int mSpectralInversion;
     // Dvbc time interleave mode is only supported in Tuner 1.1 or higher.
     private final int mInterleaveMode;
+    // Dvbc bandwidth is only supported in Tuner 1.1 or higher.
+    private final int mBandwidth;
 
     private DvbcFrontendSettings(int frequency, int modulation, long innerFec, int symbolRate,
-            int outerFec, int annex, int spectralInversion, int interleaveMode) {
+            int outerFec, int annex, int spectralInversion, int interleaveMode, int bandwidth) {
         super(frequency);
         mModulation = modulation;
         mInnerFec = innerFec;
@@ -243,6 +279,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
         mAnnex = annex;
         mSpectralInversion = spectralInversion;
         mInterleaveMode = interleaveMode;
+        mBandwidth = bandwidth;
     }
 
     /**
@@ -293,6 +330,13 @@ public class DvbcFrontendSettings extends FrontendSettings {
     public int getTimeInterleaveMode() {
         return mInterleaveMode;
     }
+    /**
+     * Gets Bandwidth.
+     */
+    @Bandwidth
+    public int getBandwidth() {
+        return mBandwidth;
+    }
 
     /**
      * Creates a builder for {@link DvbcFrontendSettings}.
@@ -314,6 +358,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
         private int mAnnex = ANNEX_UNDEFINED;
         private int mSpectralInversion = FrontendSettings.FRONTEND_SPECTRAL_INVERSION_UNDEFINED;
         private int mInterleaveMode = TIME_INTERLEAVE_MODE_UNDEFINED;
+        private int mBandwidth = BANDWIDTH_UNDEFINED;
 
         private Builder() {
         }
@@ -407,6 +452,23 @@ public class DvbcFrontendSettings extends FrontendSettings {
             }
             return this;
         }
+        /**
+         * Set the Bandwidth.
+         *
+         * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
+         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         *
+         * @param bandwidth the value to set as the bandwidth. Default value is
+         * {@link #BANDWIDTH_UNDEFINED}.
+         */
+        @NonNull
+        public Builder setBandwidth(@Bandwidth int bandwidth) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_1_1, "setBandwidth")) {
+                mBandwidth = bandwidth;
+            }
+            return this;
+        }
 
         /**
          * Builds a {@link DvbcFrontendSettings} object.
@@ -414,7 +476,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
         @NonNull
         public DvbcFrontendSettings build() {
             return new DvbcFrontendSettings(mFrequency, mModulation, mInnerFec, mSymbolRate,
-                mOuterFec, mAnnex, mSpectralInversion, mInterleaveMode);
+                mOuterFec, mAnnex, mSpectralInversion, mInterleaveMode, mBandwidth);
         }
     }
 

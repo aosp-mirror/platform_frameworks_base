@@ -4489,7 +4489,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             detachChildren();
         }
         if (app != null) {
-            app.invalidateOomScoreReferenceState(false /* computeNow */);
+            app.computeProcessActivityState();
         }
 
         switch (state) {
