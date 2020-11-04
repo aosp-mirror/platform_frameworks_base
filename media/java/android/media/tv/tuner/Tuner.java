@@ -1062,6 +1062,13 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    private void onDvbcAnnexReported(int dvbcAnnex) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onDvbcAnnexReported(dvbcAnnex));
+        }
+    }
+
     /**
      * Opens a filter object based on the given types and buffer size.
      *

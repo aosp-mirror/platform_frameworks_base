@@ -75,4 +75,7 @@ public interface ScanCallback {
 
     /** Frontend scan message priority reported. */
     default void onPriorityReported(boolean isHighPriority) {}
+
+    /** DVBC Frontend Annex reported. */
+    default void onDvbcAnnexReported(@DvbcFrontendSettings.Annex int dvbcAnnex) {}
 }
