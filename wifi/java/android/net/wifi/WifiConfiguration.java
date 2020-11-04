@@ -2736,17 +2736,18 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * Get a key for this WifiConfig to generate Persist random Mac Address.
+     * Get a unique key which represent this Wi-Fi network. If two profiles are for
+     * the same Wi-Fi network, but from different provider, they would have the same key.
      * @hide
      */
-    public String getMacRandomKey() {
+    public String getNetworkKey() {
         // Passpoint ephemeral networks have their unique identifier set. Return it as is to be
         // able to match internally.
         if (mPasspointUniqueId != null) {
             return mPasspointUniqueId;
         }
 
-        String key = getSsidAndSecurityTypeString();
+        String key = SSID + getDefaultSecurityType();
         if (!shared) {
             key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
         }
