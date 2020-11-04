@@ -160,10 +160,17 @@ cc_test {
                 "tests/ObbFile_test.cpp",
                 "tests/PosixUtils_test.cpp",
             ],
-            shared_libs: common_test_libs + ["libbinder", "liblog", "libui"],
+            shared_libs: common_test_libs + [
+                "libbinder",
+                "liblog",
+                "libui",
+            ],
         },
         host: {
-            static_libs: common_test_libs + ["liblog", "libz"],
+            static_libs: common_test_libs + [
+                "liblog",
+                "libz",
+            ],
         },
     },
     data: [
@@ -204,10 +211,20 @@ cc_library {
     export_include_dirs: ["include"],
     target: {
         android: {
-            shared_libs: common_test_libs + ["libbinder", "liblog"],
+            shared_libs: common_test_libs + [
+                "libbinder",
+                "liblog",
+            ],
         },
         host: {
-            static_libs: common_test_libs + ["libbinder", "liblog"],
+            static_libs: common_test_libs + [
+                "libbinder",
+                "liblog",
+            ],
+        },
+        darwin: {
+            // libbinder is not supported on mac
+            enabled: false,
         },
     },
 }
