@@ -75,7 +75,7 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.annotation.NonNull;
@@ -2532,8 +2532,8 @@ class ActivityStarter {
                             "bringingFoundTaskToFront");
                     mMovedToFront = !isSplitScreenTopStack;
                 } else {
-                    intentTask.reparent(launchStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE,
-                            DEFER_RESUME, "reparentToTargetStack");
+                    intentTask.reparent(launchStack, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
+                            ANIMATE, DEFER_RESUME, "reparentToTargetStack");
                     mMovedToFront = true;
                 }
                 mOptions = null;

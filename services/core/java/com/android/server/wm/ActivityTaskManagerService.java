@@ -106,7 +106,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFI
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_IMMERSIVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -120,11 +120,11 @@ import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
-import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_ONLY;
-import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_ONLY;
+import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
-import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -306,7 +306,7 @@ import java.util.Set;
  */
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
-    static final String TAG_STACK = TAG + POSTFIX_STACK;
+    static final String TAG_ROOT_TASK = TAG + POSTFIX_ROOT_TASK;
     static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -2228,7 +2228,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY);
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     return;
                 }
@@ -2266,7 +2266,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final long ident = Binder.clearCallingIdentity();
             try {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
                 if (task == null) {
                     Slog.w(TAG, "removeTask: No task remove with id=" + taskId);
                     return false;
@@ -2374,7 +2374,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
                 if (task == null) {
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
                     return rect;
@@ -2397,7 +2397,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             enforceCallerIsRecentsOrHasPermission(
                     MANAGE_ACTIVITY_TASKS, "getTaskDescription()");
             final Task tr = mRootWindowContainer.anyTaskForId(id,
-                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
             if (tr != null) {
                 return tr.getTaskDescription();
             }
@@ -2418,7 +2418,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return setTaskWindowingModeSplitScreen(taskId, windowingMode, toTop);
                 }
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY);
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
                     return false;
@@ -2789,8 +2789,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException("moveTaskToRootTask: Attempt to move task "
                             + taskId + " to rootTask " + rootTaskId);
                 }
-                task.reparent(rootTask, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
-                        "moveTaskToRootTask");
+                task.reparent(rootTask, toTop, REPARENT_KEEP_ROOT_TASK_AT_FRONT, ANIMATE,
+                        !DEFER_RESUME, "moveTaskToRootTask");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2834,7 +2834,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                MATCH_TASK_IN_STACKS_ONLY);
+                MATCH_ATTACHED_TASK_ONLY);
         if (task == null) {
             Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
             return false;
@@ -3013,7 +3013,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY);
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     return;
                 }
@@ -3361,7 +3361,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void setTaskResizeable(int taskId, int resizeableMode) {
         synchronized (mGlobalLock) {
             final Task task = mRootWindowContainer.anyTaskForId(
-                    taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+                    taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
             if (task == null) {
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
@@ -3377,7 +3377,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY);
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return false;
@@ -4395,7 +4395,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY);
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "cancelTaskWindowTransition: taskId=" + taskId + " not found");
                     return;
@@ -4423,7 +4423,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final Task task;
         synchronized (mGlobalLock) {
             task = mRootWindowContainer.anyTaskForId(taskId,
-                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
             if (task == null) {
                 Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
                 return null;

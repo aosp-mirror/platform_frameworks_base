@@ -59,9 +59,9 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
-import static com.android.server.wm.Task.STACK_VISIBILITY_INVISIBLE;
-import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -516,13 +516,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.setState(Task.ActivityState.STOPPED, "Testing");
         spyOn(mStack);
 
-        doReturn(STACK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
+        doReturn(TASK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
         assertEquals(true, mActivity.shouldResumeActivity(null /* activeActivity */));
 
-        doReturn(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT).when(mStack).getVisibility(null);
+        doReturn(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT).when(mStack).getVisibility(null);
         assertEquals(false, mActivity.shouldResumeActivity(null /* activeActivity */));
 
-        doReturn(STACK_VISIBILITY_INVISIBLE).when(mStack).getVisibility(null);
+        doReturn(TASK_VISIBILITY_INVISIBLE).when(mStack).getVisibility(null);
         assertEquals(false, mActivity.shouldResumeActivity(null /* activeActivity */));
     }
 
@@ -535,7 +535,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent());
         topActivity.finishing = true;
 
-        doReturn(STACK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
+        doReturn(TASK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
         assertEquals(true, mActivity.shouldResumeActivity(null /* activeActivity */));
         assertEquals(false, mActivity.shouldPauseActivity(null /*activeActivity */));
     }
