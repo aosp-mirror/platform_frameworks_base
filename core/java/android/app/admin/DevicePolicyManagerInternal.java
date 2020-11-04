@@ -88,6 +88,26 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
 
     /**
+     * Checks if an app with given uid is an active device owner of its user.
+     *
+     * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
+     *
+     * @param uid App uid.
+     * @return true if the uid is an active device owner.
+     */
+    public abstract boolean isActiveDeviceOwner(int uid);
+
+    /**
+     * Checks if an app with given uid is an active profile owner of its user.
+     *
+     * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
+     *
+     * @param uid App uid.
+     * @return true if the uid is an active profile owner.
+     */
+    public abstract boolean isActiveProfileOwner(int uid);
+
+    /**
      * Checks if an app with given uid is the active supervision admin.
      *
      * <p>This takes the DPMS lock. DO NOT call from PM/UM/AM with their lock held.
