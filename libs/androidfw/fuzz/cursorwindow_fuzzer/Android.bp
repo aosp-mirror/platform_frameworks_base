@@ -27,5 +27,9 @@ cc_fuzz {
                 "libutils",
             ],
         },
+        darwin: {
+            // libbinder is not supported on mac
+            enabled: false,
+        },
     },
 }
