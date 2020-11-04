@@ -6353,6 +6353,7 @@ package android.media.tv.tuner.frontend {
   public interface ScanCallback {
     method public void onAnalogSifStandardReported(int);
     method public void onAtsc3PlpInfosReported(@NonNull android.media.tv.tuner.frontend.Atsc3PlpInfo[]);
+    method public default void onDvbcAnnexReported(int);
     method public void onDvbsStandardReported(int);
     method public void onDvbtStandardReported(int);
     method public void onFrequenciesReported(@NonNull int[]);
