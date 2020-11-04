@@ -35,6 +35,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
@@ -57,6 +58,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
     private QSPanel mQSPanel;
     @Mock
     private QSTileHost mQSTileHost;
+    @Mock
+    private QSCustomizerController mQSCustomizerController;
     @Mock
     private MediaHost mMediaHost;
     @Mock
@@ -91,7 +94,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
                 .thenReturn(mBrightnessController);
 
         mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
-                mQSTileHost, mDumpManager, mMetricsLogger, mUiEventLogger,
+                mQSTileHost, mQSCustomizerController, mDumpManager, mMetricsLogger, mUiEventLogger,
                 mBrightnessControllerFactory);
 
         mController.init();

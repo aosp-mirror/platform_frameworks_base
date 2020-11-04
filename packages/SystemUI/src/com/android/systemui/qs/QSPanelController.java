@@ -29,7 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -44,6 +44,7 @@ import javax.inject.Inject;
 public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final QSSecurityFooter mQsSecurityFooter;
     private final TunerService mTunerService;
+    private final QSCustomizerController mQsCustomizerController;
     private final BrightnessController mBrightnessController;
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
@@ -61,15 +62,23 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
-            QSTileHost qstileHost, DumpManager dumpManager,
-            MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
+            QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
+            DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory) {
-        super(view, qstileHost, metricsLogger, uiEventLogger, dumpManager);
+        super(view, qstileHost, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
+        mQsCustomizerController = qsCustomizerController;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
         mBrightnessController = brightnessControllerFactory.create(
                 mView.findViewById(R.id.brightness_slider));
+
+        mView.setCustomizer(mQsCustomizerController.getView());
+    }
+
+    @Override
+    public void onInit() {
+        mQsCustomizerController.init();
     }
 
     @Override
@@ -112,11 +121,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     public QSPanel.QSTileLayout getTileLayout() {
         return mView.getTileLayout();
-    }
-
-    /** */
-    public void setCustomizer(QSCustomizer customizer) {
-        mView.setCustomizer(customizer);
     }
 
     /** */
@@ -196,6 +200,23 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** Start customizing the Quick Settings. */
     public void showEdit(View view) {
-        mView.showEdit(view);
+        view.post(() -> {
+            if (!mQsCustomizerController.isCustomizing()) {
+                int[] loc = view.getLocationOnScreen();
+                int x = loc[0] + view.getWidth() / 2;
+                int y = loc[1] + view.getHeight() / 2;
+                mQsCustomizerController.show(x, y, false);
+            }
+        });
+    }
+
+    /** */
+    public void setCallback(QSDetail.Callback qsPanelCallback) {
+        mView.setCallback(qsPanelCallback);
+    }
+
+    /** */
+    public void setGridContentVisibility(boolean visible) {
+        mView.setGridContentVisibility(visible);
     }
 }
