@@ -158,7 +158,7 @@ import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.InetAddresses;
-import android.net.InterfaceConfiguration;
+import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
 import android.net.IpSecManager.UdpEncapsulationSocket;
@@ -6084,12 +6084,13 @@ public class ConnectivityServiceTest {
     }
 
     /**
-     * Make simulated InterfaceConfig for Nat464Xlat to query clat lower layer info.
+     * Make simulated InterfaceConfigParcel for Nat464Xlat to query clat lower layer info.
      */
-    private InterfaceConfiguration getClatInterfaceConfig(LinkAddress la) {
-        InterfaceConfiguration cfg = new InterfaceConfiguration();
-        cfg.setHardwareAddress("11:22:33:44:55:66");
-        cfg.setLinkAddress(la);
+    private InterfaceConfigurationParcel getClatInterfaceConfigParcel(LinkAddress la) {
+        final InterfaceConfigurationParcel cfg = new InterfaceConfigurationParcel();
+        cfg.hwAddr = "11:22:33:44:55:66";
+        cfg.ipv4Addr = la.getAddress().getHostAddress();
+        cfg.prefixLength = la.getPrefixLength();
         return cfg;
     }
 
@@ -6180,8 +6181,8 @@ public class ConnectivityServiceTest {
         reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
-        when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
-                .thenReturn(getClatInterfaceConfig(myIpv4));
+        when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
+                .thenReturn(getClatInterfaceConfigParcel(myIpv4));
 
         // Remove IPv4 address. Expect prefix discovery to be started again.
         cellLp.removeLinkAddress(myIpv4);
@@ -6230,7 +6231,8 @@ public class ConnectivityServiceTest {
                     TYPE_MOBILE);
         }
         reset(mMockNetd);
-
+        when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
+                .thenReturn(getClatInterfaceConfigParcel(myIpv4));
         // Change the NAT64 prefix without first removing it.
         // Expect clatd to be stopped and started with the new prefix.
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, true /* added */,
@@ -6279,8 +6281,8 @@ public class ConnectivityServiceTest {
         reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
-        when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
-                .thenReturn(getClatInterfaceConfig(myIpv4));
+        when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
+                .thenReturn(getClatInterfaceConfigParcel(myIpv4));
 
         // Stopping prefix discovery causes netd to tell us that the NAT64 prefix is gone.
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
@@ -6320,6 +6322,7 @@ public class ConnectivityServiceTest {
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 0);
         verify(mMockNetd, times(1)).networkRemoveInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
+        verify(mMockNetd, times(1)).interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME);
         verifyNoMoreInteractions(mMockNetd);
         // Clean up.
         mCellNetworkAgent.disconnect();
