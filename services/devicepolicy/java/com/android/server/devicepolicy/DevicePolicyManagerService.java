@@ -244,6 +244,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -269,7 +270,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
@@ -8500,29 +8500,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, printWriter)) return;
-        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
 
-        synchronized (getLockObject()) {
+        try (IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ")) {
             pw.println("Current Device Policy Manager state:");
             pw.increaseIndent();
 
-            mOwners.dump(pw);
-            pw.println();
-            mDeviceAdminServiceController.dump(pw);
-            pw.println();
-            dumpDevicePolicyData(pw);
-            pw.println();
-            mConstants.dump(pw);
-            pw.println();
-            mStatLogger.dump(pw);
-            pw.println();
+            dumpImmutableState(pw);
+            synchronized (getLockObject()) {
+                mOwners.dump(pw);
+                pw.println();
+                mDeviceAdminServiceController.dump(pw);
+                pw.println();
+                dumpDevicePolicyData(pw);
+                pw.println();
+                mConstants.dump(pw);
+                pw.println();
+                mStatLogger.dump(pw);
+                pw.println();
 
-            pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
-            pw.println();
-            mPolicyCache.dump(pw);
-            pw.println();
-            mStateCache.dump(pw);
+                pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
+                pw.println();
+                mPolicyCache.dump(pw);
+                pw.println();
+                mStateCache.dump(pw);
+            }
         }
+    }
+
+    private void dumpImmutableState(IndentingPrintWriter pw) {
+        pw.println("Immutable state:");
+        pw.increaseIndent();
+        pw.printf("mHasFeature=%b\n", mHasFeature);
+        pw.printf("mIsWatch=%b\n", mIsWatch);
+        pw.printf("mHasTelephonyFeature=%b\n", mHasTelephonyFeature);
+        pw.decreaseIndent();
     }
 
     private String getEncryptionStatusName(int encryptionStatus) {
