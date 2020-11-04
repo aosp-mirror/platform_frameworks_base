@@ -29,6 +29,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.util.ViewController;
 
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable{
     protected final QSTileHost mHost;
+    private final QSCustomizerController mQsCustomizerController;
     private final MediaHost mMediaHost;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
@@ -69,9 +71,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private String mCachedSpecs = "";
 
     protected QSPanelControllerBase(T view, QSTileHost host,
-            MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
+            QSCustomizerController qsCustomizerController, MetricsLogger metricsLogger,
+            UiEventLogger uiEventLogger, DumpManager dumpManager) {
         super(view);
         mHost = host;
+        mQsCustomizerController = qsCustomizerController;
         mMediaHost = mView.getMediaHost();
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
@@ -192,6 +196,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     /** */
     public void closeDetail() {
+        if (mQsCustomizerController.isShown()) {
+            mQsCustomizerController.hide();
+            return;
+        }
         mView.closeDetail();
     }
 

@@ -608,12 +608,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         }
     }
 
-    public void onCollapse() {
-        if (mCustomizePanel != null && mCustomizePanel.isShown()) {
-            mCustomizePanel.hide();
-        }
-    }
-
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mQSLogger.logPanelExpanded(expanded, getDumpableTag());
@@ -742,29 +736,7 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         mTileLayout.removeTile(tileRecord);
     }
 
-    public void showEdit(final View v) {
-        v.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mCustomizePanel != null) {
-                    if (!mCustomizePanel.isCustomizing()) {
-                        int[] loc = v.getLocationOnScreen();
-                        int x = loc[0] + v.getWidth() / 2;
-                        int y = loc[1] + v.getHeight() / 2;
-                        mCustomizePanel.show(x, y);
-                    }
-                }
-
-            }
-        });
-    }
-
-    public void closeDetail() {
-        if (mCustomizePanel != null && mCustomizePanel.isShown()) {
-            // Treat this as a detail panel for now, to make things easy.
-            mCustomizePanel.hide();
-            return;
-        }
+    void closeDetail() {
         showDetail(false, mDetailRecord);
     }
 

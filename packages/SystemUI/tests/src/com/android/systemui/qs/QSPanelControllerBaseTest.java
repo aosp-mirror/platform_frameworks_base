@@ -38,6 +38,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import org.junit.Before;
@@ -61,6 +62,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     private QSTileHost mQSTileHost;
     @Mock
+    private QSCustomizerController mQSCustomizerController;
+    @Mock
     private MediaHost mMediaHost;
     @Mock
     private MetricsLogger mMetricsLogger;
@@ -76,9 +79,9 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private static class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
-                MetricsLogger metricsLogger,
+                QSCustomizerController qsCustomizerController, MetricsLogger metricsLogger,
                 UiEventLogger uiEventLogger, DumpManager dumpManager) {
-            super(view, host, metricsLogger, uiEventLogger, dumpManager);
+            super(view, host, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
         }
     }
 
@@ -95,7 +98,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
-                mMetricsLogger, mUiEventLogger, mDumpManager);
+                mQSCustomizerController, mMetricsLogger, mUiEventLogger, mDumpManager);
 
         mController.init();
     }

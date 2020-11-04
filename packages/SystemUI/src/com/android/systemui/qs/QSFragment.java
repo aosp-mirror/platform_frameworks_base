@@ -38,7 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
@@ -69,7 +69,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSAnimator mQSAnimator;
     private HeightListener mPanelView;
     protected QuickStatusBarHeader mHeader;
-    private QSCustomizer mQSCustomizer;
     protected NonInterceptingScrollView mQSPanelScrollView;
     private QSDetail mQSDetail;
     private boolean mListening;
@@ -97,6 +96,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private float mLastHeaderTranslation;
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
+    private QSCustomizerController mQSCustomizerController;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -148,16 +148,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
 
-        mQSDetail.setQsPanel(mQSPanelController.getView(), mHeader, mFooter);
+        mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
 
-        mQSCustomizer = view.findViewById(R.id.qs_customize);
-        mQSCustomizer.setQs(this);
+        mQSCustomizerController = qsFragmentComponent.getQSCustomizerController();
+        mQSCustomizerController.init();
+        mQSCustomizerController.setQs(this);
         if (savedInstanceState != null) {
             setExpanded(savedInstanceState.getBoolean(EXTRA_EXPANDED));
             setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
             setEditLocation(view);
-            mQSCustomizer.restoreInstanceState(savedInstanceState);
+            mQSCustomizerController.restoreInstanceState(savedInstanceState);
             if (mQsExpanded) {
                 mQSPanelController.getTileLayout().restoreInstanceState(savedInstanceState);
             }
@@ -181,7 +182,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mListening) {
             setListening(false);
         }
-        mQSCustomizer.setQs(null);
+        mQSCustomizerController.setQs(null);
     }
 
     @Override
@@ -189,7 +190,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         super.onSaveInstanceState(outState);
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
-        mQSCustomizer.saveInstanceState(outState);
+        mQSCustomizerController.saveInstanceState(outState);
         if (mQsExpanded) {
             mQSPanelController.getTileLayout().saveInstanceState(outState);
         }
@@ -236,23 +237,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         int[] loc = edit.getLocationOnScreen();
         int x = loc[0] + edit.getWidth() / 2;
         int y = loc[1] + edit.getHeight() / 2;
-        mQSCustomizer.setEditLocation(x, y);
+        mQSCustomizerController.setEditLocation(x, y);
     }
 
     @Override
     public void setContainer(ViewGroup container) {
         if (container instanceof NotificationsQuickSettingsContainer) {
-            mQSCustomizer.setContainer((NotificationsQuickSettingsContainer) container);
+            mQSCustomizerController.setContainer((NotificationsQuickSettingsContainer) container);
         }
     }
 
     @Override
     public boolean isCustomizing() {
-        return mQSCustomizer.isCustomizing();
+        return mQSCustomizerController.isCustomizing();
     }
 
     public void setHost(QSTileHost qsh) {
-        mQSPanelController.setCustomizer(mQSCustomizer);
         mHeader.setQSPanel(mQSPanelController.getView());
         mFooter.setQSPanel(mQSPanelController.getView());
         mQSDetail.setHost(qsh);
@@ -323,10 +323,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     public QSPanel getQsPanel() {
         return mQSPanelController.getView();
-    }
-
-    public QSCustomizer getCustomizer() {
-        return mQSCustomizer;
     }
 
     @Override
@@ -553,9 +549,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void notifyCustomizeChanged() {
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
-        mQSPanelScrollView.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE
+        mQSPanelScrollView.setVisibility(!mQSCustomizerController.isCustomizing() ? View.VISIBLE
                 : View.INVISIBLE);
-        mFooter.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
+        mFooter.setVisibility(
+                !mQSCustomizerController.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
         mPanelView.onQsHeightChanged();
@@ -567,7 +564,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      */
     @Override
     public int getDesiredHeight() {
-        if (mQSCustomizer.isCustomizing()) {
+        if (mQSCustomizerController.isCustomizing()) {
             return getView().getHeight();
         }
         if (mQSDetail.isClosingDetail()) {
