@@ -3824,18 +3824,21 @@ public abstract class PackageManager {
      * Unstartable state with no root cause specified. E.g., data loader seeing missing pages but
      * unclear about the cause. This corresponds to a generic alert window shown to the user when
      * the user attempts to launch the app.
+     * @hide
      */
     public static final int UNSTARTABLE_REASON_UNKNOWN = 0;
 
     /**
      * Unstartable state due to connection issues that interrupt package loading.
      * This corresponds to an alert window shown to the user indicating connection errors.
+     * @hide
      */
     public static final int UNSTARTABLE_REASON_CONNECTION_ERROR = 1;
 
     /**
      * Unstartable state after encountering storage limitations.
      * This corresponds to an alert window indicating limited storage.
+     * @hide
      */
     public static final int UNSTARTABLE_REASON_INSUFFICIENT_STORAGE = 2;
 
