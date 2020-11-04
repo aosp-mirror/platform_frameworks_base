@@ -240,6 +240,12 @@ public final class DataCallResponse implements Parcelable {
      */
     @Deprecated
     public int getSuggestedRetryTime() {
+        // To match the pre-deprecated getSuggestedRetryTime() behavior.
+        if (mSuggestedRetryTime == RETRY_INTERVAL_UNDEFINED) {
+            return 0;
+        } else if (mSuggestedRetryTime > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
         return (int) mSuggestedRetryTime;
     }
 
