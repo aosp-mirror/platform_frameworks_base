@@ -56,6 +56,9 @@
                      android:id="@+id/screenshot_share_chip"/>
             <include layout="@layout/global_screenshot_action_chip"
                      android:id="@+id/screenshot_edit_chip"/>
+            <include layout="@layout/global_screenshot_action_chip"
+                     android:id="@+id/screenshot_scroll_chip"
+                     android:visibility="gone" />
         </LinearLayout>
     </HorizontalScrollView>
     <include layout="@layout/global_screenshot_preview"/>
