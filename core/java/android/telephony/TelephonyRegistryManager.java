@@ -786,6 +786,21 @@ public class TelephonyRegistryManager {
         }
     }
 
+    /**
+     * Notify that the data enabled has changed.
+     *
+     * @param enabled True if data is enabled, otherwise disabled.
+     * @param reason Reason for data enabled/disabled. See {@code REASON_*} in
+     * {@link TelephonyManager}.
+     */
+    public void notifyDataEnabled(boolean enabled, @TelephonyManager.DataEnabledReason int reason) {
+        try {
+            sRegistry.notifyDataEnabled(enabled, reason);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
     public @NonNull Set<Integer> getEventsFromListener(@NonNull PhoneStateListener listener) {
 
         Set<Integer> eventList = new ArraySet<>();
