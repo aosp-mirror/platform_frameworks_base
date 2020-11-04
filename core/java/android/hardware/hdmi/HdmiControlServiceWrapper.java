@@ -301,18 +301,33 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
-        public List<String> getAllowedCecSettingValues(String name) {
-            return HdmiControlServiceWrapper.this.getAllowedCecSettingValues(name);
+        public List<String> getAllowedCecSettingStringValues(String name) {
+            return HdmiControlServiceWrapper.this.getAllowedCecSettingStringValues(name);
         }
 
         @Override
-        public String getCecSettingValue(String name) {
-            return HdmiControlServiceWrapper.this.getCecSettingValue(name);
+        public int[] getAllowedCecSettingIntValues(String name) {
+            return HdmiControlServiceWrapper.this.getAllowedCecSettingIntValues(name);
         }
 
         @Override
-        public void setCecSettingValue(String name, String value) {
-            HdmiControlServiceWrapper.this.setCecSettingValue(name, value);
+        public String getCecSettingStringValue(String name) {
+            return HdmiControlServiceWrapper.this.getCecSettingStringValue(name);
+        }
+
+        @Override
+        public void setCecSettingStringValue(String name, String value) {
+            HdmiControlServiceWrapper.this.setCecSettingStringValue(name, value);
+        }
+
+        @Override
+        public int getCecSettingIntValue(String name) {
+            return HdmiControlServiceWrapper.this.getCecSettingIntValue(name);
+        }
+
+        @Override
+        public void setCecSettingIntValue(String name, int value) {
+            HdmiControlServiceWrapper.this.setCecSettingIntValue(name, value);
         }
     };
 
@@ -494,15 +509,30 @@ public final class HdmiControlServiceWrapper {
     }
 
     /** @hide */
-    public List<String> getAllowedCecSettingValues(String name) {
+    public List<String> getAllowedCecSettingStringValues(String name) {
         return new ArrayList<>();
     }
 
     /** @hide */
-    public String getCecSettingValue(String name) {
+    public int[] getAllowedCecSettingIntValues(String name) {
+        return new int[0];
+    }
+
+    /** @hide */
+    public String getCecSettingStringValue(String name) {
         return "";
     }
 
     /** @hide */
-    public void setCecSettingValue(String name, String value) {}
+    public void setCecSettingStringValue(String name, String value) {
+    }
+
+    /** @hide */
+    public int getCecSettingIntValue(String name) {
+        return 0;
+    }
+
+    /** @hide */
+    public void setCecSettingIntValue(String name, int value) {
+    }
 }
