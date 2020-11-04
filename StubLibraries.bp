@@ -57,6 +57,7 @@ stubs_defaults {
             "telephony/java",
             "media/aidl",
         ],
+        include_dirs: ["frameworks/av/aidl"],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
     // from framework-non-updatable-sources. Add more here when there's a need.
