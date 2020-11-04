@@ -43,12 +43,12 @@ fun WmAssertion.appWindowReplacesLauncherAsTopWindow(
     }
 }
 
-fun LayersAssertion.wallpaperLayerBecomesInvisible(
+fun LayersAssertion.appLayerReplacesWallpaperLayer(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("wallpaperLayerBecomesInvisible", bugId, enabled) {
+    all("appLayerReplacesWallpaperLayer", bugId, enabled) {
         this.showsLayer("Wallpaper")
                 .then()
                 .replaceVisibleLayer("Wallpaper", testApp.getPackage())
