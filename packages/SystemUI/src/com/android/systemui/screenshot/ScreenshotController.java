@@ -472,7 +472,7 @@ public class ScreenshotController {
             mScrollCaptureClient.request(DEFAULT_DISPLAY, (connection) ->
                     mScreenshotView.showScrollChip(() ->
                             runScrollCapture(connection,
-                                    () -> dismissScreenshot(false))));
+                                    () -> dismissScreenshot(true))));
         }
     }
 
