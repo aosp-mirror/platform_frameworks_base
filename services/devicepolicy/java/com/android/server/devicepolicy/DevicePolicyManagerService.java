@@ -12474,6 +12474,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
+        public boolean isActiveDeviceOwner(int uid) {
+            synchronized (getLockObject()) {
+                return getActiveAdminWithPolicyForUidLocked(
+                        null, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, uid) != null;
+            }
+        }
+
+        @Override
+        public boolean isActiveProfileOwner(int uid) {
+            synchronized (getLockObject()) {
+                return getActiveAdminWithPolicyForUidLocked(
+                        null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, uid) != null;
+            }
+        }
+
+        @Override
         public boolean isActiveSupervisionApp(int uid) {
             synchronized (getLockObject()) {
                 final ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
