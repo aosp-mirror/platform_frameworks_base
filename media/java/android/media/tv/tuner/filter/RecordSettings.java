@@ -133,8 +133,11 @@ public class RecordSettings extends Settings {
      * according to ISO/IEC 13818-1.
      * @hide
      */
-    @IntDef(flag = true, value = {SC_INDEX_I_FRAME, SC_INDEX_P_FRAME, SC_INDEX_B_FRAME,
-            SC_INDEX_SEQUENCE})
+    @IntDef(prefix = "SC_INDEX_",
+            flag = true,
+            value = {SC_INDEX_I_FRAME, SC_INDEX_P_FRAME, SC_INDEX_B_FRAME,
+                    SC_INDEX_SEQUENCE, SC_INDEX_I_SLICE, SC_INDEX_P_SLICE,
+                    SC_INDEX_B_SLICE, SC_INDEX_SI_SLICE, SC_INDEX_SP_SLICE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScIndex {}
 
@@ -154,7 +157,31 @@ public class RecordSettings extends Settings {
      * SC index for a new sequence.
      */
     public static final int SC_INDEX_SEQUENCE = Constants.DemuxScIndex.SEQUENCE;
-
+    /**
+     * All blocks are coded as I blocks.
+     */
+    public static final int SC_INDEX_I_SLICE =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.I_SLICE;
+    /**
+     * Blocks are coded as I or P blocks.
+     */
+    public static final int SC_INDEX_P_SLICE =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.P_SLICE;
+    /**
+     * Blocks are coded as I, P or B blocks.
+     */
+    public static final int SC_INDEX_B_SLICE =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.B_SLICE;
+    /**
+     * A so-called switching I slice that is coded.
+     */
+    public static final int SC_INDEX_SI_SLICE =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.SI_SLICE;
+    /**
+     * A so-called switching P slice that is coded.
+     */
+    public static final int SC_INDEX_SP_SLICE =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxScIndex.SP_SLICE;
 
     /**
      * Indexes can be tagged by NAL unit group in HEVC according to ISO/IEC 23008-2.
