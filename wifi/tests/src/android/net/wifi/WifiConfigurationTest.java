@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OPEN;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OWE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_PSK;
@@ -581,6 +582,26 @@ public class WifiConfigurationTest {
     }
 
     /**
+     * Ensure that {@link WifiConfiguration#setSecurityParams(int)} sets up the
+     * {@link WifiConfiguration} object correctly for WPA3 Enterprise security type.
+     * @throws Exception
+     */
+    @Test
+    public void testSetSecurityParamsForWpa3Enterprise() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+
+        config.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
+
+        assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_EAP));
+        assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.IEEE8021X));
+        assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.CCMP));
+        assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.GCMP_256));
+        assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.GCMP_256));
+        assertTrue(config.requirePmf);
+    }
+
+    /**
      * Test that the NetworkSelectionStatus Builder returns the same values that was set, and that
      * calling build multiple times returns different instances.
      */
@@ -641,6 +662,9 @@ public class WifiConfigurationTest {
         configuration.setSecurityParams(SECURITY_TYPE_EAP);
         assertFalse(configuration.needsPreSharedKey());
 
+        configuration.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
+        assertFalse(configuration.needsPreSharedKey());
+
         configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
         assertFalse(configuration.needsPreSharedKey());
     }
@@ -665,6 +689,9 @@ public class WifiConfigurationTest {
         assertEquals(KeyMgmt.OWE, configuration.getAuthType());
 
         configuration.setSecurityParams(SECURITY_TYPE_EAP);
+        assertEquals(KeyMgmt.WPA_EAP, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
         assertEquals(KeyMgmt.WPA_EAP, configuration.getAuthType());
 
         configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
