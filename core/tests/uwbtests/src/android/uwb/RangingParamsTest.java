@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.os.PersistableBundle;
-import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -95,8 +94,6 @@ public class RangingParamsTest {
         params.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         RangingParams fromParcel = RangingParams.CREATOR.createFromParcel(parcel);
-        Log.w("bstack", "original: " + params.toString());
-        Log.w("bstack", "parcel: " + fromParcel.toString());
         assertEquals(params, fromParcel);
     }
 }
