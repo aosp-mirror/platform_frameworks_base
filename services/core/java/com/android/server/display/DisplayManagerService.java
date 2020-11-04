@@ -1423,17 +1423,18 @@ public final class DisplayManagerService extends SystemService {
 
     private Optional<Integer> getViewportType(DisplayDeviceInfo info) {
         // Get the corresponding viewport type.
-        if ((info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0) {
-            return Optional.of(VIEWPORT_INTERNAL);
-        } else if (info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
-            return Optional.of(VIEWPORT_EXTERNAL);
-        } else if (info.touch == DisplayDeviceInfo.TOUCH_VIRTUAL
-                && !TextUtils.isEmpty(info.uniqueId)) {
-            return Optional.of(VIEWPORT_VIRTUAL);
-        } else {
-            if (DEBUG) {
-                Slog.i(TAG, "Display " + info + " does not support input device matching.");
-            }
+        switch (info.touch) {
+            case DisplayDeviceInfo.TOUCH_INTERNAL:
+                return Optional.of(VIEWPORT_INTERNAL);
+            case DisplayDeviceInfo.TOUCH_EXTERNAL:
+                return Optional.of(VIEWPORT_EXTERNAL);
+            case DisplayDeviceInfo.TOUCH_VIRTUAL:
+                if (!TextUtils.isEmpty(info.uniqueId)) {
+                    return Optional.of(VIEWPORT_VIRTUAL);
+                }
+                // fallthrough
+            default:
+                Slog.w(TAG, "Display " + info + " does not support input device matching.");
         }
         return Optional.empty();
     }
@@ -1481,13 +1482,6 @@ public final class DisplayManagerService extends SystemService {
             Slog.wtf(TAG, "Cannot call getViewportByTypeLocked for type "
                     + DisplayViewport.typeToString(viewportType));
             return null;
-        }
-
-        // Only allow a single INTERNAL or EXTERNAL viewport by forcing their uniqueIds
-        // to be identical (in particular, empty).
-        // TODO (b/116824030) allow multiple EXTERNAL viewports and remove this function.
-        if (viewportType != VIEWPORT_VIRTUAL) {
-            uniqueId = "";
         }
 
         DisplayViewport viewport;
