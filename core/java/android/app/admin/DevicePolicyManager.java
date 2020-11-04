@@ -525,7 +525,7 @@ public class DevicePolicyManager {
      * @hide
      */
     public static final String ACTION_REMOTE_BUGREPORT_DISPATCH =
-            "com.android.server.action.REMOTE_BUGREPORT_DISPATCH";
+            "android.intent.action.REMOTE_BUGREPORT_DISPATCH";
 
     /**
      * Extra for shared bugreport's SHA-256 hash.
