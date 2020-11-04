@@ -22,7 +22,12 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_RECENTS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_REMOVE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_QS_SCROLL_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND;
@@ -67,6 +72,11 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME = 9;
     public static final int CUJ_LAUNCHER_APP_CLOSE_TO_PIP = 10;
     public static final int CUJ_LAUNCHER_QUICK_SWITCH = 11;
+    public static final int CUJ_NOTIFICATION_HEADS_UP_APPEAR = 12;
+    public static final int CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR = 13;
+    public static final int CUJ_NOTIFICATION_ADD = 14;
+    public static final int CUJ_NOTIFICATION_REMOVE = 15;
+    public static final int CUJ_NOTIFICATION_APP_START = 16;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -87,6 +97,11 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_REMOVE,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -112,6 +127,11 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_APP_CLOSE_TO_HOME,
             CUJ_LAUNCHER_APP_CLOSE_TO_PIP,
             CUJ_LAUNCHER_QUICK_SWITCH,
+            CUJ_NOTIFICATION_HEADS_UP_APPEAR,
+            CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR,
+            CUJ_NOTIFICATION_ADD,
+            CUJ_NOTIFICATION_REMOVE,
+            CUJ_NOTIFICATION_APP_START,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}

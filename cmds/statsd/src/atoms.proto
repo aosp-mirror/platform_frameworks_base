@@ -5304,6 +5304,11 @@ message UIInteractionFrameInfoReported {
         LAUNCHER_APP_CLOSE_TO_HOME = 10;
         LAUNCHER_APP_CLOSE_TO_PIP = 11;
         LAUNCHER_QUICK_SWITCH = 12;
+        SHADE_HEADS_UP_APPEAR = 13;
+        SHADE_HEADS_UP_DISAPPEAR = 14;
+        SHADE_NOTIFICATION_ADD = 15;
+        SHADE_NOTIFICATION_REMOVE = 16;
+        SHADE_APP_LAUNCH = 17;
     }
 
     optional InteractionType interaction_type = 1;
