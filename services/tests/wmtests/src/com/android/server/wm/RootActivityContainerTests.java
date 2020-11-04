@@ -38,7 +38,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
+import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 
@@ -107,7 +107,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
     public void testRestoringInvalidTask() {
         mRootWindowContainer.getDefaultDisplay().removeAllTasks();
         Task task = mRootWindowContainer.anyTaskForId(0 /*taskId*/,
-                MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null, false /* onTop */);
+                MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE, null, false /* onTop */);
         assertNull(task);
     }
 

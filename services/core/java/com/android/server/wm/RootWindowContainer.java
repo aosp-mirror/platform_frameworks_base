@@ -59,7 +59,7 @@ import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
@@ -76,9 +76,9 @@ import static com.android.server.wm.Task.ActivityState.PAUSED;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
-import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
-import static com.android.server.wm.Task.STACK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
+import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
+import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
@@ -232,20 +232,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            MATCH_TASK_IN_STACKS_ONLY,
-            MATCH_TASK_IN_STACKS_OR_RECENT_TASKS,
-            MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE
+            MATCH_ATTACHED_TASK_ONLY,
+            MATCH_ATTACHED_TASK_OR_RECENT_TASKS,
+            MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE
     })
     public @interface AnyTaskForIdMatchTaskMode {
     }
 
-    // Match only tasks in the current stacks
-    static final int MATCH_TASK_IN_STACKS_ONLY = 0;
-    // Match either tasks in the current stacks, or in the recent tasks if not found in the stacks
-    static final int MATCH_TASK_IN_STACKS_OR_RECENT_TASKS = 1;
-    // Match either tasks in the current stacks, or in the recent tasks, restoring it to the
-    // provided stack id
-    static final int MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE = 2;
+    // Match only tasks that are attached to the hierarchy
+    static final int MATCH_ATTACHED_TASK_ONLY = 0;
+    // Match either attached tasks, or in the recent tasks if the tasks are detached
+    static final int MATCH_ATTACHED_TASK_OR_RECENT_TASKS = 1;
+    // Match either attached tasks, or in the recent tasks, restoring it to the provided task id
+    static final int MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE = 2;
 
     ActivityTaskManagerService mService;
     ActivityStackSupervisor mStackSupervisor;
@@ -1953,7 +1952,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
                 for (int taskNdx = displayArea.getStackCount() - 1; taskNdx >= 0; --taskNdx) {
                     final Task rootTask = displayArea.getStackAt(taskNdx);
-                    if (rootTask.getVisibility(null /*starting*/) == STACK_VISIBILITY_INVISIBLE) {
+                    if (rootTask.getVisibility(null /*starting*/) == TASK_VISIBILITY_INVISIBLE) {
                         break;
                     }
 
@@ -2556,7 +2555,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Override
     public void onDisplayAdded(int displayId) {
-        if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
+        if (DEBUG_ROOT_TASK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
             final DisplayContent display = getDisplayContentOrCreate(displayId);
             if (display == null) {
@@ -2578,7 +2577,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Override
     public void onDisplayRemoved(int displayId) {
-        if (DEBUG_STACK) Slog.v(TAG, "Display removed displayId=" + displayId);
+        if (DEBUG_ROOT_TASK) Slog.v(TAG, "Display removed displayId=" + displayId);
         if (displayId == DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can't remove the primary display.");
         }
@@ -2595,7 +2594,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Override
     public void onDisplayChanged(int displayId) {
-        if (DEBUG_STACK) Slog.v(TAG, "Display changed displayId=" + displayId);
+        if (DEBUG_ROOT_TASK) Slog.v(TAG, "Display changed displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
             final DisplayContent displayContent = getDisplayContent(displayId);
             if (displayContent != null) {
@@ -2888,7 +2887,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Temporarily set the task id to invalid in case in re-entry.
             options.setLaunchTaskId(INVALID_TASK_ID);
             final Task task = anyTaskForId(taskId,
-                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, options, onTop);
+                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE, options, onTop);
             options.setLaunchTaskId(taskId);
             if (task != null) {
                 return task.getRootTask();
@@ -3444,7 +3443,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     Task anyTaskForId(int id) {
-        return anyTaskForId(id, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE);
+        return anyTaskForId(id, MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE);
     }
 
     Task anyTaskForId(int id, @RootWindowContainer.AnyTaskForIdMatchTaskMode int matchMode) {
@@ -3462,7 +3461,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     Task anyTaskForId(int id, @RootWindowContainer.AnyTaskForIdMatchTaskMode int matchMode,
             @Nullable ActivityOptions aOptions, boolean onTop) {
         // If options are set, ensure that we are attempting to actually restore a task
-        if (matchMode != MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE && aOptions != null) {
+        if (matchMode != MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE && aOptions != null) {
             throw new IllegalArgumentException("Should not specify activity options for non-restore"
                     + " lookup");
         }
@@ -3480,7 +3479,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         getLaunchStack(null, aOptions, task, onTop);
                 if (launchStack != null && task.getRootTask() != launchStack) {
                     final int reparentMode = onTop
-                            ? REPARENT_MOVE_STACK_TO_FRONT : REPARENT_LEAVE_STACK_IN_PLACE;
+                            ? REPARENT_MOVE_ROOT_TASK_TO_FRONT : REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
                     task.reparent(launchStack, onTop, reparentMode, ANIMATE, DEFER_RESUME,
                             "anyTaskForId");
                 }
@@ -3489,7 +3488,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         // If we are matching stack tasks only, return now
-        if (matchMode == MATCH_TASK_IN_STACKS_ONLY) {
+        if (matchMode == MATCH_ATTACHED_TASK_ONLY) {
             return null;
         }
 
@@ -3506,11 +3505,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return null;
         }
 
-        if (matchMode == MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) {
+        if (matchMode == MATCH_ATTACHED_TASK_OR_RECENT_TASKS) {
             return task;
         }
 
-        // Implicitly, this case is MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE
+        // Implicitly, this case is MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE
         if (!mStackSupervisor.restoreRecentTaskLocked(task, aOptions, onTop)) {
             if (DEBUG_RECENTS) {
                 Slog.w(TAG_RECENTS,
