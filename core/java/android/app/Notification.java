@@ -630,10 +630,16 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_BUBBLE = 0x00001000;
 
+    /**
+     * @hide
+     */
+    public static final int FLAG_IMMEDIATE_FGS_DISPLAY = 0x00002000;
+
     /** @hide */
     @IntDef({FLAG_SHOW_LIGHTS, FLAG_ONGOING_EVENT, FLAG_INSISTENT, FLAG_ONLY_ALERT_ONCE,
             FLAG_AUTO_CANCEL, FLAG_NO_CLEAR, FLAG_FOREGROUND_SERVICE, FLAG_HIGH_PRIORITY,
-            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE})
+            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE,
+            FLAG_IMMEDIATE_FGS_DISPLAY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFlags{};
 
@@ -4381,6 +4387,18 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Set to {@code true} to require that the Notification associated with a
+         * foreground service is shown as soon as the service's {@code startForeground()}
+         * method is called, even if the system's UI policy might otherwise defer
+         * its visibility to a later time.
+         */
+        @NonNull
+        public Builder setShowForegroundImmediately(boolean showImmediately) {
+            setFlag(FLAG_IMMEDIATE_FGS_DISPLAY, showImmediately);
+            return this;
+        }
+
+        /**
          * Make this notification automatically dismissed when the user touches it.
          *
          * @see Notification#FLAG_AUTO_CANCEL
@@ -6380,6 +6398,35 @@ public class Notification implements Parcelable
      */
     public boolean isForegroundService() {
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+    }
+
+    /**
+     * Describe whether this notification's content such that it should always display
+     * immediately when tied to a foreground service, even if the system might generally
+     * avoid showing the notifications for short-lived foreground service lifetimes.
+     *
+     * Immediate visibility of the Notification is recommended when:
+     * <ul>
+     *     <li>The app specifically indicated it with
+     *         {@link Notification.Builder#setShowForegroundImmediately(boolean)
+     *         setShowForegroundImmediately(true)}</li>
+     *     <li>It is a media notification or has an associated media session</li>
+     *     <li>It is a call or navigation notification</li>
+     *     <li>It provides additional action affordances</li>
+     * </ul>
+     * @return whether this notification should always be displayed immediately when
+     * its associated service transitions to the foreground state
+     * @hide
+     */
+    public boolean shouldShowForegroundImmediately() {
+        if ((flags & Notification.FLAG_IMMEDIATE_FGS_DISPLAY) != 0
+                || isMediaNotification() || hasMediaSession()
+                || CATEGORY_CALL.equals(category)
+                || CATEGORY_NAVIGATION.equals(category)
+                || (actions != null && actions.length > 0)) {
+            return true;
+        }
+        return false;
     }
 
     /**
