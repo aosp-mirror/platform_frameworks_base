@@ -5826,6 +5826,7 @@ package android.media.tv.tuner.frontend {
   public class DvbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder builder();
     method @Nullable public android.media.tv.tuner.frontend.DvbsCodeRate getCodeRate();
+    method public boolean getCouldHandleDiseqcRxMessage();
     method public int getInputStreamId();
     method public int getModulation();
     method public int getPilot();
@@ -5835,7 +5836,6 @@ package android.media.tv.tuner.frontend {
     method public int getSymbolRate();
     method public int getType();
     method public int getVcmMode();
-    method public boolean isDiseqcRxMessage();
     field public static final int MODULATION_AUTO = 1; // 0x1
     field public static final int MODULATION_MOD_128APSK = 2048; // 0x800
     field public static final int MODULATION_MOD_16APSK = 256; // 0x100
@@ -5879,7 +5879,7 @@ package android.media.tv.tuner.frontend {
   public static class DvbsFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCodeRate(@Nullable android.media.tv.tuner.frontend.DvbsCodeRate);
-    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setDiseqcRxMessage(boolean);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCouldHandleDiseqcRxMessage(boolean);
     method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setInputStreamId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setModulation(int);

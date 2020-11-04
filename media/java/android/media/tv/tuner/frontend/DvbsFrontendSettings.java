@@ -341,12 +341,13 @@ public class DvbsFrontendSettings extends FrontendSettings {
         return mScanType;
     }
     /**
-     * To receive Diseqc Message or not. Default value is false.
+     * Get if the client could handle the Diseqc Rx Message or not. Default value is false.
      *
-     * The setter {@link Builder#setDiseqcRxMessage(boolean)} is only supported with Tuner HAL 1.1
-     * or higher.
+     * The setter {@link Builder#setCouldHandleDiseqcRxMessage(boolean)} is only supported with
+     * Tuner HAL 1.1 or higher. Use {@link TunerVersionChecker.getTunerVersion()} to check the
+     * version.
      */
-    public boolean isDiseqcRxMessage() {
+    public boolean getCouldHandleDiseqcRxMessage() {
         return mIsDiseqcRxMessage;
     }
 
@@ -408,16 +409,18 @@ public class DvbsFrontendSettings extends FrontendSettings {
         }
 
         /**
-         * Set true to receive Diseqc Message.
+         * Set true to indicate the client could handle the Diseqc Messages. Note that it's still
+         * possible that the client won't receive the messages when HAL is not able to setup Rx
+         * channel in the hardware layer.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
          * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
          */
         @NonNull
-        public Builder setDiseqcRxMessage(boolean isDiseqcRxMessage) {
+        public Builder setCouldHandleDiseqcRxMessage(boolean couldReceiveDiseqcMessage) {
             if (TunerVersionChecker.checkHigherOrEqualVersionTo(
-                        TunerVersionChecker.TUNER_VERSION_1_1, "setDiseqcRxMessage")) {
-                mIsDiseqcRxMessage = isDiseqcRxMessage;
+                        TunerVersionChecker.TUNER_VERSION_1_1, "setCouldHandleDiseqcRxMessage")) {
+                mIsDiseqcRxMessage = couldReceiveDiseqcMessage;
             }
             return this;
         }
