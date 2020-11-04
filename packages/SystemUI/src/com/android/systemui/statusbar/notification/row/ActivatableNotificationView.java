@@ -33,6 +33,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -750,12 +751,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 if (!mWasCancelled) {
                     enableAppearDrawing(false);
                     onAppearAnimationFinished(isAppearing);
+                    InteractionJankMonitor.getInstance().end(getCujType(isAppearing));
+                } else {
+                    InteractionJankMonitor.getInstance().cancel(getCujType(isAppearing));
                 }
             }
 
             @Override
             public void onAnimationStart(Animator animation) {
                 mWasCancelled = false;
+                InteractionJankMonitor.getInstance().begin(getCujType(isAppearing));
             }
 
             @Override
@@ -764,6 +769,18 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             }
         });
         mAppearAnimator.start();
+    }
+
+    private int getCujType(boolean isAppearing) {
+        if (mIsHeadsUpAnimation) {
+            return isAppearing
+                    ? InteractionJankMonitor.CUJ_NOTIFICATION_HEADS_UP_APPEAR
+                    : InteractionJankMonitor.CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR;
+        } else {
+            return isAppearing
+                    ? InteractionJankMonitor.CUJ_NOTIFICATION_ADD
+                    : InteractionJankMonitor.CUJ_NOTIFICATION_REMOVE;
+        }
     }
 
     protected void onAppearAnimationFinished(boolean wasAppearing) {
