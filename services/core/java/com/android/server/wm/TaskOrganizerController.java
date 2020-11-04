@@ -442,7 +442,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final Task task = WindowContainer.fromBinder(token.asBinder()).asTask();
+                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+                if (wc == null) {
+                    throw new IllegalArgumentException("Can't resolve window from token");
+                }
+                final Task task = wc.asTask();
                 if (task == null) return false;
                 if (!task.mCreatedByOrganizer) {
                     throw new IllegalArgumentException(
@@ -564,8 +568,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (defaultTaskDisplayArea == null) {
                     return;
                 }
-                Task task = token == null
-                        ? null : WindowContainer.fromBinder(token.asBinder()).asTask();
+                WindowContainer wc = null;
+                if (token != null) {
+                    wc = WindowContainer.fromBinder(token.asBinder());
+                    if (wc == null) {
+                        throw new IllegalArgumentException("Can't resolve window from token");
+                    }
+                }
+                final Task task = wc == null ? null : wc.asTask();
                 if (task == null) {
                     defaultTaskDisplayArea.mLaunchRootTask = null;
                     return;
@@ -666,7 +676,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Set intercept back pressed on root=%b",
                         interceptBackPressed);
-                final Task task = WindowContainer.fromBinder(token.asBinder()).asTask();
+                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+                if (wc == null) {
+                    Slog.w(TAG, "Could not resolve window from token");
+                    return;
+                }
+                final Task task = wc.asTask();
                 if (task == null) {
                     Slog.w(TAG, "Could not resolve task from token");
                     return;
