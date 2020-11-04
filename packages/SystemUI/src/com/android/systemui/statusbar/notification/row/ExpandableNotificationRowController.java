@@ -154,7 +154,8 @@ public class ExpandableNotificationRowController implements NodeController {
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
-                mBubblesManagerOptional
+                mBubblesManagerOptional,
+                mNotificationGutsManager
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
