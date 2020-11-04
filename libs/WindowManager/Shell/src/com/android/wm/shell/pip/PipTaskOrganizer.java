@@ -135,6 +135,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final Handler mUpdateHandler;
     private final PipBoundsState mPipBoundsState;
     private final PipBoundsHandler mPipBoundsHandler;
+    // TODO(b/172286265): Remove dependency on .pip.PHONE.PipMenuActivityController
     private final PipMenuActivityController mMenuActivityController;
     private final PipAnimationController mPipAnimationController;
     private final PipUiEventLogger mPipUiEventLoggerLogger;
@@ -946,10 +947,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mState.isInPip());
-        if (mMenuActivityController.isMenuVisible()) {
-            runOnMainHandler(() -> {
-                mMenuActivityController.resizePipMenu(mLeash, tx, destinationBounds);
-            });
+        if (mMenuActivityController != null && mMenuActivityController.isMenuVisible()) {
+            runOnMainHandler(() ->
+                    mMenuActivityController.resizePipMenu(mLeash, tx, destinationBounds));
         } else {
             tx.apply();
         }
@@ -973,10 +973,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper.scale(tx, mLeash, startBounds, destinationBounds);
-        if (mMenuActivityController.isMenuVisible()) {
-            runOnMainHandler(() -> {
-                mMenuActivityController.movePipMenu(mLeash, tx, destinationBounds);
-            });
+        if (mMenuActivityController != null && mMenuActivityController.isMenuVisible()) {
+            runOnMainHandler(() ->
+                    mMenuActivityController.movePipMenu(mLeash, tx, destinationBounds));
         } else {
             tx.apply();
         }
@@ -993,7 +992,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
             removePipImmediately();
             return;
-        } else if (isInPipDirection(direction) && type == ANIM_TYPE_ALPHA) {
+        } else if (isInPipDirection(direction) && type == ANIM_TYPE_ALPHA
+                && mMenuActivityController != null) {
             // TODO: Synchronize this correctly in #applyEnterPipSyncTransaction
             finishResizeForMenu(destinationBounds);
             return;
