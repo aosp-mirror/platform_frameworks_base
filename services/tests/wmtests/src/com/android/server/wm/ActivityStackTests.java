@@ -242,8 +242,7 @@ public class ActivityStackTests extends WindowTestsBase {
     public void testRemoveOrganizedTask_UpdateStackReference() {
         final Task rootHomeTask = mDefaultTaskDisplayArea.getRootHomeTask();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
-                .setStack(rootHomeTask)
-                .setCreateTask(true)
+                .setTask(rootHomeTask)
                 .build();
         final Task secondaryStack = mAtm.mTaskOrganizerController.createRootTask(
                 rootHomeTask.getDisplayContent(), WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
@@ -291,7 +290,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
     @Test
     public void testStopActivityWhenActivityDestroyed() {
-        final ActivityRecord r = new ActivityBuilder(mAtm).setTask(mTask).build();
+        final ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
         r.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
         mStack.moveToFront("testStopActivityWithDestroy");
         r.stopIfPossible();
@@ -303,7 +302,6 @@ public class ActivityStackTests extends WindowTestsBase {
     public void testFindTaskWithOverlay() {
         final ActivityRecord r = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
-                .setStack(mStack)
                 .setUid(0)
                 .build();
         final Task task = r.getTask();
@@ -314,7 +312,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
         final RootWindowContainer.FindTaskResult result =
                 new RootWindowContainer.FindTaskResult();
-        result.process(r, mStack);
+        result.process(r, task);
 
         assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */));
         assertEquals(taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */));
@@ -355,9 +353,11 @@ public class ActivityStackTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = addNewDisplayContentAt(DisplayContent.POSITION_TOP)
                 .getDefaultTaskDisplayArea();
         final Task stack1 = createStackForShouldBeVisibleTest(taskDisplayArea,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */,
+                true /* twoLevelTask */);
         final Task stack2 = createStackForShouldBeVisibleTest(taskDisplayArea,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */,
+                true /* twoLevelTask */);
 
         // Do not move display to back because there is still another stack.
         stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.getTopMostTask());
@@ -377,8 +377,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         // Add an activity to the pinned stack so it isn't considered empty for visibility check.
         final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setStack(pinnedStack)
+                .setTask(pinnedStack)
                 .build();
 
         assertTrue(homeStack.shouldBeVisible(null /* starting */));
@@ -676,8 +675,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 translucentStack.getVisibility(null /* starting */));
         // Add an activity to the pinned stack so it isn't considered empty for visibility check.
         final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setStack(pinnedStack)
+                .setTask(pinnedStack)
                 .build();
         assertEquals(STACK_VISIBILITY_VISIBLE, pinnedStack.getVisibility(null /* starting */));
     }
@@ -689,8 +687,7 @@ public class ActivityStackTests extends WindowTestsBase {
         ActivityRecord topRunningHomeActivity = homeStack.topRunningActivity();
         if (topRunningHomeActivity == null) {
             topRunningHomeActivity = new ActivityBuilder(mAtm)
-                    .setStack(homeStack)
-                    .setCreateTask(true)
+                    .setTask(homeStack)
                     .build();
         }
 
@@ -721,7 +718,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
 
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                    .setStack(homeStack)
+                    .setParentTask(homeStack)
                     .setCreateTask(true)
                     .build();
         final Task task = firstActivity.getTask();
@@ -985,14 +982,29 @@ public class ActivityStackTests extends WindowTestsBase {
         return stack;
     }
 
-    @SuppressWarnings("TypeParameterUnusedInFormals")
     private Task createStackForShouldBeVisibleTest(
             TaskDisplayArea taskDisplayArea, int windowingMode, int activityType, boolean onTop) {
+        return createStackForShouldBeVisibleTest(taskDisplayArea,
+                windowingMode, activityType, onTop, false /* twoLevelTask */);
+    }
+
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    private Task createStackForShouldBeVisibleTest(TaskDisplayArea taskDisplayArea,
+            int windowingMode, int activityType, boolean onTop, boolean twoLevelTask) {
         final Task task;
         if (activityType == ACTIVITY_TYPE_HOME) {
             task = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
             mDefaultTaskDisplayArea.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, task,
                     false /* includingParents */);
+        } else if (twoLevelTask) {
+            task = new TaskBuilder(mSupervisor)
+                    .setTaskDisplayArea(taskDisplayArea)
+                    .setWindowingMode(windowingMode)
+                    .setActivityType(activityType)
+                    .setOnTop(onTop)
+                    .setCreateActivity(true)
+                    .setCreateParentTask(true)
+                    .build().getRootTask();
         } else {
             task = new TaskBuilder(mSupervisor)
                     .setTaskDisplayArea(taskDisplayArea)
@@ -1154,7 +1166,7 @@ public class ActivityStackTests extends WindowTestsBase {
         ActivityRecord activity = homeStack.topRunningActivity();
         if (activity == null) {
             activity = new ActivityBuilder(mAtm)
-                    .setStack(homeStack)
+                    .setParentTask(homeStack)
                     .setCreateTask(true)
                     .build();
         }
@@ -1319,8 +1331,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
     @Test
     public void testResetTaskWithFinishingActivities() {
-        final ActivityRecord taskTop =
-                new ActivityBuilder(mAtm).setStack(mStack).setCreateTask(true).build();
+        final ActivityRecord taskTop = new ActivityBuilder(mAtm).setTask(mStack).build();
         // Make all activities in the task are finishing to simulate Task#getTopActivity
         // returns null.
         taskTop.finishing = true;
@@ -1334,10 +1345,8 @@ public class ActivityStackTests extends WindowTestsBase {
     public void testIterateOccludedActivity() {
         final ArrayList<ActivityRecord> occludedActivities = new ArrayList<>();
         final Consumer<ActivityRecord> handleOccludedActivity = occludedActivities::add;
-        final ActivityRecord bottomActivity =
-                new ActivityBuilder(mAtm).setStack(mStack).setTask(mTask).build();
-        final ActivityRecord topActivity =
-                new ActivityBuilder(mAtm).setStack(mStack).setTask(mTask).build();
+        final ActivityRecord bottomActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         // Top activity occludes bottom activity.
         doReturn(true).when(mStack).shouldBeVisible(any());
         assertTrue(topActivity.shouldBeVisible());
@@ -1355,8 +1364,7 @@ public class ActivityStackTests extends WindowTestsBase {
         assertThat(occludedActivities).isEmpty();
 
         // A finishing activity should not occlude other activities behind.
-        final ActivityRecord finishingActivity =
-                new ActivityBuilder(mAtm).setStack(mStack).setTask(mTask).build();
+        final ActivityRecord finishingActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         finishingActivity.finishing = true;
         doCallRealMethod().when(finishingActivity).occludesParent();
         assertTrue(topActivity.shouldBeVisible());

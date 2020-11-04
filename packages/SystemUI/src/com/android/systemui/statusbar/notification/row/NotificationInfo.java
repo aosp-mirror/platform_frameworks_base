@@ -236,6 +236,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             NotificationChannel.DEFAULT_CHANNEL_ID)
                     && numTotalChannels == 1;
         }
+        mIsAutomaticChosen = getAlertingBehavior() == BEHAVIOR_AUTOMATIC;
 
         bindHeader();
         bindChannelDetails();
@@ -658,13 +659,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             try {
                 if (mChannelToUpdate != null) {
                     if (mUnlockImportance) {
-                        mChannelToUpdate.unlockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+                        mINotificationManager.unlockNotificationChannel(
+                                mPackageName, mAppUid, mChannelToUpdate.getId());
                     } else {
                         mChannelToUpdate.setImportance(mNewImportance);
                         mChannelToUpdate.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+                        mINotificationManager.updateNotificationChannelForPackage(
+                                mPackageName, mAppUid, mChannelToUpdate);
                     }
-                    mINotificationManager.updateNotificationChannelForPackage(
-                            mPackageName, mAppUid, mChannelToUpdate);
                 } else {
                     // For notifications with more than one channel, update notification enabled
                     // state. If the importance was lowered, we disable notifications.

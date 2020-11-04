@@ -4033,7 +4033,8 @@ public class UserManager {
      * @return the {@link RemoveResult} code
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
     public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
         try {
             return mService.removeUserOrSetEphemeral(userId);

@@ -85,12 +85,12 @@ public class TaskStackTests extends WindowTestsBase {
     public void testClosingAppDifferentStackOrientation() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        ActivityRecord activity1 = createTestActivityRecord(mDisplayContent);
+        ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
         task1.addChild(activity1, 0);
         activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        ActivityRecord activity2 = createTestActivityRecord(mDisplayContent);
+        ActivityRecord activity2 = createNonAttachedActivityRecord(mDisplayContent);
         task2.addChild(activity2, 0);
         activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
@@ -103,12 +103,12 @@ public class TaskStackTests extends WindowTestsBase {
     public void testMoveTaskToBackDifferentStackOrientation() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        ActivityRecord activity1 = createTestActivityRecord(mDisplayContent);
+        ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
         task1.addChild(activity1, 0);
         activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        ActivityRecord activity2 = createTestActivityRecord(mDisplayContent);
+        ActivityRecord activity2 = createNonAttachedActivityRecord(mDisplayContent);
         task2.addChild(activity2, 0);
         activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
@@ -217,7 +217,7 @@ public class TaskStackTests extends WindowTestsBase {
     public void testActivityAndTaskGetsProperType() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        ActivityRecord activity1 = createTestActivityRecord(mDisplayContent);
+        ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
 
         // First activity should become standard
         task1.addChild(activity1, 0);
@@ -225,7 +225,7 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, task1.getActivityType());
 
         // Second activity should also become standard
-        ActivityRecord activity2 = createTestActivityRecord(mDisplayContent);
+        ActivityRecord activity2 = createNonAttachedActivityRecord(mDisplayContent);
         task1.addChild(activity2, WindowContainer.POSITION_TOP);
         assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, activity2.getActivityType());
         assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, task1.getActivityType());

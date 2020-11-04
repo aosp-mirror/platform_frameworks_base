@@ -56,6 +56,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -81,6 +82,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Nullable private final List<FingerprintSensorPropertiesInternal> mFpProps;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
+    @Nullable private final List<FingerprintSensorPropertiesInternal> mUdfpsProps;
 
     // TODO: These should just be saved from onSaveState
     private SomeArgs mCurrentDialogArgs;
@@ -314,6 +316,16 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 : null;
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
+        List<FingerprintSensorPropertiesInternal> udfpsProps = new ArrayList<>();
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal props : mFpProps) {
+                if (props.isAnyUdfpsType()) {
+                    udfpsProps.add(props);
+                }
+            }
+        }
+        mUdfpsProps = !udfpsProps.isEmpty() ? udfpsProps : null;
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
 
@@ -326,15 +338,9 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCommandQueue.addCallback(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
-        if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
-            final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
-                    mFingerprintManager.getSensorPropertiesInternal();
-            for (FingerprintSensorPropertiesInternal props : fingerprintSensorProperties) {
-                if (props.isAnyUdfpsType()) {
-                    mUdfpsController = mUdfpsControllerFactory.get();
-                    break;
-                }
-            }
+        if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()
+                && mUdfpsProps != null) {
+            mUdfpsController = mUdfpsControllerFactory.get();
         }
 
         try {
@@ -484,12 +490,14 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
    /**
-     * Whether the current user has a UDFP enrolled.
+     * Whether the passed userId has enrolled UDFPS.
      */
-    public boolean isUdfpsEnrolled() {
-        // TODO: (b/171392825) right now only checks whether the UDFPS sensor exists on this device
-        //  but not whether user has enrolled or not
-        return mUdfpsController != null;
+    public boolean isUdfpsEnrolled(int userId) {
+        if (mUdfpsController == null) {
+            return false;
+        }
+
+        return mFingerprintManager.hasEnrolledTemplatesForAnySensor(userId, mUdfpsProps);
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {

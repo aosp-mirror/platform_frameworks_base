@@ -16,8 +16,6 @@
 
 package com.android.tests.rollback.host;
 
-import static com.android.tests.rollback.host.WatchdogEventLogger.watchdogEventOccurred;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -158,12 +156,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         runPhase("testBadApkOnly_Phase4");
 
-        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
                 REASON_APP_CRASH, TESTAPP_A));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
     }
 
     @Test
@@ -192,12 +189,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // verify rollback committed
         runPhase("testNativeWatchdogTriggersRollback_Phase3");
 
-        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
                         REASON_NATIVE_CRASH, null));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
     }
 
     @Test
@@ -233,12 +229,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // verify all available rollbacks have been committed
         runPhase("testNativeWatchdogTriggersRollbackForAll_Phase4");
 
-        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
                         REASON_NATIVE_CRASH, null));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
     }
 
     /**
@@ -316,12 +311,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Verify rollback occurred due to crash of apk-in-apex
         runPhase("testRollbackApexWithApkCrashing_Phase3");
 
-        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
                 REASON_APP_CRASH, TESTAPP_A));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
-        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
+        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
     }
 
     /**

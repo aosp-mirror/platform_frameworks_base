@@ -82,7 +82,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         addWindow(TYPE_STATUS_BAR, "statusBar");
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
-        final WindowState win = createWindowOnStack(null, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+        final WindowState win = createWindow(null, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
         final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
 
@@ -95,7 +95,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         addWindow(TYPE_STATUS_BAR, "statusBar");
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
-        final WindowState win = createWindowOnStack(null, WINDOWING_MODE_FREEFORM,
+        final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
         final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
 

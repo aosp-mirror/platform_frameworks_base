@@ -626,6 +626,51 @@ public final class Font {
         return mNativePtr;
     }
 
+    /**
+     * Returns true if the given font is created from the same source data from this font.
+     *
+     * This method essentially compares {@link ByteBuffer} inside Font, but has some optimization
+     * for faster comparing. This method compares the internal object before going to one-by-one
+     * byte compare with {@link ByteBuffer}. This typically works efficiently if you compares the
+     * font that is created from {@link Builder#Builder(Font)}.
+     *
+     * This API is typically useful for checking if two fonts can be interpolated by font variation
+     * axes. For example, when you call {@link android.text.TextShaper} for the same
+     * string but different style, you may get two font objects which is created from the same
+     * source but have different parameters. You may want to animate between them by interpolating
+     * font variation settings if these fonts are created from the same source.
+     *
+     * @param other a font object to be compared.
+     * @return true if given font is created from the same source from this font. Otherwise false.
+     */
+    public boolean isSameSource(@NonNull Font other) {
+        Objects.requireNonNull(other);
+
+        // Shortcut for the same instance.
+        if (mBuffer == other.mBuffer) {
+            return true;
+        }
+
+        // Shortcut for different font buffer check by comparing size.
+        if (mBuffer.capacity() != other.mBuffer.capacity()) {
+            return false;
+        }
+
+        // ByteBuffer#equals compares all bytes which is not performant for e.g HashMap. Since
+        // underlying native font object holds buffer address, check if this buffer points exactly
+        // the same address as a shortcut of equality. For being compatible with of API30 or before,
+        // check buffer position even if the buffer points the same address.
+        if (nIsSameBufferAddress(mNativePtr, other.mNativePtr)
+                && mBuffer.position() == other.mBuffer.position()) {
+            return true;
+        }
+
+        // Unfortunately, need to compare bytes one-by-one since the buffer may be different font
+        // file but has the same file size, or two font has same content but they are allocated
+        // differently. For being compatible with API30 ore before, compare with ByteBuffer#equals.
+        return mBuffer.equals(other.mBuffer);
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (o == this) {
@@ -643,24 +688,7 @@ public final class Font {
             return false;
         }
 
-        // Shortcut for different font buffer check by comparing size.
-        if (mBuffer.capacity() != f.mBuffer.capacity()) {
-            return false;
-        }
-
-        // ByteBuffer#equals compares all bytes which is not performant for e.g HashMap. Since
-        // underlying native font object holds buffer address, check if this buffer points exactly
-        // the same address as a shortcut of equality. For being compatible with of API30 or before,
-        // check buffer position even if the buffer points the same address.
-        if (nIsSameBufferAddress(mNativePtr, f.mNativePtr)
-                && mBuffer.position() == f.mBuffer.position()) {
-            return true;
-        }
-
-        // Unfortunately, need to compare bytes one-by-one since the buffer may be different font
-        // file but has the same file size, or two font has same content but they are allocated
-        // differently. For being compatible with API30 ore before, compare with ByteBuffer#equals.
-        return mBuffer.equals(f.mBuffer);
+        return isSameSource(f);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     private ActivityRecord mActivity;
 
     public void setUpOnDisplay(DisplayContent dc) {
-        mActivity = createTestActivityRecord(dc, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
+        mActivity = createActivityRecord(dc, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
         mTask = mActivity.getTask();
         mStack = mTask.getRootTask();
 

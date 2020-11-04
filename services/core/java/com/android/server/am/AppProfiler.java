@@ -247,6 +247,9 @@ public class AppProfiler {
     private int mMemWatchDumpUid;
     private boolean mMemWatchIsUserInitiated;
 
+    boolean mHasHomeProcess;
+    boolean mHasPreviousProcess;
+
     /**
      * Used to collect per-process CPU use for ANRs, battery stats, etc.
      * Must acquire this object's lock when accessing it.
@@ -961,8 +964,8 @@ public class AppProfiler {
             }
             int factor = numTrimming / 3;
             int minFactor = 2;
-            if (mService.mAtmInternal.getHomeProcess() != null) minFactor++;
-            if (mService.mAtmInternal.getPreviousProcess() != null) minFactor++;
+            if (mHasHomeProcess) minFactor++;
+            if (mHasPreviousProcess) minFactor++;
             if (factor < minFactor) factor = minFactor;
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             for (int i = 0; i < numOfLru; i++) {

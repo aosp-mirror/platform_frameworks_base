@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
@@ -63,8 +62,7 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
 
     @Test
     public void testDeferring() {
-        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         final ActivityRecord activity2 = createAppWindow(activity1.getTask(), ACTIVITY_TYPE_STANDARD,
                 "activity2").mActivityRecord;
         final AnimatingActivityRegistry registry =
@@ -87,8 +85,7 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
 
     @Test
     public void testContainerRemoved() {
-        final ActivityRecord window1 = createActivityRecord(mDisplayContent,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord window1 = createActivityRecord(mDisplayContent);
         final ActivityRecord window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
                 "window2").mActivityRecord;
         final AnimatingActivityRegistry registry =

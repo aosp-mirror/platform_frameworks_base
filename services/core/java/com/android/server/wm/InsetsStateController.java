@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
@@ -35,6 +36,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -281,6 +283,7 @@ class InsetsStateController {
      * Called when a layout pass has occurred.
      */
     void onPostLayout() {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "ISC.onPostLayout");
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             mProviders.valueAt(i).onPostLayout();
         }
@@ -297,6 +300,7 @@ class InsetsStateController {
             }
         }
         winInsetsChanged.clear();
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     void onInsetsModified(InsetsControlTarget caller) {

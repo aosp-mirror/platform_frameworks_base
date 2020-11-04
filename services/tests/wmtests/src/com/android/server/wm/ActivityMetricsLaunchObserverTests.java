@@ -362,8 +362,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .setDisplay(addNewDisplayContentAt(DisplayContent.POSITION_BOTTOM))
                 .build();
         final ActivityRecord activityOnNewDisplay = new ActivityBuilder(mAtm)
-                .setStack(stack)
-                .setCreateTask(true)
+                .setTask(stack)
                 .setProcessName("new")
                 .build();
 

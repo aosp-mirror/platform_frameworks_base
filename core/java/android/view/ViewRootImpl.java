@@ -1890,8 +1890,10 @@ public final class ViewRootImpl implements ViewParent,
         mSurface.release();
         mSurfaceControl.release();
 
-        // We should probably add an explicit dispose.
-        mBlastBufferQueue = null;
+        if (mBlastBufferQueue != null) {
+            mBlastBufferQueue.destroy();
+            mBlastBufferQueue = null;
+        }
     }
 
     /**

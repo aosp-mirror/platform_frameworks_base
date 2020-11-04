@@ -144,6 +144,8 @@ message AlarmManagerServiceDumpProto {
 
     repeated IdleDispatchEntryProto allow_while_idle_dispatches = 40;
     repeated WakeupEventProto recent_wakeup_history = 41;
+
+    repeated AlarmProto pending_alarms = 42;
 }
 
 // This is a soft wrapper for alarm clock information. It is not representative

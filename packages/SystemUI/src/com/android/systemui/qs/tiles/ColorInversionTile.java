@@ -39,6 +39,7 @@ import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 
@@ -63,12 +64,13 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            UserTracker userTracker
+            UserTracker userTracker,
+            SecureSettings secureSettings
     ) {
         super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
                 activityStarter, qsLogger);
 
-        mSetting = new SecureSetting(mContext, mainHandler,
+        mSetting = new SecureSetting(secureSettings, mainHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {

@@ -658,8 +658,8 @@ class RecentTasks {
         }
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
-            if (task.mUserId == userId
-                    && !mService.getLockTaskController().isTaskAllowlisted(task)) {
+            if (task.mUserId == userId && !mService.getLockTaskController().isTaskAuthAllowlisted(
+                    task.mLockTaskAuth)) {
                 remove(task);
             }
         }
@@ -1874,11 +1874,23 @@ class RecentTasks {
      * Creates a new RecentTaskInfo from a Task.
      */
     ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras) {
-        ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
+        final ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         tr.fillTaskInfo(rti, stripExtras);
-        // Fill in some deprecated values
+        // Fill in some deprecated values.
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
+
+        // Fill in organized child task info for the task created by organizer.
+        if (tr.mCreatedByOrganizer) {
+            for (int i = tr.getChildCount() - 1; i >= 0; i--) {
+                final Task childTask = tr.getChildAt(i).asTask();
+                if (childTask != null && childTask.isOrganized()) {
+                    final ActivityManager.RecentTaskInfo cti = new ActivityManager.RecentTaskInfo();
+                    childTask.fillTaskInfo(cti);
+                    rti.childrenTaskInfos.add(cti);
+                }
+            }
+        }
         return rti;
     }
 

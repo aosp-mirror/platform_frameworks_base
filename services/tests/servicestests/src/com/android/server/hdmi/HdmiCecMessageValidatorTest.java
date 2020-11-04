@@ -130,6 +130,17 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_setTimerProgramTitle() {
+        assertMessageValidity("40:67:47:61:6D:65:20:6F:66:20:54:68:72:6F:6E:65:73").isEqualTo(OK);
+        assertMessageValidity("40:67:4A").isEqualTo(OK);
+
+        assertMessageValidity("4F:67:47:4F:54").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F4:67:47:4F:54").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:67").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:67:47:9A:54").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
     public void isValid_setMenuLanguage() {
         assertMessageValidity("4F:32:53:50:41").isEqualTo(OK);
         assertMessageValidity("0F:32:45:4E:47:8C:49:D3:48").isEqualTo(OK);
@@ -180,6 +191,166 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:0A:0F").isEqualTo(ERROR_PARAMETER);
         assertMessageValidity("40:0A:1D").isEqualTo(ERROR_PARAMETER);
         assertMessageValidity("40:0A:30").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setAnalogueTimer_clearAnalogueTimer() {
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:13:AD:06").isEqualTo(OK);
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:03:34").isEqualTo(OK);
+
+        assertMessageValidity("0F:33:0C:08:10:1E:04:30:08:00:13:AD:06")
+                .isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:34:04:0C:16:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:13:AD:06")
+                .isEqualTo(ERROR_PARAMETER_SHORT);
+        // Out of range Day of Month
+        assertMessageValidity("04:34:20:0C:16:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Month of Year
+        assertMessageValidity("04:33:0C:00:10:1E:04:30:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Hour
+        assertMessageValidity("04:34:04:0C:18:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Minute
+        assertMessageValidity("04:33:0C:08:10:50:04:30:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Duration Hours
+        assertMessageValidity("04:34:04:0C:16:0F:64:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Minute
+        assertMessageValidity("04:33:0C:08:10:1E:04:64:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:88:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:A2:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Analogue Broadcast Type
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:03:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Analogue Frequency
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:FF:FF:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Broadcast System
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setDigitalTimer_clearDigitalTimer() {
+        // Services identified by Digital IDs - ARIB Broadcast System
+        assertMessageValidity("04:99:0C:08:15:05:04:1E:00:00:C4:C2:11:D8:75:30").isEqualTo(OK);
+        // Service identified by Digital IDs - ATSC Broadcast System
+        assertMessageValidity("04:97:1E:07:12:20:50:28:01:01:8B:5E:39:5A").isEqualTo(OK);
+        // Service identified by Digital IDs - DVB Broadcast System
+        assertMessageValidity("04:99:05:0C:06:0A:19:3B:40:19:8B:44:03:11:04:FC").isEqualTo(OK);
+        // Service identified by Channel - 1 part channel number
+        assertMessageValidity("04:97:12:06:0C:2D:5A:19:08:91:04:00:B1").isEqualTo(OK);
+        // Service identified by Channel - 2 part channel number
+        assertMessageValidity("04:99:15:09:00:0F:00:2D:04:82:09:C8:72:C8").isEqualTo(OK);
+
+        assertMessageValidity("4F:97:0C:08:15:05:04:1E:00:00:C4:C2:11:D8:75:30")
+                .isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:99:15:09:00:0F:00:2D:04:82:09:C8:72:C8").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("04:97:1E:12:20:58:01:01:8B:5E:39:5A")
+                .isEqualTo(ERROR_PARAMETER_SHORT);
+        // Out of range Day of Month
+        assertMessageValidity("04:99:24:0C:06:0A:19:3B:40:19:8B:44:03:11:04:FC")
+                .isEqualTo(ERROR_PARAMETER);
+        // Out of range Month of Year
+        assertMessageValidity("04:97:12:10:0C:2D:5A:19:08:91:04:00:B1").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Hour
+        assertMessageValidity("04:99:0C:08:20:05:04:1E:00:00:C4:C2:11:D8:75:30")
+                .isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Minute
+        assertMessageValidity("04:97:15:09:00:4B:00:2D:04:82:09:C8:72:C8")
+                .isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Duration Hours
+        assertMessageValidity("04:99:1E:07:12:20:78:28:01:01:8B:5E:39:5A")
+                .isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Minute
+        assertMessageValidity("04:97:05:0C:06:0A:19:48:40:19:8B:44:03:11:04:FC")
+                .isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:99:12:06:0C:2D:5A:19:90:91:04:00:B1").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:97:0C:08:15:05:04:1E:21:00:C4:C2:11:D8:75:30")
+                .isEqualTo(ERROR_PARAMETER);
+
+        // Invalid Digital Broadcast System
+        assertMessageValidity("04:99:1E:07:12:20:50:28:01:04:8B:5E:39:5A")
+                .isEqualTo(ERROR_PARAMETER);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("04:97:05:0C:06:0A:19:3B:40:93:8B:44:03:11:04:FC")
+                .isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ARIB Broadcast system
+        assertMessageValidity("04:99:0C:08:15:05:04:1E:00:00:C4:C2:11:D8:75")
+                .isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ATSC Broadcast system
+        assertMessageValidity("04:97:1E:07:12:20:50:28:01:01:8B:5E:39").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for DVB Broadcast system
+        assertMessageValidity("04:99:05:0C:06:0A:19:3B:40:19:8B:44:03:11:04")
+                .isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 2 part channel number
+        assertMessageValidity("04:97:15:09:00:0F:00:2D:04:82:09:C8:72").isEqualTo(ERROR_PARAMETER);
+        // Invalid Channel Number format
+        assertMessageValidity("04:99:12:06:0C:2D:5A:19:08:91:0D:00:B1").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setExternalTimer_clearExternalTimer() {
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:02:04:20").isEqualTo(OK);
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:10:05:10:00").isEqualTo(OK);
+
+        assertMessageValidity("4F:A1:0C:08:15:05:04:1E:02:04:20").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F4:A2:14:09:12:28:4B:19:10:05:10:00").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:02:04").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Out of range Day of Month
+        assertMessageValidity("40:A2:28:09:12:28:4B:19:10:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Out of range Month of Year
+        assertMessageValidity("40:A1:0C:0F:15:05:04:1E:02:04:20").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Hour
+        assertMessageValidity("40:A2:14:09:1A:28:4B:19:10:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Minute
+        assertMessageValidity("40:A1:0C:08:15:48:04:1E:02:04:20").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Duration Hours
+        assertMessageValidity("40:A2:14:09:12:28:66:19:10:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Minute
+        assertMessageValidity("40:A1:0C:08:15:05:04:3F:02:04:20").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:84:05:10:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:14:04:20").isEqualTo(ERROR_PARAMETER);
+        // Invalid external source specifier
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:10:08:10:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid External PLug
+        assertMessageValidity("04:A1:0C:08:15:05:04:1E:02:04:00").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_timerClearedStatus() {
+        assertMessageValidity("40:43:01:7E").isEqualTo(OK);
+        assertMessageValidity("40:43:80").isEqualTo(OK);
+
+        assertMessageValidity("4F:43:01").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:43:80").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:43").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:43:03").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_timerStatus() {
+        // Programmed - Space available
+        assertMessageValidity("40:35:58").isEqualTo(OK);
+        // Programmed - Not enough space available
+        assertMessageValidity("40:35:B9:32:1C:4F").isEqualTo(OK);
+        // Not programmed - Date out of range
+        assertMessageValidity("40:35:82:3B").isEqualTo(OK);
+        // Not programmed - Duplicate
+        assertMessageValidity("40:35:EE:52:0C").isEqualTo(OK);
+
+        assertMessageValidity("4F:35:58").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:35:82").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:35").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Programmed - Invalid programmed info
+        assertMessageValidity("40:35:BD").isEqualTo(ERROR_PARAMETER);
+        // Non programmed - Invalid not programmed error info
+        assertMessageValidity("40:35:DE").isEqualTo(ERROR_PARAMETER);
+        // Programmed - Might not be enough space available - Invalid duration hours
+        assertMessageValidity("40:35:BB:96:1C").isEqualTo(ERROR_PARAMETER);
+        // Not programmed - Duplicate - Invalid duration minutes
+        assertMessageValidity("40:35:EE:52:4A").isEqualTo(ERROR_PARAMETER);
     }
 
     private IntegerSubject assertMessageValidity(String message) {

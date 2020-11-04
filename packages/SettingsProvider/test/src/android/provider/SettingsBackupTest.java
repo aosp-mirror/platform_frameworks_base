@@ -230,6 +230,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
                     Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_SV,
                     Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_VR,
+                    Settings.Global.DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,

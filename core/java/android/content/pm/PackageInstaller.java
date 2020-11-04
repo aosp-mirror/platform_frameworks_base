@@ -1356,7 +1356,9 @@ public class PackageInstaller {
          * Completely abandon this session, destroying all staged data and
          * rendering it invalid. Abandoned sessions will be reported to
          * {@link SessionCallback} listeners as failures. This is equivalent to
-         * opening the session and calling {@link Session#abandon()}.
+         * {@link #abandonSession(int)}.
+         * <p>If the parent is abandoned, all children will also be abandoned. Any written data
+         * would be destroyed and the created {@link Session} information will be discarded.</p>
          */
         public void abandon() {
             try {
@@ -1419,7 +1421,8 @@ public class PackageInstaller {
          * when this session is committed.
          *
          * <p>If the parent is staged or has rollback enabled, all children must have
-         * the same properties.
+         * the same properties.</p>
+         * <p>If the parent is abandoned, all children will also be abandoned.</p>
          *
          * @param sessionId the session ID to add to this multi-package session.
          */

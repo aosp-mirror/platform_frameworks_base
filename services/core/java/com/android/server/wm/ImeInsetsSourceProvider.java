@@ -16,11 +16,14 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IME_TARGET_FROM_IME;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.INSETS_SOURCE_PROVIDER;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IS_IME_LAYOUT_DRAWN;
 
+import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.WindowInsets;
@@ -79,6 +82,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ProtoLog.i(WM_DEBUG_IME, "call showInsets(ime) on %s",
                         target.getWindow() != null ? target.getWindow().getName() : "");
                 target.showInsets(WindowInsets.Type.ime(), true /* fromIme */);
+                Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 if (target != mImeTargetFromIme && mImeTargetFromIme != null) {
                     ProtoLog.w(WM_DEBUG_IME,
                             "showInsets(ime) was requested by different window: %s ",

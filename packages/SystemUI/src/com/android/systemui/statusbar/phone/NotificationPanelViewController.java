@@ -873,7 +873,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     clockPreferredY, hasCustomClock(),
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding(),
-                    mAuthController.isUdfpsEnrolled());
+                    mUpdateMonitor.isUdfpsEnrolled());
             mClockPositionAlgorithm.run(mClockPositionResult);
             mKeyguardStatusViewController.updatePosition(
                     mClockPositionResult.clockX, mClockPositionResult.clockY, animateClock);
@@ -914,7 +914,7 @@ public class NotificationPanelViewController extends PanelViewController {
                         - Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding)
                         - mKeyguardStatusViewController.getLogoutButtonHeight();
 
-        if (mAuthController.isUdfpsEnrolled()) {
+        if (mUpdateMonitor.isUdfpsEnrolled()) {
             availableSpace = mNotificationStackScrollLayoutController.getHeight()
                     - minPadding - shelfSize
                     - (mStatusBar.getDisplayHeight() - mAuthController.getUdfpsRegion().top);

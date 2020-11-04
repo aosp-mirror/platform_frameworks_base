@@ -118,7 +118,7 @@ public class DragDropControllerTests extends WindowTestsBase {
      * Creates a window state which can be used as a drop target.
      */
     private WindowState createDropTargetWindow(String name, int ownerId) {
-        final ActivityRecord activity = createTestActivityRecord(mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         final Task stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final Task task = createTaskInStack(stack, ownerId);

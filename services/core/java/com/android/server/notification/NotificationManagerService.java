@@ -3526,6 +3526,20 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void unlockNotificationChannel(String pkg, int uid, String channelId) {
+            checkCallerIsSystemOrSystemUiOrShell("Caller not system or sysui or shell");
+            mPreferencesHelper.unlockNotificationChannelImportance(pkg, uid, channelId);
+            handleSavePolicyFile();
+        }
+
+        @Override
+        public void unlockAllNotificationChannels() {
+            checkCallerIsSystem();
+            mPreferencesHelper.unlockAllNotificationChannels();
+            handleSavePolicyFile();
+        }
+
+        @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsForPackage(String pkg,
                 int uid, boolean includeDeleted) {
             enforceSystemOrSystemUI("getNotificationChannelsForPackage");
@@ -5498,6 +5512,8 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mCallState=" + callStateToString(mCallState));
                     pw.println("  mSystemReady=" + mSystemReady);
                     pw.println("  mMaxPackageEnqueueRate=" + mMaxPackageEnqueueRate);
+                    pw.println("  hideSilentStatusBar="
+                            + mPreferencesHelper.shouldHideSilentStatusIcons());
                 }
                 pw.println("  mArchive=" + mArchive.toString());
                 Iterator<Pair<StatusBarNotification, Integer>> iter = mArchive.descendingIterator();

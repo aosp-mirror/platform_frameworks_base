@@ -25,5 +25,6 @@ import android.telephony.ims.RcsContactUceCapability;
  */
 oneway interface IRcsUceControllerCallback {
     void onCapabilitiesReceived(in List<RcsContactUceCapability> contactCapabilities);
+    void onComplete();
     void onError(int errorCode);
 }

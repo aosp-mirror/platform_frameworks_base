@@ -176,7 +176,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
      * Trigger the prefetto daemon.
      */
     public void triggerPerfetto() {
-        InteractionJankMonitor.getInstance().trigger();
+        InteractionJankMonitor.getInstance().trigger(mSession);
     }
 
     /**

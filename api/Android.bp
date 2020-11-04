@@ -16,25 +16,6 @@ package {
     default_visibility: ["//visibility:private"],
 }
 
-// *-current.txt files for use by modules in other directories like cts
-filegroup {
-    name: "frameworks-base-api-current.txt",
-    srcs: ["current.txt"],
-    visibility: ["//visibility:public"],
-}
-
-filegroup {
-    name: "frameworks-base-api-system-current.txt",
-    srcs: ["system-current.txt"],
-    visibility: ["//visibility:public"],
-}
-
-filegroup {
-    name: "frameworks-base-api-system-removed.txt",
-    srcs: ["system-removed.txt"],
-    visibility: ["//visibility:public"],
-}
-
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
@@ -45,7 +26,7 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-current-merged.txt",
+    name: "frameworks-base-api-current.txt",
     srcs: [
         ":conscrypt.module.public.api{.public.api.txt}",
         ":framework-appsearch{.public.api.txt}",
@@ -74,10 +55,11 @@ genrule {
             dest: "android.txt",
         },
     ],
+    visibility: ["//visibility:public"],
 }
 
 genrule {
-    name: "frameworks-base-api-removed-merged.txt",
+    name: "frameworks-base-api-removed.txt",
     srcs: [
         ":conscrypt.module.public.api{.public.removed-api.txt}",
         ":framework-appsearch{.public.removed-api.txt}",
@@ -104,7 +86,7 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-system-current-merged.txt",
+    name: "frameworks-base-api-system-current.txt",
     srcs: [
         ":framework-appsearch{.system.api.txt}",
         ":framework-graphics{.system.api.txt}",
@@ -132,10 +114,11 @@ genrule {
             dest: "android.txt",
         },
     ],
+    visibility: ["//visibility:public"],
 }
 
 genrule {
-    name: "frameworks-base-api-system-removed-merged.txt",
+    name: "frameworks-base-api-system-removed.txt",
     srcs: [
         ":framework-appsearch{.system.removed-api.txt}",
         ":framework-graphics{.system.removed-api.txt}",
@@ -158,10 +141,11 @@ genrule {
             dest: "system-removed.txt",
         },
     ],
+    visibility: ["//visibility:public"],
 }
 
 genrule {
-    name: "frameworks-base-api-module-lib-current-merged.txt",
+    name: "frameworks-base-api-module-lib-current.txt",
     srcs: [
         ":framework-appsearch{.module-lib.api.txt}",
         ":framework-graphics{.module-lib.api.txt}",
@@ -192,7 +176,7 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-module-lib-removed-merged.txt",
+    name: "frameworks-base-api-module-lib-removed.txt",
     srcs: [
         ":framework-appsearch{.module-lib.removed-api.txt}",
         ":framework-graphics{.module-lib.removed-api.txt}",
@@ -220,8 +204,8 @@ genrule {
 genrule {
     name: "combined-removed-dex",
     srcs: [
-        ":frameworks-base-api-removed-merged.txt",
-        ":frameworks-base-api-system-removed-merged.txt",
+        ":frameworks-base-api-removed.txt",
+        ":frameworks-base-api-system-removed.txt",
         ":android.car-stubs-docs{.removed-api.txt}",
         ":android.car-system-stubs-docs{.removed-api.txt}",
     ],

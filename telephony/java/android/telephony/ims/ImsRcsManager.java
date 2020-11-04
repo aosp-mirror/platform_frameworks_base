@@ -29,12 +29,10 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.feature.ImsFeature;
-import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
@@ -77,7 +75,7 @@ public class ImsRcsManager {
             "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
 
     /**
-     * Receives RCS availability status updates from the ImsService.
+     * Receives RCS Feature availability status updates from the ImsService.
      *
      * @see #isAvailable(int)
      * @see #registerRcsAvailabilityCallback(Executor, AvailabilityCallback)
@@ -101,8 +99,7 @@ public class ImsRcsManager {
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> mLocalCallback.onAvailabilityChanged(
-                            new RcsFeature.RcsImsCapabilities(config)));
+                    mExecutor.execute(() -> mLocalCallback.onAvailabilityChanged(config));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -137,7 +134,7 @@ public class ImsRcsManager {
          *
          * @param capabilities The new availability of the capabilities.
          */
-        public void onAvailabilityChanged(@NonNull RcsFeature.RcsImsCapabilities capabilities) {
+        public void onAvailabilityChanged(@RcsUceAdapter.RcsImsCapabilityFlag int capabilities) {
         }
 
         /**@hide*/
@@ -394,7 +391,7 @@ public class ImsRcsManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isCapable(@RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+    public boolean isCapable(@RcsUceAdapter.RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
@@ -428,7 +425,7 @@ public class ImsRcsManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isAvailable(@RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability)
+    public boolean isAvailable(@RcsUceAdapter.RcsImsCapabilityFlag int capability)
             throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {

@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 
@@ -31,7 +28,6 @@ import static org.mockito.ArgumentMatchers.intThat;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -62,8 +58,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mActivity = createTestActivityRecord(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD);
+        mActivity = createActivityRecord(mDisplayContent);
     }
 
     @Test

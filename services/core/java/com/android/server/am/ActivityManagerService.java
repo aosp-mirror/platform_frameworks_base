@@ -4890,6 +4890,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isIntentSenderImmutable(IIntentSender pendingResult) {
+        if (pendingResult instanceof PendingIntentRecord) {
+            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
+            return (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isIntentSenderAnActivity(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return false;
