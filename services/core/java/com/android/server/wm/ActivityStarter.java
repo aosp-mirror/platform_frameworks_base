@@ -1665,11 +1665,6 @@ class ActivityStarter {
             final Task taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
                     ? mSourceRecord.getTask() : null;
             setNewTask(taskToAffiliate);
-            if (mService.getLockTaskController().isLockTaskModeViolation(
-                    mStartActivity.getTask())) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
         } else if (mAddingToTask) {
             addOrReparentStartingActivity(targetTask, "adding to task");
         }
@@ -1848,10 +1843,17 @@ class ActivityStarter {
         final boolean isNewClearTask =
                 (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                         == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
-        if (!newTask && mService.getLockTaskController().isLockTaskModeViolation(targetTask,
-                isNewClearTask)) {
-            Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-            return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+        if (!newTask) {
+            if (mService.getLockTaskController().isLockTaskModeViolation(targetTask,
+                    isNewClearTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+        } else {
+            if (mService.getLockTaskController().isNewTaskLockTaskModeViolation(mStartActivity)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
         }
 
         return START_SUCCESS;
