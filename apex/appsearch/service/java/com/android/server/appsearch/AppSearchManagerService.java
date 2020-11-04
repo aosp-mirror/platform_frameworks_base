@@ -15,27 +15,32 @@
  */
 package com.android.server.appsearch;
 
+import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
+
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
+import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchManager;
+import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
-import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.ParcelableException;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -61,10 +66,9 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull List<Bundle> schemaBundles,
                 boolean forceOverride,
-                @NonNull AndroidFuture<AppSearchResult> callback) {
+                @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(schemaBundles);
-            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -76,9 +80,10 @@ public class AppSearchManagerService extends SystemService {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 impl.setSchema(databaseName, schemas, forceOverride);
-                callback.complete(AppSearchResult.newSuccessfulResult(/*result=*/ null));
+                invokeCallbackOnResult(callback,
+                        AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {
-                callback.complete(throwableToFailedResult(t));
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -88,7 +93,7 @@ public class AppSearchManagerService extends SystemService {
         public void putDocuments(
                 @NonNull String databaseName,
                 @NonNull List<Bundle> documentBundles,
-                @NonNull AndroidFuture<AppSearchBatchResult> callback) {
+                @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(documentBundles);
             Preconditions.checkNotNull(callback);
@@ -96,22 +101,24 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 for (int i = 0; i < documentBundles.size(); i++) {
                     GenericDocument document = new GenericDocument(documentBundles.get(i));
                     try {
+                        // TODO(b/173451571): reduce burden of binder thread by enqueue request onto
+                        // a separate thread.
                         impl.putDocument(databaseName, document);
                         resultBuilder.setSuccess(document.getUri(), /*result=*/ null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(document.getUri(), throwableToFailedResult(t));
                     }
                 }
-                callback.complete(resultBuilder.build());
+                invokeCallbackOnResult(callback, resultBuilder.build());
             } catch (Throwable t) {
-                callback.completeExceptionally(t);
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -119,7 +126,8 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void getDocuments(@NonNull String databaseName, @NonNull String namespace,
-                @NonNull List<String> uris, @NonNull AndroidFuture<AppSearchBatchResult> callback) {
+                @NonNull List<String> uris,
+                @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(namespace);
             Preconditions.checkNotNull(uris);
@@ -128,10 +136,10 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
@@ -141,9 +149,9 @@ public class AppSearchManagerService extends SystemService {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
                     }
                 }
-                callback.complete(resultBuilder.build());
+                invokeCallbackOnResult(callback, resultBuilder.build());
             } catch (Throwable t) {
-                callback.completeExceptionally(t);
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -182,19 +190,19 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void removeByUri(@NonNull String databaseName, @NonNull String namespace,
-                List<String> uris, AndroidFuture<AppSearchBatchResult> callback) {
+                @NonNull List<String> uris,
+                @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(namespace);
             Preconditions.checkNotNull(uris);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
+            AppSearchBatchResult.Builder<String, Void> resultBuilder =
+                    new AppSearchBatchResult.Builder<>();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                AppSearchBatchResult.Builder<String, Void> resultBuilder =
-                        new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
@@ -204,9 +212,9 @@ public class AppSearchManagerService extends SystemService {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
                     }
                 }
-                callback.complete(resultBuilder.build());
+                invokeCallbackOnResult(callback, resultBuilder.build());
             } catch (Throwable t) {
-                callback.completeExceptionally(t);
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -237,6 +245,21 @@ public class AppSearchManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void initialize(@NonNull IAppSearchResultCallback callback) {
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                ImplInstanceManager.getInstance(getContext(), callingUserId);
+                invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
         /**
          * Rewrites the database name by adding a prefix of unique name for the given uid.
          *
@@ -256,23 +279,51 @@ public class AppSearchManagerService extends SystemService {
             return callingUidName + CALLING_NAME_DATABASE_DELIMITER + databaseName;
         }
 
-        private <ValueType> AppSearchResult<ValueType> throwableToFailedResult(
-                @NonNull Throwable t) {
-            if (t instanceof AppSearchException) {
-                return ((AppSearchException) t).toAppSearchResult();
+        /**  Invokes the {@link IAppSearchResultCallback} with the result. */
+        private void invokeCallbackOnResult(IAppSearchResultCallback callback,
+                AppSearchResult result) {
+            try {
+                callback.onResult(result);
+            } catch (RemoteException e) {
+                Log.d(TAG, "Unable to send result to the callback", e);
             }
+        }
 
-            @AppSearchResult.ResultCode int resultCode;
-            if (t instanceof IllegalStateException) {
-                resultCode = AppSearchResult.RESULT_INTERNAL_ERROR;
-            } else if (t instanceof IllegalArgumentException) {
-                resultCode = AppSearchResult.RESULT_INVALID_ARGUMENT;
-            } else if (t instanceof IOException) {
-                resultCode = AppSearchResult.RESULT_IO_ERROR;
-            } else {
-                resultCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
+        /**  Invokes the {@link IAppSearchBatchResultCallback} with the result. */
+        private void invokeCallbackOnResult(IAppSearchBatchResultCallback callback,
+                AppSearchBatchResult result) {
+            try {
+                callback.onResult(result);
+            } catch (RemoteException e) {
+                Log.d(TAG, "Unable to send result to the callback", e);
             }
-            return AppSearchResult.newFailedResult(resultCode, t.getMessage());
+        }
+
+        /**
+         *  Invokes the {@link IAppSearchResultCallback} with an throwable.
+         *
+         *  <p>The throwable is convert to a {@link AppSearchResult};
+         */
+        private void invokeCallbackOnError(IAppSearchResultCallback callback, Throwable throwable) {
+            try {
+                callback.onResult(throwableToFailedResult(throwable));
+            } catch (RemoteException e) {
+                Log.d(TAG, "Unable to send result to the callback", e);
+            }
+        }
+
+        /**
+         *  Invokes the {@link IAppSearchBatchResultCallback} with an throwable.
+         *
+         * <p>The throwable is converted to {@link ParcelableException}.
+         */
+        private void invokeCallbackOnError(IAppSearchBatchResultCallback callback,
+                Throwable throwable) {
+            try {
+                callback.onSystemError(new ParcelableException(throwable));
+            } catch (RemoteException e) {
+                Log.d(TAG, "Unable to send error to the callback", e);
+            }
         }
     }
 }
