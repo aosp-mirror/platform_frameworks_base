@@ -5305,6 +5305,22 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        public boolean isAmbientDisplaySuppressedForTokenByApp(@NonNull String token, int appUid) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_DREAM_STATE, null);
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_DREAM_SUPPRESSION, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isAmbientDisplayAvailable()
+                        && mAmbientDisplaySuppressionController.isSuppressed(token, appUid);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public boolean isAmbientDisplaySuppressed() {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_DREAM_STATE, null);
