@@ -162,7 +162,7 @@ static jchar nativeGetDisplayLabel(JNIEnv *env, jobject clazz, jlong ptr, jint k
 
 static jint nativeGetKeyboardType(JNIEnv *env, jobject clazz, jlong ptr) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
-    return map->getMap()->getKeyboardType();
+    return static_cast<jint>(map->getMap()->getKeyboardType());
 }
 
 static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
