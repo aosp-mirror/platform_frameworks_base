@@ -213,11 +213,6 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         mView.setContainer(container);
     }
 
-    // TODO(b/168904199): remove this.
-    public QSCustomizer getView() {
-        return mView;
-    }
-
     public boolean isShown() {
         return mView.isShown();
     }

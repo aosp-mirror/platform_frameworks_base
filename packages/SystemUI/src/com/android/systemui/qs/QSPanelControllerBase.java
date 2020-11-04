@@ -48,6 +48,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         implements Dumpable{
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
+    private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final MediaHost mMediaHost;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
@@ -55,6 +56,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
     private int mLastOrientation;
+    private QSTileRevealController mQsTileRevealController;
 
     private final QSHost.Callback mQSHostCallback = this::setTiles;
 
@@ -71,11 +73,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private String mCachedSpecs = "";
 
     protected QSPanelControllerBase(T view, QSTileHost host,
-            QSCustomizerController qsCustomizerController, MetricsLogger metricsLogger,
-            UiEventLogger uiEventLogger, DumpManager dumpManager) {
+            QSCustomizerController qsCustomizerController,
+            QSTileRevealController.Factory qsTileRevealControllerFactory,
+            MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
         super(view);
         mHost = host;
         mQsCustomizerController = qsCustomizerController;
+        mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
         mMediaHost = mView.getMediaHost();
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
@@ -84,6 +88,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onViewAttached() {
+        QSPanel.QSTileLayout regularTileLayout = mView.createRegularTileLayout();
+        if (regularTileLayout instanceof PagedTileLayout) {
+            mQsTileRevealController = mQsTileRevealControllerFactory.create(
+                    (PagedTileLayout) regularTileLayout);
+        }
+
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.addCallback(mQSHostCallback);
         mMediaHost.addVisibilityChangeListener(aBoolean -> {
@@ -115,7 +125,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     /** */
     public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
         if (!collapsedView) {
-            mView.updateRevealedTiles(tiles);
+            mQsTileRevealController.updateRevealedTiles(tiles);
         }
         for (QSPanelControllerBase.TileRecord record : mRecords) {
             mView.removeTile(record);
@@ -236,6 +246,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
     }
 
+    /** */
+    public QSTileRevealController getQsTileRevealController() {
+        return mQsTileRevealController;
+    }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

@@ -64,6 +64,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     private QSCustomizerController mQSCustomizerController;
     @Mock
+    private QSTileRevealController.Factory mQSTileRevealControllerFactory;
+    @Mock
+    private QSTileRevealController mQSTileRevealController;
+    @Mock
     private MediaHost mMediaHost;
     @Mock
     private MetricsLogger mMetricsLogger;
@@ -73,15 +77,19 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     QSTileImpl mQSTile;
     @Mock
     QSTileView mQSTileView;
+    @Mock
+    PagedTileLayout mPagedTileLayout;
 
     private QSPanelControllerBase<QSPanel> mController;
 
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private static class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
-                QSCustomizerController qsCustomizerController, MetricsLogger metricsLogger,
-                UiEventLogger uiEventLogger, DumpManager dumpManager) {
-            super(view, host, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
+                QSCustomizerController qsCustomizerController,
+                QSTileRevealController.Factory qsTileRevealControllerFactory,
+                MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
+            super(view, host, qsCustomizerController, qsTileRevealControllerFactory, metricsLogger,
+                    uiEventLogger, dumpManager);
         }
     }
 
@@ -94,11 +102,14 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
         when(mQSPanel.openPanelEvent()).thenReturn(QSEvent.QS_PANEL_EXPANDED);
         when(mQSPanel.closePanelEvent()).thenReturn(QSEvent.QS_PANEL_COLLAPSED);
+        when(mQSPanel.createRegularTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
+        when(mQSTileRevealControllerFactory.create(any())).thenReturn(mQSTileRevealController);
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
-                mQSCustomizerController, mMetricsLogger, mUiEventLogger, mDumpManager);
+                mQSCustomizerController, mQSTileRevealControllerFactory, mMetricsLogger,
+                mUiEventLogger, mDumpManager);
 
         mController.init();
     }
