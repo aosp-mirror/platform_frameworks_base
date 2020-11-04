@@ -650,7 +650,7 @@ std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
 
         base::Result<std::shared_ptr<KeyCharacterMap>> ret =
                 KeyCharacterMap::loadContents(filenameChars.c_str(), contentsChars.c_str(),
-                                              KeyCharacterMap::FORMAT_OVERLAY);
+                                              KeyCharacterMap::Format::OVERLAY);
         if (ret) {
             result = *ret;
         }
