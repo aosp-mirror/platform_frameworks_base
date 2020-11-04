@@ -296,15 +296,15 @@ public class GeofenceManager extends
             @Nullable String attributionTag) {
         LocationPermissions.enforceCallingOrSelfLocationPermission(mContext, PERMISSION_FINE);
 
-        CallerIdentity callerIdentity = CallerIdentity.fromBinder(mContext, packageName,
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName,
                 attributionTag, AppOpsManager.toReceiverId(pendingIntent));
 
-        final long identity = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             putRegistration(new GeofenceKey(pendingIntent, geofence),
-                    new GeofenceRegistration(geofence, callerIdentity, pendingIntent));
+                    new GeofenceRegistration(geofence, identity, pendingIntent));
         } finally {
-            Binder.restoreCallingIdentity(identity);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
