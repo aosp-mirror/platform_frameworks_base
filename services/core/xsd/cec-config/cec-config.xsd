@@ -12,6 +12,7 @@
   </xs:element>
   <xs:complexType name="setting">
     <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="value-type" type="xs:string"/>
     <xs:attribute name="user-configurable" type="xs:boolean"/>
     <xs:element name="allowed-values" type="value-list" minOccurs="1" maxOccurs="1"/>
     <xs:element name="default-value" type="value" minOccurs="1" maxOccurs="1"/>
@@ -23,5 +24,6 @@
   </xs:complexType>
   <xs:complexType name="value">
     <xs:attribute name="string-value" type="xs:string"/>
+    <xs:attribute name="int-value" type="xs:int"/>
   </xs:complexType>
 </xs:schema>
