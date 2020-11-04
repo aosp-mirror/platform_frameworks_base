@@ -327,7 +327,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public boolean isShowingDetail() {
-        return mQSPanelController.isShowingCustomize() || mQSDetail.isShowingDetail();
+        return mQSCustomizerController.isCustomizing() || mQSDetail.isShowingDetail();
     }
 
     @Override

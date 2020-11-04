@@ -63,17 +63,17 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
+            QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory) {
-        super(view, qstileHost, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
+        super(view, qstileHost, qsCustomizerController, qsTileRevealControllerFactory,
+                metricsLogger, uiEventLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
         mBrightnessController = brightnessControllerFactory.create(
                 mView.findViewById(R.id.brightness_slider));
-
-        mView.setCustomizer(mQsCustomizerController.getView());
     }
 
     @Override
@@ -124,11 +124,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     /** */
-    public boolean isShowingCustomize() {
-        return mView.isShowingCustomize();
-    }
-
-    /** */
     public void setVisibility(int visibility) {
         mView.setVisibility(visibility);
     }
@@ -149,11 +144,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         } else {
             mBrightnessController.unregisterCallbacks();
         }
-    }
-
-    /** */
-    public QSTileRevealController getQsTileRevealController() {
-        return mView.getQsTileRevealController();
     }
 
     /** */

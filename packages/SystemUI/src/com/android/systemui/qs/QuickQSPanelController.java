@@ -43,9 +43,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     @Inject
     QuickQSPanelController(QuickQSPanel view, TunerService tunerService, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
+            QSTileRevealController.Factory qsTileRevealControllerFactory,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
-        super(view, qsTileHost, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
+        super(view, qsTileHost, qsCustomizerController, qsTileRevealControllerFactory,
+                metricsLogger, uiEventLogger, dumpManager);
         mTunerService = tunerService;
     }
 
