@@ -26,6 +26,7 @@ import android.os.SystemClock;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Representation of a ranging measurement between the local device and a remote device
@@ -127,6 +128,35 @@ public final class RangingMeasurement implements Parcelable {
     @Nullable
     public AngleOfArrivalMeasurement getAngleOfArrival() {
         return mAngleOfArrivalMeasurement;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof RangingMeasurement) {
+            RangingMeasurement other = (RangingMeasurement) obj;
+            return mRemoteDeviceAddress.equals(other.getRemoteDeviceAddress())
+                    && mStatus == other.getStatus()
+                    && mElapsedRealtimeNanos == other.getElapsedRealtimeNanos()
+                    && mDistanceMeasurement.equals(other.getDistance())
+                    && mAngleOfArrivalMeasurement.equals(other.getAngleOfArrival());
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRemoteDeviceAddress, mStatus, mElapsedRealtimeNanos,
+                mDistanceMeasurement, mAngleOfArrivalMeasurement);
     }
 
     @Override
