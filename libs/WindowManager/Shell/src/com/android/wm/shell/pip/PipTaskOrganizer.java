@@ -339,10 +339,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             PictureInPictureParams pictureInPictureParams) {
         mShouldIgnoreEnteringPipTransition = true;
         sendOnPipTransitionStarted(componentName, TRANSITION_DIRECTION_TO_PIP);
-        mPipBoundsState.setLastPipComponentName(componentName);
-        mPipBoundsState.setAspectRatio(getAspectRatioOrDefault(pictureInPictureParams));
-        return mPipBoundsHandler.getDestinationBounds(null /* bounds */,
-                getMinimalSize(activityInfo));
+        setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
+        return mPipBoundsHandler.getDestinationBounds(null /* bounds */);
     }
 
     /**
@@ -354,6 +352,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (mShouldIgnoreEnteringPipTransition) {
             mPipBoundsState.setBounds(destinationBounds);
         }
+    }
+
+    private void setBoundsStateForEntry(ComponentName componentName, PictureInPictureParams params,
+            ActivityInfo activityInfo) {
+        mPipBoundsState.setLastPipComponentName(componentName);
+        mPipBoundsState.setAspectRatio(getAspectRatioOrDefault(params));
+        mPipBoundsState.setOverrideMinSize(getMinimalSize(activityInfo));
     }
 
     /**
@@ -483,7 +488,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mLeash = leash;
         mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
-        mPipBoundsState.setLastPipComponentName(mTaskInfo.topActivity);
+        setBoundsStateForEntry(mTaskInfo.topActivity, mPictureInPictureParams,
+                mTaskInfo.topActivityInfo);
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
         mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
@@ -520,9 +526,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        mPipBoundsState.setAspectRatio(getAspectRatioOrDefault(mPictureInPictureParams));
-        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(null /* bounds */,
-                getMinimalSize(mTaskInfo.topActivityInfo));
+        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(null /* bounds */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
@@ -675,6 +679,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
         mPipBoundsState.setLastPipComponentName(info.topActivity);
+        mPipBoundsState.setOverrideMinSize(getMinimalSize(info.topActivityInfo));
         final PictureInPictureParams newParams = info.pictureInPictureParams;
         if (newParams == null || !applyPictureInPictureParams(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
@@ -682,8 +687,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         // Aspect ratio changed, re-calculate destination bounds.
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                mPipBoundsState.getBounds(), getMinimalSize(info.topActivityInfo),
-                true /* userCurrentMinEdgeSize */);
+                mPipBoundsState.getBounds(), true /* useCurrentMinEdgeSize */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
                 null /* updateBoundsCallback */);
@@ -698,7 +702,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void onFixedRotationFinished(int displayId) {
         if (mShouldDeferEnteringPip && mState.isInPip()) {
             final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
+                    null /* bounds */);
             // schedule a regular animation to ensure all the callbacks are still being sent
             enterPipWithAlphaAnimation(destinationBounds, 0 /* durationMs */);
         }
@@ -773,8 +777,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(null /* bounds */,
-                getMinimalSize(mTaskInfo.topActivityInfo));
+        final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(null /* bounds */);
         if (newDestinationBounds.equals(currentDestinationBounds)) return;
         if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
             animator.updateEndValue(newDestinationBounds);

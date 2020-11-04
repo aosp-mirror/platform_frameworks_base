@@ -58,8 +58,6 @@ public class PipBoundsHandler {
     private int mDefaultStackGravity;
     private int mDefaultMinSize;
     private Point mScreenEdgeInsets;
-    private int mCurrentMinSize;
-    private Size mOverrideMinimalSize;
 
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -74,6 +72,7 @@ public class PipBoundsHandler {
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
         // triggers a configuration change and the resources to be reloaded.
         mPipBoundsState.setAspectRatio(mDefaultAspectRatio);
+        mPipBoundsState.setMinEdgeSize(mDefaultMinSize);
     }
 
     /**
@@ -87,7 +86,6 @@ public class PipBoundsHandler {
                 com.android.internal.R.integer.config_defaultPictureInPictureGravity);
         mDefaultMinSize = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
-        mCurrentMinSize = mDefaultMinSize;
         final String screenEdgeInsetsDpString = res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
@@ -100,14 +98,6 @@ public class PipBoundsHandler {
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
-    }
-
-    /**
-     * Update the Min edge size for {@link PipSnapAlgorithm} to calculate corresponding bounds
-     * @param minEdgeSize
-     */
-    public void setMinEdgeSize(int minEdgeSize) {
-        mCurrentMinSize = minEdgeSize;
     }
 
     /**
@@ -167,16 +157,16 @@ public class PipBoundsHandler {
     }
 
     /**
-     * See {@link #getDestinationBounds(Rect, Size, boolean)}
+     * See {@link #getDestinationBounds(Rect, boolean)}
      */
-    public Rect getDestinationBounds(Rect bounds, Size minimalSize) {
-        return getDestinationBounds(bounds, minimalSize, false /* useCurrentMinEdgeSize */);
+    public Rect getDestinationBounds(Rect bounds) {
+        return getDestinationBounds(bounds, false /* useCurrentMinEdgeSize */);
     }
 
     /**
      * @return {@link Rect} of the destination PiP window bounds.
      */
-    public Rect getDestinationBounds(Rect bounds, Size minimalSize, boolean useCurrentMinEdgeSize) {
+    public Rect getDestinationBounds(Rect bounds, boolean useCurrentMinEdgeSize) {
         boolean isReentryBounds = false;
         final Rect destinationBounds;
         if (bounds == null) {
@@ -191,7 +181,6 @@ public class PipBoundsHandler {
             } else {
                 // Get actual default bounds.
                 defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
-                mOverrideMinimalSize = minimalSize;
             }
 
             destinationBounds = new Rect(defaultBounds);
@@ -307,66 +296,55 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Sets the current bound with the currently store aspect ratio.
-     * @param stackBounds
-     */
-    public void transformBoundsToAspectRatio(Rect stackBounds) {
-        transformBoundsToAspectRatio(stackBounds, mPipBoundsState.getAspectRatio(),
-                true /* useCurrentMinEdgeSize */, true /* useCurrentSize */);
-    }
-
-    /**
      * Set the current bounds (or the default bounds if there are no current bounds) with the
      * specified aspect ratio.
      */
-    private void transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio,
+    public void transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio,
             boolean useCurrentMinEdgeSize, boolean useCurrentSize) {
         // Save the snap fraction and adjust the size based on the new aspect ratio.
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds), mPipBoundsState.getStashedState());
-        final int minEdgeSize = useCurrentMinEdgeSize ? mCurrentMinSize : mDefaultMinSize;
+
+        final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
         final Size size;
         if (useCurrentMinEdgeSize || useCurrentSize) {
+            // The default minimum edge size, or the override min edge size if set.
+            final int defaultMinEdgeSize = overrideMinSize == null ? mDefaultMinSize
+                    : mPipBoundsState.getOverrideMinEdgeSize();
+            final int minEdgeSize = useCurrentMinEdgeSize ? mPipBoundsState.getMinEdgeSize()
+                    : defaultMinEdgeSize;
+            // Use the existing size but adjusted to the aspect ratio and min edge size.
             size = mSnapAlgorithm.getSizeForAspectRatio(
                     new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
         } else {
-            final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
-            size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, minEdgeSize,
-                    displayInfo.logicalWidth, displayInfo.logicalHeight);
+            if (overrideMinSize != null) {
+                // The override minimal size is set, use that as the default size making sure it's
+                // adjusted to the aspect ratio.
+                size = adjustSizeToAspectRatio(overrideMinSize, aspectRatio);
+            } else {
+                // Calculate the default size using the display size and default min edge size.
+                final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
+                size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, mDefaultMinSize,
+                        displayInfo.logicalWidth, displayInfo.logicalHeight);
+            }
         }
 
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
         stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
-        // apply the override minimal size if applicable, this minimal size is specified by app
-        if (mOverrideMinimalSize != null) {
-            transformBoundsToMinimalSize(stackBounds, aspectRatio, mOverrideMinimalSize);
-        }
         mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
     }
 
-    /**
-     * Transforms a given bounds to meet the minimal size constraints.
-     * This function assumes the given {@param stackBounds} qualifies {@param aspectRatio}.
-     */
-    private void transformBoundsToMinimalSize(Rect stackBounds, float aspectRatio,
-            Size minimalSize) {
-        if (minimalSize == null) return;
-        final Size adjustedMinimalSize;
-        final float minimalSizeAspectRatio =
-                minimalSize.getWidth() / (float) minimalSize.getHeight();
-        if (minimalSizeAspectRatio > aspectRatio) {
-            // minimal size is wider, fixed the width and increase the height
-            adjustedMinimalSize = new Size(
-                    minimalSize.getWidth(), (int) (minimalSize.getWidth() / aspectRatio));
+    /** Adjusts the given size to conform to the given aspect ratio. */
+    private Size adjustSizeToAspectRatio(@NonNull Size size, float aspectRatio) {
+        final float sizeAspectRatio = size.getWidth() / (float) size.getHeight();
+        if (sizeAspectRatio > aspectRatio) {
+            // Size is wider, fix the width and increase the height
+            return new Size(size.getWidth(), (int) (size.getWidth() / aspectRatio));
         } else {
-            adjustedMinimalSize = new Size(
-                    (int) (minimalSize.getHeight() * aspectRatio), minimalSize.getHeight());
+            // Size is taller, fix the height and adjust the width.
+            return new Size((int) (size.getHeight() * aspectRatio), size.getHeight());
         }
-        final Rect containerBounds = new Rect(stackBounds);
-        Gravity.apply(mDefaultStackGravity,
-                adjustedMinimalSize.getWidth(), adjustedMinimalSize.getHeight(),
-                containerBounds, stackBounds);
     }
 
     /**
@@ -383,12 +361,20 @@ public class PipBoundsHandler {
             final Rect insetBounds = new Rect();
             getInsetBounds(insetBounds);
             final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
-            size = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
-                    mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
-            Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
-                    0, Math.max(mIsImeShowing ? mImeHeight : 0,
-                            mIsShelfShowing ? mShelfHeight : 0),
-                    defaultBounds);
+            final Size defaultSize;
+            final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
+            if (overrideMinSize != null) {
+                // The override minimal size is set, use that as the default size making sure it's
+                // adjusted to the aspect ratio.
+                defaultSize = adjustSizeToAspectRatio(overrideMinSize, mDefaultAspectRatio);
+            } else {
+                // Calculate the default size using the display size and default min edge size.
+                defaultSize = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
+                        mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
+            }
+            Gravity.apply(mDefaultStackGravity, defaultSize.getWidth(), defaultSize.getHeight(),
+                    insetBounds, 0, Math.max(mIsImeShowing ? mImeHeight : 0,
+                            mIsShelfShowing ? mShelfHeight : 0), defaultBounds);
         }
         return defaultBounds;
     }
@@ -441,6 +427,10 @@ public class PipBoundsHandler {
     public void applySnapFraction(Rect stackBounds, float snapFraction) {
         final Rect movementBounds = getMovementBounds(stackBounds);
         mSnapAlgorithm.applySnapFraction(stackBounds, movementBounds, snapFraction);
+    }
+
+    public int getDefaultMinSize() {
+        return mDefaultMinSize;
     }
 
     /**
