@@ -274,11 +274,10 @@ public class LockTaskController {
     }
 
     /**
-     * @return whether the requested task is allowed to be locked (either allowlisted, or declares
-     * lockTaskMode="always" in the manifest).
+     * @return whether the requested task auth is allowed to be locked.
      */
-    boolean isTaskAllowlisted(Task task) {
-        switch(task.mLockTaskAuth) {
+    static boolean isTaskAuthAllowlisted(int lockTaskAuth) {
+        switch(lockTaskAuth) {
             case LOCK_TASK_AUTH_ALLOWLISTED:
             case LOCK_TASK_AUTH_LAUNCHABLE:
             case LOCK_TASK_AUTH_LAUNCHABLE_PRIV:
@@ -302,7 +301,30 @@ public class LockTaskController {
      * @return whether the requested task is disallowed to be launched.
      */
     boolean isLockTaskModeViolation(Task task, boolean isNewClearTask) {
-        if (isLockTaskModeViolationInternal(task, isNewClearTask)) {
+        // TODO: Double check what's going on here. If the task is already in lock task mode, it's
+        // likely allowlisted, so will return false below.
+        if (isTaskLocked(task) && !isNewClearTask) {
+            // If the task is already at the top and won't be cleared, then allow the operation
+        } else if (isLockTaskModeViolationInternal(task, task.mUserId, task.intent,
+                task.mLockTaskAuth)) {
+            showLockTaskToast();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param activity an activity that is going to be started in a new task as the root activity.
+     * @return whether the given activity is allowed to be launched.
+     */
+    boolean isNewTaskLockTaskModeViolation(ActivityRecord activity) {
+        // Use the belong task (if any) to perform the lock task checks
+        if (activity.getTask() != null) {
+            return isLockTaskModeViolation(activity.getTask());
+        }
+
+        int auth = getLockTaskAuth(activity, null /* task */);
+        if (isLockTaskModeViolationInternal(activity, activity.mUserId, activity.intent, auth)) {
             showLockTaskToast();
             return true;
         }
@@ -319,25 +341,19 @@ public class LockTaskController {
         return mLockTaskModeTasks.get(0);
     }
 
-    private boolean isLockTaskModeViolationInternal(Task task, boolean isNewClearTask) {
-        // TODO: Double check what's going on here. If the task is already in lock task mode, it's
-        // likely allowlisted, so will return false below.
-        if (isTaskLocked(task) && !isNewClearTask) {
-            // If the task is already at the top and won't be cleared, then allow the operation
-            return false;
-        }
-
+    private boolean isLockTaskModeViolationInternal(WindowContainer wc, int userId,
+            Intent intent, int taskAuth) {
         // Allow recents activity if enabled by policy
-        if (task.isActivityTypeRecents() && isRecentsAllowed(task.mUserId)) {
+        if (wc.isActivityTypeRecents() && isRecentsAllowed(userId)) {
             return false;
         }
 
         // Allow emergency calling when the device is protected by a locked keyguard
-        if (isKeyguardAllowed(task.mUserId) && isEmergencyCallTask(task)) {
+        if (isKeyguardAllowed(userId) && isEmergencyCallIntent(intent)) {
             return false;
         }
 
-        return !(isTaskAllowlisted(task) || mLockTaskModeTasks.isEmpty());
+        return !(isTaskAuthAllowlisted(taskAuth) || mLockTaskModeTasks.isEmpty());
     }
 
     private boolean isRecentsAllowed(int userId) {
@@ -369,8 +385,7 @@ public class LockTaskController {
         return isPackageAllowlisted(userId, packageName);
     }
 
-    private boolean isEmergencyCallTask(Task task) {
-        final Intent intent = task.intent;
+    private boolean isEmergencyCallIntent(Intent intent) {
         if (intent == null) {
             return false;
         }

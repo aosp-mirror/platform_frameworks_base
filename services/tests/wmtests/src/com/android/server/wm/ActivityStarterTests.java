@@ -486,7 +486,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0);
 
         final LockTaskController lockTaskController = mAtm.getLockTaskController();
-        doReturn(true).when(lockTaskController).isLockTaskModeViolation(any());
+        doReturn(true).when(lockTaskController).isNewTaskLockTaskModeViolation(any());
 
         final int result = starter.setReason("testTaskModeViolation").execute();
 
