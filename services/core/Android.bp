@@ -74,6 +74,7 @@ java_library_static {
         ":platform-compat-config",
         ":display-device-config",
         ":cec-config",
+        ":device-state-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",

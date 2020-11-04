@@ -1,0 +1,165 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.policy;
+
+
+import static com.android.server.policy.DeviceStateProviderImpl.DEFAULT_DEVICE_STATE;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import android.annotation.Nullable;
+import android.hardware.input.InputManagerInternal;
+
+import androidx.annotation.NonNull;
+
+import com.android.server.LocalServices;
+import com.android.server.devicestate.DeviceStateProvider;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * Unit tests for {@link DeviceStateProviderImpl}.
+ * <p/>
+ * Run with <code>atest DeviceStateProviderImplTest</code>.
+ */
+public final class DeviceStateProviderImplTest {
+    private final ArgumentCaptor<int[]> mIntArrayCaptor = ArgumentCaptor.forClass(int[].class);
+    private final ArgumentCaptor<Integer> mIntegerCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    @Before
+    public void setup() {
+        LocalServices.addService(InputManagerInternal.class, mock(InputManagerInternal.class));
+    }
+
+    @After
+    public void tearDown() {
+        LocalServices.removeServiceForTest(InputManagerInternal.class);
+    }
+
+    @Test
+    public void create_noConfig() {
+        assertDefaultProviderValues(null);
+    }
+
+    @Test
+    public void create_emptyFile() {
+        String configString = "";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+
+        assertDefaultProviderValues(config);
+    }
+
+    @Test
+    public void create_emptyConfig() {
+        String configString = "<device-state-config></device-state-config>";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+
+        assertDefaultProviderValues(config);
+    }
+
+    @Test
+    public void create_invalidConfig() {
+        String configString = "<device-state-config>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+
+        assertDefaultProviderValues(config);
+    }
+
+    private void assertDefaultProviderValues(
+            @Nullable DeviceStateProviderImpl.ReadableConfig config) {
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        assertArrayEquals(new int[] { DEFAULT_DEVICE_STATE }, mIntArrayCaptor.getValue());
+
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(DEFAULT_DEVICE_STATE, mIntegerCaptor.getValue().intValue());
+    }
+
+    @Test
+    public void create_lidSwitch() {
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <conditions>\n"
+                + "            <lid-switch>\n"
+                + "                <open>true</open>\n"
+                + "            </lid-switch>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <conditions>\n"
+                + "            <lid-switch>\n"
+                + "                <open>false</open>\n"
+                + "            </lid-switch>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        assertArrayEquals(new int[] { 1, 2 }, mIntArrayCaptor.getValue());
+
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(2, mIntegerCaptor.getValue().intValue());
+
+        Mockito.clearInvocations(listener);
+
+        provider.notifyLidSwitchChanged(0, true /* lidOpen */);
+
+        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(1, mIntegerCaptor.getValue().intValue());
+    }
+
+    private static final class TestReadableConfig implements
+            DeviceStateProviderImpl.ReadableConfig {
+        private final byte[] mData;
+
+        TestReadableConfig(String configFileData) {
+            mData = configFileData.getBytes();
+        }
+
+        @NonNull
+        @Override
+        public InputStream openRead() throws IOException {
+            return new ByteArrayInputStream(mData);
+        }
+    }
+}

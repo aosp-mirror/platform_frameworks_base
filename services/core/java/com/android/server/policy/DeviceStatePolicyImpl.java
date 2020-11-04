@@ -30,7 +30,7 @@ public final class DeviceStatePolicyImpl implements DeviceStatePolicy {
     private final DeviceStateProvider mProvider;
 
     public DeviceStatePolicyImpl() {
-        mProvider = new DeviceStateProviderImpl();
+        mProvider = DeviceStateProviderImpl.create();
     }
 
     public DeviceStateProvider getDeviceStateProvider() {
