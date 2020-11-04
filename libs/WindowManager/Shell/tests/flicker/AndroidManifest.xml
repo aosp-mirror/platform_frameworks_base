@@ -32,8 +32,19 @@
     <!-- Workaround grant runtime permission exception from b/152733071 -->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <uses-permission android:name="android.permission.READ_LOGS"/>
+    <!-- Force-stop test apps -->
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES"/>
     <application>
         <uses-library android:name="android.test.runner"/>
+
+        <service android:name=".NotificationListener"
+                 android:exported="true"
+                 android:label="WMShellTestsNotificationListenerService"
+                 android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

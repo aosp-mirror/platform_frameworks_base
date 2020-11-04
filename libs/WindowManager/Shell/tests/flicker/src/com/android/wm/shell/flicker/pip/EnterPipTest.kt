@@ -31,6 +31,7 @@ import com.android.wm.shell.flicker.noUncoveredRegions
 import com.android.wm.shell.flicker.statusBarLayerIsAlwaysVisible
 import com.android.wm.shell.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.PIP_WINDOW_NAME
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -79,7 +80,7 @@ class EnterPipTest(
                 }
             }
             transitions {
-                testApp.clickEnterPipButton(device)
+                testApp.clickEnterPipButton()
                 device.expandPipWindow()
             }
             assertions {
@@ -89,7 +90,7 @@ class EnterPipTest(
                     all("pipWindowBecomesVisible") {
                         this.showsAppWindow(testApp.`package`)
                                 .then()
-                                .showsAppWindow(sPipWindowTitle)
+                                .showsAppWindow(PIP_WINDOW_NAME)
                     }
                 }
 
@@ -103,7 +104,7 @@ class EnterPipTest(
                     all("pipLayerBecomesVisible") {
                         this.showsLayer(testApp.launcherName)
                                 .then()
-                                .showsLayer(sPipWindowTitle)
+                                .showsLayer(PIP_WINDOW_NAME)
                     }
                 }
             }
