@@ -1385,4 +1385,9 @@
 
     <!-- Name of the 3.5mm and usb audio device. [CHAR LIMIT=50] -->
     <string name="media_transfer_wired_usb_device_name">Wired headphone</string>
+
+    <!-- Label for Wifi hotspot switch on. Toggles hotspot on [CHAR LIMIT=30] -->
+    <string name="wifi_hotspot_switch_on_text">On</string>
+    <!-- Label for Wifi hotspot switch off. Toggles hotspot off [CHAR LIMIT=30] -->
+    <string name="wifi_hotspot_switch_off_text">Off</string>
 </resources>
