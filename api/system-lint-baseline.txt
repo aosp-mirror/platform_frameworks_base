@@ -41,8 +41,8 @@ BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(jav
     Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
 
 
-ExecutorRegistration: android.media.MediaPlayer#setOnImsRxNoticeListener(android.media.MediaPlayer.OnImsRxNoticeListener, android.os.Handler):
-    Registration methods should have overload that accepts delivery Executor: `setOnImsRxNoticeListener`
+ExecutorRegistration: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
+    Registration methods should have overload that accepts delivery Executor: `setOnRtpRxNoticeListener`
 ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#deletePersistentGroup(android.net.wifi.p2p.WifiP2pManager.Channel, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
     
 ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener):
@@ -377,8 +377,8 @@ SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.
     
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.media.MediaPlayer#setOnImsRxNoticeListener(android.media.MediaPlayer.OnImsRxNoticeListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaPlayer.setOnImsRxNoticeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.media.MediaPlayer.setOnRtpRxNoticeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
 SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
