@@ -84,13 +84,6 @@ public class LauncherActivityInfo {
     }
 
     /**
-     * @return whether the package is startable.
-     */
-    public boolean isStartable() {
-        return mInternal.getIncrementalStatesInfo().isStartable();
-    }
-
-    /**
      * @return Package loading progress, range between [0, 1].
      */
     public float getLoadingProgress() {
