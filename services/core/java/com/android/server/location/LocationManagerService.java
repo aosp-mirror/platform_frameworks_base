@@ -21,10 +21,10 @@ import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.location.LocationManager.BLOCK_PENDING_INTENT_SYSTEM_API_USAGE;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
-import static android.location.LocationManager.PREVENT_PENDING_INTENT_SYSTEM_API_USAGE;
 import static android.location.LocationRequest.LOW_POWER_EXCEPTIONS;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
@@ -597,14 +597,15 @@ public class LocationManagerService extends ILocationManager.Stub {
         // simplest to ensure these apis are simply never set for pending intent requests. the same
         // does not apply for listener requests since those will have the process (including the
         // listener) killed on permission removal
-        boolean usesSystemApi = request.isLowPower()
-                || request.isHiddenFromAppOps()
-                || request.isLocationSettingsIgnored()
-                || !request.getWorkSource().isEmpty();
-        if (usesSystemApi
-                && isChangeEnabled(PREVENT_PENDING_INTENT_SYSTEM_API_USAGE, identity.getUid())) {
-            throw new SecurityException(
-                    "PendingIntent location requests may not use system APIs: " + request);
+        if (isChangeEnabled(BLOCK_PENDING_INTENT_SYSTEM_API_USAGE, identity.getUid())) {
+            boolean usesSystemApi = request.isLowPower()
+                    || request.isHiddenFromAppOps()
+                    || request.isLocationSettingsIgnored()
+                    || !request.getWorkSource().isEmpty();
+            if (usesSystemApi) {
+                throw new SecurityException(
+                        "PendingIntent location requests may not use system APIs: " + request);
+            }
         }
 
         request = validateLocationRequest(request, identity);
