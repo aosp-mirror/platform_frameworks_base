@@ -16803,6 +16803,18 @@ package android.graphics.text {
 
 package android.hardware {
 
+  public abstract class Battery {
+    ctor public Battery();
+    method @FloatRange(from=-1.0F, to=1.0f) public abstract float getCapacity();
+    method public abstract int getStatus();
+    method public abstract boolean hasBattery();
+    field public static final int STATUS_CHARGING = 2; // 0x2
+    field public static final int STATUS_DISCHARGING = 3; // 0x3
+    field public static final int STATUS_FULL = 5; // 0x5
+    field public static final int STATUS_NOT_CHARGING = 4; // 0x4
+    field public static final int STATUS_UNKNOWN = 1; // 0x1
+  }
+
   @Deprecated public class Camera {
     method @Deprecated public final void addCallbackBuffer(byte[]);
     method @Deprecated public final void autoFocus(android.hardware.Camera.AutoFocusCallback);
@@ -46363,6 +46375,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.hardware.Battery getBattery();
     method public int getControllerNumber();
     method public String getDescriptor();
     method public static android.view.InputDevice getDevice(int);
