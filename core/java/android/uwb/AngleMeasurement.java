@@ -20,6 +20,8 @@ import android.annotation.FloatRange;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Angle measurement
  *
@@ -73,6 +75,32 @@ public final class AngleMeasurement implements Parcelable {
     @FloatRange(from = 0.0, to = 1.0)
     public double getConfidenceLevel() {
         return mConfidenceLevel;
+    }
+
+    /**
+     * @hide
+    */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof AngleMeasurement) {
+            AngleMeasurement other = (AngleMeasurement) obj;
+            return mRadians == other.getRadians()
+                    && mErrorRadians == other.getErrorRadians()
+                    && mConfidenceLevel == other.getConfidenceLevel();
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRadians, mErrorRadians, mConfidenceLevel);
     }
 
     @Override
