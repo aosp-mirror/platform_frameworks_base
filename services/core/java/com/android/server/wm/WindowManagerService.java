@@ -7697,6 +7697,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (imeTarget == null) {
                     return;
                 }
+                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 final InsetsControlTarget controlTarget = imeTarget.getImeControlTarget();
                 imeTarget = controlTarget.getWindow();
                 // If InsetsControlTarget doesn't have a window, its using remoteControlTarget which
@@ -7710,6 +7711,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void hideIme(IBinder imeTargetWindowToken, int displayId) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.hideIme");
             synchronized (mGlobalLock) {
                 WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
                 ProtoLog.d(WM_DEBUG_IME, "hideIme target: %s ", imeTarget);
@@ -7730,6 +7732,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             WindowInsets.Type.ime(), true /* fromIme */);
                 }
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         @Override
