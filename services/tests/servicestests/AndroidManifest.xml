@@ -77,6 +77,7 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <uses-permission android:name="android.permission.DUMP"/>
     <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
+    <uses-permission android:name="android.permission.READ_DREAM_SUPPRESSION"/>
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
