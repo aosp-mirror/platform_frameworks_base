@@ -101,21 +101,18 @@ public final class IncrementalStates {
         if (DEBUG) {
             Slog.i(TAG, "received package commit event");
         }
+        final boolean startableStateChanged;
         synchronized (mLock) {
-            if (!mStartableState.isStartable()) {
-                mStartableState.adoptNewStartableStateLocked(true);
-            }
+            startableStateChanged = mStartableState.adoptNewStartableStateLocked(true);
             if (!isIncremental) {
                 updateProgressLocked(1);
             }
         }
-        mHandler.post(PooledLambda.obtainRunnable(
-                IncrementalStates::reportStartableState,
-                IncrementalStates.this).recycleOnUse());
+        if (startableStateChanged) {
+            onStartableStateChanged();
+        }
         if (!isIncremental) {
-            mHandler.post(PooledLambda.obtainRunnable(
-                    IncrementalStates::reportFullyLoaded,
-                    IncrementalStates.this).recycleOnUse());
+            onLoadingStateChanged();
         }
     }
 
@@ -131,8 +128,7 @@ public final class IncrementalStates {
         synchronized (mLock) {
             if (mStartableState.isStartable() && mLoadingState.isLoading()) {
                 // Changing from startable -> unstartable only if app is still loading.
-                mStartableState.adoptNewStartableStateLocked(false);
-                startableStateChanged = true;
+                startableStateChanged = mStartableState.adoptNewStartableStateLocked(false);
             } else {
                 // If the app is fully loaded, the crash or ANR is caused by the app itself, so
                 // we do not change the startable state.
@@ -140,10 +136,13 @@ public final class IncrementalStates {
             }
         }
         if (startableStateChanged) {
-            mHandler.post(PooledLambda.obtainRunnable(
-                    IncrementalStates::reportStartableState,
-                    IncrementalStates.this).recycleOnUse());
+            onStartableStateChanged();
         }
+    }
+
+    private void onStartableStateChanged() {
+        // Disable startable state broadcasts
+        // TODO(b/171920377): completely remove unstartable state.
     }
 
     private void reportStartableState() {
@@ -165,6 +164,12 @@ public final class IncrementalStates {
         }
     }
 
+    private void onLoadingStateChanged() {
+        mHandler.post(PooledLambda.obtainRunnable(
+                IncrementalStates::reportFullyLoaded,
+                IncrementalStates.this).recycleOnUse());
+    }
+
     private void reportFullyLoaded() {
         final Callback callback;
         synchronized (mLock) {
@@ -178,23 +183,20 @@ public final class IncrementalStates {
     private class StatusConsumer implements Consumer<Integer> {
         @Override
         public void accept(Integer storageStatus) {
-            final boolean oldState, newState;
+            final boolean startableStateChanged;
             synchronized (mLock) {
                 if (!mLoadingState.isLoading()) {
                     // Do nothing if the package is already fully loaded
                     return;
                 }
-                oldState = mStartableState.isStartable();
                 mStorageHealthStatus = storageStatus;
-                updateStartableStateLocked();
-                newState = mStartableState.isStartable();
+                startableStateChanged = updateStartableStateLocked();
             }
-            if (oldState != newState) {
-                mHandler.post(PooledLambda.obtainRunnable(IncrementalStates::reportStartableState,
-                        IncrementalStates.this).recycleOnUse());
+            if (startableStateChanged) {
+                onStartableStateChanged();
             }
         }
-    };
+    }
 
     /**
      * By calling this method, the caller indicates that there issues with the Incremental
@@ -239,14 +241,10 @@ public final class IncrementalStates {
             newStartableState = mStartableState.isStartable();
         }
         if (!newLoadingState) {
-            mHandler.post(PooledLambda.obtainRunnable(
-                    IncrementalStates::reportFullyLoaded,
-                    IncrementalStates.this).recycleOnUse());
+            onLoadingStateChanged();
         }
         if (newStartableState != oldStartableState) {
-            mHandler.post(PooledLambda.obtainRunnable(
-                    IncrementalStates::reportStartableState,
-                    IncrementalStates.this).recycleOnUse());
+            onStartableStateChanged();
         }
     }
 
@@ -284,8 +282,9 @@ public final class IncrementalStates {
      * health
      * status. If the next state is different from the current state, proceed with state
      * change.
+     * @return True if the new startable state is different from the old one.
      */
-    private void updateStartableStateLocked() {
+    private boolean updateStartableStateLocked() {
         final boolean currentState = mStartableState.isStartable();
         boolean nextState = currentState;
         if (!currentState) {
@@ -302,9 +301,9 @@ public final class IncrementalStates {
             }
         }
         if (nextState == currentState) {
-            return;
+            return false;
         }
-        mStartableState.adoptNewStartableStateLocked(nextState);
+        return mStartableState.adoptNewStartableStateLocked(nextState);
     }
 
     private void updateProgressLocked(float progress) {
@@ -343,12 +342,30 @@ public final class IncrementalStates {
             return mUnstartableReason;
         }
 
-        public void adoptNewStartableStateLocked(boolean nextState) {
+        /**
+         * Adopt new startable state if it is different from the current state.
+         * @param nextState True if startable, false if unstartable.
+         * @return True if the state has changed, false otherwise.
+         */
+        public boolean adoptNewStartableStateLocked(boolean nextState) {
+            if (mIsStartable == nextState) {
+                return false;
+            }
+            if (!nextState) {
+                // Do nothing if the next state is "unstartable"; keep package always startable.
+                // TODO(b/171920377): completely remove unstartable state.
+                if (DEBUG) {
+                    Slog.i(TAG, "Attempting to set startable state to false. Abort.");
+                }
+                return false;
+            }
             if (DEBUG) {
-                Slog.i(TAG, "startable state changed from " + mIsStartable + " to " + nextState);
+                Slog.i(TAG,
+                        "startable state changed from " + mIsStartable + " to " + nextState);
             }
             mIsStartable = nextState;
             mUnstartableReason = getUnstartableReasonLocked();
+            return true;
         }
 
         private int getUnstartableReasonLocked() {

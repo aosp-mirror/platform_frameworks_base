@@ -16478,8 +16478,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
                     healthCheckParams.unhealthyMonitoringMs =
                             INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
-                    mIncrementalManager.registerHealthListener(codePath,
-                            new StorageHealthCheckParams(), incrementalHealthListener);
+                    mIncrementalManager.registerHealthListener(codePath, healthCheckParams,
+                            incrementalHealthListener);
                 }
 
                 // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
