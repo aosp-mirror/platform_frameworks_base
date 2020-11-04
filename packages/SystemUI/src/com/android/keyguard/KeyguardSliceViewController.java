@@ -42,6 +42,9 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
@@ -197,6 +200,13 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         }
         mObserver.onChanged(slice);
         Trace.endSection();
+    }
+
+    /**
+     * Update position of the view, with optional animation
+     */
+    void updatePosition(int x, AnimationProperties props, boolean animate) {
+        PropertyAnimator.setProperty(mView, AnimatableProperty.TRANSLATION_X, x, props, animate);
     }
 
     void showSlice(Slice slice) {

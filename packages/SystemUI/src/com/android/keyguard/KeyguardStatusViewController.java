@@ -186,12 +186,23 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     /**
      * Update position of the view with an optional animation
      */
-    public void updatePosition(int clockTranslationX, int clockTranslationY,
-            boolean animateClock) {
-        PropertyAnimator.setProperty(mView, AnimatableProperty.X,
-                clockTranslationX, CLOCK_ANIMATION_PROPERTIES, animateClock);
-        PropertyAnimator.setProperty(mView, AnimatableProperty.Y,
-                clockTranslationY, CLOCK_ANIMATION_PROPERTIES, animateClock);
+    public void updatePosition(int x, int y, boolean animate) {
+        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
+                animate);
+
+        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+            // reset any prior movement
+            PropertyAnimator.setProperty(mView, AnimatableProperty.X, 0,
+                    CLOCK_ANIMATION_PROPERTIES, animate);
+
+            mKeyguardClockSwitchController.updatePosition(x, CLOCK_ANIMATION_PROPERTIES, animate);
+        } else {
+            // reset any prior movement
+            mKeyguardClockSwitchController.updatePosition(0, CLOCK_ANIMATION_PROPERTIES, animate);
+
+            PropertyAnimator.setProperty(mView, AnimatableProperty.X, x,
+                    CLOCK_ANIMATION_PROPERTIES, animate);
+        }
     }
 
     /**
