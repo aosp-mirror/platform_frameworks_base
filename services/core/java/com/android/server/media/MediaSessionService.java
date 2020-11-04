@@ -991,6 +991,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 } else if (mCurrentFullUserRecord.mLastMediaButtonReceiverHolder != null) {
                     String packageName = mLastMediaButtonReceiverHolder.getPackageName();
                     callback.onMediaKeyEventSessionChanged(packageName, null);
+                } else {
+                    callback.onMediaKeyEventSessionChanged("", null);
                 }
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to pushAddressedPlayerChangedLocked", e);
