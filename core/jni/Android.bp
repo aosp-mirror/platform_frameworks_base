@@ -204,6 +204,7 @@ cc_library_shared {
             ],
 
             shared_libs: [
+                "audioflinger-aidl-unstable-cpp",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
