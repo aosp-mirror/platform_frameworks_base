@@ -1060,7 +1060,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 + "; isStaged = " + session.isStaged()
                 + "; isReady = " + session.isStagedSessionReady()
                 + "; isApplied = " + session.isStagedSessionApplied()
-                + "; isFailed = " + session.isStagedSessionFailed() + ";");
+                + "; isFailed = " + session.isStagedSessionFailed()
+                + "; errorMsg = " + session.getStagedSessionErrorMessage()
+                + ";");
     }
 
     private Intent parseIntentAndUser() throws URISyntaxException {
