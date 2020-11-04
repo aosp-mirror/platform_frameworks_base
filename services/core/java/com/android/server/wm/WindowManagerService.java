@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -5886,6 +5887,11 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void createInputConsumer(IBinder token, String name, int displayId,
             InputChannel inputChannel) {
+        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+                && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
+            throw new SecurityException("createInputConsumer requires INPUT_CONSUMER permission");
+        }
+
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
@@ -5897,6 +5903,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean destroyInputConsumer(String name, int displayId) {
+        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+                && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
+            throw new SecurityException("destroyInputConsumer requires INPUT_CONSUMER permission");
+        }
+
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
