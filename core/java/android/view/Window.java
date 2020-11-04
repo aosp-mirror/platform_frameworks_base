@@ -161,7 +161,7 @@ public abstract class Window {
      * Max value used as a feature ID
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int FEATURE_MAX = FEATURE_ACTIVITY_TRANSITIONS;
 
     /**
@@ -788,7 +788,7 @@ public abstract class Window {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final boolean isDestroyed() {
         return mDestroyed;
     }
@@ -1134,7 +1134,7 @@ public abstract class Window {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void addPrivateFlags(int flags) {
         setPrivateFlags(flags, flags);
     }

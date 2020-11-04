@@ -21,6 +21,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -37,35 +38,35 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onTaskStackChanged() throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityPinned(String packageName, int userId, int taskId, int stackId)
             throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityUnpinned() throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
             boolean clearedTask, boolean wasVisible) throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityForcedResizable(String packageName, int taskId, int reason)
             throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityDismissingDockedStack() throws RemoteException {
     }
 
@@ -80,12 +81,12 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
      *         #onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo, int)}
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityLaunchOnSecondaryDisplayFailed() throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityLaunchOnSecondaryDisplayRerouted(RunningTaskInfo taskInfo,
             int requestedDisplayId) throws RemoteException {
     }
@@ -95,7 +96,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onTaskRemoved(int taskId) throws RemoteException {
     }
 
@@ -109,7 +110,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
      * @deprecated see {@link #onTaskMovedToFront(RunningTaskInfo)}
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onTaskMovedToFront(int taskId) throws RemoteException {
     }
 
@@ -141,18 +142,18 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation)
             throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onTaskProfileLocked(int taskId, int userId) throws RemoteException {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) throws RemoteException {
         if (Binder.getCallingPid() != android.os.Process.myPid()
                 && snapshot != null && snapshot.getSnapshot() != null) {
@@ -162,7 +163,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken)
             throws RemoteException {
     }

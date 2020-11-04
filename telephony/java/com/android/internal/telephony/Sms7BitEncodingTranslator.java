@@ -19,6 +19,7 @@ package com.android.internal.telephony;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.util.SparseIntArray;
 
 import com.android.internal.telephony.cdma.sms.UserData;
@@ -28,15 +29,15 @@ import com.android.telephony.Rlog;
 
 public class Sms7BitEncodingTranslator {
     private static final String TAG = "Sms7BitEncodingTranslator";
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final boolean DBG = TelephonyUtils.IS_DEBUGGABLE;
     private static boolean mIs7BitTranslationTableLoaded = false;
     private static SparseIntArray mTranslationTable = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static SparseIntArray mTranslationTableCommon = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static SparseIntArray mTranslationTableGSM = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static SparseIntArray mTranslationTableCDMA = null;
 
     // Parser variables
