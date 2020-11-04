@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.system;
+package com.android.wm.shell.common;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
@@ -35,12 +35,11 @@ import android.view.WindowManagerGlobal;
 import java.io.PrintWriter;
 
 /**
- * Manages the input consumer that allows the SystemUI to directly receive input.
- * TODO: Refactor this for the gesture nav case
+ * Manages the input consumer that allows the Shell to directly receive input.
  */
-public class InputConsumerController {
+public class PipInputConsumer {
 
-    private static final String TAG = InputConsumerController.class.getSimpleName();
+    private static final String TAG = PipInputConsumer.class.getSimpleName();
 
     /**
      * Listener interface for callers to subscribe to input events.
@@ -93,18 +92,10 @@ public class InputConsumerController {
     /**
      * @param name the name corresponding to the input consumer that is defined in the system.
      */
-    public InputConsumerController(IWindowManager windowManager, String name) {
+    public PipInputConsumer(IWindowManager windowManager, String name) {
         mWindowManager = windowManager;
         mToken = new Binder();
         mName = name;
-    }
-
-    /**
-     * @return A controller for the recents animation input consumer.
-     */
-    public static InputConsumerController getRecentsAnimationInputConsumer() {
-        return new InputConsumerController(WindowManagerGlobal.getWindowManagerService(),
-                INPUT_CONSUMER_RECENTS_ANIMATION);
     }
 
     /**
@@ -145,19 +136,21 @@ public class InputConsumerController {
      * @param withSfVsync the flag set using sf vsync signal or no
      */
     public void registerInputConsumer(boolean withSfVsync) {
-        if (mInputEventReceiver == null) {
-            final InputChannel inputChannel = new InputChannel();
-            try {
-                mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
-                mWindowManager.createInputConsumer(mToken, mName, DEFAULT_DISPLAY, inputChannel);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to create input consumer", e);
-            }
-            mInputEventReceiver = new InputEventReceiver(inputChannel, Looper.myLooper(),
-                    withSfVsync ? Choreographer.getSfInstance() : Choreographer.getInstance());
-            if (mRegistrationListener != null) {
-                mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
-            }
+        if (mInputEventReceiver != null) {
+            return;
+        }
+        final InputChannel inputChannel = new InputChannel();
+        try {
+            // TODO(b/113087003): Support Picture-in-picture in multi-display.
+            mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
+            mWindowManager.createInputConsumer(mToken, mName, DEFAULT_DISPLAY, inputChannel);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to create input consumer", e);
+        }
+        mInputEventReceiver = new InputEventReceiver(inputChannel, Looper.myLooper(),
+                withSfVsync ? Choreographer.getSfInstance() : Choreographer.getInstance());
+        if (mRegistrationListener != null) {
+            mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
         }
     }
 
@@ -165,17 +158,19 @@ public class InputConsumerController {
      * Unregisters the input consumer.
      */
     public void unregisterInputConsumer() {
-        if (mInputEventReceiver != null) {
-            try {
-                mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to destroy input consumer", e);
-            }
-            mInputEventReceiver.dispose();
-            mInputEventReceiver = null;
-            if (mRegistrationListener != null) {
-                mRegistrationListener.onRegistrationChanged(false /* isRegistered */);
-            }
+        if (mInputEventReceiver == null) {
+            return;
+        }
+        try {
+            // TODO(b/113087003): Support Picture-in-picture in multi-display.
+            mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to destroy input consumer", e);
+        }
+        mInputEventReceiver.dispose();
+        mInputEventReceiver = null;
+        if (mRegistrationListener != null) {
+            mRegistrationListener.onRegistrationChanged(false /* isRegistered */);
         }
     }
 

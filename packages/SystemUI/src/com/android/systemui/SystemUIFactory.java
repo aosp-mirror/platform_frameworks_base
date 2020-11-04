@@ -118,10 +118,7 @@ public class SystemUIFactory {
                     .setBubbles(Optional.ofNullable(null))
                     .setShellDump(Optional.ofNullable(null));
         }
-        mSysUIComponent = builder
-                .setInputConsumerController(mWMComponent.getInputConsumerController())
-                .setShellTaskOrganizer(mWMComponent.getShellTaskOrganizer())
-                .build();
+        mSysUIComponent = builder.build();
         if (initializeComponents) {
             mSysUIComponent.init();
         }

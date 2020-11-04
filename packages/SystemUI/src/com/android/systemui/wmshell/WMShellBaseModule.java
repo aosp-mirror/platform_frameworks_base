@@ -43,6 +43,7 @@ import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -116,12 +117,6 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static InputConsumerController provideInputConsumerController() {
-        return InputConsumerController.getPipInputConsumer();
-    }
-
-    @WMSingleton
-    @Provides
     static FloatingContentCoordinator provideFloatingContentCoordinator() {
         return new FloatingContentCoordinator();
     }
@@ -181,6 +176,12 @@ public abstract class WMShellBaseModule {
                 mainExecutor, AnimationThread.instance().getExecutor());
     }
 
+    @WMSingleton
+    @Provides
+    static TaskStackListenerImpl providerTaskStackListenerImpl(@Main Handler handler) {
+        return new TaskStackListenerImpl(handler);
+    }
+
     @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();
 
@@ -203,8 +204,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<OneHanded> provideOneHandedController(Context context,
-            DisplayController displayController) {
-        return Optional.ofNullable(OneHandedController.create(context, displayController));
+            DisplayController displayController, TaskStackListenerImpl taskStackListener) {
+        return Optional.ofNullable(OneHandedController.create(context, displayController,
+                taskStackListener));
     }
 
     @WMSingleton

@@ -27,9 +27,6 @@ import java.util.function.Consumer;
  * Interface to engage split screen feature.
  */
 public interface SplitScreen {
-    /** Returns {@code true} if split screen is supported on the device. */
-    boolean isSplitScreenSupported();
-
     /** Called when keyguard showing state changed. */
     void onKeyguardVisibilityChanged(boolean isShowing);
 
@@ -47,15 +44,6 @@ public interface SplitScreen {
 
     /** Switch to minimized state if appropriate. */
     void setMinimized(boolean minimized);
-
-    /** Called when there's an activity forced resizable. */
-    void onActivityForcedResizable(String packageName, int taskId, int reason);
-
-    /** Called when there's an activity dismissing split screen. */
-    void onActivityDismissingSplitScreen();
-
-    /** Called when there's an activity launch on secondary display failed. */
-    void onActivityLaunchOnSecondaryDisplayFailed();
 
     /** Called when there's a task undocking. */
     void onUndockingTask();

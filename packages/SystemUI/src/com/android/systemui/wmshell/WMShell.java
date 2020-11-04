@@ -55,7 +55,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.shared.tracing.ProtoTraceable;
@@ -71,7 +70,6 @@ import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -100,9 +98,7 @@ public final class WMShell extends SystemUI
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
-    private final InputConsumerController mInputConsumerController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final TaskStackChangeListeners mTaskStackChangeListeners;
     private final NavigationModeController mNavigationModeController;
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
@@ -120,9 +116,7 @@ public final class WMShell extends SystemUI
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
             ConfigurationController configurationController,
-            InputConsumerController inputConsumerController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            TaskStackChangeListeners taskStackChangeListeners,
             NavigationModeController navigationModeController,
             ScreenLifecycle screenLifecycle,
             SysUiState sysUiState,
@@ -134,9 +128,7 @@ public final class WMShell extends SystemUI
         super(context);
         mCommandQueue = commandQueue;
         mConfigurationController = configurationController;
-        mInputConsumerController = inputConsumerController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mTaskStackChangeListeners = taskStackChangeListeners;
         mNavigationModeController = navigationModeController;
         mScreenLifecycle = screenLifecycle;
         mSysUiState = sysUiState;
@@ -192,58 +184,6 @@ public final class WMShell extends SystemUI
             }
         });
 
-        // TODO: Move this into the shell
-        // Handle for system task stack changes.
-        mTaskStackChangeListeners.registerTaskStackListener(
-                new TaskStackChangeListener() {
-                    @Override
-                    public void onTaskStackChanged() {
-                        pip.onTaskStackChanged();
-                    }
-
-                    @Override
-                    public void onActivityPinned(String packageName, int userId, int taskId,
-                            int stackId) {
-                        pip.onActivityPinned(packageName);
-                        mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
-                    }
-
-                    @Override
-                    public void onActivityUnpinned() {
-                        final Pair<ComponentName, Integer> topPipActivityInfo =
-                                PipUtils.getTopPipActivity(mContext);
-                        final ComponentName topActivity = topPipActivityInfo.first;
-                        pip.onActivityUnpinned(topActivity);
-                        mInputConsumerController.unregisterInputConsumer();
-                    }
-
-                    @Override
-                    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
-                            boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                        pip.onActivityRestartAttempt(task, clearedTask);
-                    }
-                });
-
-        try {
-            RootTaskInfo taskInfo = ActivityTaskManager.getService().getRootTaskInfo(
-                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-            if (taskInfo != null) {
-                // If SystemUI restart, and it already existed a pinned stack,
-                // register the pip input consumer to ensure touch can send to it.
-                mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
-            }
-        } catch (RemoteException | UnsupportedOperationException e) {
-            Log.e(TAG, "Failed to register pinned stack listener", e);
-            e.printStackTrace();
-        }
-
-        // Register the listener for input consumer touch events. Only for Phone
-        if (pip.getPipTouchHandler() != null) {
-            mInputConsumerController.setInputListener(pip.getPipTouchHandler()::handleTouchEvent);
-            mInputConsumerController.setRegistrationListener(
-                    pip.getPipTouchHandler()::onRegistrationChanged);
-        }
-
         // The media session listener needs to be re-registered when switching users
         UserInfoController userInfoController = Dependency.get(UserInfoController.class);
         userInfoController.addCallback((String name, Drawable picture, String userAccount) ->
@@ -263,39 +203,6 @@ public final class WMShell extends SystemUI
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
-
-        mTaskStackChangeListeners.registerTaskStackListener(
-                new TaskStackChangeListener() {
-                    @Override
-                    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
-                            boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                        if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
-                                != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                                || !splitScreen.isSplitScreenSupported()) {
-                            return;
-                        }
-
-                        if (splitScreen.isMinimized()) {
-                            splitScreen.onUndockingTask();
-                        }
-                    }
-
-                    @Override
-                    public void onActivityForcedResizable(String packageName, int taskId,
-                            int reason) {
-                        splitScreen.onActivityForcedResizable(packageName, taskId, reason);
-                    }
-
-                    @Override
-                    public void onActivityDismissingDockedStack() {
-                        splitScreen.onActivityDismissingSplitScreen();
-                    }
-
-                    @Override
-                    public void onActivityLaunchOnSecondaryDisplayFailed() {
-                        splitScreen.onActivityLaunchOnSecondaryDisplayFailed();
-                    }
-                });
     }
 
     @VisibleForTesting
@@ -375,21 +282,6 @@ public final class WMShell extends SystemUI
                 }
             }
         });
-
-        mTaskStackChangeListeners.registerTaskStackListener(
-                new TaskStackChangeListener() {
-                    @Override
-                    public void onTaskCreated(int taskId, ComponentName componentName) {
-                        oneHanded.stopOneHanded(
-                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
-                    }
-
-                    @Override
-                    public void onTaskMovedToFront(int taskId) {
-                        oneHanded.stopOneHanded(
-                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
-                    }
-                });
     }
 
     @Override
