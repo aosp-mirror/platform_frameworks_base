@@ -15,10 +15,9 @@
  */
 package com.android.server.devicepolicy;
 
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Slog;
-
-import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.concurrent.TimeUnit;
 
