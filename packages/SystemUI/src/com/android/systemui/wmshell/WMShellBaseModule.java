@@ -18,21 +18,27 @@ package com.android.systemui.wmshell;
 
 import android.app.IActivityManager;
 import android.content.Context;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.view.IWindowManager;
+import android.view.WindowManager;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.bubbles.Bubbles;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -116,6 +122,18 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static FloatingContentCoordinator provideFloatingContentCoordinator() {
+        return new FloatingContentCoordinator();
+    }
+
+    @WMSingleton
+    @Provides
+    static WindowManagerShellWrapper provideWindowManagerShellWrapper() {
+        return new WindowManagerShellWrapper();
+    }
+
+    @WMSingleton
+    @Provides
     static PipAppOpsListener providePipAppOpsListener(Context context,
             IActivityManager activityManager,
             PipTouchHandler pipTouchHandler) {
@@ -166,8 +184,21 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();
 
-    @BindsOptionalOf
-    abstract Bubbles optionalBubbles();
+    @WMSingleton
+    @Provides
+    static Optional<Bubbles> provideBubbles(Context context,
+            FloatingContentCoordinator floatingContentCoordinator,
+            IStatusBarService statusBarService,
+            WindowManager windowManager,
+            WindowManagerShellWrapper windowManagerShellWrapper,
+            LauncherApps launcherApps,
+            UiEventLogger uiEventLogger,
+            @Main Handler mainHandler,
+            ShellTaskOrganizer organizer) {
+        return Optional.of(BubbleController.create(context, null /* synchronizer */,
+                floatingContentCoordinator, statusBarService, windowManager,
+                windowManagerShellWrapper, launcherApps, uiEventLogger, mainHandler, organizer));
+    }
 
     @WMSingleton
     @Provides

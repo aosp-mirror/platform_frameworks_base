@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -26,6 +24,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.HashSet;
 import java.util.Optional;

@@ -23,4 +23,21 @@
     <item type="id" name="action_move_tl_50" />
     <item type="id" name="action_move_tl_30" />
     <item type="id" name="action_move_rb_full" />
+
+    <!-- For saving PhysicsAnimationLayout animations/animators as view tags. -->
+    <item type="id" name="translation_x_dynamicanimation_tag"/>
+    <item type="id" name="translation_y_dynamicanimation_tag"/>
+    <item type="id" name="translation_z_dynamicanimation_tag"/>
+    <item type="id" name="alpha_dynamicanimation_tag"/>
+    <item type="id" name="scale_x_dynamicanimation_tag"/>
+    <item type="id" name="scale_y_dynamicanimation_tag"/>
+    <item type="id" name="physics_animator_tag"/>
+    <item type="id" name="target_animator_tag" />
+    <item type="id" name="reorder_animator_tag"/>
+
+    <!-- Accessibility actions for bubbles. -->
+    <item type="id" name="action_move_top_left"/>
+    <item type="id" name="action_move_top_right"/>
+    <item type="id" name="action_move_bottom_left"/>
+    <item type="id" name="action_move_bottom_right"/>
 </resources>

@@ -144,7 +144,7 @@ public @interface SoftInputShowHideReason {
     int HIDE_RECENTS_ANIMATION = 18;
 
     /**
-     * Hide soft input when {@link com.android.systemui.bubbles.BubbleController} is expanding,
+     * Hide soft input when {@link com.android.wm.shell.bubbles.BubbleController} is expanding,
      * switching, or collapsing Bubbles.
      */
     int HIDE_BUBBLES = 19;

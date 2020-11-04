@@ -18,4 +18,8 @@
 <resources>
     <dimen name="docked_divider_handle_width">2dp</dimen>
     <dimen name="docked_divider_handle_height">16dp</dimen>
+
+    <!-- Padding between status bar and bubbles when displayed in expanded state, smaller
+     value in landscape since we have limited vertical space-->
+    <dimen name="bubble_padding_top">4dp</dimen>
 </resources>
