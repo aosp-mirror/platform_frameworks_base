@@ -17,6 +17,8 @@
 package com.android.wm.shell.flicker.pip.tv
 
 import android.app.Notification
+import android.app.PendingIntent
+import android.os.Bundle
 import android.service.notification.StatusBarNotification
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -25,6 +27,7 @@ import com.android.wm.shell.flicker.NotificationListener.Companion.stopNotificat
 import com.android.wm.shell.flicker.NotificationListener.Companion.waitForNotificationToAppear
 import com.android.wm.shell.flicker.NotificationListener.Companion.waitForNotificationToDisappear
 import org.junit.After
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -64,13 +67,50 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
         testApp.launchViaIntent()
         testApp.clickEnterPipButton()
 
-        assertTrue("Pip notification should have been posted",
+        assertNotNull("Pip notification should have been posted",
                 waitForNotificationToAppear { it.isPipNotificationWithTitle(testApp.label) })
 
         testApp.closePipWindow()
 
         assertTrue("Pip notification should have been dismissed",
                 waitForNotificationToDisappear { it.isPipNotificationWithTitle(testApp.label) })
+    }
+
+    @Test
+    fun pipNotification_closeIntent() {
+        testApp.launchViaIntent()
+        testApp.clickEnterPipButton()
+
+        val notification: StatusBarNotification = waitForNotificationToAppear {
+            it.isPipNotificationWithTitle(testApp.label)
+        } ?: throw AssertionError("Pip notification should have been posted")
+
+        notification.deleteIntent?.send()
+            ?: throw AssertionError("Pip notification should contain `delete_intent`")
+
+        assertTrue("Pip should have closed by sending the `delete_intent`",
+                testApp.waitUntilClosed())
+        assertTrue("Pip notification should have been dismissed",
+                waitForNotificationToDisappear { it.isPipNotificationWithTitle(testApp.label) })
+    }
+
+    @Test
+    fun pipNotification_menuIntent() {
+        testApp.launchViaIntent()
+        testApp.clickEnterPipButton()
+
+        val notification: StatusBarNotification = waitForNotificationToAppear {
+            it.isPipNotificationWithTitle(testApp.label)
+        } ?: throw AssertionError("Pip notification should have been posted")
+
+        notification.contentIntent?.send()
+            ?: throw AssertionError("Pip notification should contain `content_intent`")
+
+        assertTrue("Pip menu should have been shown after sending `content_intent`",
+                uiDevice.waitForTvPipMenu())
+
+        uiDevice.pressBack()
+        testApp.closePipWindow()
     }
 
     companion object {
@@ -83,10 +123,23 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
     }
 }
 
-private const val PIP_NOTIFICATION_TAG = "PipNotification"
+private val StatusBarNotification.extras: Bundle?
+    get() = notification?.extras
 
 private val StatusBarNotification.title: String
-    get() = notification?.extras?.getString(Notification.EXTRA_TITLE) ?: ""
+    get() = extras?.getString(Notification.EXTRA_TITLE) ?: ""
+
+/** Get TV extensions with [android.app.Notification.TvExtender.EXTRA_TV_EXTENDER]. */
+private val StatusBarNotification.tvExtensions: Bundle?
+    get() = extras?.getBundle("android.tv.EXTENSIONS")
+
+/** "Content" TV intent with key [android.app.Notification.TvExtender.EXTRA_CONTENT_INTENT]. */
+private val StatusBarNotification.contentIntent: PendingIntent?
+    get() = tvExtensions?.getParcelable("content_intent")
+
+/** "Delete" TV intent with key [android.app.Notification.TvExtender.EXTRA_DELETE_INTENT]. */
+private val StatusBarNotification.deleteIntent: PendingIntent?
+    get() = tvExtensions?.getParcelable("delete_intent")
 
 private fun StatusBarNotification.isPipNotificationWithTitle(expectedTitle: String): Boolean =
-    tag == PIP_NOTIFICATION_TAG && title == expectedTitle
+    tag == "PipNotification" && title == expectedTitle
