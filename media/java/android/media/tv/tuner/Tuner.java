@@ -122,6 +122,17 @@ public class Tuner implements AutoCloseable  {
             android.hardware.tv.tuner.V1_1.Constants.Constant
                     .INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM;
     /**
+     * Invalid first macroblock address in MmtpRecordEvent and TsRecordEvent.
+     *
+     * <p>Returned by {@link MmtpRecordEvent#getMbInSlice()} and
+     * {@link TsRecordEvent#getMbInSlice()} when the requested sequence number is not available.
+     *
+     * @see android.media.tv.tuner.filter.MmtpRecordEvent#getMbInSlice()
+     * @see android.media.tv.tuner.filter.TsRecordEvent#getMbInSlice()
+     */
+    public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE =
+            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FIRST_MACROBLOCK_IN_SLICE;
+    /**
      * Invalid local transport stream id.
      *
      * <p>Returned by {@link #linkFrontendToCiCam(int)} when the requested failed
