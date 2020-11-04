@@ -629,12 +629,20 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Whether or not this channel represents a conversation.
+     */
+    public boolean isConversation() {
+        return !TextUtils.isEmpty(getConversationId());
+    }
+
+
+    /**
      * Whether or not notifications in this conversation are considered important.
      *
      * <p>Important conversations may get special visual treatment, and might be able to bypass DND.
      *
-     * <p>This is only valid for channels that represent conversations, that is, those with a valid
-     * {@link #getConversationId() conversation id}.
+     * <p>This is only valid for channels that represent conversations, that is,
+     * where {@link #isConversation()} is true.
      */
     public boolean isImportantConversation() {
         return mImportantConvo;
