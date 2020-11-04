@@ -16,9 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.graphics.drawable.Drawable;
 import android.util.FloatProperty;
-import android.util.Log;
 import android.util.Property;
 import android.view.View;
 
@@ -34,8 +32,13 @@ public abstract class AnimatableProperty {
 
     public static final AnimatableProperty X = AnimatableProperty.from(View.X,
             R.id.x_animator_tag, R.id.x_animator_tag_start_value, R.id.x_animator_tag_end_value);
+
     public static final AnimatableProperty Y = AnimatableProperty.from(View.Y,
             R.id.y_animator_tag, R.id.y_animator_tag_start_value, R.id.y_animator_tag_end_value);
+
+    public static final AnimatableProperty TRANSLATION_X = AnimatableProperty.from(
+            View.TRANSLATION_X, R.id.x_animator_tag, R.id.x_animator_tag_start_value,
+            R.id.x_animator_tag_end_value);
 
     /**
      * Similar to X, however this doesn't allow for any other modifications other than from this

@@ -31,10 +31,13 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
@@ -173,6 +176,16 @@ public class NotificationIconAreaController implements
             updateAodNotificationIcons();
         }
         updateIconLayoutParams(mContext);
+    }
+
+    /**
+     * Update position of the view, with optional animation
+     */
+    public void updatePosition(int x, AnimationProperties props, boolean animate) {
+        if (mAodIcons != null) {
+            PropertyAnimator.setProperty(mAodIcons, AnimatableProperty.TRANSLATION_X, x, props,
+                    animate);
+        }
     }
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
