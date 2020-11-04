@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.Manifest.permission;
 import android.app.AppOpsManager;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -167,13 +166,11 @@ public class NetworkStatsAccessTest {
     }
 
     private void setIsDeviceOwner(boolean isOwner) {
-        when(mDpmi.isActiveAdminWithPolicy(TEST_UID, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER))
-                .thenReturn(isOwner);
+        when(mDpmi.isActiveDeviceOwner(TEST_UID)).thenReturn(isOwner);
     }
 
     private void setIsProfileOwner(boolean isOwner) {
-        when(mDpmi.isActiveAdminWithPolicy(TEST_UID, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER))
-                .thenReturn(isOwner);
+        when(mDpmi.isActiveProfileOwner(TEST_UID)).thenReturn(isOwner);
     }
 
     private void setHasAppOpsPermission(int appOpsMode, boolean hasPermission) {
