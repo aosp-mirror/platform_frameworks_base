@@ -226,28 +226,20 @@ public class RescuePartyTest {
 
     @Test
     public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevels() {
-        notePersistentAppCrash();
+        notePersistentAppCrash(1);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        notePersistentAppCrash();
+        notePersistentAppCrash(2);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, /*resetNamespaces=*/ null);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        notePersistentAppCrash();
+        notePersistentAppCrash(3);
 
         verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, /*resetNamespaces=*/ null);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        notePersistentAppCrash();
-
-        assertEquals(LEVEL_FACTORY_RESET,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
+        notePersistentAppCrash(4);
+        assertTrue(RescueParty.isAttemptingFactoryReset());
     }
 
     @Test
@@ -281,25 +273,19 @@ public class RescuePartyTest {
         final String[] expectedAllResetNamespaces =
                 new String[]{NAMESPACE1, NAMESPACE2, NAMESPACE3};
         observer.execute(new VersionedPackage(
-                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, expectedResetNamespaces);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         observer.execute(new VersionedPackage(
-                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 2);
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, expectedResetNamespaces);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         observer.execute(new VersionedPackage(
-                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 3);
         verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, expectedAllResetNamespaces);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         observer.execute(new VersionedPackage(
-                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4);
         assertTrue(RescueParty.isAttemptingFactoryReset());
     }
 
@@ -341,11 +327,11 @@ public class RescuePartyTest {
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
         SystemProperties.set(PROP_DISABLE_RESCUE, Boolean.toString(true));
         assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING), false);
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1), false);
 
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
         assertTrue(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING));
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1));
     }
 
     @Test
@@ -354,7 +340,7 @@ public class RescuePartyTest {
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(true));
 
         assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING), false);
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1), false);
 
         // Restore the property value initialized in SetUp()
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
@@ -379,46 +365,24 @@ public class RescuePartyTest {
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
         // Ensure that no action is taken for cases where the failure reason is unknown
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                LEVEL_FACTORY_RESET));
-        assertEquals(observer.onHealthCheckFailed(null, PackageWatchdog.FAILURE_REASON_UNKNOWN),
+        assertEquals(observer.onHealthCheckFailed(null, PackageWatchdog.FAILURE_REASON_UNKNOWN, 1),
                 PackageHealthObserverImpact.USER_IMPACT_NONE);
 
-        /*
-        For the following cases, ensure that the returned user impact corresponds with the user
-        impact of the next available rescue level, not the current one.
-         */
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_NONE));
+        // Ensure the correct user impact is returned for each mitigation count.
         assertEquals(observer.onHealthCheckFailed(null,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
                 PackageHealthObserverImpact.USER_IMPACT_LOW);
 
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS));
         assertEquals(observer.onHealthCheckFailed(null,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 2),
                 PackageHealthObserverImpact.USER_IMPACT_LOW);
 
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES));
         assertEquals(observer.onHealthCheckFailed(null,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 3),
                 PackageHealthObserverImpact.USER_IMPACT_HIGH);
 
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS));
         assertEquals(observer.onHealthCheckFailed(null,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
-
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                LEVEL_FACTORY_RESET));
-        assertEquals(observer.onHealthCheckFailed(null,
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4),
                 PackageHealthObserverImpact.USER_IMPACT_HIGH);
     }
 
@@ -451,17 +415,6 @@ public class RescuePartyTest {
         assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
     }
 
-    @Test
-    public void testRescueLevelIncrementsWhenExecuted() {
-        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_NONE));
-        observer.execute(sFailingPackage,
-                PackageWatchdog.FAILURE_REASON_APP_CRASH);
-        assertEquals(SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, -1),
-                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS);
-    }
-
     private void verifySettingsResets(int resetMode, String[] resetNamespaces) {
         verify(() -> Settings.Global.resetToDefaultsAsUser(mMockContentResolver, null,
                 resetMode, UserHandle.USER_SYSTEM));
@@ -481,9 +434,9 @@ public class RescuePartyTest {
         RescuePartyObserver.getInstance(mMockContext).executeBootLoopMitigation();
     }
 
-    private void notePersistentAppCrash() {
+    private void notePersistentAppCrash(int mitigationCount) {
         RescuePartyObserver.getInstance(mMockContext).execute(new VersionedPackage(
-                "com.package.name", 1), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+                "com.package.name", 1), PackageWatchdog.FAILURE_REASON_APP_CRASH, mitigationCount);
     }
 
     private Bundle getConfigAccessBundle(String callingPackage, String namespace) {

@@ -77,6 +77,7 @@ public class RescueParty {
     static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
     @VisibleForTesting
     static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
+    static final String PROP_ATTEMPTING_FACTORY_RESET = "sys.attempting_factory_reset";
     @VisibleForTesting
     static final int LEVEL_NONE = 0;
     @VisibleForTesting
@@ -155,7 +156,7 @@ public class RescueParty {
      * Check if we're currently attempting to reboot for a factory reset.
      */
     public static boolean isAttemptingFactoryReset() {
-        return SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) == LEVEL_FACTORY_RESET;
+        return SystemProperties.getBoolean(PROP_ATTEMPTING_FACTORY_RESET, false);
     }
 
     /**
@@ -230,14 +231,38 @@ public class RescueParty {
         }
     }
 
+    private static int getMaxRescueLevel() {
+        return SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)
+                ? LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS : LEVEL_FACTORY_RESET;
+    }
+
+    /**
+     * Get the rescue level to perform if this is the n-th attempt at mitigating failure.
+     *
+     * @param mitigationCount: the mitigation attempt number (1 = first attempt etc.)
+     * @return the rescue level for the n-th mitigation attempt.
+     */
+    private static int getRescueLevel(int mitigationCount) {
+        if (mitigationCount == 1) {
+            return LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS;
+        } else if (mitigationCount == 2) {
+            return LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES;
+        } else if (mitigationCount == 3) {
+            return LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS;
+        } else if (mitigationCount >= 4) {
+            return getMaxRescueLevel();
+        } else {
+            Slog.w(TAG, "Expected positive mitigation count, was " + mitigationCount);
+            return LEVEL_NONE;
+        }
+    }
+
     /**
      * Get the next rescue level. This indicates the next level of mitigation that may be taken.
      */
     private static int getNextRescueLevel() {
-        int maxRescueLevel = SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)
-                ? LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS : LEVEL_FACTORY_RESET;
         return MathUtils.constrain(SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
-                LEVEL_NONE, maxRescueLevel);
+                LEVEL_NONE, getMaxRescueLevel());
     }
 
     /**
@@ -256,7 +281,11 @@ public class RescueParty {
     private static void executeRescueLevel(Context context, @Nullable String failedPackage) {
         final int level = SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE);
         if (level == LEVEL_NONE) return;
+        executeRescueLevel(context, failedPackage, level);
+    }
 
+    private static void executeRescueLevel(Context context, @Nullable String failedPackage,
+            int level) {
         Slog.w(TAG, "Attempting rescue level " + levelToString(level));
         try {
             executeRescueLevelInternal(context, level, failedPackage);
@@ -284,6 +313,7 @@ public class RescueParty {
             case LEVEL_FACTORY_RESET:
                 // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
                 // when device shutting down.
+                SystemProperties.set(PROP_ATTEMPTING_FACTORY_RESET, "true");
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
@@ -320,15 +350,6 @@ public class RescueParty {
         }
     }
 
-    private static int getPackageUid(Context context, String packageName) {
-        try {
-            return context.getPackageManager().getPackageUid(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            // Since UIDs are always >= 0, this value means the UID could not be determined.
-            return -1;
-        }
-    }
-
     private static void resetAllSettings(Context context, int mode, @Nullable String failedPackage)
             throws Exception {
         // Try our best to reset all settings possible, and once finished
@@ -359,7 +380,7 @@ public class RescueParty {
 
     private static void resetDeviceConfig(Context context, int resetMode,
             @Nullable String failedPackage) {
-        if (!shouldPerformScopedResets() || failedPackage == null) {
+        if (!shouldPerformScopedResets(resetMode) || failedPackage == null) {
             resetAllAffectedNamespaces(context, resetMode);
         } else {
             performScopedReset(context, resetMode, failedPackage);
@@ -384,11 +405,8 @@ public class RescueParty {
         }
     }
 
-    private static boolean shouldPerformScopedResets() {
-        int rescueLevel = MathUtils.constrain(
-                SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE),
-                LEVEL_NONE, LEVEL_FACTORY_RESET);
-        return rescueLevel <= LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES;
+    private static boolean shouldPerformScopedResets(int resetMode) {
+        return resetMode <= Settings.RESET_MODE_UNTRUSTED_CHANGES;
     }
 
     private static void performScopedReset(Context context, int resetMode,
@@ -455,7 +473,7 @@ public class RescueParty {
                 @FailureReasons int failureReason, int mitigationCount) {
             if (!isDisabled() && (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING)) {
-                return mapRescueLevelToUserImpact(getNextRescueLevel());
+                return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount));
             } else {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;
             }
@@ -469,10 +487,9 @@ public class RescueParty {
             }
             if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
-                int triggerUid = getPackageUid(mContext, failedPackage.getPackageName());
-                incrementRescueLevel(triggerUid);
+                final int level = getRescueLevel(mitigationCount);
                 executeRescueLevel(mContext,
-                        failedPackage == null ? null : failedPackage.getPackageName());
+                        failedPackage == null ? null : failedPackage.getPackageName(), level);
                 return true;
             } else {
                 return false;
