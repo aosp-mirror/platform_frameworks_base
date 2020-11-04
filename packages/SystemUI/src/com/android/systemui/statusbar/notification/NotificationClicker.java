@@ -22,10 +22,10 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.DejankUtils;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
 

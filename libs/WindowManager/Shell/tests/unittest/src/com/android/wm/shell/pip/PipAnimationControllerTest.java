@@ -32,9 +32,7 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
-import com.android.wm.shell.pip.PipTestCase;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +47,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class PipAnimationControllerTest extends PipTestCase {
+public class PipAnimationControllerTest extends ShellTestCase {
 
     private PipAnimationController mPipAnimationController;
 

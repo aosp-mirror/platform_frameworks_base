@@ -352,7 +352,7 @@
                 android:exported="true" />
 
         <activity
-            android:name=".bubbles.BubbleOverflowActivity"
+            android:name="com.android.wm.shell.bubbles.BubbleOverflowActivity"
             android:theme="@style/BubbleOverflow"
             android:excludeFromRecents="true"
             android:documentLaunchMode="always"

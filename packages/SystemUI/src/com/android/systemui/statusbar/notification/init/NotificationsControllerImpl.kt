@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
-import com.android.systemui.bubbles.Bubbles
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.FeatureFlags
@@ -41,6 +40,7 @@ import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.RemoteInputUriController
+import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
 import java.io.FileDescriptor
 import java.io.PrintWriter

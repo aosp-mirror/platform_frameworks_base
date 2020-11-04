@@ -21,6 +21,7 @@ import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -64,13 +65,11 @@ public interface WMComponent {
     InputConsumerController getInputConsumerController();
 
     // TODO(b/162923491): To be removed once Bubbles migrates over to the Shell
-
     @WMSingleton
     ShellTaskOrganizer getShellTaskOrganizer();
 
     // TODO(b/162923491): We currently pass the instances through to SysUI, but that may change
     //                    depending on the threading mechanism we go with
-
     @WMSingleton
     Optional<OneHanded> getOneHanded();
 
@@ -79,4 +78,7 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<SplitScreen> getSplitScreen();
+
+    @WMSingleton
+    Optional<Bubbles> getBubbles();
 }
