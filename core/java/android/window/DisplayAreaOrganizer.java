@@ -88,9 +88,11 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_VENDOR_FIRST = FEATURE_SYSTEM_LAST + 1;
 
     /**
-     * Registers a DisplayAreaOrganizer to manage display areas for a given feature.
+     * Registers a DisplayAreaOrganizer to manage display areas for a given feature. A feature can
+     * not be registered by multiple organizers at the same time.
      *
      * @return a list of display areas that should be managed by the organizer.
+     * @throws IllegalStateException if the feature has already been registered.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @CallSuper
