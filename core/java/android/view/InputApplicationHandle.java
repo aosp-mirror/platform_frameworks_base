@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.os.IBinder;
 
 /**
@@ -31,17 +32,20 @@ public final class InputApplicationHandle {
     private long ptr;
 
     // Application name.
-    public String name;
+    public final @NonNull String name;
 
     // Dispatching timeout.
-    public long dispatchingTimeoutMillis;
+    public final long dispatchingTimeoutMillis;
 
-    public final IBinder token;
+    public final @NonNull IBinder token;
 
     private native void nativeDispose();
 
-    public InputApplicationHandle(IBinder token) {
+    public InputApplicationHandle(@NonNull IBinder token, @NonNull String name,
+            long dispatchingTimeoutMillis) {
         this.token = token;
+        this.name = name;
+        this.dispatchingTimeoutMillis = dispatchingTimeoutMillis;
     }
 
     public InputApplicationHandle(InputApplicationHandle handle) {

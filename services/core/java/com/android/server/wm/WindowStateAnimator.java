@@ -488,6 +488,9 @@ class WindowStateAnimator {
             mSurfaceFormat = format;
 
             w.setHasSurface(true);
+            // The surface instance is changed. Make sure the input info can be applied to the
+            // new surface, e.g. relaunch activity.
+            w.mInputWindowHandle.forceChange();
 
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                         "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x / %s",

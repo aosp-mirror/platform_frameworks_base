@@ -63,9 +63,8 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
             mClientChannel.copyTo(inputChannel);
         }
 
-        mApplicationHandle = new InputApplicationHandle(new Binder());
-        mApplicationHandle.name = name;
-        mApplicationHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+        mApplicationHandle = new InputApplicationHandle(new Binder(), name,
+                DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
 
         mWindowHandle = new InputWindowHandle(mApplicationHandle, displayId);
         mWindowHandle.name = name;
@@ -160,9 +159,11 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     public void binderDied() {
         synchronized (mService.getWindowManagerLock()) {
             // Clean up the input consumer
-            final InputMonitor inputMonitor =
-                    mService.mRoot.getDisplayContent(mWindowHandle.displayId).getInputMonitor();
-            inputMonitor.destroyInputConsumer(mName);
+            final DisplayContent dc = mService.mRoot.getDisplayContent(mWindowHandle.displayId);
+            if (dc == null) {
+                return;
+            }
+            dc.getInputMonitor().destroyInputConsumer(mName);
             unlinkFromDeathRecipient();
         }
     }

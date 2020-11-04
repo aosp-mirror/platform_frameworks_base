@@ -54,26 +54,28 @@ jobject NativeInputApplicationHandle::getInputApplicationHandleObjLocalRef(JNIEn
 
 bool NativeInputApplicationHandle::updateInfo() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jobject obj = env->NewLocalRef(mObjWeak);
-    if (!obj) {
+    ScopedLocalRef<jobject> obj(env, env->NewLocalRef(mObjWeak));
+    if (!obj.get()) {
         return false;
     }
+    if (mInfo.token.get() != nullptr) {
+        // The java fields are immutable, so it doesn't need to update again.
+        return true;
+    }
 
-    mInfo.name = getStringField(env, obj, gInputApplicationHandleClassInfo.name, "<null>");
+    mInfo.name = getStringField(env, obj.get(), gInputApplicationHandleClassInfo.name, "<null>");
 
     mInfo.dispatchingTimeoutMillis =
-            env->GetLongField(obj, gInputApplicationHandleClassInfo.dispatchingTimeoutMillis);
+            env->GetLongField(obj.get(), gInputApplicationHandleClassInfo.dispatchingTimeoutMillis);
 
-    jobject tokenObj = env->GetObjectField(obj,
-            gInputApplicationHandleClassInfo.token);
-    if (tokenObj) {
-        mInfo.token = ibinderForJavaObject(env, tokenObj);
-        env->DeleteLocalRef(tokenObj);
+    ScopedLocalRef<jobject> tokenObj(env, env->GetObjectField(obj.get(),
+            gInputApplicationHandleClassInfo.token));
+    if (tokenObj.get()) {
+        mInfo.token = ibinderForJavaObject(env, tokenObj.get());
     } else {
         mInfo.token.clear();
     }
 
-    env->DeleteLocalRef(obj);
     return mInfo.token.get() != nullptr;
 }
 
