@@ -271,7 +271,7 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
                     Log.d(TAG, "    was in split, so this means leave it "
                             + mPrimary.topActivityType + "  " + mSecondary.topActivityType);
                 }
-                mSplitScreenController.startDismissSplit();
+                mSplitScreenController.startDismissSplit(false /* toPrimaryTask */);
             } else if (!primaryIsEmpty && primaryWasEmpty && secondaryWasEmpty) {
                 // Wasn't in split-mode (both were empty), but now that the primary split is
                 // populated, we should fully enter split by moving everything else into secondary.

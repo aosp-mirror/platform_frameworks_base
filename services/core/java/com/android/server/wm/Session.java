@@ -24,6 +24,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_SHORTCUT_ID;
 import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -43,6 +44,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -288,7 +290,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
         // Validate and resolve ClipDescription data before clearing the calling identity
-        validateAndResolveDragMimeTypeExtras(data, Binder.getCallingUid());
+        validateAndResolveDragMimeTypeExtras(data, Binder.getCallingUid(), Binder.getCallingPid(),
+                mPackageName);
         final long ident = Binder.clearCallingIdentity();
         try {
             return mDragDropController.performDrag(mPid, mUid, window, flags, surface, touchSource,
@@ -302,8 +305,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
      * Validates the given drag data.
      */
     @VisibleForTesting
-    public void validateAndResolveDragMimeTypeExtras(ClipData data, int callingUid) {
-        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+    void validateAndResolveDragMimeTypeExtras(ClipData data, int callingUid, int callingPid,
+            String callingPackage) {
+        if (callingUid == Process.SYSTEM_UID) {
             throw new IllegalStateException("Need to validate before calling identify is cleared");
         }
         final ClipDescription desc = data != null ? data.getDescription() : null;
@@ -358,25 +362,57 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 Binder.restoreCallingIdentity(origId);
             }
         } else if (hasShortcut) {
+            // Restrict who can start a shortcut drag since it will start the shortcut as the
+            // target shortcut package
             mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
                     "performDrag");
             for (int i = 0; i < data.getItemCount(); i++) {
-                final Intent intent = data.getItemAt(i).getIntent();
+                final ClipData.Item item = data.getItemAt(i);
+                final Intent intent = item.getIntent();
+                final String shortcutId = intent.getStringExtra(EXTRA_SHORTCUT_ID);
+                final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
                 final UserHandle user = intent.getParcelableExtra(Intent.EXTRA_USER);
-                if (!intent.hasExtra(EXTRA_SHORTCUT_ID)
-                        || TextUtils.isEmpty(intent.getStringExtra(EXTRA_SHORTCUT_ID))
+                if (TextUtils.isEmpty(shortcutId)
+                        || TextUtils.isEmpty(packageName)
                         || user == null) {
-                    throw new IllegalArgumentException("Clip item must include the shortcut id and "
-                            + "the user to launch for.");
+                    throw new IllegalArgumentException("Clip item must include the package name, "
+                            + "shortcut id, and the user to launch for.");
                 }
+                final ShortcutServiceInternal shortcutService =
+                        LocalServices.getService(ShortcutServiceInternal.class);
+                final Intent[] shortcutIntents = shortcutService.createShortcutIntents(
+                        callingUid, callingPackage, packageName, shortcutId,
+                        user.getIdentifier(), callingPid, callingUid);
+                if (shortcutIntents == null || shortcutIntents.length == 0) {
+                    throw new IllegalArgumentException("Invalid shortcut id");
+                }
+                final ActivityInfo info = mService.mAtmService.resolveActivityInfoForIntent(
+                        shortcutIntents[0], null /* resolvedType */, user.getIdentifier(),
+                        callingUid);
+                item.setActivityInfo(info);
             }
         } else if (hasTask) {
+            // TODO(b/169894807): Consider opening this up for tasks from the same app as the caller
             mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
                     "performDrag");
             for (int i = 0; i < data.getItemCount(); i++) {
-                final Intent intent = data.getItemAt(i).getIntent();
-                if (intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID) == INVALID_TASK_ID) {
+                final ClipData.Item item = data.getItemAt(i);
+                final Intent intent = item.getIntent();
+                final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
+                if (taskId == INVALID_TASK_ID) {
                     throw new IllegalArgumentException("Clip item must include the task id.");
+                }
+                final Task task = mService.mRoot.anyTaskForId(taskId);
+                if (task == null) {
+                    throw new IllegalArgumentException("Invalid task id.");
+                }
+                if (task.getRootActivity() != null) {
+                    item.setActivityInfo(task.getRootActivity().info);
+                } else {
+                    // Resolve the activity info manually if the task was restored after reboot
+                    final ActivityInfo info = mService.mAtmService.resolveActivityInfoForIntent(
+                            task.intent, null /* resolvedType */, task.mUserId, callingUid);
+                    item.setActivityInfo(info);
                 }
             }
         }

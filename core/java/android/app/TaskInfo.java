@@ -257,6 +257,18 @@ public class TaskInfo {
     }
 
     /** @hide */
+    @WindowConfiguration.WindowingMode
+    public int getWindowingMode() {
+        return configuration.windowConfiguration.getWindowingMode();
+    }
+
+    /** @hide */
+    @WindowConfiguration.ActivityType
+    public int getActivityType() {
+        return configuration.windowConfiguration.getActivityType();
+    }
+
+    /** @hide */
     public void addLaunchCookie(IBinder cookie) {
         if (cookie == null || launchCookies.contains(cookie)) return;
         launchCookies.add(cookie);

@@ -40,7 +40,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.R;
 
 /**
- * Drawable to draw the region of the
+ * Drawable to draw the region that the target will have once it is dropped.
  */
 public class DropOutlineDrawable extends Drawable {
 
