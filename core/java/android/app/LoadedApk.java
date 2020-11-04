@@ -286,7 +286,7 @@ public final class LoadedApk {
         return mSecurityViolation;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 172409979)
     public CompatibilityInfo getCompatibilityInfo() {
         return mDisplayAdjustments.getCompatibilityInfo();
     }
