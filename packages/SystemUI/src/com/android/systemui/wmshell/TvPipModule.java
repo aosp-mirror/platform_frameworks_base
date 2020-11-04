@@ -95,8 +95,8 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static PipBoundsState providePipBoundsState() {
-        return new PipBoundsState();
+    static PipBoundsState providePipBoundsState(Context context) {
+        return new PipBoundsState(context);
     }
 
     @WMSingleton
