@@ -24,6 +24,8 @@ import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.content.Context.STATUS_BAR_SERVICE;
 import static android.content.Intent.ACTION_CALL_EMERGENCY;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_CURRENT;
@@ -33,11 +35,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_ALLOWLISTED;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_PINNABLE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -128,6 +125,18 @@ public class LockTaskController {
 
     /** Tag used for disabling of keyguard */
     private static final String LOCK_TASK_TAG = "Lock-to-App";
+
+    /** Can't be put in lockTask mode. */
+    static final int LOCK_TASK_AUTH_DONT_LOCK = 0;
+    /** Can enter app pinning with user approval. Can never start over existing lockTask task. */
+    static final int LOCK_TASK_AUTH_PINNABLE = 1;
+    /** Starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing lockTask task. */
+    static final int LOCK_TASK_AUTH_LAUNCHABLE = 2;
+    /** Can enter lockTask without user approval. Can start over existing lockTask task. */
+    static final int LOCK_TASK_AUTH_ALLOWLISTED = 3;
+    /** Priv-app that starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing
+     * lockTask task. */
+    static final int LOCK_TASK_AUTH_LAUNCHABLE_PRIV = 4;
 
     private final IBinder mToken = new LockTaskToken();
     private final ActivityStackSupervisor mSupervisor;
@@ -695,6 +704,40 @@ public class LockTaskController {
         if (taskChanged) {
             mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
+    }
+
+    int getLockTaskAuth(@Nullable ActivityRecord rootActivity, @Nullable Task task) {
+        if (rootActivity == null && task == null) {
+            return LOCK_TASK_AUTH_DONT_LOCK;
+        }
+        if (rootActivity == null) {
+            return LOCK_TASK_AUTH_PINNABLE;
+        }
+
+        final String pkg = (task == null || task.realActivity == null) ? null
+                : task.realActivity.getPackageName();
+        final int userId = task != null ? task.mUserId : rootActivity.mUserId;
+        int lockTaskAuth = LOCK_TASK_AUTH_DONT_LOCK;
+        switch (rootActivity.lockTaskLaunchMode) {
+            case LOCK_TASK_LAUNCH_MODE_DEFAULT:
+                lockTaskAuth = isPackageAllowlisted(userId, pkg)
+                        ? LOCK_TASK_AUTH_ALLOWLISTED : LOCK_TASK_AUTH_PINNABLE;
+                break;
+
+            case LOCK_TASK_LAUNCH_MODE_NEVER:
+                lockTaskAuth = LOCK_TASK_AUTH_DONT_LOCK;
+                break;
+
+            case LOCK_TASK_LAUNCH_MODE_ALWAYS:
+                lockTaskAuth = LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
+                break;
+
+            case LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED:
+                lockTaskAuth = isPackageAllowlisted(userId, pkg)
+                        ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
+                break;
+        }
+        return lockTaskAuth;
     }
 
     boolean isPackageAllowlisted(int userId, String pkg) {
