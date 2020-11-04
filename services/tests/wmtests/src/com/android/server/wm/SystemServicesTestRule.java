@@ -88,6 +88,7 @@ import org.mockito.quality.Strictness;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * JUnit test rule to correctly setting up system services like {@link WindowManagerService}
@@ -112,6 +113,7 @@ public class SystemServicesTestRule implements TestRule {
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
+    private Supplier<Surface> mSurfaceFactory = () -> mock(Surface.class);
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
      */
@@ -286,7 +288,7 @@ public class SystemServicesTestRule implements TestRule {
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new,
-                () -> mock(Surface.class), (unused) -> new MockSurfaceControlBuilder());
+                () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.
@@ -394,6 +396,10 @@ public class SystemServicesTestRule implements TestRule {
 
     WindowState.PowerManagerWrapper getPowerManagerWrapper() {
         return mPowerManagerWrapper;
+    }
+
+    void setSurfaceFactory(Supplier<Surface> factory) {
+        mSurfaceFactory = factory;
     }
 
     void cleanupWindowManagerHandlers() {
