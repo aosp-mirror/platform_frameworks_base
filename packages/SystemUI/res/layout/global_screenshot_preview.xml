@@ -28,6 +28,6 @@
     android:visibility="gone"
     android:background="@drawable/screenshot_rounded_corners"
     android:adjustViewBounds="true"
-    android:contentDescription="@string/screenshot_edit"
+    android:contentDescription="@string/screenshot_edit_label"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"/>

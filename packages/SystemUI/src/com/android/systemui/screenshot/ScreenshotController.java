@@ -27,7 +27,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Notification;
-import android.app.WindowContext;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -43,6 +42,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -58,8 +58,10 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -143,6 +145,8 @@ public class ScreenshotController {
     private final DisplayMetrics mDisplayMetrics;
     private final AccessibilityManager mAccessibilityManager;
     private final MediaActionSound mCameraSound;
+    private final ScrollCaptureClient mScrollCaptureClient;
+    private final DeviceConfigProxy mConfigProxy;
 
     private final Binder mWindowToken;
     private ScreenshotView mScreenshotView;
@@ -173,11 +177,16 @@ public class ScreenshotController {
     };
 
     @Inject
-    ScreenshotController(Context context, ScreenshotSmartActions screenshotSmartActions,
+    ScreenshotController(
+            Context context,
+            ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController screenshotNotificationsController,
-            UiEventLogger uiEventLogger) {
+            ScrollCaptureClient scrollCaptureClient,
+            UiEventLogger uiEventLogger,
+            DeviceConfigProxy configProxy) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
+        mScrollCaptureClient = scrollCaptureClient;
         mUiEventLogger = uiEventLogger;
 
         final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
@@ -186,6 +195,7 @@ public class ScreenshotController {
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
+        mConfigProxy = configProxy;
 
         reloadAssets();
         Configuration config = mContext.getResources().getConfiguration();
@@ -193,6 +203,7 @@ public class ScreenshotController {
         mDirectionLTR = config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
         mOrientationPortrait = config.orientation == ORIENTATION_PORTRAIT;
         mWindowToken = new Binder("ScreenshotController");
+        mScrollCaptureClient.setHostWindowToken(mWindowToken);
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
@@ -455,6 +466,19 @@ public class ScreenshotController {
 
         // Start the post-screenshot animation
         startAnimation(finisher, screenRect, screenInsets, showFlash);
+
+        if (mConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED, false)) {
+            mScrollCaptureClient.request(DEFAULT_DISPLAY, (connection) ->
+                    mScreenshotView.showScrollChip(() ->
+                            runScrollCapture(connection,
+                                    () -> dismissScreenshot(false))));
+        }
+    }
+
+    private void runScrollCapture(ScrollCaptureClient.Connection connection,
+            Runnable after) {
+        new ScrollCaptureController(mContext, connection).run(after);
     }
 
     /**
