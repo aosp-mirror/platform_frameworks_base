@@ -501,6 +501,11 @@ public class SplitScreenController implements SplitScreen,
         }
     }
 
+    @Override
+    public void dismissSplitToPrimaryTask() {
+        startDismissSplit(true /* toPrimaryTask */);
+    }
+
     /** Notifies the bounds of split screen changed. */
     void notifyBoundsChanged(Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
         synchronized (mBoundsChangedListeners) {
@@ -519,8 +524,8 @@ public class SplitScreenController implements SplitScreen,
         mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
     }
 
-    void startDismissSplit() {
-        mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, true /* dismissOrMaximize */);
+    void startDismissSplit(boolean toPrimaryTask) {
+        mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, !toPrimaryTask);
         updateVisibility(false /* visible */);
         mMinimized = false;
         // Resets divider bar position to undefined, so new divider bar will apply default position

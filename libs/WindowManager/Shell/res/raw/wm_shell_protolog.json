@@ -79,12 +79,6 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
     },
-    "-712674749": {
-      "message": "Clip description: %s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_DRAG_AND_DROP",
-      "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
-    },
     "-710770147": {
       "message": "Add target: %s",
       "level": "VERBOSE",
@@ -120,6 +114,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DropOutlineDrawable.java"
+    },
+    "375908576": {
+      "message": "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_DRAG_AND_DROP",
+      "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
     },
     "481673835": {
       "message": "addListenerForTaskId taskId=%s",
@@ -168,12 +168,6 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragLayout.java"
-    },
-    "1842752748": {
-      "message": "Clip description: handlingDrag=%b mimeTypes=%s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_DRAG_AND_DROP",
-      "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
     },
     "1862198614": {
       "message": "Drag event: action=%s x=%f y=%f xOffset=%f yOffset=%f",
