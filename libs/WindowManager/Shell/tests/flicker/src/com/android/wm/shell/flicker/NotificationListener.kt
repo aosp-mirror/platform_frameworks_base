@@ -74,13 +74,17 @@ class NotificationListener : NotificationListenerService() {
             return wait { instance == null }
         }
 
-        fun waitForNotificationToAppear(predicate: (StatusBarNotification) -> Boolean): Boolean {
+        fun waitForNotificationToAppear(
+            predicate: (StatusBarNotification) -> Boolean
+        ): StatusBarNotification? {
             return instance?.let {
-                wait { it.notifications.values.any(predicate) }
+                waitForResult(extractor = { it.notifications.values.first(predicate) }).second
             } ?: throw IllegalStateException("NotificationListenerService is not connected")
         }
 
-        fun waitForNotificationToDisappear(predicate: (StatusBarNotification) -> Boolean): Boolean {
+        fun waitForNotificationToDisappear(
+            predicate: (StatusBarNotification) -> Boolean
+        ): Boolean {
             return instance?.let {
                 wait { it.notifications.values.none(predicate) }
             } ?: throw IllegalStateException("NotificationListenerService is not connected")
