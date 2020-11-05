@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.face;
+package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -26,32 +26,32 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
-import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
-import java.util.Map;
+import java.util.List;
 
 /**
- * Face-specific removal client supporting the {@link android.hardware.biometrics.face.V1_0}
- * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
+ * Face-specific internal enumerate client supporting the
+ * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
+ * HIDL interfaces.
  */
-class FaceRemovalClient extends RemovalClient<Face, IBiometricsFace> {
-    private static final String TAG = "FaceRemovalClient";
+class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFace> {
+    private static final String TAG = "FaceInternalEnumerateClient";
 
-    FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<Face> utils,
-            int sensorId, @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
-                authenticatorIds, BiometricsProtoEnums.MODALITY_FACE);
+    FaceInternalEnumerateClient(@NonNull Context context,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull String owner, @NonNull List<Face> enrolledList,
+            @NonNull BiometricUtils<Face> utils, int sensorId) {
+        super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().remove(mBiometricId);
+            getFreshDaemon().enumerate();
         } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting remove", e);
+            Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);
         }
     }
