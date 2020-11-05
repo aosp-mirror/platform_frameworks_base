@@ -931,6 +931,8 @@ public class DisplayModeDirector {
                 Settings.System.getUriFor(Settings.System.MIN_REFRESH_RATE);
         private final Uri mLowPowerModeSetting =
                 Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE);
+        private final Uri mMatchContentFrameRateSetting =
+                Settings.Secure.getUriFor(Settings.Secure.MATCH_CONTENT_FRAME_RATE);
 
         private final Context mContext;
         private float mDefaultPeakRefreshRate;
@@ -953,6 +955,8 @@ public class DisplayModeDirector {
                     UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(mMatchContentFrameRateSetting, false /*notifyDescendants*/,
+                    this);
 
             Float deviceConfigDefaultPeakRefresh =
                     mDeviceConfigDisplaySettings.getDefaultPeakRefreshRate();
@@ -963,6 +967,7 @@ public class DisplayModeDirector {
             synchronized (mLock) {
                 updateRefreshRateSettingLocked();
                 updateLowPowerModeSettingLocked();
+                updateModeSwitchingTypeSettingLocked();
             }
         }
 
@@ -988,6 +993,8 @@ public class DisplayModeDirector {
                     updateRefreshRateSettingLocked();
                 } else if (mLowPowerModeSetting.equals(uri)) {
                     updateLowPowerModeSettingLocked();
+                } else if (mMatchContentFrameRateSetting.equals(uri)) {
+                    updateModeSwitchingTypeSettingLocked();
                 }
             }
         }
@@ -1048,6 +1055,17 @@ public class DisplayModeDirector {
             }
 
             mBrightnessObserver.onRefreshRateSettingChangedLocked(minRefreshRate, maxRefreshRate);
+        }
+
+        private void updateModeSwitchingTypeSettingLocked() {
+            final ContentResolver cr = mContext.getContentResolver();
+            int switchingType = Settings.Secure.getIntForUser(
+                    cr, Settings.Secure.MATCH_CONTENT_FRAME_RATE, mModeSwitchingType /*default*/,
+                    cr.getUserId());
+            if (switchingType != mModeSwitchingType) {
+                mModeSwitchingType = switchingType;
+                notifyDesiredDisplayModeSpecsChangedLocked();
+            }
         }
 
         public void dumpLocked(PrintWriter pw) {
