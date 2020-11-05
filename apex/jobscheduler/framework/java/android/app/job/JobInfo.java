@@ -274,11 +274,18 @@ public class JobInfo implements Parcelable {
 
     /**
      * This job needs to be exempted from the app standby throttling. Only the system (UID 1000)
-     * can set it. Jobs with a time constrant must not have it.
+     * can set it. Jobs with a time constraint must not have it.
      *
      * @hide
      */
     public static final int FLAG_EXEMPT_FROM_APP_STANDBY = 1 << 3;
+
+    /**
+     * Whether it's a so-called "HPJ" or not.
+     *
+     * @hide
+     */
+    public static final int FLAG_FOREGROUND_JOB = 1 << 4;
 
     /**
      * @hide
@@ -571,10 +578,18 @@ public class JobInfo implements Parcelable {
 
     /**
      * Return the backoff policy of this job.
+     *
      * @see JobInfo.Builder#setBackoffCriteria(long, int)
      */
     public @BackoffPolicy int getBackoffPolicy() {
         return backoffPolicy;
+    }
+
+    /**
+     * @see JobInfo.Builder#setForeground(boolean)
+     */
+    public boolean isForegroundJob() {
+        return (flags & FLAG_FOREGROUND_JOB) != 0;
     }
 
     /**
@@ -1442,6 +1457,41 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Setting this to true indicates that this job is important and needs to run as soon as
+         * possible with stronger guarantees than regular jobs. These "foreground" jobs will:
+         * <ol>
+         *     <li>Run as soon as possible</li>
+         *     <li>Be exempted from Doze and battery saver restrictions</li>
+         *     <li>Have network access</li>
+         * </ol>
+         *
+         * Since these jobs have stronger guarantees than regular jobs, they will be subject to
+         * stricter quotas. As long as an app has available foreground quota, jobs scheduled with
+         * this set to true will run with these guarantees. If an app has run out of available
+         * foreground quota, any pending foreground jobs will run as regular jobs.
+         * {@link JobParameters#isForegroundJob()} can be used to know whether the executing job
+         * has foreground guarantees or not. In addition, {@link JobScheduler#schedule(JobInfo)}
+         * will immediately return {@link JobScheduler#RESULT_FAILURE} if the app does not have
+         * available quota (and the job will not be successfully scheduled).
+         *
+         * Foreground jobs may only set network constraints. No other constraints are allowed.
+         *
+         * Note: Even though foreground jobs are meant to run as soon as possible, they may be
+         * deferred if the system is under heavy load or the network constraint is satisfied
+         *
+         * @see JobInfo#isForegroundJob()
+         */
+        @NonNull
+        public Builder setForeground(boolean foreground) {
+            if (foreground) {
+                mFlags |= FLAG_FOREGROUND_JOB;
+            } else {
+                mFlags &= (~FLAG_FOREGROUND_JOB);
+            }
+            return this;
+        }
+
+        /**
          * Setting this to true indicates that this job is important while the scheduling app
          * is in the foreground or on the temporary whitelist for background restrictions.
          * This means that the system will relax doze restrictions on this job during this time.
@@ -1456,7 +1506,9 @@ public class JobInfo implements Parcelable {
          * @param importantWhileForeground whether to relax doze restrictions for this job when the
          *                                 app is in the foreground. False by default.
          * @see JobInfo#isImportantWhileForeground()
+         * @deprecated Use {@link #setForeground(boolean)} instead.
          */
+        @Deprecated
         public Builder setImportantWhileForeground(boolean importantWhileForeground) {
             if (importantWhileForeground) {
                 mFlags |= FLAG_IMPORTANT_WHILE_FOREGROUND;
@@ -1579,6 +1631,29 @@ public class JobInfo implements Parcelable {
         if ((flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && hasEarlyConstraint) {
             throw new IllegalArgumentException(
                     "An important while foreground job cannot have a time delay");
+        }
+
+        if ((flags & FLAG_FOREGROUND_JOB) != 0) {
+            if (hasEarlyConstraint) {
+                throw new IllegalArgumentException("A foreground job cannot have a time delay");
+            }
+            if (hasLateConstraint) {
+                throw new IllegalArgumentException("A foreground job cannot have a deadline");
+            }
+            if (isPeriodic) {
+                throw new IllegalArgumentException("A foreground job cannot be periodic");
+            }
+            if (isPersisted) {
+                throw new IllegalArgumentException("A foreground job cannot be persisted");
+            }
+            if (constraintFlags != 0 || (flags & ~FLAG_FOREGROUND_JOB) != 0) {
+                throw new IllegalArgumentException(
+                        "A foreground job can only have network constraints");
+            }
+            if (triggerContentUris != null && triggerContentUris.length > 0) {
+                throw new IllegalArgumentException(
+                        "Can't call addTriggerContentUri() on a foreground job");
+            }
         }
     }
 

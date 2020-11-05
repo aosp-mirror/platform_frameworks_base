@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.job.IJobCallback;
@@ -73,7 +74,13 @@ public final class JobServiceContext implements ServiceConnection {
 
     private static final String TAG = "JobServiceContext";
     /** Amount of time a job is allowed to execute for before being considered timed-out. */
-    public static final long EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
+    public static final long DEFAULT_EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
+    /**
+     * Amount of time a RESTRICTED HPJ is allowed to execute for before being considered
+     * timed-out.
+     */
+    public static final long DEFAULT_RESTRICTED_HPJ_EXECUTING_TIMESLICE_MILLIS =
+            DEFAULT_EXECUTING_TIMESLICE_MILLIS / 2;
     /** Amount of time the JobScheduler waits for the initial service launch+bind. */
     private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
@@ -224,7 +231,8 @@ public final class JobServiceContext implements ServiceConnection {
             final JobInfo ji = job.getJob();
             mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
-                    isDeadlineExpired, triggeredUris, triggeredAuthorities, job.network);
+                    isDeadlineExpired, job.shouldTreatAsForegroundJob(),
+                    triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
 
             final long whenDeferred = job.getWhenStandbyDeferred();
@@ -250,9 +258,18 @@ public final class JobServiceContext implements ServiceConnection {
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = false;
             try {
-                binding = mContext.bindServiceAsUser(intent, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                        | Context.BIND_NOT_PERCEPTIBLE,
+                final int bindFlags;
+                if (job.shouldTreatAsForegroundJob()) {
+                    // Add BIND_FOREGROUND_SERVICE to make it BFGS. Without it, it'll be
+                    // PROCESS_STATE_IMPORTANT_FOREGROUND. Unclear which is better here.
+                    // TODO(171305774): The job should run on the little cores. We'll probably need
+                    // another binding flag for that.
+                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+                } else {
+                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                            | Context.BIND_NOT_PERCEPTIBLE;
+                }
+                binding = mContext.bindServiceAsUser(intent, this, bindFlags,
                         UserHandle.of(job.getUserId()));
             } catch (SecurityException e) {
                 // Some permission policy, for example INTERACT_ACROSS_USERS and
@@ -848,7 +865,10 @@ public final class JobServiceContext implements ServiceConnection {
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:
-                timeoutMillis = EXECUTING_TIMESLICE_MILLIS;
+                timeoutMillis = mRunningJob.shouldTreatAsForegroundJob()
+                        && mRunningJob.getStandbyBucket() == RESTRICTED_INDEX
+                        ? DEFAULT_RESTRICTED_HPJ_EXECUTING_TIMESLICE_MILLIS
+                        : DEFAULT_EXECUTING_TIMESLICE_MILLIS;
                 break;
 
             case VERB_BINDING:

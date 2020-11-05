@@ -85,6 +85,7 @@ public final class JobStatus {
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1 << 25; // Implicit constraint
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
+    static final int CONSTRAINT_WITHIN_HPJ_QUOTA = 1 << 23;  // Implicit constraint
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
 
     /**
@@ -375,6 +376,9 @@ public final class JobStatus {
 
     /** The job is within its quota based on its standby bucket. */
     private boolean mReadyWithinQuota;
+
+    /** The job is a foreground job with sufficient quota to run as a foreground job. */
+    private boolean mReadyWithinHpjQuota;
 
     /** The job's dynamic requirements have been satisfied. */
     private boolean mReadyDynamicSatisfied;
@@ -1036,20 +1040,34 @@ public final class JobStatus {
         mPersistedUtcTimes = null;
     }
 
+    /** @return true if the app has requested that this run as a foreground job. */
+    public boolean isRequestedForegroundJob() {
+        return (getFlags() & JobInfo.FLAG_FOREGROUND_JOB) != 0;
+    }
+
+    /**
+     * @return true if all foreground job requirements are satisfied and therefore this should be
+     * treated as a foreground job.
+     */
+    public boolean shouldTreatAsForegroundJob() {
+        return mReadyWithinHpjQuota && isRequestedForegroundJob();
+    }
+
     /**
      * @return true if the job is exempted from Doze restrictions and therefore allowed to run
      * in Doze.
      */
     public boolean canRunInDoze() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0 || shouldTreatAsForegroundJob();
     }
 
     boolean canRunInBatterySaver() {
-        return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0;
+        return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
+                || shouldTreatAsForegroundJob();
     }
 
     boolean shouldIgnoreNetworkBlocking() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0 || shouldTreatAsForegroundJob();
     }
 
     /** @return true if the constraint was changed, false otherwise. */
@@ -1123,6 +1141,16 @@ public final class JobStatus {
         if (setConstraintSatisfied(CONSTRAINT_WITHIN_QUOTA, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyWithinQuota = state;
+            return true;
+        }
+        return false;
+    }
+
+    /** @return true if the constraint was changed, false otherwise. */
+    boolean setForegroundJobQuotaConstraintSatisfied(boolean state) {
+        if (setConstraintSatisfied(CONSTRAINT_WITHIN_HPJ_QUOTA, state)) {
+            // The constraint was changed. Update the ready flag.
+            mReadyWithinHpjQuota = state;
             return true;
         }
         return false;
@@ -1257,6 +1285,10 @@ public final class JobStatus {
                 oldValue = mReadyWithinQuota;
                 mReadyWithinQuota = true;
                 break;
+            case CONSTRAINT_WITHIN_HPJ_QUOTA:
+                oldValue = mReadyWithinHpjQuota;
+                mReadyWithinHpjQuota = true;
+                break;
             default:
                 satisfied |= constraint;
                 mReadyDynamicSatisfied = mDynamicConstraints != 0
@@ -1279,6 +1311,9 @@ public final class JobStatus {
             case CONSTRAINT_WITHIN_QUOTA:
                 mReadyWithinQuota = oldValue;
                 break;
+            case CONSTRAINT_WITHIN_HPJ_QUOTA:
+                mReadyWithinHpjQuota = oldValue;
+                break;
             default:
                 mReadyDynamicSatisfied = mDynamicConstraints != 0
                         && mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
@@ -1293,7 +1328,7 @@ public final class JobStatus {
         // sessions (exempt from dynamic restrictions), we need the additional check to ensure
         // that NEVER jobs don't run.
         // TODO: cleanup quota and standby bucket management so we don't need the additional checks
-        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied)
+        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied && !shouldTreatAsForegroundJob())
                 || getEffectiveStandbyBucket() == NEVER_INDEX) {
             return false;
         }
@@ -1506,6 +1541,9 @@ public final class JobStatus {
         if ((constraints & CONSTRAINT_WITHIN_QUOTA) != 0) {
             pw.print(" WITHIN_QUOTA");
         }
+        if ((constraints & CONSTRAINT_WITHIN_HPJ_QUOTA) != 0) {
+            pw.print(" WITHIN_HPJ_QUOTA");
+        }
         if (constraints != 0) {
             pw.print(" [0x");
             pw.print(Integer.toHexString(constraints));
@@ -1577,6 +1615,9 @@ public final class JobStatus {
         }
         if ((constraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
             proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_BACKGROUND_NOT_RESTRICTED);
+        }
+        if ((constraints & CONSTRAINT_WITHIN_HPJ_QUOTA) != 0) {
+            proto.write(fieldId, JobServerProtoEnums.CONSTRAINT_WITHIN_HPJ_QUOTA);
         }
     }
 
@@ -1795,6 +1836,11 @@ public final class JobStatus {
         pw.print(prefix);
         pw.print("  readyComponentEnabled: ");
         pw.println(serviceInfo != null);
+        if ((getFlags() & JobInfo.FLAG_FOREGROUND_JOB) != 0) {
+            pw.print(prefix);
+            pw.print("  mReadyWithinHpjQuota: ");
+            pw.println(mReadyWithinHpjQuota);
+        }
 
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
