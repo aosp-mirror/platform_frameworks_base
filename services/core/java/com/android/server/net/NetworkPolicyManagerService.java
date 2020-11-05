@@ -559,6 +559,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Set of all merged subscriberId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private List<String[]> mMergedSubscriberIds = new ArrayList<>();
+    /** Map from subId to carrierConfig as of last update */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private final SparseArray<PersistableBundle> mSubIdToCarrierConfig =
+            new SparseArray<PersistableBundle>();
 
     /**
      * Indicates the uids restricted by admin from accessing metered data. It's a mapping from
@@ -1186,7 +1190,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long totalBytes = getTotalBytes(policy.template, cycleStart, cycleEnd);
 
             // Carrier might want to manage notifications themselves
-            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            final PersistableBundle config = mSubIdToCarrierConfig.get(subId);
             if (!CarrierConfigManager.isConfigForIdentifiedCarrier(config)) {
                 if (LOGV) Slog.v(TAG, "isConfigForIdentifiedCarrier returned false");
                 // Don't show notifications until we confirm that the loaded config is from an
@@ -1831,8 +1835,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final List<String[]> mergedSubscriberIdsList = new ArrayList();
         final SparseArray<String> subIdToSubscriberId = new SparseArray<>(subList.size());
+        final SparseArray<PersistableBundle> subIdToCarrierConfig =
+                new SparseArray<PersistableBundle>();
         for (final SubscriptionInfo sub : subList) {
-            final TelephonyManager tmSub = tm.createForSubscriptionId(sub.getSubscriptionId());
+            final int subId = sub.getSubscriptionId();
+            final TelephonyManager tmSub = tm.createForSubscriptionId(subId);
             final String subscriberId = tmSub.getSubscriberId();
             if (!TextUtils.isEmpty(subscriberId)) {
                 subIdToSubscriberId.put(tmSub.getSubscriptionId(), subscriberId);
@@ -1843,6 +1850,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final String[] mergedSubscriberId = ArrayUtils.defeatNullable(
                     tmSub.getMergedImsisFromGroup());
             mergedSubscriberIdsList.add(mergedSubscriberId);
+
+            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            if (config != null) {
+                subIdToCarrierConfig.put(subId, config);
+            } else {
+                Slog.e(TAG, "Missing CarrierConfig for subId " + subId);
+            }
         }
 
         synchronized (mNetworkPoliciesSecondLock) {
@@ -1853,6 +1867,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             mMergedSubscriberIds = mergedSubscriberIdsList;
+
+            mSubIdToCarrierConfig.clear();
+            for (int i = 0; i < subIdToCarrierConfig.size(); i++) {
+                mSubIdToCarrierConfig.put(subIdToCarrierConfig.keyAt(i),
+                        subIdToCarrierConfig.valueAt(i));
+            }
         }
 
         Trace.traceEnd(TRACE_TAG_NETWORK);
@@ -2172,7 +2192,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         } else {
-            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            final PersistableBundle config = mSubIdToCarrierConfig.get(subId);
             final int currentCycleDay;
             if (policy.cycleRule.isMonthly()) {
                 currentCycleDay = policy.cycleRule.start.getDayOfMonth();
