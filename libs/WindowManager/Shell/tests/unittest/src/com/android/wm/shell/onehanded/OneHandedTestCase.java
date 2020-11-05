@@ -46,6 +46,8 @@ public abstract class OneHandedTestCase {
 
     @Before
     public void setupSettings() {
+        assumeTrue(SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false));
+
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
         final DisplayManager dm = testContext.getSystemService(DisplayManager.class);
@@ -74,13 +76,13 @@ public abstract class OneHandedTestCase {
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
     }
 
-    @Before
-    public void assumeOneHandedModeSupported() {
-        assumeTrue(SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false));
-    }
-
     @After
     public void restoreSettings() {
+        if (mContext == null) {
+            // Return early if one-handed mode is not supported
+            return;
+        }
+
         Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, sOrigEnabled ? 1 : 0);
         Settings.Secure.putInt(mContext.getContentResolver(),
