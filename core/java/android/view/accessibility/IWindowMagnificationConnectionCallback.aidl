@@ -50,4 +50,14 @@ import android.graphics.Rect;
      * @param sourceBounds The magnified bounds in screen coordinates.
      */
     void onSourceBoundsChanged(int displayId, in Rect sourceBounds);
+
+    /**
+     * Called when the accessibility action of scale requests to be performed.
+     * It is invoked from System UI. And the action is provided by the mirror window.
+     *
+     * @param displayId The logical display id.
+     * @param scale the target scale, or {@link Float#NaN} to leave unchanged
+     */
+    void onPerformScaleAction(int displayId, float scale);
+
 }

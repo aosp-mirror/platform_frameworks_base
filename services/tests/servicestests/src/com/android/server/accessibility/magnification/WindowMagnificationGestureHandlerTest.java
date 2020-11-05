@@ -70,7 +70,8 @@ public class WindowMagnificationGestureHandlerTest {
     @Before
     public void setUp() throws RemoteException {
         mContext = InstrumentationRegistry.getContext();
-        mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0);
+        mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0,
+                mock(WindowMagnificationManager.Callback.class));
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
                 mContext, mWindowMagnificationManager, mock(ScaleChangedListener.class),
