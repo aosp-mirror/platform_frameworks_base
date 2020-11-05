@@ -249,7 +249,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             for (int i = 0, n = hops.size(); i < n; ++i) {
                 final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                if (!wc.isAttached()) {
+                if (wc == null || !wc.isAttached()) {
                     Slog.e(TAG, "Attempt to operate on detached container: " + wc);
                     continue;
                 }
@@ -260,7 +260,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (transition != null) {
                     transition.collect(wc);
                     if (hop.isReparent() && hop.getNewParent() != null) {
-                        transition.collect(WindowContainer.fromBinder(hop.getNewParent()));
+                        final WindowContainer parentWc =
+                                WindowContainer.fromBinder(hop.getNewParent());
+                        if (parentWc == null) {
+                            Slog.e(TAG, "Can't resolve parent window from token");
+                            continue;
+                        }
+                        transition.collect(parentWc);
                     }
                 }
             }
@@ -269,7 +275,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             entries = t.getChanges().entrySet().iterator();
             while (entries.hasNext()) {
                 final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
-                final Task task = WindowContainer.fromBinder(entry.getKey()).asTask();
+                final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                    continue;
+                }
+                final Task task = wc.asTask();
                 final Rect surfaceBounds = entry.getValue().getBoundsChangeSurfaceBounds();
                 if (task == null || !task.isAttached() || surfaceBounds == null) {
                     continue;
@@ -429,6 +440,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 WindowContainer newParent = hop.getNewParent() == null
                         ? dc.getDefaultTaskDisplayArea()
                         : WindowContainer.fromBinder(hop.getNewParent());
+                if (newParent == null) {
+                    Slog.e(TAG, "Can't resolve parent window from token");
+                    return 0;
+                }
                 if (task.getParent() != newParent) {
                     if (newParent instanceof TaskDisplayArea) {
                         // For now, reparenting to displayarea is different from other reparents...
