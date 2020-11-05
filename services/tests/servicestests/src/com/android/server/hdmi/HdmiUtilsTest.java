@@ -24,6 +24,8 @@ import androidx.test.filters.SmallTest;
 import com.android.server.hdmi.HdmiUtils.CodecSad;
 import com.android.server.hdmi.HdmiUtils.DeviceConfig;
 
+import com.google.common.testing.EqualsTester;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -105,6 +107,22 @@ public class HdmiUtilsTest {
         assertThat(HdmiUtils.getLocalPortFromPhysicalAddress(
                 targetPhysicalAddress, myPhysicalAddress)).isEqualTo(
                         HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE);
+    }
+
+    @Test
+    public void testEqualsCodecSad() {
+        byte[] sad = {0x0a, 0x1b, 0x2c};
+        String sadString = "0a1b2c";
+        new EqualsTester()
+                .addEqualityGroup(
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_LPCM, sad),
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_LPCM, sadString))
+                .addEqualityGroup(
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_LPCM, sadString + "01"))
+                .addEqualityGroup(new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_DD, sadString))
+                .addEqualityGroup(
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_DD, sadString + "01"))
+                .testEquals();
     }
 
     @Test
