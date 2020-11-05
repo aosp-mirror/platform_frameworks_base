@@ -56,7 +56,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
     private int mLastOrientation;
+    private String mCachedSpecs = "";
     private QSTileRevealController mQsTileRevealController;
+    private float mRevealExpansion;
 
     private final QSHost.Callback mQSHostCallback = this::setTiles;
 
@@ -70,7 +72,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                     }
                 }
             };
-    private String mCachedSpecs = "";
 
     protected QSPanelControllerBase(T view, QSTileHost host,
             QSCustomizerController qsCustomizerController,
@@ -92,6 +93,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (regularTileLayout instanceof PagedTileLayout) {
             mQsTileRevealController = mQsTileRevealControllerFactory.create(
                     (PagedTileLayout) regularTileLayout);
+            mQsTileRevealController.setExpansion(mRevealExpansion);
         }
 
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
@@ -246,9 +248,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
     }
 
-    /** */
-    public QSTileRevealController getQsTileRevealController() {
-        return mQsTileRevealController;
+    /** Set the expansion on the associated {@link QSTileRevealController}. */
+    public void setRevealExpansion(float expansion) {
+        mRevealExpansion = expansion;
+        if (mQsTileRevealController != null) {
+            mQsTileRevealController.setExpansion(expansion);
+        }
     }
 
     @Override
