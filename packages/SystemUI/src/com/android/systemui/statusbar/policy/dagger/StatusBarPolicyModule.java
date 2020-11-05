@@ -24,6 +24,8 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.AccessPointControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
+import com.android.systemui.statusbar.policy.CameraToggleController;
+import com.android.systemui.statusbar.policy.CameraToggleControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.ExtensionController;
@@ -122,6 +124,10 @@ public interface StatusBarPolicyModule {
     @Binds
     NetworkController.AccessPointController provideAccessPointController(
             AccessPointControllerImpl accessPointControllerImpl);
+
+    /** */
+    @Binds
+    CameraToggleController provideCameraToggleController(CameraToggleControllerImpl controllerImpl);
 
     /** */
     @SysUISingleton
