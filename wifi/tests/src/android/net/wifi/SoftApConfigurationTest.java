@@ -398,6 +398,21 @@ public class SoftApConfigurationTest {
         assertThat(dual_channels_config.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
         assertTrue(dual_channels.toString().equals(dual_channels_config.getChannels().toString()));
         assertThat(dual_channels_config.getChannel()).isEqualTo(2);
+
+        // Test different parameters.
+        dual_channels.clear();
+        dual_channels.put(SoftApConfiguration.BAND_5GHZ, 149);
+        dual_channels.put(SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ, 0);
+        expected_dual_bands[0] = SoftApConfiguration.BAND_5GHZ;
+        expected_dual_bands[1] = SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ;
+        dual_channels_config = new SoftApConfiguration.Builder()
+                .setSsid("ssid")
+                .setChannels(dual_channels)
+                .build();
+        assertTrue(Arrays.equals(expected_dual_bands, dual_channels_config.getBands()));
+        assertThat(dual_channels_config.getBand()).isEqualTo(SoftApConfiguration.BAND_5GHZ);
+        assertTrue(dual_channels.toString().equals(dual_channels_config.getChannels().toString()));
+        assertThat(dual_channels_config.getChannel()).isEqualTo(149);
     }
 
     @Test
