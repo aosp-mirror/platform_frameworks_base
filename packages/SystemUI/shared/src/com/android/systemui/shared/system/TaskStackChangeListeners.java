@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Tracks all the task stack listeners
  */
-public class TaskStackChangeListeners extends TaskStackListener {
+public class TaskStackChangeListeners {
 
     private static final String TAG = TaskStackChangeListeners.class.getSimpleName();
     private static final TaskStackChangeListeners INSTANCE = new TaskStackChangeListeners();

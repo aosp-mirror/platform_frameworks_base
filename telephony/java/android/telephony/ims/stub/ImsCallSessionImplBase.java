@@ -26,10 +26,17 @@ import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
+import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.ims.RtpHeaderExtensionType;
 import android.telephony.ims.aidl.IImsCallSessionListener;
+import android.util.ArraySet;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
+
+import java.util.List;
+import java.util.Set;
+
 /**
  * Base implementation of IImsCallSession, which implements stub versions of the methods available.
  *
@@ -276,6 +283,12 @@ public class ImsCallSessionImplBase implements AutoCloseable {
         @Override
         public void sendRttMessage(String rttMessage) {
             ImsCallSessionImplBase.this.sendRttMessage(rttMessage);
+        }
+
+        @Override
+        public void sendRtpHeaderExtensions(@NonNull List<RtpHeaderExtension> extensions) {
+            ImsCallSessionImplBase.this.sendRtpHeaderExtensions(
+                    new ArraySet<RtpHeaderExtension>(extensions));
         }
     };
 
@@ -634,6 +647,22 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * @param rttMessage RTT message to be sent
      */
     public void sendRttMessage(String rttMessage) {
+    }
+
+    /**
+     * Device requests that {@code rtpHeaderExtensions} are sent as a header extension with the next
+     * RTP packet sent by the IMS stack.
+     * <p>
+     * The {@link RtpHeaderExtensionType}s negotiated during SDP (Session Description Protocol)
+     * signalling determine the {@link RtpHeaderExtension}s which can be sent using this method.
+     * See RFC8285 for more information.
+     * <p>
+     * By specification, the RTP header extension is an unacknowledged transmission and there is no
+     * guarantee that the header extension will be delivered by the network to the other end of the
+     * call.
+     * @param rtpHeaderExtensions The RTP header extensions to be included in the next RTP header.
+     */
+    public void sendRtpHeaderExtensions(@NonNull Set<RtpHeaderExtension> rtpHeaderExtensions) {
     }
 
     /** @hide */

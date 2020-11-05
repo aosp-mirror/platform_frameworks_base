@@ -9,7 +9,7 @@ android_test {
     ],
 
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "testng"
     ],
 
