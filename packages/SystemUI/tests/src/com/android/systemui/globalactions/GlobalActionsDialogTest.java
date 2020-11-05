@@ -49,6 +49,7 @@ import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.IWindowManager;
 import android.view.View;
+import android.view.WindowManagerPolicyConstants;
 import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
@@ -239,6 +240,28 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mGlobalActionsDialog.makeScreenshotActionForTesting();
         screenshotAction.onLongPress();
         verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_LONG_PRESS);
+    }
+
+    @Test
+    public void testShouldShowScreenshot() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.integer.config_navBarInteractionMode,
+                WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON);
+
+        GlobalActionsDialog.ScreenshotAction screenshotAction =
+                mGlobalActionsDialog.makeScreenshotActionForTesting();
+        assertThat(screenshotAction.shouldShow()).isTrue();
+    }
+
+    @Test
+    public void testShouldNotShowScreenshot() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.integer.config_navBarInteractionMode,
+                WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON);
+
+        GlobalActionsDialog.ScreenshotAction screenshotAction =
+                mGlobalActionsDialog.makeScreenshotActionForTesting();
+        assertThat(screenshotAction.shouldShow()).isFalse();
     }
 
     private void verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent event) {
