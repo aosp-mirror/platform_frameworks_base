@@ -19,9 +19,12 @@ package com.android.systemui.qs;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -112,7 +115,39 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 mUiEventLogger, mDumpManager);
 
         mController.init();
+        reset(mQSTileRevealController);
     }
+
+    @Test
+    public void testSetRevealExpansion_preAttach() {
+        mController.onViewDetached();
+
+        QSPanelControllerBase<QSPanel> controller = new TestableQSPanelControllerBase(mQSPanel,
+                mQSTileHost, mQSCustomizerController, mQSTileRevealControllerFactory,
+                mMetricsLogger, mUiEventLogger, mDumpManager);
+
+        // Nothing happens until attached
+        controller.setRevealExpansion(0);
+        verify(mQSTileRevealController, never()).setExpansion(anyFloat());
+        controller.setRevealExpansion(0.5f);
+        verify(mQSTileRevealController, never()).setExpansion(anyFloat());
+        controller.setRevealExpansion(1);
+        verify(mQSTileRevealController, never()).setExpansion(anyFloat());
+
+        controller.init();
+        verify(mQSTileRevealController).setExpansion(1);
+    }
+
+    @Test
+    public void testSetRevealExpansion_postAttach() {
+        mController.setRevealExpansion(0);
+        verify(mQSTileRevealController).setExpansion(0);
+        mController.setRevealExpansion(0.5f);
+        verify(mQSTileRevealController).setExpansion(0.5f);
+        mController.setRevealExpansion(1);
+        verify(mQSTileRevealController).setExpansion(1);
+    }
+
 
     @Test
     public void testSetExpanded_Metrics() {
