@@ -401,6 +401,28 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
+    public void getAllowedIntValues_HexValues() {
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<cec-settings>"
+                + "  <setting name=\"hdmi_cec_enabled\""
+                + "           value-type=\"int\""
+                + "           user-configurable=\"true\">"
+                + "    <allowed-values>"
+                + "      <value hex-value=\"0x00\" />"
+                + "      <value hex-value=\"0x01\" />"
+                + "    </allowed-values>"
+                + "    <default-value hex-value=\"0x01\" />"
+                + "  </setting>"
+                + "</cec-settings>", null);
+        assertThat(hdmiCecConfig.getAllowedIntValues(
+                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
+                .containsExactly(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED,
+                                 HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+    }
+
+    @Test
     public void getDefaultStringValue_NoMasterXml() {
         HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
                 mContext, mStorageAdapter, null, null);
@@ -517,6 +539,27 @@ public final class HdmiCecConfigTest {
                 + "      <value int-value=\"1\" />"
                 + "    </allowed-values>"
                 + "    <default-value int-value=\"1\" />"
+                + "  </setting>"
+                + "</cec-settings>", null);
+        assertThat(hdmiCecConfig.getDefaultIntValue(
+                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
+                .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+    }
+
+    @Test
+    public void getDefaultIntValue_HexValue() {
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<cec-settings>"
+                + "  <setting name=\"hdmi_cec_enabled\""
+                + "           value-type=\"int\""
+                + "           user-configurable=\"true\">"
+                + "    <allowed-values>"
+                + "      <value hex-value=\"0x00\" />"
+                + "      <value hex-value=\"0x01\" />"
+                + "    </allowed-values>"
+                + "    <default-value hex-value=\"0x01\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getDefaultIntValue(
@@ -677,6 +720,31 @@ public final class HdmiCecConfigTest {
                 + "      <value int-value=\"1\" />"
                 + "    </allowed-values>"
                 + "    <default-value int-value=\"1\" />"
+                + "  </setting>"
+                + "</cec-settings>", null);
+        assertThat(hdmiCecConfig.getIntValue(
+                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
+                .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+    }
+
+    @Test
+    public void getIntValue_GlobalSetting_HexValue() {
+        when(mStorageAdapter.retrieveGlobalSetting(mContext,
+                  Global.HDMI_CONTROL_ENABLED,
+                  Integer.toHexString(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED)))
+            .thenReturn(Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<cec-settings>"
+                + "  <setting name=\"hdmi_cec_enabled\""
+                + "           value-type=\"int\""
+                + "           user-configurable=\"true\">"
+                + "    <allowed-values>"
+                + "      <value hex-value=\"0x0\" />"
+                + "      <value hex-value=\"0x1\" />"
+                + "    </allowed-values>"
+                + "    <default-value hex-value=\"0x1\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getIntValue(
@@ -901,6 +969,29 @@ public final class HdmiCecConfigTest {
                 + "      <value int-value=\"1\" />"
                 + "    </allowed-values>"
                 + "    <default-value int-value=\"1\" />"
+                + "  </setting>"
+                + "</cec-settings>", null);
+        hdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                                  HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        verify(mStorageAdapter).storeGlobalSetting(mContext,
+                  Global.HDMI_CONTROL_ENABLED,
+                  Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
+    }
+
+    @Test
+    public void setIntValue_GlobalSetting_HexValue() {
+        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
+                mContext, mStorageAdapter,
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<cec-settings>"
+                + "  <setting name=\"hdmi_cec_enabled\""
+                + "           value-type=\"int\""
+                + "           user-configurable=\"true\">"
+                + "    <allowed-values>"
+                + "      <value hex-value=\"0x0\" />"
+                + "      <value hex-value=\"0x1\" />"
+                + "    </allowed-values>"
+                + "    <default-value hex-value=\"0x1\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         hdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
