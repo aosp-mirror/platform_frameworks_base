@@ -938,7 +938,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
          * <p>TODO: Consider to follow what other system services have been doing to manage
          * constants (e.g. {@link android.provider.Settings.Global#ACTIVITY_MANAGER_CONSTANTS}).</p>
          */
-        private final static int ENTRY_SIZE_FOR_HIGH_RAM_DEVICE = 16;
+        private final static int ENTRY_SIZE_FOR_HIGH_RAM_DEVICE = 32;
 
         /**
          * Entry size for non low-RAM devices.
