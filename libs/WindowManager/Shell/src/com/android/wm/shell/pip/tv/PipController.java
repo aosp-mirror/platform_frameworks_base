@@ -398,8 +398,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     private void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
             boolean clearedTask) {
-        if (task.configuration.windowConfiguration.getWindowingMode()
-                != WINDOWING_MODE_PINNED) {
+        if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
             return;
         }
         if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");

@@ -346,15 +346,9 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         return mTaskListeners.get(taskListenerType);
     }
 
-    @WindowingMode
-    public static int getWindowingMode(RunningTaskInfo taskInfo) {
-        return taskInfo.configuration.windowConfiguration.getWindowingMode();
-    }
-
     @VisibleForTesting
     static @TaskListenerType int taskInfoToTaskListenerType(RunningTaskInfo runningTaskInfo) {
-        final int windowingMode = getWindowingMode(runningTaskInfo);
-        switch (windowingMode) {
+        switch (runningTaskInfo.getWindowingMode()) {
             case WINDOWING_MODE_FULLSCREEN:
                 return runningTaskInfo.letterboxActivityBounds != null
                         ? TASK_LISTENER_TYPE_LETTERBOX

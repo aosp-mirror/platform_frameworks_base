@@ -57,6 +57,9 @@ public interface SplitScreen {
     /** Registers listener that gets called whenever the existence of the divider changes. */
     void registerInSplitScreenListener(Consumer<Boolean> listener);
 
+    /** Unregisters listener that gets called whenever the existence of the divider changes. */
+    void unregisterInSplitScreenListener(Consumer<Boolean> listener);
+
     /** Registers listener that gets called whenever the split screen bounds changes. */
     void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener);
 

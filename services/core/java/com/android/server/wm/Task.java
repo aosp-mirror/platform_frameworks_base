@@ -4072,6 +4072,10 @@ class Task extends WindowContainer<WindowContainer> {
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.configuration.setTo(getConfiguration());
+        // Update to the task's current activity type and windowing mode which may differ from the
+        // window configuration
+        info.configuration.windowConfiguration.setActivityType(getActivityType());
+        info.configuration.windowConfiguration.setWindowingMode(getWindowingMode());
         info.token = mRemoteToken.toWindowContainerToken();
 
         //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child

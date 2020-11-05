@@ -58,6 +58,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -85,8 +86,8 @@ public class SplitScreenController implements SplitScreen,
     private final WindowManagerProxy mWindowManagerProxy;
     private final TaskOrganizer mTaskOrganizer;
 
-    private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
-            new ArrayList<>();
+    private final CopyOnWriteArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners
+            = new CopyOnWriteArrayList<>();
     private final ArrayList<WeakReference<BiConsumer<Rect, Rect>>> mBoundsChangedListeners =
             new ArrayList<>();
 
@@ -173,7 +174,7 @@ public class SplitScreenController implements SplitScreen,
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                        if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
+                        if (!wasVisible || task.getWindowingMode()
                                 != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                                 || !mSplits.isSplitScreenSupported()) {
                             return;
@@ -478,6 +479,17 @@ public class SplitScreenController implements SplitScreen,
     }
 
     @Override
+    public void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
+        synchronized (mDockedStackExistsListeners) {
+            for (int i = mDockedStackExistsListeners.size() - 1; i >= 0; i--) {
+                if (mDockedStackExistsListeners.get(i) == listener) {
+                    mDockedStackExistsListeners.remove(i);
+                }
+            }
+        }
+    }
+
+    @Override
     public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
         synchronized (mBoundsChangedListeners) {
             mBoundsChangedListeners.add(new WeakReference<>(listener));
@@ -500,9 +512,7 @@ public class SplitScreenController implements SplitScreen,
             }
             // Note: The set of running tasks from the system is ordered by recency.
             final RunningTaskInfo topRunningTask = runningTasks.get(0);
-
-            final int activityType = topRunningTask.configuration.windowConfiguration
-                    .getActivityType();
+            final int activityType = topRunningTask.getActivityType();
             if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
                 return false;
             }

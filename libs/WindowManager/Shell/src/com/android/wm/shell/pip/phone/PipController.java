@@ -324,8 +324,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                        if (task.configuration.windowConfiguration.getWindowingMode()
-                                != WINDOWING_MODE_PINNED) {
+                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
                             return;
                         }
                         mTouchHandler.getMotionHelper().expandLeavePip(

@@ -120,7 +120,7 @@ class WindowManagerProxy {
         new WindowOrganizer().applyTransaction(t);
     }
 
-    private boolean getHomeAndRecentsTasks(List<ActivityManager.RunningTaskInfo> out,
+    boolean getHomeAndRecentsTasks(List<ActivityManager.RunningTaskInfo> out,
             WindowContainerToken parent) {
         boolean resizable = false;
         List<ActivityManager.RunningTaskInfo> rootTasks = parent == null
@@ -209,8 +209,7 @@ class WindowManagerProxy {
                 continue;
             }
             // Only move fullscreen tasks to split secondary.
-            if (rootTask.configuration.windowConfiguration.getWindowingMode()
-                    != WINDOWING_MODE_FULLSCREEN) {
+            if (rootTask.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
                 continue;
             }
             // Since this iterates from bottom to top, update topHomeTask for every fullscreen task
@@ -232,7 +231,7 @@ class WindowManagerProxy {
     }
 
     boolean isHomeOrRecentTask(ActivityManager.RunningTaskInfo ti) {
-        final int atype = ti.configuration.windowConfiguration.getActivityType();
+        final int atype = ti.getActivityType();
         return atype == ACTIVITY_TYPE_HOME || atype == ACTIVITY_TYPE_RECENTS;
     }
 

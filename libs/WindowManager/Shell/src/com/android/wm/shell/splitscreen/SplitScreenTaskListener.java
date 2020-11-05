@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.ShellTaskOrganizer.getWindowingMode;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -42,6 +41,7 @@ import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "SplitScreenTaskListener";
@@ -106,7 +106,7 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
 
-            final int winMode = getWindowingMode(taskInfo);
+            final int winMode = taskInfo.getWindowingMode();
             if (winMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 ProtoLog.v(WM_SHELL_TASK_ORG,
                         "%s onTaskAppeared Primary taskId=%d", TAG, taskInfo.taskId);
@@ -283,6 +283,21 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 mSplitScreenController.startEnterSplit();
             }
         } else if (secondaryImpliesMinimize) {
+            // Workaround for b/172686383, we can't rely on the sync bounds change transaction for
+            // the home task to finish before the last updateChildTaskSurface() call even if it's
+            // queued on the sync transaction queue, so ensure that the home task surface is updated
+            // again before we minimize
+            final ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
+            mSplitScreenController.getWmProxy().getHomeAndRecentsTasks(tasks,
+                    mSplitScreenController.getSecondaryRoot());
+            for (int i = 0; i < tasks.size(); i++) {
+                final RunningTaskInfo taskInfo = tasks.get(i);
+                final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
+                if (leash != null) {
+                    updateChildTaskSurface(taskInfo, leash, false /* firstAppeared */);
+                }
+            }
+
             // Both splits are populated but the secondary split has a home/recents stack on top,
             // so enter minimized mode.
             mSplitScreenController.ensureMinimizedSplit();

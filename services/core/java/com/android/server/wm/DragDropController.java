@@ -49,6 +49,7 @@ class DragDropController {
     static final int MSG_DRAG_END_TIMEOUT = 0;
     static final int MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT = 1;
     static final int MSG_ANIMATION_END = 2;
+    static final int MSG_REMOVE_DRAG_SURFACE_TIMEOUT = 3;
 
     /**
      * Drag state per operation.
@@ -381,6 +382,14 @@ class DragDropController {
                             return;
                         }
                         mDragState.closeLocked();
+                    }
+                    break;
+                }
+
+                case MSG_REMOVE_DRAG_SURFACE_TIMEOUT: {
+                    synchronized (mService.mGlobalLock) {
+                        mService.mTransactionFactory.get()
+                                .reparent((SurfaceControl) msg.obj, null).apply();
                     }
                     break;
                 }
