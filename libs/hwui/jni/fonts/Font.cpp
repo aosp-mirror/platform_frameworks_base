@@ -239,13 +239,10 @@ static jlong Font_getNativeFontPtr(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
 }
 
 // Critical Native
-static jboolean Font_isSameBufferAddress(CRITICAL_JNI_PARAMS_COMMA jlong lFontHandle,
-                                         jlong rFontHandle) {
-    FontWrapper* lFont = reinterpret_cast<FontWrapper*>(lFontHandle);
-    FontWrapper* rFont = reinterpret_cast<FontWrapper*>(rFontHandle);
-    const void* lBufferPtr = lFont->font->typeface()->GetFontData();
-    const void* rBufferPtr = rFont->font->typeface()->GetFontData();
-    return lBufferPtr == rBufferPtr;
+static jlong Font_GetBufferAddress(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    const void* bufferPtr = font->font->typeface()->GetFontData();
+    return reinterpret_cast<jlong>(bufferPtr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -297,7 +294,7 @@ static const JNINativeMethod gFontMethods[] = {
     { "nGetAxisInfo", "(JI)J", (void*) Font_getAxisInfo },
     { "nGetFontPath", "(J)Ljava/lang/String;", (void*) Font_getFontPath },
     { "nGetNativeFontPtr", "(J)J", (void*) Font_getNativeFontPtr },
-    { "nIsSameBufferAddress", "(JJ)Z", (void*) Font_isSameBufferAddress },
+    { "nGetFontBufferAddress", "(J)J", (void*) Font_GetBufferAddress },
 };
 
 static const JNINativeMethod gFontBufferHelperMethods[] = {
