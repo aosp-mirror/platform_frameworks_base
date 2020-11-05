@@ -225,7 +225,7 @@ droidstubs {
 }
 
 droidstubs {
-    name: "test-api-stubs-docs",
+    name: "test-api-stubs-docs-non-updatable",
     defaults: ["metalava-non-updatable-api-stubs-default"],
     arg_files: [
         "core/res/AndroidManifest.xml",
@@ -237,12 +237,12 @@ droidstubs {
         + "\\)",
     check_api: {
         current: {
-            api_file: "api/test-current.txt",
-            removed_api_file: "api/test-removed.txt",
+            api_file: "core/api/test-current.txt",
+            removed_api_file: "core/api/test-removed.txt",
         },
         api_lint: {
             enabled: true,
-            baseline_file: "api/test-lint-baseline.txt",
+            baseline_file: "core/api/test-lint-baseline.txt",
         },
     },
     dist: {
@@ -361,7 +361,7 @@ java_library_static {
 
 java_library_static {
     name: "android_test_stubs_current",
-    srcs: [ ":test-api-stubs-docs" ],
+    srcs: [ ":test-api-stubs-docs-non-updatable" ],
     static_libs: [
         // Modules do not have test APIs, but we want to include their SystemApis, like we include
         // the SystemApi of framework-non-updatable-sources.
