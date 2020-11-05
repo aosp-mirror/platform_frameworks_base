@@ -7761,6 +7761,21 @@ public final class Settings {
                 "minimal_post_processing_allowed";
 
         /**
+         * User's preference for refresh rate switching.
+         *
+         * <p>Values:
+         * 0 - Never switch refresh rates.
+         * 1 - Switch refresh rates only when it can be done seamlessly. (Default behaviour)
+         * 2 - Always prefer refresh rate switching even if it's going to have visual interruptions
+         *     for the user.
+         *
+         * @see android.view.Surface#setFrameRate
+         * @hide
+         */
+        public static final String MATCH_CONTENT_FRAME_RATE =
+                "match_content_frame_rate";
+
+        /**
          * INCALL_POWER_BUTTON_BEHAVIOR value for "turn off screen".
          * @hide
          */
@@ -10708,7 +10723,7 @@ public final class Settings {
          *    0 = Disabled
          *    1 = Enabled
          *
-         * Most readers of this setting should simply check if value == 1 to determined the
+         * Most readers of this setting should simply check if value == 1 to determine the
          * enabled state.
          * @hide
          * @deprecated To be removed.

@@ -282,6 +282,12 @@ public class HdmiCecConfig {
         }
     }
 
+    private int getIntValue(@NonNull Value value) {
+        return value.getHexValue() != null
+               ? Integer.decode(value.getHexValue())
+               : value.getIntValue();
+    }
+
     /**
      * Returns a list of all settings based on the XML metadata.
      */
@@ -380,7 +386,7 @@ public class HdmiCecConfig {
         }
         List<Integer> allowedValues = new ArrayList<Integer>();
         for (Value allowedValue : setting.getAllowedValues().getValue()) {
-            allowedValues.add(allowedValue.getIntValue());
+            allowedValues.add(getIntValue(allowedValue));
         }
         return allowedValues;
     }
@@ -412,7 +418,7 @@ public class HdmiCecConfig {
             throw new IllegalArgumentException("Setting '" + name
                     + "' is not a string-type setting.");
         }
-        return getSetting(name).getDefaultValue().getIntValue();
+        return getIntValue(getSetting(name).getDefaultValue());
     }
 
     /**
@@ -444,7 +450,7 @@ public class HdmiCecConfig {
                     + "' is not a int-type setting.");
         }
         Slog.d(TAG, "Getting CEC setting value '" + name + "'.");
-        String defaultValue = Integer.toString(setting.getDefaultValue().getIntValue());
+        String defaultValue = Integer.toString(getIntValue(setting.getDefaultValue()));
         String value = retrieveValue(setting, defaultValue);
         return Integer.parseInt(value);
     }

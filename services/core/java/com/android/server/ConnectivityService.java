@@ -135,8 +135,6 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
 import android.net.shared.PrivateDnsConfig;
-import android.net.util.LinkPropertiesUtils.CompareOrUpdateResult;
-import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
 import android.os.BasicShellCommandHandler;
@@ -192,6 +190,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
+import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DataConnectionStats;
@@ -1105,23 +1105,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_ADDED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiverAsUser(
+
+        final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
+        userAllContext.registerReceiver(
                 mIntentReceiver,
-                UserHandle.ALL,
                 intentFilter,
                 null /* broadcastPermission */,
                 mHandler);
-        mContext.registerReceiverAsUser(mUserPresentReceiver, UserHandle.SYSTEM,
-                new IntentFilter(Intent.ACTION_USER_PRESENT), null, null);
+        mContext.createContextAsUser(UserHandle.SYSTEM, 0 /* flags */).registerReceiver(
+                mUserPresentReceiver,
+                new IntentFilter(Intent.ACTION_USER_PRESENT),
+                null /* broadcastPermission */,
+                null /* scheduler */);
 
         // Listen to package add and removal events for all users.
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
-        mContext.registerReceiverAsUser(
+        userAllContext.registerReceiver(
                 mIntentReceiver,
-                UserHandle.ALL,
                 intentFilter,
                 null /* broadcastPermission */,
                 mHandler);
@@ -1129,8 +1132,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Listen to lockdown VPN reset.
         intentFilter = new IntentFilter();
         intentFilter.addAction(LockdownVpnTracker.ACTION_LOCKDOWN_RESET);
-        mContext.registerReceiverAsUser(
-                mIntentReceiver, UserHandle.ALL, intentFilter, NETWORK_STACK, mHandler);
+        userAllContext.registerReceiver(
+                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler);
 
         try {
             mNMS.registerObserver(mDataActivityObserver);
@@ -5259,7 +5262,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Try creating lockdown tracker, since user present usually means
             // unlocked keystore.
             updateLockdownVpn();
-            mContext.unregisterReceiver(this);
+            // Use the same context that registered receiver before to unregister it. Because use
+            // different context to unregister receiver will cause exception.
+            context.unregisterReceiver(this);
         }
     };
 

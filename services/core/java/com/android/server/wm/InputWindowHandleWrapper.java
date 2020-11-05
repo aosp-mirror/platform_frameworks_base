@@ -255,11 +255,6 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void replaceTouchableRegionWithCrop(@Nullable SurfaceControl bounds) {
-        setTouchableRegionCrop(bounds);
-        setReplaceTouchableRegionWithCrop(true);
-    }
-
     void setTouchableRegionCrop(@Nullable SurfaceControl bounds) {
         if (mHandle.touchableRegionSurfaceControl.get() == bounds) {
             return;

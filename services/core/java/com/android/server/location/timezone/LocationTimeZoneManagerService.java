@@ -87,7 +87,7 @@ public class LocationTimeZoneManagerService extends Binder {
                 // Binder and is registered as a binder service so it can receive shell commands.
                 publishBinderService("location_time_zone_manager", mService);
             } else {
-                Slog.i(TAG, getClass() + " is compile-time disabled");
+                Slog.i(TAG, getClass() + " is disabled");
             }
         }
 

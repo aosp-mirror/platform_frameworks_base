@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -75,7 +76,8 @@ public final class BackgroundBlurDrawable extends Drawable {
 
     private BackgroundBlurDrawable(Aggregator aggregator) {
         mAggregator = aggregator;
-        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        mPaint.setColor(Color.TRANSPARENT);
         mRenderNode = new RenderNode("BackgroundBlurDrawable");
         mRenderNode.addPositionUpdateListener(mPositionUpdateListener);
     }
@@ -85,8 +87,14 @@ public final class BackgroundBlurDrawable extends Drawable {
         if (mRectPath.isEmpty() || !isVisible() || getAlpha() == 0) {
             return;
         }
+
         canvas.drawPath(mRectPath, mPaint);
         canvas.drawRenderNode(mRenderNode);
+    }
+
+    @Override
+    public void setTint(int tintColor) {
+        mPaint.setColor(tintColor);
     }
 
     @Override

@@ -359,7 +359,7 @@ public class NetworkCapabilitiesTest {
         assertFalse(nr.satisfiedByNetworkCapabilities(new NetworkCapabilities()));
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
     public void testOemPrivate() {
         NetworkCapabilities nc = new NetworkCapabilities();
         // By default OEM_PRIVATE is neither in the unwanted or required lists and the network is

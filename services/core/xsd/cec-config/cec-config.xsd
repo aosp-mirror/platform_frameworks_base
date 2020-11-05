@@ -25,5 +25,6 @@
   <xs:complexType name="value">
     <xs:attribute name="string-value" type="xs:string"/>
     <xs:attribute name="int-value" type="xs:int"/>
+    <xs:attribute name="hex-value" type="xs:string"/>
   </xs:complexType>
 </xs:schema>

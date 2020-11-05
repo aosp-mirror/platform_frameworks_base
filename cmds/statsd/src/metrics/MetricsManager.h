@@ -285,9 +285,13 @@ private:
 
     std::vector<int> mMetricIndexesWithActivation;
 
-    void initLogSourceWhiteList();
+    void initAllowedLogSources();
 
     void initPullAtomSources();
+
+    // Only called on config creation/update to initialize log sources from the config.
+    // Calls initAllowedLogSources and initPullAtomSources. Sets mConfigValid to false on error.
+    void createAllLogSourcesFromConfig(const StatsdConfig& config);
 
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
@@ -330,6 +334,7 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
     FRIEND_TEST(MetricsManagerTest, TestLogSources);
+    FRIEND_TEST(MetricsManagerTest, TestLogSourcesOnConfigUpdate);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);

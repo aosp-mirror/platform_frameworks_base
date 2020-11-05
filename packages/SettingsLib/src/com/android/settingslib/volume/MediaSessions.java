@@ -16,6 +16,8 @@
 
 package com.android.settingslib.volume;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -23,20 +25,21 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.media.IRemoteVolumeController;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
+import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
 import android.media.session.MediaSession.Token;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener;
+import android.media.session.MediaSessionManager.RemoteVolumeControllerCallback;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.PrintWriter;
@@ -58,6 +61,7 @@ public class MediaSessions {
 
     private final Context mContext;
     private final H mHandler;
+    private final HandlerExecutor mHandlerExecutor;
     private final MediaSessionManager mMgr;
     private final Map<Token, MediaControllerRecord> mRecords = new HashMap<>();
     private final Callbacks mCallbacks;
@@ -67,6 +71,7 @@ public class MediaSessions {
     public MediaSessions(Context context, Looper looper, Callbacks callbacks) {
         mContext = context;
         mHandler = new H(looper);
+        mHandlerExecutor = new HandlerExecutor(mHandler);
         mMgr = (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
         mCallbacks = callbacks;
     }
@@ -95,7 +100,8 @@ public class MediaSessions {
         mMgr.addOnActiveSessionsChangedListener(mSessionsListener, null, mHandler);
         mInit = true;
         postUpdateSessions();
-        mMgr.registerRemoteVolumeController(mRvc);
+        mMgr.registerRemoteVolumeControllerCallback(mHandlerExecutor,
+                mRemoteVolumeControllerCallback);
     }
 
     protected void postUpdateSessions() {
@@ -110,7 +116,7 @@ public class MediaSessions {
         if (D.BUG) Log.d(TAG, "destroy");
         mInit = false;
         mMgr.removeOnActiveSessionsChangedListener(mSessionsListener);
-        mMgr.unregisterRemoteVolumeController(mRvc);
+        mMgr.unregisterRemoteVolumeControllerCallback(mRemoteVolumeControllerCallback);
     }
 
     /**
@@ -330,19 +336,19 @@ public class MediaSessions {
                 }
             };
 
-    private final IRemoteVolumeController mRvc = new IRemoteVolumeController.Stub() {
-        @Override
-        public void remoteVolumeChanged(Token sessionToken, int flags)
-                throws RemoteException {
-            mHandler.obtainMessage(H.REMOTE_VOLUME_CHANGED, flags, 0,
-                    sessionToken).sendToTarget();
-        }
+    private final RemoteVolumeControllerCallback mRemoteVolumeControllerCallback =
+            new RemoteVolumeControllerCallback() {
+                @Override
+                public void onVolumeChanged(@NonNull MediaSession.Token sessionToken,
+                        int flags) {
+                    mHandler.obtainMessage(H.REMOTE_VOLUME_CHANGED, flags, 0,
+                            sessionToken).sendToTarget();
+                }
 
-        @Override
-        public void updateRemoteController(final Token sessionToken)
-                throws RemoteException {
-            mHandler.obtainMessage(H.UPDATE_REMOTE_CONTROLLER, sessionToken).sendToTarget();
-        }
+                @Override
+                public void onSessionChanged(@Nullable MediaSession.Token sessionToken) {
+                    mHandler.obtainMessage(H.UPDATE_REMOTE_CONTROLLER, sessionToken).sendToTarget();
+                }
     };
 
     private final class H extends Handler {

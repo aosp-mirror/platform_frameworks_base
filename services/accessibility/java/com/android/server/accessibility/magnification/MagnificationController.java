@@ -37,7 +37,7 @@ import com.android.server.accessibility.AccessibilityManagerService;
  * Handles all magnification controllers initialization, generic interactions
  * and magnification mode transition.
  */
-public class MagnificationController {
+public class MagnificationController implements WindowMagnificationManager.Callback {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "MagnificationController";
@@ -76,6 +76,14 @@ public class MagnificationController {
         this(ams, lock, context);
         mFullScreenMagnificationController = fullScreenMagnificationController;
         mWindowMagnificationMgr = windowMagnificationManager;
+    }
+
+    @Override
+    public void onPerformScaleAction(int displayId, float scale) {
+        getWindowMagnificationMgr().setScale(displayId, scale);
+        getWindowMagnificationMgr().persistScale(displayId);
+        mAms.onMagnificationScaleChanged(displayId,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     /**
@@ -223,7 +231,8 @@ public class MagnificationController {
         synchronized (mLock) {
             if (mWindowMagnificationMgr == null) {
                 mWindowMagnificationMgr = new WindowMagnificationManager(mContext,
-                        mAms.getCurrentUserIdLocked());
+                        mAms.getCurrentUserIdLocked(),
+                        this);
             }
             return mWindowMagnificationMgr;
         }

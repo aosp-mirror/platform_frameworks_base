@@ -674,6 +674,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testRemoveActiveAdmin_fromDifferentUserWithINTERACT_ACROSS_USERS_FULL() {
         mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
 
         // Add admin1.
 
@@ -2748,6 +2749,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
 
         // Check that the system user is unaffiliated.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
@@ -4363,6 +4365,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testGetBindDeviceAdminTargetUsers() throws Exception {
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
+
         // Setup device owner.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -6263,6 +6267,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testGetAllCrossProfilePackages_notSet_returnsEmpty() throws Exception {
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         mContext.packageName = admin1.getPackageName();
 
@@ -6275,6 +6280,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetAllCrossProfilePackages_notSet_dpmsReinitialized_returnsEmpty()
             throws Exception {
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         mContext.packageName = admin1.getPackageName();
 
@@ -6287,6 +6293,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testGetAllCrossProfilePackages_whenSet_returnsCombinedSet() throws Exception {
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
         mContext.packageName = admin1.getPackageName();
@@ -6303,6 +6310,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetAllCrossProfilePackages_whenSet_dpmsReinitialized_returnsCombinedSet()
             throws Exception {
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
         addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
         final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
         mContext.packageName = admin1.getPackageName();
@@ -6483,6 +6491,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSetAccountTypesWithManagementDisabledOnOrgOwnedManagedProfile()
             throws Exception {
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
+
         final int managedProfileUserId = 15;
         final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
 

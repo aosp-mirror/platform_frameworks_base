@@ -21,10 +21,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.NetUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.net.module.util.NetUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
