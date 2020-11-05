@@ -90,61 +90,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     mVersionStringsInReport = config.version_strings_in_metric_report();
     mInstallerInReport = config.installer_in_metric_report();
 
-    // Init allowed pushed atom uids.
-    if (config.allowed_log_source_size() == 0) {
-        mConfigValid = false;
-        ALOGE("Log source allowlist is empty! This config won't get any data. Suggest adding at "
-                      "least AID_SYSTEM and AID_STATSD to the allowed_log_source field.");
-    } else {
-        for (const auto& source : config.allowed_log_source()) {
-            auto it = UidMap::sAidToUidMapping.find(source);
-            if (it != UidMap::sAidToUidMapping.end()) {
-                mAllowedUid.push_back(it->second);
-            } else {
-                mAllowedPkg.push_back(source);
-            }
-        }
-
-        if (mAllowedUid.size() + mAllowedPkg.size() > StatsdStats::kMaxLogSourceCount) {
-            ALOGE("Too many log sources. This is likely to be an error in the config.");
-            mConfigValid = false;
-        } else {
-            initLogSourceWhiteList();
-        }
-    }
-
-    // Init default allowed pull atom uids.
-    int numPullPackages = 0;
-    for (const string& pullSource : config.default_pull_packages()) {
-        auto it = UidMap::sAidToUidMapping.find(pullSource);
-        if (it != UidMap::sAidToUidMapping.end()) {
-            numPullPackages++;
-            mDefaultPullUids.insert(it->second);
-        } else {
-            ALOGE("Default pull atom packages must be in sAidToUidMapping");
-            mConfigValid = false;
-        }
-    }
-    // Init per-atom pull atom packages.
-    for (const PullAtomPackages& pullAtomPackages : config.pull_atom_packages()) {
-        int32_t atomId = pullAtomPackages.atom_id();
-        for (const string& pullPackage : pullAtomPackages.packages()) {
-            numPullPackages++;
-            auto it = UidMap::sAidToUidMapping.find(pullPackage);
-            if (it != UidMap::sAidToUidMapping.end()) {
-                mPullAtomUids[atomId].insert(it->second);
-            } else {
-                mPullAtomPackages[atomId].insert(pullPackage);
-            }
-        }
-    }
-    if (numPullPackages > StatsdStats::kMaxPullAtomPackages) {
-        ALOGE("Too many sources in default_pull_packages and pull_atom_packages. This is likely to "
-              "be an error in the config");
-        mConfigValid = false;
-    } else {
-        initPullAtomSources();
-    }
+    createAllLogSourcesFromConfig(config);
     mPullerManager->RegisterPullUidProvider(mConfigKey, this);
 
     // Store the sub-configs used.
@@ -241,10 +187,75 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     mAllAnomalyTrackers = newAnomalyTrackers;
     mAlertTrackerMap = newAlertTrackerMap;
     mAllPeriodicAlarmTrackers = newPeriodicAlarmTrackers;
+
+    mAllowedUid.clear();
+    mAllowedPkg.clear();
+    mDefaultPullUids.clear();
+    mPullAtomUids.clear();
+    mPullAtomPackages.clear();
+    createAllLogSourcesFromConfig(config);
     return mConfigValid;
 }
 
-void MetricsManager::initLogSourceWhiteList() {
+void MetricsManager::createAllLogSourcesFromConfig(const StatsdConfig& config) {
+    // Init allowed pushed atom uids.
+    if (config.allowed_log_source_size() == 0) {
+        mConfigValid = false;
+        ALOGE("Log source allowlist is empty! This config won't get any data. Suggest adding at "
+              "least AID_SYSTEM and AID_STATSD to the allowed_log_source field.");
+    } else {
+        for (const auto& source : config.allowed_log_source()) {
+            auto it = UidMap::sAidToUidMapping.find(source);
+            if (it != UidMap::sAidToUidMapping.end()) {
+                mAllowedUid.push_back(it->second);
+            } else {
+                mAllowedPkg.push_back(source);
+            }
+        }
+
+        if (mAllowedUid.size() + mAllowedPkg.size() > StatsdStats::kMaxLogSourceCount) {
+            ALOGE("Too many log sources. This is likely to be an error in the config.");
+            mConfigValid = false;
+        } else {
+            initAllowedLogSources();
+        }
+    }
+
+    // Init default allowed pull atom uids.
+    int numPullPackages = 0;
+    for (const string& pullSource : config.default_pull_packages()) {
+        auto it = UidMap::sAidToUidMapping.find(pullSource);
+        if (it != UidMap::sAidToUidMapping.end()) {
+            numPullPackages++;
+            mDefaultPullUids.insert(it->second);
+        } else {
+            ALOGE("Default pull atom packages must be in sAidToUidMapping");
+            mConfigValid = false;
+        }
+    }
+    // Init per-atom pull atom packages.
+    for (const PullAtomPackages& pullAtomPackages : config.pull_atom_packages()) {
+        int32_t atomId = pullAtomPackages.atom_id();
+        for (const string& pullPackage : pullAtomPackages.packages()) {
+            numPullPackages++;
+            auto it = UidMap::sAidToUidMapping.find(pullPackage);
+            if (it != UidMap::sAidToUidMapping.end()) {
+                mPullAtomUids[atomId].insert(it->second);
+            } else {
+                mPullAtomPackages[atomId].insert(pullPackage);
+            }
+        }
+    }
+    if (numPullPackages > StatsdStats::kMaxPullAtomPackages) {
+        ALOGE("Too many sources in default_pull_packages and pull_atom_packages. This is likely to "
+              "be an error in the config");
+        mConfigValid = false;
+    } else {
+        initPullAtomSources();
+    }
+}
+
+void MetricsManager::initAllowedLogSources() {
     std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
     mAllowedLogSources.clear();
     mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
@@ -288,7 +299,7 @@ void MetricsManager::notifyAppUpgrade(const int64_t& eventTimeNs, const string& 
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) != mAllowedPkg.end()) {
         // We will re-initialize the whole list because we don't want to keep the multi mapping of
         // UID<->pkg inside MetricsManager to reduce the memory usage.
-        initLogSourceWhiteList();
+        initAllowedLogSources();
     }
 
     for (const auto& it : mPullAtomPackages) {
@@ -309,7 +320,7 @@ void MetricsManager::notifyAppRemoved(const int64_t& eventTimeNs, const string& 
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) != mAllowedPkg.end()) {
         // We will re-initialize the whole list because we don't want to keep the multi mapping of
         // UID<->pkg inside MetricsManager to reduce the memory usage.
-        initLogSourceWhiteList();
+        initAllowedLogSources();
     }
 
     for (const auto& it : mPullAtomPackages) {
@@ -329,7 +340,7 @@ void MetricsManager::onUidMapReceived(const int64_t& eventTimeNs) {
     if (mAllowedPkg.size() == 0) {
         return;
     }
-    initLogSourceWhiteList();
+    initAllowedLogSources();
 }
 
 void MetricsManager::onStatsdInitCompleted(const int64_t& eventTimeNs) {
