@@ -432,7 +432,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                  * This gets called on a RenderThread worker thread, so members accessed here must
                  * be protected by a lock.
                  */
-                final boolean useBLAST = viewRoot.useBLAST();
+                final boolean useBLAST = useBLASTSync(viewRoot);
                 viewRoot.registerRtFrameCallback(frame -> {
                     try {
                         synchronized (mSurfaceControlLock) {
@@ -809,7 +809,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
          * This gets called on a RenderThread worker thread, so members accessed here must
          * be protected by a lock.
          */
-        final boolean useBLAST = viewRoot.useBLAST();
+        final boolean useBLAST = useBLASTSync(viewRoot);
         viewRoot.registerRtFrameCallback(frame -> {
             try {
                 synchronized (mSurfaceControlLock) {
@@ -1110,7 +1110,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
                 final boolean needBLASTSync =
                     (layoutSizeChanged || positionChanged || visibleChanged) &&
-                        viewRoot.useBLAST();
+                        useBLASTSync(viewRoot);
                 final boolean realSizeChanged = performSurfaceTransaction(viewRoot,
                     translator, creating, sizeChanged, needBLASTSync);
                 final boolean redrawNeeded = sizeChanged || creating ||
@@ -1352,7 +1352,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void applySurfaceTransforms(SurfaceControl surface, SurfaceControl.Transaction t,
             Rect position, long frameNumber) {
         final ViewRootImpl viewRoot = getViewRootImpl();
-        if (frameNumber > 0 && viewRoot != null && !viewRoot.useBLAST()) {
+        if (frameNumber > 0 && viewRoot != null && !useBLASTSync(viewRoot)) {
             t.deferTransactionUntil(surface, viewRoot.getSurfaceControl(),
                     frameNumber);
         }
@@ -1385,7 +1385,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
         final ViewRootImpl viewRoot = getViewRootImpl();
-        final boolean useBLAST = viewRoot.useBLAST();
+        final boolean useBLAST = useBLASTSync(viewRoot);
 
         if (useBLAST) {
             synchronized (viewRoot.getBlastTransactionLock()) {
@@ -1444,7 +1444,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         @Override
         public void positionLost(long frameNumber) {
             final ViewRootImpl viewRoot = getViewRootImpl();
-            boolean useBLAST = viewRoot != null && viewRoot.useBLAST();
+            boolean useBLAST = viewRoot != null && useBLASTSync(viewRoot);
             if (DEBUG) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                         System.identityHashCode(this), frameNumber));
@@ -1919,5 +1919,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             Log.e(TAG, System.identityHashCode(this)
                     + "Exception requesting focus on embedded window", e);
         }
+    }
+
+    private boolean useBLASTSync(ViewRootImpl viewRoot) {
+        return viewRoot.useBLAST() && mUseBlastAdapter;
     }
 }
