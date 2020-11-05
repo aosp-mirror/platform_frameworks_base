@@ -3460,6 +3460,7 @@
   <java-symbol type="string" name="notification_channel_heavy_weight_app" />
   <java-symbol type="string" name="notification_channel_system_changes" />
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
+  <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
   <java-symbol type="string" name="config_defaultWellbeingPackage" />
@@ -4097,4 +4098,10 @@
   <java-symbol type="dimen" name="config_taskLetterboxAspectRatio" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
+
+  <!-- Window magnification prompt -->
+  <java-symbol type="string" name="window_magnification_prompt_title" />
+  <java-symbol type="string" name="window_magnification_prompt_content" />
+  <java-symbol type="string" name="turn_on_magnification_settings_action" />
+  <java-symbol type="string" name="dismiss_action" />
 </resources>
