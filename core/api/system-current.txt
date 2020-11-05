@@ -9093,6 +9093,26 @@ package android.service.carrier {
     method @NonNull @WorkerThread public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
+  public final class CarrierMessagingServiceWrapper {
+    ctor public CarrierMessagingServiceWrapper();
+    method public boolean bindToCarrierMessagingService(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull Runnable);
+    method public void disposeConnection(@NonNull android.content.Context);
+    method public void downloadMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void receiveSms(@NonNull android.service.carrier.MessagePdu, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendDataSms(@NonNull byte[], int, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendMultipartTextSms(@NonNull java.util.List<java.lang.String>, int, @NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendTextSms(@NonNull String, int, @NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+  }
+
+  public static interface CarrierMessagingServiceWrapper.CarrierMessagingCallback {
+    method public default void onDownloadMmsComplete(int);
+    method public default void onReceiveSmsComplete(int);
+    method public default void onSendMmsComplete(int, @Nullable byte[]);
+    method public default void onSendMultipartSmsComplete(int, @Nullable int[]);
+    method public default void onSendSmsComplete(int, int);
+  }
+
 }
 
 package android.service.contentcapture {
