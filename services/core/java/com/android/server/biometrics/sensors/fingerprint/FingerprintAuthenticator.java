@@ -30,11 +30,12 @@ import com.android.server.biometrics.sensors.LockoutTracker;
  */
 public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub {
     private final IFingerprintService mFingerprintService;
+    private final int mSensorId;
 
     public FingerprintAuthenticator(IFingerprintService fingerprintService, SensorConfig config)
             throws RemoteException {
         mFingerprintService = fingerprintService;
-        mFingerprintService.initializeConfiguration(config.id, config.strength);
+        mSensorId = config.id;
     }
 
     @Override
@@ -42,40 +43,40 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
-        mFingerprintService.prepareForAuthentication(token, operationId, userId, sensorReceiver,
-                opPackageName, cookie, callingUid, callingPid, callingUserId);
+        mFingerprintService.prepareForAuthentication(mSensorId, token, operationId, userId,
+                sensorReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
     }
 
     @Override
     public void startPreparedClient(int cookie) throws RemoteException {
-        mFingerprintService.startPreparedClient(cookie);
+        mFingerprintService.startPreparedClient(mSensorId, cookie);
     }
 
     @Override
     public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
             int callingPid, int callingUserId) throws RemoteException {
-        mFingerprintService.cancelAuthenticationFromService(token, opPackageName, callingUid,
-                callingPid, callingUserId);
+        mFingerprintService.cancelAuthenticationFromService(mSensorId, token, opPackageName,
+                callingUid, callingPid, callingUserId);
     }
 
     @Override
     public boolean isHardwareDetected(String opPackageName) throws RemoteException {
-        return mFingerprintService.isHardwareDetected(opPackageName);
+        return mFingerprintService.isHardwareDetected(mSensorId, opPackageName);
     }
 
     @Override
     public boolean hasEnrolledTemplates(int userId, String opPackageName) throws RemoteException {
-        return mFingerprintService.hasEnrolledFingerprints(userId, opPackageName);
+        return mFingerprintService.hasEnrolledFingerprints(mSensorId, userId, opPackageName);
     }
 
     @Override
     public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId)
             throws RemoteException {
-        return mFingerprintService.getLockoutModeForUser(userId);
+        return mFingerprintService.getLockoutModeForUser(mSensorId, userId);
     }
 
     @Override
     public long getAuthenticatorId(int callingUserId) throws RemoteException {
-        return mFingerprintService.getAuthenticatorId(callingUserId);
+        return mFingerprintService.getAuthenticatorId(mSensorId, callingUserId);
     }
 }

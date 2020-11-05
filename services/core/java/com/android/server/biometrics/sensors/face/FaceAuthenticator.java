@@ -30,11 +30,12 @@ import com.android.server.biometrics.sensors.LockoutTracker;
  */
 public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     private final IFaceService mFaceService;
+    private final int mSensorId;
 
     public FaceAuthenticator(IFaceService faceService, SensorConfig config)
             throws RemoteException {
         mFaceService = faceService;
-        mFaceService.initializeConfiguration(config.id, config.strength);
+        mSensorId = config.id;
     }
 
     @Override
@@ -42,40 +43,41 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
-        mFaceService.prepareForAuthentication(requireConfirmation, token, operationId, userId,
-                sensorReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
+        mFaceService.prepareForAuthentication(mSensorId, requireConfirmation, token, operationId,
+                userId, sensorReceiver, opPackageName, cookie, callingUid, callingPid,
+                callingUserId);
     }
 
     @Override
     public void startPreparedClient(int cookie) throws RemoteException {
-        mFaceService.startPreparedClient(cookie);
+        mFaceService.startPreparedClient(mSensorId, cookie);
     }
 
     @Override
     public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
             int callingPid, int callingUserId) throws RemoteException {
-        mFaceService.cancelAuthenticationFromService(token, opPackageName, callingUid, callingPid,
-                callingUserId);
+        mFaceService.cancelAuthenticationFromService(mSensorId, token, opPackageName, callingUid,
+                callingPid, callingUserId);
     }
 
     @Override
     public boolean isHardwareDetected(String opPackageName) throws RemoteException {
-        return mFaceService.isHardwareDetected(opPackageName);
+        return mFaceService.isHardwareDetected(mSensorId, opPackageName);
     }
 
     @Override
     public boolean hasEnrolledTemplates(int userId, String opPackageName) throws RemoteException {
-        return mFaceService.hasEnrolledFaces(userId, opPackageName);
+        return mFaceService.hasEnrolledFaces(mSensorId, userId, opPackageName);
     }
 
     @Override
     public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId)
             throws RemoteException {
-        return mFaceService.getLockoutModeForUser(userId);
+        return mFaceService.getLockoutModeForUser(mSensorId, userId);
     }
 
     @Override
     public long getAuthenticatorId(int callingUserId) throws RemoteException {
-        return mFaceService.getAuthenticatorId(callingUserId);
+        return mFaceService.getAuthenticatorId(mSensorId, callingUserId);
     }
 }

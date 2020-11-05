@@ -577,9 +577,17 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public List<Face> getEnrolledFaces(int userId) {
+        final List<FaceSensorPropertiesInternal> faceSensorProperties =
+                getSensorPropertiesInternal();
+        if (faceSensorProperties.isEmpty()) {
+            Slog.e(TAG, "No sensors");
+            return new ArrayList<>();
+        }
+
         if (mService != null) {
             try {
-                return mService.getEnrolledFaces(userId, mContext.getOpPackageName());
+                return mService.getEnrolledFaces(faceSensorProperties.get(0).sensorId, userId,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -606,15 +614,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public boolean hasEnrolledTemplates() {
-        if (mService != null) {
-            try {
-                return mService.hasEnrolledFaces(
-                        UserHandle.myUserId(), mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return false;
+        return hasEnrolledTemplates(UserHandle.myUserId());
     }
 
     /**
@@ -624,9 +624,17 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             USE_BIOMETRIC_INTERNAL,
             INTERACT_ACROSS_USERS})
     public boolean hasEnrolledTemplates(int userId) {
+        final List<FaceSensorPropertiesInternal> faceSensorProperties =
+                getSensorPropertiesInternal();
+        if (faceSensorProperties.isEmpty()) {
+            Slog.e(TAG, "No sensors");
+            return false;
+        }
+
         if (mService != null) {
             try {
-                return mService.hasEnrolledFaces(userId, mContext.getOpPackageName());
+                return mService.hasEnrolledFaces(faceSensorProperties.get(0).sensorId, userId,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -642,9 +650,17 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public boolean isHardwareDetected() {
+        final List<FaceSensorPropertiesInternal> faceSensorProperties =
+                getSensorPropertiesInternal();
+        if (faceSensorProperties.isEmpty()) {
+            Slog.e(TAG, "No sensors");
+            return false;
+        }
+
         if (mService != null) {
             try {
-                return mService.isHardwareDetected(mContext.getOpPackageName());
+                return mService.isHardwareDetected(faceSensorProperties.get(0).sensorId,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -677,7 +693,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @NonNull
     public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
-            if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
+            if (mService == null) {
                 return new ArrayList<>();
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
