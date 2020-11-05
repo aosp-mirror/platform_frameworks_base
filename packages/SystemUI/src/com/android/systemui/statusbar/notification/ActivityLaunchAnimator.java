@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_APP_START;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -32,6 +34,7 @@ import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.View;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -226,10 +229,27 @@ public class ActivityLaunchAnimator {
                     }
                 });
                 anim.addListener(new AnimatorListenerAdapter() {
+                    private boolean mWasCancelled;
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_APP_START);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        mWasCancelled = true;
+                    }
+
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         setExpandAnimationRunning(false);
                         invokeCallback(iRemoteAnimationFinishedCallback);
+                        if (!mWasCancelled) {
+                            InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_APP_START);
+                        } else {
+                            InteractionJankMonitor.getInstance().cancel(CUJ_NOTIFICATION_APP_START);
+                        }
                     }
                 });
                 anim.start();

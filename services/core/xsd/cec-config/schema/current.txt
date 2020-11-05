@@ -12,15 +12,19 @@ package com.android.server.hdmi.cec.config {
     method public com.android.server.hdmi.cec.config.Value getDefaultValue();
     method public String getName();
     method public boolean getUserConfigurable();
+    method public String getValueType();
     method public void setAllowedValues(com.android.server.hdmi.cec.config.ValueList);
     method public void setDefaultValue(com.android.server.hdmi.cec.config.Value);
     method public void setName(String);
     method public void setUserConfigurable(boolean);
+    method public void setValueType(String);
   }
 
   public class Value {
     ctor public Value();
+    method public int getIntValue();
     method public String getStringValue();
+    method public void setIntValue(int);
     method public void setStringValue(String);
   }
 

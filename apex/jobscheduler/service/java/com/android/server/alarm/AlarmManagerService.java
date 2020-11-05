@@ -439,7 +439,7 @@ public class AlarmManagerService extends SystemService {
         private static final int DEFAULT_APP_STANDBY_RESTRICTED_QUOTA = 1;
         private static final long DEFAULT_APP_STANDBY_RESTRICTED_WINDOW = MILLIS_IN_DAY;
 
-        private static final boolean DEFAULT_LAZY_BATCHING = false;
+        private static final boolean DEFAULT_LAZY_BATCHING = true;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;

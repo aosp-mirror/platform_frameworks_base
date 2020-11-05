@@ -255,35 +255,35 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-                long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-                String opPackageName, int cookie, int callingUid, int callingPid,
-                int callingUserId) {
+        public void prepareForAuthentication(int sensorId, boolean requireConfirmation,
+                IBinder token, long operationId, int userId,
+                IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
+                int callingUid, int callingPid, int callingUserId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for prepareForAuthentication");
                 return;
             }
 
             final boolean restricted = true; // BiometricPrompt is always restricted
-            provider.second.scheduleAuthenticate(provider.first, token, operationId, userId, cookie,
+            provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, false /* isKeyguard */);
         }
 
         @Override // Binder call
-        public void startPreparedClient(int cookie) {
+        public void startPreparedClient(int sensorId, int cookie) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for startPreparedClient");
                 return;
             }
 
-            provider.second.startPreparedClient(provider.first, cookie);
+            provider.startPreparedClient(sensorId, cookie);
         }
 
         @Override // Binder call
@@ -312,17 +312,17 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        public void cancelAuthenticationFromService(final IBinder token, final String opPackageName,
-                int callingUid, int callingPid, int callingUserId) {
+        public void cancelAuthenticationFromService(int sensorId, final IBinder token,
+                final String opPackageName, int callingUid, int callingPid, int callingUserId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for cancelAuthenticationFromService");
                 return;
             }
 
-            provider.second.cancelAuthentication(provider.first, token);
+            provider.cancelAuthentication(sensorId, token);
         }
 
         @Override // Binder call
@@ -384,24 +384,24 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean isHardwareDetected(String opPackageName) {
+        public boolean isHardwareDetected(int sensorId, String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final long token = Binder.clearCallingIdentity();
             try {
-                final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+                final ServiceProvider provider = getProviderForSensor(sensorId);
                 if (provider == null) {
                     Slog.w(TAG, "Null provider for isHardwareDetected, caller: " + opPackageName);
                     return false;
                 }
-                return provider.second.isHardwareDetected(provider.first);
+                return provider.isHardwareDetected(sensorId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override // Binder call
-        public List<Face> getEnrolledFaces(int userId, String opPackageName) {
+        public List<Face> getEnrolledFaces(int sensorId, int userId, String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             if (userId != UserHandle.getCallingUserId()) {
@@ -412,7 +412,7 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean hasEnrolledFaces(int userId, String opPackageName) {
+        public boolean hasEnrolledFaces(int sensorId, int userId, String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             if (userId != UserHandle.getCallingUserId()) {
@@ -423,30 +423,29 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        @LockoutTracker.LockoutMode
-        public int getLockoutModeForUser(int userId) {
+        public @LockoutTracker.LockoutMode int getLockoutModeForUser(int sensorId, int userId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for getLockoutModeForUser");
                 return LockoutTracker.LOCKOUT_NONE;
             }
 
-            return provider.second.getLockoutModeForUser(provider.first, userId);
+            return provider.getLockoutModeForUser(sensorId, userId);
         }
 
         @Override // Binder call
-        public long getAuthenticatorId(int userId) {
+        public long getAuthenticatorId(int sensorId, int userId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for getAuthenticatorId");
                 return 0;
             }
 
-            return provider.second.getAuthenticatorId(provider.first, userId);
+            return provider.getAuthenticatorId(sensorId, userId);
         }
 
         @Override // Binder call
@@ -454,13 +453,13 @@ public class FaceService extends SystemService {
                 String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for resetLockout, caller: " + opPackageName);
                 return;
             }
 
-            provider.second.scheduleResetLockout(provider.first, userId, hardwareAuthToken);
+            provider.scheduleResetLockout(sensorId, userId, hardwareAuthToken);
         }
 
         @Override

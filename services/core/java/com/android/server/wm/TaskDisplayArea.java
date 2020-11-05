@@ -37,11 +37,11 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
+import static com.android.server.wm.ActivityTaskManagerService.TAG_ROOT_TASK;
 import static com.android.server.wm.DisplayContent.alwaysCreateStack;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.STACK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
@@ -311,7 +311,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
     @Override
     void addChild(Task task, int position) {
-        if (DEBUG_STACK) Slog.d(TAG_WM, "Set task=" + task + " on taskDisplayArea=" + this);
+        if (DEBUG_ROOT_TASK) Slog.d(TAG_WM, "Set task=" + task + " on taskDisplayArea=" + this);
 
         addStackReferenceIfNeeded(task);
         position = findPositionForStack(position, task, true /* adding */);
@@ -831,8 +831,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     void onStackRemoved(Task stack) {
-        if (ActivityTaskManagerDebugConfig.DEBUG_STACK) {
-            Slog.v(TAG_STACK, "removeStack: detaching " + stack + " from displayId="
+        if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) {
+            Slog.v(TAG_ROOT_TASK, "removeStack: detaching " + stack + " from displayId="
                     + mDisplayContent.mDisplayId);
         }
         if (mPreferredTopFocusableStack == stack) {
@@ -870,7 +870,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             homeParentTask.positionChildAtBottom(task);
         } else {
             task.reparent(homeParentTask, false /* toTop */,
-                    Task.REPARENT_LEAVE_STACK_IN_PLACE, false /* animate */,
+                    Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE, false /* animate */,
                     false /* deferResume */, "positionTaskBehindHome");
         }
     }
@@ -1205,8 +1205,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             }
         }
         final Task currentFocusedStack = getFocusedStack();
-        if (ActivityTaskManagerDebugConfig.DEBUG_STACK) {
-            Slog.d(TAG_STACK, "allResumedActivitiesComplete: mLastFocusedStack changing from="
+        if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) {
+            Slog.d(TAG_ROOT_TASK, "allResumedActivitiesComplete: mLastFocusedStack changing from="
                     + mLastFocusedStack + " to=" + currentFocusedStack);
         }
         mLastFocusedStack = currentFocusedStack;
@@ -1230,7 +1230,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             final Task stack = getStackAt(stackNdx);
             final ActivityRecord resumedActivity = stack.getResumedActivity();
             if (resumedActivity != null
-                    && (stack.getVisibility(resuming) != STACK_VISIBILITY_VISIBLE
+                    && (stack.getVisibility(resuming) != TASK_VISIBILITY_VISIBLE
                     || !stack.isTopActivityFocusable())) {
                 ProtoLog.d(WM_DEBUG_STATES, "pauseBackStacks: stack=%s "
                         + "mResumedActivity=%s", stack, resumedActivity);

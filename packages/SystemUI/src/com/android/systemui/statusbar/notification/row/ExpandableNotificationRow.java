@@ -35,6 +35,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -43,6 +44,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -327,6 +329,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShelfIconVisible;
     private boolean mAboveShelf;
     private OnUserInteractionCallback mOnUserInteractionCallback;
+    private NotificationGutsManager mNotificationGutsManager;
     private boolean mIsLowPriority;
     private boolean mIsColorized;
     private boolean mUseIncreasedCollapsedHeight;
@@ -1089,6 +1092,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         };
     }
 
+    /** The click listener for the snooze button. */
+    public View.OnClickListener getSnoozeClickListener(MenuItem item) {
+        return v -> {
+            mNotificationGutsManager.openGuts(this, 0, 0, item);
+        };
+    }
+
     private void updateClickAndFocus() {
         boolean normalChild = !isChildInGroup() || isGroupExpanded();
         boolean clickable = mOnClickListener != null && normalChild;
@@ -1155,10 +1165,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     @Nullable
     public NotificationMenuRowPlugin createMenu() {
-        if (mMenuRow == null) {
+        final boolean removeShelf = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 0 /* show shelf by default */) == 1;
+        if (mMenuRow == null || removeShelf) {
             return null;
         }
-
         if (mMenuRow.getMenuView() == null) {
             mMenuRow.createMenu(this, mEntry.getSbn());
             mMenuRow.setAppName(mAppName);
@@ -1555,7 +1566,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             OnUserInteractionCallback onUserInteractionCallback,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional,
+            NotificationGutsManager gutsManager) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1584,6 +1596,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mNotificationGutsManager = gutsManager;
 
         cacheIsSystemNotification();
     }

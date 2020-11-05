@@ -31,17 +31,13 @@ import android.util.Size;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.PipTestCase;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.phone.PipMenuActivityController;
-import com.android.wm.shell.pip.phone.PipMotionHelper;
-import com.android.wm.shell.pip.phone.PipResizeGestureHandler;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +55,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class PipTouchHandlerTest extends PipTestCase {
+public class PipTouchHandlerTest extends ShellTestCase {
 
     private PipTouchHandler mPipTouchHandler;
 

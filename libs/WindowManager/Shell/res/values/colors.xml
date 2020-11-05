@@ -25,4 +25,14 @@
 
     <!-- Background for the various drop targets when handling drag and drop. -->
     <color name="drop_outline_background">#330000FF</color>
+
+    <!-- Bubbles -->
+    <color name="bubbles_light">#FFFFFF</color>
+    <color name="bubbles_dark">@color/GM2_grey_800</color>
+    <color name="bubbles_icon_tint">@color/GM2_grey_700</color>
+
+    <!-- GM2 colors -->
+    <color name="GM2_grey_200">#E8EAED</color>
+    <color name="GM2_grey_700">#5F6368</color>
+    <color name="GM2_grey_800">#3C4043</color>
 </resources>

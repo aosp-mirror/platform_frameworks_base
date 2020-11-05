@@ -22,6 +22,7 @@ import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
@@ -30,6 +31,9 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.util.ViewController;
@@ -51,6 +55,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ClockManager mClockManager;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
     private final NotificationIconAreaController mNotificationIconAreaController;
+    private FrameLayout mNewLockscreenClockFrame;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
@@ -114,6 +119,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mColorExtractor.addOnColorsChangedListener(mColorsListener);
         mView.updateColors(getGradientColors());
         updateAodIcons();
+        mNewLockscreenClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view);
     }
 
     @Override
@@ -177,6 +183,21 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     void refresh() {
         mView.refresh();
+    }
+
+    /**
+     * Update position of the view, with optional animation. Move the slice view and the clock
+     * slightly towards the center in order to prevent burn-in. Y positioning occurs at the
+     * view parent level.
+     */
+    void updatePosition(int x, AnimationProperties props, boolean animate) {
+        x = Math.abs(x);
+        if (mNewLockscreenClockFrame != null) {
+            PropertyAnimator.setProperty(mNewLockscreenClockFrame, AnimatableProperty.TRANSLATION_X,
+                    -x, props, animate);
+        }
+        mKeyguardSliceViewController.updatePosition(x, props, animate);
+        mNotificationIconAreaController.updatePosition(x, props, animate);
     }
 
     /**

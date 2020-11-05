@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
@@ -330,7 +330,7 @@ public class TaskPersister implements PersisterQueue.Listener {
 
                                 final int taskId = task.mTaskId;
                                 if (mService.mRootWindowContainer.anyTaskForId(taskId,
-                                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) != null) {
+                                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
                                 } else if (userId != task.mUserId) {

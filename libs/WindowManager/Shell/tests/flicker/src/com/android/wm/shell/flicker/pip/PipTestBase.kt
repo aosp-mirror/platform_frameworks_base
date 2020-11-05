@@ -24,8 +24,4 @@ abstract class PipTestBase(
     rotation: Int
 ) : NonRotationTestBase(rotationName, rotation) {
     protected val testApp = PipAppHelper(instrumentation)
-
-    companion object {
-        const val sPipWindowTitle = "PipMenuActivity"
-    }
 }

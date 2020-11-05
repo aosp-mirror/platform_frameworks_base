@@ -144,7 +144,6 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -229,6 +228,7 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;

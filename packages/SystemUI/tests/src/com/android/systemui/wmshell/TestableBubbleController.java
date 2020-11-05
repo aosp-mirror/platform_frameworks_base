@@ -22,13 +22,13 @@ import android.os.Handler;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.bubbles.BubbleData;
-import com.android.systemui.bubbles.BubbleDataRepository;
-import com.android.systemui.bubbles.BubbleLogger;
-import com.android.systemui.bubbles.BubblePositioner;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleData;
+import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleLogger;
+import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 
 /**

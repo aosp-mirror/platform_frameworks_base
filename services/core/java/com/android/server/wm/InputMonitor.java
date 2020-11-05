@@ -48,6 +48,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -57,12 +58,12 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
-import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -81,7 +82,7 @@ final class InputMonitor {
     private boolean mUpdateInputWindowsImmediately;
 
     private boolean mDisableWallpaperTouchEvents;
-    private final Rect mTmpRect = new Rect();
+    private final Region mTmpRegion = new Region();
     private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer;
 
     private final int mDisplayId;
@@ -276,66 +277,66 @@ final class InputMonitor {
         addInputConsumer(name, consumer);
     }
 
-
-    void populateInputWindowHandle(final InputWindowHandle inputWindowHandle,
-            final WindowState child, int flags, final int type, final boolean isVisible,
-            final boolean focusable, final boolean hasWallpaper) {
+    @VisibleForTesting
+    void populateInputWindowHandle(final InputWindowHandleWrapper inputWindowHandle,
+            final WindowState w) {
         // Add a window to our list of input windows.
-        inputWindowHandle.name = child.toString();
-        flags = child.getSurfaceTouchableRegion(inputWindowHandle, flags);
-        inputWindowHandle.layoutParamsFlags = flags;
-        inputWindowHandle.layoutParamsType = type;
-        inputWindowHandle.dispatchingTimeoutMillis = child.getInputDispatchingTimeoutMillis();
-        inputWindowHandle.visible = isVisible;
-        inputWindowHandle.focusable = focusable;
-        inputWindowHandle.touchOcclusionMode = child.getTouchOcclusionMode();
-        inputWindowHandle.hasWallpaper = hasWallpaper;
-        inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
-        inputWindowHandle.ownerPid = child.mSession.mPid;
-        inputWindowHandle.ownerUid = child.mSession.mUid;
-        inputWindowHandle.packageName = child.getOwningPackage();
-        inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
-        inputWindowHandle.displayId = child.getDisplayId();
+        inputWindowHandle.setInputApplicationHandle(w.mActivityRecord != null
+                ? w.mActivityRecord.getInputApplicationHandle(false /* update */) : null);
+        inputWindowHandle.setToken(w.mInputChannelToken);
+        inputWindowHandle.setDispatchingTimeoutMillis(w.getInputDispatchingTimeoutMillis());
+        inputWindowHandle.setTouchOcclusionMode(w.getTouchOcclusionMode());
+        inputWindowHandle.setInputFeatures(w.mAttrs.inputFeatures);
+        inputWindowHandle.setPaused(w.mActivityRecord != null && w.mActivityRecord.paused);
+        inputWindowHandle.setVisible(w.isVisible());
 
-        final Rect frame = child.getFrame();
-        inputWindowHandle.frameLeft = frame.left;
-        inputWindowHandle.frameTop = frame.top;
-        inputWindowHandle.frameRight = frame.right;
-        inputWindowHandle.frameBottom = frame.bottom;
+        final boolean focusable = w.canReceiveKeys()
+                && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());
+        inputWindowHandle.setFocusable(focusable);
+
+        final boolean hasWallpaper = mDisplayContent.mWallpaperController.isWallpaperTarget(w)
+                && !mService.mPolicy.isKeyguardShowing()
+                && !mDisableWallpaperTouchEvents;
+        inputWindowHandle.setHasWallpaper(hasWallpaper);
+
+        final Rect frame = w.getFrame();
+        inputWindowHandle.setFrame(frame.left, frame.top, frame.right, frame.bottom);
 
         // Surface insets are hardcoded to be the same in all directions
         // and we could probably deprecate the "left/right/top/bottom" concept.
         // we avoid reintroducing this concept by just choosing one of them here.
-        inputWindowHandle.surfaceInset = child.getAttrs().surfaceInsets.left;
+        inputWindowHandle.setSurfaceInset(w.mAttrs.surfaceInsets.left);
 
-        /**
-         * If the window is in a TaskManaged by a TaskOrganizer then most cropping
-         * will be applied using the SurfaceControl hierarchy from the Organizer.
-         * This means we need to make sure that these changes in crop are reflected
-         * in the input windows, and so ensure this flag is set so that
-         * the input crop always reflects the surface hierarchy.
-         *
-         * TODO(b/168252846): we have some issues with modal-windows, so we need to
-         * cross that bridge now that we organize full-screen Tasks.
-         */
-        if (child.getTask() != null
-                && child.getTask().isOrganized()
-                && child.getTask().getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
-            inputWindowHandle.replaceTouchableRegionWithCrop(null /* Use this surfaces crop */);
+        // If we are scaling the window, input coordinates need to be inversely scaled to map from
+        // what is on screen to what is actually being touched in the UI.
+        inputWindowHandle.setScaleFactor(w.mGlobalScale != 1f ? (1f / w.mGlobalScale) : 1f);
+
+        final int flags = w.getSurfaceTouchableRegion(mTmpRegion, w.mAttrs.flags);
+        inputWindowHandle.setTouchableRegion(mTmpRegion);
+        inputWindowHandle.setLayoutParamsFlags(flags);
+
+        boolean useSurfaceCrop = false;
+        final Task task = w.getTask();
+        if (task != null) {
+            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+                // If the window is in a TaskManaged by a TaskOrganizer then most cropping will
+                // be applied using the SurfaceControl hierarchy from the Organizer. This means
+                // we need to make sure that these changes in crop are reflected in the input
+                // windows, and so ensure this flag is set so that the input crop always reflects
+                // the surface hierarchy.
+                // TODO(b/168252846): we have some issues with modal-windows, so we need to cross
+                // that bridge now that we organize full-screen Tasks.
+                inputWindowHandle.replaceTouchableRegionWithCrop(null /* Use this surfaces crop */);
+                useSurfaceCrop = true;
+            } else if (task.cropWindowsToStackBounds() && !w.inFreeformWindowingMode()) {
+                inputWindowHandle.replaceTouchableRegionWithCrop(
+                        task.getRootTask().getSurfaceControl());
+                useSurfaceCrop = true;
+            }
         }
-
-        if (child.mGlobalScale != 1) {
-            // If we are scaling the window, input coordinates need
-            // to be inversely scaled to map from what is on screen
-            // to what is actually being touched in the UI.
-            inputWindowHandle.scaleFactor = 1.0f/child.mGlobalScale;
-        } else {
-            inputWindowHandle.scaleFactor = 1;
-        }
-
-        if (DEBUG_INPUT) {
-            Slog.d(TAG_WM, "addInputWindowHandle: "
-                    + child + ", " + inputWindowHandle);
+        if (!useSurfaceCrop) {
+            inputWindowHandle.setReplaceTouchableRegionWithCrop(false);
+            inputWindowHandle.setTouchableRegionCrop(null);
         }
     }
 
@@ -401,15 +402,8 @@ final class InputMonitor {
 
     public void setFocusedAppLw(ActivityRecord newApp) {
         // Focused app has changed.
-        if (newApp == null) {
-            mService.mInputManager.setFocusedApplication(mDisplayId, null);
-        } else {
-            final InputApplicationHandle handle = newApp.mInputApplicationHandle;
-            handle.name = newApp.toString();
-            handle.dispatchingTimeoutMillis = newApp.mInputDispatchingTimeoutMillis;
-
-            mService.mInputManager.setFocusedApplication(mDisplayId, handle);
-        }
+        mService.mInputManager.setFocusedApplication(mDisplayId,
+                newApp != null ? newApp.getInputApplicationHandle(true /* update */) : null);
     }
 
     public void pauseDispatchingLw(WindowToken window) {
@@ -456,10 +450,6 @@ final class InputMonitor {
         private boolean mAddRecentsAnimationInputConsumerHandle;
 
         boolean mInDrag;
-        WallpaperController mWallpaperController;
-
-        // An invalid window handle that tells SurfaceFlinger not update the input info.
-        final InputWindowHandle mInvalidInputWindow = new InputWindowHandle(null, mDisplayId);
 
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
@@ -474,10 +464,8 @@ final class InputMonitor {
             mAddWallpaperInputConsumerHandle = mWallpaperInputConsumer != null;
             mAddRecentsAnimationInputConsumerHandle = mRecentsAnimationInputConsumer != null;
 
-            mTmpRect.setEmpty();
             mDisableWallpaperTouchEvents = false;
             mInDrag = inDrag;
-            mWallpaperController = mDisplayContent.mWallpaperController;
 
             resetInputConsumers(mInputTransaction);
 
@@ -499,7 +487,7 @@ final class InputMonitor {
             }
 
             final WindowState focus = mDisplayContent.mCurrentFocus;
-            if (focus == null || focus.mInputWindowHandle.token == null) {
+            if (focus == null || focus.mInputChannelToken == null) {
                 mDisplayContent.mLastRequestedFocus = focus;
                 return;
             }
@@ -510,7 +498,7 @@ final class InputMonitor {
                 return;
             }
 
-            mInputTransaction.setFocusedWindow(focus.mInputWindowHandle.token, mDisplayId);
+            mInputTransaction.setFocusedWindow(focus.mInputChannelToken, mDisplayId);
             EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                     "Focus request " + focus, "reason=UpdateInputWindows");
             mDisplayContent.mLastRequestedFocus = focus;
@@ -519,33 +507,26 @@ final class InputMonitor {
 
         @Override
         public void accept(WindowState w) {
-            final InputChannel inputChannel = w.mInputChannel;
-            final InputWindowHandle inputWindowHandle = w.mInputWindowHandle;
+            final InputWindowHandleWrapper inputWindowHandle = w.mInputWindowHandle;
             final RecentsAnimationController recentsAnimationController =
                     mService.getRecentsAnimationController();
             final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
                     && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
-            final int type = w.mAttrs.type;
-            final boolean isVisible = w.isVisibleLw();
-            if (inputChannel == null || inputWindowHandle == null || w.mRemoved
+            if (w.mInputChannelToken == null || w.mRemoved
                     || (!w.canReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
                 if (w.mWinAnimator.hasSurface()) {
                     // Assign an InputInfo with type to the overlay window which can't receive input
                     // event. This is used to omit Surfaces from occlusion detection.
-                    populateOverlayInputInfo(mInvalidInputWindow, w.getName(), type, isVisible);
-                    mInputTransaction.setInputWindowInfo(
-                            w.mWinAnimator.mSurfaceController.mSurfaceControl,
-                            mInvalidInputWindow);
+                    populateOverlayInputInfo(inputWindowHandle, w.isVisible());
+                    setInputWindowInfoIfNeeded(mInputTransaction,
+                            w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
                     return;
                 }
                 // Skip this window because it cannot possibly receive input.
                 return;
             }
 
-            final int flags = w.mAttrs.flags;
             final int privateFlags = w.mAttrs.privateFlags;
-            final boolean focusable = w.canReceiveKeys()
-                    && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());
 
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
@@ -584,47 +565,53 @@ final class InputMonitor {
             if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
                 mDisableWallpaperTouchEvents = true;
             }
-            final boolean hasWallpaper = mWallpaperController.isWallpaperTarget(w)
-                    && !mService.mPolicy.isKeyguardShowing()
-                    && !mDisableWallpaperTouchEvents;
 
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
-            if (mInDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
+            if (mInDrag && w.isVisible() && w.getDisplayContent().isDefaultDisplay) {
                 mService.mDragDropController.sendDragStartedIfNeededLocked(w);
             }
 
-            populateInputWindowHandle(
-                    inputWindowHandle, w, flags, type, isVisible, focusable, hasWallpaper);
-
             // register key interception info
-            mService.mKeyInterceptionInfoForToken.put(inputWindowHandle.token,
+            mService.mKeyInterceptionInfoForToken.put(w.mInputChannelToken,
                     w.getKeyInterceptionInfo());
 
             if (w.mWinAnimator.hasSurface()) {
-                mInputTransaction.setInputWindowInfo(
+                populateInputWindowHandle(inputWindowHandle, w);
+                setInputWindowInfoIfNeeded(mInputTransaction,
                         w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
             }
         }
     }
 
+    @VisibleForTesting
+    static void setInputWindowInfoIfNeeded(SurfaceControl.Transaction t, SurfaceControl sc,
+            InputWindowHandleWrapper inputWindowHandle) {
+        if (DEBUG_INPUT) {
+            Slog.d(TAG_WM, "Update InputWindowHandle: " + inputWindowHandle);
+        }
+        if (inputWindowHandle.isChanged()) {
+            inputWindowHandle.applyChangesToSurface(t, sc);
+        }
+    }
+
     // This would reset InputWindowHandle fields to prevent it could be found by input event.
     // We need to check if any new field of InputWindowHandle could impact the result.
-    private static void populateOverlayInputInfo(final InputWindowHandle inputWindowHandle,
-            final String name, final int type, final boolean isVisible) {
-        inputWindowHandle.name = name;
-        inputWindowHandle.layoutParamsType = type;
-        inputWindowHandle.dispatchingTimeoutMillis = 0; // it should never receive input
-        inputWindowHandle.visible = isVisible;
-        inputWindowHandle.focusable = false;
-        inputWindowHandle.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL;
-        inputWindowHandle.scaleFactor = 1;
-        inputWindowHandle.layoutParamsFlags =
-                FLAG_NOT_TOUCH_MODAL | FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE;
-        inputWindowHandle.portalToDisplayId = INVALID_DISPLAY;
-        inputWindowHandle.touchableRegion.setEmpty();
+    @VisibleForTesting
+    static void populateOverlayInputInfo(InputWindowHandleWrapper inputWindowHandle,
+            boolean isVisible) {
+        inputWindowHandle.setDispatchingTimeoutMillis(0); // It should never receive input.
+        inputWindowHandle.setVisible(isVisible);
+        inputWindowHandle.setFocusable(false);
+        inputWindowHandle.setInputFeatures(INPUT_FEATURE_NO_INPUT_CHANNEL);
+        // The input window handle without input channel must not have a token.
+        inputWindowHandle.setToken(null);
+        inputWindowHandle.setScaleFactor(1f);
+        inputWindowHandle.setLayoutParamsFlags(
+                FLAG_NOT_TOUCH_MODAL | FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE);
+        inputWindowHandle.setPortalToDisplayId(INVALID_DISPLAY);
+        inputWindowHandle.clearTouchableRegion();
         inputWindowHandle.setTouchableRegionCrop(null);
-        inputWindowHandle.trustedOverlay = isTrustedOverlay(type);
     }
 
     /**
@@ -635,9 +622,13 @@ final class InputMonitor {
      */
     static void setTrustedOverlayInputInfo(SurfaceControl sc, SurfaceControl.Transaction t,
             int displayId, String name) {
-        InputWindowHandle inputWindowHandle = new InputWindowHandle(null, displayId);
-        populateOverlayInputInfo(inputWindowHandle, name, TYPE_SECURE_SYSTEM_OVERLAY, true);
-        t.setInputWindowInfo(sc, inputWindowHandle);
+        final InputWindowHandleWrapper inputWindowHandle = new InputWindowHandleWrapper(
+                new InputWindowHandle(null /* inputApplicationHandle */, displayId));
+        inputWindowHandle.setName(name);
+        inputWindowHandle.setLayoutParamsType(TYPE_SECURE_SYSTEM_OVERLAY);
+        inputWindowHandle.setTrustedOverlay(true);
+        populateOverlayInputInfo(inputWindowHandle, true /* isVisible */);
+        setInputWindowInfoIfNeeded(t, sc, inputWindowHandle);
     }
 
     static boolean isTrustedOverlay(int type) {

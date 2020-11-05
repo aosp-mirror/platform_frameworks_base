@@ -57,6 +57,7 @@ stubs_defaults {
             "telephony/java",
             "media/aidl",
         ],
+        include_dirs: ["frameworks/av/aidl"],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
     // from framework-non-updatable-sources. Add more here when there's a need.
@@ -338,19 +339,6 @@ java_library_static {
         "framework-wifi.stubs",
         "private-stub-annotations-jar",
     ],
-    defaults: ["android_defaults_stubs_current"],
-}
-
-java_library_static {
-    name: "android_stubs_current",
-    static_libs: ["android_merged_stubs_current"],
-    defaults: ["android_defaults_stubs_current"],
-}
-
-java_library_static {
-    name: "android_system_monolith_stubs_current",
-    srcs: [ ":system-api-stubs-docs" ],
-    static_libs: [ "private-stub-annotations-jar" ],
     defaults: [
         "android_defaults_stubs_current",
         "android_stubs_dists_default",
@@ -365,6 +353,21 @@ java_library_static {
             tag: ".jar",
             dest: "android_system.jar",
         },
+    ],
+}
+
+java_library_static {
+    name: "android_stubs_current",
+    static_libs: ["android_merged_stubs_current"],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_system_monolith_stubs_current",
+    srcs: [ ":system-api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
+    defaults: [
+        "android_defaults_stubs_current",
     ],
 }
 

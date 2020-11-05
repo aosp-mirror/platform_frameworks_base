@@ -88,7 +88,6 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_A
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.CAN_SHOW_IME;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
@@ -238,7 +237,6 @@ import java.util.function.Predicate;
  */
 class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
-    private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
     /** The default scaling mode that scales content automatically. */
     static final int FORCE_SCALING_MODE_AUTO = 0;

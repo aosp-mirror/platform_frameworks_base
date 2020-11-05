@@ -31,13 +31,16 @@ public class MmtpRecordEvent extends FilterEvent {
     private final long mDataLength;
     private final int mMpuSequenceNumber;
     private final long mPts;
+    private final int mFirstMbInSlice;
 
     // This constructor is used by JNI code only
-    private MmtpRecordEvent(int scHevcIndexMask, long dataLength, int mpuSequenceNumber, long pts) {
+    private MmtpRecordEvent(int scHevcIndexMask, long dataLength, int mpuSequenceNumber, long pts,
+            int firstMbInSlice) {
         mScHevcIndexMask = scHevcIndexMask;
         mDataLength = dataLength;
         mMpuSequenceNumber = mpuSequenceNumber;
         mPts = pts;
+        mFirstMbInSlice = firstMbInSlice;
     }
 
     /**
@@ -58,6 +61,11 @@ public class MmtpRecordEvent extends FilterEvent {
 
     /**
      * Get the MPU sequence number of the filtered data.
+     *
+     * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
+     * return {@link android.media.tv.tuner.Tuner.INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version
+     * information.
      */
     public int getMpuSequenceNumber() {
         return mMpuSequenceNumber;
@@ -65,10 +73,26 @@ public class MmtpRecordEvent extends FilterEvent {
 
     /**
      * Get the Presentation Time Stamp(PTS) for the audio or video frame. It is based on 90KHz
-     * and has the same format as the PTS in ISO/IEC 13818-1. It is used only for the SC and
-     * the SC_HEVC.
+     * and has the same format as the PTS in ISO/IEC 13818-1.
+     *
+     * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
+     * return {@link android.media.tv.tuner.Tuner.INVALID_TIMESTAMP}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version
+     * information.
      */
     public long getPts() {
         return mPts;
+    }
+
+    /**
+     * Get the address of the first macroblock in the slice defined in ITU-T Rec. H.264.
+     *
+     * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
+     * return {@link android.media.tv.tuner.Tuner.INVALID_FIRST_MACROBLOCK_IN_SLICE}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version
+     * information.
+     */
+    public int getFirstMbInSlice() {
+        return mFirstMbInSlice;
     }
 }

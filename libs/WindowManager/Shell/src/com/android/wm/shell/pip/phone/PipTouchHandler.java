@@ -710,7 +710,7 @@ public class PipTouchHandler {
                 return;
             }
 
-            Rect bounds = mMotionHelper.getPossiblyAnimatingBounds();
+            Rect bounds = getPossiblyAnimatingBounds();
             mDelta.set(0f, 0f);
             mStartPosition.set(bounds.left, bounds.top);
             mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
@@ -747,7 +747,7 @@ public class PipTouchHandler {
                 mDelta.x += left - lastX;
                 mDelta.y += top - lastY;
 
-                mTmpBounds.set(mMotionHelper.getPossiblyAnimatingBounds());
+                mTmpBounds.set(getPossiblyAnimatingBounds());
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds, true /* isDragging */);
 
@@ -783,7 +783,7 @@ public class PipTouchHandler {
 
                 // Reset the touch state on up before the fling settles
                 mTouchState.reset();
-                final Rect animatingBounds = mMotionHelper.getPossiblyAnimatingBounds();
+                final Rect animatingBounds = getPossiblyAnimatingBounds();
                 // If User releases the PIP window while it's out of the display bounds, put
                 // PIP into stashed mode.
                 if (mEnableStash
@@ -872,6 +872,16 @@ public class PipTouchHandler {
                 || mExpandedBounds.height() != mNormalBounds.height();
     }
 
+    /**
+     * Returns the PIP bounds if we're not animating, or the current, temporary animating bounds
+     * otherwise.
+     */
+    Rect getPossiblyAnimatingBounds() {
+        return mPipBoundsState.getAnimatingBoundsState().isAnimating()
+                ? mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds()
+                : mPipBoundsState.getBounds();
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
@@ -889,7 +899,6 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mMovementBoundsExtraOffsets=" + mMovementBoundsExtraOffsets);
         mPipBoundsHandler.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
-        mMotionHelper.dump(pw, innerPrefix);
         if (mPipResizeGestureHandler != null) {
             mPipResizeGestureHandler.dump(pw, innerPrefix);
         }

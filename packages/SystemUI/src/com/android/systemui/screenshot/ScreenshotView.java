@@ -113,6 +113,7 @@ public class ScreenshotView extends FrameLayout implements
     private FrameLayout mDismissButton;
     private ScreenshotActionChip mShareChip;
     private ScreenshotActionChip mEditChip;
+    private ScreenshotActionChip mScrollChip;
 
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
@@ -150,6 +151,20 @@ public class ScreenshotView extends FrameLayout implements
 
         mDisplayMetrics = new DisplayMetrics();
         mContext.getDisplay().getRealMetrics(mDisplayMetrics);
+    }
+
+    /**
+     * Called to display the scroll action chip when support is detected.
+     *
+     * @param onClick the action to take when the chip is clicked.
+     */
+    public void showScrollChip(Runnable onClick) {
+        mScrollChip.setVisibility(VISIBLE);
+        mScrollChip.setOnClickListener((v) ->
+                onClick.run()
+                // TODO Logging, store event consumer to a field
+                //onElementTapped.accept(ScreenshotEvent.SCREENSHOT_SCROLL_TAPPED);
+        );
     }
 
     @Override // ViewTreeObserver.OnComputeInternalInsetsListener
@@ -193,6 +208,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotSelectorView = requireNonNull(findViewById(R.id.global_screenshot_selector));
         mShareChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_share_chip));
         mEditChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_edit_chip));
+        mScrollChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_scroll_chip));
 
         mScreenshotPreview.setClipToOutline(true);
         mScreenshotPreview.setOutlineProvider(new ViewOutlineProvider() {
@@ -387,7 +403,7 @@ public class ScreenshotView extends FrameLayout implements
         });
         chips.add(mShareChip);
 
-        mEditChip.setText(mContext.getString(com.android.internal.R.string.screenshot_edit));
+        mEditChip.setText(mContext.getString(R.string.screenshot_edit_label));
         mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
         mEditChip.setOnClickListener(v -> {
             mEditChip.setIsPending(true);
@@ -401,6 +417,11 @@ public class ScreenshotView extends FrameLayout implements
             mEditChip.setIsPending(false);
             mPendingInteraction = PendingInteraction.PREVIEW;
         });
+
+        mScrollChip.setText(mContext.getString(R.string.screenshot_scroll_label));
+        mScrollChip.setIcon(Icon.createWithResource(mContext,
+                R.drawable.ic_screenshot_scroll), true);
+        chips.add(mScrollChip);
 
         // remove the margin from the last chip so that it's correctly aligned with the end
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)

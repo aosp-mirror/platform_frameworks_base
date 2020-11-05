@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
@@ -43,6 +42,7 @@ import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectio
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.Assert;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.HashMap;

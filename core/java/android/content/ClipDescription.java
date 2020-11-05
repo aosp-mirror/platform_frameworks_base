@@ -74,8 +74,8 @@ public class ClipDescription implements Parcelable {
 
     /**
      * The MIME type for a shortcut. The ClipData must include intents with required extras
-     * {@link #EXTRA_PENDING_INTENT} and {@link Intent#EXTRA_USER}, and an optional
-     * {@link #EXTRA_ACTIVITY_OPTIONS}.
+     * {@link Intent#EXTRA_SHORTCUT_ID}, {@link Intent#EXTRA_PACKAGE_NAME} and
+     * {@link Intent#EXTRA_USER}, and an optional {@link #EXTRA_ACTIVITY_OPTIONS}.
      * @hide
      */
     public static final String MIMETYPE_APPLICATION_SHORTCUT = "application/vnd.android.shortcut";

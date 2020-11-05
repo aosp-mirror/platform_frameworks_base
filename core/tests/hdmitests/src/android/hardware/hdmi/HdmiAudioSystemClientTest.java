@@ -381,17 +381,31 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
-        public List<String> getAllowedCecSettingValues(String name) {
+        public List<String> getAllowedCecSettingStringValues(String name) {
             return new ArrayList<>();
         }
 
         @Override
-        public String getCecSettingValue(String name) {
+        public int[] getAllowedCecSettingIntValues(String name) {
+            return new int[0];
+        }
+
+        @Override
+        public String getCecSettingStringValue(String name) {
             return "";
         }
 
         @Override
-        public void setCecSettingValue(String name, String value) {
+        public void setCecSettingStringValue(String name, String value) {
+        }
+
+        @Override
+        public int getCecSettingIntValue(String name) {
+            return 0;
+        }
+
+        @Override
+        public void setCecSettingIntValue(String name, int value) {
         }
     }
 

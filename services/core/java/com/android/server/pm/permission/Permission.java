@@ -425,7 +425,7 @@ public final class Permission {
             permission = new Permission(permissionInfo.name, permissionInfo.packageName,
                     TYPE_MANIFEST);
         }
-        boolean wasNormal = permission.isNormal();
+        boolean wasNonRuntime = !permission.isRuntime();
         StringBuilder r = null;
         if (!permission.mReconciled) {
             if (permission.mPermissionInfo.packageName == null
@@ -465,8 +465,8 @@ public final class Permission {
             r.append("DUP:");
             r.append(permissionInfo.name);
         }
-        if (permission.isRuntime() && (ownerChanged || wasNormal)) {
-            // If this is a runtime permission and the owner has changed, or this was a normal
+        if (permission.isRuntime() && (ownerChanged || wasNonRuntime)) {
+            // If this is a runtime permission and the owner has changed, or this wasn't a runtime
             // permission, then permission state should be cleaned up
             permission.mDefinitionChanged = true;
         }

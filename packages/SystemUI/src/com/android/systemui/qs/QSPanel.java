@@ -46,7 +46,6 @@ import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.ToggleSliderView;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -56,7 +55,6 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.animation.DisappearParameters;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -84,7 +82,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
 
     private final H mHandler = new H();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private QSTileRevealController mQsTileRevealController;
     /** Whether or not the QS media player feature is enabled. */
     protected boolean mUsingMediaPlayer;
     private int mVisualMarginStart;
@@ -117,7 +114,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
     private int mVisualTilePadding;
     private boolean mUsingHorizontalLayout;
 
-    private QSCustomizer mCustomizePanel;
     private Record mDetailRecord;
 
     private BrightnessMirrorController mBrightnessMirrorController;
@@ -185,10 +181,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
             addView(mHorizontalLinearLayout, lp);
 
             initMediaHostState();
-        }
-        if (mRegularTileLayout instanceof PagedTileLayout) {
-            mQsTileRevealController = new QSTileRevealController(mContext, this,
-                    (PagedTileLayout) mRegularTileLayout);
         }
         mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), "");
     }
@@ -297,14 +289,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         setMeasuredDimension(getMeasuredWidth(), height);
     }
 
-    public QSTileRevealController getQsTileRevealController() {
-        return mQsTileRevealController;
-    }
-
-    public boolean isShowingCustomize() {
-        return mCustomizePanel != null && mCustomizePanel.isCustomizing();
-    }
-
     @Override
     protected void onDetachedFromWindow() {
         if (mTileLayout != null) {
@@ -360,10 +344,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
 
     public void setCallback(QSDetail.Callback callback) {
         mCallback = callback;
-    }
-
-    void setCustomizer(QSCustomizer customizer) {
-        mCustomizePanel = customizer;
     }
 
     /**
@@ -608,12 +588,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         }
     }
 
-    public void onCollapse() {
-        if (mCustomizePanel != null && mCustomizePanel.isShown()) {
-            mCustomizePanel.hide();
-        }
-    }
-
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mQSLogger.logPanelExpanded(expanded, getDumpableTag());
@@ -684,10 +658,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         return mExpanded;
     }
 
-    void updateRevealedTiles(Collection<QSTile> tiles) {
-        mQsTileRevealController.updateRevealedTiles(tiles);
-    }
-
     void addTile(QSPanelControllerBase.TileRecord tileRecord) {
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
@@ -742,29 +712,7 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         mTileLayout.removeTile(tileRecord);
     }
 
-    public void showEdit(final View v) {
-        v.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mCustomizePanel != null) {
-                    if (!mCustomizePanel.isCustomizing()) {
-                        int[] loc = v.getLocationOnScreen();
-                        int x = loc[0] + v.getWidth() / 2;
-                        int y = loc[1] + v.getHeight() / 2;
-                        mCustomizePanel.show(x, y);
-                    }
-                }
-
-            }
-        });
-    }
-
-    public void closeDetail() {
-        if (mCustomizePanel != null && mCustomizePanel.isShown()) {
-            // Treat this as a detail panel for now, to make things easy.
-            mCustomizePanel.hide();
-            return;
-        }
+    void closeDetail() {
         showDetail(false, mDetailRecord);
     }
 

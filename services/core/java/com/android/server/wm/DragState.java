@@ -277,9 +277,8 @@ class DragState {
             mInputEventReceiver = new DragInputEventReceiver(mClientChannel,
                     mService.mH.getLooper(), mDragDropController);
 
-            mDragApplicationHandle = new InputApplicationHandle(new Binder());
-            mDragApplicationHandle.name = "drag";
-            mDragApplicationHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+            mDragApplicationHandle = new InputApplicationHandle(new Binder(), "drag",
+                    DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
 
             mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle,
                     display.getDisplayId());

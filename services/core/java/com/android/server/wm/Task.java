@@ -103,7 +103,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKT
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
@@ -146,7 +146,7 @@ import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MIN_TASK_LETTERBOX_ASPECT_RATIO;
@@ -252,7 +252,7 @@ class Task extends WindowContainer<WindowContainer> {
     static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
-    private static final String TAG_STACK = TAG + POSTFIX_STACK;
+    private static final String TAG_ROOT_TASK = TAG + POSTFIX_ROOT_TASK;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
@@ -309,38 +309,37 @@ class Task extends WindowContainer<WindowContainer> {
     private float mShadowRadius = 0;
 
     /**
-     * The modes to control how the stack is moved to the front when calling {@link Task#reparent}.
+     * The modes to control how root task is moved to the front when calling {@link Task#reparent}.
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            REPARENT_MOVE_STACK_TO_FRONT,
-            REPARENT_KEEP_STACK_AT_FRONT,
-            REPARENT_LEAVE_STACK_IN_PLACE
+            REPARENT_MOVE_ROOT_TASK_TO_FRONT,
+            REPARENT_KEEP_ROOT_TASK_AT_FRONT,
+            REPARENT_LEAVE_ROOT_TASK_IN_PLACE
     })
-    @interface ReparentMoveStackMode {}
-    // Moves the stack to the front if it was not at the front
-    static final int REPARENT_MOVE_STACK_TO_FRONT = 0;
-    // Only moves the stack to the front if it was focused or front most already
-    static final int REPARENT_KEEP_STACK_AT_FRONT = 1;
-    // Do not move the stack as a part of reparenting
-    static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
+    @interface ReparentMoveRootTaskMode {}
+    // Moves the root task to the front if it was not at the front
+    static final int REPARENT_MOVE_ROOT_TASK_TO_FRONT = 0;
+    // Only moves the root task to the front if it was focused or front most already
+    static final int REPARENT_KEEP_ROOT_TASK_AT_FRONT = 1;
+    // Do not move the root task as a part of reparenting
+    static final int REPARENT_LEAVE_ROOT_TASK_IN_PLACE = 2;
 
-    // TODO (b/157876447): switch to Task related name
-    @IntDef(prefix = {"STACK_VISIBILITY"}, value = {
-            STACK_VISIBILITY_VISIBLE,
-            STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
-            STACK_VISIBILITY_INVISIBLE,
+    @IntDef(prefix = {"TASK_VISIBILITY"}, value = {
+            TASK_VISIBILITY_VISIBLE,
+            TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+            TASK_VISIBILITY_INVISIBLE,
     })
-    @interface StackVisibility {}
+    @interface TaskVisibility {}
 
-    /** Stack is visible. No other stacks on top that fully or partially occlude it. */
-    static final int STACK_VISIBILITY_VISIBLE = 0;
+    /** Task is visible. No other tasks on top that fully or partially occlude it. */
+    static final int TASK_VISIBILITY_VISIBLE = 0;
 
-    /** Stack is partially occluded by other translucent stack(s) on top of it. */
-    static final int STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT = 1;
+    /** Task is partially occluded by other translucent task(s) on top of it. */
+    static final int TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT = 1;
 
-    /** Stack is completely invisible. */
-    static final int STACK_VISIBILITY_INVISIBLE = 2;
+    /** Task is completely invisible. */
+    static final int TASK_VISIBILITY_INVISIBLE = 2;
 
     enum ActivityState {
         INITIALIZING,
@@ -954,7 +953,7 @@ class Task extends WindowContainer<WindowContainer> {
             mAtmService.getLockTaskController().clearLockedTask(this);
         }
         if (shouldDeferRemoval()) {
-            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
+            if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
             return;
         }
         removeImmediately();
@@ -1046,7 +1045,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     /** Convenience method to reparent a task to the top or bottom position of the stack. */
     boolean reparent(Task preferredStack, boolean toTop,
-            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            @ReparentMoveRootTaskMode int moveStackMode, boolean animate, boolean deferResume,
             String reason) {
         return reparent(preferredStack, toTop ? MAX_VALUE : 0, moveStackMode, animate, deferResume,
                 true /* schedulePictureInPictureModeChange */, reason);
@@ -1057,7 +1056,7 @@ class Task extends WindowContainer<WindowContainer> {
      * an option to skip scheduling the picture-in-picture mode change.
      */
     boolean reparent(Task preferredStack, boolean toTop,
-            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            @ReparentMoveRootTaskMode int moveStackMode, boolean animate, boolean deferResume,
             boolean schedulePictureInPictureModeChange, String reason) {
         return reparent(preferredStack, toTop ? MAX_VALUE : 0, moveStackMode, animate,
                 deferResume, schedulePictureInPictureModeChange, reason);
@@ -1065,7 +1064,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     /** Convenience method to reparent a task to a specific position of the stack. */
     boolean reparent(Task preferredStack, int position,
-            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            @ReparentMoveRootTaskMode int moveStackMode, boolean animate, boolean deferResume,
             String reason) {
         return reparent(preferredStack, position, moveStackMode, animate, deferResume,
                 true /* schedulePictureInPictureModeChange */, reason);
@@ -1091,7 +1090,7 @@ class Task extends WindowContainer<WindowContainer> {
     // TODO: Inspect all call sites and change to just changing windowing mode of the stack vs.
     // re-parenting the task. Can only be done when we are no longer using static stack Ids.
     boolean reparent(Task preferredStack, int position,
-            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            @ReparentMoveRootTaskMode int moveStackMode, boolean animate, boolean deferResume,
             boolean schedulePictureInPictureModeChange, String reason) {
         final ActivityStackSupervisor supervisor = mStackSupervisor;
         final RootWindowContainer root = mRootWindowContainer;
@@ -1146,8 +1145,9 @@ class Task extends WindowContainer<WindowContainer> {
             final boolean wasFront = r != null && sourceStack.isTopStackInDisplayArea()
                     && (sourceStack.topRunningActivity() == r);
 
-            final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
-                    || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
+            final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_ROOT_TASK_TO_FRONT
+                    || (moveStackMode == REPARENT_KEEP_ROOT_TASK_AT_FRONT
+                            && (wasFocused || wasFront));
 
             reparent(toStack, position, moveStackToFront, reason);
 
@@ -1171,7 +1171,7 @@ class Task extends WindowContainer<WindowContainer> {
             toStack.prepareFreezingTaskBounds();
 
             if (toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
+                    && moveStackMode == REPARENT_KEEP_ROOT_TASK_AT_FRONT) {
                 // Move recents to front so it is not behind home stack when going into docked
                 // mode
                 mStackSupervisor.moveRecentsStackToFront(reason);
@@ -1522,7 +1522,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        if (ActivityTaskManagerDebugConfig.DEBUG_STACK) Slog.d(TAG_STACK,
+        if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) Slog.d(TAG_ROOT_TASK,
                 "setResumedActivity stack:" + this + " + from: "
                 + mResumedActivity + " to:" + r + " reason:" + reason);
         mResumedActivity = r;
@@ -2175,8 +2175,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (state == RESUMED) {
-            if (ActivityTaskManagerDebugConfig.DEBUG_STACK) {
-                Slog.v(TAG_STACK, "set resumed activity to:" + record + " reason:" + reason);
+            if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) {
+                Slog.v(TAG_ROOT_TASK, "set resumed activity to:" + record + " reason:" + reason);
             }
             setResumedActivity(record, reason + " - onActivityStateChanged");
             if (record == mRootWindowContainer.getTopResumedActivity()) {
@@ -3230,7 +3230,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void removeImmediately() {
-        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
+        if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
 
         // If applicable let the TaskOrganizer know the Task is vanishing.
@@ -3241,7 +3241,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     // TODO: Consolidate this with Task.reparent()
     void reparent(Task stack, int position, boolean moveParents, String reason) {
-        if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
+        if (DEBUG_ROOT_TASK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + getRootTask());
         EventLogTags.writeWmTaskRemoved(mTaskId, "reParentTask:" + reason);
 
@@ -4145,7 +4145,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @param starting The currently starting activity or null if there is none.
      */
     boolean shouldBeVisible(ActivityRecord starting) {
-        return getVisibility(starting) != STACK_VISIBILITY_INVISIBLE;
+        return getVisibility(starting) != TASK_VISIBILITY_INVISIBLE;
     }
 
     /**
@@ -4153,14 +4153,14 @@ class Task extends WindowContainer<WindowContainer> {
      *
      * @param starting The currently starting activity or null if there is none.
      */
-    @Task.StackVisibility
+    @TaskVisibility
     int getVisibility(ActivityRecord starting) {
         if (!isAttached() || isForceHidden()) {
-            return STACK_VISIBILITY_INVISIBLE;
+            return TASK_VISIBILITY_INVISIBLE;
         }
 
         if (isTopActivityLaunchedBehind()) {
-            return STACK_VISIBILITY_VISIBLE;
+            return TASK_VISIBILITY_VISIBLE;
         }
 
         boolean gotSplitScreenStack = false;
@@ -4176,10 +4176,10 @@ class Task extends WindowContainer<WindowContainer> {
         final WindowContainer parent = getParent();
         if (parent.asTask() != null) {
             final int parentVisibility = parent.asTask().getVisibility(starting);
-            if (parentVisibility == STACK_VISIBILITY_INVISIBLE) {
+            if (parentVisibility == TASK_VISIBILITY_INVISIBLE) {
                 // Can't be visible if parent isn't visible
-                return STACK_VISIBILITY_INVISIBLE;
-            } else if (parentVisibility == STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT) {
+                return TASK_VISIBILITY_INVISIBLE;
+            } else if (parentVisibility == TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT) {
                 // Parent is behind a translucent container so the highest visibility this container
                 // can get is that.
                 gotTranslucentFullscreen = true;
@@ -4214,7 +4214,7 @@ class Task extends WindowContainer<WindowContainer> {
                     gotTranslucentFullscreen = true;
                     continue;
                 }
-                return STACK_VISIBILITY_INVISIBLE;
+                return TASK_VISIBILITY_INVISIBLE;
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
                 gotSplitScreenStack = true;
@@ -4223,7 +4223,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                         && gotOpaqueSplitScreenPrimary) {
                     // Can not be visible behind another opaque stack in split-screen-primary mode.
-                    return STACK_VISIBILITY_INVISIBLE;
+                    return TASK_VISIBILITY_INVISIBLE;
                 }
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                     && !gotOpaqueSplitScreenSecondary) {
@@ -4233,24 +4233,24 @@ class Task extends WindowContainer<WindowContainer> {
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         && gotOpaqueSplitScreenSecondary) {
                     // Can not be visible behind another opaque stack in split-screen-secondary mode.
-                    return STACK_VISIBILITY_INVISIBLE;
+                    return TASK_VISIBILITY_INVISIBLE;
                 }
             }
             if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
                 // Can not be visible if we are in split-screen windowing mode and both halves of
                 // the screen are opaque.
-                return STACK_VISIBILITY_INVISIBLE;
+                return TASK_VISIBILITY_INVISIBLE;
             }
             if (isAssistantType && gotSplitScreenStack) {
                 // Assistant stack can't be visible behind split-screen. In addition to this not
                 // making sense, it also works around an issue here we boost the z-order of the
                 // assistant window surfaces in window manager whenever it is visible.
-                return STACK_VISIBILITY_INVISIBLE;
+                return TASK_VISIBILITY_INVISIBLE;
             }
         }
 
         if (!shouldBeVisible) {
-            return STACK_VISIBILITY_INVISIBLE;
+            return TASK_VISIBILITY_INVISIBLE;
         }
 
         // Handle cases when there can be a translucent split-screen stack on top.
@@ -4258,26 +4258,26 @@ class Task extends WindowContainer<WindowContainer> {
             case WINDOWING_MODE_FULLSCREEN:
                 if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
                     // At least one of the split-screen stacks that covers this one is translucent.
-                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
                 }
                 break;
             case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
                 if (gotTranslucentSplitScreenPrimary) {
                     // Covered by translucent primary split-screen on top.
-                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
                 }
                 break;
             case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
                 if (gotTranslucentSplitScreenSecondary) {
                     // Covered by translucent secondary split-screen on top.
-                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
                 }
                 break;
         }
 
         // Lastly - check if there is a translucent fullscreen stack on top.
-        return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
-                : STACK_VISIBILITY_VISIBLE;
+        return gotTranslucentFullscreen ? TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
+                : TASK_VISIBILITY_VISIBLE;
     }
 
     private boolean isTopActivityLaunchedBehind() {
@@ -7291,7 +7291,7 @@ class Task extends WindowContainer<WindowContainer> {
         boolean toTop = position >= getChildCount();
         boolean includingParents = toTop || getDisplayArea().getNextFocusableStack(this,
                 true /* ignoreCurrent */) == null;
-        if (WindowManagerDebugConfig.DEBUG_STACK) {
+        if (WindowManagerDebugConfig.DEBUG_ROOT_TASK) {
             Slog.i(TAG_WM, "positionChildAt: positioning task=" + task + " at " + position);
         }
         positionChildAt(position, task, includingParents);

@@ -77,6 +77,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -8722,13 +8723,16 @@ public class Activity extends ContextThemeWrapper
      * the activity is visible after the screen is turned on when the lockscreen is up. In addition,
      * if this flag is set and the activity calls {@link
      * KeyguardManager#requestDismissKeyguard(Activity, KeyguardManager.KeyguardDismissCallback)}
-     * the screen will turn on.
+     * the screen will turn on. If the screen is off and device is not secured, this flag can turn
+     * screen on and dismiss keyguard to make this activity visible and resume, which can be used to
+     * replace {@link PowerManager#ACQUIRE_CAUSES_WAKEUP}
      *
      * @param turnScreenOn {@code true} to turn on the screen; {@code false} otherwise.
      *
      * @see #setShowWhenLocked(boolean)
      * @see android.R.attr#turnScreenOn
      * @see android.R.attr#showWhenLocked
+     * @see KeyguardManager#isDeviceSecure()
      */
     public void setTurnScreenOn(boolean turnScreenOn) {
         try {

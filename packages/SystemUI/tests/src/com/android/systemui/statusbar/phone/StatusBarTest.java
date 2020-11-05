@@ -83,7 +83,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
@@ -146,6 +145,7 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
+import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;
@@ -337,7 +337,7 @@ public class StatusBarTest extends SysuiTestCase {
         mShadeController = new ShadeControllerImpl(mCommandQueue,
                 mStatusBarStateController, mNotificationShadeWindowController,
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
-                () -> mStatusBar, () -> mAssistManager, Optional.of(() -> mBubbles));
+                () -> mStatusBar, () -> mAssistManager, Optional.of(mBubbles));
 
         mStatusBar = new StatusBar(
                 mContext,

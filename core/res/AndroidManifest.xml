@@ -349,7 +349,6 @@
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_PNO" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DEVICE_IDLE" />
-    <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_DISPATCH" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED" />
     <protected-broadcast android:name="com.android.internal.action.EUICC_FACTORY_RESET" />

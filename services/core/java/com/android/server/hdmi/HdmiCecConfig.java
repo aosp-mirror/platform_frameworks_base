@@ -21,6 +21,7 @@ import static android.hardware.hdmi.HdmiControlManager.CecSettingName;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.os.Environment;
@@ -67,6 +68,15 @@ public class HdmiCecConfig {
 
     private static final int STORAGE_SYSPROPS = 0;
     private static final int STORAGE_GLOBAL_SETTINGS = 1;
+
+    private static final String VALUE_TYPE_STRING = "string";
+    private static final String VALUE_TYPE_INT = "int";
+
+    @StringDef({
+        VALUE_TYPE_STRING,
+        VALUE_TYPE_INT,
+    })
+    private @interface ValueType {}
 
     /**
      * System property key for Power State Change on Active Source Lost.
@@ -247,17 +257,15 @@ public class HdmiCecConfig {
         }
     }
 
-    private String retrieveValue(@NonNull Setting setting) {
+    private String retrieveValue(@NonNull Setting setting, @NonNull String defaultValue) {
         @Storage int storage = getStorage(setting);
         String storageKey = getStorageKey(setting);
         if (storage == STORAGE_SYSPROPS) {
             Slog.d(TAG, "Reading '" + storageKey + "' sysprop.");
-            return mStorageAdapter.retrieveSystemProperty(storageKey,
-                    setting.getDefaultValue().getStringValue());
+            return mStorageAdapter.retrieveSystemProperty(storageKey, defaultValue);
         } else if (storage == STORAGE_GLOBAL_SETTINGS) {
             Slog.d(TAG, "Reading '" + storageKey + "' global setting.");
-            return mStorageAdapter.retrieveGlobalSetting(mContext, storageKey,
-                    setting.getDefaultValue().getStringValue());
+            return mStorageAdapter.retrieveGlobalSetting(mContext, storageKey, defaultValue);
         }
         return null;
     }
@@ -316,12 +324,40 @@ public class HdmiCecConfig {
     }
 
     /**
-     * For a given setting name returns values that are allowed for that setting.
+     * For a given setting name returns true if and only if the value type of that
+     * setting is a string.
      */
-    public List<String> getAllowedValues(@NonNull @CecSettingName String name) {
+    public boolean isStringValueType(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        return getSetting(name).getValueType().equals(VALUE_TYPE_STRING);
+    }
+
+    /**
+     * For a given setting name returns true if and only if the value type of that
+     * setting is an int.
+     */
+    public boolean isIntValueType(@NonNull @CecSettingName String name) {
+        Setting setting = getSetting(name);
+        if (setting == null) {
+            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        return getSetting(name).getValueType().equals(VALUE_TYPE_INT);
+    }
+
+    /**
+     * For a given setting name returns values that are allowed for that setting (string).
+     */
+    public List<String> getAllowedStringValues(@NonNull @CecSettingName String name) {
+        Setting setting = getSetting(name);
+        if (setting == null) {
+            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        if (!setting.getValueType().equals(VALUE_TYPE_STRING)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a string-type setting.");
         }
         List<String> allowedValues = new ArrayList<String>();
         for (Value allowedValue : setting.getAllowedValues().getValue()) {
@@ -331,32 +367,92 @@ public class HdmiCecConfig {
     }
 
     /**
-     * For a given setting name returns the default value for that setting.
+     * For a given setting name returns values that are allowed for that setting (string).
      */
-    public String getDefaultValue(@NonNull @CecSettingName String name) {
+    public List<Integer> getAllowedIntValues(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        if (!setting.getValueType().equals(VALUE_TYPE_INT)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a string-type setting.");
+        }
+        List<Integer> allowedValues = new ArrayList<Integer>();
+        for (Value allowedValue : setting.getAllowedValues().getValue()) {
+            allowedValues.add(allowedValue.getIntValue());
+        }
+        return allowedValues;
+    }
+
+    /**
+     * For a given setting name returns the default value for that setting (string).
+     */
+    public String getDefaultStringValue(@NonNull @CecSettingName String name) {
+        Setting setting = getSetting(name);
+        if (setting == null) {
+            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        if (!setting.getValueType().equals(VALUE_TYPE_STRING)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a string-type setting.");
         }
         return getSetting(name).getDefaultValue().getStringValue();
     }
 
     /**
-     * For a given setting name returns the current value of that setting.
+     * For a given setting name returns the default value for that setting (int).
      */
-    public String getValue(@NonNull @CecSettingName String name) {
+    public int getDefaultIntValue(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
         }
-        Slog.d(TAG, "Getting CEC setting value '" + name + "'.");
-        return retrieveValue(setting);
+        if (!setting.getValueType().equals(VALUE_TYPE_INT)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a string-type setting.");
+        }
+        return getSetting(name).getDefaultValue().getIntValue();
     }
 
     /**
-     * For a given setting name and value sets the current value of that setting.
+     * For a given setting name returns the current value of that setting (string).
      */
-    public void setValue(@NonNull @CecSettingName String name, @NonNull String value) {
+    public String getStringValue(@NonNull @CecSettingName String name) {
+        Setting setting = getSetting(name);
+        if (setting == null) {
+            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        if (!setting.getValueType().equals(VALUE_TYPE_STRING)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a string-type setting.");
+        }
+        Slog.d(TAG, "Getting CEC setting value '" + name + "'.");
+        return retrieveValue(setting, setting.getDefaultValue().getStringValue());
+    }
+
+    /**
+     * For a given setting name returns the current value of that setting (int).
+     */
+    public int getIntValue(@NonNull @CecSettingName String name) {
+        Setting setting = getSetting(name);
+        if (setting == null) {
+            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        if (!setting.getValueType().equals(VALUE_TYPE_INT)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a int-type setting.");
+        }
+        Slog.d(TAG, "Getting CEC setting value '" + name + "'.");
+        String defaultValue = Integer.toString(setting.getDefaultValue().getIntValue());
+        String value = retrieveValue(setting, defaultValue);
+        return Integer.parseInt(value);
+    }
+
+    /**
+     * For a given setting name and value sets the current value of that setting (string).
+     */
+    public void setStringValue(@NonNull @CecSettingName String name, @NonNull String value) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -364,11 +460,38 @@ public class HdmiCecConfig {
         if (!setting.getUserConfigurable()) {
             throw new IllegalArgumentException("Updating CEC setting '" + name + "' prohibited.");
         }
-        if (!getAllowedValues(name).contains(value)) {
+        if (!setting.getValueType().equals(VALUE_TYPE_STRING)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a string-type setting.");
+        }
+        if (!getAllowedStringValues(name).contains(value)) {
             throw new IllegalArgumentException("Invalid CEC setting '" + name
                                                + "' value: '" + value + "'.");
         }
         Slog.d(TAG, "Updating CEC setting '" + name + "' to '" + value + "'.");
         storeValue(setting, value);
+    }
+
+    /**
+     * For a given setting name and value sets the current value of that setting (int).
+     */
+    public void setIntValue(@NonNull @CecSettingName String name, int value) {
+        Setting setting = getSetting(name);
+        if (setting == null) {
+            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
+        }
+        if (!setting.getUserConfigurable()) {
+            throw new IllegalArgumentException("Updating CEC setting '" + name + "' prohibited.");
+        }
+        if (!setting.getValueType().equals(VALUE_TYPE_INT)) {
+            throw new IllegalArgumentException("Setting '" + name
+                    + "' is not a int-type setting.");
+        }
+        if (!getAllowedIntValues(name).contains(value)) {
+            throw new IllegalArgumentException("Invalid CEC setting '" + name
+                                               + "' value: '" + value + "'.");
+        }
+        Slog.d(TAG, "Updating CEC setting '" + name + "' to '" + value + "'.");
+        storeValue(setting, Integer.toString(value));
     }
 }

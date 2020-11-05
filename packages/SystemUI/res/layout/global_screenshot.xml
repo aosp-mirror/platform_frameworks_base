@@ -46,7 +46,7 @@
         android:layout_height="@dimen/screenshot_dismiss_button_tappable_size"
         android:elevation="7dp"
         android:visibility="gone"
-        android:contentDescription="@string/screenshot_dismiss_ui_description">
+        android:contentDescription="@string/screenshot_dismiss_description">
         <ImageView
             android:id="@+id/global_screenshot_dismiss_image"
             android:layout_width="match_parent"

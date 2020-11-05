@@ -23,6 +23,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -41,9 +42,12 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, TunerService tunerService, QSTileHost qsTileHost,
+            QSCustomizerController qsCustomizerController,
+            QSTileRevealController.Factory qsTileRevealControllerFactory,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
-        super(view, qsTileHost, metricsLogger, uiEventLogger, dumpManager);
+        super(view, qsTileHost, qsCustomizerController, qsTileRevealControllerFactory,
+                metricsLogger, uiEventLogger, dumpManager);
         mTunerService = tunerService;
     }
 

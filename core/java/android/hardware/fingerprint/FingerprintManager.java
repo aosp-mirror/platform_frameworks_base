@@ -846,13 +846,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
     public boolean hasEnrolledFingerprints() {
-        if (mService != null) try {
-            return mService.hasEnrolledFingerprints(
-                    mContext.getUserId(), mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return false;
+        return hasEnrolledFingerprints(UserHandle.myUserId());
     }
 
     /**
@@ -863,7 +857,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             INTERACT_ACROSS_USERS})
     public boolean hasEnrolledFingerprints(int userId) {
         if (mService != null) try {
-            return mService.hasEnrolledFingerprints(userId, mContext.getOpPackageName());
+            return mService.hasEnrolledFingerprintsDeprecated(userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -882,7 +876,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public boolean isHardwareDetected() {
         if (mService != null) {
             try {
-                return mService.isHardwareDetected(mContext.getOpPackageName());
+                return mService.isHardwareDetectedDeprecated(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -900,7 +894,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @NonNull
     public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
-            if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
+            if (mService == null) {
                 return new ArrayList<>();
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
